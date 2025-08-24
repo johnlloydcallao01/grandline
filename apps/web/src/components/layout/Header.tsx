@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
 
 /**
@@ -16,9 +17,14 @@ export function Header({
   onToggleSidebar,
   onSearch
 }: HeaderProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  const handleSignInClick = () => {
+    router.push('/signin');
+  };
 
   // Scroll detection for header visibility (mobile/tablet only)
   useEffect(() => {
@@ -90,8 +96,8 @@ export function Header({
     }`}>
       {/* Mobile Header - matches the exact design */}
       <div className="lg:hidden flex items-center px-3 py-1.5 space-x-1 sm:space-x-2 h-14">
-        {/* Logo - 70% */}
-        <div className="w-[70%] flex items-center justify-start">
+        {/* Logo - 80% */}
+        <div className="w-[80%] flex items-center justify-start">
           <Image
             src="/calsiter-inc-logo.png"
             alt="Calsiter Inc Logo"
@@ -100,11 +106,6 @@ export function Header({
             className="h-14 w-auto"
             priority
           />
-        </div>
-
-        {/* Heart/Favorites Icon - 10% */}
-        <div className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
-          <i className="fa fa-heart text-gray-600 text-lg"></i>
         </div>
 
         {/* Bell/Notifications Icon - 10% */}
@@ -173,8 +174,19 @@ export function Header({
         {/* Right section - Desktop */}
         <div className="flex items-center">
           <button
-            className="text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
-            style={{ backgroundColor: '#201a7c' }}
+            onClick={handleSignInClick}
+            className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 hover:shadow-lg"
+            style={{
+              backgroundColor: '#fff',
+              color: '#201a7c',
+              boxShadow: '0 0 10px rgba(0, 0, 0, 0.15)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 0 15px rgba(32, 26, 124, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.15)';
+            }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

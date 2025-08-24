@@ -19,22 +19,22 @@ export function MobileFooter() {
       path: '/',
     },
     {
-      id: 'services',
-      label: 'Services',
-      icon: <i className="fa fa-briefcase text-lg"></i>,
+      id: 'courses',
+      label: 'Courses',
+      icon: <i className="fa fa-graduation-cap text-lg"></i>,
       path: '/marketing',
     },
     {
-      id: 'help',
-      label: '', // No label for help icon
-      icon: <i className="fa fa-hand-paper text-lg text-white"></i>,
-      path: '/help',
+      id: 'portal',
+      label: 'Portal', // Portal label for LMS
+      icon: <i className="fa fa-book text-lg text-white"></i>,
+      path: '/portal',
       isHelp: true,
     },
     {
-      id: 'contents',
-      label: 'Contents',
-      icon: <i className="fa fa-file-alt text-lg"></i>,
+      id: 'blogs',
+      label: 'Blogs',
+      icon: <i className="fa fa-edit text-lg"></i>,
       path: '/trending',
     },
     {
@@ -71,9 +71,14 @@ export function MobileFooter() {
             aria-label={item.label || 'Help'}
           >
             {item.isHelp ? (
-              // Brand color circle for help icon
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform -translate-y-1" style={{ backgroundColor: '#d41a10' }}>
-                {item.icon}
+              // Brand color circle for help icon with Portal text
+              <div className="flex flex-col items-center justify-center -mt-2">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: '#201a7c' }}>
+                  {item.icon}
+                </div>
+                <span className="text-xs font-medium leading-none text-gray-600 mt-1">
+                  {item.label}
+                </span>
               </div>
             ) : (
               <>

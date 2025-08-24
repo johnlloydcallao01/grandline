@@ -27,7 +27,7 @@ export function HeroSection() {
         />
 
         {/* Content */}
-        <div className="relative z-10 px-6 sm:px-8 lg:px-12 py-8 lg:py-12">
+        <div className="relative z-10 px-6 sm:px-8 lg:px-12 py-5 lg:py-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             {/* Text Content */}
             <div className="lg:flex-1">

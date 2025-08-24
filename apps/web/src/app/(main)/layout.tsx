@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Header, Sidebar } from '@/components/layout'
+import { Header, Sidebar, MobileFooter } from '@/components/layout'
 
 /**
  * Main App Layout - Persistent layout for all main app pages
@@ -76,6 +76,9 @@ export default function MainLayout({
           {children}
         </div>
       </main>
+
+      {/* Mobile Footer - Only for main app pages */}
+      <MobileFooter />
     </div>
   )
 }
