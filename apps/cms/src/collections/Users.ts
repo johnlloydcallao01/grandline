@@ -24,23 +24,19 @@ export const Users: CollectionConfig = {
       type: 'select',
       options: [
         {
-          label: 'Super Admin',
-          value: 'super-admin',
-        },
-        {
           label: 'Admin',
           value: 'admin',
         },
         {
-          label: 'Editor',
-          value: 'editor',
+          label: 'Instructor',
+          value: 'instructor',
         },
         {
-          label: 'Viewer',
-          value: 'viewer',
+          label: 'Trainee',
+          value: 'trainee',
         },
       ],
-      defaultValue: 'editor',
+      defaultValue: 'trainee',
       required: true,
       admin: {
         description: 'User role determines access permissions',

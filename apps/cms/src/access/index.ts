@@ -1,0 +1,194 @@
+import type { Access, FieldAccess, AccessArgs } from 'payload'
+
+// LMS role hierarchy levels
+export const ROLE_LEVELS = {
+  TRAINEE: 1,
+  INSTRUCTOR: 5,
+  ADMIN: 10,
+} as const
+
+// Legacy role mapping for backward compatibility
+export const LEGACY_ROLE_LEVELS = {
+  'trainee': ROLE_LEVELS.TRAINEE,
+  'instructor': ROLE_LEVELS.INSTRUCTOR,
+  'admin': ROLE_LEVELS.ADMIN,
+} as const
+
+/**
+ * Check if user has minimum role level
+ */
+export const hasMinimumRoleLevel = (userRole: string, minimumLevel: number): boolean => {
+  const userLevel = LEGACY_ROLE_LEVELS[userRole as keyof typeof LEGACY_ROLE_LEVELS] || 0
+  return userLevel >= minimumLevel
+}
+
+/**
+ * Access control for admins only
+ */
+export const adminOnly: Access = ({ req: { user } }) => {
+  return user?.role === 'admin'
+}
+
+/**
+ * Access control for instructors and above
+ */
+export const instructorOrAbove: Access = ({ req: { user } }) => {
+  return hasMinimumRoleLevel(user?.role || '', ROLE_LEVELS.INSTRUCTOR)
+}
+
+/**
+ * Access control for authenticated users
+ */
+export const authenticatedUsers: Access = ({ req: { user } }) => {
+  return !!user
+}
+
+/**
+ * Access control for users to read their own data
+ */
+export const usersOwnData: Access = ({ req: { user } }) => {
+  if (!user) return false
+  
+  // Admins can access all user data
+  if (user.role === 'admin') {
+    return true
+  }
+  
+  // Users can only access their own data
+  return {
+    id: {
+      equals: user.id,
+    },
+  }
+}
+
+/**
+ * Access control for course content
+ */
+export const courseContentAccess: Access = ({ req: { user } }) => {
+  if (!user) return false
+
+  // Admins can access all content
+  if (user.role === 'admin') {
+    return true
+  }
+
+  // Instructors can access content they created
+  if (user.role === 'instructor') {
+    return true // Simplified for now
+  }
+
+  // Trainees can only access published content
+  return true // Simplified for now
+}
+
+/**
+ * Field access for sensitive data
+ */
+export const sensitiveData: FieldAccess = ({ req: { user } }) => {
+  // Only admins can access sensitive data
+  return user?.role === 'admin'
+}
+
+/**
+ * Access control for media based on user role
+ */
+export const mediaAccess: Access = ({ req: { user } }) => {
+  if (!user) return false
+
+  // Admins can access all media
+  if (user.role === 'admin') {
+    return true
+  }
+
+  // Instructors and trainees can access media
+  return true // Simplified for now
+}
+
+/**
+ * Dynamic access control based on user roles
+ */
+export const dynamicRoleAccess = (resource: string, action: string): Access => {
+  return ({ req: { user } }) => {
+    if (!user) return false
+    
+    switch (action) {
+      case 'create':
+        return hasMinimumRoleLevel(user.role || '', ROLE_LEVELS.INSTRUCTOR)
+      case 'read':
+        return hasMinimumRoleLevel(user.role || '', ROLE_LEVELS.TRAINEE)
+      case 'update':
+        return hasMinimumRoleLevel(user.role || '', ROLE_LEVELS.INSTRUCTOR)
+      case 'delete':
+        return hasMinimumRoleLevel(user.role || '', ROLE_LEVELS.ADMIN)
+      default:
+        return false
+    }
+  }
+}
+
+/**
+ * LMS-specific access patterns
+ */
+export const lmsAccess = {
+  // Course management access
+  courseManagement: ({ req: { user } }: AccessArgs) => {
+    if (!user) return false
+
+    // Admins can manage all courses
+    if (user.role === 'admin') {
+      return true
+    }
+
+    // Instructors can manage courses
+    if (user.role === 'instructor') {
+      return true
+    }
+
+    return false
+  },
+
+  // User enrollment access
+  userEnrollment: ({ req: { user } }: AccessArgs) => {
+    if (!user) return false
+
+    // Admins and instructors can manage enrollments
+    if (user.role === 'admin' || user.role === 'instructor') {
+      return true
+    }
+
+    // Trainees can see enrollments
+    return true
+  },
+
+  // Grade management access
+  gradeManagement: ({ req: { user } }: AccessArgs) => {
+    if (!user) return false
+
+    // Admins can manage all grades
+    if (user.role === 'admin') {
+      return true
+    }
+
+    // Instructors can manage grades
+    if (user.role === 'instructor') {
+      return true
+    }
+
+    return false
+  },
+}
+
+const accessControls = {
+  adminOnly,
+  instructorOrAbove,
+  authenticatedUsers,
+  usersOwnData,
+  courseContentAccess,
+  sensitiveData,
+  mediaAccess,
+  dynamicRoleAccess,
+  lmsAccess,
+}
+
+export default accessControls

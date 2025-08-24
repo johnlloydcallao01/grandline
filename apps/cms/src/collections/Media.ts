@@ -5,16 +5,16 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true, // Public can read media files
     create: ({ req: { user } }) => {
-      // All authenticated users can upload media
-      return user?.role === 'super-admin' || user?.role === 'admin' || user?.role === 'editor'
+      // Only admins and instructors can upload media
+      return user?.role === 'admin' || user?.role === 'instructor'
     },
     update: ({ req: { user } }) => {
-      // Only admins and editors can update media
-      return user?.role === 'super-admin' || user?.role === 'admin' || user?.role === 'editor'
+      // Only admins and instructors can update media
+      return user?.role === 'admin' || user?.role === 'instructor'
     },
     delete: ({ req: { user } }) => {
       // Only admins can delete media
-      return user?.role === 'super-admin' || user?.role === 'admin'
+      return user?.role === 'admin'
     },
   },
   fields: [

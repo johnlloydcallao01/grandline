@@ -10,6 +10,9 @@ import { cloudinaryAdapter } from './storage/cloudinary-adapter'
 // import sharp from 'sharp'
 
 import { Users } from './collections/Users'
+import { Instructors } from './collections/Instructors'
+import { Trainees } from './collections/Trainees'
+import { Admins } from './collections/Admins'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Services } from './collections/Services'
@@ -24,7 +27,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Services],
+  collections: [Users, Instructors, Trainees, Admins, Media, Posts, Services],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   cors: '*',

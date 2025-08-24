@@ -67,7 +67,8 @@ export const cloudinaryAdapter = ({
     // Handle file deletion from Cloudinary
     handleDelete: async ({ doc, filename }) => {
       try {
-        const publicId = (doc as any).cloudinaryPublicId || filename
+        const docWithCloudinary = doc as { cloudinaryPublicId?: string }
+        const publicId = docWithCloudinary.cloudinaryPublicId || filename
         await cloudinary.uploader.destroy(publicId)
       } catch (error) {
         console.error('Cloudinary delete error:', error)

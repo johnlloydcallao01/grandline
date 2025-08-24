@@ -1,26 +1,19 @@
 import type { CollectionConfig } from 'payload'
 import { blogContentFields } from '../fields'
+import { instructorOrAbove, adminOnly } from '../access'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'publishedAt', 'updatedAt'],
+    group: 'Content',
   },
   access: {
     read: () => true, // Public can read published posts
-    create: ({ req: { user } }) => {
-      // Only admins and editors can create posts
-      return user?.role === 'super-admin' || user?.role === 'admin' || user?.role === 'editor'
-    },
-    update: ({ req: { user } }) => {
-      // Only admins and editors can update posts
-      return user?.role === 'super-admin' || user?.role === 'admin' || user?.role === 'editor'
-    },
-    delete: ({ req: { user } }) => {
-      // Only super-admin and admin can delete posts
-      return user?.role === 'super-admin' || user?.role === 'admin'
-    },
+    create: instructorOrAbove, // Instructors and admins can create posts
+    update: instructorOrAbove, // Instructors and admins can update posts
+    delete: adminOnly, // Only admins can delete posts
   },
   fields: blogContentFields,
   versions: {
