@@ -109,9 +109,12 @@ export function Header({
         </div>
 
         {/* Bell/Notifications Icon - 10% */}
-        <div className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
+        <button
+          onClick={() => router.push('/notifications')}
+          className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+        >
           <i className="fas fa-bell text-gray-600 text-lg"></i>
-        </div>
+        </button>
 
         {/* Search Icon - 10% */}
         <div className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">

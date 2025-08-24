@@ -22,7 +22,7 @@ export function MobileFooter() {
       id: 'courses',
       label: 'Courses',
       icon: <i className="fa fa-graduation-cap text-lg"></i>,
-      path: '/marketing',
+      path: '/courses',
     },
     {
       id: 'portal',
@@ -41,7 +41,7 @@ export function MobileFooter() {
       id: 'menu',
       label: 'Menu',
       icon: <i className="fa fa-layer-group text-lg"></i>,
-      path: '/dashboard',
+      path: '/menu',
     },
   ];
 
