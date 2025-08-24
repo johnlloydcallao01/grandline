@@ -1,0 +1,81 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { Header, Sidebar } from '@/components/layout'
+
+/**
+ * Main App Layout - Persistent layout for all main app pages
+ * 
+ * This layout provides:
+ * - Persistent Header and Sidebar that never re-render during navigation
+ * - Proper SPA behavior where only the page content changes
+ * - Sidebar state that persists across all routes in this group
+ */
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  // Check if we're on desktop and update sidebar visibility accordingly
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isLargeScreen = window.innerWidth >= 1024 // lg breakpoint
+      setIsDesktop(isLargeScreen)
+
+      // On mobile/tablet, always keep sidebar closed
+      if (!isLargeScreen) {
+        setSidebarOpen(false)
+      }
+    }
+
+    // Check on mount
+    checkScreenSize()
+
+    // Listen for resize events
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  const toggleSidebar = () => {
+    // Only allow toggling on desktop
+    if (isDesktop) {
+      setSidebarOpen(prev => !prev)
+    }
+  }
+
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query)
+    // TODO: Implement search functionality
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Persistent across all pages */}
+      <Header
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={toggleSidebar}
+        onSearch={handleSearch}
+      />
+
+      {/* Sidebar - Persistent across all pages */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={toggleSidebar}
+      />
+
+      {/* Main Content Area - Only this changes during navigation */}
+      <main
+        className={`transition-all duration-300 ${
+          sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'
+        }`}
+      >
+        <div className="min-h-full">
+          {children}
+        </div>
+      </main>
+    </div>
+  )
+}

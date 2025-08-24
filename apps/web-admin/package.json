@@ -1,0 +1,55 @@
+{
+  "name": "@encreasl/web-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node ../../node_modules/next/dist/bin/next build",
+    "dev": "cross-env ESLINT_NO_DEV_ERRORS=true node ../../node_modules/next/dist/bin/next dev --port 3002",
+    "dev:nolint": "node ../../node_modules/next/dist/bin/next dev --port 3002",
+    "lint": "node ../../node_modules/next/dist/bin/next lint",
+    "start": "node ../../node_modules/next/dist/bin/next start",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lexical/code": "^0.28.0",
+    "@lexical/link": "^0.28.0",
+    "@lexical/list": "^0.28.0",
+    "@lexical/markdown": "^0.28.0",
+    "@lexical/react": "^0.28.0",
+    "@lexical/rich-text": "^0.28.0",
+    "@lexical/selection": "^0.28.0",
+    "@lexical/table": "^0.28.0",
+    "@lexical/utils": "^0.28.0",
+    "@payloadcms/richtext-lexical": "3.49.0",
+    "@payloadcms/ui": "3.49.0",
+    "lexical": "^0.28.0",
+    "lucide-react": "^0.263.1",
+    "next": "15.4.2",
+    "payload": "3.49.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-hook-form": "^7.53.2",
+    "zod": "^4.0.10"
+  },
+  "devDependencies": {
+    "@encreasl/cms-types": "workspace:*",
+    "@encreasl/env": "workspace:*",
+    "@encreasl/eslint-config": "workspace:*",
+
+    "@encreasl/typescript-config": "workspace:*",
+    "@encreasl/ui": "workspace:*",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "cross-env": "^7.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Mobile footer safe area */
+.h-safe-area-inset-bottom {
+  height: env(safe-area-inset-bottom);
+}
+
+/* Mobile layout adjustments for footer and header */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: 0; /* Remove body padding */
+    padding-top: 0; /* Remove padding - header is fixed positioned */
+    background-color: #f9fafb; /* Ensure consistent background */
+  }
+
+  /* Ensure main content fills viewport and accounts for mobile footer and header */
+  main {
+    min-height: calc(100vh - 56px); /* Full viewport height minus header */
+    margin-top: 56px; /* Push content below fixed header (h-14 = 56px) */
+    background-color: #f9fafb; /* Match bg-gray-50 to eliminate gaps */
+    box-sizing: border-box;
+  }
+
+  /* Remove any default margins on first child to eliminate gaps */
+  main > div > *:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+/* Mobile-only adjustments for footer */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: calc(55px + env(safe-area-inset-bottom, 0px)); /* Footer height + safe area */
+  }
+
+  /* Ensure the main layout container also fills height */
+  .min-h-screen {
+    min-height: 100vh;
+    background-color: #f9fafb;
+  }
+
+/* Mobile-only page content adjustments */
+@media (max-width: 767px) {
+  /* Ensure page content extends to fill available space and has consistent background */
+  main > div {
+    min-height: calc(100vh - 56px - 55px - env(safe-area-inset-bottom, 0px)); /* Account for header + footer */
+    background-color: #f9fafb;
+  }
+}
+
+/* Tablet-only page content adjustments */
+@media (min-width: 768px) and (max-width: 1023px) {
+  main > div {
+    min-height: calc(100vh - 56px); /* Account for header only, no footer on tablet */
+    background-color: #f9fafb;
+  }
+}
+
+  /* Ensure no gaps between content sections */
+  main * {
+    box-sizing: border-box;
+  }
+}
+
+/* Ensure sidebar is completely hidden on mobile and tablet */
+@media (max-width: 1023px) {
+  aside[data-sidebar="main"] {
+    display: none !important;
+  }
+}
+
+/* SPA Content Transitions */
+.content-transition {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Sidebar Scrollbar */
+aside[data-sidebar="main"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside[data-sidebar="main"]::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+aside[data-sidebar="main"]::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+aside[data-sidebar="main"]::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth transitions for layout components */
+.content-wrapper {
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Loading state */
+.content-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Performance optimizations */
+.content-transition,
+aside[data-sidebar="main"],
+main {
+  will-change: transform, opacity;
+}
+
+/* Accessibility - Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .content-transition,
+  .content-wrapper,
+  aside[data-sidebar="main"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}

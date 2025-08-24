@@ -1,0 +1,113 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": [".env.local", ".env"],
+  "globalEnv": [
+    "NODE_ENV",
+    "VERCEL_ENV",
+    "CI"
+  ],
+  "globalPassThroughEnv": [
+    "NEXT_PUBLIC_*",
+    "FIREBASE_*",
+    "ADMIN_*",
+    "PAYLOAD_*",
+    "DATABASE_URL",
+    "DATABASE_URI",
+    "POSTGRES_URL",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "lib/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "FIREBASE_*",
+        "ADMIN_*",
+        "PAYLOAD_*",
+        "DATABASE_URL",
+        "DATABASE_URI",
+        "POSTGRES_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    },
+    "build:functions": {
+      "dependsOn": ["^build"],
+      "outputs": ["lib/**"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"],
+      "env": [
+        "FIREBASE_*",
+        "NODE_ENV"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NEXT_PUBLIC_*",
+        "FIREBASE_*",
+        "ADMIN_*",
+        "PAYLOAD_*",
+        "DATABASE_URL",
+        "DATABASE_URI",
+        "POSTGRES_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    },
+    "dev:turbo": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NEXT_PUBLIC_*",
+        "FIREBASE_*",
+        "ADMIN_*",
+        "PAYLOAD_*",
+        "DATABASE_URL",
+        "DATABASE_URI",
+        "POSTGRES_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    },
+    "dev:functions": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "FIREBASE_*",
+        "NODE_ENV"
+      ]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "lint:functions": {
+      "outputs": [],
+      "inputs": ["src/**", ".eslintrc.*"],
+      "env": []
+    },
+    "type-check": {
+      "dependsOn": ["^type-check"]
+    },
+    "type-check:functions": {
+      "outputs": [],
+      "inputs": ["src/**", "tsconfig.json"],
+      "env": []
+    },
+    "test:functions": {
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**", "**/*.test.ts", "**/*.spec.ts", "jest.config.*"],
+      "env": [
+        "NODE_ENV"
+      ]
+    },
+    "deploy:functions": {
+      "dependsOn": ["build:functions", "lint:functions", "type-check:functions"],
+      "cache": false,
+      "env": [
+        "FIREBASE_*",
+        "NODE_ENV"
+      ]
+    }
+  }
+}

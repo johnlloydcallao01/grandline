@@ -1,0 +1,12 @@
+{
+  "extends": "@encreasl/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "target": "es2015",
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

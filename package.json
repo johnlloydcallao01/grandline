@@ -1,0 +1,33 @@
+{
+  "name": "encreasl",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=@encreasl/web",
+    "build:admin": "turbo run build --filter=@encreasl/web-admin",
+    "build:cms": "turbo run build --filter=@encreasl/cms",
+    "build:functions": "cd functions && npm run build",
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@encreasl/web",
+    "dev:admin": "turbo run dev --filter=@encreasl/web-admin",
+    "dev:cms": "turbo run dev --filter=@encreasl/cms",
+    "dev:functions": "cd functions && npm run build:watch",
+    "lint": "turbo run lint",
+    "lint:functions": "cd functions && npm run lint",
+    "type-check": "turbo run type-check",
+    "type-check:functions": "cd functions && tsc --noEmit",
+    "test:functions": "cd functions && npm run test",
+    "deploy:functions": "cd functions && npm run deploy",
+    "serve:functions": "cd functions && npm run serve",
+    "setup": "node scripts/setup-env.js",
+    "clean": "turbo run clean && cd functions && rm -rf lib"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.5"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "dependencies": {
+    "dotenv": "^17.2.0"
+  }
+}
