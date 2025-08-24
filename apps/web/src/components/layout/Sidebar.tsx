@@ -105,29 +105,7 @@ export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
             <SidebarItem icon="sports" label="Sports" collapsed={!isOpen} href="/sports" />
           </div>
 
-          {isOpen && <hr className="my-3 border-gray-200" />}
 
-          {/* Business Tools */}
-          <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Business Tools</div>}
-            <SidebarItem icon="analytics" label="Analytics" collapsed={!isOpen} href="/analytics" />
-            <SidebarItem icon="dashboard" label="Dashboard" collapsed={!isOpen} href="/dashboard" />
-            <SidebarItem icon="reports" label="Reports" collapsed={!isOpen} href="/reports" />
-            <SidebarItem icon="marketing" label="Marketing Hub" collapsed={!isOpen} href="/marketing" />
-            <SidebarItem icon="ecommerce" label="E-commerce" collapsed={!isOpen} href="/ecommerce" />
-          </div>
-
-          {isOpen && <hr className="my-3 border-gray-200" />}
-
-          {/* Management */}
-          <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Management</div>}
-            <SidebarItem icon="team" label="Team Management" collapsed={!isOpen} href="/team" />
-            <SidebarItem icon="projects" label="Projects" collapsed={!isOpen} href="/projects" />
-            <SidebarItem icon="calendar" label="Calendar" collapsed={!isOpen} href="/calendar" />
-            <SidebarItem icon="tasks" label="Tasks" collapsed={!isOpen} href="/tasks" />
-            <SidebarItem icon="workflow" label="Workflow" collapsed={!isOpen} href="/workflow" />
-          </div>
 
 
         </nav>

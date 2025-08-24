@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CategoryCarousel, VideoGrid } from "@/components/sections";
+import { CategoryCarousel, VideoGrid, HeroSection } from "@/components/sections";
 import { useCategory } from "@/hooks";
 
 /**
@@ -16,6 +16,9 @@ export default function Home() {
 
   return (
     <>
+      {/* Hero Section */}
+      <HeroSection />
+
       {/* Category Circles Carousel */}
       <div className="bg-white border-b border-gray-200">
         <CategoryCarousel
