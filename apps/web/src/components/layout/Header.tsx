@@ -95,9 +95,9 @@ export function Header({
           <Image
             src="/calsiter-inc-logo.png"
             alt="Calsiter Inc Logo"
-            width={120}
-            height={32}
-            className="h-8 w-auto"
+            width={210}
+            height={56}
+            className="h-14 w-auto"
             priority
           />
         </div>
@@ -119,7 +119,7 @@ export function Header({
       </div>
 
       {/* Desktop Header - existing design */}
-      <div className="hidden lg:flex items-center justify-between px-4 py-2">
+      <div className="hidden lg:flex items-center justify-between px-4">
         {/* Left section */}
         <div className="flex items-center space-x-4">
           {/* Sidebar toggle button - only visible on desktop */}
@@ -138,9 +138,9 @@ export function Header({
           <Image
             src="/calsiter-inc-logo.png"
             alt="Calsiter Inc Logo"
-            width={150}
-            height={40}
-            className="h-10 w-auto"
+            width={270}
+            height={72}
+            className="h-16 w-auto"
             priority
           />
         </div>

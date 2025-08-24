@@ -14,12 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Calsiter - Ecommerce Marketing Agency",
+  title: "Grandline Maritime Training and Development Center Inc",
   description: "Transform your ecommerce business with data-driven marketing strategies. We help online stores increase sales, optimize conversions, and scale profitably.",
   keywords: "ecommerce marketing, digital marketing agency, online store marketing, conversion optimization, ecommerce growth",
   authors: [{ name: "Calsiter Team" }],
   openGraph: {
-    title: "Calsiter - Ecommerce Marketing Agency",
+    title: "Grandline Maritime Training and Development Center Inc",
     description: "Transform your ecommerce business with data-driven marketing strategies.",
     type: "website",
   },

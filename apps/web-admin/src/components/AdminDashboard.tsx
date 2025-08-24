@@ -62,7 +62,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
         />
 
         {/* Main Content */}
-        <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+        <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
           {children || <DefaultDashboardContent />}
         </main>
       </div>

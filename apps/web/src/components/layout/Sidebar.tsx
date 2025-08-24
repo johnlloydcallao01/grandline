@@ -22,7 +22,7 @@ export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
         className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${
           isOpen
             ? 'w-64 translate-x-0'
-            : 'w-16 translate-x-0'
+            : 'w-20 translate-x-0'
         }`}
         style={{
           height: 'calc(100vh - 4rem)',
