@@ -84,17 +84,14 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white">
-        <div className="px-4 py-6">
-          <h1 className="text-2xl font-bold">Menu</h1>
-          <p className="text-blue-100 text-sm mt-1">Account and app settings</p>
-        </div>
-      </div>
-
       {/* User Profile Section */}
       <div className="bg-white border-b border-gray-200">
-        <div className="px-4 py-6">
+        <div className="px-4 pt-8 pb-6">
+          {/* Page Title */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Menu</h1>
+            <p className="text-gray-600 text-sm mt-1">Account and app settings</p>
+          </div>
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200">
               <Image

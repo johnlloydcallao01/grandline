@@ -160,20 +160,20 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white">
-        <div className="px-4 py-6">
-          <div className="flex items-center justify-between">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="px-4 pt-8 pb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold">Notifications</h1>
-              <p className="text-blue-100 text-sm mt-1">
+              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+              <p className="text-gray-600 text-sm mt-1">
                 {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
               </p>
             </div>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="px-3 py-1.5 bg-white/20 rounded-lg text-sm font-medium hover:bg-white/30 transition-colors"
+                className="px-3 py-1.5 bg-[#201a7c] text-white rounded-lg text-sm font-medium hover:bg-[#1a1569] transition-colors"
               >
                 Mark all read
               </button>

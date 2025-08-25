@@ -115,19 +115,16 @@ const mockCourses = [
 ];
 
 const categories = ['All', 'Safety', 'Navigation', 'Security', 'Engineering', 'Operations', 'Legal'];
-const levels = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
 
 export default function CoursesPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLevel, setSelectedLevel] = useState('All Levels');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredCourses = mockCourses.filter(course => {
     const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory;
-    const matchesLevel = selectedLevel === 'All Levels' || course.level === selectedLevel;
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesLevel && matchesSearch;
+    return matchesCategory && matchesSearch;
   });
 
   const getLevelColor = (level: string) => {
@@ -141,18 +138,14 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white">
-        <div className="px-4 py-8">
-          <h1 className="text-2xl font-bold mb-2">Professional Maritime Courses</h1>
-          <p className="text-blue-100 text-sm">
-            Advance your maritime career with industry-certified training programs
-          </p>
-        </div>
-      </div>
-
       {/* Search and Filters */}
-      <div className="px-4 py-6 bg-white border-b border-gray-200">
+      <div className="px-4 pt-8 pb-6 bg-white border-b border-gray-200">
+        {/* Page Title */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Courses</h1>
+          <p className="text-gray-600 text-sm">Discover professional maritime training programs</p>
+        </div>
+
         {/* Search Bar */}
         <div className="mb-4">
           <div className="relative">
@@ -187,25 +180,7 @@ export default function CoursesPage() {
           </div>
         </div>
 
-        {/* Level Filter */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Level</h3>
-          <div className="flex space-x-2">
-            {levels.map((level) => (
-              <button
-                key={level}
-                onClick={() => setSelectedLevel(level)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedLevel === level
-                    ? 'bg-[#201a7c] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
+
       </div>
 
       {/* Results Count */}

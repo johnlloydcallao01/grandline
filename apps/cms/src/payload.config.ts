@@ -31,14 +31,7 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   cors: '*',
-  csrf: [
-    'http://localhost:3002',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://web-admin.encreasl.com',
-    'https://encreasl.com',
-    'https://www.encreasl.com'
-  ],
+  csrf: false, // Disable CSRF temporarily to test
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
