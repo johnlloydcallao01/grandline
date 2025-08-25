@@ -27,6 +27,21 @@ export const cloudinaryAdapter = ({
       name: 'cloudinary',
     // Handle file upload to Cloudinary
     handleUpload: async ({ file, data }) => {
+      console.log('=== CLOUDINARY UPLOAD START ===')
+      console.log('Environment:', process.env.NODE_ENV)
+      console.log('File info:', {
+        filename: file.filename,
+        size: file.buffer?.length,
+        mimeType: file.mimeType,
+      })
+      console.log('Cloudinary config:', {
+        cloudName: cloudName,
+        apiKeyPresent: !!apiKey,
+        apiSecretPresent: !!apiSecret,
+        folder: folder,
+        prefix: prefix,
+      })
+
       try {
         const uploadOptions = {
           folder: prefix ? `${folder}/${prefix}` : folder,
@@ -37,12 +52,23 @@ export const cloudinaryAdapter = ({
           resource_type: 'auto' as const,
         }
 
+        console.log('Upload options:', uploadOptions)
+
         const result: UploadApiResponse = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             uploadOptions,
             (error, result) => {
-              if (error) reject(error)
-              else resolve(result!)
+              if (error) {
+                console.error('Cloudinary stream error:', error)
+                reject(error)
+              } else {
+                console.log('Cloudinary upload success:', {
+                  public_id: result!.public_id,
+                  secure_url: result!.secure_url,
+                  bytes: result!.bytes,
+                })
+                resolve(result!)
+              }
             }
           )
 
@@ -58,8 +84,15 @@ export const cloudinaryAdapter = ({
         data.width = result.width
         data.height = result.height
         data.mimeType = `${result.resource_type}/${result.format}`
+
+        console.log('=== CLOUDINARY UPLOAD SUCCESS ===')
       } catch (error) {
-        console.error('Cloudinary upload error:', error)
+        console.error('=== CLOUDINARY UPLOAD ERROR ===')
+        console.error('Error type:', typeof error)
+        console.error('Error message:', error instanceof Error ? error.message : String(error))
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+        console.error('Full error object:', error)
+        console.error('=== END CLOUDINARY ERROR ===')
         throw error
       }
     },
