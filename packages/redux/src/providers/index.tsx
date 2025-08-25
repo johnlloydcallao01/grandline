@@ -8,7 +8,7 @@
 
 'use client';
 
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor, type AppStore } from '../store';
@@ -19,16 +19,16 @@ import { loadUserFromToken } from '../slices/auth';
 // ============================================================================
 
 export interface ReduxProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
   customStore?: AppStore;
   enablePersistence?: boolean;
   enableDevTools?: boolean;
-  loadingComponent?: ReactNode;
-  errorComponent?: ReactNode;
+  loadingComponent?: React.ReactNode;
+  errorComponent?: React.ReactNode;
 }
 
 interface StoreInitializerProps {
-  children: ReactNode;
+  children: React.ReactNode;
   store: AppStore;
 }
 
@@ -209,19 +209,19 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
 
   return (
     <Provider store={storeToUse}>
-      <PersistGate
-        loading={LoadingComponent}
-        persistor={persistor}
-        onBeforeLift={() => {
+      {React.createElement(PersistGate as any, {
+        loading: LoadingComponent,
+        persistor: persistor,
+        onBeforeLift: () => {
           // Optional: Perform any actions before rehydration
           console.log('🔄 Rehydrating Redux store...');
-        }}
-
-      >
-        <StoreInitializer store={storeToUse}>
-          {children}
-        </StoreInitializer>
-      </PersistGate>
+        },
+        children: (
+          <StoreInitializer store={storeToUse}>
+            {children}
+          </StoreInitializer>
+        )
+      })}
     </Provider>
   );
 };
@@ -233,7 +233,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
 /**
  * Minimal Redux Provider without persistence (useful for testing or SSR)
  */
-export const MinimalReduxProvider: React.FC<{ children: ReactNode; store?: AppStore }> = ({
+export const MinimalReduxProvider: React.FC<{ children: React.ReactNode; store?: AppStore }> = ({
   children,
   store: customStore,
 }) => {
@@ -249,7 +249,7 @@ export const MinimalReduxProvider: React.FC<{ children: ReactNode; store?: AppSt
 /**
  * Development Redux Provider with enhanced debugging
  */
-export const DevReduxProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const DevReduxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Add global store access for debugging
@@ -271,7 +271,7 @@ export const DevReduxProvider: React.FC<{ children: ReactNode }> = ({ children }
 /**
  * Production Redux Provider with optimized settings
  */
-export const ProductionReduxProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ProductionReduxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ReduxProvider
       enableDevTools={false}

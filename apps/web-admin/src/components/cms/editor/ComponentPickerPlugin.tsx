@@ -17,11 +17,12 @@ import {
   Heading3,
   Quote,
   Code,
+  type LucideIcon,
 } from 'lucide-react';
 
 class ComponentPickerOption extends MenuOption {
   title: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
   keywords: Array<string>;
   keyboardShortcut?: string;
   onSelect: (queryString: string) => void;
@@ -29,7 +30,7 @@ class ComponentPickerOption extends MenuOption {
   constructor(
     title: string,
     options: {
-      icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+      icon: LucideIcon;
       keywords?: Array<string>;
       keyboardShortcut?: string;
       onSelect: (queryString: string) => void;

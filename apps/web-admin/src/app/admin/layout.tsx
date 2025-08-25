@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { AdminDashboard } from '@/components/AdminDashboard';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { usePathname } from 'next/navigation';
@@ -22,19 +23,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // If it's the login page, don't wrap with AdminDashboard
   if (pathname === '/admin/login') {
-    return (
-      <AuthGuard>
-        {children}
-      </AuthGuard>
-    );
+    return React.createElement(AuthGuard as React.ComponentType<{ children?: React.ReactNode }>, {}, children);
   }
 
   // For all other admin pages, wrap with AdminDashboard
-  return (
-    <AuthGuard>
-      <AdminDashboard>
-        {children}
-      </AdminDashboard>
-    </AuthGuard>
+  return React.createElement(AuthGuard as React.ComponentType<{ children?: React.ReactNode }>, {},
+    React.createElement(AdminDashboard as React.ComponentType<{ children?: React.ReactNode }>, {}, children)
   );
 }

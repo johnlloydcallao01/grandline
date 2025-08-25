@@ -55,11 +55,11 @@ function UnauthorizedScreen() {
 }
 
 // Main AuthGuard component
-export function AuthGuard({
+export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
   fallback,
   redirectTo = '/admin/login'
-}: AuthGuardProps) {
+}) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -73,26 +73,26 @@ export function AuthGuard({
 
   // Allow login page to pass through without authentication
   if (pathname === redirectTo) {
-    return <>{children}</>;
+    return children;
   }
 
   // Show loading screen while checking authentication (only on initial load)
   if (isLoading) {
-    return fallback || <AuthLoadingScreen />;
+    return fallback || React.createElement(AuthLoadingScreen);
   }
 
   // Redirect is handled by useEffect, but show loading while redirecting
   if (!isAuthenticated) {
-    return fallback || <AuthLoadingScreen />;
+    return fallback || React.createElement(AuthLoadingScreen);
   }
 
   // Check if user has admin privileges (super-admin, admin, or editor roles)
   if (user && !['super-admin', 'admin', 'editor'].includes(user.role)) {
-    return <UnauthorizedScreen />;
+    return React.createElement(UnauthorizedScreen);
   }
   // User is authenticated and has admin privileges
-  return <>{children}</>;
-}
+  return children;
+};
 
 // Higher-order component for protecting pages
 export function withAuthGuard<P extends object>(

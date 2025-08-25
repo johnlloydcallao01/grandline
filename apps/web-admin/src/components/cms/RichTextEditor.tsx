@@ -215,107 +215,103 @@ export function RichTextEditor({
         <div className="editor-container relative bg-white">
         <div className="editor-inner bg-white relative leading-5 font-normal text-left rounded-t-lg">
           <ToolbarPlugin />
-          <div className="editor-content bg-white relative min-h-[300px] text-base outline-none">
-            <style jsx>{`
-              .editor-content {
-                position: relative;
-                padding: 10px; /* Clean 10px padding, no extra space needed for buttons */
-              }
-              .editor-content :global(.editor-paragraph) {
-                margin: 0;
-                padding: 12px 20px; /* Start closer to left edge */
-                min-height: 1.5em;
-                position: relative;
-                border-radius: 4px;
-                transition: background-color 0.15s ease;
-              }
-              .editor-content :global(.editor-paragraph:hover) {
-                background-color: #f9fafb;
-              }
-              /* Remove individual block placeholders */
-              .editor-content :global(.editor-heading-h1) {
-                font-size: 2.25em;
-                font-weight: 700;
-                margin: 0;
-                padding: 16px 20px; /* Consistent left padding */
-                min-height: 1.2em;
-                line-height: 1.2;
-                border-radius: 4px;
-                transition: background-color 0.15s ease;
-              }
-              .editor-content :global(.editor-heading-h1:hover) {
-                background-color: #f9fafb;
-              }
-              .editor-content :global(.editor-heading-h2) {
-                font-size: 1.75em;
-                font-weight: 600;
-                margin: 0;
-                padding: 14px 20px; /* Consistent left padding */
-                min-height: 1.3em;
-                line-height: 1.3;
-                border-radius: 4px;
-                transition: background-color 0.15s ease;
-              }
-              .editor-content :global(.editor-heading-h2:hover) {
-                background-color: #f9fafb;
-              }
-              .editor-content :global(.editor-heading-h3) {
-                font-size: 1.375em;
-                font-weight: 600;
-                margin: 0;
-                padding: 12px 20px; /* Consistent left padding */
-                min-height: 1.4em;
-                line-height: 1.4;
-                border-radius: 4px;
-                transition: background-color 0.15s ease;
-              }
-              .editor-content :global(.editor-heading-h3:hover) {
-                background-color: #f9fafb;
-              }
-              .editor-content :global(.editor-quote) {
-                border-left: 4px solid #3b82f6;
-                padding: 16px 20px 16px 24px; /* Consistent left alignment */
-                margin: 8px 0;
-                font-style: italic;
-                background-color: #f8fafc;
-                border-radius: 0 4px 4px 0;
-                color: #475569;
-                font-size: 1.1em;
-                line-height: 1.6;
-              }
-              .editor-content :global(.editor-list-ol),
-              .editor-content :global(.editor-list-ul) {
-                margin: 8px 0;
-                padding: 8px 20px 8px 44px; /* Consistent left alignment */
-              }
-              .editor-content :global(.editor-listitem) {
-                margin: 6px 0;
-                padding: 4px 0;
-                line-height: 1.6;
-              }
-              .editor-content :global(.editor-nested-listitem) {
-                list-style: none;
-              }
-              .editor-content :global(.editor-code) {
-                background-color: #f1f5f9;
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-                padding: 16px 20px; /* Consistent left alignment */
-                margin: 8px 0;
-                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-                font-size: 0.875em;
-                line-height: 1.5;
-                overflow-x: auto;
-              }
-              /* Block selection and hover states */
-              .editor-content :global([data-lexical-editor] > *) {
-                position: relative;
-              }
-              .editor-content :global([data-lexical-editor] > *:hover) {
-                outline: 1px solid #e5e7eb;
-                outline-offset: -1px;
-              }
-            `}</style>
+          <div className="editor-content bg-white relative min-h-[300px] text-base outline-none p-2.5">
+            <style dangerouslySetInnerHTML={{
+              __html: `
+                .editor-content .editor-paragraph {
+                  margin: 0;
+                  padding: 12px 20px;
+                  min-height: 1.5em;
+                  position: relative;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-paragraph:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-heading-h1 {
+                  font-size: 2.25em;
+                  font-weight: 700;
+                  margin: 0;
+                  padding: 16px 20px;
+                  min-height: 1.2em;
+                  line-height: 1.2;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-heading-h1:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-heading-h2 {
+                  font-size: 1.75em;
+                  font-weight: 600;
+                  margin: 0;
+                  padding: 14px 20px;
+                  min-height: 1.3em;
+                  line-height: 1.3;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-heading-h2:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-heading-h3 {
+                  font-size: 1.375em;
+                  font-weight: 600;
+                  margin: 0;
+                  padding: 12px 20px;
+                  min-height: 1.4em;
+                  line-height: 1.4;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-heading-h3:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-quote {
+                  border-left: 4px solid #3b82f6;
+                  padding: 16px 20px 16px 24px;
+                  margin: 8px 0;
+                  font-style: italic;
+                  background-color: #f8fafc;
+                  border-radius: 0 4px 4px 0;
+                  color: #475569;
+                  font-size: 1.1em;
+                  line-height: 1.6;
+                }
+                .editor-content .editor-list-ol,
+                .editor-content .editor-list-ul {
+                  margin: 8px 0;
+                  padding: 8px 20px 8px 44px;
+                }
+                .editor-content .editor-listitem {
+                  margin: 6px 0;
+                  padding: 4px 0;
+                  line-height: 1.6;
+                }
+                .editor-content .editor-nested-listitem {
+                  list-style: none;
+                }
+                .editor-content .editor-code {
+                  background-color: #f1f5f9;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 6px;
+                  padding: 16px 20px;
+                  margin: 8px 0;
+                  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                  font-size: 0.875em;
+                  line-height: 1.5;
+                  overflow-x: auto;
+                }
+                .editor-content [data-lexical-editor] > * {
+                  position: relative;
+                }
+                .editor-content [data-lexical-editor] > *:hover {
+                  outline: 1px solid #e5e7eb;
+                  outline-offset: -1px;
+                }
+              `
+            }} />
             <RichTextPlugin
               contentEditable={
                 <ContentEditable

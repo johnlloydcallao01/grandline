@@ -20,7 +20,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "lib/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "lib/**", "src/**/*.js", "src/**/*.d.ts"],
       "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"],
       "env": [
         "NEXT_PUBLIC_*",

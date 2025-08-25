@@ -9,7 +9,7 @@ import {
 } from 'lexical';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, GripVertical, Type, Heading1, Heading2, Heading3, Quote, Code, Image, List, ListOrdered } from 'lucide-react';
+import { Plus, GripVertical, Type, Heading1, Heading2, Heading3, Quote, Code, Image, List, ListOrdered, type LucideIcon } from 'lucide-react';
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createListNode, $createListItemNode } from '@lexical/list';
@@ -100,7 +100,7 @@ function getBlockElement(
 interface BlockType {
   key: string;
   name: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
   description: string;
   onSelect: (editor: LexicalEditor) => void;
 }

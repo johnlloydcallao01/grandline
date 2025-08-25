@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { AuthGuard } from './AuthGuard';
 import { AlertTriangle } from 'lucide-react';
 
@@ -45,22 +46,22 @@ function _InsufficientPermissionsScreen({
 }
 
 // Admin route guard component
-export function AdminRouteGuard({ 
-  children, 
+export function AdminRouteGuard({
+  children,
   requiredPermission,
   requireSuperAdmin = false,
-  fallback 
+  fallback
 }: AdminRouteGuardProps) {
-  return (
-    <AuthGuard fallback={fallback}>
-      <PermissionCheck 
-        requiredPermission={requiredPermission}
-        requireSuperAdmin={requireSuperAdmin}
-      >
-        {children}
-      </PermissionCheck>
-    </AuthGuard>
-  );
+  return React.createElement(AuthGuard as React.ComponentType<{ fallback?: React.ReactNode; children?: React.ReactNode }>, {
+    fallback
+  }, React.createElement(PermissionCheck as React.ComponentType<{
+    requiredPermission?: string;
+    requireSuperAdmin?: boolean;
+    children?: React.ReactNode
+  }>, {
+    requiredPermission,
+    requireSuperAdmin
+  }, children));
 }
 
 // Permission check component (used within AuthGuard)
@@ -88,15 +89,16 @@ export function withAdminRouteGuard<P extends object>(
   }
 ) {
   const WrappedComponent = (props: P) => {
-    return (
-      <AdminRouteGuard 
-        requiredPermission={options?.requiredPermission}
-        requireSuperAdmin={options?.requireSuperAdmin}
-        fallback={options?.fallback}
-      >
-        <Component {...props} />
-      </AdminRouteGuard>
-    );
+    return React.createElement(AdminRouteGuard as React.ComponentType<{
+      requiredPermission?: string;
+      requireSuperAdmin?: boolean;
+      fallback?: React.ReactNode;
+      children?: React.ReactNode;
+    }>, {
+      requiredPermission: options?.requiredPermission,
+      requireSuperAdmin: options?.requireSuperAdmin,
+      fallback: options?.fallback
+    }, React.createElement(Component, props));
   };
 
   WrappedComponent.displayName = `withAdminRouteGuard(${Component.displayName || Component.name})`;
