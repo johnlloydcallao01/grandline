@@ -31,7 +31,7 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   cors: '*',
-  csrf: false, // Disable CSRF temporarily to test
+  csrf: [], // Empty array disables CSRF protection
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
