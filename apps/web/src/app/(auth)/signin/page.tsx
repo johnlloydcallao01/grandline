@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAuth, useNotifications, loginUser, registerUser } from '@encreasl/redux';
+import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
 /**
  * Modern Professional Sign In / Sign Up Page
@@ -11,42 +13,91 @@ import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const { showSuccess, showError } = useNotifications();
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
+    // Personal Information
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    nameExtension: '',
+    gender: '',
+    civilStatus: '',
+    srn: '',
+    nationality: '',
+    birthDate: '',
+    placeOfBirth: '',
+    completeAddress: '',
+
+    // Contact Information
     email: '',
+    phoneNumber: '',
+
+    // Username & Password
+    username: '',
     password: '',
     confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    rank: '',
-    company: '',
+
+    // Marketing
+    couponCode: '',
+
+    // Emergency Contact
+    emergencyFirstName: '',
+    emergencyMiddleName: '',
+    emergencyLastName: '',
+    emergencyContactNumber: '',
+    emergencyRelationship: '',
+    emergencyCompleteAddress: '',
+
+    // Terms
     agreeToTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Maritime ranks for dropdown
-  const maritimeRanks = [
-    'Deck Cadet',
-    'Third Officer',
-    'Second Officer',
-    'Chief Officer',
-    'Captain',
-    'Engine Cadet',
-    'Fourth Engineer',
-    'Third Engineer',
-    'Second Engineer',
-    'Chief Engineer',
-    'Bosun',
-    'Able Seaman',
-    'Ordinary Seaman',
-    'Cook',
-    'Steward',
-    'Other'
+  // Use Redux loading state
+  const isLoading = auth.isLoading;
+
+  // Dropdown options for form fields
+  const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' },
+    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const civilStatusOptions = [
+    { value: 'single', label: 'Single' },
+    { value: 'married', label: 'Married' },
+    { value: 'divorced', label: 'Divorced' },
+    { value: 'widowed', label: 'Widowed' },
+    { value: 'separated', label: 'Separated' }
+  ];
+
+  const relationshipOptions = [
+    'Spouse', 'Parent', 'Child', 'Sibling', 'Friend', 'Colleague', 'Other'
+  ];
+
+  // Helper function to display field errors
+  const getFieldError = (fieldName: string) => {
+    return errors[fieldName];
+  };
+
+  const renderFieldError = (fieldName: string) => {
+    const error = getFieldError(fieldName);
+    if (!error) return null;
+
+    return (
+      <p className="mt-1 text-sm text-red-600">
+        <i className="fa fa-exclamation-circle mr-1"></i>
+        {error}
+      </p>
+    );
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -56,26 +107,94 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setErrors({});
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For now, just redirect to portal
-      router.push('/portal');
-    }, 2000);
+    try {
+      if (isSignUp) {
+        // Validate form data for signup
+        const validation = validateUserRegistration(formData);
+
+        if (!validation.success) {
+          const newErrors: Record<string, string> = {};
+          validation.error.errors.forEach((error) => {
+            const fieldName = error.path.join('.');
+            newErrors[fieldName] = error.message;
+          });
+          setErrors(newErrors);
+          return;
+        }
+
+        // Dispatch register action
+        const result = await auth.dispatch(registerUser(formData));
+
+        if (registerUser.fulfilled.match(result)) {
+          showSuccess('Registration successful! Welcome to Encreasl!');
+          router.push('/portal');
+        } else {
+          const error = result.payload as any;
+          showError(error?.message || 'Registration failed. Please try again.');
+        }
+      } else {
+        // Sign in
+        const credentials = {
+          email: formData.email,
+          password: formData.password,
+        };
+
+        const result = await auth.dispatch(loginUser(credentials));
+
+        if (loginUser.fulfilled.match(result)) {
+          showSuccess('Login successful! Welcome back!');
+          router.push('/portal');
+        } else {
+          const error = result.payload as any;
+          showError(error?.message || 'Login failed. Please check your credentials.');
+        }
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      showError('An unexpected error occurred. Please try again.');
+    }
   };
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
+    setErrors({});
     setFormData({
+      // Personal Information
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      nameExtension: '',
+      gender: '',
+      civilStatus: '',
+      srn: '',
+      nationality: '',
+      birthDate: '',
+      placeOfBirth: '',
+      completeAddress: '',
+
+      // Contact Information
       email: '',
+      phoneNumber: '',
+
+      // Username & Password
+      username: '',
       password: '',
       confirmPassword: '',
-      firstName: '',
-      lastName: '',
-      rank: '',
-      company: '',
+
+      // Marketing
+      couponCode: '',
+
+      // Emergency Contact
+      emergencyFirstName: '',
+      emergencyMiddleName: '',
+      emergencyLastName: '',
+      emergencyContactNumber: '',
+      emergencyRelationship: '',
+      emergencyCompleteAddress: '',
+
+      // Terms
       agreeToTerms: false
     });
   };
@@ -85,7 +204,7 @@ export default function SignInPage() {
       {/* Modern Split Layout */}
       <div className="min-h-screen flex">
         {/* Left Side - Branding & Info (Hidden on mobile) */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#201a7c] to-[#ab3b43] relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-[#201a7c] to-[#ab3b43] relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -169,7 +288,7 @@ export default function SignInPage() {
 
         {/* Right Side - Form */}
         <div
-          className="w-full lg:w-1/2 flex items-center justify-center px-1.5 py-4 lg:p-8 relative"
+          className="w-full lg:w-3/5 flex items-center justify-center px-1.5 py-4 lg:p-8 relative"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop&crop=center')`,
             backgroundSize: 'cover',
@@ -177,7 +296,7 @@ export default function SignInPage() {
             backgroundRepeat: 'no-repeat'
           }}
         >
-          <div className="w-full max-w-md md:max-w-lg relative z-10">
+          <div className="w-full max-w-lg md:max-w-2xl relative z-10">
             {/* Mobile Header */}
             <div className="lg:hidden mb-8">
               <button
@@ -218,161 +337,500 @@ export default function SignInPage() {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Sign Up Fields */}
                 {isSignUp && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-8">
+                    {/* Personal Information Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                        Personal Information
+                      </h3>
+
+                      {/* Name Fields */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            First Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            required
+                            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                              getFieldError('firstName')
+                                ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                                : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                            }`}
+                            placeholder="Juan"
+                          />
+                          {renderFieldError('firstName')}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Middle Name (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            name="middleName"
+                            value={formData.middleName}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Carlos"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Last Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Dela Cruz"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Name Extension (e.g. Jr., II)
+                          </label>
+                          <input
+                            type="text"
+                            name="nameExtension"
+                            value={formData.nameExtension}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Jr."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Gender and Civil Status */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Gender *
+                          </label>
+                          <select
+                            name="gender"
+                            value={formData.gender}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          >
+                            <option value="">Select gender</option>
+                            {genderOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Civil Status *
+                          </label>
+                          <select
+                            name="civilStatus"
+                            value={formData.civilStatus}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          >
+                            <option value="">Select civil status</option>
+                            {civilStatusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* SRN and Nationality */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            SRN *
+                          </label>
+                          <input
+                            type="text"
+                            name="srn"
+                            value={formData.srn}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="SRN-123456"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Nationality *
+                          </label>
+                          <input
+                            type="text"
+                            name="nationality"
+                            value={formData.nationality}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Filipino"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Birth Date and Place of Birth */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Birth Date *
+                          </label>
+                          <input
+                            type="date"
+                            name="birthDate"
+                            value={formData.birthDate}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Place of Birth *
+                          </label>
+                          <input
+                            type="text"
+                            name="placeOfBirth"
+                            value={formData.placeOfBirth}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Manila, Philippines"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Complete Address */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                          Complete Address *
+                        </label>
+                        <textarea
+                          name="completeAddress"
+                          value={formData.completeAddress}
+                          onChange={handleInputChange}
+                          required
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
+                          placeholder="123 Main Street, Barangay Sample, City, Province, ZIP Code"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Contact Information Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                        Contact Information
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Email *
+                          </label>
+                          <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="juan.delacruz@example.com"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Phone Number *
+                          </label>
+                          <input
+                            type="tel"
+                            name="phoneNumber"
+                            value={formData.phoneNumber}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="+63 912 345 6789"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Username & Password Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                        Username & Password
+                      </h3>
+
+                      <div className="space-y-4">
+                        {/* Username and Password - 50/50 on desktop */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                              Username *
+                            </label>
+                            <input
+                              type="text"
+                              name="username"
+                              value={formData.username}
+                              onChange={handleInputChange}
+                              required
+                              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                              placeholder="juan_delacruz"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                              Password *
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                required
+                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                                placeholder="Enter your password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                              >
+                                <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Confirm Password - Full width */}
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Confirm Password *
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              name="confirmPassword"
+                              value={formData.confirmPassword}
+                              onChange={handleInputChange}
+                              required
+                              className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                              placeholder="Confirm your password"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Marketing Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                        Marketing
+                      </h3>
+
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          First Name *
+                        <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                          Coupon Code
                         </label>
                         <input
                           type="text"
-                          name="firstName"
-                          value={formData.firstName}
+                          name="couponCode"
+                          value={formData.couponCode}
                           onChange={handleInputChange}
-                          required
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          placeholder="John"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Last Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          placeholder="Smith"
+                          placeholder="Enter coupon code (optional)"
                         />
                       </div>
                     </div>
 
+                    {/* Emergency Contact Section */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Maritime Rank *
-                      </label>
-                      <select
-                        name="rank"
-                        value={formData.rank}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                      >
-                        <option value="">Select your rank</option>
-                        {maritimeRanks.map((rank) => (
-                          <option key={rank} value={rank}>{rank}</option>
-                        ))}
-                      </select>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                        In Case of Emergency
+                      </h3>
+
+                      {/* Emergency Contact Name */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            First Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="emergencyFirstName"
+                            value={formData.emergencyFirstName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Maria"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Middle Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="emergencyMiddleName"
+                            value={formData.emergencyMiddleName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Santos"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Last Name *
+                          </label>
+                          <input
+                            type="text"
+                            name="emergencyLastName"
+                            value={formData.emergencyLastName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="Dela Cruz"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Contact Number *
+                          </label>
+                          <input
+                            type="tel"
+                            name="emergencyContactNumber"
+                            value={formData.emergencyContactNumber}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            placeholder="+63 912 345 6789"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Relationship *
+                          </label>
+                          <select
+                            name="emergencyRelationship"
+                            value={formData.emergencyRelationship}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          >
+                            <option value="">Select relationship</option>
+                            {relationshipOptions.map((relationship) => (
+                              <option key={relationship} value={relationship}>{relationship}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                            Complete Address *
+                          </label>
+                          <textarea
+                            name="emergencyCompleteAddress"
+                            value={formData.emergencyCompleteAddress}
+                            onChange={handleInputChange}
+                            required
+                            rows={3}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
+                            placeholder="456 Emergency Street, Barangay Sample, City, Province, ZIP Code"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Company/Organization
-                      </label>
+                    {/* Terms Agreement */}
+                    <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
                       <input
-                        type="text"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                        placeholder="Global Shipping Ltd."
-                      />
-                    </div>
-              </>
-            )}
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                    placeholder="john.smith@example.com"
-                  />
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                      placeholder="Enter your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm Password (Sign Up only) */}
-                {isSignUp && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Confirm Password *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
+                        type="checkbox"
+                        name="agreeToTerms"
+                        checked={formData.agreeToTerms}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                        placeholder="Confirm your password"
+                        className="mt-1 w-4 h-4 text-[#201a7c] border-gray-300 rounded focus:ring-[#201a7c]"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                      </button>
+                      <label className="text-sm text-gray-600">
+                        I agree to the{' '}
+                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Terms of Service</a>
+                        {' '}and{' '}
+                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Privacy Policy</a>
+                      </label>
                     </div>
                   </div>
                 )}
 
-                {/* Terms Agreement (Sign Up only) */}
-                {isSignUp && (
-                  <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="checkbox"
-                      name="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-4 h-4 text-[#201a7c] border-gray-300 rounded focus:ring-[#201a7c]"
-                    />
-                    <label className="text-sm text-gray-600">
-                      I agree to the{' '}
-                      <a href="#" className="text-[#201a7c] hover:underline font-medium">Terms of Service</a>
-                      {' '}and{' '}
-                      <a href="#" className="text-[#201a7c] hover:underline font-medium">Privacy Policy</a>
-                    </label>
-                  </div>
+                {/* Sign In Fields - Email and Password for sign in only */}
+                {!isSignUp && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                        placeholder="john.smith@example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
+                        Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          placeholder="Enter your password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {/* Forgot Password (Sign In only) */}

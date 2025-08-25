@@ -90,6 +90,29 @@ export {
 } from './analytics-schemas';
 
 // ========================================
+// USER REGISTRATION VALIDATORS
+// ========================================
+
+export {
+  PersonalInformationSchema,
+  ContactInformationSchema,
+  UsernamePasswordSchema,
+  MarketingSchema,
+  EmergencyContactSchema,
+  UserRegistrationSchema,
+  FlatUserRegistrationSchema,
+  validateUserRegistration,
+  transformToStructuredRegistration,
+  type PersonalInformationData,
+  type ContactInformationData,
+  type UsernamePasswordData,
+  type MarketingData,
+  type EmergencyContactData,
+  type UserRegistrationData,
+  type FlatUserRegistrationData,
+} from './user-registration-schemas';
+
+// ========================================
 // COMMON VALIDATORS
 // ========================================
 

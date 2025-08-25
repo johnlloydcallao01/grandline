@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@encreasl/redux": "workspace:*",
     "@lexical/code": "^0.28.0",
     "@lexical/link": "^0.28.0",
     "@lexical/list": "^0.28.0",

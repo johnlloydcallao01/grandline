@@ -20,6 +20,7 @@
     "db:test": "node test-db-connection.js"
   },
   "dependencies": {
+    "@encreasl/redux": "workspace:*",
     "@payloadcms/db-postgres": "3.49.0",
     "@payloadcms/next": "3.49.0",
     "@payloadcms/payload-cloud": "3.49.0",
