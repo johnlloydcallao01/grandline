@@ -4,7 +4,7 @@ export const Instructors: CollectionConfig = {
   slug: 'instructors',
   admin: {
     useAsTitle: 'user',
-    defaultColumns: ['user', 'specialization', 'yearsExperience', 'isActive'],
+    defaultColumns: ['user', 'specialization', 'yearsExperience', 'teachingPermissions'],
   },
   fields: [
     {
@@ -17,6 +17,8 @@ export const Instructors: CollectionConfig = {
         description: 'Link to user account',
       },
     },
+
+    // ROLE-SPECIFIC FIELDS (instructor-specific data only)
     {
       name: 'specialization',
       type: 'text',
@@ -40,13 +42,6 @@ export const Instructors: CollectionConfig = {
       },
     },
     {
-      name: 'bio',
-      type: 'textarea',
-      admin: {
-        description: 'Instructor biography',
-      },
-    },
-    {
       name: 'officeHours',
       type: 'text',
       admin: {
@@ -60,12 +55,13 @@ export const Instructors: CollectionConfig = {
         description: 'Professional contact email',
       },
     },
+
+    // ENTERPRISE ENHANCEMENT: Teaching-specific permissions
     {
-      name: 'isActive',
-      type: 'checkbox',
-      defaultValue: true,
+      name: 'teachingPermissions',
+      type: 'json',
       admin: {
-        description: 'Whether instructor is currently active',
+        description: 'Course management and teaching capabilities',
       },
     },
   ],

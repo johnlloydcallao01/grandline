@@ -4,7 +4,7 @@ export const Trainees: CollectionConfig = {
   slug: 'trainees',
   admin: {
     useAsTitle: 'user',
-    defaultColumns: ['user', 'enrollmentDate', 'currentLevel', 'isActive'],
+    defaultColumns: ['user', 'srn', 'enrollmentDate', 'currentLevel'],
   },
   fields: [
     {
@@ -17,69 +17,53 @@ export const Trainees: CollectionConfig = {
         description: 'Link to user account',
       },
     },
+
+    // ROLE-SPECIFIC FIELDS (trainee learning data)
+    {
+      name: 'srn',
+      type: 'text',
+      unique: true,
+      required: true,
+      admin: {
+        description: 'Student Registration Number (unique identifier)',
+      },
+    },
+    {
+      name: 'couponCode',
+      type: 'text',
+      admin: {
+        description: 'Marketing coupon code used during registration',
+      },
+    },
     {
       name: 'enrollmentDate',
       type: 'date',
-      required: true,
       admin: {
-        description: 'Date when trainee enrolled',
+        description: 'Date when trainee enrolled in the program',
       },
     },
     {
       name: 'currentLevel',
       type: 'select',
       options: [
-        { label: 'Beginner', value: 'beginner' },
-        { label: 'Intermediate', value: 'intermediate' },
-        { label: 'Advanced', value: 'advanced' },
+        {
+          label: 'Beginner',
+          value: 'beginner',
+        },
+        {
+          label: 'Intermediate',
+          value: 'intermediate',
+        },
+        {
+          label: 'Advanced',
+          value: 'advanced',
+        },
       ],
       defaultValue: 'beginner',
       admin: {
-        description: 'Current skill level',
+        description: 'Current learning level',
       },
     },
-    {
-      name: 'coursesEnrolled',
-      type: 'relationship',
-      relationTo: 'posts', // Assuming posts are courses
-      hasMany: true,
-      admin: {
-        description: 'Courses currently enrolled in',
-      },
-    },
-    {
-      name: 'progressPercentage',
-      type: 'number',
-      min: 0,
-      max: 100,
-      defaultValue: 0,
-      admin: {
-        description: 'Overall progress percentage',
-      },
-    },
-    {
-      name: 'completedCourses',
-      type: 'relationship',
-      relationTo: 'posts',
-      hasMany: true,
-      admin: {
-        description: 'Completed courses',
-      },
-    },
-    {
-      name: 'emergencyContact',
-      type: 'text',
-      admin: {
-        description: 'Emergency contact information',
-      },
-    },
-    {
-      name: 'isActive',
-      type: 'checkbox',
-      defaultValue: true,
-      admin: {
-        description: 'Whether trainee is currently active',
-      },
-    },
+
   ],
 }

@@ -4,7 +4,7 @@ export const Admins: CollectionConfig = {
   slug: 'admins',
   admin: {
     useAsTitle: 'user',
-    defaultColumns: ['user', 'department', 'adminLevel', 'isActive'],
+    defaultColumns: ['user', 'adminLevel', 'systemPermissions'],
   },
   fields: [
     {
@@ -17,69 +17,36 @@ export const Admins: CollectionConfig = {
         description: 'Link to user account',
       },
     },
-    {
-      name: 'department',
-      type: 'text',
-      required: true,
-      admin: {
-        description: 'Department or area of responsibility',
-      },
-    },
+
+    // ROLE-SPECIFIC FIELDS (enterprise-grade admin management)
     {
       name: 'adminLevel',
       type: 'select',
       options: [
-        { label: 'System Admin', value: 'system' },
-        { label: 'Department Admin', value: 'department' },
-        { label: 'Content Admin', value: 'content' },
+        {
+          label: 'System Admin',
+          value: 'system',
+        },
+        {
+          label: 'Department Admin',
+          value: 'department',
+        },
+        {
+          label: 'Content Admin',
+          value: 'content',
+        },
       ],
+      defaultValue: 'content',
       required: true,
       admin: {
-        description: 'Level of administrative access',
+        description: 'Administrative access level',
       },
     },
     {
-      name: 'permissions',
-      type: 'select',
-      hasMany: true,
-      options: [
-        { label: 'User Management', value: 'user_management' },
-        { label: 'Course Management', value: 'course_management' },
-        { label: 'Content Management', value: 'content_management' },
-        { label: 'System Settings', value: 'system_settings' },
-        { label: 'Reports Access', value: 'reports_access' },
-      ],
+      name: 'systemPermissions',
+      type: 'json',
       admin: {
-        description: 'Specific admin permissions',
-      },
-    },
-    {
-      name: 'hireDate',
-      type: 'date',
-      admin: {
-        description: 'Date when admin was hired',
-      },
-    },
-    {
-      name: 'officeLocation',
-      type: 'text',
-      admin: {
-        description: 'Office location or building',
-      },
-    },
-    {
-      name: 'directReports',
-      type: 'number',
-      admin: {
-        description: 'Number of direct reports',
-      },
-    },
-    {
-      name: 'isActive',
-      type: 'checkbox',
-      defaultValue: true,
-      admin: {
-        description: 'Whether admin is currently active',
+        description: 'System-level permissions and capabilities',
       },
     },
   ],

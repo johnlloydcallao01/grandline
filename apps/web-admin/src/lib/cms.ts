@@ -41,13 +41,11 @@ export const cmsConfig = {
     posts: 'posts',
     media: 'media',
     users: 'users',
-    services: 'services',
   },
   endpoints: {
     posts: '/api/posts',
     media: '/api/media',
     users: '/api/users',
-    services: '/api/services',
   },
 } as const;
 

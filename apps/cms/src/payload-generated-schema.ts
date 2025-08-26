@@ -17,22 +17,69 @@ import {
   timestamp,
   serial,
   boolean,
-  numeric,
   jsonb,
+  numeric,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
-export const enum_users_role = pgEnum('enum_users_role', [
-  'super-admin',
-  'admin',
-  'editor',
-  'viewer',
+export const enum_users_gender = pgEnum('enum_users_gender', [
+  'male',
+  'female',
+  'other',
+  'prefer_not_to_say',
+])
+export const enum_users_civil_status = pgEnum('enum_users_civil_status', [
+  'single',
+  'married',
+  'divorced',
+  'widowed',
+  'separated',
+])
+export const enum_users_role = pgEnum('enum_users_role', ['admin', 'instructor', 'trainee'])
+export const enum_trainees_current_level = pgEnum('enum_trainees_current_level', [
+  'beginner',
+  'intermediate',
+  'advanced',
+])
+export const enum_admins_admin_level = pgEnum('enum_admins_admin_level', [
+  'system',
+  'department',
+  'content',
+])
+export const enum_user_relationships_related_entity_type = pgEnum(
+  'enum_user_relationships_related_entity_type',
+  ['course', 'department', 'project', 'group'],
+)
+export const enum_user_relationships_relationship_type = pgEnum(
+  'enum_user_relationships_relationship_type',
+  ['enrolled', 'teaching', 'managing', 'supervising', 'member'],
+)
+export const enum_user_events_event_type = pgEnum('enum_user_events_event_type', [
+  'USER_CREATED',
+  'ROLE_CHANGED',
+  'PROFILE_UPDATED',
+  'USER_DEACTIVATED',
+  'USER_REACTIVATED',
+  'LOGIN_SUCCESS',
+  'LOGIN_FAILED',
+  'PASSWORD_CHANGED',
+])
+export const enum_emergency_contacts_relationship = pgEnum('enum_emergency_contacts_relationship', [
+  'parent',
+  'spouse',
+  'sibling',
+  'child',
+  'guardian',
+  'friend',
+  'relative',
+  'other',
 ])
 export const enum_posts_status = pgEnum('enum_posts_status', ['draft', 'published'])
 export const enum__posts_v_version_status = pgEnum('enum__posts_v_version_status', [
   'draft',
   'published',
 ])
+export const enum_services_status = pgEnum('enum_services_status', ['draft', 'published'])
 
 export const users_sessions = pgTable(
   'users_sessions',
@@ -64,8 +111,23 @@ export const users = pgTable(
     id: serial('id').primaryKey(),
     firstName: varchar('first_name').notNull(),
     lastName: varchar('last_name').notNull(),
-    role: enum_users_role('role').notNull().default('editor'),
+    middleName: varchar('middle_name'),
+    nameExtension: varchar('name_extension'),
+    username: varchar('username'),
+    gender: enum_users_gender('gender'),
+    civilStatus: enum_users_civil_status('civil_status'),
+    nationality: varchar('nationality'),
+    birthDate: timestamp('birth_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    placeOfBirth: varchar('place_of_birth'),
+    completeAddress: varchar('complete_address'),
+    role: enum_users_role('role').notNull().default('trainee'),
     isActive: boolean('is_active').default(true),
+    bio: varchar('bio'),
+    phone: varchar('phone'),
+    profileImageUrl: varchar('profile_image_url'),
+    emergencyContact: varchar('emergency_contact'),
+    preferences: jsonb('preferences'),
+    metadata: jsonb('metadata'),
     lastLogin: timestamp('last_login', { mode: 'string', withTimezone: true, precision: 3 }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -86,9 +148,252 @@ export const users = pgTable(
     lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
   },
   (columns) => ({
+    users_username_idx: uniqueIndex('users_username_idx').on(columns.username),
     users_updated_at_idx: index('users_updated_at_idx').on(columns.updatedAt),
     users_created_at_idx: index('users_created_at_idx').on(columns.createdAt),
     users_email_idx: uniqueIndex('users_email_idx').on(columns.email),
+  }),
+)
+
+export const instructors = pgTable(
+  'instructors',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    specialization: varchar('specialization').notNull(),
+    yearsExperience: numeric('years_experience'),
+    certifications: varchar('certifications'),
+    officeHours: varchar('office_hours'),
+    contactEmail: varchar('contact_email'),
+    teachingPermissions: jsonb('teaching_permissions'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    instructors_user_idx: uniqueIndex('instructors_user_idx').on(columns.user),
+    instructors_updated_at_idx: index('instructors_updated_at_idx').on(columns.updatedAt),
+    instructors_created_at_idx: index('instructors_created_at_idx').on(columns.createdAt),
+  }),
+)
+
+export const trainees = pgTable(
+  'trainees',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    srn: varchar('srn').notNull(),
+    couponCode: varchar('coupon_code'),
+    enrollmentDate: timestamp('enrollment_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    currentLevel: enum_trainees_current_level('current_level').default('beginner'),
+    graduationTargetDate: timestamp('graduation_target_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    learningPath: varchar('learning_path'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    trainees_user_idx: uniqueIndex('trainees_user_idx').on(columns.user),
+    trainees_srn_idx: uniqueIndex('trainees_srn_idx').on(columns.srn),
+    trainees_updated_at_idx: index('trainees_updated_at_idx').on(columns.updatedAt),
+    trainees_created_at_idx: index('trainees_created_at_idx').on(columns.createdAt),
+  }),
+)
+
+export const admins_department_access = pgTable(
+  'admins_department_access',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    department: varchar('department'),
+  },
+  (columns) => ({
+    _orderIdx: index('admins_department_access_order_idx').on(columns._order),
+    _parentIDIdx: index('admins_department_access_parent_id_idx').on(columns._parentID),
+    _parentIDFk: foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [admins.id],
+      name: 'admins_department_access_parent_id_fk',
+    }).onDelete('cascade'),
+  }),
+)
+
+export const admins = pgTable(
+  'admins',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    adminLevel: enum_admins_admin_level('admin_level').notNull().default('content'),
+    systemPermissions: jsonb('system_permissions'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    admins_user_idx: uniqueIndex('admins_user_idx').on(columns.user),
+    admins_updated_at_idx: index('admins_updated_at_idx').on(columns.updatedAt),
+    admins_created_at_idx: index('admins_created_at_idx').on(columns.createdAt),
+  }),
+)
+
+export const user_certifications = pgTable(
+  'user_certifications',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    certificationName: varchar('certification_name').notNull(),
+    issuingAuthority: varchar('issuing_authority'),
+    issueDate: timestamp('issue_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    expiryDate: timestamp('expiry_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    verificationUrl: varchar('verification_url'),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    user_certifications_user_idx: index('user_certifications_user_idx').on(columns.user),
+    user_certifications_updated_at_idx: index('user_certifications_updated_at_idx').on(
+      columns.updatedAt,
+    ),
+    user_certifications_created_at_idx: index('user_certifications_created_at_idx').on(
+      columns.createdAt,
+    ),
+  }),
+)
+
+export const user_relationships = pgTable(
+  'user_relationships',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    relatedEntityType: enum_user_relationships_related_entity_type('related_entity_type').notNull(),
+    relatedEntityId: numeric('related_entity_id').notNull(),
+    relationshipType: enum_user_relationships_relationship_type('relationship_type').notNull(),
+    relationshipData: jsonb('relationship_data'),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    user_relationships_user_idx: index('user_relationships_user_idx').on(columns.user),
+    user_relationships_updated_at_idx: index('user_relationships_updated_at_idx').on(
+      columns.updatedAt,
+    ),
+    user_relationships_created_at_idx: index('user_relationships_created_at_idx').on(
+      columns.createdAt,
+    ),
+  }),
+)
+
+export const user_events = pgTable(
+  'user_events',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    eventType: enum_user_events_event_type('event_type').notNull(),
+    eventData: jsonb('event_data').notNull(),
+    triggeredBy: integer('triggered_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    timestamp: timestamp('timestamp', { mode: 'string', withTimezone: true, precision: 3 }),
+    ipAddress: varchar('ip_address'),
+    userAgent: varchar('user_agent'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    user_events_user_idx: index('user_events_user_idx').on(columns.user),
+    user_events_triggered_by_idx: index('user_events_triggered_by_idx').on(columns.triggeredBy),
+    user_events_updated_at_idx: index('user_events_updated_at_idx').on(columns.updatedAt),
+    user_events_created_at_idx: index('user_events_created_at_idx').on(columns.createdAt),
+  }),
+)
+
+export const emergency_contacts = pgTable(
+  'emergency_contacts',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    firstName: varchar('first_name').notNull(),
+    middleName: varchar('middle_name').notNull(),
+    lastName: varchar('last_name').notNull(),
+    contactNumber: varchar('contact_number').notNull(),
+    relationship: enum_emergency_contacts_relationship('relationship').notNull(),
+    completeAddress: varchar('complete_address').notNull(),
+    isPrimary: boolean('is_primary').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    emergency_contacts_user_idx: index('emergency_contacts_user_idx').on(columns.user),
+    emergency_contacts_updated_at_idx: index('emergency_contacts_updated_at_idx').on(
+      columns.updatedAt,
+    ),
+    emergency_contacts_created_at_idx: index('emergency_contacts_created_at_idx').on(
+      columns.createdAt,
+    ),
   }),
 )
 
@@ -96,7 +401,9 @@ export const media = pgTable(
   'media',
   {
     id: serial('id').primaryKey(),
-    alt: varchar('alt').notNull(),
+    alt: varchar('alt'),
+    cloudinaryPublicId: varchar('cloudinary_public_id'),
+    cloudinaryURL: varchar('cloudinary_u_r_l'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -297,6 +604,13 @@ export const services = pgTable(
     featuredImage: integer('featured_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
+    status: enum_services_status('status').notNull().default('draft'),
+    publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    author: integer('author_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
     seo_title: varchar('seo_title'),
     seo_description: varchar('seo_description'),
     seo_focusKeyword: varchar('seo_focus_keyword'),
@@ -310,6 +624,7 @@ export const services = pgTable(
   (columns) => ({
     services_slug_idx: uniqueIndex('services_slug_idx').on(columns.slug),
     services_featured_image_idx: index('services_featured_image_idx').on(columns.featuredImage),
+    services_author_idx: index('services_author_idx').on(columns.author),
     services_updated_at_idx: index('services_updated_at_idx').on(columns.updatedAt),
     services_created_at_idx: index('services_created_at_idx').on(columns.createdAt),
   }),
@@ -348,6 +663,13 @@ export const payload_locked_documents_rels = pgTable(
     parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
     usersID: integer('users_id'),
+    instructorsID: integer('instructors_id'),
+    traineesID: integer('trainees_id'),
+    adminsID: integer('admins_id'),
+    'user-certificationsID': integer('user_certifications_id'),
+    'user-relationshipsID': integer('user_relationships_id'),
+    'user-eventsID': integer('user_events_id'),
+    'emergency-contactsID': integer('emergency_contacts_id'),
     mediaID: integer('media_id'),
     postsID: integer('posts_id'),
     servicesID: integer('services_id'),
@@ -359,6 +681,27 @@ export const payload_locked_documents_rels = pgTable(
     payload_locked_documents_rels_users_id_idx: index(
       'payload_locked_documents_rels_users_id_idx',
     ).on(columns.usersID),
+    payload_locked_documents_rels_instructors_id_idx: index(
+      'payload_locked_documents_rels_instructors_id_idx',
+    ).on(columns.instructorsID),
+    payload_locked_documents_rels_trainees_id_idx: index(
+      'payload_locked_documents_rels_trainees_id_idx',
+    ).on(columns.traineesID),
+    payload_locked_documents_rels_admins_id_idx: index(
+      'payload_locked_documents_rels_admins_id_idx',
+    ).on(columns.adminsID),
+    payload_locked_documents_rels_user_certifications_id_idx: index(
+      'payload_locked_documents_rels_user_certifications_id_idx',
+    ).on(columns['user-certificationsID']),
+    payload_locked_documents_rels_user_relationships_id_idx: index(
+      'payload_locked_documents_rels_user_relationships_id_idx',
+    ).on(columns['user-relationshipsID']),
+    payload_locked_documents_rels_user_events_id_idx: index(
+      'payload_locked_documents_rels_user_events_id_idx',
+    ).on(columns['user-eventsID']),
+    payload_locked_documents_rels_emergency_contacts_id_idx: index(
+      'payload_locked_documents_rels_emergency_contacts_id_idx',
+    ).on(columns['emergency-contactsID']),
     payload_locked_documents_rels_media_id_idx: index(
       'payload_locked_documents_rels_media_id_idx',
     ).on(columns.mediaID),
@@ -377,6 +720,41 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['usersID']],
       foreignColumns: [users.id],
       name: 'payload_locked_documents_rels_users_fk',
+    }).onDelete('cascade'),
+    instructorsIdFk: foreignKey({
+      columns: [columns['instructorsID']],
+      foreignColumns: [instructors.id],
+      name: 'payload_locked_documents_rels_instructors_fk',
+    }).onDelete('cascade'),
+    traineesIdFk: foreignKey({
+      columns: [columns['traineesID']],
+      foreignColumns: [trainees.id],
+      name: 'payload_locked_documents_rels_trainees_fk',
+    }).onDelete('cascade'),
+    adminsIdFk: foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: 'payload_locked_documents_rels_admins_fk',
+    }).onDelete('cascade'),
+    'user-certificationsIdFk': foreignKey({
+      columns: [columns['user-certificationsID']],
+      foreignColumns: [user_certifications.id],
+      name: 'payload_locked_documents_rels_user_certifications_fk',
+    }).onDelete('cascade'),
+    'user-relationshipsIdFk': foreignKey({
+      columns: [columns['user-relationshipsID']],
+      foreignColumns: [user_relationships.id],
+      name: 'payload_locked_documents_rels_user_relationships_fk',
+    }).onDelete('cascade'),
+    'user-eventsIdFk': foreignKey({
+      columns: [columns['user-eventsID']],
+      foreignColumns: [user_events.id],
+      name: 'payload_locked_documents_rels_user_events_fk',
+    }).onDelete('cascade'),
+    'emergency-contactsIdFk': foreignKey({
+      columns: [columns['emergency-contactsID']],
+      foreignColumns: [emergency_contacts.id],
+      name: 'payload_locked_documents_rels_emergency_contacts_fk',
     }).onDelete('cascade'),
     mediaIdFk: foreignKey({
       columns: [columns['mediaID']],
@@ -484,6 +862,73 @@ export const relations_users = relations(users, ({ many }) => ({
     relationName: 'sessions',
   }),
 }))
+export const relations_instructors = relations(instructors, ({ one }) => ({
+  user: one(users, {
+    fields: [instructors.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_trainees = relations(trainees, ({ one }) => ({
+  user: one(users, {
+    fields: [trainees.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_admins_department_access = relations(
+  admins_department_access,
+  ({ one }) => ({
+    _parentID: one(admins, {
+      fields: [admins_department_access._parentID],
+      references: [admins.id],
+      relationName: 'departmentAccess',
+    }),
+  }),
+)
+export const relations_admins = relations(admins, ({ one, many }) => ({
+  user: one(users, {
+    fields: [admins.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  departmentAccess: many(admins_department_access, {
+    relationName: 'departmentAccess',
+  }),
+}))
+export const relations_user_certifications = relations(user_certifications, ({ one }) => ({
+  user: one(users, {
+    fields: [user_certifications.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_user_relationships = relations(user_relationships, ({ one }) => ({
+  user: one(users, {
+    fields: [user_relationships.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_user_events = relations(user_events, ({ one }) => ({
+  user: one(users, {
+    fields: [user_events.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  triggeredBy: one(users, {
+    fields: [user_events.triggeredBy],
+    references: [users.id],
+    relationName: 'triggeredBy',
+  }),
+}))
+export const relations_emergency_contacts = relations(emergency_contacts, ({ one }) => ({
+  user: one(users, {
+    fields: [emergency_contacts.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
 export const relations_media = relations(media, () => ({}))
 export const relations_posts_tags = relations(posts_tags, ({ one }) => ({
   _parentID: one(posts, {
@@ -550,6 +995,11 @@ export const relations_services = relations(services, ({ one, many }) => ({
   tags: many(services_tags, {
     relationName: 'tags',
   }),
+  author: one(users, {
+    fields: [services.author],
+    references: [users.id],
+    relationName: 'author',
+  }),
 }))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -563,6 +1013,41 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.usersID],
       references: [users.id],
       relationName: 'users',
+    }),
+    instructorsID: one(instructors, {
+      fields: [payload_locked_documents_rels.instructorsID],
+      references: [instructors.id],
+      relationName: 'instructors',
+    }),
+    traineesID: one(trainees, {
+      fields: [payload_locked_documents_rels.traineesID],
+      references: [trainees.id],
+      relationName: 'trainees',
+    }),
+    adminsID: one(admins, {
+      fields: [payload_locked_documents_rels.adminsID],
+      references: [admins.id],
+      relationName: 'admins',
+    }),
+    'user-certificationsID': one(user_certifications, {
+      fields: [payload_locked_documents_rels['user-certificationsID']],
+      references: [user_certifications.id],
+      relationName: 'user-certifications',
+    }),
+    'user-relationshipsID': one(user_relationships, {
+      fields: [payload_locked_documents_rels['user-relationshipsID']],
+      references: [user_relationships.id],
+      relationName: 'user-relationships',
+    }),
+    'user-eventsID': one(user_events, {
+      fields: [payload_locked_documents_rels['user-eventsID']],
+      references: [user_events.id],
+      relationName: 'user-events',
+    }),
+    'emergency-contactsID': one(emergency_contacts, {
+      fields: [payload_locked_documents_rels['emergency-contactsID']],
+      references: [emergency_contacts.id],
+      relationName: 'emergency-contacts',
     }),
     mediaID: one(media, {
       fields: [payload_locked_documents_rels.mediaID],
@@ -612,11 +1097,28 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
+  enum_users_gender: typeof enum_users_gender
+  enum_users_civil_status: typeof enum_users_civil_status
   enum_users_role: typeof enum_users_role
+  enum_trainees_current_level: typeof enum_trainees_current_level
+  enum_admins_admin_level: typeof enum_admins_admin_level
+  enum_user_relationships_related_entity_type: typeof enum_user_relationships_related_entity_type
+  enum_user_relationships_relationship_type: typeof enum_user_relationships_relationship_type
+  enum_user_events_event_type: typeof enum_user_events_event_type
+  enum_emergency_contacts_relationship: typeof enum_emergency_contacts_relationship
   enum_posts_status: typeof enum_posts_status
   enum__posts_v_version_status: typeof enum__posts_v_version_status
+  enum_services_status: typeof enum_services_status
   users_sessions: typeof users_sessions
   users: typeof users
+  instructors: typeof instructors
+  trainees: typeof trainees
+  admins_department_access: typeof admins_department_access
+  admins: typeof admins
+  user_certifications: typeof user_certifications
+  user_relationships: typeof user_relationships
+  user_events: typeof user_events
+  emergency_contacts: typeof emergency_contacts
   media: typeof media
   posts_tags: typeof posts_tags
   posts: typeof posts
@@ -631,6 +1133,14 @@ type DatabaseSchema = {
   payload_migrations: typeof payload_migrations
   relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
+  relations_instructors: typeof relations_instructors
+  relations_trainees: typeof relations_trainees
+  relations_admins_department_access: typeof relations_admins_department_access
+  relations_admins: typeof relations_admins
+  relations_user_certifications: typeof relations_user_certifications
+  relations_user_relationships: typeof relations_user_relationships
+  relations_user_events: typeof relations_user_events
+  relations_emergency_contacts: typeof relations_emergency_contacts
   relations_media: typeof relations_media
   relations_posts_tags: typeof relations_posts_tags
   relations_posts: typeof relations_posts

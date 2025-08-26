@@ -13,9 +13,11 @@ import { Users } from './collections/Users'
 import { Instructors } from './collections/Instructors'
 import { Trainees } from './collections/Trainees'
 import { Admins } from './collections/Admins'
+import { UserCertifications } from './collections/UserCertifications'
+import { UserEvents } from './collections/UserEvents'
+import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
-import { Services } from './collections/Services'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,7 +29,17 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Instructors, Trainees, Admins, Media, Posts, Services],
+  collections: [
+    Users,
+    Instructors,
+    Trainees,
+    Admins,
+    UserCertifications,
+    UserEvents,
+    EmergencyContacts,
+    Media,
+    Posts
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   cors: '*',
