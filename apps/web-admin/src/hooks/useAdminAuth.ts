@@ -54,10 +54,10 @@ export function useAdminAuth(): AdminAuthReturn {
           await dispatch(loadUserFromToken()).unwrap();
         } catch (error) {
           console.warn('⚠️ Failed to load user from stored token:', error);
-          // Clear invalid tokens (use same keys as Redux auth)
+          // Clear invalid tokens
+          // Note: PayloadCMS only uses a single JWT token, no refresh token
           if (typeof window !== 'undefined') {
             localStorage.removeItem('encreasl_token');
-            localStorage.removeItem('encreasl_refresh_token');
             localStorage.removeItem('admin_user');
           }
         }
@@ -101,10 +101,10 @@ export function useAdminAuth(): AdminAuthReturn {
       // Dispatch Redux logout action
       await dispatch(logoutUser()).unwrap();
 
-      // Clear localStorage (use same keys as Redux auth)
+      // Clear localStorage
+      // Note: PayloadCMS only uses a single JWT token, no refresh token
       if (typeof window !== 'undefined') {
         localStorage.removeItem('encreasl_token');
-        localStorage.removeItem('encreasl_refresh_token');
         localStorage.removeItem('admin_user');
       }
 

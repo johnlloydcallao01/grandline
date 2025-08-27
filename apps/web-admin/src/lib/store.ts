@@ -79,10 +79,10 @@ export const loginWithPayloadCMS = createAsyncThunk<
         isActive: user.isActive
       });
 
-      // Store token in localStorage for persistence (use same keys as Redux auth)
+      // Store token in localStorage for persistence
+      // Note: PayloadCMS only provides a single JWT token, no refresh token
       if (typeof window !== 'undefined') {
         localStorage.setItem('encreasl_token', token);
-        localStorage.setItem('encreasl_refresh_token', refreshToken || '');
         localStorage.setItem('admin_user', JSON.stringify(user));
       }
 
