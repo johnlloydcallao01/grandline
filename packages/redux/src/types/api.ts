@@ -256,6 +256,9 @@ export const API_TAGS = {
   File: 'File',
   Search: 'Search',
   Analytics: 'Analytics',
+  Post: 'Post',
+  Media: 'Media',
+  Trainee: 'Trainee',
 } as const;
 
 export type ApiTag = typeof API_TAGS[keyof typeof API_TAGS];

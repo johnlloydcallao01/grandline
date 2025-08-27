@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HeaderProps } from '@/types';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { ChevronDown, User, Settings, LogOut, Shield } from 'lucide-react';
 
 /**
@@ -17,7 +17,7 @@ export function Header({
 }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout } = useAdminAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside or pressing Escape

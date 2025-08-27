@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, File } from 'lucide-react';
-import { createAuthenticatedCMSClient, getCMSImageUrl } from '@/lib/cms';
-import { payloadAuth } from '@/lib/payload-auth';
+// Note: useUploadMediaMutation available but using direct fetch for now
+import { getCMSImageUrl } from '@/lib/cms';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface MediaUploaderProps {
   value?: string | number; // Media ID
@@ -47,15 +48,15 @@ export function MediaUploader({
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { isAuthenticated } = useAdminAuth();
+
   const loadMediaInfo = useCallback(async (mediaId: string | number) => {
-    if (!payloadAuth.isAuthenticated()) return;
+    if (!isAuthenticated) return;
 
     try {
-      const client = createAuthenticatedCMSClient();
-
-      // Fetch media item details
-      const response = await fetch(`${client.baseUrl}/api/media/${mediaId}`, {
-        headers: payloadAuth.getAuthHeader(),
+      // Use direct fetch for now - could be replaced with RTK Query
+      const response = await fetch(`/api/media/${mediaId}`, {
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -74,26 +75,25 @@ export function MediaUploader({
     } catch (err) {
       console.error('Failed to load media info:', err);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Load selected media info when value changes
   React.useEffect(() => {
-    if (value && payloadAuth.isAuthenticated()) {
+    if (value && isAuthenticated) {
       loadMediaInfo(value);
     } else {
       setSelectedMedia(null);
     }
-  }, [value, loadMediaInfo]);
+  }, [value, loadMediaInfo, isAuthenticated]);
 
   const uploadFile = useCallback(async (file: File) => {
-    if (!payloadAuth.isAuthenticated()) return;
+    if (!isAuthenticated) return;
 
     setIsUploading(true);
     setError(null);
     setUploadProgress(0);
 
     try {
-      const client = createAuthenticatedCMSClient();
 
       // Create form data
       const formData = new FormData();
@@ -126,11 +126,8 @@ export function MediaUploader({
 
         xhr.onerror = () => reject(new Error('Upload failed'));
 
-        xhr.open('POST', `${client.baseUrl}/api/media`);
-        const token = payloadAuth.getToken();
-        if (token) {
-          xhr.setRequestHeader('Authorization', `JWT ${token}`);
-        }
+        xhr.open('POST', `/api/media`);
+        // Credentials are handled by the browser with credentials: 'include'
         xhr.send(formData);
       });
 
@@ -157,10 +154,10 @@ export function MediaUploader({
       setIsUploading(false);
       setUploadProgress(0);
     }
-  }, [onChange]);
+  }, [onChange, isAuthenticated]);
 
   const handleFileSelect = useCallback((file: File) => {
-    if (!payloadAuth.isAuthenticated()) return;
+    if (!isAuthenticated) return;
 
     // Validate file size
     if (file.size > maxSize * 1024 * 1024) {
@@ -175,7 +172,7 @@ export function MediaUploader({
     }
 
     uploadFile(file);
-  }, [maxSize, accept, uploadFile]);
+  }, [maxSize, accept, uploadFile, isAuthenticated]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

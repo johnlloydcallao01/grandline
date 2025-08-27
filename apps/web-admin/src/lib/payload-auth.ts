@@ -172,7 +172,7 @@ export class PayloadAuthClient {
 
 // Create singleton instance
 export const payloadAuth = new PayloadAuthClient(
-  env.NEXT_PUBLIC_CMS_SERVER_URL || 'https://cms.encreasl.com'
+  env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://grandline-cms.vercel.app'
 );
 
 /**

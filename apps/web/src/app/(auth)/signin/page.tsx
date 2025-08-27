@@ -124,15 +124,35 @@ export default function SignInPage() {
           return;
         }
 
-        // Dispatch register action
-        const result = await auth.dispatch(registerUser(formData));
+        // Use custom trainee registration endpoint from deployed CMS
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const response = await fetch(`${apiBaseUrl.replace('/api', '')}/api/trainee-register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
 
-        if (registerUser.fulfilled.match(result)) {
+        if (response.ok) {
+          const result = await response.json();
           showSuccess('Registration successful! Welcome to Encreasl!');
-          router.push('/portal');
+
+          // Login the newly created user
+          const loginResult = await auth.dispatch(loginUser({
+            email: formData.email,
+            password: formData.password
+          }));
+
+          if (loginUser.fulfilled.match(loginResult)) {
+            router.push('/portal');
+          } else {
+            // Registration succeeded but login failed - still show success
+            showSuccess('Registration successful! Please login with your credentials.');
+          }
         } else {
-          const error = result.payload as any;
-          showError(error?.message || 'Registration failed. Please try again.');
+          const error = await response.json();
+          showError(error?.error || 'Registration failed. Please try again.');
         }
       } else {
         // Sign in

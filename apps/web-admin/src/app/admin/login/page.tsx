@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { login, isAuthenticated, isLoading, error, clearError } = useAuth();
+  const { login, isAuthenticated, isLoading, error, clearError } = useAdminAuth();
 
   // Clear any cached values on mount
   React.useEffect(() => {
@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login({ email, password });
       // Redirect will happen automatically via useEffect
     } catch (err) {
       // Error is handled by the auth context

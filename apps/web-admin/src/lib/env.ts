@@ -25,9 +25,8 @@ export const env = {
   NEXT_PUBLIC_DEBUG_MODE: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true',
   NEXT_PUBLIC_SHOW_DEV_TOOLS: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === 'true',
 
-  // CMS Configuration
-  NEXT_PUBLIC_CMS_API_URL: process.env.NEXT_PUBLIC_CMS_API_URL || 'http://localhost:3001/api',
-  NEXT_PUBLIC_CMS_SERVER_URL: process.env.NEXT_PUBLIC_CMS_SERVER_URL || 'http://localhost:3001',
+  // API Configuration (consistent with apps/web)
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
 };
 
 // Export commonly used environment variables for easy access

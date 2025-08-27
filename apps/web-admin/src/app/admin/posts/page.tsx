@@ -1,60 +1,35 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
-import { createAuthenticatedCMSClient, formatCMSDateTime } from '@/lib/cms';
-import { payloadAuth } from '@/lib/payload-auth';
-import type { PostListItem, PostFilters } from '@encreasl/cms-types';
+import { useGetPostsQuery, useDeletePostMutation } from '@/lib/admin-api';
+import { formatCMSDateTime } from '@/lib/cms';
+import type { Post } from '@encreasl/cms-types';
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<PostFilters>({
-    status: undefined,
+  const [filters, setFilters] = useState({
+    status: undefined as 'draft' | 'published' | undefined,
     search: '',
     limit: 10,
     page: 1,
   });
-  const [totalPages, setTotalPages] = useState(1);
 
-  const loadPosts = useCallback(async () => {
-    if (!payloadAuth.isAuthenticated()) {
-      setError('Please login to access posts.');
-      return;
-    }
+  // Use Redux RTK Query for data fetching
+  const {
+    data: postsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetPostsQuery(filters);
 
-    setIsLoading(true);
-    setError(null);
+  const [deletePostMutation] = useDeletePostMutation();
 
-    try {
-      const client = createAuthenticatedCMSClient();
-      const response = await client.getPosts(filters);
+  const posts = postsResponse?.docs || [];
+  const totalPages = postsResponse?.totalPages || 1;
 
-      if (response.docs) {
-        setPosts(response.docs);
-        setTotalPages(response.totalPages || 1);
-      }
-    } catch (err: unknown) {
-      console.error('Failed to load posts:', err);
 
-      if (err instanceof Error && err.message.includes('No authentication token')) {
-        setError('Please login to access posts.');
-      } else if (err instanceof Error && err.message.includes('Failed to fetch')) {
-        setError('Unable to connect to CMS. Please check your connection.');
-      } else {
-        setError('Failed to load posts. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    loadPosts();
-  }, [filters, loadPosts]);
 
   const handleSearch = (searchTerm: string) => {
     setFilters(prev => ({
@@ -80,14 +55,11 @@ export default function PostsPage() {
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!payloadAuth.isAuthenticated() || !confirm('Are you sure you want to delete this post?')) return;
+    if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const client = createAuthenticatedCMSClient();
-      await client.deletePost(postId);
-
-      // Reload posts after deletion
-      loadPosts();
+      await deletePostMutation(postId).unwrap();
+      // RTK Query will automatically refetch the posts list
     } catch (err: unknown) {
       console.error('Failed to delete post:', err);
       alert('Failed to delete post. Please try again.');
@@ -180,9 +152,13 @@ export default function PostsPage() {
                 </div>
               ) : error ? (
                 <div className="p-6 text-center">
-                  <p className="text-red-600">{error}</p>
+                  <p className="text-red-600">
+                    {error && typeof error === 'object' && 'message' in error
+                      ? (error as { message: string }).message
+                      : 'Failed to load posts'}
+                  </p>
                   <button
-                    onClick={loadPosts}
+                    onClick={() => refetch()}
                     className="mt-2 text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Try again
@@ -201,7 +177,7 @@ export default function PostsPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
-                  {posts.map((post) => (
+                  {posts.map((post: Post) => (
                     <div key={post.id} className="p-4 hover:bg-gray-50">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -214,7 +190,7 @@ export default function PostsPage() {
                           
                           <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500">
                             <span>
-                              By {post.author.firstName} {post.author.lastName}
+                              By {typeof post.author === 'object' ? `${post.author.firstName} ${post.author.lastName}` : 'Unknown Author'}
                             </span>
                             {post.publishedAt && (
                               <span className="flex items-center">

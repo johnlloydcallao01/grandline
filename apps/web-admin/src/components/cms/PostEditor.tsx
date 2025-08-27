@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Save, Eye, X } from 'lucide-react';
 import { PostFormData, validatePostForm, generateSlug } from '@encreasl/cms-types';
-import { createAuthenticatedCMSClient } from '@/lib/cms';
+// CMS config available if needed: import { cmsConfig } from '@/lib/cms';
 import { payloadAuth } from '@/lib/payload-auth';
 import { RichTextEditor } from './RichTextEditor';
 import { MediaUploader } from './MediaUploader';
@@ -86,11 +86,18 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
     setError(null);
 
     try {
-      const client = createAuthenticatedCMSClient();
-      const response = await client.getPost(id);
+      const response = await fetch(`/api/posts/${id}`, {
+        credentials: 'include',
+      });
 
-      if (response.doc) {
-        const post = response.doc;
+      if (!response.ok) {
+        throw new Error('Failed to fetch post');
+      }
+
+      const data = await response.json();
+
+      if (data.doc || data) {
+        const post = data.doc || data;
         const postContent = post.content || {
           root: {
             type: 'root',
@@ -179,13 +186,25 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
         return;
       }
 
-      const client = createAuthenticatedCMSClient();
-
       let response;
       if (postId) {
-        response = await client.updatePost(postId, data);
+        const res = await fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error('Failed to update post');
+        response = await res.json();
       } else {
-        response = await client.createPost(data);
+        const res = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error('Failed to create post');
+        response = await res.json();
       }
 
       if (response.doc) {

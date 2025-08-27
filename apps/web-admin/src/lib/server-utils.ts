@@ -52,7 +52,7 @@ export async function getCurrentAdminUser(): Promise<PayloadUser | null> {
     
     // In production, you would validate this token with Payload CMS
     // For now, return a mock user
-    const response = await fetch(`${env.NEXT_PUBLIC_CMS_SERVER_URL}/api/users/me`, {
+    const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
         'Authorization': `JWT ${token}`,
       },

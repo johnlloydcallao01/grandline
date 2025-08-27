@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Shield, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -60,7 +60,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   fallback,
   redirectTo = '/admin/login'
 }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -120,7 +120,7 @@ export function withAuthGuard<P extends object>(
 
 // Hook to get current admin user (for use within AuthGuard)
 export function useCurrentAdmin() {
-  const { user } = useAuth();
+  const { user } = useAdminAuth();
   return user;
 }
 
