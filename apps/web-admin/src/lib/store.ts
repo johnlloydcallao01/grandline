@@ -79,9 +79,10 @@ export const loginWithPayloadCMS = createAsyncThunk<
         isActive: user.isActive
       });
 
-      // Store token in localStorage for persistence
+      // Store token in localStorage for persistence (use same keys as Redux auth)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('admin_token', token);
+        localStorage.setItem('encreasl_token', token);
+        localStorage.setItem('encreasl_refresh_token', refreshToken || '');
         localStorage.setItem('admin_user', JSON.stringify(user));
       }
 

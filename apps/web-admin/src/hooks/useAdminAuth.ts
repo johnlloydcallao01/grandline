@@ -38,12 +38,14 @@ export function useAdminAuth(): AdminAuthReturn {
 
   // Initialize auth state on mount (only once)
   useEffect(() => {
+    let mounted = true;
+
     const initializeAuth = async () => {
       // Only initialize if we don't have a user and we're not already loading
-      if (user || isLoading) return;
+      if (user || isLoading || !mounted) return;
 
-      // Check if we have a stored token
-      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      // Check if we have a stored token (use same key as Redux auth)
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('encreasl_token') : null;
 
       if (storedToken) {
         console.log('🔄 Initializing auth from stored token...');
@@ -52,9 +54,10 @@ export function useAdminAuth(): AdminAuthReturn {
           await dispatch(loadUserFromToken()).unwrap();
         } catch (error) {
           console.warn('⚠️ Failed to load user from stored token:', error);
-          // Clear invalid token
+          // Clear invalid tokens (use same keys as Redux auth)
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('admin_token');
+            localStorage.removeItem('encreasl_token');
+            localStorage.removeItem('encreasl_refresh_token');
             localStorage.removeItem('admin_user');
           }
         }
@@ -62,6 +65,10 @@ export function useAdminAuth(): AdminAuthReturn {
     };
 
     initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, [dispatch]); // Only run once on mount
 
   const login = useCallback(async (credentials: LoginCredentials) => {
@@ -94,9 +101,10 @@ export function useAdminAuth(): AdminAuthReturn {
       // Dispatch Redux logout action
       await dispatch(logoutUser()).unwrap();
 
-      // Clear localStorage
+      // Clear localStorage (use same keys as Redux auth)
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('admin_token');
+        localStorage.removeItem('encreasl_token');
+        localStorage.removeItem('encreasl_refresh_token');
         localStorage.removeItem('admin_user');
       }
 
