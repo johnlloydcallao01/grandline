@@ -6,6 +6,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { Post, Media, User } from '@encreasl/cms-types';
 import { env } from './env';
+import { authService } from './auth-service';
 
 // ============================================================================
 // Admin API Types
@@ -50,8 +51,8 @@ const adminBaseQuery = fetchBaseQuery({
   baseUrl: env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
   credentials: 'include',
   prepareHeaders: (headers) => {
-    // Get token from localStorage (PayloadCMS format)
-    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    // Get token from auth service
+    const token = authService.getToken();
 
     if (token) {
       headers.set('authorization', `JWT ${token}`);

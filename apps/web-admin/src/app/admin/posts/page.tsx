@@ -6,9 +6,10 @@ import Link from '@/components/ui/LinkWrapper';
 
 import { useGetPostsQuery, useDeletePostMutation } from '@/lib/admin-api';
 import { formatCMSDateTime } from '@/lib/cms';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import type { Post } from '@encreasl/cms-types';
 
-export default function PostsPage() {
+function PostsPageContent() {
   const [filters, setFilters] = useState({
     status: undefined as 'draft' | 'published' | undefined,
     search: '',
@@ -266,5 +267,13 @@ export default function PostsPage() {
             )}
           </div>
     </div>
+  );
+}
+
+export default function PostsPage() {
+  return (
+    <ProtectedRoute requiredPermission="canManagePosts">
+      <PostsPageContent />
+    </ProtectedRoute>
   );
 }
