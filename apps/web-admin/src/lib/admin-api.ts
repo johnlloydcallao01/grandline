@@ -132,7 +132,7 @@ export const adminApi = createApi({
 
     /**
      * Login with PayloadCMS - Professional Implementation
-     * Only allows admin and instructor roles
+     * Only allows admin role for admin panel access
      */
     login: builder.mutation<PayloadAuthResponse, PayloadLoginRequest>({
       query: (credentials) => ({
@@ -141,9 +141,9 @@ export const adminApi = createApi({
         body: credentials,
       }),
       transformResponse: (response: PayloadAuthResponse) => {
-        // Validate user role on client side as well
-        if (!['admin', 'instructor'].includes(response.user.role)) {
-          throw new Error(`Access denied. Required role: admin or instructor. Current: ${response.user.role}`);
+        // Validate user role on client side as well - ONLY admin allowed
+        if (response.user.role !== 'admin') {
+          throw new Error(`Access denied. Admin panel requires admin role. Current role: ${response.user.role}`);
         }
 
         if (!response.user.isActive) {
