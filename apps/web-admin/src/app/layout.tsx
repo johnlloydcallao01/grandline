@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,11 +18,12 @@ export const metadata: Metadata = {
   robots: "noindex, nofollow", // Prevent search engine indexing
 };
 
-export default function RootLayout({
-  children,
-}: {
+// Proper React 19 layout props type
+type LayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <body

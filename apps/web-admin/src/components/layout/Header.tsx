@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HeaderProps } from '@/types';
-import { ChevronDown, User, Settings, LogOut, Shield } from '@/components/ui/IconWrapper';
+import { ChevronDown, User, Settings, Shield } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
 
 /**
@@ -56,10 +56,7 @@ export function Header({
     }
   };
 
-  const handleLogout = async () => {
-    setIsProfileDropdownOpen(false);
-    // Logout is handled by LogoutButton component
-  };
+
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);

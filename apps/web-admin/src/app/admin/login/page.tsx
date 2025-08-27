@@ -38,6 +38,10 @@ export default function AdminLoginPage() {
         credentials: 'include', // Important for cookie handling
       });
 
+      // Log response details for debugging
+      console.log('📡 Login response status:', response.status);
+      console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
+
       const result = await response.json();
 
       if (!response.ok) {
@@ -56,12 +60,27 @@ export default function AdminLoginPage() {
       console.log('✅ PayloadCMS login successful:', {
         email: result.user.email,
         role: result.user.role,
-        isActive: result.user.isActive
+        isActive: result.user.isActive,
+        token: result.token ? 'Present' : 'Missing'
       });
 
-      // Refresh server components and redirect
-      router.refresh();
-      router.replace('/admin/posts');
+      // Check what cookies were set
+      console.log('🍪 All cookies after login:', document.cookie);
+
+      // If PayloadCMS didn't set the cookie, we need to set it manually
+      if (result.token && !document.cookie.includes('payload-token')) {
+        console.log('⚠️ PayloadCMS did not set cookie, setting manually...');
+        // Set the cookie manually with proper settings
+        document.cookie = `payload-token=${result.token}; path=/; SameSite=Lax`;
+        console.log('✅ Cookie set manually');
+      }
+
+      console.log('🔄 Redirecting to dashboard...');
+
+      // Small delay to ensure cookie is processed
+      setTimeout(() => {
+        router.push('/admin/dashboard');
+      }, 100);
     } catch (err: unknown) {
       console.error('❌ PayloadCMS login failed:', err);
       const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin privileges.';

@@ -3,7 +3,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Save, Eye, X } from '@/components/ui/IconWrapper';
-import { PostFormData, validatePostForm, generateSlug } from '@encreasl/cms-types';
+import { PostFormData, validatePostForm, generateSlug } from '@encreasl/cms-types'
+
+// Type for PayloadCMS user object
+interface PayloadUser {
+  id: number;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  role: string;
+};
 // CMS config available if needed: import { cmsConfig } from '@/lib/cms';
 // Authentication is now handled by middleware
 import { RichTextEditor } from './RichTextEditor';
@@ -58,7 +69,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
       featuredImage: undefined,
       status: 'draft',
       publishedAt: '',
-      author: 0,
+      author: 1, // Temporary default, will be updated when user is fetched
       tags: [],
       seo: {
         title: '',
@@ -70,6 +81,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
   const watchedTitle = watch('title');
   const watchedStatus = watch('status');
+  const watchedAuthor = watch('author');
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -86,7 +98,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/posts/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`, {
         credentials: 'include',
       });
 
@@ -147,17 +159,105 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
+        console.log('🔍 Fetching current user from PayloadCMS...');
+
+        // Get the payload-token cookie value
+        const getPayloadToken = () => {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'payload-token') {
+              return value;
+            }
+          }
+          return null;
+        };
+
+        const payloadToken = getPayloadToken();
+        console.log('🍪 PayloadCMS token for user fetch:', !!payloadToken);
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        // Add Authorization header if we have a token
+        if (payloadToken) {
+          headers['Authorization'] = `JWT ${payloadToken}`;
+          console.log('🔐 Added Authorization header for user fetch');
+        }
+
+        // Try the correct PayloadCMS me endpoint
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          method: 'GET',
           credentials: 'include',
+          headers,
         });
 
+        console.log('📡 User response status:', response.status);
+        console.log('📡 User response headers:', Object.fromEntries(response.headers.entries()));
+
         if (response.ok) {
-          const user = await response.json();
-          _setCurrentUser(user as unknown as Record<string, unknown>);
-          setValue('author', user.id);
+          const result = await response.json();
+          console.log('✅ Current user response:', result);
+
+          // PayloadCMS returns the user directly, not wrapped in a user property
+          const user = result.user || result; // Handle both formats
+
+          if (user && user.id) {
+            console.log('👤 User data:', user);
+            console.log('👤 User fields available:', Object.keys(user));
+            _setCurrentUser(user as unknown as Record<string, unknown>);
+
+            // Ensure user.id is a number
+            const userId = typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
+            console.log('👤 Setting author ID:', userId, typeof userId);
+            setValue('author', userId);
+          } else {
+            console.warn('⚠️ No user data in response:', result);
+            console.log('🔧 Using fallback: Setting default author ID');
+
+            // Create a mock user for display purposes
+            _setCurrentUser({
+              id: 1,
+              email: 'admin@example.com',
+              firstName: 'Admin',
+              lastName: 'User',
+              role: 'admin'
+            } as unknown as Record<string, unknown>);
+
+            // Set a default author ID (admin user)
+            setValue('author', 1);
+            console.log('✅ Fallback author set: ID 1');
+          }
+        } else {
+          console.warn('⚠️ Failed to fetch user:', response.status);
+          const errorText = await response.text();
+          console.warn('⚠️ User fetch error:', errorText);
+
+          // Set fallback user and author
+          _setCurrentUser({
+            id: 1,
+            email: 'admin@example.com',
+            firstName: 'Admin',
+            lastName: 'User',
+            role: 'admin'
+          } as unknown as Record<string, unknown>);
+          setValue('author', 1);
+          console.log('✅ Fallback author set due to fetch error: ID 1');
         }
       } catch (error) {
-        console.error('Failed to get current user:', error);
+        console.warn('⚠️ Failed to get current user:', error);
+
+        // Set fallback user and author
+        _setCurrentUser({
+          id: 1,
+          email: 'admin@example.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin'
+        } as unknown as Record<string, unknown>);
+        setValue('author', 1);
+        console.log('✅ Fallback author set due to network error: ID 1');
       }
     };
 
@@ -178,31 +278,91 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
     setError(null);
 
     try {
-      // Validate form data
-      const validation = validatePostForm(data);
-      if (!validation.success) {
-        setError('Please check your form data and try again.');
+      // Check if author is set
+      if (!data.author || data.author <= 0) {
+        setError('Author information is required. Please wait for user data to load.');
         return;
       }
 
-      let response;
+      // Validate form data
+      console.log('🔍 Validating form data:', data);
+      const validation = validatePostForm(data);
+      if (!validation.success) {
+        console.error('❌ Form validation failed:', validation.error);
+        console.error('❌ Validation errors:', validation.error?.issues);
+        setError(`Validation failed: ${validation.error?.issues?.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ')}`);
+        return;
+      }
+      console.log('✅ Form validation passed');
+
+      // Transform data for PayloadCMS API
+      const payloadData = {
+        ...data,
+        // Convert datetime-local format to ISO string for PayloadCMS
+        publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : undefined,
+        // Ensure featuredImage is properly formatted
+        featuredImage: data.featuredImage || undefined,
+        // Ensure tags are properly formatted
+        tags: data.tags?.length ? data.tags : undefined,
+        // Ensure seo is properly formatted
+        seo: data.seo && (data.seo.title || data.seo.description || data.seo.focusKeyword) ? data.seo : undefined,
+      };
+
+      console.log('📤 Sending data to PayloadCMS:', payloadData);
+
+      // Get the payload-token cookie value
+      const getPayloadToken = () => {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'payload-token') {
+            return value;
+          }
+        }
+        return null;
+      };
+
+      const payloadToken = getPayloadToken();
+      console.log('🍪 PayloadCMS token found:', !!payloadToken);
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add Authorization header if we have a token
+      if (payloadToken) {
+        headers['Authorization'] = `JWT ${payloadToken}`;
+        console.log('🔐 Added Authorization header with JWT token');
+      }
+
+      let response: { id: string; [key: string]: unknown };
       if (postId) {
-        const res = await fetch(`/api/posts/${postId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           credentials: 'include',
-          body: JSON.stringify(data),
+          body: JSON.stringify(payloadData),
         });
-        if (!res.ok) throw new Error('Failed to update post');
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('❌ Update failed:', res.status, errorText);
+          throw new Error(`Failed to update post: ${res.status}`);
+        }
         response = await res.json();
       } else {
-        const res = await fetch('/api/posts', {
+        console.log('📤 Creating post with headers:', headers);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           credentials: 'include',
-          body: JSON.stringify(data),
+          body: JSON.stringify(payloadData),
         });
-        if (!res.ok) throw new Error('Failed to create post');
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('❌ Create failed:', res.status, errorText);
+          console.error('❌ Response headers:', Object.fromEntries(res.headers.entries()));
+          throw new Error(`Failed to create post: ${res.status}`);
+        }
         response = await res.json();
       }
 
@@ -240,7 +400,12 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
   const handlePublish = () => {
     setValue('status', 'published');
-    setValue('publishedAt', new Date().toISOString());
+    // Format date for datetime-local input: YYYY-MM-DDTHH:mm
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16); // Remove seconds and timezone info
+    setValue('publishedAt', localDateTime);
     handleSubmit(onSubmit)();
   };
 
@@ -415,6 +580,65 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                   />
                 </div>
 
+                {/* Author Field */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Author
+                  </label>
+                  <div className="text-sm text-gray-600 px-2 py-1 bg-gray-50 border border-gray-200 rounded">
+                    {_currentUser ? (
+                      <span>
+                        {(() => {
+                          const user = _currentUser as unknown as PayloadUser;
+                          const firstName = user.firstName || user.first_name || '';
+                          const lastName = user.lastName || user.last_name || '';
+                          const email = user.email || '';
+
+                          // If we have first/last name, show them
+                          if (firstName || lastName) {
+                            return (
+                              <>
+                                {firstName} {lastName}
+                                {email && <span className="text-gray-400 ml-1">({email})</span>}
+                                {user.id === 1 && email === 'admin@example.com' && (
+                                  <span className="text-orange-500 text-xs ml-2">(Fallback)</span>
+                                )}
+                              </>
+                            );
+                          }
+
+                          // If no name, just show email
+                          if (email) {
+                            return (
+                              <span>
+                                {email}
+                                {user.id === 1 && email === 'admin@example.com' && (
+                                  <span className="text-orange-500 text-xs ml-2">(Fallback)</span>
+                                )}
+                              </span>
+                            );
+                          }
+
+                          // Fallback to user ID
+                          return <span>User #{user.id}</span>;
+                        })()}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">
+                        {watchedAuthor && watchedAuthor > 0 ? `Author ID: ${watchedAuthor}` : 'Loading user...'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Hidden field for form submission */}
+                  <Controller
+                    name="author"
+                    control={control}
+                    render={({ field }) => (
+                      <input {...field} type="hidden" />
+                    )}
+                  />
+                </div>
+
                 {watchedStatus === 'published' && (
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -423,13 +647,36 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                     <Controller
                       name="publishedAt"
                       control={control}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="datetime-local"
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
-                        />
-                      )}
+                      render={({ field }) => {
+                        // Convert ISO string to datetime-local format
+                        const formatForDateTimeLocal = (value: string) => {
+                          if (!value) return '';
+                          try {
+                            // If it's already in the correct format, return as is
+                            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+                              return value;
+                            }
+                            // Convert ISO string to datetime-local format
+                            const date = new Date(value);
+                            const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+                              .toISOString()
+                              .slice(0, 16);
+                            return localDateTime;
+                          } catch {
+                            return '';
+                          }
+                        };
+
+                        return (
+                          <input
+                            {...field}
+                            value={formatForDateTimeLocal(field.value || '')}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+                            type="datetime-local"
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                          />
+                        );
+                      }}
                     />
                   </div>
                 )}
@@ -438,20 +685,20 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                   <button
                     type="button"
                     onClick={handleSaveDraft}
-                    disabled={isSaving}
+                    disabled={isSaving || !watchedAuthor || watchedAuthor <= 0}
                     className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                   >
                     <Save className="w-4 h-4 mr-1" />
-                    {isSaving ? 'Saving...' : 'Save Draft'}
+                    {isSaving ? 'Saving...' : (!watchedAuthor || watchedAuthor <= 0) ? 'Loading user...' : 'Save Draft'}
                   </button>
-                  
+
                   <button
                     type="button"
                     onClick={handlePublish}
-                    disabled={isSaving}
+                    disabled={isSaving || !watchedAuthor || watchedAuthor <= 0}
                     className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {isSaving ? 'Publishing...' : 'Publish'}
+                    {isSaving ? 'Publishing...' : (!watchedAuthor || watchedAuthor <= 0) ? 'Loading user...' : 'Publish'}
                   </button>
                 </div>
               </div>

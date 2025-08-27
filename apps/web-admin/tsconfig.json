@@ -7,6 +7,9 @@
     "strict": false,
     "jsx": "preserve",
     "jsxImportSource": "react",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "paths": {
       "@/*": ["./src/*"]
     }

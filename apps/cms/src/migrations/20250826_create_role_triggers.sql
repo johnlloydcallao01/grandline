@@ -8,16 +8,16 @@ BEGIN
     -- Create corresponding record based on user role
     CASE NEW.role
         WHEN 'admin' THEN
-            INSERT INTO admins (user_id, is_active, created_at, updated_at) 
-            VALUES (NEW.id, true, NOW(), NOW());
+            INSERT INTO admins (user_id, admin_level, system_permissions, created_at, updated_at)
+            VALUES (NEW.id, 'content', '{"user_management": false, "content_management": true}', NOW(), NOW());
             
         WHEN 'instructor' THEN
-            INSERT INTO instructors (user_id, specialization, is_active, created_at, updated_at) 
-            VALUES (NEW.id, 'General', true, NOW(), NOW());
+            INSERT INTO instructors (user_id, specialization, teaching_permissions, created_at, updated_at)
+            VALUES (NEW.id, 'General', '{"course_creation": true, "student_management": true}', NOW(), NOW());
             
         WHEN 'trainee' THEN
-            INSERT INTO trainees (user_id, is_active, created_at, updated_at) 
-            VALUES (NEW.id, true, NOW(), NOW());
+            INSERT INTO trainees (user_id, current_level, created_at, updated_at)
+            VALUES (NEW.id, 'beginner', NOW(), NOW());
     END CASE;
     
     RETURN NEW;
@@ -50,14 +50,14 @@ BEGIN
         -- Create new role record
         CASE NEW.role
             WHEN 'admin' THEN
-                INSERT INTO admins (user_id, is_active, created_at, updated_at) 
-                VALUES (NEW.id, true, NOW(), NOW());
+                INSERT INTO admins (user_id, admin_level, system_permissions, created_at, updated_at)
+                VALUES (NEW.id, 'content', '{"user_management": false, "content_management": true}', NOW(), NOW());
             WHEN 'instructor' THEN
-                INSERT INTO instructors (user_id, specialization, is_active, created_at, updated_at) 
-                VALUES (NEW.id, 'General', true, NOW(), NOW());
+                INSERT INTO instructors (user_id, specialization, teaching_permissions, created_at, updated_at)
+                VALUES (NEW.id, 'General', '{"course_creation": true, "student_management": true}', NOW(), NOW());
             WHEN 'trainee' THEN
-                INSERT INTO trainees (user_id, is_active, created_at, updated_at) 
-                VALUES (NEW.id, true, NOW(), NOW());
+                INSERT INTO trainees (user_id, current_level, created_at, updated_at)
+                VALUES (NEW.id, 'beginner', NOW(), NOW());
         END CASE;
     END IF;
     
