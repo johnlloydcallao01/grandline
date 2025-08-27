@@ -3,15 +3,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
-  const { login, isAuthenticated, isLoading, error, clearError } = useAdminAuth();
 
   // Clear any cached values on mount
   React.useEffect(() => {
@@ -19,44 +18,54 @@ export default function AdminLoginPage() {
     setPassword('');
   }, []);
 
-  // Don't show loading screen on login page - user wants to login
-  if (isLoading && !isSubmitting) {
-    // Still show the login form, just wait for auth check to complete
-    // This prevents the annoying "Verifying access..." blinking
-  }
-
-  // Redirect if already authenticated (but not during initial loading)
-  React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      router.push('/admin');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
+    setError('');
     setIsSubmitting(true);
 
     try {
-      console.log('🔐 Professional PayloadCMS admin login initiated...');
+      console.log('🔐 PayloadCMS admin login initiated...');
       console.log('📧 Email:', email);
       console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      const result = await login({ email, password });
-
-      console.log('✅ Professional login successful:', {
-        email: result.user.email,
-        role: result.user.role,
-        hasToken: !!result.token
+      // Use PayloadCMS REST API for authentication
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // Important for cookie handling
       });
 
-      // Redirect to admin dashboard
-      router.push('/admin/posts');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+
+      // Validate user role - ONLY admin allowed
+      if (result.user.role !== 'admin') {
+        throw new Error(`Access denied. Admin panel requires admin role. Current role: ${result.user.role}`);
+      }
+
+      if (!result.user.isActive) {
+        throw new Error('Account is inactive. Please contact administrator.');
+      }
+
+      console.log('✅ PayloadCMS login successful:', {
+        email: result.user.email,
+        role: result.user.role,
+        isActive: result.user.isActive
+      });
+
+      // Refresh server components and redirect
+      router.refresh();
+      router.replace('/admin/posts');
     } catch (err: unknown) {
-      console.error('❌ Professional login failed:', err);
-      const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin or instructor privileges.';
-      console.error('Error details:', errorMessage);
-      // Error is already set by the Redux auth system
+      console.error('❌ PayloadCMS login failed:', err);
+      const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin privileges.';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -150,7 +159,7 @@ export default function AdminLoginPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 bg-white"
                   placeholder="Enter your email"
                   autoComplete="email"
@@ -169,7 +178,7 @@ export default function AdminLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 bg-white"
                     placeholder="Enter your password"
                     autoComplete="current-password"

@@ -5,7 +5,7 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Save, Eye, X } from '@/components/ui/IconWrapper';
 import { PostFormData, validatePostForm, generateSlug } from '@encreasl/cms-types';
 // CMS config available if needed: import { cmsConfig } from '@/lib/cms';
-import { payloadAuth } from '@/lib/payload-auth';
+// Authentication is now handled by middleware
 import { RichTextEditor } from './RichTextEditor';
 import { MediaUploader } from './MediaUploader';
 import { TagInput } from './TagInput';
@@ -80,7 +80,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
   }, [watchedTitle, setValue, postId]);
 
   const loadPost = useCallback(async (id: string) => {
-    if (!payloadAuth.isAuthenticated()) return;
+    // Authentication is now handled by middleware
 
     setIsLoading(true);
     setError(null);
@@ -147,8 +147,12 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const user = await payloadAuth.me();
-        if (user) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const user = await response.json();
           _setCurrentUser(user as unknown as Record<string, unknown>);
           setValue('author', user.id);
         }
@@ -157,23 +161,18 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
       }
     };
 
-    if (payloadAuth.isAuthenticated()) {
-      getCurrentUser();
-    }
+    getCurrentUser();
   }, [setValue]);
 
   // Load existing post if editing
   useEffect(() => {
-    if (postId && payloadAuth.isAuthenticated()) {
+    if (postId) {
       loadPost(postId);
     }
   }, [postId, loadPost]);
 
   const onSubmit: SubmitHandler<PostFormData> = async (data: PostFormData) => {
-    if (!payloadAuth.isAuthenticated()) {
-      setError('Authentication required. Please login first.');
-      return;
-    }
+    // Authentication is now handled by middleware
 
     setIsSaving(true);
     setError(null);

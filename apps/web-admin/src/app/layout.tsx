@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AdminReduxProvider } from "@/components/providers/AdminReduxProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,10 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <AdminReduxProvider>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {children as any}
-        </AdminReduxProvider>
+        {children}
       </body>
     </html>
   );

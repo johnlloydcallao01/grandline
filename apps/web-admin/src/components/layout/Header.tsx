@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HeaderProps } from '@/types';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { ChevronDown, User, Settings, LogOut, Shield } from '@/components/ui/IconWrapper';
+import LogoutButton from '@/components/LogoutButton';
 
 /**
  * Admin Header component with navigation, search, and user controls
@@ -17,7 +17,14 @@ export function Header({
 }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const { user, logout } = useAdminAuth();
+
+  // For now, use a placeholder user - in real app this would come from server session
+  const user = {
+    email: 'admin@example.com',
+    role: 'admin',
+    firstName: 'Admin',
+    lastName: 'User'
+  };
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside or pressing Escape
@@ -50,12 +57,8 @@ export function Header({
   };
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      setIsProfileDropdownOpen(false);
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+    setIsProfileDropdownOpen(false);
+    // Logout is handled by LogoutButton component
   };
 
   const toggleProfileDropdown = () => {
@@ -193,13 +196,7 @@ export function Header({
                 </div>
 
                 <div className="border-t border-gray-100 py-1">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4 mr-3 text-red-500" />
-                    Sign Out
-                  </button>
+                  <LogoutButton />
                 </div>
               </div>
             )}

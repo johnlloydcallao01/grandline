@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar } from '@/components/ui/IconWrapper';
 import Link from '@/components/ui/LinkWrapper';
-
-import { useGetPostsQuery, useDeletePostMutation } from '@/lib/admin-api';
 import { formatCMSDateTime } from '@/lib/cms';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import type { Post } from '@encreasl/cms-types';
 
 function PostsPageContent() {
@@ -17,18 +14,49 @@ function PostsPageContent() {
     page: 1,
   });
 
-  // Use Redux RTK Query for data fetching
-  const {
-    data: postsResponse,
-    isLoading,
-    error,
-    refetch,
-  } = useGetPostsQuery(filters);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const [deletePostMutation] = useDeletePostMutation();
+  // Fetch posts using PayloadCMS REST API
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        const params = new URLSearchParams({
+          limit: filters.limit.toString(),
+          page: filters.page.toString(),
+        });
 
-  const posts = postsResponse?.docs || [];
-  const totalPages = postsResponse?.totalPages || 1;
+        if (filters.status) {
+          params.append('where[status][equals]', filters.status);
+        }
+
+        if (filters.search) {
+          params.append('where[title][contains]', filters.search);
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?${params}`, {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+
+        const data = await response.json();
+        setPosts(data.docs || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch posts');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [filters]);
 
 
 
@@ -59,8 +87,17 @@ function PostsPageContent() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      await deletePostMutation(postId).unwrap();
-      // RTK Query will automatically refetch the posts list
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete post');
+      }
+
+      // Remove post from local state
+      setPosts(prev => prev.filter(post => post.id !== postId));
     } catch (err: unknown) {
       console.error('Failed to delete post:', err);
       alert('Failed to delete post. Please try again.');
@@ -159,7 +196,7 @@ function PostsPageContent() {
                       : 'Failed to load posts'}
                   </p>
                   <button
-                    onClick={() => refetch()}
+                    onClick={() => window.location.reload()}
                     className="mt-2 text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Try again
@@ -271,9 +308,5 @@ function PostsPageContent() {
 }
 
 export default function PostsPage() {
-  return (
-    <ProtectedRoute requiredPermission="canManagePosts">
-      <PostsPageContent />
-    </ProtectedRoute>
-  );
+  return <PostsPageContent />;
 }

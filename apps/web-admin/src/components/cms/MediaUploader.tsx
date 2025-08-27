@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, File } from '@/components/ui/IconWrapper';
 // Note: useUploadMediaMutation available but using direct fetch for now
 import { getCMSImageUrl } from '@/lib/cms';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+// Authentication is now handled by middleware
 
 interface MediaUploaderProps {
   value?: string | number; // Media ID
@@ -48,7 +48,8 @@ export function MediaUploader({
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { isAuthenticated } = useAdminAuth();
+  // Authentication is now handled by middleware
+  const isAuthenticated = true;
 
   const loadMediaInfo = useCallback(async (mediaId: string | number) => {
     if (!isAuthenticated) return;
