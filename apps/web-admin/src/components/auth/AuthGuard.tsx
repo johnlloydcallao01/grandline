@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Loader2 } from '@/components/ui/IconWrapper';
+import { Loader2, Shield } from '@/components/ui/IconWrapper';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface AuthGuardProps {

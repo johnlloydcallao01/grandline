@@ -7,7 +7,7 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import type { Post, Media, User } from '@encreasl/cms-types';
+import type { Post } from '@encreasl/cms-types';
 import { env } from './env';
 import type { RootState } from './store';
 
@@ -210,7 +210,7 @@ export const adminApi = createApi({
      */
     getPost: builder.query<Post, string>({
       query: (id) => `/posts/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Post', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Post', id }],
     }),
 
     /**
@@ -234,7 +234,7 @@ export const adminApi = createApi({
         method: 'PATCH',
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: 'Post', id },
         { type: 'Post', id: 'LIST' },
       ],
@@ -248,7 +248,7 @@ export const adminApi = createApi({
         url: `/posts/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: 'Post', id },
         { type: 'Post', id: 'LIST' },
       ],
