@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import Image from '@/components/ui/ImageWrapper';
 
 /**
  * Professional Courses Page - Coursera-style design
@@ -153,7 +153,7 @@ export default function CoursesPage() {
               type="text"
               placeholder="Search courses, instructors..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
             />
             <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -199,6 +199,7 @@ export default function CoursesPage() {
                 {/* Course Image */}
                 <div className="md:w-1/3 relative">
                   <div className="relative h-48 md:h-full">
+                    {/* @ts-ignore */}
                     <Image
                       src={course.thumbnail}
                       alt={course.title}

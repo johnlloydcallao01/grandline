@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import Image from "@/components/ui/ImageWrapper";
 
 /**
  * Trending page component - Shows trending content and popular videos

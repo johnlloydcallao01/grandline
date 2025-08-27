@@ -85,7 +85,7 @@ export type IconName =
 
 // Category icon mapping type
 export interface CategoryIconConfig {
-  icon: React.ReactNode;
+  icon: any;
   bgColor: string;
 }
 

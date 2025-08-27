@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+// CORS headers for all responses
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Max-Age': '86400',
+}
+
+// Handle preflight OPTIONS request
+export async function OPTIONS(_request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config: configPromise })
@@ -18,7 +34,7 @@ export async function POST(request: NextRequest) {
       if (!body[field]) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
     }
@@ -93,7 +109,7 @@ export async function POST(request: NextRequest) {
           lastName: emergencyContact.lastName
         }
       }
-    })
+    }, { headers: corsHeaders })
 
   } catch (error: unknown) {
     console.error('Trainee registration error:', error)
@@ -115,7 +131,7 @@ export async function POST(request: NextRequest) {
           error: 'Validation failed',
           details: (error as { data?: unknown; message: string }).data || error.message
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -129,7 +145,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { error: `This ${field} is already registered` },
-        { status: 409 }
+        { status: 409, headers: corsHeaders }
       )
     }
 
@@ -143,7 +159,7 @@ export async function POST(request: NextRequest) {
           errorType: error instanceof Error ? error.name : typeof error
         })
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }

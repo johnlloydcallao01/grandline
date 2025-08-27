@@ -42,7 +42,13 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
-  cors: '*',
+  cors: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://*.vercel.app',
+    'https://*.netlify.app',
+    '*'
+  ],
   csrf: [], // Empty array disables CSRF protection
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

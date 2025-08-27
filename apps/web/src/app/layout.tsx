@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import * as React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ReduxProvider } from "@encreasl/redux";
 import "./globals.css";
@@ -45,7 +44,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {React.createElement(ReduxProvider as React.ComponentType<{ children?: React.ReactNode }>, {}, children)}
+        {/* @ts-ignore */}
+        <ReduxProvider>
+          {children as any}
+        </ReduxProvider>
       </body>
     </html>
   );

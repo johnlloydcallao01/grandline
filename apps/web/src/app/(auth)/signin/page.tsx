@@ -116,24 +116,37 @@ export default function SignInPage() {
     e.preventDefault();
     setErrors({});
 
+    // DIAGNOSTIC LOGGING
+    console.log('🚀 FORM SUBMISSION STARTED');
+    console.log('📋 isSignUp:', isSignUp);
+    console.log('📋 Form Data:', formData);
+    console.log('📋 isLoading:', isLoading);
+
     try {
       if (isSignUp) {
         // Validate form data for signup
+        console.log('🔍 VALIDATING FORM DATA...');
         const validation = validateUserRegistration(formData);
+        console.log('📊 Validation result:', validation);
 
         if (!validation.success) {
+          console.log('❌ VALIDATION FAILED!');
+          console.log('📋 Validation errors:', validation.error.errors);
           const newErrors: Record<string, string> = {};
           validation.error.errors.forEach((error) => {
             const fieldName = error.path.join('.');
             newErrors[fieldName] = error.message;
+            console.log(`❌ Field error: ${fieldName} = ${error.message}`);
           });
           setErrors(newErrors);
+          console.log('📋 Setting errors:', newErrors);
           return;
         }
 
-        // Use custom trainee registration endpoint from deployed CMS
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-        const registrationUrl = `${apiBaseUrl.replace('/api', '')}/api/trainee-register`;
+        console.log('✅ VALIDATION PASSED!');
+
+        // CORS is completely disabled on the CMS - use direct URL
+        const registrationUrl = 'https://grandline-cms.vercel.app/api/trainee-register';
 
         console.log('🚀 Starting trainee registration...');
         console.log('📍 Registration URL:', registrationUrl);
@@ -901,6 +914,7 @@ export default function SignInPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
+                  onClick={() => console.log('🔘 BUTTON CLICKED! isSignUp:', isSignUp, 'isLoading:', isLoading)}
                   className="w-full bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white py-4 px-6 rounded-xl font-semibold hover:from-[#1a1569] hover:to-[#8b2f36] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                 >
                   {isLoading ? (

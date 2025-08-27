@@ -34,6 +34,16 @@ const nextConfig: NextConfig = {
     // Add server-only environment variables here if needed
   },
 
+  // Proxy API requests to avoid CORS during development
+  async rewrites() {
+    return [
+      {
+        source: '/api/cms/:path*',
+        destination: 'https://grandline-cms.vercel.app/api/:path*',
+      },
+    ];
+  },
+
   // Security headers for production
   async headers() {
     return [

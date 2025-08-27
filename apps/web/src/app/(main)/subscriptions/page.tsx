@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { VideoCard } from "@/components/ui";
-import Image from "next/image";
+import Image from "@/components/ui/ImageWrapper";
 
 // Mock data for subscribed channels
 const subscribedChannels = [

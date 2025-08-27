@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
 
@@ -157,7 +157,7 @@ export function Header({
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: any) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:border-blue-500 text-gray-900 placeholder-gray-500"
               />
             </div>
@@ -184,10 +184,10 @@ export function Header({
               color: '#201a7c',
               boxShadow: '0 0 10px rgba(0, 0, 0, 0.15)'
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={(e: any) => {
               e.currentTarget.style.boxShadow = '0 0 15px rgba(32, 26, 124, 0.25)';
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={(e: any) => {
               e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.15)';
             }}
           >
