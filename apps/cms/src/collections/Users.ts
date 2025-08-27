@@ -7,32 +7,7 @@ export const Users: CollectionConfig = {
     defaultColumns: ['email', 'firstName', 'lastName', 'role'],
   },
   auth: true,
-  access: {
-    // Allow public login attempts
-    read: ({ req: { user } }) => {
-      // Admins can read all users
-      if (user?.role === 'admin') return true;
-      // Users can read their own data
-      if (user) return { id: { equals: user.id } };
-      // Public cannot read user data
-      return false;
-    },
-    create: ({ req: { user } }) => {
-      // Only admins can create users through the admin panel
-      return user?.role === 'admin';
-    },
-    update: ({ req: { user } }) => {
-      // Admins can update all users
-      if (user?.role === 'admin') return true;
-      // Users can update their own data
-      if (user) return { id: { equals: user.id } };
-      return false;
-    },
-    delete: ({ req: { user } }) => {
-      // Only admins can delete users
-      return user?.role === 'admin';
-    },
-  },
+
   fields: [
     // Email and password are added automatically by auth: true
     {

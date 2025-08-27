@@ -86,8 +86,8 @@ export const AuthGuard = ({
     return fallback || <AuthLoadingScreen />;
   }
 
-  // Check if user has admin privileges (super-admin, admin, or editor roles)
-  if (user && !['super-admin', 'admin', 'editor'].includes((user as { role?: string }).role || '')) {
+  // Check if user has admin privileges (admin or instructor roles)
+  if (user && !['admin', 'instructor'].includes((user as { role?: string }).role || '')) {
     return <UnauthorizedScreen />;
   }
   // User is authenticated and has admin privileges

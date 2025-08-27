@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
         headers: {
           'Access-Control-Allow-Origin': isAllowedOrigin ? origin : ALLOWED_ORIGINS[0],
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token, X-Client-Version, X-Client-Platform',
           'Access-Control-Max-Age': '86400',
           'Access-Control-Allow-Credentials': 'true',
           'Vary': 'Origin',
@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.next()
     response.headers.set('Access-Control-Allow-Origin', isAllowedOrigin ? origin : ALLOWED_ORIGINS[0])
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token, X-Client-Version, X-Client-Platform')
     response.headers.set('Access-Control-Max-Age', '86400')
     response.headers.set('Access-Control-Allow-Credentials', 'true')
     response.headers.set('Vary', 'Origin')
