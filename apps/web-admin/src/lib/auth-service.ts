@@ -203,6 +203,8 @@ class AuthService {
     return this.user;
   }
 
+
+
   /**
    * Initialize auth state from localStorage
    */
