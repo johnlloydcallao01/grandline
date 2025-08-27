@@ -19,12 +19,18 @@ export default function AdminLoginPage() {
     setPassword('');
   }, []);
 
-  // Redirect if already authenticated
+  // Don't show loading screen on login page - user wants to login
+  if (isLoading && !isSubmitting) {
+    // Still show the login form, just wait for auth check to complete
+    // This prevents the annoying "Verifying access..." blinking
+  }
+
+  // Redirect if already authenticated (but not during initial loading)
   React.useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoading) {
       router.push('/admin');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,10 +191,10 @@ export default function AdminLoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting}
                 className="w-full bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
               >
-                {(isSubmitting || isLoading) ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Signing in...</span>

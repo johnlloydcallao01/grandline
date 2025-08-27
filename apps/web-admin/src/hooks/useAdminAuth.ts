@@ -36,13 +36,16 @@ export function useAdminAuth(): AdminAuthReturn {
   // Get auth state from Redux store
   const { user, isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth);
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount (only once)
   useEffect(() => {
     const initializeAuth = async () => {
-      // Check if we have a stored token but no user in Redux
+      // Only initialize if we don't have a user and we're not already loading
+      if (user || isLoading) return;
+
+      // Check if we have a stored token
       const storedToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
 
-      if (storedToken && !user && !isLoading) {
+      if (storedToken) {
         console.log('🔄 Initializing auth from stored token...');
         try {
           // Try to load user from token
@@ -59,7 +62,7 @@ export function useAdminAuth(): AdminAuthReturn {
     };
 
     initializeAuth();
-  }, [dispatch, user, isLoading]);
+  }, [dispatch]); // Only run once on mount
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     try {
