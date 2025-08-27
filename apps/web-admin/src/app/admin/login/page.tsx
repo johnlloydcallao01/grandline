@@ -32,18 +32,25 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      console.log('🔐 Starting admin login process...');
+      console.log('🔐 Professional PayloadCMS admin login initiated...');
       console.log('📧 Email:', email);
+      console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      await login({ email, password });
+      const result = await login({ email, password });
 
-      console.log('✅ Login successful, redirecting...');
-      // Redirect will happen automatically via useEffect
+      console.log('✅ Professional login successful:', {
+        email: result.user.email,
+        role: result.user.role,
+        hasToken: !!result.token
+      });
+
+      // Redirect to admin dashboard
+      router.push('/admin/posts');
     } catch (err: unknown) {
-      console.error('❌ Login error:', err);
-      // Error is handled by the auth context, but we can show additional feedback
-      const errorMessage = (err as Error)?.message || 'Login failed. Please check your credentials.';
-      console.error('Error message:', errorMessage);
+      console.error('❌ Professional login failed:', err);
+      const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin or instructor privileges.';
+      console.error('Error details:', errorMessage);
+      // Error is already set by the Redux auth system
     } finally {
       setIsSubmitting(false);
     }

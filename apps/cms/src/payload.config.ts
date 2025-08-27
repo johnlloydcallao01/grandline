@@ -45,11 +45,17 @@ export default buildConfig({
   cors: [
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://*.vercel.app',
-    'https://*.netlify.app',
-    '*'
+    'http://localhost:3002', // web-admin dev server
+    'https://grandline-web-admin.vercel.app',
+    'https://grandline-cms.vercel.app',
   ],
-  csrf: [], // Empty array disables CSRF protection
+  csrf: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002', // web-admin dev server
+    'https://grandline-web-admin.vercel.app',
+    'https://grandline-cms.vercel.app',
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

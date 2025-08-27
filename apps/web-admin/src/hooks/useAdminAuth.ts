@@ -1,121 +1,147 @@
 /**
- * Admin Authentication Hook
- * Enhanced to work with PayloadCMS authentication
+ * Professional Admin Authentication Hook
+ * Integrates PayloadCMS authentication with Redux Toolkit state management
  */
 
-import { useAuth } from '@encreasl/redux';
-import { useAppDispatch } from '@encreasl/redux';
-import { loginUser, logoutUser, loadUserFromToken } from '@encreasl/redux';
-import { useCallback, useEffect, useState } from 'react';
-import { authService, type LoginCredentials } from '@/lib/auth-service';
+import { useCallback, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginWithPayloadCMS, type RootState, type AppDispatch } from '@/lib/store';
+import { logoutUser, loadUserFromToken } from '@encreasl/redux';
+import { adminApi } from '@/lib/admin-api';
 
-interface AdminUser {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: string;
+interface LoginCredentials {
+  email: string;
+  password: string;
 }
 
 interface AdminAuthReturn {
-  user: AdminUser | null;
+  user: any | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<{ user: AdminUser; token: string; }>;
+  login: (credentials: LoginCredentials) => Promise<any>;
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
   isAdmin: boolean;
+  isInstructor: boolean;
 }
 
+/**
+ * Professional Admin Authentication Hook
+ * Uses Redux Toolkit for state management with PayloadCMS integration
+ */
 export function useAdminAuth(): AdminAuthReturn {
-  const { user, isAuthenticated, isLoading, error } = useAuth();
-  const appDispatch = useAppDispatch();
-  const [localLoading, setLocalLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Get auth state from Redux store
+  const { user, isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth);
 
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = authService.getToken();
-      if (token && !isAuthenticated) {
+      // Check if we have a stored token but no user in Redux
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+
+      if (storedToken && !user && !isLoading) {
+        console.log('🔄 Initializing auth from stored token...');
         try {
-          await appDispatch(loadUserFromToken()).unwrap();
+          // Try to load user from token
+          await dispatch(loadUserFromToken()).unwrap();
         } catch (error) {
-          console.error('Failed to load user from token:', error);
-          await authService.logout();
+          console.warn('⚠️ Failed to load user from stored token:', error);
+          // Clear invalid token
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+          }
         }
       }
     };
 
     initializeAuth();
-  }, [appDispatch, isAuthenticated]);
+  }, [dispatch, user, isLoading]);
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    setLocalLoading(true);
     try {
-      // Use our auth service for PayloadCMS authentication
-      const result = await authService.login(credentials);
+      console.log('🔐 Professional PayloadCMS login initiated...');
 
-      // Update Redux state with the authenticated user
-      await appDispatch(loginUser({
-        ...credentials,
-        rememberMe: true // Always remember admin sessions
-      })).unwrap();
+      // Use Redux thunk for PayloadCMS authentication
+      const result = await dispatch(loginWithPayloadCMS(credentials)).unwrap();
+
+      console.log('✅ Professional login successful:', {
+        email: result.user.email,
+        role: result.user.role,
+        hasToken: !!result.token
+      });
 
       return result;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('❌ Professional login failed:', error);
       throw error;
-    } finally {
-      setLocalLoading(false);
     }
-  }, [appDispatch]);
+  }, [dispatch]);
 
   const logout = useCallback(async () => {
-    setLocalLoading(true);
     try {
-      await authService.logout();
-      await appDispatch(logoutUser()).unwrap();
+      console.log('🚪 Professional logout initiated...');
+
+      // Call PayloadCMS logout endpoint
+      await dispatch(adminApi.endpoints.logout.initiate()).unwrap();
+
+      // Dispatch Redux logout action
+      await dispatch(logoutUser()).unwrap();
+
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+      }
+
+      console.log('✅ Professional logout successful');
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setLocalLoading(false);
+      console.error('❌ Logout error:', error);
+      // Force clear state even if API call fails
+      dispatch({ type: 'auth/forceLogout' });
     }
-  }, [appDispatch]);
+  }, [dispatch]);
 
   const clearError = useCallback(() => {
-    appDispatch({ type: 'auth/clearError' });
-  }, [appDispatch]);
+    dispatch({ type: 'auth/clearError' });
+  }, [dispatch]);
 
   return {
     user,
-    isAuthenticated: isAuthenticated || authService.isAuthenticated(),
-    isLoading: isLoading || localLoading,
+    isAuthenticated,
+    isLoading,
     login,
     logout,
     error,
     clearError,
-    isAdmin: user?.role === 'admin' || user?.role === 'instructor',
+    isAdmin: user?.role === 'admin',
+    isInstructor: user?.role === 'instructor',
   };
 }
 
-export function useAdminUser(): AdminUser | null {
-  const { user } = useAuth();
-  return user as AdminUser | null;
+export function useAdminUser() {
+  const { user } = useAdminAuth();
+  return user;
 }
 
 interface AuthStateReturn {
-  user: AdminUser | null;
+  user: any | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isInstructor: boolean;
 }
 
 export function useAuthState(): AuthStateReturn {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated, isAdmin, isInstructor } = useAdminAuth();
   return {
     user,
     isLoading,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAuthenticated,
+    isAdmin,
+    isInstructor,
   };
 }
