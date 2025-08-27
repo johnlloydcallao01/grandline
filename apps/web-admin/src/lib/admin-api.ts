@@ -3,10 +3,8 @@
  * Extends the base Redux API with admin-only endpoints
  */
 
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { api } from '@encreasl/redux';
 import type { Post, Media, User } from '@encreasl/cms-types';
-import { env } from './env';
-import { authService } from './auth-service';
 
 // ============================================================================
 // Admin API Types
@@ -43,37 +41,7 @@ interface TraineesResponse extends PaginatedResponse<TraineeData> {}
 // Admin API Extensions
 // ============================================================================
 
-// ============================================================================
-// Admin API Configuration
-// ============================================================================
-
-const adminBaseQuery = fetchBaseQuery({
-  baseUrl: env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
-  credentials: 'include',
-  prepareHeaders: (headers) => {
-    // Get token from auth service
-    const token = authService.getToken();
-
-    if (token) {
-      headers.set('authorization', `JWT ${token}`);
-    }
-
-    // Set common headers
-    headers.set('content-type', 'application/json');
-    headers.set('accept', 'application/json');
-
-    return headers;
-  },
-});
-
-export const adminApi = createApi({
-  reducerPath: 'adminApi',
-  baseQuery: adminBaseQuery,
-  tagTypes: ['Post', 'Media', 'User', 'Trainee'],
-  keepUnusedDataFor: 60,
-  refetchOnMountOrArgChange: 30,
-  refetchOnFocus: true,
-  refetchOnReconnect: true,
+export const adminApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // ========================================================================
     // Posts Management
@@ -250,6 +218,7 @@ export const adminApi = createApi({
       ],
     }),
   }),
+  overrideExisting: false,
 });
 
 // ============================================================================

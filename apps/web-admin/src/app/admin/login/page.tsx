@@ -32,25 +32,18 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      console.log('🔐 Starting PayloadCMS admin login...');
+      console.log('🔐 Starting admin login process...');
       console.log('📧 Email:', email);
-      console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      const result = await login({ email, password });
+      await login({ email, password });
 
-      console.log('✅ Login successful:', {
-        email: result.user.email,
-        role: result.user.role,
-        permissions: result.user.permissions
-      });
-
-      // Redirect to admin dashboard
-      router.push('/admin/posts');
+      console.log('✅ Login successful, redirecting...');
+      // Redirect will happen automatically via useEffect
     } catch (err: unknown) {
       console.error('❌ Login error:', err);
+      // Error is handled by the auth context, but we can show additional feedback
       const errorMessage = (err as Error)?.message || 'Login failed. Please check your credentials.';
       console.error('Error message:', errorMessage);
-      // Error is already set by the auth hook
     } finally {
       setIsSubmitting(false);
     }
