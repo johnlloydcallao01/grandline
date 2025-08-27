@@ -21,9 +21,9 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
-  // If it's the login page, don't wrap with AdminDashboard
+  // If it's the login page, don't wrap with AuthGuard or AdminDashboard
   if (pathname === '/admin/login') {
-    return React.createElement(AuthGuard as React.ComponentType<{ children?: React.ReactNode }>, {}, children);
+    return children;
   }
 
   // For all other admin pages, wrap with AdminDashboard
