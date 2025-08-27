@@ -65,7 +65,7 @@ export default function SignInPage() {
     { value: 'male', label: 'Male' },
     { value: 'female', label: 'Female' },
     { value: 'other', label: 'Other' },
-    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
+    { value: 'prefer_not_to_say', label: 'Prefer not to say' }
   ];
 
   const civilStatusOptions = [
@@ -77,7 +77,14 @@ export default function SignInPage() {
   ];
 
   const relationshipOptions = [
-    'Spouse', 'Parent', 'Child', 'Sibling', 'Friend', 'Colleague', 'Other'
+    { value: 'parent', label: 'Parent' },
+    { value: 'spouse', label: 'Spouse' },
+    { value: 'sibling', label: 'Sibling' },
+    { value: 'child', label: 'Child' },
+    { value: 'guardian', label: 'Guardian' },
+    { value: 'friend', label: 'Friend' },
+    { value: 'relative', label: 'Relative' },
+    { value: 'other', label: 'Other' }
   ];
 
   // Helper function to display field errors
@@ -126,7 +133,17 @@ export default function SignInPage() {
 
         // Use custom trainee registration endpoint from deployed CMS
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-        const response = await fetch(`${apiBaseUrl.replace('/api', '')}/api/trainee-register`, {
+        const registrationUrl = `${apiBaseUrl.replace('/api', '')}/api/trainee-register`;
+
+        console.log('🚀 Starting trainee registration...');
+        console.log('📍 Registration URL:', registrationUrl);
+        console.log('📋 Form data being sent:', {
+          ...formData,
+          password: '[HIDDEN]',
+          confirmPassword: '[HIDDEN]'
+        });
+
+        const response = await fetch(registrationUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -134,8 +151,12 @@ export default function SignInPage() {
           body: JSON.stringify(formData)
         });
 
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
         if (response.ok) {
           const result = await response.json();
+          console.log('✅ Registration successful!', result);
           showSuccess('Registration successful! Welcome to Encreasl!');
 
           // Login the newly created user
@@ -145,14 +166,21 @@ export default function SignInPage() {
           }));
 
           if (loginUser.fulfilled.match(loginResult)) {
+            console.log('✅ Login successful, redirecting to portal');
             router.push('/portal');
           } else {
             // Registration succeeded but login failed - still show success
+            console.log('⚠️ Registration succeeded but login failed');
             showSuccess('Registration successful! Please login with your credentials.');
           }
         } else {
           const error = await response.json();
-          showError(error?.error || 'Registration failed. Please try again.');
+          console.error('❌ Registration failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: error
+          });
+          showError(error?.error || error?.message || 'Registration failed. Please try again.');
         }
       } else {
         // Sign in
@@ -172,7 +200,14 @@ export default function SignInPage() {
         }
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('❌ Authentication error:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+      }
       showError('An unexpected error occurred. Please try again.');
     }
   };
@@ -767,8 +802,8 @@ export default function SignInPage() {
                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
                           >
                             <option value="">Select relationship</option>
-                            {relationshipOptions.map((relationship) => (
-                              <option key={relationship} value={relationship}>{relationship}</option>
+                            {relationshipOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
                           </select>
                         </div>

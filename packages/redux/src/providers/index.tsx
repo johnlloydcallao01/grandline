@@ -196,7 +196,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
     return (
       <Provider store={storeToUse}>
         <StoreInitializer store={storeToUse}>
-          {children}
+          {children as any}
         </StoreInitializer>
       </Provider>
     );
@@ -218,7 +218,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
         },
         children: (
           <StoreInitializer store={storeToUse}>
-            {children}
+            {children as any}
           </StoreInitializer>
         )
       })}

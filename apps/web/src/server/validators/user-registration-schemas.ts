@@ -34,7 +34,7 @@ export const PersonalInformationSchema = z.object({
     .max(10, 'Name extension too long')
     .optional()
     .transform(val => val?.trim()),
-  gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say'], {
+  gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say'], {
     errorMap: () => ({ message: 'Please select a gender' })
   }),
   civilStatus: z.enum(['single', 'married', 'divorced', 'widowed', 'separated'], {
@@ -185,7 +185,7 @@ export const FlatUserRegistrationSchema = z.object({
     .max(10, 'Name extension too long')
     .optional()
     .transform(val => val?.trim()),
-  gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say']),
+  gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']),
   civilStatus: z.enum(['single', 'married', 'divorced', 'widowed', 'separated']),
   srn: z
     .string()

@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-import config from '@payload-config'
+import configPromise from '@payload-config'
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 
     // Validate required fields
     const requiredFields = [
       'firstName', 'lastName', 'email', 'password', 'srn',
-      'emergencyFirstName', 'emergencyLastName', 'emergencyContactNumber', 'emergencyRelationship'
+      'emergencyFirstName', 'emergencyMiddleName', 'emergencyLastName',
+      'emergencyContactNumber', 'emergencyRelationship', 'emergencyCompleteAddress'
     ]
 
     for (const field of requiredFields) {
@@ -97,6 +98,16 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Trainee registration error:', error)
 
+    // Log detailed error information for debugging
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+
+    // Log the full error object
+    console.error('Full error object:', JSON.stringify(error, null, 2))
+
     // Handle specific PayloadCMS validation errors
     if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json(
@@ -122,8 +133,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Return more detailed error information in development
+    const isDevelopment = process.env.NODE_ENV === 'development'
     return NextResponse.json(
-      { error: 'Registration failed. Please try again.' },
+      {
+        error: 'Registration failed. Please try again.',
+        ...(isDevelopment && {
+          details: error instanceof Error ? error.message : String(error),
+          errorType: error instanceof Error ? error.name : typeof error
+        })
+      },
       { status: 500 }
     )
   }
