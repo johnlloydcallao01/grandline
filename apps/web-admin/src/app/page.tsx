@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield } from 'lucide-react';
+import { Shield } from '@/components/ui/IconWrapper';
 
 export default function HomePage() {
   const router = useRouter();

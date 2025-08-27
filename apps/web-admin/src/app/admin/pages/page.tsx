@@ -1,7 +1,6 @@
 'use client';
 
-import {
-  FileText,
+import { FileText,
   Plus,
   Search,
   Edit,
@@ -12,8 +11,7 @@ import {
   Calendar,
   User,
   MoreHorizontal,
-  ExternalLink
-} from 'lucide-react';
+  ExternalLink } from '@/components/ui/IconWrapper';
 
 export default function PagesPage() {
   const pages = [

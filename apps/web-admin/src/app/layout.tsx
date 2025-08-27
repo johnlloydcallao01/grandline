@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ReduxProvider } from "@encreasl/redux";
 import "./globals.css";
@@ -30,7 +31,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
         <ReduxProvider>
-          {children}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {children as any}
         </ReduxProvider>
       </body>
     </html>

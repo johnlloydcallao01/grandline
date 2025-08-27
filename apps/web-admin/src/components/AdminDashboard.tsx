@@ -48,20 +48,15 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
   return (
     <DashboardContext.Provider value={dashboardValue}>
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <Header
           sidebarOpen={sidebarOpen}
           onToggleSidebar={toggleSidebar}
           onSearch={handleSearch}
         />
-
-        {/* Sidebar */}
         <Sidebar
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
         />
-
-        {/* Main Content */}
         <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
           {children || <DefaultDashboardContent />}
         </main>

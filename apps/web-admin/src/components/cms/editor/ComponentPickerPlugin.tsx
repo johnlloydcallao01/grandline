@@ -10,15 +10,13 @@ import { $createParagraphNode, $getSelection, $isRangeSelection, TextNode } from
 import { useCallback, useMemo, useState } from 'react';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import {
-  Type,
+import { Type,
   Heading1,
   Heading2,
   Heading3,
   Quote,
   Code,
-  type LucideIcon,
-} from 'lucide-react';
+  type LucideIcon, } from '@/components/ui/IconWrapper';
 
 class ComponentPickerOption extends MenuOption {
   title: string;
@@ -57,6 +55,7 @@ function ComponentPickerMenuItem({
   onClick: () => void;
   onMouseEnter: () => void;
   option: ComponentPickerOption;
+  key?: string;
 }) {
   return (
     <li

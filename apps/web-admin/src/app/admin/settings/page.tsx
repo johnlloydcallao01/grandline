@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 
-import {
-  Settings,
+import { Settings,
   Bell,
   Shield,
   Palette,
-  Save
-} from 'lucide-react';
+  Save } from '@/components/ui/IconWrapper';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');

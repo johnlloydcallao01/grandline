@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2 } from '@/components/ui/IconWrapper';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface AuthGuardProps {
@@ -55,11 +55,11 @@ function UnauthorizedScreen() {
 }
 
 // Main AuthGuard component
-export const AuthGuard: React.FC<AuthGuardProps> = ({
+export const AuthGuard = ({
   children,
   fallback,
   redirectTo = '/admin/login'
-}) => {
+}: AuthGuardProps) => {
   const { user, isAuthenticated, isLoading } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -78,17 +78,17 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // Show loading screen while checking authentication (only on initial load)
   if (isLoading) {
-    return fallback || React.createElement(AuthLoadingScreen);
+    return fallback || <AuthLoadingScreen />;
   }
 
   // Redirect is handled by useEffect, but show loading while redirecting
   if (!isAuthenticated) {
-    return fallback || React.createElement(AuthLoadingScreen);
+    return fallback || <AuthLoadingScreen />;
   }
 
   // Check if user has admin privileges (super-admin, admin, or editor roles)
-  if (user && !['super-admin', 'admin', 'editor'].includes(user.role)) {
-    return React.createElement(UnauthorizedScreen);
+  if (user && !['super-admin', 'admin', 'editor'].includes((user as { role?: string }).role || '')) {
+    return <UnauthorizedScreen />;
   }
   // User is authenticated and has admin privileges
   return children;
@@ -102,7 +102,7 @@ export function withAuthGuard<P extends object>(
     redirectTo?: string;
   }
 ) {
-  const WrappedComponent = (props: P) => {
+  const WrappedComponent = (props: P): React.ReactElement => {
     return (
       <AuthGuard
         fallback={options?.fallback}
@@ -119,7 +119,7 @@ export function withAuthGuard<P extends object>(
 }
 
 // Hook to get current admin user (for use within AuthGuard)
-export function useCurrentAdmin() {
+export function useCurrentAdmin(): { firstName?: string; lastName?: string; email?: string; role?: string; } | null {
   const { user } = useAdminAuth();
   return user;
 }

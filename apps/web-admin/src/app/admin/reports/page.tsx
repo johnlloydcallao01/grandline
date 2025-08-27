@@ -1,8 +1,7 @@
 'use client';
 
 
-import {
-  FileText,
+import { FileText,
   Download,
   Calendar,
   Filter,
@@ -11,8 +10,7 @@ import {
   TrendingUp,
   DollarSign,
   Clock,
-  Eye
-} from 'lucide-react';
+  Eye } from '@/components/ui/IconWrapper';
 
 export default function ReportsPage() {
   const reportTypes = [

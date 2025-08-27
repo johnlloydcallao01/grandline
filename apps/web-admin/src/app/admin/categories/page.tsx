@@ -1,7 +1,6 @@
 'use client';
 
-import {
-  Folder,
+import { Folder,
   Plus,
   Search,
   Edit,
@@ -11,8 +10,7 @@ import {
   FileText,
   Hash,
   Calendar,
-  User
-} from 'lucide-react';
+  User } from '@/components/ui/IconWrapper';
 
 export default function CategoriesPage() {
   const categories = [

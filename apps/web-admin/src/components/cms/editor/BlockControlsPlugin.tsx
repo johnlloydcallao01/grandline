@@ -7,7 +7,7 @@ import {
   $isRangeSelection,
   LexicalEditor,
 } from 'lexical';
-import { Plus } from 'lucide-react';
+import { Plus } from '@/components/ui/IconWrapper';
 
 
 

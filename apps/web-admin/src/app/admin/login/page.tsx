@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 export default function AdminLoginPage() {
@@ -32,11 +32,18 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
+      console.log('🔐 Starting admin login process...');
+      console.log('📧 Email:', email);
+
       await login({ email, password });
+
+      console.log('✅ Login successful, redirecting...');
       // Redirect will happen automatically via useEffect
-    } catch (err) {
-      // Error is handled by the auth context
-      console.error('Login error:', err);
+    } catch (err: unknown) {
+      console.error('❌ Login error:', err);
+      // Error is handled by the auth context, but we can show additional feedback
+      const errorMessage = (err as Error)?.message || 'Login failed. Please check your credentials.';
+      console.error('Error message:', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -190,7 +197,10 @@ export default function AdminLoginPage() {
               {/* Footer */}
               <div className="text-center pt-4 border-t border-gray-200">
                 <p className="text-xs text-gray-500">
-                  Use your Payload CMS credentials to access the admin panel
+                  Use your admin credentials to access the CMS dashboard
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Admin and Instructor roles only
                 </p>
               </div>
             </form>

@@ -14,13 +14,11 @@ import {
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { mergeRegister } from '@lexical/utils';
-import {
-  Bold,
+import { Bold,
   Italic,
   Underline,
   Undo,
-  Redo,
-} from 'lucide-react';
+  Redo, } from '@/components/ui/IconWrapper';
 
 const LowPriority = 1;
 

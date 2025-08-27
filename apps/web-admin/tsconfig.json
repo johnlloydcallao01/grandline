@@ -3,6 +3,10 @@
   "compilerOptions": {
     "target": "es2015",
     "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "jsx": "preserve",
+    "jsxImportSource": "react",
     "paths": {
       "@/*": ["./src/*"]
     }

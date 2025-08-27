@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LinkWrapper';
 import type { Route } from 'next';
 import { SidebarItemProps, IconName } from '@/types';
 import { getIcon } from '@/utils';

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar } from 'lucide-react';
-import Link from 'next/link';
+import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar } from '@/components/ui/IconWrapper';
+import Link from '@/components/ui/LinkWrapper';
 
 import { useGetPostsQuery, useDeletePostMutation } from '@/lib/admin-api';
 import { formatCMSDateTime } from '@/lib/cms';

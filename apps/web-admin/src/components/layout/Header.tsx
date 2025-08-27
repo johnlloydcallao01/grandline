@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HeaderProps } from '@/types';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { ChevronDown, User, Settings, LogOut, Shield } from 'lucide-react';
+import { ChevronDown, User, Settings, LogOut, Shield } from '@/components/ui/IconWrapper';
 
 /**
  * Admin Header component with navigation, search, and user controls
@@ -67,7 +67,7 @@ export function Header({
     if (!user) return 'A';
     const firstName = user.firstName || '';
     const lastName = user.lastName || '';
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || user.email.charAt(0).toUpperCase();
+    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'A';
   };
 
   return (

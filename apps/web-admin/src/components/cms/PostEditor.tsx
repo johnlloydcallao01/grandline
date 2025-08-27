@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { Save, Eye, X } from 'lucide-react';
+import { Save, Eye, X } from '@/components/ui/IconWrapper';
 import { PostFormData, validatePostForm, generateSlug } from '@encreasl/cms-types';
 // CMS config available if needed: import { cmsConfig } from '@/lib/cms';
 import { payloadAuth } from '@/lib/payload-auth';

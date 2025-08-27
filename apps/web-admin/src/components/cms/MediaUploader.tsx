@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, File } from 'lucide-react';
+import { Upload, X, File } from '@/components/ui/IconWrapper';
 // Note: useUploadMediaMutation available but using direct fetch for now
 import { getCMSImageUrl } from '@/lib/cms';
 import { useAdminAuth } from '@/hooks/useAdminAuth';

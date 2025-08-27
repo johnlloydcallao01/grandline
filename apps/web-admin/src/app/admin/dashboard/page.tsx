@@ -1,16 +1,14 @@
 'use client';
 
 
-import {
-  Users,
+import { Users,
   FileText,
   TrendingUp,
   BarChart3,
   Eye,
   MessageSquare,
   Heart,
-  Share2
-} from 'lucide-react';
+  Share2 } from '@/components/ui/IconWrapper';
 
 export default function DashboardPage() {
   return (

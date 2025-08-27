@@ -1,7 +1,6 @@
 'use client';
 
-import {
-  Tag,
+import { Tag,
   Plus,
   Search,
   Edit,
@@ -10,8 +9,7 @@ import {
   TrendingUp,
   Calendar,
   FileText,
-  MoreHorizontal
-} from 'lucide-react';
+  MoreHorizontal } from '@/components/ui/IconWrapper';
 
 export default function TagsPage() {
   const tags = [

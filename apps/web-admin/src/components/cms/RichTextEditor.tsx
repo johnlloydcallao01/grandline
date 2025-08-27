@@ -211,7 +211,7 @@ export function RichTextEditor({
 
   return (
     <div className={`relative border border-gray-300 rounded-lg overflow-hidden ${className}`}>
-      <LexicalComposer key="stable-editor" initialConfig={EDITOR_CONFIG}>
+      <LexicalComposer initialConfig={EDITOR_CONFIG}>
         <div className="editor-container relative bg-white">
         <div className="editor-inner bg-white relative leading-5 font-normal text-left rounded-t-lg">
           <ToolbarPlugin />
@@ -314,10 +314,10 @@ export function RichTextEditor({
             }} />
             <RichTextPlugin
               contentEditable={
-                <ContentEditable
-                  className="editor-input min-h-[300px] outline-none resize-none text-gray-900 leading-relaxed"
-                  style={{ caretColor: '#1f2937' }}
-                />
+                React.createElement(ContentEditable, {
+                  className: "editor-input min-h-[300px] outline-none resize-none text-gray-900 leading-relaxed",
+                  style: { caretColor: '#1f2937' }
+                })
               }
               placeholder={
                 <div className="editor-placeholder absolute text-gray-400 pointer-events-none" style={{ top: '22px', left: '30px', lineHeight: '1.5em' }}>

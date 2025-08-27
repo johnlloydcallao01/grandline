@@ -1,16 +1,14 @@
 'use client';
 
 
-import {
-  BarChart3,
+import { BarChart3,
   TrendingUp,
   Eye,
   Globe,
   Smartphone,
   Monitor,
   ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react';
+  ArrowDownRight } from '@/components/ui/IconWrapper';
 
 export default function AnalyticsPage() {
   const metrics = [

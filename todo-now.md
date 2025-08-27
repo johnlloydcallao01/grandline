@@ -1,38 +1,14 @@
-This is for Trainees in our LMS, as their info.
+Now, please implement an authentication for our trainee user role. Deeply analyze the apps/cms so you can understand better the real database user roles for trainees, and don't do cheap shallow implementation. Do it professionally and correctly because this is for enterprise level platform.
+Please implement an authentication completely 100% now in our /signin
 
-TRAINEE USER ACCOUNT CREATION / SIGNUP
+977-afe9e2a121019560.js:1 
+ POST https://grandline-web.vercel.app/api/auth/login 405 (Method Not Allowed)
 
-PERSONAL INFORMATION 
-First Name *
-Middle Name (Optional)
-Last Name *
-Name Extension (e.g. Jr., II)
-Gender
-Civil Status
-SRN
-Nationality
-Birth Date
-Place of Birth
-Complete Address
-
-
-CONTACT INFORMATION 
-Email *
-Phone Number *
-
-USERNAME & PASSWORD 
-Username * 
-Password * 
-
-
-MARKETING 
-Coupon Code
-
-
-IN CASE OF EMERGENCY 
-First Name *
-Middle Name *
-Last Name *
-Contact Number *
-Relationship *
-Complete Address *
+page-53c73614037aa860.js:1 🔘 BUTTON CLICKED! isSignUp: false isLoading: false
+page-53c73614037aa860.js:1 🚀 FORM SUBMISSION STARTED
+page-53c73614037aa860.js:1 📋 isSignUp: false
+page-53c73614037aa860.js:1 📋 Form Data: 
+{firstName: '', middleName: '', lastName: '', nameExtension: '', gender: '', …}
+page-53c73614037aa860.js:1 📋 isLoading: false
+977-afe9e2a121019560.js:1 
+ POST https://grandline-web.vercel.app/api/auth/login 405 (Method Not Allowed)

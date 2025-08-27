@@ -47,6 +47,8 @@ const nextConfig: NextConfig = {
     ];
   },
 
+
+
   // ESLint configuration
   eslint: {
     // Warning: This allows production builds to successfully complete even if

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, KeyboardEvent } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus } from '@/components/ui/IconWrapper';
 
 interface Tag {
   tag: string;

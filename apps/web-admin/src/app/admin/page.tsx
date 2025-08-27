@@ -1,15 +1,13 @@
 'use client';
 
 
-import {
-  Users,
+import { Users,
   FileText,
   TrendingUp,
   AlertCircle,
   CheckCircle,
   BarChart3,
-  Mail
-} from 'lucide-react';
+  Mail } from '@/components/ui/IconWrapper';
 
 export default function AdminPage() {
   return (

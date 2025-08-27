@@ -10,7 +10,7 @@ import {
   TextNode,
 } from 'lexical';
 import { createPortal } from 'react-dom';
-import { Type, Heading1, Heading2, Heading3, Quote, Code, Image, List, ListOrdered, type LucideIcon } from 'lucide-react';
+import { Type, Heading1, Heading2, Heading3, Quote, Code, Image, List, ListOrdered, type LucideIcon } from '@/components/ui/IconWrapper';
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createListNode, $createListItemNode } from '@lexical/list';

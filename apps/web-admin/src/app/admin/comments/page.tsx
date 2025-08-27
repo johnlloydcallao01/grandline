@@ -1,7 +1,6 @@
 'use client';
 
-import {
-  MessageCircle,
+import { MessageCircle,
   Search,
   Filter,
   Check,
@@ -13,8 +12,7 @@ import {
   Calendar,
   ExternalLink,
   MoreHorizontal,
-  AlertTriangle
-} from 'lucide-react';
+  AlertTriangle } from '@/components/ui/IconWrapper';
 
 export default function CommentsPage() {
   const comments = [

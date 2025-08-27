@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { AuthGuard } from './AuthGuard';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from '@/components/ui/IconWrapper';
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;

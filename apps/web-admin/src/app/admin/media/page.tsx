@@ -1,7 +1,6 @@
 'use client';
 
-import {
-  Upload,
+import { Upload,
   Search,
   Grid,
   List,
@@ -14,8 +13,7 @@ import {
   FileText,
   Music,
   MoreHorizontal,
-  Calendar
-} from 'lucide-react';
+  Calendar } from '@/components/ui/IconWrapper';
 
 export default function MediaLibraryPage() {
   const mediaItems = [

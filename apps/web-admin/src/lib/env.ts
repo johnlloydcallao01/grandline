@@ -26,7 +26,7 @@ export const env = {
   NEXT_PUBLIC_SHOW_DEV_TOOLS: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === 'true',
 
   // API Configuration (consistent with apps/web)
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
 };
 
 // Export commonly used environment variables for easy access
