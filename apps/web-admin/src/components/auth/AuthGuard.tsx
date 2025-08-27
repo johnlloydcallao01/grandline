@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Shield, Loader2 } from '@/components/ui/IconWrapper';
+import { Loader2 } from '@/components/ui/IconWrapper';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface AuthGuardProps {
@@ -31,28 +31,7 @@ function AuthLoadingScreen() {
   );
 }
 
-// Unauthorized access component
-function UnauthorizedScreen() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center max-w-md">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-2xl mb-6">
-          <Shield className="w-8 h-8 text-red-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-        <p className="text-gray-600 mb-6">
-          You don&apos;t have permission to access this admin area. Please contact your administrator if you believe this is an error.
-        </p>
-        <button
-          onClick={() => window.location.href = '/admin/login'}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-        >
-          Return to Login
-        </button>
-      </div>
-    </div>
-  );
-}
+
 
 // Main AuthGuard component
 export const AuthGuard = ({
@@ -88,7 +67,9 @@ export const AuthGuard = ({
 
   // Check if user has admin privileges (ONLY admin role allowed)
   if (user && (user as { role?: string }).role !== 'admin') {
-    return <UnauthorizedScreen />;
+    // Just redirect to login, no stupid blocking page
+    router.push('/admin/login');
+    return fallback || <AuthLoadingScreen />;
   }
   // User is authenticated and has admin privileges
   return children;
