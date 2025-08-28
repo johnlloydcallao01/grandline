@@ -29,19 +29,22 @@ interface TraineeRegistrationBody {
 }
 
 // CORS headers for all responses
-const getAllowedOrigins = () => [
-  // Local development
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
-  'http://127.0.0.1:3002',
-  // Production deployments
-  'https://grandline-web.vercel.app',
-  'https://grandline-web-admin.vercel.app',
-  'https://grandline-cms.vercel.app'
-]
+const getAllowedOrigins = () => {
+  const localOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    'http://127.0.0.1:3002',
+  ]
+
+  const envOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : []
+
+  return [...localOrigins, ...envOrigins].filter(Boolean)
+}
 
 const getCorsHeaders = (origin?: string | null) => {
   const allowedOrigins = getAllowedOrigins()
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
     ]
 
     for (const field of requiredFields) {
-      const fieldValue = (body as Record<string, unknown>)[field]
+      const fieldValue = (body as unknown as Record<string, unknown>)[field]
       if (!fieldValue) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
@@ -140,7 +143,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Trainee record was not created by trigger')
     }
 
-    await payload.update({
+    const trainee = await payload.update({
       collection: 'trainees',
       id: traineeRecords.docs[0].id,
       data: {
@@ -150,9 +153,6 @@ export async function POST(request: NextRequest) {
         currentLevel: 'beginner'
       }
     })
-
-    // Get the updated trainee record for response
-    const updatedTrainee = traineeRecords.docs[0]
 
     // Step 3: Create emergency contact
     const emergencyContact = await payload.create({
@@ -181,8 +181,8 @@ export async function POST(request: NextRequest) {
           role: user.role
         },
         trainee: {
-          id: updatedTrainee.id,
-          srn: body.srn // Use the SRN from the request since we just updated it
+          id: trainee.id,
+          srn: trainee.srn
         },
         emergencyContact: {
           id: emergencyContact.id,

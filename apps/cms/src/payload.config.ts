@@ -42,33 +42,38 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
-  cors: [
-    // Local development
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002', // web-admin dev server
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-    // Production deployments
-    'https://grandline-web.vercel.app', // apps/web production
-    'https://grandline-web-admin.vercel.app',
-    'https://grandline-cms.vercel.app',
-    // Vercel preview deployments (pattern matching not supported, but main domains covered)
-  ],
-  csrf: [
-    // Local development
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002', // web-admin dev server
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-    // Production deployments
-    'https://grandline-web.vercel.app', // apps/web production
-    'https://grandline-web-admin.vercel.app',
-    'https://grandline-cms.vercel.app',
-  ],
+  cors: (() => {
+    const localOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002',
+    ]
+
+    const envOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+      : []
+
+    return [...localOrigins, ...envOrigins].filter(Boolean)
+  })(),
+  csrf: (() => {
+    const localOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002',
+    ]
+
+    const envOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+      : []
+
+    return [...localOrigins, ...envOrigins].filter(Boolean)
+  })(),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
