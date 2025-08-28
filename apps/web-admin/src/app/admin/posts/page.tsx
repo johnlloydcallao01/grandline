@@ -228,7 +228,7 @@ function PostsPageContent() {
                           
                           <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500">
                             <span>
-                              By {typeof post.author === 'object' ? `${post.author.firstName} ${post.author.lastName}` : 'Unknown Author'}
+                              By {typeof post.author === 'object' && post.author ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() || 'Unknown Author' : 'Unknown Author'}
                             </span>
                             {post.publishedAt && (
                               <span className="flex items-center">

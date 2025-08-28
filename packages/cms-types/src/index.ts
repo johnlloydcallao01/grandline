@@ -20,7 +20,7 @@ export interface Post {
   featuredImage?: Media | string;
   status: 'draft' | 'published';
   publishedAt?: string;
-  author: User | string;
+  author: User | string | null;
   tags?: Array<{ tag: string }>;
   seo?: {
     title?: string;

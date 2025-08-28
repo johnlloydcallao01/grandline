@@ -11,17 +11,96 @@ import { validateUserRegistration, type FlatUserRegistrationData } from '@/serve
  * Responsive design with split layout for desktop and mobile-optimized forms
  */
 
+// Helper function to detect duplicate field from error message
+function detectDuplicateField(errorMessage: string): string | null {
+  const message = errorMessage.toLowerCase();
+
+  if (message.includes('email') && (message.includes('duplicate') || message.includes('already') || message.includes('exists'))) {
+    return 'email';
+  }
+  if (message.includes('username') && (message.includes('duplicate') || message.includes('already') || message.includes('exists'))) {
+    return 'username';
+  }
+  if (message.includes('srn') && (message.includes('duplicate') || message.includes('already') || message.includes('exists'))) {
+    return 'srn';
+  }
+
+  // Check for database constraint names
+  if (message.includes('users_email_idx') || message.includes('email_unique')) {
+    return 'email';
+  }
+  if (message.includes('users_username_idx') || message.includes('username_unique')) {
+    return 'username';
+  }
+  if (message.includes('trainees_srn_idx') || message.includes('srn_unique')) {
+    return 'srn';
+  }
+  if (message.includes('trainees_user_idx') || message.includes('user_unique')) {
+    return 'user_account';
+  }
+
+  return null;
+}
+
+// Helper function to get user-friendly duplicate field messages
+function getDuplicateFieldMessage(field?: string, originalMessage?: string): string {
+  switch (field) {
+    case 'email':
+      return '📧 This email address is already registered. Please use a different email address or try signing in instead.';
+
+    case 'username':
+      return '👤 This username is already taken. Please choose a different username.';
+
+    case 'srn':
+      return '🎓 This Student Registration Number (SRN) is already in use. Please check your SRN or contact support if you believe this is an error.';
+
+    case 'user_account':
+      return '👥 This user account is already associated with a trainee profile. Please contact support if you need assistance.';
+
+    default:
+      // If we have an original message that mentions a specific field, use it
+      if (originalMessage) {
+        const detectedField = detectDuplicateField(originalMessage);
+        if (detectedField) {
+          return getDuplicateFieldMessage(detectedField, undefined);
+        }
+        return originalMessage;
+      }
+      return '⚠️ Some of your information is already registered in our system. Please check your details and try again, or contact support for assistance.';
+  }
+}
+
 export default function SignInPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Simple notification functions without Redux
   const showSuccess = (message: string) => {
     alert(`✅ ${message}`);
+    // Clear any field errors on success
+    setFieldErrors({});
   };
 
   const showError = (message: string) => {
     alert(`❌ ${message}`);
+  };
+
+  // Function to set specific field errors
+  const setFieldError = (field: string, message: string) => {
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: message
+    }));
+  };
+
+  // Function to clear field errors
+  const clearFieldError = (field: string) => {
+    setFieldErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
   };
   const [formData, setFormData] = useState({
     // Personal Information
@@ -162,10 +241,35 @@ export default function SignInPage() {
 
         console.log('🚀 Starting trainee registration...');
         console.log('📍 Registration URL:', registrationUrl);
+
+        // Add a simple connectivity test
+        console.log('🔍 Testing API connectivity...');
+        try {
+          const testResponse = await fetch(registrationUrl, {
+            method: 'OPTIONS',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          console.log('✅ OPTIONS request successful:', testResponse.status);
+        } catch (optionsError) {
+          console.warn('⚠️ OPTIONS request failed:', optionsError);
+        }
         console.log('📋 Form data being sent:', {
           ...formData,
           password: '[HIDDEN]',
           confirmPassword: '[HIDDEN]'
+        });
+
+        console.log('📊 Form data summary:', {
+          hasFirstName: !!formData.firstName,
+          hasLastName: !!formData.lastName,
+          hasEmail: !!formData.email,
+          hasUsername: !!formData.username,
+          hasPassword: !!formData.password,
+          hasSRN: !!formData.srn,
+          hasEmergencyContact: !!(formData.emergencyFirstName && formData.emergencyLastName),
+          agreeToTerms: formData.agreeToTerms
         });
 
         const response = await fetch(registrationUrl, {
@@ -182,7 +286,13 @@ export default function SignInPage() {
         if (response.ok) {
           const result = await response.json();
           console.log('✅ Registration successful!', result);
-          showSuccess('Registration successful! Your trainee account has been created.');
+          console.log('🎉 User created:', {
+            id: result.data?.user?.id,
+            email: result.data?.user?.email,
+            name: `${result.data?.user?.firstName} ${result.data?.user?.lastName}`,
+            srn: result.data?.trainee?.srn
+          });
+          showSuccess(result.message || 'Registration successful! Your trainee account has been created.');
 
           // Reset form after successful registration
           setFormData({
@@ -212,13 +322,59 @@ export default function SignInPage() {
             agreeToTerms: true
           });
         } else {
-          const error = await response.json();
+          // Try to get the response text first, then parse as JSON
+          const responseText = await response.text();
+          console.error('❌ Registration failed - Raw response:', responseText);
+
+          let error;
+          try {
+            error = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('❌ Failed to parse error response as JSON:', parseError);
+            error = { error: 'Server returned invalid JSON', rawResponse: responseText };
+          }
+
           console.error('❌ Registration failed:', {
             status: response.status,
             statusText: response.statusText,
             error: error
           });
-          showError(error?.error || error?.message || 'Registration failed. Please try again.');
+
+          // Clear any previous field errors
+          setFieldErrors({});
+
+          // Show more specific error messages based on error type
+          let errorMessage = 'Registration failed. Please try again.';
+
+          if (error?.type === 'duplicate') {
+            errorMessage = getDuplicateFieldMessage(error.field, error.message);
+
+            // Set specific field error for visual indication
+            if (error.field) {
+              setFieldError(error.field, errorMessage);
+            }
+          } else if (error?.type === 'validation') {
+            errorMessage = error.message || 'Please check your form data and try again.';
+
+            // If there are specific field errors, show them
+            if (error?.details && typeof error.details === 'object') {
+              console.log('📋 Validation details:', error.details);
+              // You could set specific field errors here if needed
+            }
+          } else if (error?.type === 'server_error') {
+            errorMessage = error.message || 'We encountered a server error. Please try again in a few moments.';
+          } else {
+            // Check if it's a generic duplicate error by examining the error message
+            const duplicateField = detectDuplicateField(error?.error || error?.message || '');
+            if (duplicateField) {
+              errorMessage = getDuplicateFieldMessage(duplicateField);
+              setFieldError(duplicateField, errorMessage);
+            } else {
+              errorMessage = error?.error || error?.message || 'Registration failed. Please try again.';
+            }
+          }
+
+          showError(errorMessage);
         }
       } else {
         // Login form - NO AUTHENTICATION LOGIC, just UI
@@ -544,11 +700,27 @@ export default function SignInPage() {
                             type="text"
                             name="srn"
                             value={formData.srn}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                              handleInputChange(e);
+                              // Clear field error when user starts typing
+                              if (fieldErrors.srn) {
+                                clearFieldError('srn');
+                              }
+                            }}
                             required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                              fieldErrors.srn
+                                ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
+                                : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                            }`}
                             placeholder="SRN-123456"
                           />
+                          {fieldErrors.srn && (
+                            <p className="mt-1 text-sm text-red-600 flex items-center">
+                              <span className="mr-1">⚠️</span>
+                              {fieldErrors.srn}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -669,11 +841,27 @@ export default function SignInPage() {
                               type="text"
                               name="username"
                               value={formData.username}
-                              onChange={handleInputChange}
+                              onChange={(e) => {
+                                handleInputChange(e);
+                                // Clear field error when user starts typing
+                                if (fieldErrors.username) {
+                                  clearFieldError('username');
+                                }
+                              }}
                               required
-                              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                                fieldErrors.username
+                                  ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                              }`}
                               placeholder="juan_delacruz"
                             />
+                            {fieldErrors.username && (
+                              <p className="mt-1 text-sm text-red-600 flex items-center">
+                                <span className="mr-1">⚠️</span>
+                                {fieldErrors.username}
+                              </p>
+                            )}
                           </div>
                           <div>
                             <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -883,11 +1071,27 @@ export default function SignInPage() {
                         type="email"
                         name="email"
                         value={formData.email}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          // Clear field error when user starts typing
+                          if (fieldErrors.email) {
+                            clearFieldError('email');
+                          }
+                        }}
                         required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                          fieldErrors.email
+                            ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                        }`}
                         placeholder="john.smith@example.com"
                       />
+                      {fieldErrors.email && (
+                        <p className="mt-1 text-sm text-red-600 flex items-center">
+                          <span className="mr-1">⚠️</span>
+                          {fieldErrors.email}
+                        </p>
+                      )}
                     </div>
 
                     <div>

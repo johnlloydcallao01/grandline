@@ -27,9 +27,9 @@ export const EmergencyContacts: CollectionConfig = {
     {
       name: 'middleName',
       type: 'text',
-      required: true,
+      required: false,
       admin: {
-        description: 'Emergency contact middle name',
+        description: 'Emergency contact middle name (optional)',
       },
     },
     {
