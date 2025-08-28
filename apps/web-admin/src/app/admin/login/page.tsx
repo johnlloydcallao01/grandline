@@ -28,8 +28,8 @@ export default function AdminLoginPage() {
       console.log('📧 Email:', email);
       console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      // Use PayloadCMS REST API for authentication
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+      // Use local API route to avoid CORS issues
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

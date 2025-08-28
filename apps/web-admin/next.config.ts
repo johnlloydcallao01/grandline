@@ -24,6 +24,16 @@ const nextConfig: NextConfig = {
     },
   },
 
+  // Proxy API requests to avoid CORS during development
+  async rewrites() {
+    return [
+      {
+        source: '/api/cms/:path*',
+        destination: 'https://grandline-cms.vercel.app/api/:path*',
+      },
+    ];
+  },
+
   // Admin-specific security headers
   async headers() {
     return [

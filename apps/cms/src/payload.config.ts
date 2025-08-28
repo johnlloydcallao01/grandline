@@ -42,7 +42,18 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
-  // No CORS configuration - completely disabled
+  cors: [
+    'https://grandline-web-admin.vercel.app',
+    'http://localhost:3002',
+    'https://grandline-web.vercel.app',
+    'http://localhost:3000'
+  ],
+  csrf: [
+    'https://grandline-web-admin.vercel.app',
+    'http://localhost:3002',
+    'https://grandline-web.vercel.app',
+    'http://localhost:3000'
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
