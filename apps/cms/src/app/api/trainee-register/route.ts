@@ -28,7 +28,16 @@ interface TraineeRegistrationBody {
   emergencyCompleteAddress: string
 }
 
-// No CORS handling - let PayloadCMS handle it natively
+// Simple CORS headers - allow all origins
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders })
+}
 
 export async function POST(request: NextRequest) {
   let body: TraineeRegistrationBody = {} as TraineeRegistrationBody // Declare body outside try block for error logging
@@ -49,7 +58,7 @@ export async function POST(request: NextRequest) {
       if (!fieldValue) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
     }
@@ -124,7 +133,7 @@ export async function POST(request: NextRequest) {
           lastName: emergencyContact.lastName
         }
       }
-    })
+    }, { headers: corsHeaders })
 
   } catch (error: unknown) {
     console.error('Trainee registration error:', error)
@@ -153,7 +162,7 @@ export async function POST(request: NextRequest) {
           error: 'Validation failed',
           details: (error as { data?: unknown; message: string }).data || error.message
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -167,7 +176,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { error: `This ${field} is already registered` },
-        { status: 409 }
+        { status: 409, headers: corsHeaders }
       )
     }
 
@@ -181,7 +190,7 @@ export async function POST(request: NextRequest) {
           errorType: error instanceof Error ? error.name : typeof error
         })
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }
