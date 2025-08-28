@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 1: Create user account (trigger will automatically create trainee record)
+    // Step 1: Create user account
     const user = await payload.create({
       collection: 'users',
       data: {
@@ -132,24 +132,11 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Step 2: Find the trainee record created by the trigger and update it with SRN
-    const traineeRecords = await payload.find({
+    // Step 2: Create trainee record manually (trigger is disabled for trainees)
+    const trainee = await payload.create({
       collection: 'trainees',
-      where: {
-        user: {
-          equals: user.id
-        }
-      }
-    })
-
-    if (traineeRecords.docs.length === 0) {
-      throw new Error('Trainee record was not created by trigger')
-    }
-
-    const trainee = await payload.update({
-      collection: 'trainees',
-      id: traineeRecords.docs[0].id,
       data: {
+        user: user.id,
         srn: body.srn,
         couponCode: body.couponCode || '',
         enrollmentDate: new Date().toISOString(),
