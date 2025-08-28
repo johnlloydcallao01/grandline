@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { SidebarItemProps, IconName } from '@/types';
 import { getIcon } from '@/utils';
 
@@ -37,14 +36,15 @@ export function SidebarItem({
   );
 
   if (href) {
+    const LinkComponent = Link as any;
     return (
-      <Link
-        href={href as Route}
+      <LinkComponent
+        href={href}
         className={`${baseClasses} ${activeClasses}`}
         onClick={onClick}
       >
         {content}
-      </Link>
+      </LinkComponent>
     );
   }
 

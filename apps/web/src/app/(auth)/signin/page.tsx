@@ -13,9 +13,16 @@ import { validateUserRegistration, type FlatUserRegistrationData } from '@/serve
 
 export default function SignInPage() {
   const router = useRouter();
-  const auth = useAuth();
-  const { showSuccess, showError } = useNotifications();
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Simple notification functions without Redux
+  const showSuccess = (message: string) => {
+    alert(`✅ ${message}`);
+  };
+
+  const showError = (message: string) => {
+    alert(`❌ ${message}`);
+  };
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: '',
@@ -56,9 +63,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Use Redux loading state
-  const isLoading = auth.isLoading;
+  const [isLoading, setIsLoading] = useState(false);
 
   // Dropdown options for form fields
   const genderOptions = [
@@ -116,6 +121,13 @@ export default function SignInPage() {
     e.preventDefault();
     setErrors({});
 
+    if (isLoading) {
+      console.log('⚠️ Already loading, ignoring submission');
+      return;
+    }
+
+    setIsLoading(true);
+
     // DIAGNOSTIC LOGGING
     console.log('🚀 FORM SUBMISSION STARTED');
     console.log('📋 isSignUp:', isSignUp);
@@ -170,22 +182,35 @@ export default function SignInPage() {
         if (response.ok) {
           const result = await response.json();
           console.log('✅ Registration successful!', result);
-          showSuccess('Registration successful! Welcome to Encreasl!');
+          showSuccess('Registration successful! Your trainee account has been created.');
 
-          // Login the newly created user
-          const loginResult = await auth.dispatch(loginUser({
-            email: formData.email,
-            password: formData.password
-          }));
-
-          if (loginUser.fulfilled.match(loginResult)) {
-            console.log('✅ Login successful, redirecting to portal');
-            router.push('/portal');
-          } else {
-            // Registration succeeded but login failed - still show success
-            console.log('⚠️ Registration succeeded but login failed');
-            showSuccess('Registration successful! Please login with your credentials.');
-          }
+          // Reset form after successful registration
+          setFormData({
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            nameExtension: '',
+            gender: '',
+            civilStatus: '',
+            srn: '',
+            nationality: '',
+            birthDate: '',
+            placeOfBirth: '',
+            completeAddress: '',
+            email: '',
+            phoneNumber: '',
+            username: '',
+            password: '',
+            confirmPassword: '',
+            couponCode: '',
+            emergencyFirstName: '',
+            emergencyMiddleName: '',
+            emergencyLastName: '',
+            emergencyContactNumber: '',
+            emergencyRelationship: '',
+            emergencyCompleteAddress: '',
+            agreeToTerms: false
+          });
         } else {
           const error = await response.json();
           console.error('❌ Registration failed:', {
@@ -196,21 +221,9 @@ export default function SignInPage() {
           showError(error?.error || error?.message || 'Registration failed. Please try again.');
         }
       } else {
-        // Sign in
-        const credentials = {
-          email: formData.email,
-          password: formData.password,
-        };
-
-        const result = await auth.dispatch(loginUser(credentials));
-
-        if (loginUser.fulfilled.match(result)) {
-          showSuccess('Login successful! Welcome back!');
-          router.push('/portal');
-        } else {
-          const error = result.payload as any;
-          showError(error?.message || 'Login failed. Please check your credentials.');
-        }
+        // Login form - NO AUTHENTICATION LOGIC, just UI
+        console.log('Login clicked but no authentication logic implemented');
+        showError('Login functionality not implemented yet.');
       }
     } catch (error) {
       console.error('❌ Authentication error:', error);
@@ -222,6 +235,8 @@ export default function SignInPage() {
         });
       }
       showError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

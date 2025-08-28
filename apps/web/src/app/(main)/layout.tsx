@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Header, Sidebar, MobileFooter } from '@/components/layout'
 
 /**
@@ -14,7 +14,7 @@ import { Header, Sidebar, MobileFooter } from '@/components/layout'
 export default function MainLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
