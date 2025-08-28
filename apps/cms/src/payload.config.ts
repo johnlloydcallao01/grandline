@@ -43,16 +43,20 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   cors: [
+    // Production web-admin
     'https://grandline-web-admin.vercel.app',
+    // Local development
     'http://localhost:3002',
+    'http://127.0.0.1:3002',
+    // Production web app (for trainee registration)
     'https://grandline-web.vercel.app',
-    'http://localhost:3000'
-  ],
-  csrf: [
-    'https://grandline-web-admin.vercel.app',
-    'http://localhost:3002',
-    'https://grandline-web.vercel.app',
-    'http://localhost:3000'
+    // Local web app development
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    // CMS admin panel itself
+    'https://grandline-cms.vercel.app',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
