@@ -29,7 +29,7 @@ interface TraineeRegistrationBody {
 }
 
 // CORS headers for all responses
-const getAllowedOrigins = () => {
+const getAllowedOrigins = (): string[] => {
   const localOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
@@ -39,19 +39,22 @@ const getAllowedOrigins = () => {
     'http://127.0.0.1:3002',
   ]
 
-  const envOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : []
+  // Production origins from environment variables with fallbacks
+  const productionOrigins = [
+    process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
+    process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
+    process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
+  ]
 
-  return [...localOrigins, ...envOrigins].filter(Boolean)
+  return [...localOrigins, ...productionOrigins]
 }
 
-const getCorsHeaders = (origin?: string | null) => {
+const getCorsHeaders = (origin?: string | null): Record<string, string> => {
   const allowedOrigins = getAllowedOrigins()
 
   // If no origin (direct API call) or origin is allowed, use the origin
   // Otherwise, use the first allowed origin as fallback
-  let allowedOrigin = allowedOrigins[0] // Default fallback
+  let allowedOrigin = allowedOrigins[0] || 'https://grandline-web.vercel.app' // Ensure we always have a fallback
 
   if (origin && allowedOrigins.includes(origin)) {
     allowedOrigin = origin

@@ -52,11 +52,14 @@ export default buildConfig({
       'http://127.0.0.1:3002',
     ]
 
-    const envOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-      : []
+    // Production origins from environment variables with fallbacks
+    const productionOrigins = [
+      process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
+      process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
+      process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
+    ]
 
-    return [...localOrigins, ...envOrigins].filter(Boolean)
+    return [...localOrigins, ...productionOrigins]
   })(),
   csrf: (() => {
     const localOrigins = [
@@ -68,11 +71,14 @@ export default buildConfig({
       'http://127.0.0.1:3002',
     ]
 
-    const envOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-      : []
+    // Production origins from environment variables with fallbacks
+    const productionOrigins = [
+      process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
+      process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
+      process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
+    ]
 
-    return [...localOrigins, ...envOrigins].filter(Boolean)
+    return [...localOrigins, ...productionOrigins]
   })(),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

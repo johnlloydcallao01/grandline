@@ -25,40 +25,40 @@ export default function SignInPage() {
   };
   const [formData, setFormData] = useState({
     // Personal Information
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    nameExtension: '',
-    gender: '',
-    civilStatus: '',
-    srn: '',
-    nationality: '',
-    birthDate: '',
-    placeOfBirth: '',
-    completeAddress: '',
+    firstName: 'Juan',
+    middleName: 'Ponze',
+    lastName: 'Enrile',
+    nameExtension: 'Jr',
+    gender: 'male',
+    civilStatus: 'single',
+    srn: 'SRN-343',
+    nationality: 'Filipino',
+    birthDate: '2000-12-28',
+    placeOfBirth: 'Manila, Philippines',
+    completeAddress: 'Manila, Philippines',
 
     // Contact Information
-    email: '',
-    phoneNumber: '',
+    email: 'carlos@gmail.com',
+    phoneNumber: '+639092809767',
 
     // Username & Password
-    username: '',
-    password: '',
-    confirmPassword: '',
+    username: 'juancarlos',
+    password: '@Iamachessgrandmaster23',
+    confirmPassword: '@Iamachessgrandmaster23',
 
     // Marketing
-    couponCode: '',
+    couponCode: '334ssdfsdf',
 
     // Emergency Contact
-    emergencyFirstName: '',
-    emergencyMiddleName: '',
-    emergencyLastName: '',
-    emergencyContactNumber: '',
-    emergencyRelationship: '',
-    emergencyCompleteAddress: '',
+    emergencyFirstName: 'Johny',
+    emergencyMiddleName: 'Buli',
+    emergencyLastName: 'Dana',
+    emergencyContactNumber: '+639468748743',
+    emergencyRelationship: 'relative',
+    emergencyCompleteAddress: 'Pangi, Zamboanga',
 
     // Terms
-    agreeToTerms: false
+    agreeToTerms: true
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -186,30 +186,30 @@ export default function SignInPage() {
 
           // Reset form after successful registration
           setFormData({
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            nameExtension: '',
-            gender: '',
-            civilStatus: '',
-            srn: '',
-            nationality: '',
-            birthDate: '',
-            placeOfBirth: '',
-            completeAddress: '',
-            email: '',
-            phoneNumber: '',
-            username: '',
-            password: '',
-            confirmPassword: '',
-            couponCode: '',
-            emergencyFirstName: '',
-            emergencyMiddleName: '',
-            emergencyLastName: '',
-            emergencyContactNumber: '',
-            emergencyRelationship: '',
-            emergencyCompleteAddress: '',
-            agreeToTerms: false
+            firstName: 'Juan',
+            middleName: 'Ponze',
+            lastName: 'Enrile',
+            nameExtension: 'Jr',
+            gender: 'male',
+            civilStatus: 'single',
+            srn: 'SRN-343',
+            nationality: 'Filipino',
+            birthDate: '2000-12-28',
+            placeOfBirth: 'Manila, Philippines',
+            completeAddress: 'Manila, Philippines',
+            email: 'carlos@gmail.com',
+            phoneNumber: '+639092809767',
+            username: 'juancarlos',
+            password: '@Iamachessgrandmaster23',
+            confirmPassword: '@Iamachessgrandmaster23',
+            couponCode: '334ssdfsdf',
+            emergencyFirstName: 'Johny',
+            emergencyMiddleName: 'Buli',
+            emergencyLastName: 'Dana',
+            emergencyContactNumber: '+639468748743',
+            emergencyRelationship: 'relative',
+            emergencyCompleteAddress: 'Pangi, Zamboanga',
+            agreeToTerms: true
           });
         } else {
           const error = await response.json();
@@ -245,40 +245,40 @@ export default function SignInPage() {
     setErrors({});
     setFormData({
       // Personal Information
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      nameExtension: '',
-      gender: '',
-      civilStatus: '',
-      srn: '',
-      nationality: '',
-      birthDate: '',
-      placeOfBirth: '',
-      completeAddress: '',
+      firstName: 'Juan',
+      middleName: 'Ponze',
+      lastName: 'Enrile',
+      nameExtension: 'Jr',
+      gender: 'male',
+      civilStatus: 'single',
+      srn: 'SRN-343',
+      nationality: 'Filipino',
+      birthDate: '2000-12-28',
+      placeOfBirth: 'Manila, Philippines',
+      completeAddress: 'Manila, Philippines',
 
       // Contact Information
-      email: '',
-      phoneNumber: '',
+      email: 'carlos@gmail.com',
+      phoneNumber: '+639092809767',
 
       // Username & Password
-      username: '',
-      password: '',
-      confirmPassword: '',
+      username: 'juancarlos',
+      password: '@Iamachessgrandmaster23',
+      confirmPassword: '@Iamachessgrandmaster23',
 
       // Marketing
-      couponCode: '',
+      couponCode: '334ssdfsdf',
 
       // Emergency Contact
-      emergencyFirstName: '',
-      emergencyMiddleName: '',
-      emergencyLastName: '',
-      emergencyContactNumber: '',
-      emergencyRelationship: '',
-      emergencyCompleteAddress: '',
+      emergencyFirstName: 'Johny',
+      emergencyMiddleName: 'Buli',
+      emergencyLastName: 'Dana',
+      emergencyContactNumber: '+639468748743',
+      emergencyRelationship: 'relative',
+      emergencyCompleteAddress: 'Pangi, Zamboanga',
 
       // Terms
-      agreeToTerms: false
+      agreeToTerms: true
     });
   };
 
