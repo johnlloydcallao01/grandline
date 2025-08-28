@@ -2,16 +2,75 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+// Type for the request body
+interface TraineeRegistrationBody {
+  firstName: string
+  lastName: string
+  middleName?: string
+  nameExtension?: string
+  gender: 'male' | 'female' | 'other' | 'prefer_not_to_say'
+  civilStatus: 'single' | 'married' | 'divorced' | 'widowed' | 'separated'
+  nationality: string
+  birthDate: string
+  placeOfBirth: string
+  completeAddress: string
+  email: string
+  phoneNumber: string
+  username: string
+  password: string
+  srn: string
+  couponCode?: string
+  emergencyFirstName: string
+  emergencyMiddleName?: string
+  emergencyLastName: string
+  emergencyContactNumber: string
+  emergencyRelationship: 'parent' | 'spouse' | 'sibling' | 'child' | 'guardian' | 'friend' | 'relative' | 'other'
+  emergencyCompleteAddress: string
+}
+
 // CORS headers for all responses
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-  'Access-Control-Max-Age': '86400',
+const getAllowedOrigins = () => [
+  // Local development
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'http://127.0.0.1:3002',
+  // Production deployments
+  'https://grandline-web.vercel.app',
+  'https://grandline-web-admin.vercel.app',
+  'https://grandline-cms.vercel.app'
+]
+
+const getCorsHeaders = (origin?: string | null) => {
+  const allowedOrigins = getAllowedOrigins()
+
+  // If no origin (direct API call) or origin is allowed, use the origin
+  // Otherwise, use the first allowed origin as fallback
+  let allowedOrigin = allowedOrigins[0] // Default fallback
+
+  if (origin && allowedOrigins.includes(origin)) {
+    allowedOrigin = origin
+  }
+
+  console.log(`CORS: Request from origin: ${origin}, Allowing: ${allowedOrigin}`)
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'true',
+    'Vary': 'Origin', // Important for caching with multiple origins
+  }
 }
 
 // Handle preflight OPTIONS request
-export async function OPTIONS(_request: NextRequest) {
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
   return new NextResponse(null, {
     status: 200,
     headers: corsHeaders,
@@ -19,19 +78,25 @@ export async function OPTIONS(_request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
+  let body: TraineeRegistrationBody = {} as TraineeRegistrationBody // Declare body outside try block for error logging
+
   try {
     const payload = await getPayload({ config: configPromise })
-    const body = await request.json()
+    body = await request.json()
 
     // Validate required fields
     const requiredFields = [
       'firstName', 'lastName', 'email', 'password', 'srn',
-      'emergencyFirstName', 'emergencyMiddleName', 'emergencyLastName',
+      'emergencyFirstName', 'emergencyLastName', // emergencyMiddleName is not required from form
       'emergencyContactNumber', 'emergencyRelationship', 'emergencyCompleteAddress'
     ]
 
     for (const field of requiredFields) {
-      if (!body[field]) {
+      const fieldValue = (body as Record<string, unknown>)[field]
+      if (!fieldValue) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
           { status: 400, headers: corsHeaders }
@@ -39,7 +104,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 1: Create user account (trigger will NOT create trainee record)
+    // Step 1: Create user account (trigger will automatically create trainee record)
     const user = await payload.create({
       collection: 'users',
       data: {
@@ -54,18 +119,31 @@ export async function POST(request: NextRequest) {
         placeOfBirth: body.placeOfBirth,
         completeAddress: body.completeAddress,
         email: body.email,
-        phone: body.phoneNumber,
+        phone: body.phoneNumber, // Form sends phoneNumber, PayloadCMS expects phone
         username: body.username,
         password: body.password,
         role: 'trainee'
       }
     })
 
-    // Step 2: Create trainee record with SRN (trigger skipped this)
-    const trainee = await payload.create({
+    // Step 2: Find the trainee record created by the trigger and update it with SRN
+    const traineeRecords = await payload.find({
       collection: 'trainees',
+      where: {
+        user: {
+          equals: user.id
+        }
+      }
+    })
+
+    if (traineeRecords.docs.length === 0) {
+      throw new Error('Trainee record was not created by trigger')
+    }
+
+    await payload.update({
+      collection: 'trainees',
+      id: traineeRecords.docs[0].id,
       data: {
-        user: user.id,
         srn: body.srn,
         couponCode: body.couponCode || '',
         enrollmentDate: new Date().toISOString(),
@@ -73,13 +151,16 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Get the updated trainee record for response
+    const updatedTrainee = traineeRecords.docs[0]
+
     // Step 3: Create emergency contact
     const emergencyContact = await payload.create({
       collection: 'emergency-contacts',
       data: {
         user: user.id,
         firstName: body.emergencyFirstName,
-        middleName: body.emergencyMiddleName || '',
+        middleName: body.emergencyMiddleName || 'N/A', // Required field, use N/A if empty
         lastName: body.emergencyLastName,
         contactNumber: body.emergencyContactNumber,
         relationship: body.emergencyRelationship,
@@ -100,8 +181,8 @@ export async function POST(request: NextRequest) {
           role: user.role
         },
         trainee: {
-          id: trainee.id,
-          srn: trainee.srn
+          id: updatedTrainee.id,
+          srn: body.srn // Use the SRN from the request since we just updated it
         },
         emergencyContact: {
           id: emergencyContact.id,
@@ -123,6 +204,13 @@ export async function POST(request: NextRequest) {
 
     // Log the full error object
     console.error('Full error object:', JSON.stringify(error, null, 2))
+
+    // Log the request body for debugging (without sensitive data)
+    console.error('Request body (sanitized):', {
+      ...body,
+      password: '[REDACTED]',
+      confirmPassword: '[REDACTED]'
+    })
 
     // Handle specific PayloadCMS validation errors
     if (error instanceof Error && error.name === 'ValidationError') {
