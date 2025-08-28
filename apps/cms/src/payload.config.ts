@@ -42,44 +42,7 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
-  cors: (() => {
-    const localOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002',
-    ]
-
-    // Production origins from environment variables with fallbacks
-    const productionOrigins = [
-      process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
-      process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
-      process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
-    ]
-
-    return [...localOrigins, ...productionOrigins]
-  })(),
-  csrf: (() => {
-    const localOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002',
-    ]
-
-    // Production origins from environment variables with fallbacks
-    const productionOrigins = [
-      process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
-      process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
-      process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
-    ]
-
-    return [...localOrigins, ...productionOrigins]
-  })(),
+  // No CORS configuration - completely disabled
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

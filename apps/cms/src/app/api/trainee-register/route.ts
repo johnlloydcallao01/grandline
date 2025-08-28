@@ -28,65 +28,9 @@ interface TraineeRegistrationBody {
   emergencyCompleteAddress: string
 }
 
-// CORS headers for all responses
-const getAllowedOrigins = (): string[] => {
-  const localOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-  ]
-
-  // Production origins from environment variables with fallbacks
-  const productionOrigins = [
-    process.env.NEXT_PUBLIC_WEB_URL || 'https://grandline-web.vercel.app',
-    process.env.NEXT_PUBLIC_WEB_ADMIN_URL || 'https://grandline-web-admin.vercel.app',
-    process.env.NEXT_PUBLIC_CMS_URL || 'https://grandline-cms.vercel.app',
-  ]
-
-  return [...localOrigins, ...productionOrigins]
-}
-
-const getCorsHeaders = (origin?: string | null): Record<string, string> => {
-  const allowedOrigins = getAllowedOrigins()
-
-  // If no origin (direct API call) or origin is allowed, use the origin
-  // Otherwise, use the first allowed origin as fallback
-  let allowedOrigin = allowedOrigins[0] || 'https://grandline-web.vercel.app' // Ensure we always have a fallback
-
-  if (origin && allowedOrigins.includes(origin)) {
-    allowedOrigin = origin
-  }
-
-  console.log(`CORS: Request from origin: ${origin}, Allowing: ${allowedOrigin}`)
-
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-    'Access-Control-Max-Age': '86400',
-    'Access-Control-Allow-Credentials': 'true',
-    'Vary': 'Origin', // Important for caching with multiple origins
-  }
-}
-
-// Handle preflight OPTIONS request
-export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const corsHeaders = getCorsHeaders(origin)
-
-  return new NextResponse(null, {
-    status: 200,
-    headers: corsHeaders,
-  })
-}
+// No CORS handling - let PayloadCMS handle it natively
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const corsHeaders = getCorsHeaders(origin)
-
   let body: TraineeRegistrationBody = {} as TraineeRegistrationBody // Declare body outside try block for error logging
 
   try {
@@ -105,7 +49,7 @@ export async function POST(request: NextRequest) {
       if (!fieldValue) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
-          { status: 400, headers: corsHeaders }
+          { status: 400 }
         )
       }
     }
@@ -180,7 +124,7 @@ export async function POST(request: NextRequest) {
           lastName: emergencyContact.lastName
         }
       }
-    }, { headers: corsHeaders })
+    })
 
   } catch (error: unknown) {
     console.error('Trainee registration error:', error)
@@ -209,7 +153,7 @@ export async function POST(request: NextRequest) {
           error: 'Validation failed',
           details: (error as { data?: unknown; message: string }).data || error.message
         },
-        { status: 400, headers: corsHeaders }
+        { status: 400 }
       )
     }
 
@@ -223,7 +167,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { error: `This ${field} is already registered` },
-        { status: 409, headers: corsHeaders }
+        { status: 409 }
       )
     }
 
@@ -237,7 +181,7 @@ export async function POST(request: NextRequest) {
           errorType: error instanceof Error ? error.name : typeof error
         })
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     )
   }
 }

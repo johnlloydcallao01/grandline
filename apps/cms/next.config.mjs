@@ -12,7 +12,7 @@ const nextConfig = {
       },
     ]
   },
-  // CORS headers are now handled by middleware.ts for proper origin validation
+  // Security headers only - no CORS
   async headers() {
     return [
       {
