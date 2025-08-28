@@ -149,14 +149,7 @@ export async function POST(request: NextRequest) {
         password: '[HIDDEN]'
       })
 
-      // Check if it's a duplicate key error and handle it specifically
-      if (typeof userCreationError === 'object' && userCreationError !== null && 'code' in userCreationError && userCreationError.code === '23505') {
-        console.error('🔍 USER CREATION - DUPLICATE KEY ERROR DETECTED')
-        // Re-throw to be handled by the main error handler
-        throw userCreationError
-      }
-
-      // Re-throw with more context for other errors
+      // Re-throw with more context
       throw new Error(`User creation failed: ${userCreationError instanceof Error ? userCreationError.message : String(userCreationError)}`)
     }
 
@@ -189,14 +182,7 @@ export async function POST(request: NextRequest) {
       console.error('💥 TRAINEE CREATION FAILED:', traineeCreationError)
       console.error('📋 Data that failed:', traineeData)
 
-      // Check if it's a duplicate key error and handle it specifically
-      if (typeof traineeCreationError === 'object' && traineeCreationError !== null && 'code' in traineeCreationError && traineeCreationError.code === '23505') {
-        console.error('🔍 TRAINEE CREATION - DUPLICATE KEY ERROR DETECTED')
-        // Re-throw to be handled by the main error handler
-        throw traineeCreationError
-      }
-
-      // Re-throw with more context for other errors
+      // Re-throw with more context
       throw new Error(`Trainee creation failed: ${traineeCreationError instanceof Error ? traineeCreationError.message : String(traineeCreationError)}`)
     }
 
@@ -288,7 +274,7 @@ export async function POST(request: NextRequest) {
     // Log the full error object with better formatting
     try {
       console.error('❌ Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
-    } catch (jsonError) {
+    } catch (_jsonError) {
       console.error('❌ Could not stringify error object:', error)
     }
 
@@ -322,42 +308,28 @@ export async function POST(request: NextRequest) {
       console.error('🔍 HANDLING DUPLICATE KEY ERROR')
       let field = 'field'
       let friendlyField = 'field'
-      let userMessage = 'This information is already registered'
       const detail = 'detail' in error ? String(error.detail) : ''
       const constraint = 'constraint' in error ? String(error.constraint) : ''
 
       console.error('🔍 Duplicate key details:', { detail, constraint })
 
-      // Check for specific constraint names and details
-      if (detail.includes('email') || constraint.includes('users_email_idx') || constraint.includes('email')) {
+      if (detail.includes('email') || constraint.includes('email')) {
         field = 'email'
         friendlyField = 'email address'
-        userMessage = 'This email address is already registered. Please use a different email address or try signing in instead.'
-      } else if (detail.includes('username') || constraint.includes('users_username_idx') || constraint.includes('username')) {
+      } else if (detail.includes('username') || constraint.includes('username')) {
         field = 'username'
         friendlyField = 'username'
-        userMessage = 'This username is already taken. Please choose a different username.'
-      } else if (detail.includes('srn') || constraint.includes('trainees_srn_idx') || constraint.includes('srn')) {
+      } else if (detail.includes('srn') || constraint.includes('srn')) {
         field = 'srn'
         friendlyField = 'Student Registration Number (SRN)'
-        userMessage = 'This Student Registration Number (SRN) is already in use. Please check your SRN or contact support if you believe this is an error.'
-      } else if (detail.includes('user_id') || constraint.includes('trainees_user_idx') || constraint.includes('user')) {
-        field = 'user_account'
-        friendlyField = 'user account'
-        userMessage = 'This user account is already associated with a trainee profile. Please contact support if you need assistance.'
       }
 
       return NextResponse.json(
         {
-          error: userMessage,
-          message: userMessage,
+          error: `This ${friendlyField} is already registered`,
+          message: `A user with this ${friendlyField} already exists. Please use a different ${friendlyField}.`,
           field: field,
-          type: 'duplicate',
-          details: {
-            constraint: constraint,
-            detail: detail,
-            friendlyField: friendlyField
-          }
+          type: 'duplicate'
         },
         { status: 409, headers: corsHeaders }
       )
