@@ -1,10 +1,17 @@
 import type { CollectionConfig } from 'payload'
+import { adminOnly, instructorOrAbove } from '../access'
 
 export const Trainees: CollectionConfig = {
   slug: 'trainees',
   admin: {
     useAsTitle: 'user',
     defaultColumns: ['user', 'srn', 'enrollmentDate', 'currentLevel'],
+  },
+  access: {
+    read: instructorOrAbove, // Instructors and admins can read trainee data
+    create: adminOnly, // Only admins can create trainee records
+    update: adminOnly, // Only admins can update trainee records
+    delete: adminOnly, // Only admins can delete trainee records
   },
   fields: [
     {

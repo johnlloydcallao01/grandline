@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOnly } from '../access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -7,6 +8,90 @@ export const Users: CollectionConfig = {
     defaultColumns: ['email', 'firstName', 'lastName', 'role'],
   },
   auth: true,
+  access: {
+    read: () => true, // Allow reading user data
+    create: adminOnly, // Only admins can create users
+    update: ({ req: { user } }) => {
+      // Users can update their own data, admins can update any
+      if (user?.role === 'admin') return true;
+      return { id: { equals: user?.id } };
+    },
+    delete: adminOnly, // Only admins can delete users
+  },
+  hooks: {
+    beforeDelete: [
+      async ({ req, id }) => {
+        console.log(`🗑️ Attempting to delete user ${id}`);
+
+        // Delete related records first to avoid foreign key constraint errors
+        const payload = req.payload;
+
+        try {
+          // Delete related trainee records
+          const trainees = await payload.find({
+            collection: 'trainees',
+            where: { user: { equals: id } },
+          });
+
+          for (const trainee of trainees.docs) {
+            console.log(`🗑️ Deleting trainee record ${trainee.id}`);
+            await payload.delete({
+              collection: 'trainees',
+              id: trainee.id,
+            });
+          }
+
+          // Delete related emergency contacts
+          const emergencyContacts = await payload.find({
+            collection: 'emergency-contacts',
+            where: { user: { equals: id } },
+          });
+
+          for (const contact of emergencyContacts.docs) {
+            console.log(`🗑️ Deleting emergency contact ${contact.id}`);
+            await payload.delete({
+              collection: 'emergency-contacts',
+              id: contact.id,
+            });
+          }
+
+          // Delete related instructor records
+          const instructors = await payload.find({
+            collection: 'instructors',
+            where: { user: { equals: id } },
+          });
+
+          for (const instructor of instructors.docs) {
+            console.log(`🗑️ Deleting instructor record ${instructor.id}`);
+            await payload.delete({
+              collection: 'instructors',
+              id: instructor.id,
+            });
+          }
+
+          // Delete related admin records
+          const admins = await payload.find({
+            collection: 'admins',
+            where: { user: { equals: id } },
+          });
+
+          for (const admin of admins.docs) {
+            console.log(`🗑️ Deleting admin record ${admin.id}`);
+            await payload.delete({
+              collection: 'admins',
+              id: admin.id,
+            });
+          }
+
+          console.log(`✅ Successfully cleaned up related records for user ${id}`);
+        } catch (error) {
+          console.error(`❌ Error cleaning up related records for user ${id}:`, error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+          throw new Error(`Failed to delete user: ${errorMessage}`);
+        }
+      },
+    ],
+  },
 
   fields: [
     // Email and password are added automatically by auth: true
