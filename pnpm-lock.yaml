@@ -313,6 +313,73 @@ importers:
         specifier: ^5
         version: 5.8.3
 
+  apps/web-landing:
+    dependencies:
+      '@encreasl/redux':
+        specifier: workspace:*
+        version: link:../../packages/redux
+      next:
+        specifier: 15.4.2
+        version: 15.4.2(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@encreasl/env':
+        specifier: workspace:*
+        version: link:../../packages/env
+      '@encreasl/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@encreasl/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@encreasl/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@eslint/eslintrc':
+        specifier: ^3
+        version: 3.3.1
+      '@eslint/js':
+        specifier: ^9
+        version: 9.31.0
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.1.11
+      '@types/node':
+        specifier: ^20
+        version: 20.19.9
+      '@types/react':
+        specifier: ^19
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.1.2(@types/react@19.1.0)
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.38.0(@typescript-eslint/parser@8.38.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.31.0(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.38.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.7.3)
+      eslint:
+        specifier: ^9
+        version: 9.31.0(jiti@2.4.2)
+      eslint-config-next:
+        specifier: 15.4.2
+        version: 15.4.2(eslint@9.31.0(jiti@2.4.2))(typescript@5.7.3)
+      tailwindcss:
+        specifier: ^4
+        version: 4.1.11
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+
   functions:
     dependencies:
       cors:

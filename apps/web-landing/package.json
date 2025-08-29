@@ -1,0 +1,38 @@
+{
+  "name": "@encreasl/web-landing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node ../../node_modules/next/dist/bin/next build",
+    "dev": "node ../../node_modules/next/dist/bin/next dev --port 3003",
+    "dev:turbo": "node ../../node_modules/next/dist/bin/next dev --turbopack --port 3003",
+    "lint": "node ../../node_modules/next/dist/bin/next lint",
+    "start": "node ../../node_modules/next/dist/bin/next start --port 3003",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@encreasl/redux": "workspace:*",
+    "next": "15.4.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@encreasl/env": "workspace:*",
+    "@encreasl/eslint-config": "workspace:*",
+    "@encreasl/typescript-config": "workspace:*",
+    "@encreasl/ui": "workspace:*",
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
