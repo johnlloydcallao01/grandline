@@ -18,7 +18,7 @@ const nextConfig = {
       {
         source: '/api/(.*)',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: `https://grandline-web-admin.vercel.app,${process.env.ADMIN_LOCAL_URL},https://grandline-web.vercel.app,${process.env.WEB_LOCAL_URL}` },
+          { key: 'Access-Control-Allow-Origin', value: `${process.env.ADMIN_PROD_URL},${process.env.ADMIN_LOCAL_URL},${process.env.WEB_PROD_URL},${process.env.WEB_LOCAL_URL}` },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization,X-Requested-With' },
           { key: 'Access-Control-Allow-Credentials', value: 'true' },

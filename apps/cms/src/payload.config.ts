@@ -44,15 +44,15 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   cors: [
     // Production web-admin
-    'https://grandline-web-admin.vercel.app',
+    process.env.ADMIN_PROD_URL!,
     // Local development
     process.env.ADMIN_LOCAL_URL!,
     // Production web app (for trainee registration)
-    'https://grandline-web.vercel.app',
+    process.env.WEB_PROD_URL!,
     // Local web app development
     process.env.WEB_LOCAL_URL!,
     // CMS admin panel itself
-    'https://grandline-cms.vercel.app',
+    process.env.CMS_PROD_URL!,
     process.env.CMS_LOCAL_URL!,
   ],
   typescript: {

@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  'https://grandline-web-admin.vercel.app',
+  process.env.ADMIN_PROD_URL!,
   process.env.ADMIN_LOCAL_URL!,
-  'https://grandline-web.vercel.app',
+  process.env.WEB_PROD_URL!,
   process.env.WEB_LOCAL_URL!,
-  'https://grandline-cms.vercel.app',
+  process.env.CMS_PROD_URL!,
   process.env.CMS_LOCAL_URL!,
 ]
 
