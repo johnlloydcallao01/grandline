@@ -69,7 +69,7 @@ export default function MainLayout({
       {/* Main Content Area - Only this changes during navigation */}
       <main
         className={`transition-all duration-300 ${
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
+          sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
         }`}
       >
         <div className="min-h-full">

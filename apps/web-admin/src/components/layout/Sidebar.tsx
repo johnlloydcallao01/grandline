@@ -16,7 +16,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
   return (
     <aside 
       className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 ${
-        isOpen ? 'w-64' : 'w-20'
+        isOpen ? 'w-60' : 'w-20'
       }`}
       style={{
         height: 'calc(100vh - 4rem)',

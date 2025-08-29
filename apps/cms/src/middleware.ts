@@ -3,14 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 // Allowed origins for CORS
 const allowedOrigins = [
   'https://grandline-web-admin.vercel.app',
-  'http://localhost:3002',
-  'http://127.0.0.1:3002',
+  process.env.ADMIN_LOCAL_URL!,
   'https://grandline-web.vercel.app',
   'http://localhost:3000',
-  'http://127.0.0.1:3000',
   'https://grandline-cms.vercel.app',
   'http://localhost:3001',
-  'http://127.0.0.1:3001',
 ]
 
 export function middleware(request: NextRequest) {

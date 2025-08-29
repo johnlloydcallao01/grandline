@@ -57,7 +57,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
         />
-        <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+        <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-60' : 'ml-20'}`}>
           {children || <DefaultDashboardContent />}
         </main>
       </div>
