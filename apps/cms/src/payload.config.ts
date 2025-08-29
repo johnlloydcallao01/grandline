@@ -50,10 +50,10 @@ export default buildConfig({
     // Production web app (for trainee registration)
     'https://grandline-web.vercel.app',
     // Local web app development
-    'http://localhost:3000',
+    process.env.WEB_LOCAL_URL!,
     // CMS admin panel itself
     'https://grandline-cms.vercel.app',
-    'http://localhost:3001',
+    process.env.CMS_LOCAL_URL!,
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -5,9 +5,9 @@ const allowedOrigins = [
   'https://grandline-web-admin.vercel.app',
   process.env.ADMIN_LOCAL_URL!,
   'https://grandline-web.vercel.app',
-  'http://localhost:3000',
+  process.env.WEB_LOCAL_URL!,
   'https://grandline-cms.vercel.app',
-  'http://localhost:3001',
+  process.env.CMS_LOCAL_URL!,
 ]
 
 export function middleware(request: NextRequest) {
