@@ -2,91 +2,42 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAdminAuth } from '@encreasl/auth';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
+
+  // Use shared auth hook with admin role requirement
+  const { login, isLoading, error, clearError } = useAdminAuth(
+    process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
+    process.env.NODE_ENV === 'development'
+  );
 
   // Clear any cached values on mount
   React.useEffect(() => {
     setEmail('');
     setPassword('');
-  }, []);
+    clearError();
+  }, [clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
+    clearError();
 
     try {
-      console.log('🔐 PayloadCMS admin login initiated...');
-      console.log('📧 Email:', email);
-      console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
-
-      // Use PayloadCMS REST API for authentication
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important for cookie handling
-      });
-
-      // Log response details for debugging
-      console.log('📡 Login response status:', response.status);
-      console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
-
-      // Validate user role - ONLY admin allowed
-      if (result.user.role !== 'admin') {
-        throw new Error(`Access denied. Admin panel requires admin role. Current role: ${result.user.role}`);
-      }
-
-      if (!result.user.isActive) {
-        throw new Error('Account is inactive. Please contact administrator.');
-      }
-
-      console.log('✅ PayloadCMS login successful:', {
-        email: result.user.email,
-        role: result.user.role,
-        isActive: result.user.isActive,
-        token: result.token ? 'Present' : 'Missing'
-      });
-
-      // Check what cookies were set
-      console.log('🍪 All cookies after login:', document.cookie);
-
-      // If PayloadCMS didn't set the cookie, we need to set it manually
-      if (result.token && !document.cookie.includes('payload-token')) {
-        console.log('⚠️ PayloadCMS did not set cookie, setting manually...');
-        // Set the cookie manually with proper settings
-        document.cookie = `payload-token=${result.token}; path=/; SameSite=Lax`;
-        console.log('✅ Cookie set manually');
-      }
-
-      console.log('🔄 Redirecting to dashboard...');
+      await login({ email, password });
 
       // Small delay to ensure cookie is processed
       setTimeout(() => {
         router.push('/admin/dashboard');
       }, 100);
-    } catch (err: unknown) {
-      console.error('❌ PayloadCMS login failed:', err);
-      const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin privileges.';
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      // Error is already handled by the auth hook
+      console.error('Login failed:', err);
     }
   };
 
@@ -162,7 +113,7 @@ export default function AdminLoginPage() {
                   <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-red-800">Authentication Failed</p>
-                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                    <p className="text-sm text-red-700 mt-1">{error.message}</p>
                   </div>
                 </div>
               )}
@@ -219,10 +170,10 @@ export default function AdminLoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="w-full bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
               >
-                {isSubmitting ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Signing in...</span>

@@ -133,6 +133,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@encreasl/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@encreasl/redux':
         specifier: workspace:*
         version: link:../../packages/redux
@@ -197,6 +200,9 @@ importers:
 
   apps/web-admin:
     dependencies:
+      '@encreasl/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@encreasl/redux':
         specifier: workspace:*
         version: link:../../packages/redux
@@ -449,6 +455,37 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.3
+
+  packages/auth:
+    dependencies:
+      next:
+        specifier: '>=14.0.0'
+        version: 15.4.2(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      react:
+        specifier: '>=18.0.0'
+        version: 19.1.0
+      zod:
+        specifier: ^4.0.10
+        version: 4.0.10
+    devDependencies:
+      '@encreasl/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@encreasl/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.9
+      '@types/react':
+        specifier: ^19
+        version: 19.1.0
+      eslint:
+        specifier: ^9
+        version: 9.31.0(jiti@2.4.2)
+      typescript:
+        specifier: ^5
+        version: 5.7.3
 
   packages/cms-types:
     dependencies:

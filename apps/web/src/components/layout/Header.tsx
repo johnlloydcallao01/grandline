@@ -22,8 +22,8 @@ export function Header({
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const handleSignInClick = () => {
-    router.push('/signin');
+  const handlePortalClick = () => {
+    router.push('/portal');
   };
 
   // Scroll detection for header visibility (mobile/tablet only)
@@ -177,7 +177,7 @@ export function Header({
         {/* Right section - Desktop */}
         <div className="flex items-center">
           <button
-            onClick={handleSignInClick}
+            onClick={handlePortalClick}
             className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 hover:shadow-lg"
             style={{
               backgroundColor: '#fff',
@@ -191,10 +191,8 @@ export function Header({
               e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.15)';
             }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Sign in
+            <i className="fa fa-graduation-cap text-lg"></i>
+            My Portal
           </button>
         </div>
       </div>

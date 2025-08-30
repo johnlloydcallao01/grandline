@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth, useNotifications, loginUser, registerUser } from '@encreasl/redux';
+import { useTraineeAuth } from '@encreasl/auth';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
 /**
@@ -14,6 +14,12 @@ import { validateUserRegistration, type FlatUserRegistrationData } from '@/serve
 export default function SignInPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Use shared auth hook for trainee authentication
+  const { login, isLoading, error, clearError } = useTraineeAuth(
+    process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
+    process.env.NODE_ENV === 'development'
+  );
 
   // Simple notification functions without Redux
   const showSuccess = (message: string) => {
@@ -63,7 +69,6 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   // Dropdown options for form fields
   const genderOptions = [
@@ -126,7 +131,7 @@ export default function SignInPage() {
       return;
     }
 
-    setIsLoading(true);
+    clearError();
 
     // DIAGNOSTIC LOGGING
     console.log('🚀 FORM SUBMISSION STARTED');
@@ -283,9 +288,24 @@ export default function SignInPage() {
           showError(errorMessage);
         }
       } else {
-        // Login form - NO AUTHENTICATION LOGIC, just UI
-        console.log('Login clicked but no authentication logic implemented');
-        showError('Login functionality not implemented yet.');
+        // Sign In Logic - Use shared auth package for trainee authentication
+        console.log('🔐 Trainee sign in initiated...');
+        console.log('📧 Email:', formData.email);
+
+        try {
+          await login({
+            email: formData.email,
+            password: formData.password
+          });
+
+          console.log('✅ Trainee login successful!');
+
+          // Redirect immediately after successful login
+          router.push('/');
+        } catch (loginError) {
+          console.error('❌ Trainee login failed:', loginError);
+          // Error is already handled by the auth hook and displayed via the error state
+        }
       }
     } catch (error) {
       console.error('❌ Authentication error:', error);
@@ -298,7 +318,7 @@ export default function SignInPage() {
       }
       showError('An unexpected error occurred. Please try again.');
     } finally {
-      setIsLoading(false);
+      // isLoading is managed by the auth hook, no need to set it manually
     }
   };
 
@@ -483,6 +503,17 @@ export default function SignInPage() {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Authentication Error Display */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
+                    <i className="fa fa-exclamation-circle text-red-500 mt-0.5"></i>
+                    <div>
+                      <p className="text-sm font-medium text-red-800">Authentication Failed</p>
+                      <p className="text-sm text-red-700 mt-1">{error.message}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Sign Up Fields */}
                 {isSignUp && (
                   <div className="space-y-8">
