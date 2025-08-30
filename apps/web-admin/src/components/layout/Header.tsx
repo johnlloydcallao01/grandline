@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAdminAuth } from '@encreasl/auth';
 import { HeaderProps } from '@/types';
 import { ChevronDown, User, Settings, Shield } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
@@ -18,14 +19,50 @@ export function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // For now, use a placeholder user - in real app this would come from server session
-  const user = {
-    email: 'admin@example.com',
-    role: 'admin',
-    firstName: 'Admin',
-    lastName: 'User'
-  };
+  // Get real authenticated user from auth context
+  const { user, isAuthenticated, isCheckingSession } = useAdminAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Debug user data in development
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Header - Auth State:', {
+        isAuthenticated,
+        isCheckingSession,
+        hasUser: !!user,
+        user: user ? {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          name: user.name
+        } : null
+      });
+    }
+  }, [user, isAuthenticated, isCheckingSession]);
+
+  // Helper function to get user display name
+  const getUserDisplayName = () => {
+    if (!user) return 'Admin User';
+
+    // Try different name combinations based on what's available
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    } else if (user.name) {
+      return user.name;
+    } else if (user.email) {
+      // Extract name from email if no display name
+      return user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    return 'Admin User';
+  };
+
+  // Helper function to get user email
+  const getUserEmail = () => {
+    return user?.email || 'admin@encreasl.com';
+  };
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -65,9 +102,23 @@ export function Header({
   // Get user initials for avatar
   const getUserInitials = () => {
     if (!user) return 'A';
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'A';
+
+    // Try to get initials from firstName/lastName
+    if (user.firstName && user.lastName) {
+      return (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
+    }
+
+    // Try to get initials from name field
+    if (user.name) {
+      const nameParts = user.name.split(' ');
+      if (nameParts.length >= 2) {
+        return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+      }
+      return user.name.charAt(0).toUpperCase();
+    }
+
+    // Fallback to email initial
+    return user.email?.charAt(0).toUpperCase() || 'A';
   };
 
   return (
@@ -165,10 +216,10 @@ export function Header({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
-                        {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
+                        {getUserDisplayName()}
                       </p>
                       <p className="text-sm text-gray-500 truncate">
-                        {user?.email || 'admin@encreasl.com'}
+                        {getUserEmail()}
                       </p>
                       <div className="flex items-center mt-1">
                         <Shield className="w-3 h-3 text-blue-500 mr-1" />

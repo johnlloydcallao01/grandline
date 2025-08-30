@@ -10,9 +10,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - signin (login page - public)
+     * - signin (authentication page)
      * - public assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|signin|.*\\.).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|signin|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.css|.*\\.js).*)',
   ],
 }

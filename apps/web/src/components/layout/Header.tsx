@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
+import { useTraineeAuth } from '@encreasl/auth';
 import { HeaderProps } from '@/types';
 
 /**
@@ -21,10 +22,68 @@ export function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get auth state and functions
+  const { user, isAuthenticated, logout } = useTraineeAuth();
 
   const handlePortalClick = () => {
     router.push('/portal');
   };
+
+  const handleLogout = async () => {
+    try {
+      console.log('🚪 Logout initiated...');
+      await logout();
+      setIsProfileDropdownOpen(false);
+      console.log('✅ Logout successful, redirecting...');
+      router.push('/signin');
+    } catch (error) {
+      console.error('❌ Logout failed:', error);
+      // Still redirect to signin even if logout fails
+      router.push('/signin');
+    }
+  };
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return 'User';
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user.firstName) return user.firstName;
+    return user.email;
+  };
+
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    if (user.firstName && user.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user.firstName) return user.firstName[0].toUpperCase();
+    return user.email[0].toUpperCase();
+  };
+
+  // Click outside handler for profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   // Scroll detection for header visibility (mobile/tablet only)
   useEffect(() => {
@@ -175,7 +234,7 @@ export function Header({
         </div>
 
         {/* Right section - Desktop */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-4">
           <button
             onClick={handlePortalClick}
             className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 hover:shadow-lg"
@@ -194,6 +253,102 @@ export function Header({
             <i className="fa fa-graduation-cap text-lg"></i>
             My Portal
           </button>
+
+          {/* Professional Profile Dropdown */}
+          <div className="relative" ref={profileDropdownRef}>
+            {isAuthenticated ? (
+              <button
+                onClick={toggleProfileDropdown}
+                className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Profile menu"
+                aria-expanded={isProfileDropdownOpen}
+              >
+                <div className="w-8 h-8 bg-gradient-to-r from-[#201a7c] to-[#ab3b43] rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  {getUserInitials()}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-medium text-gray-900 truncate max-w-32">
+                    {getUserDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate max-w-32">
+                    {user?.email}
+                  </p>
+                </div>
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/signin')}
+                className="px-4 py-2 bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-105"
+              >
+                Sign In
+              </button>
+            )}
+
+            {/* Professional Dropdown Menu */}
+            {isProfileDropdownOpen && isAuthenticated && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                {/* User Info Section */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#201a7c] to-[#ab3b43] rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                      {getUserInitials()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {getUserDisplayName()}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user?.email}
+                      </p>
+                      <div className="flex items-center mt-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                        <span className="text-xs text-green-600 font-medium capitalize">
+                          {user?.role || 'Trainee'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      router.push('/portal');
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <i className="fa fa-graduation-cap w-4 h-4 mr-3 text-gray-400"></i>
+                    My Learning Portal
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      router.push('/profile');
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <i className="fa fa-user w-4 h-4 mr-3 text-gray-400"></i>
+                    Profile Settings
+                  </button>
+                </div>
+
+                <div className="border-t border-gray-100 py-1">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <i className="fa fa-sign-out-alt w-4 h-4 mr-3 text-red-500"></i>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

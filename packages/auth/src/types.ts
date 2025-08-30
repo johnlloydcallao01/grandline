@@ -7,9 +7,24 @@ export interface AuthUser {
   email: string;
   role: string;
   isActive: boolean;
-  firstName?: string;
-  lastName?: string;
-  displayName?: string;
+  firstName: string; // Required in your PayloadCMS schema
+  lastName: string;  // Required in your PayloadCMS schema
+  middleName?: string;
+  nameExtension?: string;
+  username?: string;
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  civilStatus?: string;
+  nationality?: string;
+  birthDate?: string;
+  placeOfBirth?: string;
+  completeAddress?: string;
+  bio?: string;
+  phone?: string;
+  profileImageUrl?: string;
+  emergencyContact?: string;
+  preferences?: any;
+  metadata?: any;
+  lastLogin?: string;
   [key: string]: any; // Allow additional properties from PayloadCMS
 }
 

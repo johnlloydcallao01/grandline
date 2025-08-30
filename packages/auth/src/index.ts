@@ -1,51 +1,48 @@
 /**
- * @encreasl/auth - Shared authentication package
- * 
- * Provides authentication utilities, hooks, and middleware
- * for PayloadCMS integration across the monorepo.
+ * PayloadCMS Authentication Package
+ * Official pattern implementation based on PayloadCMS documentation
  */
 
 // Types
 export type {
   AuthUser,
-  AuthResponse,
   LoginCredentials,
-  AuthConfig,
-  AuthError,
-  AuthState,
-  AuthContextValue,
-  RoleValidator,
-  RoleConfig,
 } from './types';
 
 // Core authentication client
-export { AuthClient } from './auth-client';
+export { PayloadAuthClient, type PayloadAuthConfig } from './auth-client';
 
-// React hooks
+// React Provider and hooks
 export {
+  AuthProvider,
   useAuth,
   useAdminAuth,
-  useRoleAuth,
   useTraineeAuth,
+  useAdminLogin,
+  useTraineeLogin,
+  type AuthProviderProps,
 } from './hooks';
+
+// Error handling components
+export {
+  AuthErrorBoundary,
+  useErrorHandler,
+} from './components/AuthErrorBoundary';
+
+// Debug utilities
+export {
+  authDebugger,
+  enableAuthDebug,
+  disableAuthDebug,
+  getAuthReport,
+  downloadAuthReport,
+  type AuthDebugInfo,
+} from './utils/debug';
 
 // Middleware
 export {
   createAuthMiddleware,
   adminAuthMiddleware,
   traineeAuthMiddleware,
-  createMiddlewareConfig,
+  type AuthMiddlewareConfig,
 } from './middleware';
-
-// Utilities
-export {
-  validateUserRole,
-  createRoleErrorMessage,
-  hasRole,
-  hasAnyRole,
-  isAdmin,
-  isTrainee,
-  isInstructor,
-  getUserDisplayName,
-  formatRole,
-} from './utils';

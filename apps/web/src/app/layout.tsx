@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// import { ReduxProvider } from "@encreasl/redux"; // Removed - no authentication needed
+import { AuthProvider } from "@encreasl/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,7 +44,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider
+          config={{
+            apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
+            requiredRole: 'trainee',
+            debug: process.env.NODE_ENV === 'development',
+          }}
+        >
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

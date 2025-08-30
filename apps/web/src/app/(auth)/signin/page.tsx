@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useTraineeAuth } from '@encreasl/auth';
+import { useTraineeLogin } from '@encreasl/auth';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
 /**
@@ -15,11 +15,12 @@ export default function SignInPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
 
-  // Use shared auth hook for trainee authentication
-  const { login, isLoading, error, clearError } = useTraineeAuth(
+  // Use LOGIN-ONLY hook - no automatic session checking
+  const { login, isLoading, error: authError, clearError } = useTraineeLogin(
     process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
     process.env.NODE_ENV === 'development'
   );
+  const [error, setError] = useState<string | null>(null);
 
   // Simple notification functions without Redux
   const showSuccess = (message: string) => {
@@ -31,40 +32,40 @@ export default function SignInPage() {
   };
   const [formData, setFormData] = useState({
     // Personal Information
-    firstName: 'Juan',
-    middleName: 'Ponze',
-    lastName: 'Enrile',
-    nameExtension: 'Jr',
-    gender: 'male',
-    civilStatus: 'single',
-    srn: 'SRN-343',
-    nationality: 'Filipino',
-    birthDate: '2000-12-28',
-    placeOfBirth: 'Manila, Philippines',
-    completeAddress: 'Manila, Philippines',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    nameExtension: '',
+    gender: '',
+    civilStatus: '',
+    srn: '',
+    nationality: '',
+    birthDate: '',
+    placeOfBirth: '',
+    completeAddress: '',
 
     // Contact Information
-    email: 'carlos@gmail.com',
-    phoneNumber: '+639092809767',
+    email: '',
+    phoneNumber: '',
 
     // Username & Password
-    username: 'juancarlos',
-    password: '@Iamachessgrandmaster23',
-    confirmPassword: '@Iamachessgrandmaster23',
+    username: '',
+    password: '',
+    confirmPassword: '',
 
     // Marketing
-    couponCode: '334ssdfsdf',
+    couponCode: '',
 
     // Emergency Contact
-    emergencyFirstName: 'Johny',
-    emergencyMiddleName: 'Buli',
-    emergencyLastName: 'Dana',
-    emergencyContactNumber: '+639468748743',
-    emergencyRelationship: 'relative',
-    emergencyCompleteAddress: 'Pangi, Zamboanga',
+    emergencyFirstName: '',
+    emergencyMiddleName: '',
+    emergencyLastName: '',
+    emergencyContactNumber: '',
+    emergencyRelationship: '',
+    emergencyCompleteAddress: '',
 
     // Terms
-    agreeToTerms: true
+    agreeToTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -131,7 +132,7 @@ export default function SignInPage() {
       return;
     }
 
-    clearError();
+    setError(null);
 
     // DIAGNOSTIC LOGGING
     console.log('🚀 FORM SUBMISSION STARTED');
@@ -304,7 +305,9 @@ export default function SignInPage() {
           router.push('/');
         } catch (loginError) {
           console.error('❌ Trainee login failed:', loginError);
-          // Error is already handled by the auth hook and displayed via the error state
+          const errorMessage = (loginError as Error)?.message || 'Login failed. Please check your credentials.';
+          setError(errorMessage);
+          showError(errorMessage);
         }
       }
     } catch (error) {
@@ -327,40 +330,40 @@ export default function SignInPage() {
     setErrors({});
     setFormData({
       // Personal Information
-      firstName: 'Juan',
-      middleName: 'Ponze',
-      lastName: 'Enrile',
-      nameExtension: 'Jr',
-      gender: 'male',
-      civilStatus: 'single',
-      srn: 'SRN-343',
-      nationality: 'Filipino',
-      birthDate: '2000-12-28',
-      placeOfBirth: 'Manila, Philippines',
-      completeAddress: 'Manila, Philippines',
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      nameExtension: '',
+      gender: '',
+      civilStatus: '',
+      srn: '',
+      nationality: '',
+      birthDate: '',
+      placeOfBirth: '',
+      completeAddress: '',
 
       // Contact Information
-      email: 'carlos@gmail.com',
-      phoneNumber: '+639092809767',
+      email: '',
+      phoneNumber: '',
 
       // Username & Password
-      username: 'juancarlos',
-      password: '@Iamachessgrandmaster23',
-      confirmPassword: '@Iamachessgrandmaster23',
+      username: '',
+      password: '',
+      confirmPassword: '',
 
       // Marketing
-      couponCode: '334ssdfsdf',
+      couponCode: '',
 
       // Emergency Contact
-      emergencyFirstName: 'Johny',
-      emergencyMiddleName: 'Buli',
-      emergencyLastName: 'Dana',
-      emergencyContactNumber: '+639468748743',
-      emergencyRelationship: 'relative',
-      emergencyCompleteAddress: 'Pangi, Zamboanga',
+      emergencyFirstName: '',
+      emergencyMiddleName: '',
+      emergencyLastName: '',
+      emergencyContactNumber: '',
+      emergencyRelationship: '',
+      emergencyCompleteAddress: '',
 
       // Terms
-      agreeToTerms: true
+      agreeToTerms: false
     });
   };
 
@@ -509,7 +512,7 @@ export default function SignInPage() {
                     <i className="fa fa-exclamation-circle text-red-500 mt-0.5"></i>
                     <div>
                       <p className="text-sm font-medium text-red-800">Authentication Failed</p>
-                      <p className="text-sm text-red-700 mt-1">{error.message}</p>
+                      <p className="text-sm text-red-700 mt-1">{error}</p>
                     </div>
                   </div>
                 )}

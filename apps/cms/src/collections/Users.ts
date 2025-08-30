@@ -7,7 +7,19 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'firstName', 'lastName', 'role'],
   },
-  auth: true,
+  auth: {
+    // CRITICAL: PayloadCMS 3.x Session-Based Authentication Configuration
+    useAPIKey: false, // Disable API key authentication
+    cookies: {
+      secure: process.env.NODE_ENV === 'production', // HTTPS in production
+      sameSite: 'Lax', // CSRF protection
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined, // Vercel domain for production
+    },
+    // Session-based authentication settings
+    tokenExpiration: 24 * 60 * 60, // 24 hours in seconds
+    maxLoginAttempts: 5, // Prevent brute force attacks
+    lockTime: 10 * 60 * 1000, // 10 minutes lockout
+  },
   access: {
     read: () => true, // Allow reading user data
     create: adminOnly, // Only admins can create users

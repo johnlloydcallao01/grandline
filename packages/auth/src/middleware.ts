@@ -46,8 +46,20 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig = {}) {
       return NextResponse.next();
     }
 
-    // Check for authentication cookie
-    const authToken = request.cookies.get(cookieName);
+    // PayloadCMS session-based authentication - check for session cookies
+    // Session-based cookie names: 'payload-session', 'payload-token', 'connect.sid', etc.
+    const possibleCookieNames = ['payload-session', 'payload-token', 'payload-auth', 'users-token', 'connect.sid', 'session', cookieName];
+    let authToken: string | null = null;
+    let foundCookieName = '';
+
+    for (const name of possibleCookieNames) {
+      const token = request.cookies.get(name);
+      if (token) {
+        authToken = token.value;
+        foundCookieName = name;
+        break;
+      }
+    }
 
     if (debug) {
       // Debug: Log all cookies
@@ -57,6 +69,9 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig = {}) {
       });
       console.log('🍪 All cookies:', allCookies);
       console.log('🔍 Auth token found:', !!authToken);
+      if (authToken) {
+        console.log('🔍 Found auth token in cookie:', foundCookieName);
+      }
     }
 
     if (!authToken) {
@@ -74,10 +89,10 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig = {}) {
 }
 
 /**
- * Default admin middleware configuration
+ * Default admin middleware configuration - SESSION-BASED AUTH
  */
 export const adminAuthMiddleware = createAuthMiddleware({
-  cookieName: 'payload-token',
+  cookieName: 'payload-session', // SESSION-BASED COOKIE NAME
   loginPath: '/admin/login',
   publicPaths: ['/admin/login'],
   protectedPaths: ['/', '/admin'],
@@ -86,11 +101,11 @@ export const adminAuthMiddleware = createAuthMiddleware({
 });
 
 /**
- * Custom trainee middleware that doesn't redirect root path
+ * Custom trainee middleware that doesn't redirect root path - SESSION-BASED AUTH
  */
 export const traineeAuthMiddleware = async function(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const cookieName = 'payload-token';
+  const cookieName = 'payload-session'; // SESSION-BASED COOKIE NAME
   const loginPath = '/signin';
   const debug = process.env.NODE_ENV === 'development';
 
@@ -99,8 +114,17 @@ export const traineeAuthMiddleware = async function(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for authentication cookie
-  const authToken = request.cookies.get(cookieName);
+  // Check for session-based authentication cookies
+  const sessionCookieNames = ['payload-session', 'payload-token', 'connect.sid', 'session', cookieName];
+  let authToken: string | undefined = undefined;
+
+  for (const name of sessionCookieNames) {
+    const cookie = request.cookies.get(name);
+    if (cookie) {
+      authToken = cookie.value;
+      break;
+    }
+  }
 
   if (debug) {
     // Debug: Log all cookies

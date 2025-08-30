@@ -18,9 +18,6 @@ importers:
 
   apps/cms:
     dependencies:
-      '@encreasl/redux':
-        specifier: workspace:*
-        version: link:../../packages/redux
       '@payloadcms/db-postgres':
         specifier: 3.49.0
         version: 3.49.0(@opentelemetry/api@1.9.0)(payload@3.49.0(graphql@16.11.0)(typescript@5.7.3))
@@ -136,9 +133,6 @@ importers:
       '@encreasl/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@encreasl/redux':
-        specifier: workspace:*
-        version: link:../../packages/redux
       next:
         specifier: 15.4.2
         version: 15.4.2(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
@@ -203,9 +197,6 @@ importers:
       '@encreasl/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@encreasl/redux':
-        specifier: workspace:*
-        version: link:../../packages/redux
       '@lexical/code':
         specifier: ^0.28.0
         version: 0.28.0
@@ -321,9 +312,6 @@ importers:
 
   apps/web-landing:
     dependencies:
-      '@encreasl/redux':
-        specifier: workspace:*
-        version: link:../../packages/redux
       next:
         specifier: 15.4.2
         version: 15.4.2(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)

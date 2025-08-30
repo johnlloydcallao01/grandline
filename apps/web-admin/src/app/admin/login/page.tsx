@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdminAuth } from '@encreasl/auth';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
 
 export default function AdminLoginPage() {
@@ -11,11 +10,13 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  // Use shared auth hook with admin role requirement
-  const { login, isLoading, error, clearError } = useAdminAuth(
-    process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
-    process.env.NODE_ENV === 'development'
-  );
+  // Direct PayloadCMS session-based authentication - no auth hooks needed
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+
+  const clearError = useCallback(() => setError(''), []);
+
+  // No automatic redirects - login page is isolated
 
   // Clear any cached values on mount
   React.useEffect(() => {
@@ -27,17 +28,41 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setIsLoading(true);
 
     try {
-      await login({ email, password });
+      console.log('🚀 Starting PayloadCMS session-based login...');
 
-      // Small delay to ensure cookie is processed
-      setTimeout(() => {
-        router.push('/admin/dashboard');
-      }, 100);
+      // Direct PayloadCMS Session-Based Authentication - NO JWT
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // Essential for session cookies
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+
+      console.log('✅ Session-based login successful');
+      console.log('🍪 Session cookie set by PayloadCMS server');
+      console.log('👤 User authenticated:', result.user?.email);
+
+      // PayloadCMS with session-based auth automatically sets HTTP-only session cookies
+      // Use router.push for proper Next.js navigation with session
+      console.log('🔄 Redirecting to dashboard with session...');
+      router.push('/admin/dashboard');
+
     } catch (err) {
-      // Error is already handled by the auth hook
-      console.error('Login failed:', err);
+      setError(err instanceof Error ? err.message : 'Login failed');
+      console.error('❌ Session-based login failed:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,7 +138,7 @@ export default function AdminLoginPage() {
                   <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-red-800">Authentication Failed</p>
-                    <p className="text-sm text-red-700 mt-1">{error.message}</p>
+                    <p className="text-sm text-red-700 mt-1">{error}</p>
                   </div>
                 </div>
               )}
@@ -167,7 +192,7 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button - PROFESSIONAL: Static until user clicks */}
               <button
                 type="submit"
                 disabled={isLoading}
