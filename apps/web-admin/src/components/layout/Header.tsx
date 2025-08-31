@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { HeaderProps } from '@/types';
 import { ChevronDown, User, Settings, Shield } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
+import { useAuth, getFullName, getUserInitials } from '@/hooks/useAuth';
+import SecurityAlert from '@/components/SecurityAlert';
 
 /**
  * Admin Header component with navigation, search, and user controls
@@ -18,13 +20,8 @@ export function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // For now, use a placeholder user - in real app this would come from server session
-  const user = {
-    email: 'admin@example.com',
-    role: 'admin',
-    firstName: 'Admin',
-    lastName: 'User'
-  };
+  // Get authenticated user data from PayloadCMS
+  const { user, loading, error, isAuthenticated, securityAlert } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside or pressing Escape
@@ -62,17 +59,26 @@ export function Header({
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (!user) return 'A';
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'A';
-  };
+  // Get user display data
+  const userDisplayName = getFullName(user);
+  const userInitials = getUserInitials(user);
+  const userEmail = user?.email || 'Loading...';
+  const userRole = user?.role || 'Loading...';
 
   return (
-    <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
-      <div className="flex items-center justify-between px-4 py-2">
+    <>
+      {/* Security Alert Modal */}
+      {securityAlert?.show && (
+        <SecurityAlert
+          type={securityAlert.type}
+          message={securityAlert.message}
+          autoRedirect={true}
+          redirectDelay={5000}
+        />
+      )}
+
+      <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
+        <div className="flex items-center justify-between px-4 py-2">
         {/* Left section */}
         <div className="flex items-center space-x-4">
           <button
@@ -149,7 +155,7 @@ export function Header({
               aria-expanded={isProfileDropdownOpen}
             >
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {getUserInitials()}
+                {userInitials}
               </div>
               <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -159,25 +165,45 @@ export function Header({
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                      {getUserInitials()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
-                      </p>
-                      <p className="text-sm text-gray-500 truncate">
-                        {user?.email || 'admin@encreasl.com'}
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <Shield className="w-3 h-3 text-blue-500 mr-1" />
-                        <span className="text-xs text-blue-600 font-medium capitalize">
-                          {user?.role || 'Admin'}
-                        </span>
+                  {loading ? (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse"></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="h-4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded animate-pulse w-2/3"></div>
                       </div>
                     </div>
-                  </div>
+                  ) : error ? (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <span className="text-red-600 font-semibold">!</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-red-900">Authentication Error</p>
+                        <p className="text-xs text-red-600">Please refresh or re-login</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                        {userInitials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {userDisplayName}
+                        </p>
+                        <p className="text-sm text-gray-500 truncate">
+                          {userEmail}
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <Shield className="w-3 h-3 text-blue-500 mr-1" />
+                          <span className="text-xs text-blue-600 font-medium capitalize">
+                            {userRole}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Menu Items */}
@@ -201,5 +227,6 @@ export function Header({
         </div>
       </div>
     </header>
+    </>
   );
 }

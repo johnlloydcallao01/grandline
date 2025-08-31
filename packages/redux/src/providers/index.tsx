@@ -39,7 +39,7 @@ interface StoreInitializerProps {
 /**
  * Component that handles initial store setup and user authentication
  */
-const StoreInitializer: React.FC<StoreInitializerProps> = ({ children, store }) => {
+const StoreInitializer = ({ children, store }: StoreInitializerProps): React.JSX.Element => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
 
@@ -48,12 +48,12 @@ const StoreInitializer: React.FC<StoreInitializerProps> = ({ children, store }) 
       try {
         // Check if we have a stored token and try to load user
         const token = localStorage.getItem('encreasl_token');
-        
+
         if (token) {
           // Dispatch action to load user from token
           await store.dispatch(loadUserFromToken());
         }
-        
+
         // Mark as initialized
         setIsInitialized(true);
       } catch (error) {
@@ -111,7 +111,7 @@ const StoreInitializer: React.FC<StoreInitializerProps> = ({ children, store }) 
 // Loading Component
 // ============================================================================
 
-const DefaultLoadingComponent: React.FC = () => (
+const DefaultLoadingComponent = (): React.JSX.Element => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -124,7 +124,7 @@ const DefaultLoadingComponent: React.FC = () => (
 // Error Component
 // ============================================================================
 
-const DefaultErrorComponent: React.FC<{ error?: string }> = ({ error }) => (
+const DefaultErrorComponent = ({ error }: { error?: string }): React.JSX.Element => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center max-w-md mx-auto p-6">
       <div className="text-red-500 text-6xl mb-4">❌</div>
@@ -155,7 +155,7 @@ const DefaultErrorComponent: React.FC<{ error?: string }> = ({ error }) => (
 
 /**
  * Main Redux Provider component that wraps applications with Redux context
- * 
+ *
  * Features:
  * - Redux store provider
  * - Redux Persist integration
@@ -165,15 +165,15 @@ const DefaultErrorComponent: React.FC<{ error?: string }> = ({ error }) => (
  * - Error boundary handling
  * - Loading states
  */
-export const ReduxProvider: React.FC<ReduxProviderProps> = ({
+export const ReduxProvider = ({
   children,
   customStore,
   enablePersistence = true,
   loadingComponent,
   errorComponent,
-}) => {
+}: ReduxProviderProps): React.JSX.Element => {
   const [hydrationError] = useState<string | null>(null);
-  
+
   const storeToUse = customStore || store;
   const LoadingComponent = loadingComponent || <DefaultLoadingComponent />;
   const ErrorComponent = errorComponent || <DefaultErrorComponent error={hydrationError || undefined} />;
@@ -204,7 +204,7 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
 
   // Show error component if hydration failed
   if (hydrationError) {
-    return ErrorComponent;
+    return ErrorComponent as React.JSX.Element;
   }
 
   return (
@@ -233,12 +233,12 @@ export const ReduxProvider: React.FC<ReduxProviderProps> = ({
 /**
  * Minimal Redux Provider without persistence (useful for testing or SSR)
  */
-export const MinimalReduxProvider: React.FC<{ children: React.ReactNode; store?: AppStore }> = ({
+export const MinimalReduxProvider = ({
   children,
   store: customStore,
-}) => {
+}: { children: React.ReactNode; store?: AppStore }): React.JSX.Element => {
   const storeToUse = customStore || store;
-  
+
   return (
     <Provider store={storeToUse}>
       {children}
@@ -249,13 +249,13 @@ export const MinimalReduxProvider: React.FC<{ children: React.ReactNode; store?:
 /**
  * Development Redux Provider with enhanced debugging
  */
-export const DevReduxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DevReduxProvider = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Add global store access for debugging
       (window as any).__REDUX_STORE__ = store;
       (window as any).__REDUX_PERSISTOR__ = persistor;
-      
+
       console.log('🔧 Development Redux Provider loaded');
       console.log('📦 Store:', store.getState());
     }
@@ -271,7 +271,7 @@ export const DevReduxProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 /**
  * Production Redux Provider with optimized settings
  */
-export const ProductionReduxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ProductionReduxProvider = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   return (
     <ReduxProvider
       enableDevTools={false}
@@ -297,14 +297,14 @@ export const withRedux = <P extends object>(
   Component: React.ComponentType<P>,
   options?: Partial<ReduxProviderProps>
 ) => {
-  const WrappedComponent: React.FC<P> = (props) => (
+  const WrappedComponent = (props: P): React.JSX.Element => (
     <ReduxProvider {...options}>
-      <Component {...props} />
+      {React.createElement(Component, props)}
     </ReduxProvider>
   );
-  
+
   WrappedComponent.displayName = `withRedux(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 };
 
