@@ -12,6 +12,14 @@ export type {
   AuthState,
 } from './hooks/useAuth';
 
+// Additional types from auth types
+export type {
+  SecurityAlert,
+  AuthConfig,
+  SecurityConfig,
+  AuthMiddlewareConfig,
+} from './types/auth';
+
 // Hooks
 export { useAuth, getFullName, getUserInitials } from './hooks/useAuth';
 
