@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
         router.push('/admin/dashboard');
       }, 100);
     } catch (err: unknown) {
-      console.error('❌ PayloadCMS login failed:', err);
+      console.error('❌ Admin login failed:', err);
       const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin privileges.';
       setError(errorMessage);
     } finally {

@@ -91,6 +91,13 @@ export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
               collapsed={!isOpen}
               href="/liked-videos"
             />
+            <SidebarItem
+              icon="user"
+              label="Login Status"
+              active={pathname === '/login-status'}
+              collapsed={!isOpen}
+              href="/login-status"
+            />
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}

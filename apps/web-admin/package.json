@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@encreasl/redux": "workspace:*",
+    "@grandline/auth-core": "workspace:*",
+    "@grandline/auth-ui": "workspace:*",
     "@lexical/code": "^0.28.0",
     "@lexical/link": "^0.28.0",
     "@lexical/list": "^0.28.0",

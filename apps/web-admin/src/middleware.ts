@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
-  // SECURITY ENHANCEMENT: Validate user role in real-time
+  // 🛡️ SECURITY ENHANCEMENT: Real-time role validation
   try {
     const apiUrl = 'https://grandline-cms.vercel.app/api'
     const response = await fetch(`${apiUrl}/users/me`, {

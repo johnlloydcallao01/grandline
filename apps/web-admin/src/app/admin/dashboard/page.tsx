@@ -10,12 +10,13 @@ import { Users,
   Heart,
   Share2 } from '@/components/ui/IconWrapper';
 import { useAuth, getFullName } from '@/hooks/useAuth';
+import type { AuthUser } from '@/hooks/useAuth';
 
 // This hook is now replaced by the shared useAuth hook
 
 // Hook to fetch all users from PayloadCMS
 function useAllUsers() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AuthUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -216,8 +217,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-3">
                   {users.map((user, index) => {
-                    const firstName = user.firstName || user.first_name || 'No First Name';
-                    const lastName = user.lastName || user.last_name || 'No Last Name';
+                    const firstName = user.firstName || 'No First Name';
+                    const lastName = user.lastName || 'No Last Name';
                     const email = user.email || 'No Email';
                     const role = user.role || 'No Role';
 

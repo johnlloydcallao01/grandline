@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth, useNotifications, loginUser, registerUser } from '@encreasl/redux';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
 /**
@@ -283,9 +282,89 @@ export default function SignInPage() {
           showError(errorMessage);
         }
       } else {
-        // Login form - NO AUTHENTICATION LOGIC, just UI
-        console.log('Login clicked but no authentication logic implemented');
-        showError('Login functionality not implemented yet.');
+        // Login form - EXACT same as web-admin, just trainee role
+        console.log('🔐 PayloadCMS trainee login initiated...');
+        console.log('📧 Email:', formData.email);
+        console.log('🌐 API URL:', 'https://grandline-cms.vercel.app/api');
+
+        try {
+          // Use PayloadCMS REST API for authentication
+          const response = await fetch('https://grandline-cms.vercel.app/api/users/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: formData.email, password: formData.password }),
+            credentials: 'include', // Important for cookie handling
+          });
+
+          // Log response details for debugging
+          console.log('📡 Login response status:', response.status);
+          console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || 'Login failed');
+          }
+
+          // Validate user role - ONLY trainee allowed
+          if (result.user.role !== 'trainee') {
+            throw new Error(`Access denied. Trainee portal requires trainee role. Current role: ${result.user.role}`);
+          }
+
+          if (!result.user.isActive) {
+            throw new Error('Account is inactive. Please contact administrator.');
+          }
+
+          console.log('✅ PayloadCMS login successful:', {
+            email: result.user.email,
+            role: result.user.role,
+            isActive: result.user.isActive,
+            token: result.token ? 'Present' : 'Missing'
+          });
+
+          // Check what cookies were set
+          console.log('🍪 All cookies after login:', document.cookie);
+
+          // PayloadCMS should set the cookie, but if not, set it manually
+          if (result.token) {
+            const hasPayloadToken = document.cookie.includes('payload-token');
+            console.log('🔍 Has payload-token cookie:', hasPayloadToken);
+
+            if (!hasPayloadToken) {
+              console.log('⚠️ PayloadCMS did not set cookie, setting manually...');
+              // Set the cookie manually with proper settings for localhost
+              const isSecure = window.location.protocol === 'https:';
+              const cookieString = `payload-token=${result.token}; path=/; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+              document.cookie = cookieString;
+              console.log('✅ Cookie set manually:', cookieString);
+
+              // Verify the cookie was set
+              const verification = document.cookie.includes('payload-token');
+              console.log('🔍 Cookie verification after manual set:', verification);
+            } else {
+              console.log('✅ PayloadCMS cookie already set');
+            }
+          } else {
+            console.warn('⚠️ No token received from PayloadCMS');
+          }
+
+          console.log('🔄 Redirecting to main page...');
+
+          // Longer delay to ensure cookie is processed and available
+          setTimeout(() => {
+            // Final verification before redirect
+            const finalCookieCheck = document.cookie.includes('payload-token');
+            console.log('🔍 Final cookie check before redirect:', finalCookieCheck);
+            console.log('🍪 Final cookies:', document.cookie);
+            router.push('/'); // Redirect to your original main page
+          }, 500);
+        } catch (err: unknown) {
+          console.error('❌ Trainee login failed:', err);
+          const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have trainee privileges.';
+          showError(errorMessage);
+        }
       }
     } catch (error) {
       console.error('❌ Authentication error:', error);

@@ -1,5 +1,5 @@
 /**
- * Admin authentication hook - uses shared logic with 'admin' role
+ * Trainee authentication hook - uses shared logic with 'trainee' role
  */
 import { useAuth as useSharedAuth, getFullName, getUserInitials } from '@grandline/auth-core';
 
@@ -7,10 +7,10 @@ import { useAuth as useSharedAuth, getFullName, getUserInitials } from '@grandli
 export type { AuthUser, AuthState } from '@grandline/auth-core';
 
 /**
- * Admin-specific authentication hook
+ * Trainee-specific authentication hook
  */
 export function useAuth() {
-  return useSharedAuth('admin'); // Only difference: role = 'admin'
+  return useSharedAuth('trainee'); // Only difference: role = 'trainee'
 }
 
 // Re-export utility functions
