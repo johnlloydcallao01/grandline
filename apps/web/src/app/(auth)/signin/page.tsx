@@ -22,43 +22,90 @@ export default function SignInPage() {
   const showError = (message: string) => {
     alert(`❌ ${message}`);
   };
-  const [formData, setFormData] = useState({
-    // Personal Information
-    firstName: 'Juan',
-    middleName: 'Ponze',
-    lastName: 'Enrile',
-    nameExtension: 'Jr',
-    gender: 'male',
-    civilStatus: 'single',
-    srn: 'SRN-343',
-    nationality: 'Filipino',
-    birthDate: '2000-12-28',
-    placeOfBirth: 'Manila, Philippines',
-    completeAddress: 'Manila, Philippines',
+  // Helper function to get initial form data
+  const getInitialFormData = () => {
+    const shouldPrefill = process.env.NEXT_PUBLIC_DEBUG_FORMS === 'true';
 
-    // Contact Information
-    email: 'carlos@gmail.com',
-    phoneNumber: '+639092809767',
+    if (shouldPrefill) {
+      return {
+        // Personal Information
+        firstName: 'Juan',
+        middleName: 'Ponze',
+        lastName: 'Enrile',
+        nameExtension: 'Jr',
+        gender: 'male',
+        civilStatus: 'single',
+        srn: 'SRN-343',
+        nationality: 'Filipino',
+        birthDate: '2000-12-28',
+        placeOfBirth: 'Manila, Philippines',
+        completeAddress: 'Manila, Philippines',
 
-    // Username & Password
-    username: 'juancarlos',
-    password: '@Iamachessgrandmaster23',
-    confirmPassword: '@Iamachessgrandmaster23',
+        // Contact Information
+        email: 'carlos@gmail.com',
+        phoneNumber: '+639092809767',
 
-    // Marketing
-    couponCode: '334ssdfsdf',
+        // Username & Password
+        username: 'juancarlos',
+        password: '@Iamachessgrandmaster23',
+        confirmPassword: '@Iamachessgrandmaster23',
 
-    // Emergency Contact
-    emergencyFirstName: 'Johny',
-    emergencyMiddleName: 'Buli',
-    emergencyLastName: 'Dana',
-    emergencyContactNumber: '+639468748743',
-    emergencyRelationship: 'relative',
-    emergencyCompleteAddress: 'Pangi, Zamboanga',
+        // Marketing
+        couponCode: '334ssdfsdf',
 
-    // Terms
-    agreeToTerms: true
-  });
+        // Emergency Contact
+        emergencyFirstName: 'Johny',
+        emergencyMiddleName: 'Buli',
+        emergencyLastName: 'Dana',
+        emergencyContactNumber: '+639468748743',
+        emergencyRelationship: 'relative',
+        emergencyCompleteAddress: 'Pangi, Zamboanga',
+
+        // Terms
+        agreeToTerms: true
+      };
+    }
+
+    return {
+      // Personal Information
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      nameExtension: '',
+      gender: '',
+      civilStatus: '',
+      srn: '',
+      nationality: '',
+      birthDate: '',
+      placeOfBirth: '',
+      completeAddress: '',
+
+      // Contact Information
+      email: '',
+      phoneNumber: '',
+
+      // Username & Password
+      username: '',
+      password: '',
+      confirmPassword: '',
+
+      // Marketing
+      couponCode: '',
+
+      // Emergency Contact
+      emergencyFirstName: '',
+      emergencyMiddleName: '',
+      emergencyLastName: '',
+      emergencyContactNumber: '',
+      emergencyRelationship: '',
+      emergencyCompleteAddress: '',
+
+      // Terms
+      agreeToTerms: false
+    };
+  };
+
+  const [formData, setFormData] = useState(() => getInitialFormData());
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -215,32 +262,7 @@ export default function SignInPage() {
           showSuccess(result.message || 'Registration successful! Your trainee account has been created.');
 
           // Reset form after successful registration
-          setFormData({
-            firstName: 'Juan',
-            middleName: 'Ponze',
-            lastName: 'Enrile',
-            nameExtension: 'Jr',
-            gender: 'male',
-            civilStatus: 'single',
-            srn: 'SRN-343',
-            nationality: 'Filipino',
-            birthDate: '2000-12-28',
-            placeOfBirth: 'Manila, Philippines',
-            completeAddress: 'Manila, Philippines',
-            email: 'carlos@gmail.com',
-            phoneNumber: '+639092809767',
-            username: 'juancarlos',
-            password: '@Iamachessgrandmaster23',
-            confirmPassword: '@Iamachessgrandmaster23',
-            couponCode: '334ssdfsdf',
-            emergencyFirstName: 'Johny',
-            emergencyMiddleName: 'Buli',
-            emergencyLastName: 'Dana',
-            emergencyContactNumber: '+639468748743',
-            emergencyRelationship: 'relative',
-            emergencyCompleteAddress: 'Pangi, Zamboanga',
-            agreeToTerms: true
-          });
+          setFormData(getInitialFormData());
         } else {
           // Try to get the response text first, then parse as JSON
           const responseText = await response.text();
@@ -384,47 +406,30 @@ export default function SignInPage() {
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
     setErrors({});
-    setFormData({
-      // Personal Information
-      firstName: 'Juan',
-      middleName: 'Ponze',
-      lastName: 'Enrile',
-      nameExtension: 'Jr',
-      gender: 'male',
-      civilStatus: 'single',
-      srn: 'SRN-343',
-      nationality: 'Filipino',
-      birthDate: '2000-12-28',
-      placeOfBirth: 'Manila, Philippines',
-      completeAddress: 'Manila, Philippines',
-
-      // Contact Information
-      email: 'carlos@gmail.com',
-      phoneNumber: '+639092809767',
-
-      // Username & Password
-      username: 'juancarlos',
-      password: '@Iamachessgrandmaster23',
-      confirmPassword: '@Iamachessgrandmaster23',
-
-      // Marketing
-      couponCode: '334ssdfsdf',
-
-      // Emergency Contact
-      emergencyFirstName: 'Johny',
-      emergencyMiddleName: 'Buli',
-      emergencyLastName: 'Dana',
-      emergencyContactNumber: '+639468748743',
-      emergencyRelationship: 'relative',
-      emergencyCompleteAddress: 'Pangi, Zamboanga',
-
-      // Terms
-      agreeToTerms: true
-    });
+    setFormData(getInitialFormData());
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      {/* Debug Mode Indicator */}
+      {process.env.NEXT_PUBLIC_DEBUG_FORMS === 'true' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <i className="fa fa-exclamation-triangle text-yellow-500"></i>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">
+                🚧 Debug Mode Active: Forms are pre-filled with test data
+              </p>
+              <p className="text-xs mt-1">
+                Set NEXT_PUBLIC_DEBUG_FORMS=false in .env.local to disable
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modern Split Layout */}
       <div className="min-h-screen flex">
         {/* Left Side - Branding & Info (Hidden on mobile) */}
