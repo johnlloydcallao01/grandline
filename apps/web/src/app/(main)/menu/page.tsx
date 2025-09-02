@@ -75,11 +75,24 @@ export default function MenuPage() {
     setShowLogoutConfirm(true);
   };
 
-  const confirmLogout = () => {
-    // Handle logout logic here
-    console.log('Logging out...');
-    setShowLogoutConfirm(false);
-    router.push('/signin');
+  const confirmLogout = async () => {
+    try {
+      console.log('🔄 Professional logout initiated...');
+
+      // Use professional cookie manager for complete logout
+      const { AuthCookies } = await import('@/utils/auth-cookies');
+      AuthCookies.logout();
+
+      console.log('✅ Professional logout complete');
+      setShowLogoutConfirm(false);
+      router.push('/signin');
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      // Fallback to manual cookie clearing
+      document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      setShowLogoutConfirm(false);
+      router.push('/signin');
+    }
   };
 
   return (

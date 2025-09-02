@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
+import { AuthCookies } from '@/utils/auth-cookies';
+import { useSessionRecovery } from '@/hooks/useSessionRecovery';
 
 /**
  * Modern Professional Sign In / Sign Up Page
@@ -12,16 +14,14 @@ import { validateUserRegistration, type FlatUserRegistrationData } from '@/serve
 
 export default function SignInPage() {
   const router = useRouter();
+
+  // 🚀 ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Simple notification functions without Redux
-  const showSuccess = (message: string) => {
-    alert(`✅ ${message}`);
-  };
-
-  const showError = (message: string) => {
-    alert(`❌ ${message}`);
-  };
   // Helper function to get initial form data
   const getInitialFormData = () => {
     const shouldPrefill = process.env.NEXT_PUBLIC_DEBUG_FORMS === 'true';
@@ -106,10 +106,45 @@ export default function SignInPage() {
   };
 
   const [formData, setFormData] = useState(() => getInitialFormData());
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+
+  // 🚀 PROFESSIONAL SESSION RECOVERY
+  const {
+    isRecovering,
+    shouldShowLogin,
+    shouldShowApp,
+    sessionInfo
+  } = useSessionRecovery({
+    redirectOnSuccess: '/',
+    enableAutoRecovery: true,
+    enableDebugLogging: process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true'
+  });
+
+  // Simple notification functions without Redux
+  const showSuccess = (message: string) => {
+    alert(`✅ ${message}`);
+  };
+
+  const showError = (message: string) => {
+    alert(`❌ ${message}`);
+  };
+
+  // Show loading while recovering session
+  if (isRecovering) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't show login form if user should be redirected to app
+  if (shouldShowApp) {
+    return null;
+  }
+
 
   // Dropdown options for form fields
   const genderOptions = [
@@ -346,28 +381,23 @@ export default function SignInPage() {
             token: result.token ? 'Present' : 'Missing'
           });
 
-          // Check what cookies were set
+          // 🚀 PROFESSIONAL PERSISTENT AUTHENTICATION
           console.log('🍪 All cookies after login:', document.cookie);
 
-          // PayloadCMS should set the cookie, but if not, set it manually
           if (result.token) {
-            const hasPayloadToken = document.cookie.includes('payload-token');
-            console.log('🔍 Has payload-token cookie:', hasPayloadToken);
+            console.log('🔐 Setting up persistent authentication...');
 
-            if (!hasPayloadToken) {
-              console.log('⚠️ PayloadCMS did not set cookie, setting manually...');
-              // Set the cookie manually with proper settings for localhost
-              const isSecure = window.location.protocol === 'https:';
-              const cookieString = `payload-token=${result.token}; path=/; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-              document.cookie = cookieString;
-              console.log('✅ Cookie set manually:', cookieString);
+            // Use professional cookie manager for persistent login (30 days)
+            AuthCookies.setPersistentLogin(result.token);
 
-              // Verify the cookie was set
-              const verification = document.cookie.includes('payload-token');
-              console.log('🔍 Cookie verification after manual set:', verification);
-            } else {
-              console.log('✅ PayloadCMS cookie already set');
-            }
+            // Verify authentication was set
+            const isAuthenticated = AuthCookies.isAuthenticated();
+            console.log('✅ Persistent authentication set:', isAuthenticated);
+
+            // Log session info for debugging
+            const sessionInfo = AuthCookies.getSessionInfo();
+            console.log('📊 Session Info:', sessionInfo);
+
           } else {
             console.warn('⚠️ No token received from PayloadCMS');
           }
