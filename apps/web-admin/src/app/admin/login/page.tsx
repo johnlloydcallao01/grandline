@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
+import { AdminAuthCookies } from '@/utils/admin-auth-cookies';
+import { useAdminSessionRecovery } from '@/hooks/useAdminSessionRecovery';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -12,11 +14,41 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // 🚀 PROFESSIONAL ADMIN SESSION RECOVERY
+  const {
+    isRecovering,
+    shouldShowAdminApp
+  } = useAdminSessionRecovery({
+    redirectOnSuccess: '/admin/dashboard',
+    enableAutoRecovery: true,
+    enableDebugLogging: process.env.NEXT_PUBLIC_DEBUG_ADMIN_AUTH === 'true'
+  });
+
   // Clear any cached values on mount
-  React.useEffect(() => {
+  useEffect(() => {
     setEmail('');
     setPassword('');
   }, []);
+
+  // Show loading while recovering admin session
+  if (isRecovering) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-red-600 via-red-700 to-red-800">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl mb-6 shadow-xl border border-white/20">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Checking admin authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't show login form if admin should be redirected to app
+  if (shouldShowAdminApp) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,15 +96,25 @@ export default function AdminLoginPage() {
         token: result.token ? 'Present' : 'Missing'
       });
 
-      // Check what cookies were set
-      console.log('🍪 All cookies after login:', document.cookie);
+      // 🚀 PROFESSIONAL PERSISTENT ADMIN AUTHENTICATION
+      console.log('🍪 All cookies after admin login:', document.cookie);
 
-      // If PayloadCMS didn't set the cookie, we need to set it manually
-      if (result.token && !document.cookie.includes('payload-token')) {
-        console.log('⚠️ PayloadCMS did not set cookie, setting manually...');
-        // Set the cookie manually with proper settings
-        document.cookie = `payload-token=${result.token}; path=/; SameSite=Lax`;
-        console.log('✅ Cookie set manually');
+      if (result.token) {
+        console.log('🔐 Setting up persistent admin authentication...');
+
+        // Use professional admin cookie manager for persistent login (30 days)
+        AdminAuthCookies.setPersistentAdminLogin(result.token);
+
+        // Verify admin authentication was set
+        const isAuthenticated = AdminAuthCookies.isAdminAuthenticated();
+        console.log('✅ Persistent admin authentication set:', isAuthenticated);
+
+        // Log admin session info for debugging
+        const sessionInfo = AdminAuthCookies.getAdminSessionInfo();
+        console.log('📊 Admin Session Info:', sessionInfo);
+
+      } else {
+        console.warn('⚠️ No token received from PayloadCMS');
       }
 
       console.log('🔄 Redirecting to dashboard...');

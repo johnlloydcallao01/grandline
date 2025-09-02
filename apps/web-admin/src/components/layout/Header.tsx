@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
 import { ChevronDown, User, Settings, Shield } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
@@ -16,6 +17,7 @@ export function Header({
   onToggleSidebar,
   onSearch
 }: HeaderProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -236,6 +238,15 @@ export function Header({
                     <Settings className="w-4 h-4 mr-3 text-gray-400" />
                     Account Settings
                   </button>
+                  {process.env.NEXT_PUBLIC_DEBUG_ADMIN_AUTH === 'true' && (
+                    <button
+                      onClick={() => router.push('/admin/session-debug')}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Shield className="w-4 h-4 mr-3 text-gray-400" />
+                      Admin Session Debug
+                    </button>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-100 py-1">
