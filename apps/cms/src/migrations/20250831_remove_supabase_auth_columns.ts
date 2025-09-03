@@ -119,7 +119,7 @@ export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): P
   }
 }
 
-export async function down({ db, payload: _payload, req: _req }: MigrateDownArgs): Promise<void> {
+export async function down({ db: _db, payload: _payload, req: _req }: MigrateDownArgs): Promise<void> {
   console.log('⚠️ WARNING: This down migration cannot restore the removed Supabase Auth columns')
   console.log('⚠️ The columns and their data have been permanently removed')
   console.log('⚠️ If you need to restore Supabase Auth, you will need to recreate the schema manually')

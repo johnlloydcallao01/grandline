@@ -1,21 +1,20 @@
-## 🎓 **Enterprise-Grade LMS Database Architecture**
+-- =====================================================
+-- ENTERPRISE-GRADE LMS DATABASE IMPLEMENTATION
+-- =====================================================
+-- Implementation Date: 2025-01-03
+-- Architecture: Three-Layer Design Pattern
+-- Compatibility: INTEGER user IDs for existing CMS integration
+-- =====================================================
 
-### **Architecture Overview: Three-Layer Design Pattern**
+-- Enable UUID extension if not already enabled
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-Following proven enterprise database design principles used by Facebook, Google, Netflix, and Amazon, this LMS architecture eliminates data duplication, ensures scalability, and maintains performance at any scale.
+-- =====================================================
+-- PHASE 1: BASE TABLES (Universal Information)
+-- =====================================================
 
-**Core Principle**: Consolidate shared information in authoritative locations, isolate unique information appropriately, and connect them through proper relationships.
-
-**✅ COMPATIBILITY UPDATE**: This schema has been updated to use INTEGER user ID references to match the existing CMS database structure (users.id is INTEGER, not UUID). All user-related foreign keys now use INTEGER data type for seamless integration.
-
----
-
-## **LAYER 1: BASE TABLES (Universal Information)**
-
-### **Course Content Base Table** - Single Source of Truth
-*Stores information common to ALL course-related content items*
-
-```sql
+-- Course Content Base Table - Single Source of Truth
+-- Stores information common to ALL course-related content items
 CREATE TABLE course_content_base (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content_type VARCHAR(50) NOT NULL CHECK (content_type IN ('course', 'module', 'lesson', 'assignment', 'quiz', 'question')),
@@ -29,18 +28,9 @@ CREATE TABLE course_content_base (
     created_by INTEGER NOT NULL REFERENCES users(id),
     updated_by INTEGER REFERENCES users(id)
 );
-```
 
-**Benefits**:
-- Eliminates duplicate title/description/status fields across 6+ tables
-- Single location for all publication status management
-- Unified audit trail for all content creation/modification
-- 95% storage efficiency vs. 60-70% in duplicated design
-
-### **Course Content Metadata Table** - Universal Attributes
-*Stores shared attributes that apply across multiple content types*
-
-```sql
+-- Course Content Metadata Table - Universal Attributes
+-- Stores shared attributes that apply across multiple content types
 CREATE TABLE course_content_metadata (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content_id UUID NOT NULL REFERENCES course_content_base(id) ON DELETE CASCADE,
@@ -54,21 +44,27 @@ CREATE TABLE course_content_metadata (
     resources JSONB, -- downloadable materials, links, etc.
     settings JSONB -- flexible settings storage
 );
-```
 
-**Benefits**:
-- Eliminates duplication of duration, language, objectives across tables
-- Flexible JSONB storage for evolving requirements
-- Single query to get metadata for any content type
+-- Course Categories Table - Hierarchical Classification System
+CREATE TABLE course_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    parent_id UUID REFERENCES course_categories(id),
+    category_type VARCHAR(50) DEFAULT 'course' CHECK (category_type IN ('course', 'skill', 'topic', 'industry')),
+    display_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    metadata JSONB, -- icon_url, color_code, etc.
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
 
----
+-- =====================================================
+-- PHASE 2: SPECIFIC TABLES (Type-Unique Information)
+-- =====================================================
 
-## **LAYER 2: SPECIFIC TABLES (Type-Unique Information)**
-
-### **Courses Table** - Course-Specific Data Only
-*Contains ONLY information unique to courses*
-
-```sql
+-- Courses Table - Course-Specific Data Only
 CREATE TABLE courses (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     course_code VARCHAR(50) UNIQUE NOT NULL,
@@ -82,16 +78,12 @@ CREATE TABLE courses (
     course_start_date TIMESTAMP,
     course_end_date TIMESTAMP,
     max_students INTEGER,
-    certificate_template_id UUID REFERENCES course_certificate_templates(id),
+    certificate_template_id UUID, -- Will be created later if needed
     passing_grade DECIMAL(5,2) DEFAULT 70.00,
     enrollment_settings JSONB -- flexible enrollment rules
 );
-```
 
-### **Course Modules Table** - Module-Specific Data Only
-*Contains ONLY information unique to course modules*
-
-```sql
+-- Course Modules Table - Module-Specific Data Only
 CREATE TABLE course_modules (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
@@ -99,12 +91,8 @@ CREATE TABLE course_modules (
     completion_required BOOLEAN DEFAULT false,
     module_settings JSONB -- module-specific configurations
 );
-```
 
-### **Course Lessons Table** - Lesson-Specific Data Only
-*Contains ONLY information unique to course lessons*
-
-```sql
+-- Course Lessons Table - Lesson-Specific Data Only
 CREATE TABLE course_lessons (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     module_id UUID NOT NULL REFERENCES course_modules(id) ON DELETE CASCADE,
@@ -115,12 +103,8 @@ CREATE TABLE course_lessons (
     is_preview BOOLEAN DEFAULT false,
     lesson_settings JSONB -- lesson-specific configurations
 );
-```
 
-### **Course Assignments Table** - Assignment-Specific Data Only
-*Contains ONLY information unique to course assignments*
-
-```sql
+-- Course Assignments Table - Assignment-Specific Data Only
 CREATE TABLE course_assignments (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     course_id UUID NOT NULL REFERENCES courses(id),
@@ -137,12 +121,8 @@ CREATE TABLE course_assignments (
     max_group_size INTEGER DEFAULT 1,
     assignment_settings JSONB
 );
-```
 
-### **Course Quizzes Table** - Quiz-Specific Data Only
-*Contains ONLY information unique to course quizzes*
-
-```sql
+-- Course Quizzes Table - Quiz-Specific Data Only
 CREATE TABLE course_quizzes (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     course_id UUID NOT NULL REFERENCES courses(id),
@@ -158,12 +138,8 @@ CREATE TABLE course_quizzes (
     available_until TIMESTAMP,
     quiz_settings JSONB
 );
-```
 
-### **Course Quiz Questions Table** - Question-Specific Data Only
-*Contains ONLY information unique to course quiz questions*
-
-```sql
+-- Course Quiz Questions Table - Question-Specific Data Only
 CREATE TABLE course_quiz_questions (
     id UUID PRIMARY KEY REFERENCES course_content_base(id) ON DELETE CASCADE,
     quiz_id UUID NOT NULL REFERENCES course_quizzes(id) ON DELETE CASCADE,
@@ -174,16 +150,12 @@ CREATE TABLE course_quiz_questions (
     explanation TEXT,
     question_settings JSONB
 );
-```
 
----
+-- =====================================================
+-- PHASE 3: ASSOCIATION TABLES (Relationships & Complex Data)
+-- =====================================================
 
-## **LAYER 3: ASSOCIATION TABLES (Relationships & Complex Data)**
-
-### **Course Content Hierarchy Table** - Universal Relationship Management
-*Handles all hierarchical and complex relationships between course content items*
-
-```sql
+-- Course Content Hierarchy Table - Universal Relationship Management
 CREATE TABLE course_content_hierarchy (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     parent_content_id UUID NOT NULL REFERENCES course_content_base(id) ON DELETE CASCADE,
@@ -194,18 +166,8 @@ CREATE TABLE course_content_hierarchy (
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(parent_content_id, child_content_id, relationship_type)
 );
-```
 
-**Benefits**:
-- Eliminates `order_index` duplication across multiple tables
-- Flexible prerequisite management for any content type
-- Supports complex relationships without schema changes
-- Single query to get content hierarchy
-
-### **Course Progress Table** - Universal Progress Tracking
-*Tracks user progress for ANY course content type (courses, modules, lessons, assignments, quizzes)*
-
-```sql
+-- Course Progress Table - Universal Progress Tracking
 CREATE TABLE course_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -221,18 +183,8 @@ CREATE TABLE course_progress (
     updated_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, content_id)
 );
-```
 
-**Benefits**:
-- Single table tracks progress for ALL content types
-- Eliminates separate progress tables for lessons, modules, courses
-- Consistent progress tracking interface
-- Flexible progress data storage
-
-### **Course Submissions Table** - Universal Submission Management
-*Handles submissions for course assignments, quizzes, and any assessable content*
-
-```sql
+-- Course Submissions Table - Universal Submission Management
 CREATE TABLE course_submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id INTEGER NOT NULL REFERENCES users(id),
@@ -249,37 +201,8 @@ CREATE TABLE course_submissions (
     graded_at TIMESTAMP,
     submission_metadata JSONB -- flexible metadata storage
 );
-```
 
-**Benefits**:
-- Single table handles all submission types
-- Eliminates separate tables for assignment submissions, quiz attempts
-- Consistent grading interface
-- Flexible submission data storage
-
-### **Course Categories Table** - Hierarchical Classification System
-*Manages course categories and classification needs*
-
-```sql
-CREATE TABLE course_categories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT,
-    parent_id UUID REFERENCES course_categories(id),
-    category_type VARCHAR(50) DEFAULT 'course' CHECK (category_type IN ('course', 'skill', 'topic', 'industry')),
-    display_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT true,
-    metadata JSONB, -- icon_url, color_code, etc.
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-### **Course Content Categories Table** - Flexible Categorization
-*Associates any course content with multiple categories*
-
-```sql
+-- Course Content Categories Table - Flexible Categorization
 CREATE TABLE course_content_categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content_id UUID NOT NULL REFERENCES course_content_base(id) ON DELETE CASCADE,
@@ -288,12 +211,8 @@ CREATE TABLE course_content_categories (
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(content_id, category_id)
 );
-```
 
-### **Course Enrollments Table** - Course Access Management
-*Manages student enrollment and access to courses*
-
-```sql
+-- Course Enrollments Table - Course Access Management
 CREATE TABLE course_enrollments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -306,12 +225,8 @@ CREATE TABLE course_enrollments (
     enrollment_metadata JSONB, -- payment info, referral data, etc.
     UNIQUE(student_id, course_id)
 );
-```
 
-### **Course Certificates Table** - Achievement Recognition
-*Manages course certificates and other achievements*
-
-```sql
+-- Course Certificates Table - Achievement Recognition
 CREATE TABLE course_certificates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id INTEGER NOT NULL REFERENCES users(id),
@@ -326,15 +241,11 @@ CREATE TABLE course_certificates (
     certificate_data JSONB, -- template info, custom fields, etc.
     UNIQUE(user_id, content_id, certificate_type)
 );
-```
 
----
+-- =====================================================
+-- PHASE 4: PERFORMANCE OPTIMIZATION (Indexes)
+-- =====================================================
 
-## **PERFORMANCE OPTIMIZATION LAYER**
-
-### **Essential Indexes for High Performance**
-
-```sql
 -- Course content base indexes
 CREATE INDEX idx_course_content_base_type_status ON course_content_base(content_type, status);
 CREATE INDEX idx_course_content_base_created_by ON course_content_base(created_by);
@@ -358,59 +269,22 @@ CREATE INDEX idx_course_submissions_grading ON course_submissions(graded_by, gra
 -- Enrollment indexes
 CREATE INDEX idx_course_enrollments_student_status ON course_enrollments(student_id, status);
 CREATE INDEX idx_course_enrollments_course_active ON course_enrollments(course_id, status) WHERE status = 'active';
-```
 
-### **Materialized Views for Complex Queries**
+-- Category indexes
+CREATE INDEX idx_course_categories_parent ON course_categories(parent_id);
+CREATE INDEX idx_course_categories_slug ON course_categories(slug);
+CREATE INDEX idx_course_categories_active ON course_categories(is_active) WHERE is_active = true;
 
-```sql
--- Course statistics view
-CREATE MATERIALIZED VIEW course_statistics AS
-SELECT
-    c.id as course_id,
-    ccb.title,
-    COUNT(DISTINCT ce.student_id) as total_enrollments,
-    COUNT(DISTINCT CASE WHEN ce.status = 'active' THEN ce.student_id END) as active_enrollments,
-    COUNT(DISTINCT CASE WHEN ce.status = 'completed' THEN ce.student_id END) as completions,
-    AVG(CASE WHEN cp.progress_status = 'completed' THEN cp.completion_percentage END) as avg_completion_rate
-FROM courses c
-JOIN course_content_base ccb ON c.id = ccb.id
-LEFT JOIN course_enrollments ce ON c.id = ce.course_id
-LEFT JOIN course_progress cp ON c.id = cp.content_id AND cp.user_id = ce.student_id
-WHERE ccb.status = 'published'
-GROUP BY c.id, ccb.title;
+-- Course specific indexes
+CREATE INDEX idx_courses_instructor ON courses(instructor_id);
+CREATE INDEX idx_courses_category ON courses(category_id);
+CREATE INDEX idx_courses_code ON courses(course_code);
 
--- Refresh strategy
-CREATE OR REPLACE FUNCTION refresh_course_statistics()
-RETURNS void AS $$
-BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY course_statistics;
-END;
-$$ LANGUAGE plpgsql;
-```
+-- =====================================================
+-- PHASE 5: BUSINESS LOGIC FUNCTIONS
+-- =====================================================
 
----
-
-## **IMPLEMENTATION STRATEGY**
-
-### **Phase 1: Foundation Setup (Week 1-2)**
-
-**1. Create Base Layer Tables**
-```sql
--- Execute in order:
--- 1. course_content_base table
--- 2. course_content_metadata table
--- 3. course_categories table
--- 4. Essential indexes
-```
-
-**2. Implement Core Business Logic**
-- Entity creation functions
-- Status management procedures
-- Basic validation rules
-
-**3. Set Up Automated Data Management**
-```sql
--- Trigger to auto-update updated_at
+-- Trigger function to auto-update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -419,22 +293,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply to all tables with updated_at
+-- Apply trigger to tables with updated_at
 CREATE TRIGGER update_course_content_base_updated_at
     BEFORE UPDATE ON course_content_base
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-```
 
-### **Phase 2: Specific Tables Implementation (Week 3-4)**
+CREATE TRIGGER update_course_progress_updated_at
+    BEFORE UPDATE ON course_progress
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-**1. Create Type-Specific Tables**
-- Courses table with business rules
-- Course Modules, Course Lessons, Course Assignments, Course Quizzes tables
-- Foreign key constraints and validation
+CREATE TRIGGER update_course_categories_updated_at
+    BEFORE UPDATE ON course_categories
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-**2. Implement Content Creation Procedures**
-```sql
--- Example: Course creation with automatic base content
+-- Course creation function with automatic base content
 CREATE OR REPLACE FUNCTION create_course(
     p_title VARCHAR(255),
     p_description TEXT,
@@ -457,18 +329,8 @@ BEGIN
     RETURN v_content_id;
 END;
 $$ LANGUAGE plpgsql;
-```
 
-### **Phase 3: Association Tables & Relationships (Week 5-6)**
-
-**1. Implement Relationship Management**
-- Course content hierarchy table
-- Course progress tracking
-- Course submission system
-
-**2. Create Relationship Management Functions**
-```sql
--- Add content to parent (e.g., lesson to module)
+-- Content relationship management function
 CREATE OR REPLACE FUNCTION add_course_content_relationship(
     p_parent_id UUID,
     p_child_id UUID,
@@ -497,127 +359,128 @@ BEGIN
     RETURN v_relationship_id;
 END;
 $$ LANGUAGE plpgsql;
-```
 
-### **Phase 4: Advanced Features & Optimization (Week 7-8)**
+-- =====================================================
+-- PHASE 6: MATERIALIZED VIEWS FOR PERFORMANCE
+-- =====================================================
 
-**1. Progress Tracking System**
-- User entity progress implementation
-- Completion percentage calculations
-- Achievement tracking
-
-**2. Performance Optimization**
-- Materialized views creation
-- Index optimization based on query patterns
-- Query performance monitoring
-
----
-
-## **QUERY EXAMPLES: Simple & Efficient**
-
-### **Get Complete Course Structure**
-```sql
--- Single query gets entire course hierarchy
-WITH RECURSIVE course_structure AS (
-    -- Get course
-    SELECT
-        ccb.id, ccb.title, ccb.description, ccb.status,
-        'course' as level, 0 as depth,
-        ARRAY[ccb.id] as path
-    FROM course_content_base ccb
-    JOIN courses c ON ccb.id = c.id
-    WHERE ccb.id = $1 -- course_id parameter
-
-    UNION ALL
-
-    -- Get all children recursively
-    SELECT
-        child_ccb.id, child_ccb.title, child_ccb.description, child_ccb.status,
-        child_ccb.content_type as level, cs.depth + 1,
-        cs.path || child_ccb.id
-    FROM course_structure cs
-    JOIN course_content_hierarchy cch ON cs.id = cch.parent_content_id
-    JOIN course_content_base child_ccb ON cch.child_content_id = child_ccb.id
-    WHERE child_ccb.status = 'published'
-)
-SELECT * FROM course_structure ORDER BY path, depth;
-```
-
-### **Get Student Progress Dashboard**
-```sql
--- Single query gets all student progress
+-- Course statistics view
+CREATE MATERIALIZED VIEW course_statistics AS
 SELECT
-    ccb.content_type,
+    c.id as course_id,
     ccb.title,
-    cp.progress_status,
-    cp.completion_percentage,
-    cp.time_spent,
-    cp.last_accessed
-FROM course_progress cp
-JOIN course_content_base ccb ON cp.content_id = ccb.id
-WHERE cp.user_id = $1 -- student_id parameter (INTEGER)
-AND ccb.status = 'published'
-ORDER BY cp.last_accessed DESC;
-```
+    ccb.status,
+    COUNT(DISTINCT ce.student_id) as total_enrollments,
+    COUNT(DISTINCT CASE WHEN ce.status = 'active' THEN ce.student_id END) as active_enrollments,
+    COUNT(DISTINCT CASE WHEN ce.status = 'completed' THEN ce.student_id END) as completions,
+    AVG(CASE WHEN cp.progress_status = 'completed' THEN cp.completion_percentage END) as avg_completion_rate,
+    ccb.created_at,
+    ccb.updated_at
+FROM courses c
+JOIN course_content_base ccb ON c.id = ccb.id
+LEFT JOIN course_enrollments ce ON c.id = ce.course_id
+LEFT JOIN course_progress cp ON c.id = cp.content_id AND cp.user_id = ce.student_id
+GROUP BY c.id, ccb.title, ccb.status, ccb.created_at, ccb.updated_at;
 
-### **Get All Published Content by Type**
-```sql
--- Simple query for any content type
-SELECT
-    ccb.id, ccb.title, ccb.description,
-    ccm.estimated_duration, ccm.difficulty_level
-FROM course_content_base ccb
-LEFT JOIN course_content_metadata ccm ON ccb.id = ccm.content_id
-WHERE ccb.content_type = $1 -- 'course', 'module', 'lesson', etc.
-AND ccb.status = 'published'
-ORDER BY ccb.created_at DESC;
-```
+-- Create unique index for concurrent refresh
+CREATE UNIQUE INDEX idx_course_statistics_course_id ON course_statistics(course_id);
 
----
+-- Refresh function for materialized view
+CREATE OR REPLACE FUNCTION refresh_course_statistics()
+RETURNS void AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW CONCURRENTLY course_statistics;
+END;
+$$ LANGUAGE plpgsql;
 
-## **ARCHITECTURAL BENEFITS ACHIEVED**
+-- =====================================================
+-- PHASE 7: DATA VALIDATION AND INTEGRITY CHECKS
+-- =====================================================
 
-### **✅ Data Duplication Eliminated**
-- **Before**: 15+ duplicate timestamp fields across tables
-- **After**: Single authoritative timestamp location
-- **Storage Efficiency**: 95% vs. previous 60-70%
+-- Function to validate course content hierarchy (prevent circular references)
+CREATE OR REPLACE FUNCTION validate_content_hierarchy()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Prevent self-reference
+    IF NEW.parent_content_id = NEW.child_content_id THEN
+        RAISE EXCEPTION 'Content cannot be its own parent';
+    END IF;
 
-### **✅ Query Simplicity**
-- **Before**: Complex multi-table joins for basic operations
-- **After**: Simple, direct queries for common operations
-- **Performance**: 40-60% faster query execution
+    -- Prevent circular references (simplified check)
+    IF EXISTS (
+        SELECT 1 FROM course_content_hierarchy
+        WHERE parent_content_id = NEW.child_content_id
+        AND child_content_id = NEW.parent_content_id
+    ) THEN
+        RAISE EXCEPTION 'Circular reference detected in content hierarchy';
+    END IF;
 
-### **✅ Maintenance Efficiency**
-- **Before**: Changes required updates in 6+ locations
-- **After**: Single location updates for shared information
-- **Development Time**: 70% reduction in maintenance overhead
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-### **✅ Unlimited Scalability**
-- Architecture maintains performance with millions of records
-- No structural changes needed for growth
-- Consistent behavior regardless of data volume
+-- Apply hierarchy validation trigger
+CREATE TRIGGER validate_course_content_hierarchy_trigger
+    BEFORE INSERT OR UPDATE ON course_content_hierarchy
+    FOR EACH ROW EXECUTE FUNCTION validate_content_hierarchy();
 
-### **✅ Enterprise-Grade Reliability**
-- Follows patterns used by Facebook, Google, Netflix
-- Proven at massive scale
-- Industry-validated approach
+-- =====================================================
+-- IMPLEMENTATION COMPLETE - VERIFICATION QUERIES
+-- =====================================================
 
----
+-- Query to verify all tables were created successfully
+-- Run this after implementation to confirm success:
 
-## **MIGRATION FROM EXISTING SYSTEMS**
+/*
+SELECT table_name,
+       (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = t.table_name) as column_count
+FROM information_schema.tables t
+WHERE table_schema = 'public'
+AND table_name IN (
+    'course_content_base', 'course_content_metadata', 'courses', 'course_modules', 'course_lessons',
+    'course_assignments', 'course_quizzes', 'course_quiz_questions', 'course_content_hierarchy',
+    'course_progress', 'course_submissions', 'course_categories', 'course_content_categories',
+    'course_enrollments', 'course_certificates'
+)
+ORDER BY table_name;
+*/
 
-### **Assessment Checklist**
-- [ ] Identify all duplicate fields in current schema
-- [ ] Map existing entities to base entity types
-- [ ] Plan data migration for shared vs. specific information
-- [ ] Create migration scripts with rollback procedures
-- [ ] Test migration with subset of data first
+-- Query to verify all indexes were created:
+/*
+SELECT indexname, tablename
+FROM pg_indexes
+WHERE schemaname = 'public'
+AND indexname LIKE 'idx_course_%'
+ORDER BY tablename, indexname;
+*/
 
-### **Migration Strategy**
-1. **Create new schema alongside existing**
-2. **Migrate data in phases** (courses → modules → lessons → assessments)
-3. **Update application code incrementally**
-4. **Validate data integrity at each step**
-5. **Switch over when fully validated**
+-- Query to verify all functions were created:
+/*
+SELECT proname as function_name, pronargs as arg_count
+FROM pg_proc
+WHERE pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
+AND proname IN ('create_course', 'add_course_content_relationship', 'refresh_course_statistics', 'update_updated_at_column', 'validate_content_hierarchy')
+ORDER BY proname;
+*/
 
-This enterprise-grade architecture eliminates the fundamental problems of data duplication while providing unlimited scalability and maintainability. The design follows proven patterns used by the world's largest technology platforms and will support your LMS growth from hundreds to millions of users without architectural changes.
+-- =====================================================
+-- IMPLEMENTATION NOTES
+-- =====================================================
+-- 1. All tables use UUID primary keys except user references (INTEGER)
+-- 2. Comprehensive foreign key constraints ensure data integrity
+-- 3. Check constraints validate enum-like values
+-- 4. JSONB fields provide flexibility for evolving requirements
+-- 5. Indexes optimized for common query patterns
+-- 6. Triggers automate timestamp updates and validation
+-- 7. Materialized views provide performance for complex analytics
+-- 8. Functions encapsulate business logic for consistency
+--
+-- Total Objects Created:
+-- - 15 Tables (enterprise-grade LMS schema)
+-- - 14 Indexes (query performance optimization)
+-- - 5 Functions (business logic and utilities)
+-- - 4 Triggers (automation and validation)
+-- - 1 Materialized View (analytics performance)
+--
+-- TOTAL: 39 database objects
+-- =====================================================
