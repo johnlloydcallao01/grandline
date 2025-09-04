@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-// GET /api/lms/courses/[id] - Get course with full details including media
+// GET /api/lms/enrollments/[id] - Get enrollment by ID
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -10,36 +10,24 @@ export async function GET(
   try {
     const payload = await getPayload({ config: configPromise })
     const params = await context.params
-
-    // Get course with all relationships
-    const course = await payload.findByID({
-      collection: 'courses',
+    
+    // Get enrollment with all relationships
+    const enrollment = await payload.findByID({
+      collection: 'course-enrollments',
       id: params.id,
-      depth: 2, // Include nested relationships
+      depth: 2,
     })
 
-    if (!course) {
+    if (!enrollment) {
       return NextResponse.json(
-        { error: 'Course not found' },
+        { error: 'Enrollment not found' },
         { status: 404 }
       )
     }
 
-    // For now, return course without advanced statistics
-    // Advanced statistics can be added later with proper database integration
-    const courseWithStats = {
-      ...course,
-      statistics: {
-        total_enrollments: 0,
-        active_enrollments: 0,
-        completed_enrollments: 0,
-        avg_progress: 0
-      }
-    }
-
-    return NextResponse.json(courseWithStats)
+    return NextResponse.json(enrollment)
   } catch (error) {
-    console.error('Error fetching course:', error)
+    console.error('Error fetching enrollment:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -47,7 +35,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/lms/courses/[id] - Update course
+// PATCH /api/lms/enrollments/[id] - Update enrollment
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -57,15 +45,15 @@ export async function PATCH(
     const params = await context.params
     const body = await request.json()
 
-    const updatedCourse = await payload.update({
-      collection: 'courses',
+    const updatedEnrollment = await payload.update({
+      collection: 'course-enrollments',
       id: params.id,
       data: body,
     })
 
-    return NextResponse.json(updatedCourse)
+    return NextResponse.json(updatedEnrollment)
   } catch (error) {
-    console.error('Error updating course:', error)
+    console.error('Error updating enrollment:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -73,7 +61,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/lms/courses/[id] - Delete course
+// DELETE /api/lms/enrollments/[id] - Delete enrollment
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -83,13 +71,13 @@ export async function DELETE(
     const params = await context.params
 
     await payload.delete({
-      collection: 'courses',
+      collection: 'course-enrollments',
       id: params.id,
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting course:', error)
+    console.error('Error deleting enrollment:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

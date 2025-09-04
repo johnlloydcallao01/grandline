@@ -5,6 +5,7 @@ import * as migration_20250826_065630 from './20250826_065630';
 import * as migration_20250826_083543 from './20250826_083543';
 import * as migration_20250826_132231 from './20250826_132231';
 import * as migration_20250826_performance_views from './20250826_performance_views';
+import * as migration_20250831_safe_courses_schema_fix from './20250831_safe_courses_schema_fix';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20250826_performance_views.up,
     down: migration_20250826_performance_views.down,
     name: '20250826_performance_views'
+  },
+  {
+    up: migration_20250831_safe_courses_schema_fix.up,
+    down: migration_20250831_safe_courses_schema_fix.down,
+    name: '20250831_safe_courses_schema_fix'
   },
 ];
