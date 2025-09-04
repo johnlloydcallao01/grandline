@@ -18,6 +18,10 @@ import { UserEvents } from './collections/UserEvents'
 import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+// LMS Collections
+import { Courses } from './collections/Courses'
+import { CourseCategories } from './collections/CourseCategories'
+import { CourseEnrollments } from './collections/CourseEnrollments'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,6 +34,7 @@ export default buildConfig({
     },
   },
   collections: [
+    // User Management
     Users,
     Instructors,
     Trainees,
@@ -37,8 +42,15 @@ export default buildConfig({
     UserCertifications,
     UserEvents,
     EmergencyContacts,
+
+    // Content & Media
     Media,
-    Posts
+    Posts,
+
+    // Learning Management System
+    Courses,
+    CourseCategories,
+    CourseEnrollments,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
