@@ -238,8 +238,9 @@ export default function SignInPage() {
 
         console.log('✅ VALIDATION PASSED!');
 
-        // CORS is completely disabled on the CMS - use direct URL
-        const registrationUrl = 'https://grandline-cms.vercel.app/api/trainee-register';
+        // Use environment variable for API URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const registrationUrl = `${apiUrl}/trainee-register`;
 
         console.log('🚀 Starting trainee registration...');
         console.log('📍 Registration URL:', registrationUrl);
@@ -346,7 +347,8 @@ export default function SignInPage() {
 
         try {
           // Use PayloadCMS REST API for authentication
-          const response = await fetch('https://grandline-cms.vercel.app/api/users/login', {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+          const response = await fetch(`${apiUrl}/users/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

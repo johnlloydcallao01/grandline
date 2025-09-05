@@ -153,45 +153,101 @@ export async function POST(request: NextRequest) {
       throw new Error(`User creation failed: ${userCreationError instanceof Error ? userCreationError.message : String(userCreationError)}`)
     }
 
-    // Step 2: Create trainee record manually (trigger is disabled for trainees)
-    console.log('🎓 Creating trainee record...')
-    const traineeData = {
-      user: user.id,
-      srn: body.srn,
-      couponCode: body.couponCode || '',
-      enrollmentDate: new Date().toISOString(),
-      currentLevel: 'beginner' as const
-    }
+    // Step 2: Check if trainee record was created by trigger, if not create manually
+    console.log('🎓 Checking/Creating trainee record...')
 
-    console.log('📋 Trainee data to create:', traineeData)
-
+    // First, check if trainee record was already created by the database trigger
     let trainee;
     try {
-      console.log('🔄 Attempting to create trainee...')
-      trainee = await payload.create({
+      console.log('🔍 Checking if trainee record exists (created by trigger)...')
+      const existingTrainees = await payload.find({
         collection: 'trainees',
-        data: traineeData
+        where: {
+          user: {
+            equals: user.id
+          }
+        },
+        limit: 1
       })
 
-      console.log('✅ Trainee created successfully:', {
-        id: trainee.id,
-        srn: trainee.srn,
-        userId: trainee.user
-      })
-    } catch (traineeCreationError) {
-      console.error('💥 TRAINEE CREATION FAILED:', traineeCreationError)
-      console.error('📋 Data that failed:', traineeData)
+      if (existingTrainees.docs.length > 0) {
+        trainee = existingTrainees.docs[0]
+        console.log('✅ Trainee record found (created by trigger):', {
+          id: trainee.id,
+          srn: trainee.srn,
+          userId: trainee.user
+        })
 
-      // Re-throw with more context
-      throw new Error(`Trainee creation failed: ${traineeCreationError instanceof Error ? traineeCreationError.message : String(traineeCreationError)}`)
+        // Update the SRN if it's different from what was provided
+        if (trainee.srn !== body.srn && body.srn) {
+          console.log('🔄 Updating SRN to match registration...')
+          trainee = await payload.update({
+            collection: 'trainees',
+            id: trainee.id,
+            data: {
+              srn: body.srn,
+              couponCode: body.couponCode || ''
+            }
+          })
+          console.log('✅ Trainee SRN updated')
+        }
+      } else {
+        // No trainee record found, create manually
+        console.log('🔄 Creating trainee record manually...')
+        const traineeData = {
+          user: user.id,
+          srn: body.srn,
+          couponCode: body.couponCode || '',
+          enrollmentDate: new Date().toISOString(),
+          currentLevel: 'beginner' as const
+        }
+
+        console.log('📋 Trainee data to create:', traineeData)
+
+        trainee = await payload.create({
+          collection: 'trainees',
+          data: traineeData
+        })
+
+        console.log('✅ Trainee created manually:', {
+          id: trainee.id,
+          srn: trainee.srn,
+          userId: trainee.user
+        })
+      }
+    } catch (traineeError) {
+      console.error('💥 TRAINEE HANDLING FAILED:', traineeError)
+      throw new Error(`Trainee handling failed: ${traineeError instanceof Error ? traineeError.message : String(traineeError)}`)
     }
 
     // Step 3: Create emergency contact
     console.log('🚨 Creating emergency contact...')
+
+    // Validate emergency contact fields
+    console.log('🔍 Validating emergency contact fields...')
+    const emergencyValidation = {
+      emergencyFirstName: !!body.emergencyFirstName,
+      emergencyLastName: !!body.emergencyLastName,
+      emergencyContactNumber: !!body.emergencyContactNumber,
+      emergencyRelationship: !!body.emergencyRelationship,
+      emergencyCompleteAddress: !!body.emergencyCompleteAddress
+    }
+
+    console.log('📋 Emergency field validation:', emergencyValidation)
+
+    const missingEmergencyFields = Object.entries(emergencyValidation)
+      .filter(([_, isValid]) => !isValid)
+      .map(([field, _]) => field)
+
+    if (missingEmergencyFields.length > 0) {
+      console.error('❌ Missing emergency contact fields:', missingEmergencyFields)
+      throw new Error(`Missing required emergency contact fields: ${missingEmergencyFields.join(', ')}`)
+    }
+
     const emergencyData = {
       user: user.id,
       firstName: body.emergencyFirstName,
-      middleName: body.emergencyMiddleName || 'N/A', // Database requires this field, use N/A if empty
+      middleName: body.emergencyMiddleName || null, // Make it nullable instead of 'N/A'
       lastName: body.emergencyLastName,
       contactNumber: body.emergencyContactNumber,
       relationship: body.emergencyRelationship,
