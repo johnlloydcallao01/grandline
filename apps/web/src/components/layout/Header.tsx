@@ -145,27 +145,67 @@ export function Header({
       {/* Security Alert Modal */}
       {securityAlert?.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="max-w-md w-full mx-4 bg-red-50 border-red-200 border rounded-lg shadow-lg">
+          <div className={`max-w-md w-full mx-4 border rounded-lg shadow-lg ${
+            securityAlert.type === 'session-expired'
+              ? 'bg-yellow-50 border-yellow-200'
+              : securityAlert.type === 'account-deactivated'
+              ? 'bg-orange-50 border-orange-200'
+              : 'bg-red-50 border-red-200'
+          }`}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center mr-3">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                    securityAlert.type === 'session-expired'
+                      ? 'bg-yellow-50'
+                      : securityAlert.type === 'account-deactivated'
+                      ? 'bg-orange-50'
+                      : 'bg-red-50'
+                  }`}>
+                    <svg className={`w-6 h-6 ${
+                      securityAlert.type === 'session-expired'
+                        ? 'text-yellow-600'
+                        : securityAlert.type === 'account-deactivated'
+                        ? 'text-orange-600'
+                        : 'text-red-600'
+                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-red-800">
-                    {securityAlert.type === 'role-changed' ? 'Access Revoked - Role Changed' : 'Account Deactivated'}
+                  <h3 className={`text-lg font-semibold ${
+                    securityAlert.type === 'session-expired'
+                      ? 'text-yellow-800'
+                      : securityAlert.type === 'account-deactivated'
+                      ? 'text-orange-800'
+                      : 'text-red-800'
+                  }`}>
+                    {securityAlert.type === 'role-changed'
+                      ? 'Access Revoked - Role Changed'
+                      : securityAlert.type === 'session-expired'
+                      ? 'Access Revoked - User Not Found'
+                      : 'Account Deactivated'}
                   </h3>
                 </div>
               </div>
-              <div className="text-red-700 mb-4">
+              <div className={`mb-4 ${
+                securityAlert.type === 'session-expired'
+                  ? 'text-yellow-700'
+                  : securityAlert.type === 'account-deactivated'
+                  ? 'text-orange-700'
+                  : 'text-red-700'
+              }`}>
                 <p className="text-sm leading-relaxed">{securityAlert.message}</p>
               </div>
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => window.location.href = '/signin'}
-                  className="px-4 py-2 text-sm font-medium text-white rounded-md transition-colors bg-red-600 hover:bg-red-700"
+                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+                    securityAlert.type === 'session-expired'
+                      ? 'bg-yellow-600 hover:bg-yellow-700'
+                      : securityAlert.type === 'account-deactivated'
+                      ? 'bg-orange-600 hover:bg-orange-700'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
                 >
                   Go to Login Now
                 </button>

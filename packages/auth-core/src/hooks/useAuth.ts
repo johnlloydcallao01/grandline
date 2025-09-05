@@ -43,7 +43,7 @@ export function useAuth(allowedRole: string): AuthState {
   useEffect(() => {
     async function fetchCurrentUser() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = 'https://grandline-cms.vercel.app/api';
 
         // Get the payload token from cookies
         const payloadToken = document.cookie
@@ -55,11 +55,22 @@ export function useAuth(allowedRole: string): AuthState {
         console.log('🍪 useAuth: All cookies:', document.cookie);
         console.log('🎫 useAuth: Found token:', payloadToken ? 'Yes' : 'No');
 
+        // CRITICAL: If no token, set state but don't redirect (let AuthGuard handle it)
+        if (!payloadToken) {
+          console.log('🚨 useAuth: No token found - setting unauthenticated state');
+          setLoading(false);
+          setUser(null);
+          setError('No authentication token found');
+
+          // Don't redirect here - let AuthGuard handle redirects to prevent loops
+          return;
+        }
+
         const response = await fetch(`${apiUrl}/users/me`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            ...(payloadToken && { 'Authorization': `Bearer ${payloadToken}` })
+            'Authorization': `Bearer ${payloadToken}`
           }
         });
 
@@ -137,9 +148,59 @@ export function useAuth(allowedRole: string): AuthState {
           }
         } else {
           const errorText = await response.text();
+          console.error('🚨 CRITICAL SECURITY: API returned error - user may be deleted or unauthorized');
+          console.error('Response status:', response.status);
+          console.error('Response text:', errorText);
+
+          // CRITICAL SECURITY FIX: Handle user deletion/unauthorized access
+          if (response.status === 404 || response.status === 401 || response.status === 403) {
+            console.error('🚨 SECURITY ALERT: User not found or unauthorized - forcing logout and redirect');
+
+            // Clear ALL authentication cookies immediately
+            document.cookie.split(";").forEach(function(c) {
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            // Clear user state
+            setUser(null);
+            setError(`Access denied: ${response.status === 404 ? 'User not found' : 'Unauthorized access'}`);
+            setLoading(false);
+
+            // Don't redirect immediately - let AuthGuard handle it to prevent loops
+            console.log('🚨 USER DELETED/UNAUTHORIZED: Setting unauthenticated state');
+
+            return;
+          }
+
+          // For other errors, just set error message
           setError(`Authentication failed: ${response.status} ${errorText}`);
         }
       } catch (err) {
+        console.error('🚨 NETWORK ERROR during authentication check:', err);
+
+        // Check if this might be due to user deletion or server issues
+        const errorMessage = err instanceof Error ? err.message : String(err);
+
+        // If it's a fetch error that might indicate user deletion or server rejection
+        if (errorMessage.includes('404') || errorMessage.includes('401') || errorMessage.includes('403')) {
+          console.error('🚨 SECURITY ALERT: Network error suggests user deletion - immediate redirect');
+
+          // Clear authentication immediately
+          document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+
+          setUser(null);
+          setError('Access denied: Authentication failed');
+          setLoading(false);
+
+          // Don't redirect immediately - let AuthGuard handle it
+          console.log('🚨 NETWORK AUTH ERROR: Setting unauthenticated state');
+
+          return;
+        }
+
+        // For genuine network errors, just set error
         setError(`Network error: ${err}`);
       } finally {
         setLoading(false);
