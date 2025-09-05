@@ -43,7 +43,7 @@ export function useAuth(allowedRole: string): AuthState {
   useEffect(() => {
     async function fetchCurrentUser() {
       try {
-        const apiUrl = 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
 
         // Get the payload token from cookies
         const payloadToken = document.cookie

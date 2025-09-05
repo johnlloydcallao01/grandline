@@ -2,36 +2,40 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Redirect root to main page for authenticated users (same pattern as web-admin)
-  if (request.nextUrl.pathname === '/') {
-    // Check if user is authenticated by looking for the cookie
+  const { pathname } = request.nextUrl;
+
+  console.log('🔍 MIDDLEWARE: Processing request for:', pathname);
+
+  // ALWAYS allow access to signin page - NO EXCEPTIONS
+  if (pathname === '/signin') {
+    console.log('✅ MIDDLEWARE: Allowing access to /signin page');
+    return NextResponse.next();
+  }
+
+  // For root path, check authentication and redirect appropriately
+  if (pathname === '/') {
     const payloadToken = request.cookies.get('payload-token');
     if (payloadToken) {
-      // User is authenticated, allow access to main page
+      console.log('✅ MIDDLEWARE: User has auth cookie, allowing access to home');
       return NextResponse.next();
     } else {
-      // User is not authenticated, redirect to signin
-      console.log('❌ No auth cookie found, redirecting to signin');
+      console.log('❌ MIDDLEWARE: No auth cookie found, redirecting to signin');
       return NextResponse.redirect(new URL('/signin', request.url));
     }
   }
 
-  // Allow access to signin page (same as web-admin allows /admin/login)
-  if (request.nextUrl.pathname === '/signin') {
-    return NextResponse.next();
-  }
-
-  // Check for PayloadCMS authentication cookie for ALL other routes
-  const payloadToken = request.cookies.get('payload-token')
+  // For all other protected routes, check authentication
+  const payloadToken = request.cookies.get('payload-token');
 
   if (!payloadToken) {
-    console.log('❌ No auth cookie found, redirecting to signin')
-    return NextResponse.redirect(new URL('/signin', request.url))
+    console.log('❌ MIDDLEWARE: No auth cookie found for protected route, redirecting to signin');
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
 
   // 🛡️ SECURITY ENHANCEMENT: Real-time role validation (EXACT same as web-admin)
   try {
-    const apiUrl = 'https://grandline-cms.vercel.app/api'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+    console.log('🔍 MIDDLEWARE: Validating token with API:', apiUrl);
     const response = await fetch(`${apiUrl}/users/me`, {
       headers: {
         'Cookie': `payload-token=${payloadToken.value}`,
@@ -73,13 +77,18 @@ export async function middleware(request: NextRequest) {
       return response
     }
   } catch (error) {
-    console.error('❌ Error validating token:', error)
-    // On error, allow access but log the issue (fallback to client-side validation)
-    console.log('⚠️ Falling back to client-side validation')
-    return NextResponse.next()
+    console.error('❌ MIDDLEWARE: Error validating token:', error);
+
+    // CRITICAL FIX: On API errors, allow access and let client-side handle it
+    // This prevents redirect loops when the API is down or unreachable
+    console.log('⚠️ MIDDLEWARE: API error detected, allowing access (client-side will handle auth)');
+    console.log('⚠️ MIDDLEWARE: This prevents redirect loops when API is unreachable');
+    return NextResponse.next();
   }
 }
 
 export const config = {
-  matcher: ['/', '/((?!signin|_next/static|_next/image|favicon.ico).*)'],
+  // CRITICAL: Always exclude /signin to prevent redirect loops
+  // Also exclude Next.js internal routes and static assets
+  matcher: ['/', '/((?!signin|api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }
