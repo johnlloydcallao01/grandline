@@ -2,6 +2,7 @@
 
 export { useSidebar } from './useSidebar';
 export { useCategory } from './useCategory';
+export { useCourses } from './useCourses';
 export {
   useDataLoading,
   useAsyncLoading,

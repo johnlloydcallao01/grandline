@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { CategoryCarousel, VideoGrid, HeroSection } from "@/components/sections";
-import { useCategory } from "@/hooks";
+import { CategoryCarousel, VideoGrid, HeroSection, CoursesGrid } from "@/components/sections";
+import { useCategory, useCourses } from "@/hooks";
 
 /**
  * Home page component - Main application content
@@ -13,6 +13,10 @@ import { useCategory } from "@/hooks";
  */
 export default function Home() {
   const { activeCategory, selectCategory } = useCategory("All");
+  const { courses, isLoading: coursesLoading } = useCourses({
+    status: 'published',
+    limit: 8
+  });
 
   return (
     <>
@@ -26,6 +30,9 @@ export default function Home() {
           onCategoryChange={selectCategory}
         />
       </div>
+
+      {/* Courses Grid - Above Video Grid as requested */}
+      <CoursesGrid courses={courses} isLoading={coursesLoading} />
 
       {/* Video Grid */}
       <VideoGrid />
