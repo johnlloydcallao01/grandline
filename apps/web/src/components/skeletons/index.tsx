@@ -1,8 +1,6 @@
 import React from 'react';
-import { 
-  VideoCardSkeleton, 
-  CategoryCircleSkeleton, 
-  ShortCardSkeleton,
+import {
+  CategoryCircleSkeleton,
   ListItemSkeleton,
   CardSkeleton,
   TableRowSkeleton,
@@ -10,7 +8,7 @@ import {
 } from '@/components/ui/Skeleton';
 
 /**
- * Home Page Skeleton - Category carousel + Video grid
+ * Home Page Skeleton - Category carousel + Courses grid
  */
 export function HomePageSkeleton() {
   return (
@@ -26,11 +24,11 @@ export function HomePageSkeleton() {
         </div>
       </div>
 
-      {/* Video Grid Skeleton */}
+      {/* Courses Grid Skeleton */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <VideoCardSkeleton key={index} />
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CardSkeleton key={index} />
           ))}
         </div>
       </div>
@@ -38,74 +36,9 @@ export function HomePageSkeleton() {
   );
 }
 
-/**
- * Shorts Page Skeleton
- */
-export function ShortsPageSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-      <PageHeaderSkeleton />
-      
-      {/* Shorts Grid Skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {Array.from({ length: 18 }).map((_, index) => (
-          <ShortCardSkeleton key={index} />
-        ))}
-      </div>
 
-      {/* Featured Categories Skeleton */}
-      <div className="mt-12">
-        <div className="h-6 bg-gray-200 rounded w-48 animate-pulse mb-6"></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <CardSkeleton key={index} className="p-6 h-24" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
-/**
- * Video List Page Skeleton - for watch-later, liked-videos, etc.
- */
-export function VideoListPageSkeleton() {
-  return (
-    <div className="p-6">
-      <PageHeaderSkeleton />
-      
-      {/* Filter/Search Bar Skeleton */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1 h-10 bg-gray-200 rounded animate-pulse"></div>
-        <div className="w-32 h-10 bg-gray-200 rounded animate-pulse"></div>
-        <div className="w-24 h-10 bg-gray-200 rounded animate-pulse"></div>
-      </div>
 
-      {/* Video List Skeleton */}
-      <div className="space-y-4">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="flex space-x-4 p-4 bg-white rounded-lg border border-gray-200">
-            {/* Thumbnail skeleton */}
-            <div className="w-40 h-24 bg-gray-200 rounded animate-pulse flex-shrink-0"></div>
-            
-            {/* Content skeleton */}
-            <div className="flex-1 space-y-2">
-              <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-            </div>
-            
-            {/* Actions skeleton */}
-            <div className="flex flex-col space-y-2">
-              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /**
  * Dashboard/Analytics Page Skeleton

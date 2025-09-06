@@ -38,17 +38,17 @@ Based on official documentation from **web.dev**, **Google's Core Web Vitals**, 
 
 ### **✅ CORRECT: For Dynamic Content**
 ```tsx
-// Example: Loading videos from API
-function VideoPage() {
-  const { isLoading, data: videos, refetch } = useDataLoading<Video[]>();
+// Example: Loading courses from API
+function CoursePage() {
+  const { isLoading, data: courses, refetch } = useDataLoading<Course[]>();
 
   useEffect(() => {
-    refetch(() => fetch('/api/videos').then(res => res.json()));
+    refetch(() => fetch('/api/courses').then(res => res.json()));
   }, [refetch]);
 
   return (
-    <VideoGrid
-      videos={videos}
+    <CoursesGrid
+      courses={courses}
       isLoading={isLoading} // Only true when actually loading
     />
   );
@@ -123,12 +123,11 @@ These hooks are now deprecated as they hurt performance by creating artificial d
 
 ### **✅ FIXED (ALL PAGES):**
 - **Home Page** - Removed artificial delays, optimal LCP performance
-- **Video Pages** - Shorts, Watch Later, Liked Videos, History, Playlists, Subscriptions
 - **Dashboard Pages** - Analytics, Marketing, Reports, Ecommerce, Dashboard
 - **Management Pages** - Tasks, Projects, Team, Workflow, Calendar, Help
 - **Content Pages** - News, Trending, Gaming, Music, Sports
 
-**ALL 25+ PAGES NOW OPTIMIZED** - Static content renders immediately without artificial delays
+**ALL 20+ PAGES NOW OPTIMIZED** - Static content renders immediately without artificial delays
 
 ## 🚀 **COMPLETED OPTIMIZATION**
 

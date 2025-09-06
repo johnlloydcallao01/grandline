@@ -82,9 +82,9 @@ export default function TrendingPage() {
             </div>
           </div>
 
-          {/* Trending Videos */}
+          {/* Trending Content */}
           <div>
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">Trending Videos</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">Trending Content</h2>
             <div className="space-y-4">
               {trendingVideos.map((video) => (
                 <div

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CategoryCarousel, VideoGrid, HeroSection, CoursesGrid } from "@/components/sections";
+import { CategoryCarousel, HeroSection, CoursesGrid } from "@/components/sections";
 import { useCategory, useCourses } from "@/hooks";
 
 /**
@@ -31,11 +31,8 @@ export default function Home() {
         />
       </div>
 
-      {/* Courses Grid - Above Video Grid as requested */}
+      {/* Courses Grid */}
       <CoursesGrid courses={courses} isLoading={coursesLoading} />
-
-      {/* Video Grid */}
-      <VideoGrid />
     </div>
   );
 }

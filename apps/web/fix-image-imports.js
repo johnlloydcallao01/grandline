@@ -5,13 +5,9 @@ const files = [
   'src/app/(main)/menu/page.tsx',
   'src/app/(main)/music/page.tsx',
   'src/app/(main)/news/page.tsx',
-  'src/app/(main)/playlists/page.tsx',
-  'src/app/(main)/shorts/ShortsClient.tsx',
   'src/app/(main)/sports/page.tsx',
-  'src/app/(main)/subscriptions/page.tsx',
   'src/app/(main)/trending/page.tsx',
-  'src/components/layout/Header.tsx',
-  'src/components/ui/VideoCard.tsx'
+  'src/components/layout/Header.tsx'
 ];
 
 files.forEach(filePath => {

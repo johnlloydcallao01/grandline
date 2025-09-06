@@ -15,18 +15,14 @@ Skeleton screens are essential for enterprise-grade applications because they:
 
 ### Base Components (`/ui/Skeleton.tsx`)
 - `Skeleton` - Base skeleton component with animation
-- `VideoCardSkeleton` - Matches VideoCard structure
 - `CategoryCircleSkeleton` - For category carousels
-- `ShortCardSkeleton` - For shorts/vertical videos
 - `ListItemSkeleton` - Generic list items
 - `CardSkeleton` - Dashboard cards and stats
 - `TableRowSkeleton` - Table rows
 - `PageHeaderSkeleton` - Page headers
 
 ### Page Layouts (`/skeletons/index.tsx`)
-- `HomePageSkeleton` - Category carousel + video grid
-- `ShortsPageSkeleton` - Shorts grid with categories
-- `VideoListPageSkeleton` - Video lists (watch-later, liked)
+- `HomePageSkeleton` - Category carousel + courses grid
 - `DashboardPageSkeleton` - Analytics/dashboard pages
 - `ListPageSkeleton` - Task/team/project lists
 - `CalendarPageSkeleton` - Calendar grid layout
@@ -107,9 +103,6 @@ All skeleton components are fully responsive:
 
 ### ✅ Implemented Pages
 - Home page (`/`)
-- Shorts page (`/shorts`)
-- Watch Later (`/watch-later`)
-- Liked Videos (`/liked-videos`)
 - Analytics (`/analytics`)
 - Tasks (`/tasks`)
 - Calendar (`/calendar`)

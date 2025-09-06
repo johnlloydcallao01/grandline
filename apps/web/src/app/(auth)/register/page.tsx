@@ -414,33 +414,6 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              {/* General Error/Success Messages */}
-              {errors.general && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <i className="fa fa-exclamation-circle text-red-400"></i>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-800">{errors.general}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {errors.success && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <i className="fa fa-check-circle text-green-400"></i>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-green-800">{errors.success}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Error Messages */}
               {errors.general && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">

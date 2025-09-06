@@ -15,42 +15,7 @@ export function Skeleton({
   );
 }
 
-/**
- * Video Card Skeleton - matches VideoCard structure
- */
-export function VideoCardSkeleton() {
-  return (
-    <div className="group">
-      {/* Thumbnail skeleton */}
-      <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3 animate-pulse">
-        <div className="absolute bottom-2 right-2 bg-gray-300 rounded w-12 h-4"></div>
-      </div>
-      
-      {/* Content skeleton */}
-      <div className="flex space-x-3">
-        {/* Avatar skeleton */}
-        <div className="flex-shrink-0">
-          <div className="w-9 h-9 bg-gray-200 rounded-full animate-pulse"></div>
-        </div>
-        
-        {/* Text content skeleton */}
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* Title skeleton - 2 lines */}
-          <div className="space-y-1">
-            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-          </div>
-          
-          {/* Channel name skeleton */}
-          <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-          
-          {/* Views and time skeleton */}
-          <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+
 
 /**
  * Category Circle Skeleton
@@ -64,28 +29,7 @@ export function CategoryCircleSkeleton() {
   );
 }
 
-/**
- * Short Video Card Skeleton - for shorts page
- */
-export function ShortCardSkeleton() {
-  return (
-    <div className="group">
-      {/* Vertical thumbnail skeleton */}
-      <div className="relative aspect-[9/16] bg-gray-200 rounded-lg overflow-hidden mb-2 animate-pulse">
-        <div className="absolute bottom-2 right-2 bg-gray-300 rounded w-10 h-3"></div>
-      </div>
-      
-      {/* Title skeleton */}
-      <div className="space-y-1">
-        <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-        <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
-      </div>
-      
-      {/* Views skeleton */}
-      <div className="h-3 bg-gray-200 rounded w-1/2 mt-1 animate-pulse"></div>
-    </div>
-  );
-}
+
 
 /**
  * List Item Skeleton - for various list layouts

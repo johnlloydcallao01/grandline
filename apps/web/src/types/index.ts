@@ -11,15 +11,7 @@ export interface SidebarItemProps {
   href?: string;
 }
 
-export interface VideoCardProps {
-  thumbnail: string;
-  title: string;
-  channel: string;
-  views: string;
-  time: string;
-  duration: string;
-  onClick?: () => void;
-}
+
 
 export interface CategoryCircleProps {
   label: string;
@@ -45,27 +37,20 @@ export interface SidebarProps {
   onScroll?: (e: React.UIEvent<HTMLElement>) => void;
 }
 
-export interface VideoGridProps {
-  videos?: VideoCardProps[];
-}
+
 
 export interface LayoutProps {
   children: React.ReactNode;
 }
 
 // Icon mapping type
-export type IconName = 
-  | 'home' 
-  | 'shorts' 
-  | 'subscriptions' 
-  | 'history' 
-  | 'playlists' 
-  | 'watch-later' 
-  | 'liked' 
-  | 'trending' 
-  | 'music' 
-  | 'gaming' 
-  | 'news' 
+export type IconName =
+  | 'home'
+  | 'courses'
+  | 'trending'
+  | 'music'
+  | 'gaming'
+  | 'news'
   | 'sports'
   | 'growth'
   | 'strategy'

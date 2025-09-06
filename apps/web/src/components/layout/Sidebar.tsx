@@ -43,54 +43,19 @@ export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
               href="/"
             />
             <SidebarItem
-              icon="shorts"
-              label="Shorts"
-              active={pathname === '/shorts'}
+              icon="courses"
+              label="Courses"
+              active={pathname === '/courses'}
               collapsed={!isOpen}
-              href="/shorts"
-            />
-            <SidebarItem
-              icon="subscriptions"
-              label="Subscriptions"
-              active={pathname === '/subscriptions'}
-              collapsed={!isOpen}
-              href="/subscriptions"
+              href="/courses"
             />
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}
 
-          {/* You section */}
+          {/* Account section */}
           <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">You</div>}
-            <SidebarItem
-              icon="history"
-              label="History"
-              active={pathname === '/history'}
-              collapsed={!isOpen}
-              href="/history"
-            />
-            <SidebarItem
-              icon="playlists"
-              label="Playlists"
-              active={pathname === '/playlists'}
-              collapsed={!isOpen}
-              href="/playlists"
-            />
-            <SidebarItem
-              icon="watch-later"
-              label="Watch later"
-              active={pathname === '/watch-later'}
-              collapsed={!isOpen}
-              href="/watch-later"
-            />
-            <SidebarItem
-              icon="liked"
-              label="Liked videos"
-              active={pathname === '/liked-videos'}
-              collapsed={!isOpen}
-              href="/liked-videos"
-            />
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Account</div>}
             <SidebarItem
               icon="user"
               label="Login Status"
