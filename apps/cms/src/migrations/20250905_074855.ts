@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."enum_courses_difficulty_level" AS ENUM('beginner', 'intermediate', 'advanced');
   CREATE TYPE "public"."enum_courses_language" AS ENUM('en', 'es', 'fr', 'de');
@@ -176,7 +176,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   DROP TYPE "public"."enum_services_status";`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db, payload: _payload, req: _req }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."enum_user_relationships_related_entity_type" AS ENUM('course', 'department', 'project', 'group');
   CREATE TYPE "public"."enum_user_relationships_relationship_type" AS ENUM('enrolled', 'teaching', 'managing', 'supervising', 'member');

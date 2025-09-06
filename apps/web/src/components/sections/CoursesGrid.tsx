@@ -1,11 +1,30 @@
 import React from 'react';
 
+// Media interface from CMS API
+interface Media {
+  id: number;
+  alt?: string | null;
+  cloudinaryPublicId?: string | null;
+  cloudinaryURL?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+
 // Course type based on your CMS API
 interface Course {
   id: string;
   title: string;
   excerpt: string;
   status: 'published' | 'draft';
+  thumbnail?: Media | null;
+  bannerImage?: Media | null;
 }
 
 interface CoursesGridProps {
@@ -36,11 +55,38 @@ interface CourseCardProps {
 }
 
 function CourseCard({ course, onClick }: CourseCardProps) {
+  // Get the best available image URL from thumbnail
+  const getImageUrl = (media: Media | null | undefined): string | null => {
+    if (!media) return null;
+
+    // Priority: cloudinaryURL > url > thumbnailURL
+    return media.cloudinaryURL || media.url || media.thumbnailURL || null;
+  };
+
+  const imageUrl = getImageUrl(course.thumbnail);
+  const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
+
   return (
     <div className="group cursor-pointer" onClick={onClick}>
       <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
-        {/* Empty placeholder image as requested */}
-        <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={altText}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+
+        {/* Fallback placeholder - shown when no image or image fails to load */}
+        <div className={`w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center ${imageUrl ? 'hidden' : ''}`}>
           <div className="text-gray-400 text-center">
             <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />

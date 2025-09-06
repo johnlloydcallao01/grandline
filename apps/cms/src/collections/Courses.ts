@@ -68,7 +68,7 @@ export const Courses: CollectionConfig = {
     // === MEDIA & VISUAL ===
     {
       name: 'thumbnail',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       admin: {
         description: 'Course thumbnail image (original size from Cloudinary)',
@@ -76,7 +76,7 @@ export const Courses: CollectionConfig = {
     },
     {
       name: 'bannerImage',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       admin: {
         description: 'Course banner image for course page header',

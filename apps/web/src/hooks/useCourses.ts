@@ -1,11 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// Media interface from CMS API
+interface Media {
+  id: number;
+  alt?: string | null;
+  cloudinaryPublicId?: string | null;
+  cloudinaryURL?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+
 // Course type matching your CMS API
 interface Course {
   id: string;
   title: string;
   excerpt: string;
   status: 'published' | 'draft';
+  thumbnail?: Media | null;
+  bannerImage?: Media | null;
 }
 
 interface CoursesResponse {

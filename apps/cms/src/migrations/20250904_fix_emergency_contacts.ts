@@ -79,7 +79,7 @@ export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): P
       WHERE u.role = 'trainee' AND ec.id IS NULL
     `)
 
-    const orphanedCount = ((orphanedTrainees as unknown) as { rows: Array<any> }).rows.length
+    const orphanedCount = ((orphanedTrainees as unknown) as { rows: Array<Record<string, unknown>> }).rows.length
     console.log(`📊 Found ${orphanedCount} trainees without emergency contacts`)
 
     if (orphanedCount > 0) {
