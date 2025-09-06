@@ -55,12 +55,17 @@ function useAuth(allowedRole) {
       try {
         const apiUrl = "https://grandline-cms.vercel.app/api";
         const payloadToken = document.cookie.split("; ").find((row) => row.startsWith("payload-token="))?.split("=")[1];
+        console.log("\u{1F50D} USEAUTH: Checking for payload-token cookie");
+        console.log("Available cookies:", document.cookie);
+        console.log("Found payload-token:", payloadToken ? "Yes" : "No");
         if (!payloadToken) {
+          console.log("\u274C USEAUTH: No authentication token found");
           setLoading(false);
           setUser(null);
           setError("No authentication token found");
           return;
         }
+        console.log("\u2705 USEAUTH: Token found, validating with server");
         const response = await fetch(`${apiUrl}/users/me`, {
           credentials: "include",
           headers: {
@@ -68,8 +73,10 @@ function useAuth(allowedRole) {
             "Authorization": `Bearer ${payloadToken}`
           }
         });
+        console.log("\u{1F310} USEAUTH: Server response status:", response.status);
         if (response.ok) {
           const userData = await response.json();
+          console.log("\u{1F4CB} USEAUTH: User data received:", userData);
           let extractedUser = null;
           if (userData.user) {
             extractedUser = userData.user;
@@ -77,7 +84,9 @@ function useAuth(allowedRole) {
             extractedUser = userData;
           }
           if (extractedUser) {
+            console.log("\u{1F464} USEAUTH: Extracted user:", extractedUser);
             if (extractedUser.role !== allowedRole) {
+              console.log("\u{1F6A8} USEAUTH: Role mismatch - expected:", allowedRole, "got:", extractedUser.role);
               setSecurityAlert({
                 show: true,
                 type: "role-changed",
@@ -91,6 +100,7 @@ function useAuth(allowedRole) {
               return;
             }
             if (!extractedUser.isActive) {
+              console.log("\u{1F6A8} USEAUTH: Account deactivated");
               setSecurityAlert({
                 show: true,
                 type: "account-deactivated",
@@ -103,9 +113,11 @@ function useAuth(allowedRole) {
               setUser(null);
               return;
             }
+            console.log("\u2705 USEAUTH: Authentication successful");
             setUser(extractedUser);
             setError(null);
           } else {
+            console.log("\u274C USEAUTH: Unable to extract user data from response");
             setError("Unable to extract user data from response");
           }
         } else {
@@ -138,6 +150,28 @@ function useAuth(allowedRole) {
       }
     }
     fetchCurrentUser();
+    const roleValidationInterval = setInterval(() => {
+      console.log("\u{1F50D} AGGRESSIVE PERIODIC VALIDATION: Checking user authentication status...");
+      fetchCurrentUser();
+    }, 5e3);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("\u{1F50D} VISIBILITY CHANGE: Re-validating authentication...");
+        fetchCurrentUser();
+      }
+    };
+    const handleFocus = () => {
+      console.log("\u{1F50D} WINDOW FOCUS: Re-validating authentication...");
+      fetchCurrentUser();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      console.log("\u{1F9F9} USEAUTH: Cleaning up periodic validation interval and event listeners");
+      clearInterval(roleValidationInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [allowedRole]);
   return {
     user,
