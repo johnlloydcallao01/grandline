@@ -184,14 +184,31 @@ export default function LoginStatusPage() {
 
         {/* Authentication Test Section */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">🔐 Authentication Test</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">🔐 Real-Time Authentication Test</h3>
           <p className="text-blue-800 text-sm mb-4">
-            This page is protected by real-time authentication. Try changing your role in PayloadCMS to see the security system in action!
+            This page is protected by AGGRESSIVE real-time authentication. Role changes are detected within 5 seconds!
           </p>
+
+          {/* Manual Refresh Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+            >
+              🔄 Force Authentication Check
+            </button>
+          </div>
+
           <div className="text-xs text-blue-600 space-y-1">
-            <p>• If your role changes from &apos;trainee&apos; to another role, you&apos;ll be automatically logged out</p>
-            <p>• If your account is deactivated, you&apos;ll receive a security alert</p>
-            <p>• Security checks run every 60 seconds in the background</p>
+            <p>• <strong>IMMEDIATE DETECTION:</strong> Security checks run every 5 seconds</p>
+            <p>• <strong>WINDOW FOCUS:</strong> Authentication re-checked when you return to this tab</p>
+            <p>• <strong>ROLE CHANGE:</strong> If your role changes from &apos;trainee&apos;, you&apos;ll be logged out instantly</p>
+            <p>• <strong>ACCOUNT DEACTIVATION:</strong> Deactivated accounts are detected immediately</p>
+            <p>• <strong>USER DELETION:</strong> Deleted users are logged out within 5 seconds</p>
+          </div>
+
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+            <strong>Test Instructions:</strong> Change your role in PayloadCMS admin panel, then wait 5 seconds or click &quot;Force Authentication Check&quot; to see immediate logout.
           </div>
         </div>
       </main>

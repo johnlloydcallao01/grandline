@@ -195,7 +195,39 @@ export function useAuth(allowedRole: string): AuthState {
       }
     }
 
+    // Initial authentication check
     fetchCurrentUser();
+
+    // 🕐 CRITICAL FIX: AGGRESSIVE PERIODIC VALIDATION - Check role every 5 seconds
+    // This ensures IMMEDIATE detection of role changes and user deletions
+    const roleValidationInterval = setInterval(() => {
+      console.log('🔍 AGGRESSIVE PERIODIC VALIDATION: Checking user authentication status...');
+      fetchCurrentUser();
+    }, 5000); // 5 seconds - IMMEDIATE detection for security
+
+    // 🔍 ADDITIONAL: Check on window focus/visibility change for instant detection
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔍 VISIBILITY CHANGE: Re-validating authentication...');
+        fetchCurrentUser();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🔍 WINDOW FOCUS: Re-validating authentication...');
+      fetchCurrentUser();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup interval and event listeners on unmount
+    return () => {
+      console.log('🧹 USEAUTH: Cleaning up periodic validation interval and event listeners');
+      clearInterval(roleValidationInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [allowedRole]);
 
   return {

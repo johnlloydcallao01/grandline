@@ -30,6 +30,12 @@ export type { LoginCredentials, LoginResponse } from './utils/auth-api';
 // Validation Utilities
 export { AuthValidator, ValidationUtils } from './utils/validation';
 
+// Token Blacklist System
+export { TokenBlacklist, TokenBlacklistUtils, type BlacklistedToken } from './utils/token-blacklist';
+
+// Session Heartbeat System
+export { SessionHeartbeat, SessionHeartbeatUtils, type HeartbeatConfig, type HeartbeatStatus } from './utils/session-heartbeat';
+
 // Middleware
 export {
   createAuthMiddleware,

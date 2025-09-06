@@ -317,28 +317,52 @@ export function Header({
             My Portal
           </button>
 
-          {/* Profile Dropdown - Only show when authenticated */}
-          {user && !loading && !error && (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={toggleProfileDropdown}
-                className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Profile menu"
-                aria-expanded={isProfileDropdownOpen}
-              >
+          {/* Profile Dropdown - Always visible with skeleton loading */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={toggleProfileDropdown}
+              className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Profile menu"
+              aria-expanded={isProfileDropdownOpen}
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+              ) : (
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                   {getUserInitials(user)}
                 </div>
-                <svg className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              )}
+              <svg className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-              {/* Dropdown Menu */}
-              {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  {/* User Info Section */}
-                  <div className="px-4 py-3 border-b border-gray-100">
+            {/* Dropdown Menu */}
+            {isProfileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                {/* User Info Section */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  {loading ? (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse"></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="h-4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded animate-pulse w-2/3 mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                      </div>
+                    </div>
+                  ) : error ? (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <span className="text-red-600 font-semibold">!</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-red-900">Authentication Error</p>
+                        <p className="text-xs text-red-600">Please refresh or re-login</p>
+                      </div>
+                    </div>
+                  ) : (
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                         {getUserInitials(user)}
@@ -348,19 +372,20 @@ export function Header({
                           {getFullName(user)}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
-                          {user.email}
+                          {user?.email}
                         </p>
                         <div className="flex items-center mt-1">
                           <svg className="w-3 h-3 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                           </svg>
                           <span className="text-xs text-blue-600 font-medium capitalize">
-                            {user.role}
+                            {user?.role}
                           </span>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+                </div>
 
                   {/* Menu Items */}
                   <div className="py-1">
@@ -404,7 +429,6 @@ export function Header({
                 </div>
               )}
             </div>
-          )}
         </div>
       </div>
     </header>

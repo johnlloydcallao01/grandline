@@ -41,9 +41,54 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Cookie exists, let AuthGuard handle detailed validation
-  console.log('✅ MIDDLEWARE: Auth cookie found, allowing access (AuthGuard will validate)');
-  return NextResponse.next();
+  // 🛡️ SECURITY ENHANCEMENT: Real-time role validation
+  try {
+    const apiUrl = 'https://grandline-cms.vercel.app/api';
+    const response = await fetch(`${apiUrl}/users/me`, {
+      headers: {
+        'Cookie': `payload-token=${payloadToken.value}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      const user = userData.user || userData;
+
+      // 🚨 Check if user role is still trainee
+      if (user && user.role !== 'trainee') {
+        console.log('🚨 MIDDLEWARE SECURITY: User role changed to non-trainee, blocking access');
+        console.log('Current role:', user.role);
+
+        // Clear the invalid cookie and redirect to signin
+        const response = NextResponse.redirect(new URL('/signin', request.url));
+        response.cookies.delete('payload-token');
+        return response;
+      }
+
+      // 🚨 Check if user account is still active
+      if (user && !user.isActive) {
+        console.log('🚨 MIDDLEWARE SECURITY: User account deactivated, blocking access');
+
+        // Clear the invalid cookie and redirect to signin
+        const response = NextResponse.redirect(new URL('/signin', request.url));
+        response.cookies.delete('payload-token');
+        return response;
+      }
+
+      console.log('✅ MIDDLEWARE: Auth cookie and role validated, allowing access');
+      return NextResponse.next();
+    } else {
+      console.log('❌ MIDDLEWARE: Token validation failed, redirecting to signin');
+      const response = NextResponse.redirect(new URL('/signin', request.url));
+      response.cookies.delete('payload-token');
+      return response;
+    }
+  } catch (error) {
+    console.log('⚠️ MIDDLEWARE: Error validating token, allowing access (AuthGuard will handle):', error);
+    // If API is down, let AuthGuard handle it to prevent blocking all access
+    return NextResponse.next();
+  }
 }
 
 export const config = {
