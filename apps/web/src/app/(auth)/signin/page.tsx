@@ -5,6 +5,12 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
+// Simple signin form data type
+type SigninFormData = {
+  email: string;
+  password: string;
+};
+
 
 
 /**
@@ -16,96 +22,30 @@ export default function SignInPage() {
   const router = useRouter();
 
   // 🚀 ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp] = useState(false); // Always false for signin page
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Helper function to get initial form data
+  // Helper function to get initial form data - simplified for signin only
   const getInitialFormData = () => {
     const shouldPrefill = process.env.NEXT_PUBLIC_DEBUG_FORMS === 'true';
 
     if (shouldPrefill) {
       return {
-        // Personal Information
-        firstName: 'Juan',
-        middleName: 'Ponze',
-        lastName: 'Enrile',
-        nameExtension: 'Jr',
-        gender: 'male',
-        civilStatus: 'single',
-        srn: 'SRN-343',
-        nationality: 'Filipino',
-        birthDate: '2000-12-28',
-        placeOfBirth: 'Manila, Philippines',
-        completeAddress: 'Manila, Philippines',
-
-        // Contact Information
         email: 'carlos@gmail.com',
-        phoneNumber: '+639092809767',
-
-        // Username & Password
-        username: 'juancarlos',
-        password: '@Iamachessgrandmaster23',
-        confirmPassword: '@Iamachessgrandmaster23',
-
-        // Marketing
-        couponCode: '334ssdfsdf',
-
-        // Emergency Contact
-        emergencyFirstName: 'Johny',
-        emergencyMiddleName: 'Buli',
-        emergencyLastName: 'Dana',
-        emergencyContactNumber: '+639468748743',
-        emergencyRelationship: 'relative',
-        emergencyCompleteAddress: 'Pangi, Zamboanga',
-
-        // Terms
-        agreeToTerms: true
+        password: '@Iamachessgrandmaster23'
       };
     }
 
     return {
-      // Personal Information
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      nameExtension: '',
-      gender: '',
-      civilStatus: '',
-      srn: '',
-      nationality: '',
-      birthDate: '',
-      placeOfBirth: '',
-      completeAddress: '',
-
-      // Contact Information
       email: '',
-      phoneNumber: '',
-
-      // Username & Password
-      username: '',
-      password: '',
-      confirmPassword: '',
-
-      // Marketing
-      couponCode: '',
-
-      // Emergency Contact
-      emergencyFirstName: '',
-      emergencyMiddleName: '',
-      emergencyLastName: '',
-      emergencyContactNumber: '',
-      emergencyRelationship: '',
-      emergencyCompleteAddress: '',
-
-      // Terms
-      agreeToTerms: false
+      password: ''
     };
   };
 
-  const [formData, setFormData] = useState(() => getInitialFormData());
+  const [formData, setFormData] = useState<SigninFormData>(() => getInitialFormData());
 
   // Professional error handling - no popup alerts
   const showError = (message: string) => {
@@ -114,53 +54,7 @@ export default function SignInPage() {
     setErrors({ general: message });
   };
 
-  // REMOVED: Don't hide login form - always show it
-  // This was causing redirect loops
 
-
-  // Dropdown options for form fields
-  const genderOptions = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'other', label: 'Other' },
-    { value: 'prefer_not_to_say', label: 'Prefer not to say' }
-  ];
-
-  const civilStatusOptions = [
-    { value: 'single', label: 'Single' },
-    { value: 'married', label: 'Married' },
-    { value: 'divorced', label: 'Divorced' },
-    { value: 'widowed', label: 'Widowed' },
-    { value: 'separated', label: 'Separated' }
-  ];
-
-  const relationshipOptions = [
-    { value: 'parent', label: 'Parent' },
-    { value: 'spouse', label: 'Spouse' },
-    { value: 'sibling', label: 'Sibling' },
-    { value: 'child', label: 'Child' },
-    { value: 'guardian', label: 'Guardian' },
-    { value: 'friend', label: 'Friend' },
-    { value: 'relative', label: 'Relative' },
-    { value: 'other', label: 'Other' }
-  ];
-
-  // Helper function to display field errors
-  const getFieldError = (fieldName: string) => {
-    return errors[fieldName];
-  };
-
-  const renderFieldError = (fieldName: string) => {
-    const error = getFieldError(fieldName);
-    if (!error) return null;
-
-    return (
-      <p className="mt-1 text-sm text-red-600">
-        <i className="fa fa-exclamation-circle mr-1"></i>
-        {error}
-      </p>
-    );
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -181,140 +75,63 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      if (isSignUp) {
-        // Validate form data for signup
-        const validation = validateUserRegistration(formData);
+      // Use PayloadCMS REST API for authentication
+      const response = await fetch('https://grandline-cms.vercel.app/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+        credentials: 'include', // Important for cookie handling
+      });
 
-        if (!validation.success) {
-          const newErrors: Record<string, string> = {};
-          validation.error.errors.forEach((error) => {
-            const fieldName = error.path.join('.');
-            newErrors[fieldName] = error.message;
-          });
-          setErrors(newErrors);
-          return;
-        }
+      const result = await response.json();
 
-        // CORS is completely disabled on the CMS - use direct URL
-        const registrationUrl = 'https://grandline-cms.vercel.app/api/trainee-register';
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
 
-        const response = await fetch(registrationUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
+      // Validate user role - ONLY trainee allowed
+      if (result.user.role !== 'trainee') {
+        throw new Error(`Access denied. Trainee portal requires trainee role. Current role: ${result.user.role}`);
+      }
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ REGISTRATION SUCCESS:', result.message || 'Registration successful');
+      if (!result.user.isActive) {
+        throw new Error('Account is inactive. Please contact administrator.');
+      }
 
-          // Reset form after successful registration
-          setFormData(getInitialFormData());
+      // CRITICAL FIX: Manually set the cookie for this domain since cross-domain cookies don't work
+      if (result.token) {
+        // Set the payload-token cookie for the current domain
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 30); // 30 days like professional apps
 
-          // Show success state in UI instead of popup
-          setErrors({ success: result.message || 'Registration successful! Your trainee account has been created.' });
+        document.cookie = `payload-token=${result.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
+
+        console.log('✅ LOGIN: Cookie set successfully for domain:', window.location.hostname);
+      }
+
+      // Professional redirect - immediate and seamless
+      // Minimal delay to ensure cookie is processed by browser
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get('redirect');
+        if (redirectTo) {
+          router.push(redirectTo as any);
         } else {
-          // Try to get the response text first, then parse as JSON
-          const responseText = await response.text();
-
-          let error: any;
-          try {
-            error = JSON.parse(responseText);
-          } catch (parseError) {
-            error = { error: 'Server returned invalid JSON', rawResponse: responseText };
-          }
-
-          // Show more specific error messages based on error type
-          let errorMessage = 'Registration failed. Please try again.';
-
-          if (error?.type === 'duplicate') {
-            errorMessage = error.message || `This ${error.field || 'information'} is already registered. Please use different information.`;
-          } else if (error?.type === 'validation') {
-            errorMessage = error.message || 'Please check your form data and try again.';
-
-            // If there are specific field errors, show them
-            if (error?.details && typeof error.details === 'object') {
-              // You could set specific field errors here if needed
-            }
-          } else if (error?.type === 'server_error') {
-            errorMessage = error.message || 'We encountered a server error. Please try again in a few moments.';
-          } else {
-            errorMessage = error?.error || error?.message || 'Registration failed. Please try again.';
-          }
-
-          showError(errorMessage);
+          router.push('/');
         }
-      } else {
-        // Login form - FIXED: Proper cookie handling for cross-domain authentication
-
-        try {
-          // Use PayloadCMS REST API for authentication
-          const response = await fetch('https://grandline-cms.vercel.app/api/users/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: formData.email, password: formData.password }),
-            credentials: 'include', // Important for cookie handling
-          });
-
-          const result = await response.json();
-
-          if (!response.ok) {
-            throw new Error(result.message || 'Login failed');
-          }
-
-          // Validate user role - ONLY trainee allowed
-          if (result.user.role !== 'trainee') {
-            throw new Error(`Access denied. Trainee portal requires trainee role. Current role: ${result.user.role}`);
-          }
-
-          if (!result.user.isActive) {
-            throw new Error('Account is inactive. Please contact administrator.');
-          }
-
-          // CRITICAL FIX: Manually set the cookie for this domain since cross-domain cookies don't work
-          if (result.token) {
-            // Set the payload-token cookie for the current domain
-            const expires = new Date();
-            expires.setDate(expires.getDate() + 30); // 30 days like professional apps
-
-            document.cookie = `payload-token=${result.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-
-            console.log('✅ LOGIN: Cookie set successfully for domain:', window.location.hostname);
-          }
-
-          // Professional redirect - immediate and seamless
-          // Minimal delay to ensure cookie is processed by browser
-          setTimeout(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectTo = urlParams.get('redirect');
-            if (redirectTo) {
-              router.push(redirectTo as any);
-            } else {
-              router.push('/');
-            }
-          }, 100);
-        } catch (err: unknown) {
-          const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have trainee privileges.';
-          showError(errorMessage);
-        }
-      }
+      }, 100);
     } catch (error) {
-      if (error instanceof Error) {
-      }
-      showError('An unexpected error occurred. Please try again.');
+      const errorMessage = (error as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have trainee privileges.';
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleForm = () => {
-    setIsSignUp(!isSignUp);
-    setErrors({});
-    setFormData(getInitialFormData());
+  const navigateToRegister = () => {
+    router.push('/register');
   };
 
   return (
@@ -450,26 +267,20 @@ export default function SignInPage() {
               {/* Desktop Header */}
               <div className="hidden lg:block text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {isSignUp ? 'Create Your Account' : 'Welcome Back'}
+                  Welcome Back
                 </h2>
                 <p className="text-gray-600">
-                  {isSignUp
-                    ? 'Join thousands of maritime professionals'
-                    : 'Sign in to continue your learning journey'
-                  }
+                  Sign in to continue your learning journey
                 </p>
               </div>
 
               {/* Mobile Form Header */}
               <div className="lg:hidden text-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  {isSignUp ? 'Create Account' : 'Welcome Back'}
+                  Welcome Back
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  {isSignUp
-                    ? 'Join the maritime community'
-                    : 'Sign in to your portal'
-                  }
+                  Sign in to your portal
                 </p>
               </div>
 
@@ -502,456 +313,7 @@ export default function SignInPage() {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Sign Up Fields */}
-                {isSignUp && (
-                  <div className="space-y-8">
-                    {/* Personal Information Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                        Personal Information
-                      </h3>
 
-                      {/* Name Fields */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            First Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            required
-                            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
-                              getFieldError('firstName')
-                                ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
-                                : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
-                            }`}
-                            placeholder="Juan"
-                          />
-                          {renderFieldError('firstName')}
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Middle Name (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            name="middleName"
-                            value={formData.middleName}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Carlos"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Last Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Dela Cruz"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Name Extension (e.g. Jr., II)
-                          </label>
-                          <input
-                            type="text"
-                            name="nameExtension"
-                            value={formData.nameExtension}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Jr."
-                          />
-                        </div>
-                      </div>
-
-                      {/* Gender and Civil Status */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Gender *
-                          </label>
-                          <select
-                            name="gender"
-                            value={formData.gender}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          >
-                            <option value="">Select gender</option>
-                            {genderOptions.map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Civil Status *
-                          </label>
-                          <select
-                            name="civilStatus"
-                            value={formData.civilStatus}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          >
-                            <option value="">Select civil status</option>
-                            {civilStatusOptions.map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* SRN and Nationality */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            SRN *
-                          </label>
-                          <input
-                            type="text"
-                            name="srn"
-                            value={formData.srn}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="SRN-123456"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Nationality *
-                          </label>
-                          <input
-                            type="text"
-                            name="nationality"
-                            value={formData.nationality}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Filipino"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Birth Date and Place of Birth */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Birth Date *
-                          </label>
-                          <input
-                            type="date"
-                            name="birthDate"
-                            value={formData.birthDate}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Place of Birth *
-                          </label>
-                          <input
-                            type="text"
-                            name="placeOfBirth"
-                            value={formData.placeOfBirth}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Manila, Philippines"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Complete Address */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                          Complete Address *
-                        </label>
-                        <textarea
-                          name="completeAddress"
-                          value={formData.completeAddress}
-                          onChange={handleInputChange}
-                          required
-                          rows={3}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
-                          placeholder="123 Main Street, Barangay Sample, City, Province, ZIP Code"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Contact Information Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                        Contact Information
-                      </h3>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Email *
-                          </label>
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="juan.delacruz@example.com"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Phone Number *
-                          </label>
-                          <input
-                            type="tel"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="+63 912 345 6789"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Username & Password Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                        Username & Password
-                      </h3>
-
-                      <div className="space-y-4">
-                        {/* Username and Password - 50/50 on desktop */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                              Username *
-                            </label>
-                            <input
-                              type="text"
-                              name="username"
-                              value={formData.username}
-                              onChange={handleInputChange}
-                              required
-                              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                              placeholder="juan_delacruz"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                              Password *
-                            </label>
-                            <div className="relative">
-                              <input
-                                type={showPassword ? 'text' : 'password'}
-                                name="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                                placeholder="Enter your password"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                              >
-                                <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Confirm Password - Full width */}
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Confirm Password *
-                          </label>
-                          <div className="relative">
-                            <input
-                              type={showConfirmPassword ? 'text' : 'password'}
-                              name="confirmPassword"
-                              value={formData.confirmPassword}
-                              onChange={handleInputChange}
-                              required
-                              className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                              placeholder="Confirm your password"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                              <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Marketing Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                        Marketing
-                      </h3>
-
-                      <div>
-                        <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                          Coupon Code
-                        </label>
-                        <input
-                          type="text"
-                          name="couponCode"
-                          value={formData.couponCode}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          placeholder="Enter coupon code (optional)"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Emergency Contact Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                        In Case of Emergency
-                      </h3>
-
-                      {/* Emergency Contact Name */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            First Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="emergencyFirstName"
-                            value={formData.emergencyFirstName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Maria"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Middle Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="emergencyMiddleName"
-                            value={formData.emergencyMiddleName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Santos"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Last Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="emergencyLastName"
-                            value={formData.emergencyLastName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="Dela Cruz"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Contact Number *
-                          </label>
-                          <input
-                            type="tel"
-                            name="emergencyContactNumber"
-                            value={formData.emergencyContactNumber}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                            placeholder="+63 912 345 6789"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Relationship *
-                          </label>
-                          <select
-                            name="emergencyRelationship"
-                            value={formData.emergencyRelationship}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
-                          >
-                            <option value="">Select relationship</option>
-                            {relationshipOptions.map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                            Complete Address *
-                          </label>
-                          <textarea
-                            name="emergencyCompleteAddress"
-                            value={formData.emergencyCompleteAddress}
-                            onChange={handleInputChange}
-                            required
-                            rows={3}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
-                            placeholder="456 Emergency Street, Barangay Sample, City, Province, ZIP Code"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Terms Agreement */}
-                    <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                      <input
-                        type="checkbox"
-                        name="agreeToTerms"
-                        checked={formData.agreeToTerms}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1 w-4 h-4 text-[#201a7c] border-gray-300 rounded focus:ring-[#201a7c]"
-                      />
-                      <label className="text-sm text-gray-600">
-                        I agree to the{' '}
-                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Terms of Service</a>
-                        {' '}and{' '}
-                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Privacy Policy</a>
-                      </label>
-                    </div>
-                  </div>
-                )}
 
                 {/* Sign In Fields - Email and Password for sign in only */}
                 {!isSignUp && (
@@ -1016,10 +378,10 @@ export default function SignInPage() {
                   {isLoading ? (
                     <div className="flex items-center justify-center">
                       <i className="fa fa-spinner fa-spin mr-2"></i>
-                      {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                      Signing In...
                     </div>
                   ) : (
-                    isSignUp ? 'Create Account' : 'Sign In'
+                    'Sign In'
                   )}
                 </button>
               </form>
@@ -1036,13 +398,13 @@ export default function SignInPage() {
                 </div>
                 <div className="mt-6">
                   <p className="text-sm text-gray-600">
-                    {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                    Don&apos;t have an account?
                   </p>
                   <button
-                    onClick={toggleForm}
+                    onClick={navigateToRegister}
                     className="mt-2 text-[#201a7c] font-semibold hover:text-[#1a1569] transition-colors duration-200"
                   >
-                    {isSignUp ? 'Sign In Instead' : 'Create New Account'}
+                    Create New Account
                   </button>
                 </div>
               </div>
