@@ -10,35 +10,29 @@ function useAuth(allowedRole) {
       try {
         const apiUrl = "https://grandline-cms.vercel.app/api";
         const payloadToken = document.cookie.split("; ").find((row) => row.startsWith("payload-token="))?.split("=")[1];
-        console.log("\u{1F50D} useAuth: Looking for payload-token in cookies");
-        console.log("\u{1F36A} useAuth: All cookies:", document.cookie);
-        console.log("\u{1F3AB} useAuth: Found token:", payloadToken ? "Yes" : "No");
+        if (!payloadToken) {
+          setLoading(false);
+          setUser(null);
+          setError("No authentication token found");
+          return;
+        }
         const response = await fetch(`${apiUrl}/users/me`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            ...payloadToken && { "Authorization": `Bearer ${payloadToken}` }
+            "Authorization": `Bearer ${payloadToken}`
           }
         });
-        console.log("\u{1F4E1} useAuth: API response status:", response.status);
         if (response.ok) {
           const userData = await response.json();
-          console.log("\u{1F4E6} useAuth: API response data:", userData);
           let extractedUser = null;
           if (userData.user) {
             extractedUser = userData.user;
-            console.log("\u2705 useAuth: Extracted user from userData.user");
           } else if (userData.id && userData.email) {
             extractedUser = userData;
-            console.log("\u2705 useAuth: Extracted user from userData directly");
-          } else {
-            console.error("\u274C useAuth: Could not extract user from response structure");
           }
           if (extractedUser) {
             if (extractedUser.role !== allowedRole) {
-              console.error("\u{1F6A8} SECURITY ALERT: User role changed, logging out");
-              console.error("Current role:", extractedUser.role);
-              console.error("Required role:", allowedRole);
               setSecurityAlert({
                 show: true,
                 type: "role-changed",
@@ -52,7 +46,6 @@ function useAuth(allowedRole) {
               return;
             }
             if (!extractedUser.isActive) {
-              console.error("\u{1F6A8} SECURITY ALERT: User account deactivated, logging out");
               setSecurityAlert({
                 show: true,
                 type: "account-deactivated",
@@ -72,25 +65,35 @@ function useAuth(allowedRole) {
           }
         } else {
           const errorText = await response.text();
+          if (response.status === 404 || response.status === 401 || response.status === 403) {
+            document.cookie.split(";").forEach(function(c) {
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + (/* @__PURE__ */ new Date()).toUTCString() + ";path=/");
+            });
+            setUser(null);
+            setError(`Access denied: ${response.status === 404 ? "User not found" : "Unauthorized access"}`);
+            setLoading(false);
+            return;
+          }
           setError(`Authentication failed: ${response.status} ${errorText}`);
         }
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        if (errorMessage.includes("404") || errorMessage.includes("401") || errorMessage.includes("403")) {
+          document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + (/* @__PURE__ */ new Date()).toUTCString() + ";path=/");
+          });
+          setUser(null);
+          setError("Access denied: Authentication failed");
+          setLoading(false);
+          return;
+        }
         setError(`Network error: ${err}`);
       } finally {
         setLoading(false);
       }
     }
     fetchCurrentUser();
-    const roleValidationInterval = setInterval(() => {
-      if (user) {
-        console.log("\u{1F50D} Performing periodic role validation...");
-        fetchCurrentUser();
-      }
-    }, 3e4);
-    return () => {
-      clearInterval(roleValidationInterval);
-    };
-  }, [user, allowedRole]);
+  }, [allowedRole]);
   return {
     user,
     loading,

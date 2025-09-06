@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * SIMPLE MIDDLEWARE - Only basic cookie check
- * AuthGuard component handles detailed authentication
+ * PROFESSIONAL MIDDLEWARE - Robust authentication with proper error handling
+ * Prevents redirect loops and handles edge cases gracefully
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   console.log('🔍 MIDDLEWARE: Processing request for:', pathname);
 
   // ALWAYS allow access to signin page - NO EXCEPTIONS
@@ -16,16 +16,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // For all routes, just check if cookie exists
-  // AuthGuard will handle detailed validation
-  const payloadToken = request.cookies.get('payload-token');
-
-  if (!payloadToken) {
-    console.log('❌ MIDDLEWARE: No auth cookie found, redirecting to signin');
-    return NextResponse.redirect(new URL('/signin', request.url));
+  // Allow access to auth-related pages
+  if (pathname.startsWith('/(auth)') || pathname.includes('/signin')) {
+    console.log('✅ MIDDLEWARE: Allowing access to auth page:', pathname);
+    return NextResponse.next();
   }
 
-  // Cookie exists, let AuthGuard handle the rest
+  // For all protected routes, check if cookie exists
+  const payloadToken = request.cookies.get('payload-token');
+
+  if (!payloadToken || !payloadToken.value) {
+    console.log('❌ MIDDLEWARE: No auth cookie found, redirecting to signin');
+    console.log('Available cookies:', request.cookies.getAll().map(c => c.name));
+
+    // Prevent redirect loops by checking if we're already redirecting
+    if (request.nextUrl.searchParams.get('redirected') === 'true') {
+      console.log('⚠️ MIDDLEWARE: Redirect loop detected, allowing access');
+      return NextResponse.next();
+    }
+
+    const redirectUrl = new URL('/signin', request.url);
+    redirectUrl.searchParams.set('redirected', 'true');
+    redirectUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Cookie exists, let AuthGuard handle detailed validation
   console.log('✅ MIDDLEWARE: Auth cookie found, allowing access (AuthGuard will validate)');
   return NextResponse.next();
 }

@@ -56,24 +56,34 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
         page: page.toString(),
       });
 
-      // Fetch from your CMS API using existing API_URL
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lms/courses?${params}`, {
+      // Use the correct CMS API URL
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const fullUrl = `${apiUrl}/lms/courses?${params}`;
+
+      console.log('🔍 COURSES: Fetching from:', fullUrl);
+
+      // Fetch from your CMS API
+      const response = await fetch(fullUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies for authentication
       });
+
+      console.log('📡 COURSES: Response status:', response.status);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch courses: ${response.status}`);
       }
 
       const data: CoursesResponse = await response.json();
+      console.log('📋 COURSES: Data received:', data);
 
       setCourses(data.docs || []);
       setTotalCourses(data.totalDocs || 0);
     } catch (err) {
-      console.error('Error fetching courses:', err);
+      console.error('❌ COURSES: Error fetching courses:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch courses');
       setCourses([]);
       setTotalCourses(0);

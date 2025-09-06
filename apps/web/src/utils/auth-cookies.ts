@@ -54,7 +54,6 @@ export class AuthCookieManager {
    */
   setPersistentAuthCookie(token: string, persistent: boolean = true): void {
     if (!token) {
-      console.error('❌ Cannot set auth cookie: token is required');
       return;
     }
 
@@ -79,11 +78,7 @@ export class AuthCookieManager {
       this.createSessionBackup(token, expires);
     }
 
-    console.log(`✅ Persistent auth cookie set (${persistent ? 'persistent' : 'session'})`, {
-      expires: expires.toISOString(),
-      secure: cookieOptions.secure,
-      sameSite: cookieOptions.sameSite
-    });
+
   }
 
   /**
@@ -113,7 +108,7 @@ export class AuthCookieManager {
       localStorage.removeItem(AuthCookieManager.CONFIG_KEY);
     }
 
-    console.log('✅ Auth cookie and session data cleared');
+
   }
 
   /**
@@ -135,14 +130,12 @@ export class AuthCookieManager {
 
       // Check if backup is still valid
       if (new Date() >= expirationDate) {
-        console.log('🗑️ Session backup expired, cleaning up');
         localStorage.removeItem(AuthCookieManager.BACKUP_KEY);
         return false;
       }
 
       // Verify user agent for security
       if (typeof navigator !== 'undefined' && backup.userAgent !== navigator.userAgent) {
-        console.log('🚨 Session backup user agent mismatch, security cleanup');
         localStorage.removeItem(AuthCookieManager.BACKUP_KEY);
         return false;
       }
@@ -157,14 +150,8 @@ export class AuthCookieManager {
 
       this.setCookie(AuthCookieManager.COOKIE_NAME, backup.token, cookieOptions);
       
-      console.log('✅ Session recovered from backup', {
-        expires: expirationDate.toISOString(),
-        created: backup.created
-      });
-
       return true;
     } catch (error) {
-      console.error('❌ Session recovery failed:', error);
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(AuthCookieManager.BACKUP_KEY);
       }
@@ -189,9 +176,8 @@ export class AuthCookieManager {
 
     try {
       localStorage.setItem(AuthCookieManager.BACKUP_KEY, JSON.stringify(backup));
-      console.log('💾 Session backup created');
     } catch (error) {
-      console.warn('⚠️ Failed to create session backup:', error);
+      // Silently fail - session backup is not critical
     }
   }
 

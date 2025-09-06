@@ -60,16 +60,11 @@ export function Header({
 
   const handleLogout = async () => {
     try {
-      console.log('🔄 Professional logout initiated...');
-
       // Use professional cookie manager for complete logout
       const { AuthCookies } = await import('@/utils/auth-cookies');
       AuthCookies.logout();
-
-      console.log('✅ Professional logout complete');
       router.push('/signin');
     } catch (error) {
-      console.error('❌ Logout error:', error);
       // Fallback to manual cookie clearing
       document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       router.push('/signin');

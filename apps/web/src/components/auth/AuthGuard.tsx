@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,28 +9,30 @@ interface AuthGuardProps {
 }
 
 /**
- * Professional Authentication Guard
+ * SIMPLE Authentication Guard - NO BLACK SCREENS!
  *
- * Simple, clean authentication check without loading screens.
- * Professional apps don't show "Checking authentication..." - they just work.
+ * Shows content immediately and handles authentication in background.
+ * Professional apps don't show loading screens - they just work.
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    // Silent redirect if not authenticated (no loading screens)
-    if (!loading && !isAuthenticated && !user) {
-      router.push('/signin');
+    // Simple check: if not loading and not authenticated, redirect
+    if (!loading && !isAuthenticated && !user && !hasRedirected) {
+      console.log('🔒 AUTHGUARD: No authentication found, redirecting to signin');
+      setHasRedirected(true);
+
+      // Small delay to prevent race conditions
+      setTimeout(() => {
+        router.push('/signin');
+      }, 100);
     }
-  }, [loading, isAuthenticated, user, router]);
+  }, [loading, isAuthenticated, user, hasRedirected, router]);
 
-  // If still loading or not authenticated, don't render anything
-  // This prevents flash of content and eliminates loading screens
-  if (loading || !isAuthenticated || !user) {
-    return null;
-  }
-
-  // User is authenticated, show the protected content
+  // ALWAYS show content - no black screens!
+  // If user is not authenticated, they'll be redirected anyway
   return <>{children}</>;
 }

@@ -36,7 +36,7 @@ export interface AuthState {
  */
 export function useAuth(allowedRole: string): AuthState {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(false); // Start with false for professional UX
+  const [loading, setLoading] = useState(true); // Start with true to prevent premature redirects
   const [error, setError] = useState<string | null>(null);
   const [securityAlert, setSecurityAlert] = useState<AuthState['securityAlert']>(null);
 
@@ -45,19 +45,26 @@ export function useAuth(allowedRole: string): AuthState {
       try {
         const apiUrl = 'https://grandline-cms.vercel.app/api';
 
-        // Get the payload token from cookies
+        // Get the payload token from cookies - more robust parsing
         const payloadToken = document.cookie
           .split('; ')
           .find(row => row.startsWith('payload-token='))
           ?.split('=')[1];
 
+        console.log('🔍 USEAUTH: Checking for payload-token cookie');
+        console.log('Available cookies:', document.cookie);
+        console.log('Found payload-token:', payloadToken ? 'Yes' : 'No');
+
         // If no token, set unauthenticated state
         if (!payloadToken) {
+          console.log('❌ USEAUTH: No authentication token found');
           setLoading(false);
           setUser(null);
           setError('No authentication token found');
           return;
         }
+
+        console.log('✅ USEAUTH: Token found, validating with server');
 
         const response = await fetch(`${apiUrl}/users/me`, {
           credentials: 'include',
@@ -67,8 +74,11 @@ export function useAuth(allowedRole: string): AuthState {
           }
         });
 
+        console.log('🌐 USEAUTH: Server response status:', response.status);
+
         if (response.ok) {
           const userData = await response.json();
+          console.log('📋 USEAUTH: User data received:', userData);
 
           // Handle PayloadCMS complex response structure
           let extractedUser: any = null;
@@ -81,11 +91,11 @@ export function useAuth(allowedRole: string): AuthState {
           }
 
           if (extractedUser) {
+            console.log('👤 USEAUTH: Extracted user:', extractedUser);
+
             // SECURITY CHECK: Validate current role in real-time
             if (extractedUser.role !== allowedRole) {
-              console.error('🚨 SECURITY ALERT: User role changed, logging out');
-              console.error('Current role:', extractedUser.role);
-              console.error('Required role:', allowedRole);
+              console.log('🚨 USEAUTH: Role mismatch - expected:', allowedRole, 'got:', extractedUser.role);
 
               // Show security alert
               setSecurityAlert({
@@ -107,7 +117,7 @@ export function useAuth(allowedRole: string): AuthState {
 
             // SECURITY CHECK: Validate account is still active
             if (!extractedUser.isActive) {
-              console.error('🚨 SECURITY ALERT: User account deactivated, logging out');
+              console.log('🚨 USEAUTH: Account deactivated');
 
               // Show security alert
               setSecurityAlert({
@@ -127,20 +137,18 @@ export function useAuth(allowedRole: string): AuthState {
               return;
             }
 
+            console.log('✅ USEAUTH: Authentication successful');
             setUser(extractedUser);
             setError(null);
           } else {
+            console.log('❌ USEAUTH: Unable to extract user data from response');
             setError('Unable to extract user data from response');
           }
         } else {
           const errorText = await response.text();
-          console.error('🚨 CRITICAL SECURITY: API returned error - user may be deleted or unauthorized');
-          console.error('Response status:', response.status);
-          console.error('Response text:', errorText);
 
           // CRITICAL SECURITY FIX: Handle user deletion/unauthorized access
           if (response.status === 404 || response.status === 401 || response.status === 403) {
-            console.error('🚨 SECURITY ALERT: User not found or unauthorized - forcing logout and redirect');
 
             // Clear ALL authentication cookies immediately
             document.cookie.split(";").forEach(function(c) {
@@ -153,8 +161,6 @@ export function useAuth(allowedRole: string): AuthState {
             setLoading(false);
 
             // Don't redirect immediately - let AuthGuard handle it to prevent loops
-            console.log('🚨 USER DELETED/UNAUTHORIZED: Setting unauthenticated state');
-
             return;
           }
 
@@ -162,14 +168,12 @@ export function useAuth(allowedRole: string): AuthState {
           setError(`Authentication failed: ${response.status} ${errorText}`);
         }
       } catch (err) {
-        console.error('🚨 NETWORK ERROR during authentication check:', err);
 
         // Check if this might be due to user deletion or server issues
         const errorMessage = err instanceof Error ? err.message : String(err);
 
         // If it's a fetch error that might indicate user deletion or server rejection
         if (errorMessage.includes('404') || errorMessage.includes('401') || errorMessage.includes('403')) {
-          console.error('🚨 SECURITY ALERT: Network error suggests user deletion - immediate redirect');
 
           // Clear authentication immediately
           document.cookie.split(";").forEach(function(c) {
@@ -181,8 +185,6 @@ export function useAuth(allowedRole: string): AuthState {
           setLoading(false);
 
           // Don't redirect immediately - let AuthGuard handle it
-          console.log('🚨 NETWORK AUTH ERROR: Setting unauthenticated state');
-
           return;
         }
 

@@ -94,9 +94,25 @@ export function CoursesGrid({ courses = [], isLoading = false }: CoursesGridProp
     );
   }
 
-  // Don't render if no courses
+  // Show message if no courses (don't return null - that can cause layout issues)
   if (!courses || courses.length === 0) {
-    return null;
+    return (
+      <div className="p-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+          <p className="text-gray-600">Explore our published courses</p>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses available</h3>
+          <p className="text-gray-600">Check back later for new courses.</p>
+        </div>
+      </div>
+    );
   }
 
   return (

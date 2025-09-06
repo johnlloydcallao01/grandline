@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
-import { AuthCookies } from '@/utils/auth-cookies';
+
 
 
 /**
@@ -107,13 +107,11 @@ export default function SignInPage() {
 
   const [formData, setFormData] = useState(() => getInitialFormData());
 
-  // Simple notification functions without Redux
-  const showSuccess = (message: string) => {
-    alert(`✅ ${message}`);
-  };
-
+  // Professional error handling - no popup alerts
   const showError = (message: string) => {
-    alert(`❌ ${message}`);
+    console.error('❌ LOGIN ERROR:', message);
+    // Set error state instead of showing alert
+    setErrors({ general: message });
   };
 
   // REMOVED: Don't hide login form - always show it
@@ -177,76 +175,28 @@ export default function SignInPage() {
     setErrors({});
 
     if (isLoading) {
-      console.log('⚠️ Already loading, ignoring submission');
       return;
     }
 
     setIsLoading(true);
 
-    // DIAGNOSTIC LOGGING
-    console.log('🚀 FORM SUBMISSION STARTED');
-    console.log('📋 isSignUp:', isSignUp);
-    console.log('📋 Form Data:', formData);
-    console.log('📋 isLoading:', isLoading);
-
     try {
       if (isSignUp) {
         // Validate form data for signup
-        console.log('🔍 VALIDATING FORM DATA...');
         const validation = validateUserRegistration(formData);
-        console.log('📊 Validation result:', validation);
 
         if (!validation.success) {
-          console.log('❌ VALIDATION FAILED!');
-          console.log('📋 Validation errors:', validation.error.errors);
           const newErrors: Record<string, string> = {};
           validation.error.errors.forEach((error) => {
             const fieldName = error.path.join('.');
             newErrors[fieldName] = error.message;
-            console.log(`❌ Field error: ${fieldName} = ${error.message}`);
           });
           setErrors(newErrors);
-          console.log('📋 Setting errors:', newErrors);
           return;
         }
 
-        console.log('✅ VALIDATION PASSED!');
-
         // CORS is completely disabled on the CMS - use direct URL
         const registrationUrl = 'https://grandline-cms.vercel.app/api/trainee-register';
-
-        console.log('🚀 Starting trainee registration...');
-        console.log('📍 Registration URL:', registrationUrl);
-
-        // Add a simple connectivity test
-        console.log('🔍 Testing API connectivity...');
-        try {
-          const testResponse = await fetch(registrationUrl, {
-            method: 'OPTIONS',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          console.log('✅ OPTIONS request successful:', testResponse.status);
-        } catch (optionsError) {
-          console.warn('⚠️ OPTIONS request failed:', optionsError);
-        }
-        console.log('📋 Form data being sent:', {
-          ...formData,
-          password: '[HIDDEN]',
-          confirmPassword: '[HIDDEN]'
-        });
-
-        console.log('📊 Form data summary:', {
-          hasFirstName: !!formData.firstName,
-          hasLastName: !!formData.lastName,
-          hasEmail: !!formData.email,
-          hasUsername: !!formData.username,
-          hasPassword: !!formData.password,
-          hasSRN: !!formData.srn,
-          hasEmergencyContact: !!(formData.emergencyFirstName && formData.emergencyLastName),
-          agreeToTerms: formData.agreeToTerms
-        });
 
         const response = await fetch(registrationUrl, {
           method: 'POST',
@@ -256,40 +206,25 @@ export default function SignInPage() {
           body: JSON.stringify(formData)
         });
 
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (response.ok) {
           const result = await response.json();
-          console.log('✅ Registration successful!', result);
-          console.log('🎉 User created:', {
-            id: result.data?.user?.id,
-            email: result.data?.user?.email,
-            name: `${result.data?.user?.firstName} ${result.data?.user?.lastName}`,
-            srn: result.data?.trainee?.srn
-          });
-          showSuccess(result.message || 'Registration successful! Your trainee account has been created.');
+          console.log('✅ REGISTRATION SUCCESS:', result.message || 'Registration successful');
 
           // Reset form after successful registration
           setFormData(getInitialFormData());
+
+          // Show success state in UI instead of popup
+          setErrors({ success: result.message || 'Registration successful! Your trainee account has been created.' });
         } else {
           // Try to get the response text first, then parse as JSON
           const responseText = await response.text();
-          console.error('❌ Registration failed - Raw response:', responseText);
 
           let error: any;
           try {
             error = JSON.parse(responseText);
           } catch (parseError) {
-            console.error('❌ Failed to parse error response as JSON:', parseError);
             error = { error: 'Server returned invalid JSON', rawResponse: responseText };
           }
-
-          console.error('❌ Registration failed:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: error
-          });
 
           // Show more specific error messages based on error type
           let errorMessage = 'Registration failed. Please try again.';
@@ -301,7 +236,6 @@ export default function SignInPage() {
 
             // If there are specific field errors, show them
             if (error?.details && typeof error.details === 'object') {
-              console.log('📋 Validation details:', error.details);
               // You could set specific field errors here if needed
             }
           } else if (error?.type === 'server_error') {
@@ -313,10 +247,7 @@ export default function SignInPage() {
           showError(errorMessage);
         }
       } else {
-        // Login form - EXACT same as web-admin, just trainee role
-        console.log('🔐 PayloadCMS trainee login initiated...');
-        console.log('📧 Email:', formData.email);
-        console.log('🌐 API URL:', 'https://grandline-cms.vercel.app/api');
+        // Login form - FIXED: Proper cookie handling for cross-domain authentication
 
         try {
           // Use PayloadCMS REST API for authentication
@@ -328,10 +259,6 @@ export default function SignInPage() {
             body: JSON.stringify({ email: formData.email, password: formData.password }),
             credentials: 'include', // Important for cookie handling
           });
-
-          // Log response details for debugging
-          console.log('📡 Login response status:', response.status);
-          console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
 
           const result = await response.json();
 
@@ -348,58 +275,35 @@ export default function SignInPage() {
             throw new Error('Account is inactive. Please contact administrator.');
           }
 
-          console.log('✅ PayloadCMS login successful:', {
-            email: result.user.email,
-            role: result.user.role,
-            isActive: result.user.isActive,
-            token: result.token ? 'Present' : 'Missing'
-          });
-
-          // 🚀 PROFESSIONAL PERSISTENT AUTHENTICATION
-          console.log('🍪 All cookies after login:', document.cookie);
-
+          // CRITICAL FIX: Manually set the cookie for this domain since cross-domain cookies don't work
           if (result.token) {
-            console.log('🔐 Setting up persistent authentication...');
+            // Set the payload-token cookie for the current domain
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 30); // 30 days like professional apps
 
-            // Use professional cookie manager for persistent login (30 days)
-            AuthCookies.setPersistentLogin(result.token);
+            document.cookie = `payload-token=${result.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
 
-            // Verify authentication was set
-            const isAuthenticated = AuthCookies.isAuthenticated();
-            console.log('✅ Persistent authentication set:', isAuthenticated);
-
-            // Log session info for debugging
-            const sessionInfo = AuthCookies.getSessionInfo();
-            console.log('📊 Session Info:', sessionInfo);
-
-          } else {
-            console.warn('⚠️ No token received from PayloadCMS');
+            console.log('✅ LOGIN: Cookie set successfully for domain:', window.location.hostname);
           }
 
-          console.log('🔄 Redirecting to main page...');
-
-          // Longer delay to ensure cookie is processed and available
+          // Professional redirect - immediate and seamless
+          // Minimal delay to ensure cookie is processed by browser
           setTimeout(() => {
-            // Final verification before redirect
-            const finalCookieCheck = document.cookie.includes('payload-token');
-            console.log('🔍 Final cookie check before redirect:', finalCookieCheck);
-            console.log('🍪 Final cookies:', document.cookie);
-            router.push('/'); // Redirect to your original main page
-          }, 500);
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirect');
+            if (redirectTo) {
+              router.push(redirectTo as any);
+            } else {
+              router.push('/');
+            }
+          }, 100);
         } catch (err: unknown) {
-          console.error('❌ Trainee login failed:', err);
           const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have trainee privileges.';
           showError(errorMessage);
         }
       }
     } catch (error) {
-      console.error('❌ Authentication error:', error);
       if (error instanceof Error) {
-        console.error('❌ Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
       }
       showError('An unexpected error occurred. Please try again.');
     } finally {
@@ -568,6 +472,33 @@ export default function SignInPage() {
                   }
                 </p>
               </div>
+
+              {/* General Error/Success Messages */}
+              {errors.general && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <i className="fa fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errors.general}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {errors.success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <i className="fa fa-check-circle text-green-400"></i>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-800">{errors.success}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -1079,7 +1010,7 @@ export default function SignInPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  onClick={() => console.log('🔘 BUTTON CLICKED! isSignUp:', isSignUp, 'isLoading:', isLoading)}
+
                   className="w-full bg-gradient-to-r from-[#201a7c] to-[#ab3b43] text-white py-4 px-6 rounded-xl font-semibold hover:from-[#1a1569] hover:to-[#8b2f36] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                 >
                   {isLoading ? (

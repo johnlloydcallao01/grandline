@@ -5,7 +5,7 @@ import { CategoryCarousel, VideoGrid, HeroSection, CoursesGrid } from "@/compone
 import { useCategory, useCourses } from "@/hooks";
 
 /**
- * Home page component - Main application content
+ * Home page component - RESTORED: Real course fetching
  *
  * PERFORMANCE OPTIMIZED: No artificial skeleton delays for static content.
  * Skeleton screens should only be used for dynamic content that requires network requests.
@@ -19,7 +19,7 @@ export default function Home() {
   });
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
       {/* Hero Section */}
       <HeroSection />
 
@@ -36,6 +36,6 @@ export default function Home() {
 
       {/* Video Grid */}
       <VideoGrid />
-    </>
+    </div>
   );
 }
