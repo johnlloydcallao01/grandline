@@ -9,7 +9,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "jsx": "preserve",
-    "jsxImportSource": "react",
     "paths": {
       "@/*": ["./src/*"]
     }

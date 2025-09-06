@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
+import { LoadingScreenWrapper } from "@/components/loading";
 // import { ReduxProvider } from "@encreasl/redux"; // Removed - no authentication needed
 import "./globals.css";
 
@@ -44,7 +46,97 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Instant Loading Screen - Shows immediately on page load */}
+        <div id="instant-loading-screen" className="facebook-loading-screen">
+          <div className="facebook-loading-overlay">
+            <div className="facebook-loading-content">
+              {/* Company Logo Animation */}
+              <div className="facebook-logo-container">
+                <div className="facebook-logo">
+                  {/* @ts-ignore -- Next.js Image component type issue with React 19 */}
+                  <Image
+                    src="/calsiter-inc-logo.png"
+                    alt="Calsiter Inc Logo"
+                    width={48}
+                    height={48}
+                    className="facebook-logo-image"
+                    priority
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
+
+                {/* Pulsing Ring Animation */}
+                <div className="facebook-pulse-ring"></div>
+                <div className="facebook-pulse-ring facebook-pulse-ring-delay"></div>
+              </div>
+
+              {/* Loading Text */}
+              <div className="facebook-loading-text">
+                <h2>Grandline Maritime</h2>
+                <p>Loading your experience...</p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="facebook-progress-container">
+                <div className="facebook-progress-bar">
+                  <div className="facebook-progress-fill" style={{ width: '30%' }}></div>
+                </div>
+                <div className="facebook-progress-dots">
+                  <div className="facebook-dot facebook-dot-1"></div>
+                  <div className="facebook-dot facebook-dot-2"></div>
+                  <div className="facebook-dot facebook-dot-3"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Pattern */}
+            <div className="facebook-bg-pattern">
+              <div className="facebook-bg-circle facebook-bg-circle-1"></div>
+              <div className="facebook-bg-circle facebook-bg-circle-2"></div>
+              <div className="facebook-bg-circle facebook-bg-circle-3"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hide loading screen once React loads */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Only show loading screen on full page loads (not SPA navigation)
+            (function() {
+              const isFullPageLoad = !window.performance.getEntriesByType('navigation')[0] ||
+                (window.performance.getEntriesByType('navigation')[0].type === 'reload') ||
+                (window.performance.getEntriesByType('navigation')[0].type === 'navigate');
+
+              const hasAuthCookie = document.cookie.includes('payload-token=');
+              const isAuthPage = window.location.pathname.includes('/signin') ||
+                                window.location.pathname.includes('/register');
+
+              // Hide loading screen if not needed
+              if (!isFullPageLoad || isAuthPage || !hasAuthCookie) {
+                const loadingScreen = document.getElementById('instant-loading-screen');
+                if (loadingScreen) {
+                  loadingScreen.style.display = 'none';
+                }
+              } else {
+                // Auto-hide after 3 seconds max
+                setTimeout(function() {
+                  const loadingScreen = document.getElementById('instant-loading-screen');
+                  if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.style.transition = 'opacity 0.5s ease-out';
+                    setTimeout(function() {
+                      loadingScreen.style.display = 'none';
+                    }, 500);
+                  }
+                }, 3000);
+              }
+            })();
+          `
+        }} />
+
+        <LoadingScreenWrapper>
+          {children}
+        </LoadingScreenWrapper>
       </body>
     </html>
   );

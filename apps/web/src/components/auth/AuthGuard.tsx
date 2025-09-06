@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useLoading } from '@/components/loading';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,9 +14,11 @@ interface AuthGuardProps {
  *
  * Shows content immediately and handles authentication in background.
  * Now includes real-time security alerts and instant logout on role changes.
+ * Integrates with Facebook Meta-style loading screen for smooth UX.
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, loading, isAuthenticated, error, securityAlert } = useAuth();
+  const { hideLoadingScreen, setProgress } = useLoading();
   const router = useRouter();
   const [hasRedirected, setHasRedirected] = useState(false);
 
@@ -41,11 +44,22 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [securityAlert]);
 
-  // Standard authentication check
+  // Loading screen integration with authentication flow
   useEffect(() => {
-    // Simple check: if not loading and not authenticated, redirect
-    if (!loading && !isAuthenticated && !user && !hasRedirected) {
+    if (loading) {
+      // Authentication is in progress, update loading progress
+      console.log('🔄 AUTHGUARD: Authentication in progress, updating loading progress');
+      setProgress(70); // Show progress during auth check
+    } else if (isAuthenticated && user) {
+      // Authentication successful, hide loading screen
+      console.log('✅ AUTHGUARD: Authentication successful, hiding loading screen');
+      setProgress(100);
+      hideLoadingScreen();
+    } else if (!isAuthenticated && !user && !hasRedirected) {
+      // Authentication failed, redirect to signin
       console.log('🔒 AUTHGUARD: No authentication found, redirecting to signin');
+      setProgress(100);
+      hideLoadingScreen();
       setHasRedirected(true);
 
       // Small delay to prevent race conditions
@@ -53,7 +67,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         router.push('/signin');
       }, 100);
     }
-  }, [loading, isAuthenticated, user, hasRedirected, router]);
+  }, [loading, isAuthenticated, user, hasRedirected, router, setProgress, hideLoadingScreen]);
 
   // ALWAYS show content - no black screens!
   // If user is not authenticated, they'll be redirected anyway

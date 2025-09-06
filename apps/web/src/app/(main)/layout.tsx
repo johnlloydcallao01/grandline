@@ -20,6 +20,24 @@ export default function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
 
+  // Hide instant loading screen when main app loads
+  useEffect(() => {
+    const hideInstantLoadingScreen = () => {
+      const loadingScreen = document.getElementById('instant-loading-screen');
+      if (loadingScreen) {
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.5s ease-out';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+    };
+
+    // Small delay to ensure smooth transition
+    const timer = setTimeout(hideInstantLoadingScreen, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Check if we're on desktop and update sidebar visibility accordingly
   useEffect(() => {
     const checkScreenSize = () => {
