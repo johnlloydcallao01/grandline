@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 import { AuthCookies } from '@/utils/auth-cookies';
-import { useSessionRecovery } from '@/hooks/useSessionRecovery';
+
 
 /**
  * Modern Professional Sign In / Sign Up Page
@@ -107,18 +107,6 @@ export default function SignInPage() {
 
   const [formData, setFormData] = useState(() => getInitialFormData());
 
-  // 🚀 PROFESSIONAL SESSION RECOVERY
-  const {
-    isRecovering,
-    shouldShowLogin,
-    shouldShowApp,
-    sessionInfo
-  } = useSessionRecovery({
-    redirectOnSuccess: undefined, // DISABLE AUTO REDIRECT - causes redirect loops
-    enableAutoRecovery: false,    // DISABLE AUTO RECOVERY - let user login manually
-    enableDebugLogging: process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true'
-  });
-
   // Simple notification functions without Redux
   const showSuccess = (message: string) => {
     alert(`✅ ${message}`);
@@ -127,18 +115,6 @@ export default function SignInPage() {
   const showError = (message: string) => {
     alert(`❌ ${message}`);
   };
-
-  // Show loading while recovering session
-  if (isRecovering) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
 
   // REMOVED: Don't hide login form - always show it
   // This was causing redirect loops
@@ -301,7 +277,7 @@ export default function SignInPage() {
           const responseText = await response.text();
           console.error('❌ Registration failed - Raw response:', responseText);
 
-          let error;
+          let error: any;
           try {
             error = JSON.parse(responseText);
           } catch (parseError) {

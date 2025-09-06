@@ -36,7 +36,7 @@ export interface AuthState {
  */
 export function useAuth(allowedRole: string): AuthState {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false for professional UX
   const [error, setError] = useState<string | null>(null);
   const [securityAlert, setSecurityAlert] = useState<AuthState['securityAlert']>(null);
 
@@ -51,18 +51,11 @@ export function useAuth(allowedRole: string): AuthState {
           .find(row => row.startsWith('payload-token='))
           ?.split('=')[1];
 
-        console.log('🔍 useAuth: Looking for payload-token in cookies');
-        console.log('🍪 useAuth: All cookies:', document.cookie);
-        console.log('🎫 useAuth: Found token:', payloadToken ? 'Yes' : 'No');
-
-        // CRITICAL: If no token, set state but don't redirect (let AuthGuard handle it)
+        // If no token, set unauthenticated state
         if (!payloadToken) {
-          console.log('🚨 useAuth: No token found - setting unauthenticated state');
           setLoading(false);
           setUser(null);
           setError('No authentication token found');
-
-          // Don't redirect here - let AuthGuard handle redirects to prevent loops
           return;
         }
 
@@ -74,24 +67,17 @@ export function useAuth(allowedRole: string): AuthState {
           }
         });
 
-        console.log('📡 useAuth: API response status:', response.status);
-
         if (response.ok) {
           const userData = await response.json();
-          console.log('📦 useAuth: API response data:', userData);
 
           // Handle PayloadCMS complex response structure
           let extractedUser: any = null;
           if (userData.user) {
             // Structure: { user: {...}, message: "Account", token: "..." }
             extractedUser = userData.user;
-            console.log('✅ useAuth: Extracted user from userData.user');
           } else if (userData.id && userData.email) {
             // Structure: { id, email, firstName, ... }
             extractedUser = userData;
-            console.log('✅ useAuth: Extracted user from userData directly');
-          } else {
-            console.error('❌ useAuth: Could not extract user from response structure');
           }
 
           if (extractedUser) {
@@ -208,19 +194,7 @@ export function useAuth(allowedRole: string): AuthState {
     }
 
     fetchCurrentUser();
-
-    // Set up periodic role validation (every 30 seconds)
-    const roleValidationInterval = setInterval(() => {
-      if (user) {
-        console.log('🔍 Performing periodic role validation...');
-        fetchCurrentUser();
-      }
-    }, 30000); // Check every 30 seconds
-
-    return () => {
-      clearInterval(roleValidationInterval);
-    };
-  }, [user, allowedRole]);
+  }, [allowedRole]);
 
   return {
     user,

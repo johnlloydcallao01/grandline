@@ -9,62 +9,26 @@ interface AuthGuardProps {
 }
 
 /**
- * Authentication Guard Component
- * 
- * SIMPLE LOGIC:
- * - If no user authenticated → Redirect to /signin IMMEDIATELY
- * - If user authenticated → Show children
- * - If loading → Show loading state
- * 
- * NO COMPLEX LOGIC, NO SECURITY ALERTS, JUST REDIRECT!
+ * Professional Authentication Guard
+ *
+ * Simple, clean authentication check without loading screens.
+ * Professional apps don't show "Checking authentication..." - they just work.
  */
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { user, loading, error, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    console.log('🔍 AuthGuard: Checking authentication state');
-    console.log('🔍 AuthGuard: loading:', loading);
-    console.log('🔍 AuthGuard: isAuthenticated:', isAuthenticated);
-    console.log('🔍 AuthGuard: user:', user ? 'EXISTS' : 'NULL');
-    console.log('🔍 AuthGuard: error:', error);
-
-    // Only redirect if we're sure there's no authentication
-    // Add a small delay to prevent redirect loops
+    // Silent redirect if not authenticated (no loading screens)
     if (!loading && !isAuthenticated && !user) {
-      console.log('🚨 AuthGuard: User definitely not authenticated - REDIRECT to /signin');
-
-      // Use setTimeout to prevent immediate redirect loops
-      setTimeout(() => {
-        router.push('/signin');
-      }, 100);
-      return;
+      router.push('/signin');
     }
+  }, [loading, isAuthenticated, user, router]);
 
-  }, [loading, isAuthenticated, user, error, router]);
-
-  // Show loading state while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show loading while redirecting
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to login...</p>
-        </div>
-      </div>
-    );
+  // If still loading or not authenticated, don't render anything
+  // This prevents flash of content and eliminates loading screens
+  if (loading || !isAuthenticated || !user) {
+    return null;
   }
 
   // User is authenticated, show the protected content
