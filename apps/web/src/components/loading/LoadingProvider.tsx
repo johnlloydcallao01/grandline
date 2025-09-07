@@ -22,7 +22,7 @@ interface LoadingProviderProps {
  *
  * Manages the global loading state for the Facebook Meta-style loading screen.
  * This provider:
- * - Shows loading screen ONLY on full page reloads of AUTHENTICATED pages
+ * - Shows loading screen on ALL full page reloads (authenticated AND non-authenticated)
  * - Does NOT show during signin/authentication process
  * - Does NOT interfere with SPA navigation
  * - Integrates with authentication flow for smooth transitions
@@ -38,13 +38,9 @@ export function LoadingProvider({ children }: LoadingProviderProps): JSX.Element
       navigationEntries[0].type === 'reload' ||
       navigationEntries[0].type === 'navigate';
 
-    // Check if we have authentication cookie (indicates user is likely authenticated)
-    const hasAuthCookie = document.cookie.includes('payload-token=');
-
-    // Only show loading screen on full page loads of authenticated pages
-    // This prevents showing during signin process but shows on authenticated page refreshes
-    if (isFullPageLoad && hasAuthCookie) {
-      console.log('🔄 LOADING PROVIDER: Authenticated page reload detected, showing loading screen');
+    // Show loading screen on all full page loads (authenticated AND non-authenticated)
+    if (isFullPageLoad) {
+      console.log('🔄 LOADING PROVIDER: Full page reload detected, showing loading screen');
       setIsLoading(true);
       setProgress(10); // Start with some progress
 
@@ -73,7 +69,7 @@ export function LoadingProvider({ children }: LoadingProviderProps): JSX.Element
         clearTimeout(autoHideTimeout);
       };
     } else {
-      console.log('🔄 LOADING PROVIDER: No loading screen needed (SPA nav or unauthenticated)');
+      console.log('🔄 LOADING PROVIDER: No loading screen needed (SPA navigation)');
       setIsLoading(false);
     }
   }, []); // Run once on mount

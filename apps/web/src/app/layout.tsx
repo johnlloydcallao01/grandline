@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
-import { LoadingScreenWrapper } from "@/components/loading";
+import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
 // import { ReduxProvider } from "@encreasl/redux"; // Removed - no authentication needed
 import "./globals.css";
 
@@ -98,41 +98,8 @@ export default function RootLayout({
           </div>
         </div>
 
-        {/* Hide loading screen once React loads */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            // Only show loading screen on full page loads (not SPA navigation)
-            (function() {
-              const isFullPageLoad = !window.performance.getEntriesByType('navigation')[0] ||
-                (window.performance.getEntriesByType('navigation')[0].type === 'reload') ||
-                (window.performance.getEntriesByType('navigation')[0].type === 'navigate');
-
-              const hasAuthCookie = document.cookie.includes('payload-token=');
-              const isAuthPage = window.location.pathname.includes('/signin') ||
-                                window.location.pathname.includes('/register');
-
-              // Hide loading screen if not needed
-              if (!isFullPageLoad || isAuthPage || !hasAuthCookie) {
-                const loadingScreen = document.getElementById('instant-loading-screen');
-                if (loadingScreen) {
-                  loadingScreen.style.display = 'none';
-                }
-              } else {
-                // Auto-hide after 3 seconds max
-                setTimeout(function() {
-                  const loadingScreen = document.getElementById('instant-loading-screen');
-                  if (loadingScreen) {
-                    loadingScreen.style.opacity = '0';
-                    loadingScreen.style.transition = 'opacity 0.5s ease-out';
-                    setTimeout(function() {
-                      loadingScreen.style.display = 'none';
-                    }, 500);
-                  }
-                }, 3000);
-              }
-            })();
-          `
-        }} />
+        {/* Client-side loading screen controller */}
+        <InstantLoadingController />
 
         <LoadingScreenWrapper>
           {children}
