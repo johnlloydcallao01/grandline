@@ -2,6 +2,9 @@
  * Shared TypeScript interfaces and types for the web application
  */
 
+// Re-export authentication types
+export * from './auth';
+
 export interface SidebarItemProps {
   icon: string;
   label: string;

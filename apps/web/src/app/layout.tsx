@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
-// import { ReduxProvider } from "@encreasl/redux"; // Removed - no authentication needed
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthErrorBoundary } from "@/components/auth";
+// import { ReduxProvider } from "@encreasl/redux"; // Removed - replaced with AuthProvider
 import "./globals.css";
 
 const geistSans = Geist({
@@ -101,9 +103,13 @@ export default function RootLayout({
         {/* Client-side loading screen controller */}
         <InstantLoadingController />
 
-        <LoadingScreenWrapper>
-          {children}
-        </LoadingScreenWrapper>
+        <AuthErrorBoundary>
+          <AuthProvider>
+            <LoadingScreenWrapper>
+              {children}
+            </LoadingScreenWrapper>
+          </AuthProvider>
+        </AuthErrorBoundary>
       </body>
     </html>
   );

@@ -9,3 +9,17 @@ export {
   useSimulatedLoading,
   usePageLoading
 } from './useLoading';
+
+// Authentication hooks
+export {
+  useAuth,
+  useUser,
+  useAuthActions,
+  useAuthStatus,
+  useLogin,
+  useLogout,
+  useSession,
+  useRouteProtection,
+  useAuthEvents,
+  usePermissions
+} from './useAuth';

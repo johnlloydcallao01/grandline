@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { PublicRoute } from '@/components/auth';
+import { useLogin } from '@/hooks/useAuth';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
 // Simple signin form data type
@@ -20,13 +22,13 @@ type SigninFormData = {
 
 export default function SignInPage() {
   const router = useRouter();
+  const { login, isLoading, error, clearError } = useLogin();
 
   // 🚀 ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const [isSignUp] = useState(false); // Always false for signin page
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   // Helper function to get initial form data - simplified for signin only
   const getInitialFormData = () => {
@@ -46,6 +48,15 @@ export default function SignInPage() {
   };
 
   const [formData, setFormData] = useState<SigninFormData>(() => getInitialFormData());
+
+  // Clear errors when component mounts or when auth error changes
+  useEffect(() => {
+    if (error) {
+      setErrors({ general: error });
+    } else {
+      setErrors({});
+    }
+  }, [error]);
 
   // Professional error handling - no popup alerts
   const showError = (message: string) => {
@@ -67,26 +78,40 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    clearError();
 
-    if (isLoading) {
+    // Validate form data
+    if (!formData.email || !formData.password) {
+      showError('Please fill in all required fields.');
       return;
     }
 
-    setIsLoading(true);
+    console.log('🔐 ATTEMPTING LOGIN:', formData.email);
 
     try {
-      // Authentication disabled - just show a message
-      console.log('🚫 AUTHENTICATION DISABLED: Login functionality removed');
+      // Attempt login with PayloadCMS
+      await login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // Simulate loading for UI purposes
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('✅ LOGIN SUCCESS - Authentication state will handle redirect');
 
-      // Show message that authentication is disabled
-      showError('Authentication system has been disabled. This is a demo interface only.');
+      // Store the redirect URL for the PublicRoute component to use
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirect') || '/';
+
+      if (redirectTo !== '/') {
+        sessionStorage.setItem('auth:redirectAfterLogin', redirectTo);
+      }
+
+      console.log('🔄 REDIRECT STORED:', redirectTo);
+
+      // Don't manually redirect - let the authentication system handle it
+      // The PublicRoute component will automatically redirect authenticated users
     } catch (error) {
-      showError('Authentication system is not functional.');
-    } finally {
-      setIsLoading(false);
+      console.error('❌ LOGIN ERROR:', error);
+      // Error is already handled by useLogin hook and displayed in UI
     }
   };
 
@@ -95,7 +120,8 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+    <PublicRoute>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       {/* Debug Mode Indicator */}
       {process.env.NEXT_PUBLIC_DEBUG_FORMS === 'true' && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
@@ -383,6 +409,7 @@ export default function SignInPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </PublicRoute>
   );
 }

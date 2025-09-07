@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
-// Authentication removed
+import { useUser, useLogout } from '@/hooks/useAuth';
+import { UserAvatar, UserInfo } from '@/components/auth';
 
 /**
  * Header component with navigation, search, and user controls
@@ -24,7 +25,9 @@ export function Header({
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // Authentication removed - no user data
+  // Authentication hooks
+  const { user, displayName, initials, isAuthenticated } = useUser();
+  const { logout, isLoggingOut } = useLogout();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleMyPortalClick = () => {
@@ -33,6 +36,15 @@ export function Header({
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsProfileDropdownOpen(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   // Close dropdown when clicking outside or pressing Escape
@@ -232,7 +244,7 @@ export function Header({
             My Portal
           </button>
 
-          {/* Profile Placeholder - No Authentication */}
+          {/* User Profile */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={toggleProfileDropdown}
@@ -240,52 +252,83 @@ export function Header({
               aria-label="Profile menu"
               aria-expanded={isProfileDropdownOpen}
             >
-              <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
-                U
-              </div>
+              <UserAvatar size="md" showOnlineStatus />
               <svg className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
-            {/* Dropdown Menu - No Authentication */}
+            {/* User Dropdown Menu */}
             {isProfileDropdownOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                {/* No User Info - Authentication Disabled */}
+                {/* User Info */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                      U
-                    </div>
+                    <UserAvatar size="lg" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
-                        Guest User
+                        {displayName}
                       </p>
                       <p className="text-sm text-gray-500 truncate">
-                        No authentication
+                        {user?.email}
                       </p>
-                      <div className="flex items-center mt-1">
-                        <span className="text-xs text-gray-600 font-medium">
-                          Public Access
-                        </span>
-                      </div>
+                      {user?.role && (
+                        <div className="flex items-center mt-1">
+                          <span className="text-xs text-blue-600 font-medium capitalize">
+                            {user.role}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Menu Items - No Authentication */}
+                {/* Menu Items */}
                 <div className="py-1">
                   <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    About
+                    Profile Settings
+                  </button>
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Account Settings
+                  </button>
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6v-2H4v2zM4 15h8v-2H4v2zM4 11h10V9H4v2zM4 7h12V5H4v2z" />
+                    </svg>
+                    Notifications
                   </button>
                   <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Help
+                    Help & Support
+                  </button>
+                </div>
+
+                {/* Logout Section */}
+                <div className="border-t border-gray-100 py-1">
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    {isLoggingOut ? (
+                      <svg className="w-4 h-4 mr-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    )}
+                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
                   </button>
                 </div>
               </div>
