@@ -100,19 +100,15 @@ export default function SignInPage() {
         throw new Error('Account is inactive. Please contact administrator.');
       }
 
-      // CRITICAL FIX: Manually set the cookie for this domain since cross-domain cookies don't work
+      // Set session cookie for this domain
       if (result.token) {
-        // Set the payload-token cookie for the current domain
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 30); // 30 days like professional apps
+        // Set the payload-token cookie as session cookie (expires when browser closes)
+        document.cookie = `payload-token=${result.token}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
 
-        document.cookie = `payload-token=${result.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-
-        console.log('✅ LOGIN: Cookie set successfully for domain:', window.location.hostname);
+        console.log('✅ LOGIN: Session cookie set successfully for domain:', window.location.hostname);
       }
 
-      // Professional redirect - immediate and seamless
-      // Minimal delay to ensure cookie is processed by browser
+      // Simple redirect after login
       setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectTo = urlParams.get('redirect');

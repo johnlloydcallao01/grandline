@@ -64,22 +64,14 @@ export default function LoginStatusPage() {
     );
   }
 
-  const handleLogout = async () => {
-    try {
-      console.log('🔄 Professional logout initiated...');
+  const handleLogout = () => {
+    console.log('🔄 Logout initiated...');
 
-      // Use professional cookie manager for complete logout
-      const { AuthCookies } = await import('@/utils/auth-cookies');
-      AuthCookies.logout();
+    // Clear session cookie
+    document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
-      console.log('✅ Professional logout complete');
-      router.push('/signin');
-    } catch (error) {
-      console.error('❌ Logout error:', error);
-      // Fallback to manual cookie clearing
-      document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      router.push('/signin');
-    }
+    console.log('✅ Logout complete');
+    router.push('/signin');
   };
 
   return (

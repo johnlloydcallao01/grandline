@@ -58,17 +58,10 @@ export function Header({
     };
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      // Use professional cookie manager for complete logout
-      const { AuthCookies } = await import('@/utils/auth-cookies');
-      AuthCookies.logout();
-      router.push('/signin');
-    } catch (error) {
-      // Fallback to manual cookie clearing
-      document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      router.push('/signin');
-    }
+  const handleLogout = () => {
+    // Clear session cookie
+    document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    router.push('/signin');
   };
 
   // Scroll detection for header visibility (mobile/tablet only)
@@ -402,17 +395,7 @@ export function Header({
                       </svg>
                       Account Settings
                     </button>
-                    {process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true' && (
-                      <button
-                        onClick={() => router.push('/session-debug')}
-                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Session Debug
-                      </button>
-                    )}
+
                   </div>
 
                   <div className="border-t border-gray-100 py-1">
