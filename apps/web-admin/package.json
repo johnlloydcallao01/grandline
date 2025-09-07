@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@encreasl/redux": "workspace:*",
-    "@grandline/auth-core": "workspace:*",
-    "@grandline/auth-ui": "workspace:*",
     "@lexical/code": "^0.28.0",
     "@lexical/link": "^0.28.0",
     "@lexical/list": "^0.28.0",
@@ -38,13 +36,13 @@
     "@encreasl/cms-types": "workspace:*",
     "@encreasl/env": "workspace:*",
     "@encreasl/eslint-config": "workspace:*",
-
     "@encreasl/typescript-config": "workspace:*",
     "@encreasl/ui": "workspace:*",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8",

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Header, Sidebar, MobileFooter } from '@/components/layout'
-import { AuthGuard } from '@/components/auth/AuthGuard'
 
 /**
  * Main App Layout - Persistent layout for all main app pages
@@ -71,36 +70,34 @@ export default function MainLayout({
   }
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
-        {/* Header - Persistent across all pages */}
-        <Header
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          onSearch={handleSearch}
-        />
+    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+      {/* Header - Persistent across all pages */}
+      <Header
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={toggleSidebar}
+        onSearch={handleSearch}
+      />
 
-        {/* Sidebar - Persistent across all pages */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
+      {/* Sidebar - Persistent across all pages */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={toggleSidebar}
+      />
 
-        {/* Main Content Area - Only this changes during navigation */}
-        <main
-          className={`transition-all duration-300 bg-gray-50 ${
-            sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
-          }`}
-          style={{ backgroundColor: '#f9fafb' }}
-        >
-          <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
-            {children}
-          </div>
-        </main>
+      {/* Main Content Area - Only this changes during navigation */}
+      <main
+        className={`transition-all duration-300 bg-gray-50 ${
+          sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+        }`}
+        style={{ backgroundColor: '#f9fafb' }}
+      >
+        <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+          {children}
+        </div>
+      </main>
 
-        {/* Mobile Footer - Only for main app pages */}
-        <MobileFooter />
-      </div>
-    </AuthGuard>
+      {/* Mobile Footer - Only for main app pages */}
+      <MobileFooter />
+    </div>
   )
 }

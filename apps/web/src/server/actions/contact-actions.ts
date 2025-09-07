@@ -16,10 +16,7 @@ import {
 } from '../validators/contact-schemas';
 import {
   withContactFormDefaults,
-  withValidationResult,
-  withOptionalAuth,
-  getAuthContext,
-  type AuthContext
+  withValidationResult
 } from '../middleware';
 
 // ========================================
@@ -43,16 +40,13 @@ export type ContactFormSubmission = {
  * Submit contact form data with middleware pipeline
  */
 const _submitContactForm = async (
-  validatedData: ContactFormData,
-  authContext: AuthContext
+  validatedData: ContactFormData
 ): Promise<ServerActionResult<ContactFormSubmission>> => {
-  // Create submission record with auth context
+  // Create submission record
   const submission: ContactFormSubmission = {
     id: globalThis.crypto.randomUUID(),
     data: validatedData,
     submittedAt: new Date().toISOString(),
-    ipAddress: authContext.ipAddress,
-    userAgent: authContext.userAgent,
   };
 
   // Qualify the lead using web-specific business logic
@@ -89,14 +83,11 @@ const _submitContactForm = async (
  */
 export const submitContactForm = withValidationResult(ContactFormSchema)(
   async (validatedData: any): Promise<ServerActionResult<ContactFormSubmission>> => {
-    // Get auth context
-    const authContext = await getAuthContext();
-
     // Type assertion to ensure the validated data matches our expected type
     const typedData = validatedData as ContactFormData;
 
     // Call the internal function
-    return _submitContactForm(typedData, authContext);
+    return _submitContactForm(typedData);
   }
 );
 
@@ -107,9 +98,8 @@ export const submitContactForm = withValidationResult(ContactFormSchema)(
 /**
  * Get contact form submission by ID (admin only)
  */
-const _getContactSubmission = async (
-  submissionId: string,
-  authContext: AuthContext
+export const getContactSubmission = async (
+  submissionId: string
 ): Promise<ServerActionResult<ContactFormSubmission | null>> => {
   // In a real implementation, fetch from database
   console.log('Fetching contact submission:', submissionId);
@@ -121,19 +111,11 @@ const _getContactSubmission = async (
   };
 };
 
-export const getContactSubmission = async (
-  submissionId: string
-): Promise<ServerActionResult<ContactFormSubmission | null>> => {
-  const authContext = await getAuthContext();
-  return _getContactSubmission(submissionId, authContext);
-};
-
 /**
  * List contact form submissions with pagination (admin only)
  */
-const _listContactSubmissions = async (
-  filters: { page?: number; limit?: number; status?: string } | undefined,
-  authContext: AuthContext
+export const listContactSubmissions = async (
+  filters?: { page?: number; limit?: number; status?: string }
 ): Promise<ServerActionResult<{ submissions: ContactFormSubmission[]; total: number }>> => {
   // In a real implementation, fetch from database with pagination
   console.log('Listing contact submissions with filters:', filters);
@@ -146,11 +128,4 @@ const _listContactSubmissions = async (
     },
     message: 'Contact submissions retrieved',
   };
-};
-
-export const listContactSubmissions = async (
-  filters?: { page?: number; limit?: number; status?: string }
-): Promise<ServerActionResult<{ submissions: ContactFormSubmission[]; total: number }>> => {
-  const authContext = await getAuthContext();
-  return _listContactSubmissions(filters, authContext);
 };

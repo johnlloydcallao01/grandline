@@ -75,15 +75,33 @@ export default function MenuPage() {
     setShowLogoutConfirm(true);
   };
 
-  const confirmLogout = () => {
-    console.log('🔄 Logout initiated...');
+  const confirmLogout = async () => {
+    try {
+      console.log('🔄 LOGOUT: Initiating PayloadCMS logout...');
 
-    // Clear session cookie
-    document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      // Use PayloadCMS official logout endpoint
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const response = await fetch(`${apiUrl}/users/logout`, {
+        method: 'POST',
+        credentials: 'include', // Essential for PayloadCMS HTTP-only cookie handling
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    console.log('✅ Logout complete');
-    setShowLogoutConfirm(false);
-    router.push('/signin');
+      if (response.ok) {
+        console.log('✅ LOGOUT: PayloadCMS logout successful');
+      } else {
+        console.warn('⚠️ LOGOUT: PayloadCMS logout response:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ LOGOUT: PayloadCMS logout error:', error);
+    } finally {
+      // Always redirect to signin regardless of logout response
+      console.log('🔄 LOGOUT: Redirecting to signin...');
+      setShowLogoutConfirm(false);
+      router.push('/signin');
+    }
   };
 
   return (

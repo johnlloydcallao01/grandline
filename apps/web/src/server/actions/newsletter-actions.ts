@@ -17,9 +17,7 @@ import {
 } from '../validators/newsletter-schemas';
 import {
   withNewsletterDefaults,
-  withValidationResult,
-  withOptionalAuth,
-  type AuthContext
+  withValidationResult
 } from '../middleware';
 import { checkRateLimit } from '../utils/rate-limit';
 import { validateServerRequest, handleServerError } from '../utils/server-utils';

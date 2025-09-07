@@ -75,52 +75,16 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      // Use PayloadCMS REST API for authentication
-      const response = await fetch('https://grandline-cms.vercel.app/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
-        credentials: 'include', // Important for cookie handling
-      });
+      // Authentication disabled - just show a message
+      console.log('🚫 AUTHENTICATION DISABLED: Login functionality removed');
 
-      const result = await response.json();
+      // Simulate loading for UI purposes
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
-
-      // Validate user role - ONLY trainee allowed
-      if (result.user.role !== 'trainee') {
-        throw new Error(`Access denied. Trainee portal requires trainee role. Current role: ${result.user.role}`);
-      }
-
-      if (!result.user.isActive) {
-        throw new Error('Account is inactive. Please contact administrator.');
-      }
-
-      // Set session cookie for this domain
-      if (result.token) {
-        // Set the payload-token cookie as session cookie (expires when browser closes)
-        document.cookie = `payload-token=${result.token}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-
-        console.log('✅ LOGIN: Session cookie set successfully for domain:', window.location.hostname);
-      }
-
-      // Simple redirect after login
-      setTimeout(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectTo = urlParams.get('redirect');
-        if (redirectTo) {
-          router.push(redirectTo as any);
-        } else {
-          router.push('/');
-        }
-      }, 100);
+      // Show message that authentication is disabled
+      showError('Authentication system has been disabled. This is a demo interface only.');
     } catch (error) {
-      const errorMessage = (error as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have trainee privileges.';
-      showError(errorMessage);
+      showError('Authentication system is not functional.');
     } finally {
       setIsLoading(false);
     }

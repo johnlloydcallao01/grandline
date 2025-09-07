@@ -38,17 +38,7 @@ export {
 // MIDDLEWARE
 // ========================================
 
-// Authentication middleware
-export {
-  withAuth,
-  withOptionalAuth,
-  withRequiredAuth,
-  withEmailVerification,
-  withErrorHandling,
-  withLogging,
-  type AuthContext,
-  type AuthRequirement,
-} from './middleware/auth-middleware';
+
 
 // Rate limiting middleware
 export {

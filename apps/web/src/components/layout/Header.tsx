@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
-import { useAuth, getFullName, getUserInitials } from '@/hooks/useAuth';
+// Authentication removed
 
 /**
  * Header component with navigation, search, and user controls
@@ -24,8 +24,7 @@ export function Header({
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // Get authenticated user data
-  const { user, loading, error, securityAlert } = useAuth();
+  // Authentication removed - no user data
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleMyPortalClick = () => {
@@ -58,11 +57,7 @@ export function Header({
     };
   }, []);
 
-  const handleLogout = () => {
-    // Clear session cookie
-    document.cookie = 'payload-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    router.push('/signin');
-  };
+  // Authentication removed - no logout functionality
 
   // Scroll detection for header visibility (mobile/tablet only)
   useEffect(() => {
@@ -130,79 +125,6 @@ export function Header({
 
   return (
     <>
-      {/* Security Alert Modal */}
-      {securityAlert?.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`max-w-md w-full mx-4 border rounded-lg shadow-lg ${
-            securityAlert.type === 'session-expired'
-              ? 'bg-yellow-50 border-yellow-200'
-              : securityAlert.type === 'account-deactivated'
-              ? 'bg-orange-50 border-orange-200'
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                    securityAlert.type === 'session-expired'
-                      ? 'bg-yellow-50'
-                      : securityAlert.type === 'account-deactivated'
-                      ? 'bg-orange-50'
-                      : 'bg-red-50'
-                  }`}>
-                    <svg className={`w-6 h-6 ${
-                      securityAlert.type === 'session-expired'
-                        ? 'text-yellow-600'
-                        : securityAlert.type === 'account-deactivated'
-                        ? 'text-orange-600'
-                        : 'text-red-600'
-                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <h3 className={`text-lg font-semibold ${
-                    securityAlert.type === 'session-expired'
-                      ? 'text-yellow-800'
-                      : securityAlert.type === 'account-deactivated'
-                      ? 'text-orange-800'
-                      : 'text-red-800'
-                  }`}>
-                    {securityAlert.type === 'role-changed'
-                      ? 'Access Revoked - Role Changed'
-                      : securityAlert.type === 'session-expired'
-                      ? 'Access Revoked - User Not Found'
-                      : 'Account Deactivated'}
-                  </h3>
-                </div>
-              </div>
-              <div className={`mb-4 ${
-                securityAlert.type === 'session-expired'
-                  ? 'text-yellow-700'
-                  : securityAlert.type === 'account-deactivated'
-                  ? 'text-orange-700'
-                  : 'text-red-700'
-              }`}>
-                <p className="text-sm leading-relaxed">{securityAlert.message}</p>
-              </div>
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={() => window.location.href = '/signin'}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
-                    securityAlert.type === 'session-expired'
-                      ? 'bg-yellow-600 hover:bg-yellow-700'
-                      : securityAlert.type === 'account-deactivated'
-                      ? 'bg-orange-600 hover:bg-orange-700'
-                      : 'bg-red-600 hover:bg-red-700'
-                  }`}
-                >
-                  Go to Login Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
     <header className={`lg:sticky lg:top-0 fixed top-0 left-0 right-0 bg-white z-50 lg:transition-none transition-transform duration-300 ease-in-out ${
       isHeaderVisible ? 'translate-y-0' : 'lg:translate-y-0 -translate-y-full'
     }`}>
@@ -310,108 +232,65 @@ export function Header({
             My Portal
           </button>
 
-          {/* Profile Dropdown - Always visible with skeleton loading */}
+          {/* Profile Placeholder - No Authentication */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={toggleProfileDropdown}
               className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Profile menu"
               aria-expanded={isProfileDropdownOpen}
-              disabled={loading}
             >
-              {loading ? (
-                <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
-              ) : (
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {getUserInitials(user)}
-                </div>
-              )}
+              <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
+                U
+              </div>
               <svg className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu - No Authentication */}
             {isProfileDropdownOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                {/* User Info Section */}
+                {/* No User Info - Authentication Disabled */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  {loading ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="h-4 bg-gray-300 rounded animate-pulse mb-2"></div>
-                        <div className="h-3 bg-gray-300 rounded animate-pulse w-2/3 mb-2"></div>
-                        <div className="h-3 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                      U
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        Guest User
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        No authentication
+                      </p>
+                      <div className="flex items-center mt-1">
+                        <span className="text-xs text-gray-600 font-medium">
+                          Public Access
+                        </span>
                       </div>
                     </div>
-                  ) : error ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <span className="text-red-600 font-semibold">!</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-red-900">Authentication Error</p>
-                        <p className="text-xs text-red-600">Please refresh or re-login</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                        {getUserInitials(user)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {getFullName(user)}
-                        </p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {user?.email}
-                        </p>
-                        <div className="flex items-center mt-1">
-                          <svg className="w-3 h-3 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                          </svg>
-                          <span className="text-xs text-blue-600 font-medium capitalize">
-                            {user?.role}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                  {/* Menu Items */}
-                  <div className="py-1">
-                    <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                      <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Your Profile
-                    </button>
-                    <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                      <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Account Settings
-                    </button>
-
-                  </div>
-
-                  <div className="border-t border-gray-100 py-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <svg className="w-4 h-4 mr-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Sign out
-                    </button>
                   </div>
                 </div>
-              )}
-            </div>
+
+                {/* Menu Items - No Authentication */}
+                <div className="py-1">
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    About
+                  </button>
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Help
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

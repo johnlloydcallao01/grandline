@@ -22,7 +22,7 @@ export function Header({
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   // Get authenticated user data from PayloadCMS
-  const { user, loading, error, securityAlert } = useAuth();
+  const { user, loading, error } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside or pressing Escape
@@ -68,37 +68,6 @@ export function Header({
 
   return (
     <>
-      {/* Security Alert Modal */}
-      {securityAlert?.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="max-w-md w-full mx-4 bg-red-50 border-red-200 border rounded-lg shadow-lg">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center mr-3">
-                    <Shield className="w-6 h-6 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-red-800">
-                    {securityAlert.type === 'role-changed' ? 'Access Revoked - Role Changed' : 'Account Deactivated'}
-                  </h3>
-                </div>
-              </div>
-              <div className="text-red-700 mb-4">
-                <p className="text-sm leading-relaxed">{securityAlert.message}</p>
-              </div>
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={() => window.location.href = '/admin/login'}
-                  className="px-4 py-2 text-sm font-medium text-white rounded-md transition-colors bg-red-600 hover:bg-red-700"
-                >
-                  Go to Login Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
         <div className="flex items-center justify-between px-4 py-2">
         {/* Left section */}

@@ -4,22 +4,6 @@
  */
 
 // ========================================
-// AUTHENTICATION MIDDLEWARE
-// ========================================
-
-export {
-  withAuth,
-  withOptionalAuth,
-  withRequiredAuth,
-  withEmailVerification,
-  withErrorHandling,
-  withLogging,
-  getAuthContext,
-  type AuthContext,
-  type AuthRequirement,
-} from './auth-middleware';
-
-// ========================================
 // RATE LIMITING MIDDLEWARE
 // ========================================
 
