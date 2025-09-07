@@ -155,19 +155,17 @@ export const config = {
 
 /**
  * Middleware for API routes that require authentication
+ * Note: checkAuthentication is handled client-side due to domain limitations
  */
 export async function withAuth(handler: (request: NextRequest) => Promise<NextResponse>) {
   return async (request: NextRequest) => {
-    const isAuthenticated = await checkAuthentication(request);
+    // In development with external PayloadCMS, we can't check auth server-side
+    // due to cross-domain cookie limitations. Auth is handled client-side.
     
-    if (!isAuthenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-    
-    return handler(request);
+    return NextResponse.json(
+      { error: 'Server-side auth check not available in this configuration' },
+      { status: 501 }
+    );
   };
 }
 

@@ -155,7 +155,7 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // ========================================
@@ -312,10 +312,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+  return React.createElement(
+    AuthContext.Provider,
+    { value: contextValue },
+    children
   );
 }
 

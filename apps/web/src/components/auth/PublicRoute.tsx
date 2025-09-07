@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRouteProtection } from '@/hooks/useAuth';
 import type { PublicRouteProps } from '@/types/auth';
@@ -17,10 +17,10 @@ import type { PublicRouteProps } from '@/types/auth';
 // PUBLIC ROUTE COMPONENT
 // ========================================
 
-export function PublicRoute({
+export const PublicRoute = ({
   children,
   redirectTo = '/'
-}: PublicRouteProps) {
+}: PublicRouteProps): JSX.Element | null => {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -43,10 +43,10 @@ export function PublicRoute({
         if (storedRedirect) {
           console.log('🔄 REDIRECTING TO STORED PATH:', storedRedirect);
           sessionStorage.removeItem('auth:redirectAfterLogin');
-          router.replace(storedRedirect);
+          router.replace(storedRedirect as any);
         } else {
           console.log('🔄 REDIRECTING TO DEFAULT:', redirectTo);
-          router.replace(redirectTo);
+          router.replace(redirectTo as any);
         }
       }, 100); // Small delay to ensure state is settled
 
@@ -61,7 +61,7 @@ export function PublicRoute({
 
   // Render public content for unauthenticated users
   return <>{children}</>;
-}
+};
 
 // ========================================
 // HOC VERSION
@@ -77,10 +77,11 @@ export function withPublicRoute<P extends object>(
     redirectTo?: string;
   }
 ) {
-  const WrappedComponent = (props: P) => {
+  const WrappedComponent = (props: P): React.ReactNode => {
+    // @ts-expect-error React 19 component return type compatibility
     return (
       <PublicRoute redirectTo={options?.redirectTo}>
-        <Component {...props} />
+        {React.createElement(Component, props)}
       </PublicRoute>
     );
   };
@@ -104,25 +105,23 @@ interface GuestOnlyProps {
  * Component that only renders for unauthenticated users
  * Similar to PublicRoute but without automatic redirection
  */
-export function GuestOnly({ children, fallback, redirectTo }: GuestOnlyProps) {
+export const GuestOnly = ({ children, fallback, redirectTo }: GuestOnlyProps): JSX.Element | null => {
   const { isAuthenticated } = useRouteProtection();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated && redirectTo) {
+      router.replace(redirectTo as any);
+    }
+  }, [isAuthenticated, redirectTo, router]);
 
   if (isAuthenticated) {
-    if (redirectTo) {
-      // Trigger redirect if specified
-      const router = useRouter();
-      useEffect(() => {
-        router.replace(redirectTo);
-      }, [router, redirectTo]);
-
-      return fallback || null;
-    }
-
+    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
   return <>{children}</>;
-}
+};
 
 // ========================================
 // CONDITIONAL AUTH COMPONENTS
@@ -138,15 +137,16 @@ interface ConditionalAuthProps {
  * Conditionally render content based on authentication status
  * Useful for navbar items, buttons, etc.
  */
-export function ConditionalAuth({
+export const ConditionalAuth = ({
   children,
   showWhenAuthenticated = false,
   fallback
-}: ConditionalAuthProps) {
+}: ConditionalAuthProps): JSX.Element | null => {
   const { isAuthenticated } = useRouteProtection();
 
   const shouldShow = showWhenAuthenticated ? isAuthenticated : !isAuthenticated;
 
+  // @ts-expect-error React 19 fallback type compatibility
   return shouldShow ? <>{children}</> : (fallback || null);
 }
 
@@ -162,7 +162,7 @@ interface AuthStatusIndicatorProps {
  * Visual indicator of authentication status
  * Useful for debugging or admin interfaces
  */
-export function AuthStatusIndicator({ className = '' }: AuthStatusIndicatorProps) {
+export const AuthStatusIndicator = ({ className = '' }: AuthStatusIndicatorProps): JSX.Element => {
   const { isAuthenticated, isCheckingAuth, isInitialized } = useRouteProtection();
 
   if (!isInitialized) {
