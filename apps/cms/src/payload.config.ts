@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url'
 import crypto from 'crypto'
 import { cloudinaryAdapter } from './storage/cloudinary-adapter'
 import { authLogger, createAuthLogContext } from './utils/auth-logger'
-import type { PayloadHandler } from 'payload'
+import type { PayloadRequest, PayloadHandler } from 'payload'
 // import sharp from 'sharp'
 
 import { Users } from './collections/Users'
@@ -86,7 +86,7 @@ export default buildConfig({
     {
       path: '/refresh-token',
       method: 'post',
-      handler: (async (req: any, res: any, _next: any) => {
+      handler: (async (req: PayloadRequest) => {
         const startTime = Date.now();
         const requestId = crypto.randomUUID();
         const userAgent = req.headers.get('user-agent') || 'Unknown';
@@ -106,12 +106,15 @@ export default buildConfig({
             const logContext = createAuthLogContext(requestId, req, undefined, undefined, undefined, Date.now() - startTime);
             authLogger.logRefreshFailure(logContext, 'Not authenticated', { endpoint: '/refresh-token' });
             
-            return res.status(401).json({ 
-              error: 'Authentication required',
-              code: 'UNAUTHENTICATED',
-              timestamp: new Date().toISOString(),
-              requestId 
-            });
+            return new Response(
+              JSON.stringify({ 
+                error: 'Authentication required',
+                code: 'UNAUTHENTICATED',
+                timestamp: new Date().toISOString(),
+                requestId 
+              }),
+              { status: 401, headers: { 'Content-Type': 'application/json' } }
+            );
           }
 
           // Security Check 2: Verify user is active
@@ -122,12 +125,15 @@ export default buildConfig({
               securityIssue: 'INACTIVE_ACCOUNT'
             });
             
-            return res.status(403).json({ 
-              error: 'Account is inactive',
-              code: 'ACCOUNT_INACTIVE', 
-              timestamp: new Date().toISOString(),
-              requestId
-            });
+            return new Response(
+              JSON.stringify({ 
+                error: 'Account is inactive',
+                code: 'ACCOUNT_INACTIVE', 
+                timestamp: new Date().toISOString(),
+                requestId
+              }),
+              { status: 403, headers: { 'Content-Type': 'application/json' } }
+            );
           }
 
           // Security Check 3: Verify user role (trainee access only for web app)
@@ -135,12 +141,15 @@ export default buildConfig({
             const logContext = createAuthLogContext(requestId, req, user.id, user.email, user.role, Date.now() - startTime);
             authLogger.logRoleViolation(logContext, 'trainee', user.role);
             
-            return res.status(403).json({ 
-              error: 'Access denied. Only trainees can access this application.',
-              code: 'ROLE_DENIED',
-              timestamp: new Date().toISOString(), 
-              requestId
-            });
+            return new Response(
+              JSON.stringify({ 
+                error: 'Access denied. Only trainees can access this application.',
+                code: 'ROLE_DENIED',
+                timestamp: new Date().toISOString(), 
+                requestId
+              }),
+              { status: 403, headers: { 'Content-Type': 'application/json' } }
+            );
           }
 
           // Security Check 4: Rate limiting check (basic implementation)
@@ -186,26 +195,29 @@ export default buildConfig({
           });
 
           // Enterprise-grade response
-          return res.status(200).json({
-            success: true,
-            message: 'Token refreshed successfully',
-            user: {
-              id: user.id,
-              email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              role: user.role,
-              isActive: user.isActive,
-              lastLogin: user.lastLogin,
-            },
-            token,
-            exp: expirationTimestamp,
-            issuedAt: Math.floor(now / 1000),
-            expiresIn: 30 * 24 * 60 * 60, // 30 days in seconds
-            tokenType: 'Bearer',
-            requestId,
-            responseTime
-          });
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'Token refreshed successfully',
+              user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                isActive: user.isActive,
+                lastLogin: user.lastLogin,
+              },
+              token,
+              exp: expirationTimestamp,
+              issuedAt: Math.floor(now / 1000),
+              expiresIn: 30 * 24 * 60 * 60, // 30 days in seconds
+              tokenType: 'Bearer',
+              requestId,
+              responseTime
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
 
         } catch (error) {
           const responseTime = Date.now() - startTime;
@@ -229,15 +241,18 @@ export default buildConfig({
             userAgent
           });
 
-          return res.status(500).json({
-            success: false,
-            error: 'Token refresh failed',
-            code: 'INTERNAL_SERVER_ERROR',
-            message: process.env.NODE_ENV === 'development' ? errorMessage : 'An unexpected error occurred',
-            timestamp: new Date().toISOString(),
-            requestId,
-            responseTime
-          });
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Token refresh failed',
+              code: 'INTERNAL_SERVER_ERROR',
+              message: process.env.NODE_ENV === 'development' ? errorMessage : 'An unexpected error occurred',
+              timestamp: new Date().toISOString(),
+              requestId,
+              responseTime
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
         }
       }) as PayloadHandler,
     },

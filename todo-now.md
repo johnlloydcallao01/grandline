@@ -1,390 +1,409 @@
-# PayloadCMS Authentication Implementation - COMPLETED ✅
+# Deep Analysis: 30-Day Persistent Login Implementation
 
-## Implementation Status: COMPLETE ✅
+After thoroughly examining both apps/web and apps/cms, I've identified several __critical issues__ with the current persistent login implementation that prevent true 30-day persistence.
 
-All phases of the PayloadCMS authentication implementation have been successfully completed. The enterprise-grade authentication system is now fully functional with automatic 30-day persistent sessions.
+## 🚨 CRITICAL FINDINGS
 
-### 🔧 CRITICAL FIX APPLIED:
-**Issue Identified**: Authentication was incorrectly configured for `/api/trainees/*` endpoints
-**Root Cause**: PayloadCMS authentication is configured on the `users` collection, not `trainees`
-**Solution Applied**: Updated all authentication endpoints to use `/api/users/*` with trainee role filtering
+### 1. __BROKEN AUTHENTICATION ARCHITECTURE__
 
-**Corrected API Endpoints:**
-- ✅ `/api/users/login` (was `/api/trainees/login`)
-- ✅ `/api/users/me` (was `/api/trainees/me`)
-- ✅ `/api/users/logout` (was `/api/trainees/logout`)
-- ✅ `/api/users/refresh-token` (was `/api/trainees/refresh-token`)
+The current implementation has a __fundamental architectural flaw__:
 
-**Role-Based Access Control:**
-- ✅ Only users with `role: 'trainee'` can authenticate
-- ✅ All auth functions validate trainee role
-- ✅ Middleware checks both authentication and role
-- ✅ Types updated to match actual PayloadCMS User interface
+__apps/web__ (Frontend):
 
-# PayloadCMS Authentication Implementation Plan
+- Uses __localStorage__ for token storage (30-day expiration)
+- Attempts JWT-based authentication with `Authorization: JWT ${token}` header
+- Middleware is __disabled__ due to cross-domain cookie limitations
 
-## Overview
-This plan implements enterprise-grade authentication for the `apps/web` Next.js application using PayloadCMS's official authentication methods. The implementation will focus on authenticating "trainee" users with automatic 30-day persistent sessions using PayloadCMS's cookie strategy.
+__apps/cms__ (Backend):
 
-## PayloadCMS Authentication Architecture
+- Configured for __HTTP-only cookie authentication__ (30-day expiration)
+- Custom `/refresh-token` endpoint expects cookie-based auth
+- Cookie settings: `sameSite: 'Lax'`, `secure: production`, `domain: '.vercel.app'`
 
-### Authentication Strategy: HTTP-Only Cookies
-PayloadCMS provides two main authentication strategies:
-1. **JWT Strategy** - Tokens in response body
-2. **Cookie Strategy** - HTTP-only cookies (RECOMMENDED for web apps)
+__THE PROBLEM__: The frontend and backend are using __incompatible authentication methods__. The frontend sends JWT tokens, but the backend expects HTTP-only cookies.
 
-We will use the **Cookie Strategy** as it provides:
-- Automatic CSRF protection
-- XSS protection via HTTP-only cookies
-- Seamless session management
-- Built-in refresh token handling
+### 2. __CROSS-DOMAIN AUTHENTICATION ISSUES__
 
-### Core Authentication Endpoints
-PayloadCMS automatically exposes these REST API endpoints for authenticated collections:
+__Current Setup__:
 
-```
-POST /api/trainees/login     - User login
-POST /api/trainees/logout    - User logout
-POST /api/trainees/refresh   - Refresh session
-GET  /api/trainees/me        - Get current user
-POST /api/trainees/forgot-password - Password reset
-```
+- CMS: `https://grandline-cms.vercel.app`
+- Web App: Different domain (localhost:3000 in dev)
 
-## Implementation Plan
+__Issues__:
 
-### Phase 1: Authentication Context & Utilities
+- HTTP-only cookies from `.vercel.app` domain cannot be accessed by localhost
+- Middleware authentication is completely bypassed
+- No proper session validation on protected routes
 
-#### 1.1 Create Authentication Context
-**File**: `apps/web/src/contexts/AuthContext.tsx`
-- React context for managing authentication state
-- Provides user data, loading states, and auth methods
-- Handles automatic session restoration on app load
+### 3. __SECURITY VULNERABILITIES__
 
-#### 1.2 Create Authentication Service
-**File**: `apps/web/src/lib/auth.ts`
-- Centralized authentication API calls
-- Handles cookie-based authentication with PayloadCMS
-- Implements proper error handling and type safety
-- Manages session persistence (30-day duration)
+__localStorage Token Storage__:
 
-#### 1.3 Create Authentication Types
-**File**: `apps/web/src/types/auth.ts`
-- TypeScript interfaces for user data
-- Authentication response types
-- Error handling types
+- Tokens stored in localStorage are __vulnerable to XSS attacks__
+- No automatic cleanup on browser close
+- Tokens persist even after explicit logout in some scenarios
 
-### Phase 2: Authentication Implementation
+__Missing Security Features__:
 
-#### 2.1 Authentication Service Functions
-Implement the following functions in `auth.ts`:
+- No CSRF protection
+- No proper token rotation
+- Inconsistent session validation
+
+## 📋 DETAILED TECHNICAL ANALYSIS
+
+### apps/web Authentication Flow:
 
 ```typescript
-// Core authentication functions
-login(email: string, password: string): Promise<AuthResponse>
-logout(): Promise<void>
-getCurrentUser(): Promise<User | null>
-refreshSession(): Promise<AuthResponse>
+// Login stores token in localStorage (30 days)
+localStorage.setItem('grandline_auth_token', response.token);
+localStorage.setItem('grandline_auth_expires', expirationTime.toString());
 
-// Session management
-checkAuthStatus(): Promise<boolean>
-clearAuthState(): void
+// getCurrentUser() uses JWT header (NOT cookies)
+headers: {
+  'Authorization': `JWT ${storedToken}`,
+}
+
+// Middleware is disabled - no server-side protection
+return NextResponse.next(); // Always allows access
 ```
 
-#### 2.2 Authentication Context Provider
-Implement context with:
-- User state management
-- Loading states
-- Automatic session restoration
-- Session refresh handling
-- Error state management
+### apps/cms Configuration:
 
-#### 2.3 Authentication Hooks
-**File**: `apps/web/src/hooks/useAuth.ts`
-- Custom hook for accessing auth context
-- Simplified interface for components
-- Type-safe authentication state access
-
-### Phase 3: Route Protection & Middleware
-
-#### 3.1 Authentication Middleware
-**File**: `apps/web/src/middleware.ts`
-- Protect authenticated routes
-- Redirect unauthenticated users to signin
-- Handle session validation
-- Automatic session refresh
-
-#### 3.2 Route Protection Component
-**File**: `apps/web/src/components/auth/ProtectedRoute.tsx`
-- Higher-order component for route protection
-- Loading states during authentication checks
-- Redirect logic for unauthenticated users
-
-#### 3.3 Public Route Component
-**File**: `apps/web/src/components/auth/PublicRoute.tsx`
-- Redirect authenticated users away from auth pages
-- Prevent access to signin/register when logged in
-
-### Phase 4: Update Existing Components
-
-#### 4.1 Update Sign-in Page
-**File**: `apps/web/src/app/(auth)/signin/page.tsx`
-- Remove disabled authentication logic
-- Implement actual PayloadCMS authentication
-- Add proper error handling
-- Integrate with authentication context
-
-#### 4.2 Update Layout Components
-**Files**:
-- `apps/web/src/app/layout.tsx`
-- `apps/web/src/app/(main)/layout.tsx`
-
-Updates:
-- Wrap with AuthProvider
-- Add authentication state management
-- Handle loading states
-
-#### 4.3 Create User Profile Components
-**File**: `apps/web/src/components/auth/UserProfile.tsx`
-- Display current user information
-- Logout functionality
-- Session status indicator
-
-### Phase 5: Session Management & Persistence
-
-#### 5.1 Automatic Session Restoration
-- Check authentication status on app load
-- Restore user session from HTTP-only cookies
-- Handle expired sessions gracefully
-
-#### 5.2 Session Refresh Strategy
-- Implement automatic token refresh
-- Background session validation
-- Handle refresh failures
-
-#### 5.3 30-Day Persistent Sessions
-PayloadCMS cookie configuration for long-lasting sessions:
-- Configure cookie maxAge for 30 days
-- Implement "remember me" functionality automatically
-- Handle session extension on user activity
-
-### Phase 6: Error Handling & Security
-
-#### 6.1 Error Handling
-- Network error handling
-- Authentication error messages
-- Session expiration handling
-- Graceful degradation
-
-#### 6.2 Security Measures
-- CSRF protection (built-in with cookies)
-- XSS protection (HTTP-only cookies)
-- Secure cookie configuration
-- Proper error message sanitization
-
-## Technical Implementation Details
-
-### Cookie Configuration
-PayloadCMS will be configured with:
 ```typescript
-// In PayloadCMS config (backend)
+// Users collection auth config (30 days)
 auth: {
+  tokenExpiration: 30 * 24 * 60 * 60, // 30 days in seconds
   cookies: {
-    secure: true,        // HTTPS only
-    sameSite: 'lax',     // CSRF protection
-    httpOnly: true,      // XSS protection
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  }
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Lax',
+    domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined,
+  },
+}
+
+// Custom refresh endpoint expects cookies, not JWT
+const { payload, user } = req; // Expects PayloadCMS cookie auth
+```
+
+## ❌ WHAT'S NOT WORKING
+
+1. __Token Mismatch__: Frontend sends JWT, backend expects cookies
+2. __Domain Issues__: Cross-domain cookie restrictions
+3. __No Real Persistence__: Sessions don't survive browser restart reliably
+4. __Security Gaps__: localStorage storage is insecure
+5. __Inconsistent State__: Auth state can become desynchronized
+
+## ✅ WHAT IS WORKING
+
+1. __30-day Expiration Logic__: Both systems correctly calculate 30-day periods
+2. __Role-based Access__: Proper trainee role validation
+3. __Session Monitoring__: Auto-refresh mechanisms in place
+4. __Error Handling__: Comprehensive error management
+5. __User State Management__: React context properly manages auth state
+
+
+
+
+
+
+
+
+# Enterprise-Grade 30-Day Persistent Authentication Solution
+
+## 🎯 RECOMMENDED APPROACH: Hybrid Cookie + JWT Architecture
+
+After deep analysis of your current authentication system, I recommend **Option 3: Hybrid Approach** as the most reliable and professional solution for enterprise-level web applications.
+
+## 🏆 WHY HYBRID APPROACH IS BEST
+
+### ✅ **Maximum Security**
+- HTTP-only cookies prevent XSS attacks
+- Short-lived access tokens minimize exposure
+- Refresh tokens enable secure long-term persistence
+- CSRF protection through SameSite cookies
+
+### ✅ **Enterprise Reliability**
+- Graceful token rotation
+- Automatic session recovery
+- Cross-tab synchronization
+- Proper logout handling
+
+### ✅ **Scalability**
+- Works across multiple domains
+- Supports microservices architecture
+- Easy to audit and monitor
+- Compliant with security standards
+
+## 🔧 DETAILED IMPLEMENTATION PLAN
+
+### Phase 1: Backend Authentication Infrastructure
+
+#### 1.1 PayloadCMS Configuration Updates
+```typescript
+// apps/cms/src/payload.config.ts
+auth: {
+  tokenExpiration: 15 * 60, // 15 minutes for access tokens
+  cookies: {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+    domain: process.env.COOKIE_DOMAIN,
+  },
+  strategies: [
+    {
+      name: 'jwt-access',
+      expiration: 15 * 60, // 15 minutes
+    },
+    {
+      name: 'jwt-refresh', 
+      expiration: 30 * 24 * 60 * 60, // 30 days
+    }
+  ]
 }
 ```
 
-### API Integration
-All authentication requests will use:
-- Base URL: `https://grandline-cms.vercel.app/api`
-- Collection: `trainees`
-- Credentials: `include` (for cookies)
-- Proper error handling
+#### 1.2 Custom Authentication Endpoints
+- `/api/auth/login` - Issues access + refresh tokens
+- `/api/auth/refresh` - Rotates tokens securely
+- `/api/auth/logout` - Invalidates all tokens
+- `/api/auth/verify` - Validates current session
 
-### Session Management
-- Automatic session restoration on page load
-- Background session validation
-- Graceful handling of expired sessions
-- Automatic logout on session expiration
-
-## File Structure
-```
-apps/web/src/
-├── contexts/
-│   └── AuthContext.tsx
-├── lib/
-│   └── auth.ts
-├── types/
-│   └── auth.ts
-├── hooks/
-│   └── useAuth.ts
-├── components/
-│   └── auth/
-│       ├── ProtectedRoute.tsx
-│       ├── PublicRoute.tsx
-│       └── UserProfile.tsx
-├── middleware.ts
-└── app/
-    ├── layout.tsx (updated)
-    ├── (auth)/
-    │   └── signin/
-    │       └── page.tsx (updated)
-    └── (main)/
-        └── layout.tsx (updated)
+#### 1.3 Token Management System
+```typescript
+interface TokenPair {
+  accessToken: string;    // 15 minutes, stored in memory
+  refreshToken: string;   // 30 days, HTTP-only cookie
+  expiresAt: number;
+  refreshExpiresAt: number;
+}
 ```
 
-## Environment Variables
-Already configured:
+### Phase 2: Frontend Authentication Layer
+
+#### 2.1 Secure Token Storage
+- **Access Tokens**: In-memory storage (React state)
+- **Refresh Tokens**: HTTP-only cookies (server-managed)
+- **Session State**: Encrypted localStorage for UI state only
+
+#### 2.2 Authentication Service
+```typescript
+class EnterpriseAuthService {
+  private accessToken: string | null = null;
+  private tokenExpiry: number = 0;
+  private refreshPromise: Promise<void> | null = null;
+
+  // Automatic token refresh before expiry
+  // Concurrent request handling
+  // Cross-tab synchronization
+  // Secure logout with token invalidation
+}
 ```
-NEXT_PUBLIC_API_URL=https://grandline-cms.vercel.app/api
+
+#### 2.3 Enhanced Middleware
+```typescript
+// apps/web/src/middleware.ts
+export async function middleware(request: NextRequest) {
+  // Server-side token validation
+  // Automatic refresh handling
+  // Route protection
+  // Security headers injection
+}
 ```
 
-## Testing Strategy
-1. Test authentication flow (login/logout)
-2. Test session persistence across browser sessions
-3. Test automatic session refresh
-4. Test route protection
-5. Test error handling scenarios
-6. Test 30-day session duration
+### Phase 3: Security Enhancements
 
-## Security Considerations
-- All authentication uses HTTPS
-- HTTP-only cookies prevent XSS attacks
-- CSRF protection via SameSite cookies
-- Proper error message handling
-- Session timeout handling
-- Secure cookie configuration
+#### 3.1 CSRF Protection
+- Double-submit cookie pattern
+- SameSite cookie attributes
+- Origin validation
 
-## Next Steps
-1. Implement Phase 1 (Authentication Context & Utilities)
-2. Implement Phase 2 (Authentication Implementation)
-3. Implement Phase 3 (Route Protection & Middleware)
-4. Implement Phase 4 (Update Existing Components)
-5. Implement Phase 5 (Session Management & Persistence)
-6. Implement Phase 6 (Error Handling & Security)
-7. Test all authentication flows
-8. Deploy and verify production functionality
+#### 3.2 XSS Prevention
+- Content Security Policy headers
+- HTTP-only cookie enforcement
+- Input sanitization
 
-This implementation follows PayloadCMS best practices and provides enterprise-grade authentication with automatic 30-day persistent sessions without requiring user interaction.
+#### 3.3 Session Security
+- Token rotation on refresh
+- Concurrent session limits
+- Suspicious activity detection
+
+## 📋 IMPLEMENTATION CHECKLIST
+
+### Backend Tasks
+- [ ] Update PayloadCMS auth configuration
+- [ ] Implement dual-token system
+- [ ] Create secure refresh endpoint
+- [ ] Add token blacklisting
+- [ ] Implement session monitoring
+- [ ] Add security middleware
+- [ ] Create audit logging
+
+### Frontend Tasks
+- [ ] Replace localStorage with secure storage
+- [ ] Implement in-memory token management
+- [ ] Add automatic token refresh
+- [ ] Update authentication context
+- [ ] Fix middleware authentication
+- [ ] Add cross-tab synchronization
+- [ ] Implement secure logout
+
+### Security Tasks
+- [ ] Add CSRF protection
+- [ ] Implement XSS prevention
+- [ ] Add security headers
+- [ ] Create session monitoring
+- [ ] Add rate limiting
+- [ ] Implement audit logging
+- [ ] Add suspicious activity detection
+
+### Testing Tasks
+- [ ] Unit tests for auth service
+- [ ] Integration tests for token flow
+- [ ] Security penetration testing
+- [ ] Cross-browser compatibility
+- [ ] Performance testing
+- [ ] Load testing for auth endpoints
+
+## 🚀 MIGRATION STRATEGY
+
+### Phase 1: Preparation (Week 1)
+1. Backup current authentication system
+2. Set up development environment
+3. Create feature flags for gradual rollout
+
+### Phase 2: Backend Implementation (Week 2-3)
+1. Implement dual-token system
+2. Create new authentication endpoints
+3. Add security middleware
+4. Test with existing frontend
+
+### Phase 3: Frontend Migration (Week 4-5)
+1. Update authentication service
+2. Replace storage mechanisms
+3. Fix middleware and route protection
+4. Update UI components
+
+### Phase 4: Security Hardening (Week 6)
+1. Add CSRF protection
+2. Implement XSS prevention
+3. Add monitoring and logging
+4. Security audit and testing
+
+### Phase 5: Production Deployment (Week 7)
+1. Gradual rollout with feature flags
+2. Monitor authentication metrics
+3. Performance optimization
+4. Full production deployment
+
+## 🔍 SUCCESS METRICS
+
+### Security Metrics
+- Zero XSS vulnerabilities
+- Zero CSRF attacks
+- 100% HTTP-only cookie usage
+- Complete audit trail
+
+### Performance Metrics
+- < 100ms authentication response time
+- 99.9% session availability
+- Zero authentication-related downtime
+- Seamless user experience
+
+### Reliability Metrics
+- 30-day session persistence
+- Cross-tab synchronization
+- Automatic recovery from network issues
+- Graceful error handling
+
+## 💡 ADDITIONAL RECOMMENDATIONS
+
+### 1. **Monitoring & Observability**
+- Authentication success/failure rates
+- Token refresh patterns
+- Session duration analytics
+- Security incident tracking
+
+### 2. **User Experience**
+- Silent token refresh
+- Seamless cross-tab experience
+- Clear session expiry warnings
+- Graceful offline handling
+
+### 3. **Compliance & Auditing**
+- GDPR compliance for session data
+- SOC 2 audit trail
+- PCI DSS compliance (if applicable)
+- Regular security assessments
+
+## 🎯 CONCLUSION
+
+The **Hybrid Cookie + JWT Architecture** provides the perfect balance of security, reliability, and user experience for your enterprise web application. This approach:
+
+1. **Eliminates current vulnerabilities** (localStorage XSS risks)
+2. **Provides true 30-day persistence** (secure refresh tokens)
+3. **Maintains enterprise security standards** (HTTP-only cookies, CSRF protection)
+4. **Ensures scalability** (microservices ready)
+5. **Delivers excellent UX** (seamless authentication)
+
+This solution transforms your authentication system from a security liability into a competitive advantage, providing the rock-solid foundation your enterprise application deserves.
 
 ---
 
-## ✅ IMPLEMENTATION COMPLETED
+**Next Steps**: Review this plan and let me know if you'd like me to begin implementation with any specific phase or component.
 
-### What Has Been Implemented:
 
-#### ✅ Phase 1: Authentication Context & Utilities - COMPLETE
-- **Authentication Types** (`apps/web/src/types/auth.ts`) - Complete type definitions
-- **Authentication Service** (`apps/web/src/lib/auth.ts`) - PayloadCMS API integration with cookie strategy
-- **Authentication Context** (`apps/web/src/contexts/AuthContext.tsx`) - Global state management
-- **Authentication Hooks** (`apps/web/src/hooks/useAuth.ts`) - Simplified component interface
 
-#### ✅ Phase 2: Authentication Implementation - COMPLETE
-- **Route Protection Components** (`apps/web/src/components/auth/ProtectedRoute.tsx`) - Secure route protection
-- **Public Route Components** (`apps/web/src/components/auth/PublicRoute.tsx`) - Auth page redirection
-- **User Profile Components** (`apps/web/src/components/auth/UserProfile.tsx`) - User display and logout
 
-#### ✅ Phase 3: Route Protection & Middleware - COMPLETE
-- **Next.js Middleware** (`apps/web/src/middleware.ts`) - Automatic route protection and session validation
-- **Protected Route Integration** - All main app pages are now protected
-- **Public Route Integration** - Auth pages redirect authenticated users
 
-#### ✅ Phase 4: Update Existing Components - COMPLETE
-- **Root Layout** (`apps/web/src/app/layout.tsx`) - AuthProvider integration
-- **Main Layout** (`apps/web/src/app/(main)/layout.tsx`) - Route protection wrapper
-- **Sign-in Page** (`apps/web/src/app/(auth)/signin/page.tsx`) - Real PayloadCMS authentication
-- **Header Component** (`apps/web/src/components/layout/Header.tsx`) - User profile and logout
 
-#### ✅ Phase 5: Session Management & Persistence - COMPLETE
-- **Automatic Session Restoration** - Users stay logged in across browser sessions
-- **30-Day Persistent Sessions** - Automatic session extension without user interaction
-- **Background Session Refresh** - Maintains sessions automatically every 25 minutes
-- **Session Monitoring** - Detects and handles session expiration gracefully
 
-#### ✅ Phase 6: Error Handling & Security - COMPLETE
-- **Error Boundary** (`apps/web/src/components/auth/AuthErrorBoundary.tsx`) - Comprehensive error handling
-- **Network Error Handling** - Graceful degradation for connection issues
-- **Security Measures** - HTTP-only cookies, CSRF protection, XSS prevention
-- **Professional Error Messages** - User-friendly error display
 
-### Key Features Implemented:
 
-1. **🔐 Enterprise-Grade Security**
-   - HTTP-only cookies for XSS protection
-   - CSRF protection via SameSite cookies
-   - Secure session management
-   - Proper error message sanitization
+# Authentication Persistence Issue Analysis
+After analyzing your codebase, I've identified why users are being logged out after a few hours instead of persisting for the intended 30 days on https://grandline-web.vercel.app/ .
 
-2. **⏰ Automatic 30-Day Sessions**
-   - No "Remember Me" checkbox needed
-   - Automatic session refresh every 25 minutes
-   - Session persistence across browser restarts
-   - Graceful session expiration handling
+## Root Cause
+The issue is with the cookie domain configuration in your CMS authentication system. In apps/cms/src/collections/Users.ts , the cookie domain is set to:
 
-3. **🛡️ Complete Route Protection**
-   - Middleware-level authentication checks
-   - Automatic redirects for unauthenticated users
-   - Protected main app routes
-   - Public auth pages with redirect logic
+This is causing two critical problems:
 
-4. **👤 Professional User Experience**
-   - User avatar and profile display
-   - Seamless login/logout experience
-   - Loading states and error handling
-   - Real-time authentication status
+1. 1.
+   Overly Broad Domain Setting : The .vercel.app domain is too broad and doesn't properly scope cookies to your specific application domains.
+2. 2.
+   Token Storage Mismatch : Your system uses a hybrid approach:
+   
+   - The CMS sets HTTP-only cookies with the domain .vercel.app
+   - The web app stores tokens in localStorage with a 30-day expiration
+   - The refresh mechanism tries to use both systems but fails in production
+## Authentication Flow Issues
+1. 1.
+   Your authentication system is correctly configured to use a 30-day token expiration in both:
+   
+   - CMS configuration: tokenExpiration: 30 * 24 * 60 * 60 (30 days in seconds)
+   - Web app localStorage: const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000) (30 days)
+2. 2.
+   The refresh token mechanism is implemented but fails because:
+   
+   - The web app tries to refresh the token every 25 minutes via startSessionMonitoring()
+   - The refresh endpoint requires authentication which fails when cookies are not properly maintained
+   - Cross-domain cookie issues between grandline-web.vercel.app and grandline-cms.vercel.app
+## Solution
+You need to update the cookie domain configuration in the CMS to properly handle your production domains:
 
-5. **🔧 Developer Experience**
-   - TypeScript support throughout
-   - Comprehensive error boundaries
-   - Authentication test page (`/auth-test`)
-   - Event-driven architecture
-
-### File Structure Created:
+1. 1.
+   Modify apps/cms/src/collections/Users.ts to use a more specific domain configuration:
 ```
-apps/web/src/
-├── types/
-│   └── auth.ts ✅
-├── lib/
-│   └── auth.ts ✅
-├── contexts/
-│   └── AuthContext.tsx ✅
-├── hooks/
-│   └── useAuth.ts ✅
-├── components/
-│   └── auth/
-│       ├── ProtectedRoute.tsx ✅
-│       ├── PublicRoute.tsx ✅
-│       ├── UserProfile.tsx ✅
-│       ├── AuthErrorBoundary.tsx ✅
-│       └── index.ts ✅
-├── middleware.ts ✅
-└── app/
-    ├── layout.tsx ✅ (updated)
-    ├── (auth)/
-    │   └── signin/
-    │       └── page.tsx ✅ (updated)
-    ├── (main)/
-    │   ├── layout.tsx ✅ (updated)
-    │   └── auth-test/
-    │       └── page.tsx ✅ (new)
-    └── components/layout/
-        └── Header.tsx ✅ (updated)
+cookies: {
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'None', // Changed from 'Lax' to 
+  allow cross-domain
+  domain: process.env.NODE_ENV === 'production' 
+    ? process.env.COOKIE_DOMAIN || '.
+    grandline-web.vercel.app' 
+    : undefined,
+},
 ```
-
-### Testing:
-- **Authentication Test Page**: Visit `/auth-test` to verify all authentication functions
-- **Route Protection**: Try accessing protected routes without authentication
-- **Session Persistence**: Close and reopen browser to test session restoration
-- **Logout Functionality**: Test logout from header dropdown
-
-### Next Steps:
-1. **Test the implementation** by running the development server
-2. **Verify PayloadCMS connection** by attempting to sign in with trainee credentials
-3. **Test session persistence** by closing and reopening the browser
-4. **Verify route protection** by accessing protected routes without authentication
-5. **Deploy to production** and test with the live PayloadCMS instance
-
-The authentication system is now production-ready and follows all PayloadCMS best practices for enterprise-grade security and user experience.
+2. 1.
+   Add a COOKIE_DOMAIN environment variable to your CMS deployment with the value .grandline-web.vercel.app or the appropriate domain for your production environment.
+3. 2.
+   Ensure your web app's environment has the correct API URL (which it does: NEXT_PUBLIC_API_URL=https://grandline-cms.vercel.app/api ).
+These changes will ensure that authentication cookies are properly scoped to your domain and can be maintained across sessions, allowing the 30-day persistence to work correctly.
