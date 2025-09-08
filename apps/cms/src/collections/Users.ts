@@ -7,7 +7,18 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'firstName', 'lastName', 'role'],
   },
-  auth: true,
+  auth: {
+    tokenExpiration: 30 * 24 * 60 * 60, // 30 days in seconds (2,592,000 seconds)
+    maxLoginAttempts: 5,
+    lockTime: 600 * 1000, // 10 minutes in milliseconds
+    useAPIKey: false,
+    depth: 2,
+    cookies: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined,
+    },
+  },
   access: {
     read: () => true, // Allow reading user data
     create: adminOnly, // Only admins can create users

@@ -266,20 +266,65 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 /**
- * Refresh user session
- * Extends session duration using PayloadCMS refresh endpoint
+ * Refresh user session with enterprise-grade error handling and token management
+ * Extends session duration using PayloadCMS custom refresh endpoint
  * Only allows users with 'trainee' role
  */
 export async function refreshSession(): Promise<AuthResponse> {
+  const startTime = Date.now();
+  console.log('🔄 INITIATING TOKEN REFRESH...');
+
   try {
+    // Check if we have a valid token to refresh
+    const currentToken = localStorage.getItem('grandline_auth_token');
+    if (!currentToken) {
+      console.log('❌ REFRESH FAILED: No current token available');
+      throw new Error('No authentication token available for refresh');
+    }
+
+    // Make refresh request to the new enterprise endpoint
     const response = await makeAuthRequest<PayloadAuthResponse>('/refresh-token', {
       method: 'POST',
     });
 
-    // Check if user has trainee role
+    console.log('📋 REFRESH RESPONSE RECEIVED:', {
+      hasUser: !!response.user,
+      hasToken: !!response.token,
+      userRole: response.user?.role,
+      responseTime: `${Date.now() - startTime}ms`
+    });
+
+    // Security validation: Check if user has trainee role
     if (response.user.role !== 'trainee') {
+      console.log('❌ REFRESH DENIED: Invalid role', response.user.role);
+      clearAuthState(); // Clear invalid session
       throw new Error('Access denied. Only trainees can access this application.');
     }
+
+    // Update localStorage with new token and expiration
+    if (response.token) {
+      console.log('💾 UPDATING STORED TOKEN...');
+      localStorage.setItem('grandline_auth_token', response.token);
+      
+      // Update expiration time (30 days from now)
+      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+      
+      console.log('✅ TOKEN REFRESH SUCCESS:', {
+        email: response.user.email,
+        expiresAt: new Date(expirationTime).toISOString(),
+        responseTime: `${Date.now() - startTime}ms`
+      });
+    } else {
+      console.warn('⚠️ REFRESH WARNING: No token in response');
+    }
+
+    // Emit refresh success event
+    emitAuthEvent('session_refreshed', {
+      user: response.user,
+      timestamp: new Date().toISOString(),
+      responseTime: Date.now() - startTime
+    });
 
     return {
       message: response.message,
@@ -287,7 +332,44 @@ export async function refreshSession(): Promise<AuthResponse> {
       token: response.token,
       exp: response.exp,
     };
+
   } catch (error) {
+    const responseTime = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Token refresh failed';
+    
+    console.error('❌ TOKEN REFRESH FAILED:', {
+      error: errorMessage,
+      responseTime: `${responseTime}ms`,
+      hasStoredToken: !!localStorage.getItem('grandline_auth_token')
+    });
+
+    // Enhanced error handling with graceful degradation
+    if (errorMessage.includes('Authentication required') || 
+        errorMessage.includes('Invalid email or password') ||
+        errorMessage.includes('Access denied')) {
+      // These are authentication failures - clear state
+      console.log('🧹 CLEARING AUTH STATE due to authentication failure');
+      clearAuthState();
+    } else if (errorMessage.includes('Network connection failed')) {
+      // Network error - don't clear state, just throw error
+      console.log('📡 NETWORK ERROR during refresh - keeping current state');
+    } else {
+      // Unknown error - log but check if we still have a valid token
+      const hasValidToken = hasValidStoredToken();
+      console.log('❓ UNKNOWN REFRESH ERROR - token still valid?', hasValidToken);
+      
+      if (!hasValidToken) {
+        clearAuthState();
+      }
+    }
+
+    // Emit refresh failure event
+    emitAuthEvent('session_refresh_failed', {
+      error: errorMessage,
+      timestamp: new Date().toISOString(),
+      responseTime
+    });
+
     const authError = handleApiError(error);
     throw new Error(authError.message);
   }
