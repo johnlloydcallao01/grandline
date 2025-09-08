@@ -356,54 +356,110 @@ This solution transforms your authentication system from a security liability in
 
 
 
+# 🔍 UPDATED ANALYSIS: 30-Day Persistent Authentication Status
 
+## ✅ COOKIE DOMAIN ISSUE - RESOLVED
 
-# Authentication Persistence Issue Analysis
-After analyzing your codebase, I've identified why users are being logged out after a few hours instead of persisting for the intended 30 days on https://grandline-web.vercel.app/ .
+**Previous Issue**: Cookie domain was hardcoded to `.vercel.app` which caused cross-domain authentication failures.
 
-## Root Cause
-The issue is with the cookie domain configuration in your CMS authentication system. In apps/cms/src/collections/Users.ts , the cookie domain is set to:
-
-This is causing two critical problems:
-
-1. 1.
-   Overly Broad Domain Setting : The .vercel.app domain is too broad and doesn't properly scope cookies to your specific application domains.
-2. 2.
-   Token Storage Mismatch : Your system uses a hybrid approach:
-   
-   - The CMS sets HTTP-only cookies with the domain .vercel.app
-   - The web app stores tokens in localStorage with a 30-day expiration
-   - The refresh mechanism tries to use both systems but fails in production
-## Authentication Flow Issues
-1. 1.
-   Your authentication system is correctly configured to use a 30-day token expiration in both:
-   
-   - CMS configuration: tokenExpiration: 30 * 24 * 60 * 60 (30 days in seconds)
-   - Web app localStorage: const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000) (30 days)
-2. 2.
-   The refresh token mechanism is implemented but fails because:
-   
-   - The web app tries to refresh the token every 25 minutes via startSessionMonitoring()
-   - The refresh endpoint requires authentication which fails when cookies are not properly maintained
-   - Cross-domain cookie issues between grandline-web.vercel.app and grandline-cms.vercel.app
-## Solution
-You need to update the cookie domain configuration in the CMS to properly handle your production domains:
-
-1. 1.
-   Modify apps/cms/src/collections/Users.ts to use a more specific domain configuration:
+**Current Status**: ✅ **FIXED** - Cookie domain now dynamically derives from `CMS_PROD_URL`:
+```typescript
+// apps/cms/src/collections/Users.ts
+domain: process.env.NODE_ENV === 'production' && process.env.CMS_PROD_URL 
+  ? '.' + new URL(process.env.CMS_PROD_URL).hostname.split('.').slice(-2).join('.') 
+  : undefined,
 ```
-cookies: {
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'None', // Changed from 'Lax' to 
-  allow cross-domain
-  domain: process.env.NODE_ENV === 'production' 
-    ? process.env.COOKIE_DOMAIN || '.
-    grandline-web.vercel.app' 
-    : undefined,
-},
-```
-2. 1.
-   Add a COOKIE_DOMAIN environment variable to your CMS deployment with the value .grandline-web.vercel.app or the appropriate domain for your production environment.
-3. 2.
-   Ensure your web app's environment has the correct API URL (which it does: NEXT_PUBLIC_API_URL=https://grandline-cms.vercel.app/api ).
-These changes will ensure that authentication cookies are properly scoped to your domain and can be maintained across sessions, allowing the 30-day persistence to work correctly.
+
+**Result**: With `CMS_PROD_URL=https://cms.grandlinemaritime.com`, cookies are now correctly set for `.grandlinemaritime.com` domain.
+
+## 🚨 REMAINING CRITICAL AUTHENTICATION ISSUES
+
+### 1. **FUNDAMENTAL ARCHITECTURE MISMATCH** - ❌ NOT RESOLVED
+
+The core authentication architecture still has the same fundamental flaw:
+
+**Frontend (apps/web)**:
+- ✅ Uses localStorage for 30-day token storage
+- ✅ Sends `Authorization: JWT ${token}` headers
+- ❌ Middleware authentication is **completely disabled**
+- ❌ No server-side session validation
+
+**Backend (apps/cms)**:
+- ✅ Configured for HTTP-only cookie authentication (30 days)
+- ✅ Custom `/refresh-token` endpoint expects cookie-based auth
+- ❌ **MISMATCH**: Expects cookies but frontend sends JWT headers
+
+### 2. **AUTHENTICATION FLOW ANALYSIS**
+
+**Current Domain Setup**:
+- Web App: `https://app.grandlinemaritime.com`
+- CMS: `https://cms.grandlinemaritime.com`
+- Cookie Domain: `.grandlinemaritime.com` ✅
+
+**Authentication Flow Issues**:
+1. **Login Process**: ✅ Works correctly
+   - User logs in via `cms.grandlinemaritime.com/api/users/login`
+   - CMS sets HTTP-only cookie for `.grandlinemaritime.com`
+   - Frontend stores JWT token in localStorage
+
+2. **Session Validation**: ❌ **BROKEN**
+   - Frontend uses `Authorization: JWT ${token}` header
+   - CMS `/users/me` endpoint expects cookie authentication
+   - **Result**: Authentication requests may fail intermittently
+
+3. **Token Refresh**: ❌ **BROKEN**
+   - Frontend calls `/refresh-token` endpoint
+   - Endpoint expects authenticated cookie session
+   - **Result**: Refresh fails, user gets logged out
+
+### 3. **WHY USERS STILL GET LOGGED OUT**
+
+Even with the cookie domain fix, users will still experience logout issues because:
+
+1. **Inconsistent Authentication Methods**:
+   - The refresh mechanism relies on cookies
+   - But the main authentication uses JWT headers
+   - This creates authentication state mismatches
+
+2. **Middleware Bypass**:
+   ```typescript
+   // apps/web/src/middleware.ts - Line 108-115
+   // For protected routes, let the client-side ProtectedRoute component handle the auth check
+   // This is necessary because PayloadCMS cookies are set for grandline-cms.vercel.app domain
+   return NextResponse.next(); // Always allows access
+   ```
+
+3. **Session Monitoring Issues**:
+   - The `startSessionMonitoring()` function tries to refresh every 25 minutes
+   - But refresh endpoint authentication is unreliable
+   - Results in session expiration despite valid localStorage tokens
+
+## 🎯 CURRENT AUTHENTICATION STATUS
+
+### ✅ What's Working:
+- Cookie domain is correctly set to `.grandlinemaritime.com`
+- 30-day token expiration is properly configured
+- Login process works correctly
+- Role-based access control functions
+- localStorage token storage works
+
+### ❌ What's Still Broken:
+- **Token refresh mechanism fails**
+- **Inconsistent authentication methods**
+- **No server-side route protection**
+- **Session state can become desynchronized**
+- **Users still get logged out after hours/days**
+
+## 🔧 CONCLUSION
+
+**Has the cookie domain fix solved the 30-day persistence issue?**
+
+**Answer: ❌ NO - Only partially resolved**
+
+While the cookie domain fix was necessary and correct, it has **NOT** fully solved the 30-day persistence problem. The fundamental authentication architecture mismatch remains:
+
+- The system still uses incompatible authentication methods (JWT headers vs HTTP-only cookies)
+- The refresh mechanism is still broken
+- Users will continue to experience premature logouts
+
+**The cookie domain fix was a prerequisite, but the core authentication architecture still needs to be redesigned to achieve true 30-day persistence.**

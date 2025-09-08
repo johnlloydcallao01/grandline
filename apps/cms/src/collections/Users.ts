@@ -16,8 +16,8 @@ export const Users: CollectionConfig = {
     cookies: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
-      domain: process.env.NODE_ENV === 'production' && process.env.CMS_PROD_URL 
-        ? '.' + new URL(process.env.CMS_PROD_URL).hostname.split('.').slice(-2).join('.') 
+      domain: process.env.NODE_ENV === 'production' 
+        ? process.env.COOKIE_DOMAIN 
         : undefined,
     },
   },
