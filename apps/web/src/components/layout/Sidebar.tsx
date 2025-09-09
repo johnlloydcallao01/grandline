@@ -42,13 +42,7 @@ export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
               collapsed={!isOpen}
               href="/"
             />
-            <SidebarItem
-              icon="courses"
-              label="Courses"
-              active={pathname === '/courses'}
-              collapsed={!isOpen}
-              href="/courses"
-            />
+
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}

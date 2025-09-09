@@ -19,10 +19,10 @@ export function MobileFooter() {
       path: '/',
     },
     {
-      id: 'courses',
-      label: 'Courses',
-      icon: <i className="fa fa-graduation-cap text-lg"></i>,
-      path: '/courses',
+      id: 'wishlists',
+      label: 'Wishlists',
+      icon: <i className="fa fa-heart text-lg"></i>,
+      path: '/wishlists',
     },
     {
       id: 'portal',

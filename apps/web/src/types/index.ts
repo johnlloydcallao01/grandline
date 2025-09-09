@@ -49,7 +49,6 @@ export interface LayoutProps {
 // Icon mapping type
 export type IconName =
   | 'home'
-  | 'courses'
   | 'trending'
   | 'music'
   | 'gaming'

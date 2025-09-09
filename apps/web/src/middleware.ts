@@ -17,7 +17,6 @@ const COLLECTION_SLUG = 'users'; // Authentication is on users collection, not t
 // Routes that require authentication
 const PROTECTED_ROUTES = [
   '/',
-  '/courses',
   '/trending',
   '/music',
   '/gaming',
@@ -36,7 +35,6 @@ const PROTECTED_ROUTES = [
   '/auth-test',
   '/login-status',
   '/loading-test',
-  '/test-home',
   '/shorts'
 ];
 

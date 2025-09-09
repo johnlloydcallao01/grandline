@@ -42,7 +42,7 @@ export function CourseCategoryCircle({
         className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 overflow-hidden bg-gray-100 relative ${
           active 
             ? 'scale-110 shadow-lg' 
-            : 'opacity-70 group-hover:opacity-100 group-hover:scale-105'
+            : 'group-hover:scale-105'
         }`}
       >
         {category.icon && (category.icon.cloudinaryURL || category.icon.url) ? (
