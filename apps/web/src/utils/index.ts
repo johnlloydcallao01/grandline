@@ -1,3 +1,3 @@
 // Barrel exports for utilities
 
-export { getIcon, getCategoryIcon } from './icons';
+export { getIcon, getCategoryIcon, getCourseCategoryIcon } from './icons';

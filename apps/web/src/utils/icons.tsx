@@ -150,7 +150,7 @@ export const getCategoryIcon = (category: CategoryName): CategoryIconConfig => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
         </svg>
       ),
-      bgColor: 'bg-gradient-to-br from-indigo-500 to-blue-600'
+      bgColor: 'bg-gradient-to-br from-purple-500 to-pink-600'
     },
     Marketing: {
       icon: (
@@ -158,8 +158,9 @@ export const getCategoryIcon = (category: CategoryName): CategoryIconConfig => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
         </svg>
       ),
-      bgColor: 'bg-gradient-to-br from-pink-500 to-red-600'
+      bgColor: 'bg-gradient-to-br from-yellow-500 to-orange-600'
     },
+
     Analytics: {
       icon: (
         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,6 +207,66 @@ export const getCategoryIcon = (category: CategoryName): CategoryIconConfig => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
+      bgColor: 'bg-gradient-to-br from-rose-500 to-pink-600'
+    }
+  };
+
+  return iconMap[category] || iconMap.All;
+};
+
+/**
+ * Course category icon mapping with placeholder icons
+ */
+export const getCourseCategoryIcon = (category: CategoryName): CategoryIconConfig => {
+  // Empty image placeholder for all categories
+  const placeholderIcon = (
+    <div className="w-8 h-8 bg-gray-300 rounded flex items-center justify-center">
+      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    </div>
+  );
+
+  const iconMap: Record<CategoryName, CategoryIconConfig> = {
+    All: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-blue-500 to-purple-600'
+    },
+    Business: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-green-500 to-teal-600'
+    },
+    Technology: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-purple-500 to-pink-600'
+    },
+    Marketing: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-yellow-500 to-orange-600'
+    },
+
+    Analytics: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-yellow-500 to-orange-600'
+    },
+    'E-commerce': {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-purple-500 to-indigo-600'
+    },
+    Growth: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-emerald-500 to-green-600'
+    },
+    Strategy: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-cyan-500 to-blue-600'
+    },
+    Innovation: {
+      icon: placeholderIcon,
+      bgColor: 'bg-gradient-to-br from-amber-500 to-yellow-600'
+    },
+    Leadership: {
+      icon: placeholderIcon,
       bgColor: 'bg-gradient-to-br from-rose-500 to-pink-600'
     }
   };

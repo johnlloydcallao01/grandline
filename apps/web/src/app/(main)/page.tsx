@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CategoryCarousel, HeroSection, CoursesGrid } from "@/components/sections";
+import { CourseCategoryCarousel, HeroSection, CoursesGrid } from "@/components/sections";
 import { useCategory, useCourses } from "@/hooks";
 
 /**
@@ -23,9 +23,9 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Category Circles Carousel */}
+      {/* Course Category Carousel */}
       <div className="bg-white border-b border-gray-200">
-        <CategoryCarousel
+        <CourseCategoryCarousel
           activeCategory={activeCategory}
           onCategoryChange={selectCategory}
         />
