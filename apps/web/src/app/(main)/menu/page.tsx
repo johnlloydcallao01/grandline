@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
+import { useLogout } from '@/hooks/useAuth';
 
 /**
  * Professional Menu Page - Facebook-style user menu
@@ -65,43 +66,10 @@ const menuSections = [
 
 export default function MenuPage() {
   const router = useRouter();
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { logout, isLoggingOut } = useLogout();
 
   const handleMenuItemClick = (path: string) => {
     router.push(path as any);
-  };
-
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = async () => {
-    try {
-      console.log('🔄 LOGOUT: Initiating PayloadCMS logout...');
-
-      // Use PayloadCMS official logout endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-      const response = await fetch(`${apiUrl}/users/logout`, {
-        method: 'POST',
-        credentials: 'include', // Essential for PayloadCMS HTTP-only cookie handling
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        console.log('✅ LOGOUT: PayloadCMS logout successful');
-      } else {
-        console.warn('⚠️ LOGOUT: PayloadCMS logout response:', response.status);
-      }
-    } catch (error) {
-      console.error('❌ LOGOUT: PayloadCMS logout error:', error);
-    } finally {
-      // Always redirect to signin regardless of logout response
-      console.log('🔄 LOGOUT: Redirecting to signin...');
-      setShowLogoutConfirm(false);
-      router.push('/signin');
-    }
   };
 
   return (
@@ -187,20 +155,36 @@ export default function MenuPage() {
           </div>
         ))}
 
-        {/* Logout Section */}
+
+      </div>
+
+      {/* Sign Out Section */}
+      <div className="px-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-between p-4 hover:bg-red-50 transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <i className="fa fa-sign-out-alt text-red-600"></i>
-              </div>
-              <span className="font-medium text-red-600">Log Out</span>
-            </div>
-            <i className="fa fa-chevron-right text-red-400 text-sm"></i>
-          </button>
+          <div className="border-t border-gray-100 py-1">
+            <button
+              onClick={async () => {
+                try {
+                  await logout();
+                } catch (error) {
+                  console.error('Logout failed:', error);
+                }
+              }}
+              disabled={isLoggingOut}
+              className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            >
+              {isLoggingOut ? (
+                <svg className="w-4 h-4 mr-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              )}
+              {isLoggingOut ? 'Signing out...' : 'Sign out'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -213,34 +197,7 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fa fa-sign-out-alt text-red-600 text-xl"></i>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Log Out</h3>
-              <p className="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmLogout}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Log Out
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
