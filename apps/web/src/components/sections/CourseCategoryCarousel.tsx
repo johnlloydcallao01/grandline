@@ -1,31 +1,26 @@
+"use client";
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CategoryCarouselProps } from '@/types';
 import { CourseCategoryCircle } from '@/components/ui/CourseCategoryCircle';
-
-// API Response interfaces
-interface CourseCategory {
-  id: number;
-  name: string;
-  slug: string;
-  icon?: {
-    id: number;
-    url: string;
-    cloudinaryURL?: string;
-    alt?: string;
-  };
-}
+import { CourseCategory } from '@/server';
 
 /**
  * Professional CourseCategoryCarousel with smooth momentum scrolling
  * Implements physics-based scrolling similar to native mobile apps
  */
 export function CourseCategoryCarousel({
+  categories: initialCategories,
   onCategoryChange
-}: Omit<CategoryCarouselProps, 'categories' | 'activeCategory'>) {
-  // Dynamic categories from API
-  const [categories, setCategories] = useState<CourseCategory[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+}: {
+  categories: CourseCategory[];
+  onCategoryChange?: (category: string) => void;
+}) {
+  // Initialize with provided data (no loading state needed)
+  const [categories] = useState<CourseCategory[]>(initialCategories);
+  const [activeCategory, setActiveCategory] = useState<string>(
+    initialCategories[0]?.name || ''
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
@@ -191,31 +186,7 @@ export function CourseCategoryCarousel({
     handleEnd();
   };
 
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('https://cms.grandlinemaritime.com/api/lms/course-categories?limit=50');
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        const data = await response.json();
-        const categoryData = data.docs || [];
-        setCategories(categoryData);
-        if (categoryData.length > 0) {
-          setActiveCategory(categoryData[0].name);
-        }
-      } catch (error) {
-        console.error('Error fetching course categories:', error);
-        setCategories([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  // Categories are now provided via props from ISR - no client-side fetching needed
 
   // Calculate maxTranslate when categories are loaded and on resize
   useEffect(() => {
@@ -311,45 +282,33 @@ export function CourseCategoryCarousel({
           cursor: isDragging ? 'grabbing' : 'grab'
         }}
       >
-        {isLoading ? (
-          <div className="flex py-2.5" style={{ gap: '48px' }}>
-            {/* Loading skeleton */}
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="flex flex-col items-center space-y-2 flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-gray-200 animate-pulse" />
-                <div className="w-12 h-3 bg-gray-200 rounded animate-pulse" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div
-            ref={carouselRef}
-            className="flex py-2.5 select-none"
-            style={{
-              transform: `translateX(${translateX}px)`,
-              gap: '48px',
-              WebkitUserSelect: 'none',
-              userSelect: 'none',
-              transition: 'none', // Using requestAnimationFrame for smooth animations
-              willChange: 'transform',
-              pointerEvents: 'none' // Prevent individual items from blocking events
-            }}
-          >
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="flex-shrink-0"
-                style={{ pointerEvents: 'auto' }} // Re-enable pointer events for clicking
-              >
-                <CourseCategoryCircle
-                  category={category}
-                  active={activeCategory === category.name}
-                  onClick={() => handleCategoryClick(category.name)}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div
+          ref={carouselRef}
+          className="flex py-2.5 select-none"
+          style={{
+            transform: `translateX(${translateX}px)`,
+            gap: '48px',
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+            transition: 'none', // Using requestAnimationFrame for smooth animations
+            willChange: 'transform',
+            pointerEvents: 'none' // Prevent individual items from blocking events
+          }}
+        >
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className="flex-shrink-0"
+              style={{ pointerEvents: 'auto' }} // Re-enable pointer events for clicking
+            >
+              <CourseCategoryCircle
+                category={category}
+                active={activeCategory === category.name}
+                onClick={() => handleCategoryClick(category.name)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
 

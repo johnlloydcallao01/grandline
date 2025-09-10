@@ -19,13 +19,7 @@ export {
   type ContactFormSubmission,
 } from './actions/contact-actions';
 
-// Newsletter server actions
-export {
-  subscribeToNewsletter,
-  unsubscribeFromNewsletter,
-  validateNewsletterEmail,
-  type NewsletterSubscription,
-} from './actions/newsletter-actions';
+
 
 // Analytics server actions
 export {
@@ -46,7 +40,7 @@ export {
   withAdvancedRateLimit,
   withRateLimitResult,
   withContactFormRateLimit,
-  withNewsletterRateLimit,
+
   withAnalyticsRateLimit,
   withApiRateLimit,
   withIpRateLimit,
@@ -172,6 +166,25 @@ export {
 // ========================================
 // SERVER SERVICES
 // ========================================
+
+// Course category service (ISR-optimized data fetching)
+export {
+  CourseCategoryService,
+  getCourseCategories,
+  type CourseCategory,
+  type CourseCategoryResponse,
+} from './services/course-category-service';
+
+// Course service (ISR-optimized data fetching)
+export {
+  CourseService,
+  getCourses,
+  getCourseCount,
+  type Course,
+  type Media,
+  type CourseServiceOptions,
+  type CoursesResponse,
+} from './services/course-service';
 
 // Lead qualification service (web-specific business logic)
 export {

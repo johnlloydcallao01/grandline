@@ -1,38 +1,38 @@
-"use client";
-
 import React from "react";
 import { CourseCategoryCarousel, HeroSection, CoursesGrid } from "@/components/sections";
-import { useCategory, useCourses } from "@/hooks";
+import { getCourseCategories, getCourses } from "@/server";
+
+// ISR configuration - revalidate every 5 minutes
+export const revalidate = 300;
 
 /**
- * Home page component - RESTORED: Real course fetching
- *
- * PERFORMANCE OPTIMIZED: No artificial skeleton delays for static content.
- * Skeleton screens should only be used for dynamic content that requires network requests.
- * This follows Google's Core Web Vitals best practices for optimal LCP performance.
+ * Home page component - FULLY ISR OPTIMIZED
+ * 
+ * PERFORMANCE OPTIMIZED: Both categories and courses are pre-fetched 
+ * server-side with ISR. This eliminates all client-side loading states 
+ * and provides optimal SEO performance.
  */
-export default function Home() {
-  const { activeCategory, selectCategory } = useCategory("All");
-  const { courses, isLoading: coursesLoading } = useCourses({
-    status: 'published',
-    limit: 8
-  });
+export default async function Home() {
+  // Fetch both categories and courses server-side with ISR
+  const [categories, courses] = await Promise.all([
+    getCourseCategories(),
+    getCourses({ status: 'published', limit: 8 })
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Course Category Carousel */}
+      {/* Course Category Carousel with ISR data */}
       <div className="bg-white border-b border-gray-200">
         <CourseCategoryCarousel
-          activeCategory={activeCategory}
-          onCategoryChange={selectCategory}
+          categories={categories}
         />
       </div>
 
-      {/* Courses Grid */}
-      <CoursesGrid courses={courses} isLoading={coursesLoading} />
+      {/* Courses Grid with ISR data - no client wrapper needed */}
+      <CoursesGrid courses={courses} />
     </div>
   );
 }

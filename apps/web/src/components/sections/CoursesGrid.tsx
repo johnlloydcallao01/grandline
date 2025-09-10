@@ -1,35 +1,11 @@
+'use client';
+
 import React from 'react';
-
-// Media interface from CMS API
-interface Media {
-  id: number;
-  alt?: string | null;
-  cloudinaryPublicId?: string | null;
-  cloudinaryURL?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-
-// Course type based on your CMS API
-interface Course {
-  id: string;
-  title: string;
-  excerpt: string;
-  status: 'published' | 'draft';
-  thumbnail?: Media | null;
-  bannerImage?: Media | null;
-}
+import { type Course, type Media } from '@/server';
 
 interface CoursesGridProps {
-  courses?: Course[];
-  isLoading?: boolean;
+  courses: Course[]; // Required - provided by ISR
+  isLoading?: boolean; // Optional - for backward compatibility
 }
 
 // Course Card Skeleton
@@ -122,8 +98,9 @@ function CourseCard({ course, onClick }: CourseCardProps) {
 }
 
 // Main Courses Grid Component
-export function CoursesGrid({ courses = [], isLoading = false }: CoursesGridProps) {
-  // Show skeleton while loading
+export function CoursesGrid({ courses, isLoading = false }: CoursesGridProps) {
+  // Remove loading logic since ISR provides data immediately
+  // Keep for backward compatibility during migration
   if (isLoading) {
     return (
       <div className="p-6">
@@ -140,7 +117,7 @@ export function CoursesGrid({ courses = [], isLoading = false }: CoursesGridProp
     );
   }
 
-  // Show message if no courses (don't return null - that can cause layout issues)
+  // Show message if no courses
   if (!courses || courses.length === 0) {
     return (
       <div className="p-6">
