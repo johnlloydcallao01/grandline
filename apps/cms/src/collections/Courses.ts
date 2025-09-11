@@ -1,5 +1,4 @@
 import type { CollectionConfig } from 'payload'
-import { lmsAccess } from '../access'
 import { titleField, excerptField, statusField, publishedAtField } from '../fields'
 
 export const Courses: CollectionConfig = {
@@ -11,10 +10,31 @@ export const Courses: CollectionConfig = {
     description: 'Manage courses, content, and learning paths',
   },
   access: {
-    read: () => true, // Public can read published courses
-    create: lmsAccess.courseManagement, // Instructors and admins can create
-    update: lmsAccess.courseManagement, // Instructors and admins can update
-    delete: lmsAccess.courseManagement, // Instructors and admins can delete
+    // PayloadCMS automatically authenticates API keys and populates req.user
+    read: ({ req: { user } }) => {
+      // If user exists, they've been authenticated (either via API key or login)
+      if (user) {
+        // Allow service accounts (for website display) and admins
+        if (user.role === 'service' || user.role === 'admin') {
+          return true
+        }
+      }
+      
+      // Block all unauthenticated requests and other roles
+      return false
+    },
+    create: ({ req: { user } }) => {
+      // Only admins can create courses
+      return user?.role === 'admin' || false
+    },
+    update: ({ req: { user } }) => {
+      // Only admins can update courses
+      return user?.role === 'admin' || false
+    },
+    delete: ({ req: { user } }) => {
+      // Only admins can delete courses
+      return user?.role === 'admin' || false
+    },
   },
   fields: [
     // === BASIC COURSE INFORMATION ===

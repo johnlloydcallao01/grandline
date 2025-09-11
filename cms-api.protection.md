@@ -85,6 +85,16 @@ Email: johnwebsites2@gmail.com
 Role: service
 API Key: dd7d67ec-0b85-432e-9d66-54f9e0e400bf
 
+
+Also please note that we already have these environment variables in our .env in our apps/cms:
+
+# Payload CMS Configuration
+PAYLOAD_SECRET=b7ce8020091c8ea4bd3d6540677e700102e3109c20e1f5c134d194fa4d57219b
+
+# PayloadCMS API Key Configuration
+PAYLOAD_API_KEY=dd7d67ec-0b85-432e-9d66-54f9e0e400bf
+PAYLOAD_API_URL=https://cms.grandlinemaritime.com/api
+
 ### Generate API Keys Through Admin Panel
 
 1. Start your PayloadCMS application
@@ -257,6 +267,30 @@ export default Courses
 ```
 
 ## Step 5: Make Authenticated API Requests for Courses
+
+However, your current course-service.ts is NOT using API keys.
+
+Your current implementation lacks the Authorization header:
+
+TypeScript
+
+
+
+// ❌ Current - No API keyheaders: {  'Content-Type': 'application/  json',}
+It should be:
+
+TypeScript
+
+
+
+// ✅ Correct - With API keyheaders: {  'Authorization': `users API-Key $  {process.env.PAYLOAD_API_KEY}`,  'Content-Type': 'application/  json',}
+Summary of Required Fixes:
+1.
+Fix Courses collection access control to require authentication
+2.
+Update course-service.ts to include API key in requests
+3.
+Add environment variable PAYLOAD_API_KEY to your web app's .env
 
 ### REST API Authentication
 
