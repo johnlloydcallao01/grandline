@@ -17,8 +17,9 @@ import {
   timestamp,
   serial,
   boolean,
-  jsonb,
   numeric,
+  jsonb,
+  type AnyPgColumn,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
@@ -35,7 +36,12 @@ export const enum_users_civil_status = pgEnum('enum_users_civil_status', [
   'widowed',
   'separated',
 ])
-export const enum_users_role = pgEnum('enum_users_role', ['admin', 'instructor', 'trainee'])
+export const enum_users_role = pgEnum('enum_users_role', [
+  'admin',
+  'instructor',
+  'trainee',
+  'service',
+])
 export const enum_trainees_current_level = pgEnum('enum_trainees_current_level', [
   'beginner',
   'intermediate',
@@ -46,14 +52,6 @@ export const enum_admins_admin_level = pgEnum('enum_admins_admin_level', [
   'department',
   'content',
 ])
-export const enum_user_relationships_related_entity_type = pgEnum(
-  'enum_user_relationships_related_entity_type',
-  ['course', 'department', 'project', 'group'],
-)
-export const enum_user_relationships_relationship_type = pgEnum(
-  'enum_user_relationships_relationship_type',
-  ['enrolled', 'teaching', 'managing', 'supervising', 'member'],
-)
 export const enum_user_events_event_type = pgEnum('enum_user_events_event_type', [
   'USER_CREATED',
   'ROLE_CHANGED',
@@ -79,7 +77,35 @@ export const enum__posts_v_version_status = pgEnum('enum__posts_v_version_status
   'draft',
   'published',
 ])
-export const enum_services_status = pgEnum('enum_services_status', ['draft', 'published'])
+export const enum_courses_difficulty_level = pgEnum('enum_courses_difficulty_level', [
+  'beginner',
+  'intermediate',
+  'advanced',
+])
+export const enum_courses_language = pgEnum('enum_courses_language', ['en', 'es', 'fr', 'de'])
+export const enum_courses_status = pgEnum('enum_courses_status', ['draft', 'published'])
+export const enum_course_categories_category_type = pgEnum('enum_course_categories_category_type', [
+  'course',
+  'skill',
+  'topic',
+  'industry',
+])
+export const enum_course_enrollments_enrollment_type = pgEnum(
+  'enum_course_enrollments_enrollment_type',
+  ['free', 'paid', 'scholarship', 'trial', 'corporate'],
+)
+export const enum_course_enrollments_status = pgEnum('enum_course_enrollments_status', [
+  'active',
+  'suspended',
+  'completed',
+  'dropped',
+  'expired',
+  'pending',
+])
+export const enum_course_enrollments_payment_status = pgEnum(
+  'enum_course_enrollments_payment_status',
+  ['completed', 'pending', 'failed', 'refunded', 'not_required'],
+)
 
 export const users_sessions = pgTable(
   'users_sessions',
@@ -122,12 +148,6 @@ export const users = pgTable(
     completeAddress: varchar('complete_address'),
     role: enum_users_role('role').notNull().default('trainee'),
     isActive: boolean('is_active').default(true),
-    bio: varchar('bio'),
-    phone: varchar('phone'),
-    profileImageUrl: varchar('profile_image_url'),
-    emergencyContact: varchar('emergency_contact'),
-    preferences: jsonb('preferences'),
-    metadata: jsonb('metadata'),
     lastLogin: timestamp('last_login', { mode: 'string', withTimezone: true, precision: 3 }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -135,6 +155,9 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
+    enableAPIKey: boolean('enable_a_p_i_key'),
+    apiKey: varchar('api_key'),
+    apiKeyIndex: varchar('api_key_index'),
     email: varchar('email').notNull(),
     resetPasswordToken: varchar('reset_password_token'),
     resetPasswordExpiration: timestamp('reset_password_expiration', {
@@ -201,12 +224,6 @@ export const trainees = pgTable(
       precision: 3,
     }),
     currentLevel: enum_trainees_current_level('current_level').default('beginner'),
-    graduationTargetDate: timestamp('graduation_target_date', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }),
-    learningPath: varchar('learning_path'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -219,25 +236,6 @@ export const trainees = pgTable(
     trainees_srn_idx: uniqueIndex('trainees_srn_idx').on(columns.srn),
     trainees_updated_at_idx: index('trainees_updated_at_idx').on(columns.updatedAt),
     trainees_created_at_idx: index('trainees_created_at_idx').on(columns.createdAt),
-  }),
-)
-
-export const admins_department_access = pgTable(
-  'admins_department_access',
-  {
-    _order: integer('_order').notNull(),
-    _parentID: integer('_parent_id').notNull(),
-    id: varchar('id').primaryKey(),
-    department: varchar('department'),
-  },
-  (columns) => ({
-    _orderIdx: index('admins_department_access_order_idx').on(columns._order),
-    _parentIDIdx: index('admins_department_access_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
-      columns: [columns['_parentID']],
-      foreignColumns: [admins.id],
-      name: 'admins_department_access_parent_id_fk',
-    }).onDelete('cascade'),
   }),
 )
 
@@ -299,38 +297,6 @@ export const user_certifications = pgTable(
   }),
 )
 
-export const user_relationships = pgTable(
-  'user_relationships',
-  {
-    id: serial('id').primaryKey(),
-    user: integer('user_id')
-      .notNull()
-      .references(() => users.id, {
-        onDelete: 'set null',
-      }),
-    relatedEntityType: enum_user_relationships_related_entity_type('related_entity_type').notNull(),
-    relatedEntityId: numeric('related_entity_id').notNull(),
-    relationshipType: enum_user_relationships_relationship_type('relationship_type').notNull(),
-    relationshipData: jsonb('relationship_data'),
-    isActive: boolean('is_active').default(true),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => ({
-    user_relationships_user_idx: index('user_relationships_user_idx').on(columns.user),
-    user_relationships_updated_at_idx: index('user_relationships_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    user_relationships_created_at_idx: index('user_relationships_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
-)
-
 export const user_events = pgTable(
   'user_events',
   {
@@ -373,7 +339,7 @@ export const emergency_contacts = pgTable(
         onDelete: 'set null',
       }),
     firstName: varchar('first_name').notNull(),
-    middleName: varchar('middle_name').notNull(),
+    middleName: varchar('middle_name'),
     lastName: varchar('last_name').notNull(),
     contactNumber: varchar('contact_number').notNull(),
     relationship: enum_emergency_contacts_relationship('relationship').notNull(),
@@ -574,46 +540,95 @@ export const _posts_v = pgTable(
   }),
 )
 
-export const services_tags = pgTable(
-  'services_tags',
+export const courses_learning_objectives = pgTable(
+  'courses_learning_objectives',
   {
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
     id: varchar('id').primaryKey(),
-    tag: varchar('tag').notNull(),
+    objective: varchar('objective').notNull(),
   },
   (columns) => ({
-    _orderIdx: index('services_tags_order_idx').on(columns._order),
-    _parentIDIdx: index('services_tags_parent_id_idx').on(columns._parentID),
+    _orderIdx: index('courses_learning_objectives_order_idx').on(columns._order),
+    _parentIDIdx: index('courses_learning_objectives_parent_id_idx').on(columns._parentID),
     _parentIDFk: foreignKey({
       columns: [columns['_parentID']],
-      foreignColumns: [services.id],
-      name: 'services_tags_parent_id_fk',
+      foreignColumns: [courses.id],
+      name: 'courses_learning_objectives_parent_id_fk',
     }).onDelete('cascade'),
   }),
 )
 
-export const services = pgTable(
-  'services',
+export const courses_prerequisites = pgTable(
+  'courses_prerequisites',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    prerequisite: varchar('prerequisite').notNull(),
+  },
+  (columns) => ({
+    _orderIdx: index('courses_prerequisites_order_idx').on(columns._order),
+    _parentIDIdx: index('courses_prerequisites_parent_id_idx').on(columns._parentID),
+    _parentIDFk: foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [courses.id],
+      name: 'courses_prerequisites_parent_id_fk',
+    }).onDelete('cascade'),
+  }),
+)
+
+export const courses = pgTable(
+  'courses',
   {
     id: serial('id').primaryKey(),
     title: varchar('title').notNull(),
-    slug: varchar('slug').notNull(),
-    content: jsonb('content').notNull(),
+    courseCode: varchar('course_code').notNull(),
     excerpt: varchar('excerpt'),
-    featuredImage: integer('featured_image_id').references(() => media.id, {
-      onDelete: 'set null',
-    }),
-    status: enum_services_status('status').notNull().default('draft'),
-    publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
-    author: integer('author_id')
+    description: jsonb('description'),
+    instructor: integer('instructor_id')
       .notNull()
-      .references(() => users.id, {
+      .references(() => instructors.id, {
         onDelete: 'set null',
       }),
-    seo_title: varchar('seo_title'),
-    seo_description: varchar('seo_description'),
-    seo_focusKeyword: varchar('seo_focus_keyword'),
+    category: integer('category_id').references(() => course_categories.id, {
+      onDelete: 'set null',
+    }),
+    thumbnail: integer('thumbnail_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    bannerImage: integer('banner_image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    price: numeric('price').default('0'),
+    maxStudents: numeric('max_students'),
+    enrollmentStartDate: timestamp('enrollment_start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    enrollmentEndDate: timestamp('enrollment_end_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    courseStartDate: timestamp('course_start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    courseEndDate: timestamp('course_end_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    estimatedDuration: numeric('estimated_duration'),
+    difficultyLevel: enum_courses_difficulty_level('difficulty_level').default('beginner'),
+    language: enum_courses_language('language').default('en'),
+    passingGrade: numeric('passing_grade').default('70'),
+    status: enum_courses_status('status').notNull().default('draft'),
+    publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    settings: jsonb('settings'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -622,11 +637,144 @@ export const services = pgTable(
       .notNull(),
   },
   (columns) => ({
-    services_slug_idx: uniqueIndex('services_slug_idx').on(columns.slug),
-    services_featured_image_idx: index('services_featured_image_idx').on(columns.featuredImage),
-    services_author_idx: index('services_author_idx').on(columns.author),
-    services_updated_at_idx: index('services_updated_at_idx').on(columns.updatedAt),
-    services_created_at_idx: index('services_created_at_idx').on(columns.createdAt),
+    courses_course_code_idx: uniqueIndex('courses_course_code_idx').on(columns.courseCode),
+    courses_instructor_idx: index('courses_instructor_idx').on(columns.instructor),
+    courses_category_idx: index('courses_category_idx').on(columns.category),
+    courses_thumbnail_idx: index('courses_thumbnail_idx').on(columns.thumbnail),
+    courses_banner_image_idx: index('courses_banner_image_idx').on(columns.bannerImage),
+    courses_updated_at_idx: index('courses_updated_at_idx').on(columns.updatedAt),
+    courses_created_at_idx: index('courses_created_at_idx').on(columns.createdAt),
+  }),
+)
+
+export const courses_rels = pgTable(
+  'courses_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    instructorsID: integer('instructors_id'),
+  },
+  (columns) => ({
+    order: index('courses_rels_order_idx').on(columns.order),
+    parentIdx: index('courses_rels_parent_idx').on(columns.parent),
+    pathIdx: index('courses_rels_path_idx').on(columns.path),
+    courses_rels_instructors_id_idx: index('courses_rels_instructors_id_idx').on(
+      columns.instructorsID,
+    ),
+    parentFk: foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [courses.id],
+      name: 'courses_rels_parent_fk',
+    }).onDelete('cascade'),
+    instructorsIdFk: foreignKey({
+      columns: [columns['instructorsID']],
+      foreignColumns: [instructors.id],
+      name: 'courses_rels_instructors_fk',
+    }).onDelete('cascade'),
+  }),
+)
+
+export const course_categories = pgTable(
+  'course_categories',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    slug: varchar('slug').notNull(),
+    description: varchar('description'),
+    parent: integer('parent_id').references((): AnyPgColumn => course_categories.id, {
+      onDelete: 'set null',
+    }),
+    categoryType: enum_course_categories_category_type('category_type').notNull().default('course'),
+    icon: integer('icon_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    colorCode: varchar('color_code'),
+    displayOrder: numeric('display_order').default('0'),
+    isActive: boolean('is_active').default(true),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    course_categories_slug_idx: uniqueIndex('course_categories_slug_idx').on(columns.slug),
+    course_categories_parent_idx: index('course_categories_parent_idx').on(columns.parent),
+    course_categories_icon_idx: index('course_categories_icon_idx').on(columns.icon),
+    course_categories_updated_at_idx: index('course_categories_updated_at_idx').on(
+      columns.updatedAt,
+    ),
+    course_categories_created_at_idx: index('course_categories_created_at_idx').on(
+      columns.createdAt,
+    ),
+  }),
+)
+
+export const course_enrollments = pgTable(
+  'course_enrollments',
+  {
+    id: serial('id').primaryKey(),
+    student: integer('student_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    enrolledAt: timestamp('enrolled_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    enrollmentType: enum_course_enrollments_enrollment_type('enrollment_type')
+      .notNull()
+      .default('free'),
+    status: enum_course_enrollments_status('status').notNull().default('active'),
+    paymentStatus: enum_course_enrollments_payment_status('payment_status').default('completed'),
+    accessExpiresAt: timestamp('access_expires_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    amountPaid: numeric('amount_paid'),
+    progressPercentage: numeric('progress_percentage').default('0'),
+    lastAccessedAt: timestamp('last_accessed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    currentGrade: numeric('current_grade'),
+    finalGrade: numeric('final_grade'),
+    certificateIssued: boolean('certificate_issued').default(false),
+    enrolledBy: integer('enrolled_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    displayTitle: varchar('display_title'),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => ({
+    course_enrollments_student_idx: index('course_enrollments_student_idx').on(columns.student),
+    course_enrollments_course_idx: index('course_enrollments_course_idx').on(columns.course),
+    course_enrollments_enrolled_by_idx: index('course_enrollments_enrolled_by_idx').on(
+      columns.enrolledBy,
+    ),
+    course_enrollments_updated_at_idx: index('course_enrollments_updated_at_idx').on(
+      columns.updatedAt,
+    ),
+    course_enrollments_created_at_idx: index('course_enrollments_created_at_idx').on(
+      columns.createdAt,
+    ),
   }),
 )
 
@@ -667,12 +815,13 @@ export const payload_locked_documents_rels = pgTable(
     traineesID: integer('trainees_id'),
     adminsID: integer('admins_id'),
     'user-certificationsID': integer('user_certifications_id'),
-    'user-relationshipsID': integer('user_relationships_id'),
     'user-eventsID': integer('user_events_id'),
     'emergency-contactsID': integer('emergency_contacts_id'),
     mediaID: integer('media_id'),
     postsID: integer('posts_id'),
-    servicesID: integer('services_id'),
+    coursesID: integer('courses_id'),
+    'course-categoriesID': integer('course_categories_id'),
+    'course-enrollmentsID': integer('course_enrollments_id'),
   },
   (columns) => ({
     order: index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -693,9 +842,6 @@ export const payload_locked_documents_rels = pgTable(
     payload_locked_documents_rels_user_certifications_id_idx: index(
       'payload_locked_documents_rels_user_certifications_id_idx',
     ).on(columns['user-certificationsID']),
-    payload_locked_documents_rels_user_relationships_id_idx: index(
-      'payload_locked_documents_rels_user_relationships_id_idx',
-    ).on(columns['user-relationshipsID']),
     payload_locked_documents_rels_user_events_id_idx: index(
       'payload_locked_documents_rels_user_events_id_idx',
     ).on(columns['user-eventsID']),
@@ -708,9 +854,15 @@ export const payload_locked_documents_rels = pgTable(
     payload_locked_documents_rels_posts_id_idx: index(
       'payload_locked_documents_rels_posts_id_idx',
     ).on(columns.postsID),
-    payload_locked_documents_rels_services_id_idx: index(
-      'payload_locked_documents_rels_services_id_idx',
-    ).on(columns.servicesID),
+    payload_locked_documents_rels_courses_id_idx: index(
+      'payload_locked_documents_rels_courses_id_idx',
+    ).on(columns.coursesID),
+    payload_locked_documents_rels_course_categories_id_idx: index(
+      'payload_locked_documents_rels_course_categories_id_idx',
+    ).on(columns['course-categoriesID']),
+    payload_locked_documents_rels_course_enrollments_id_idx: index(
+      'payload_locked_documents_rels_course_enrollments_id_idx',
+    ).on(columns['course-enrollmentsID']),
     parentFk: foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
@@ -741,11 +893,6 @@ export const payload_locked_documents_rels = pgTable(
       foreignColumns: [user_certifications.id],
       name: 'payload_locked_documents_rels_user_certifications_fk',
     }).onDelete('cascade'),
-    'user-relationshipsIdFk': foreignKey({
-      columns: [columns['user-relationshipsID']],
-      foreignColumns: [user_relationships.id],
-      name: 'payload_locked_documents_rels_user_relationships_fk',
-    }).onDelete('cascade'),
     'user-eventsIdFk': foreignKey({
       columns: [columns['user-eventsID']],
       foreignColumns: [user_events.id],
@@ -766,10 +913,20 @@ export const payload_locked_documents_rels = pgTable(
       foreignColumns: [posts.id],
       name: 'payload_locked_documents_rels_posts_fk',
     }).onDelete('cascade'),
-    servicesIdFk: foreignKey({
-      columns: [columns['servicesID']],
-      foreignColumns: [services.id],
-      name: 'payload_locked_documents_rels_services_fk',
+    coursesIdFk: foreignKey({
+      columns: [columns['coursesID']],
+      foreignColumns: [courses.id],
+      name: 'payload_locked_documents_rels_courses_fk',
+    }).onDelete('cascade'),
+    'course-categoriesIdFk': foreignKey({
+      columns: [columns['course-categoriesID']],
+      foreignColumns: [course_categories.id],
+      name: 'payload_locked_documents_rels_course_categories_fk',
+    }).onDelete('cascade'),
+    'course-enrollmentsIdFk': foreignKey({
+      columns: [columns['course-enrollmentsID']],
+      foreignColumns: [course_enrollments.id],
+      name: 'payload_locked_documents_rels_course_enrollments_fk',
     }).onDelete('cascade'),
   }),
 )
@@ -876,36 +1033,16 @@ export const relations_trainees = relations(trainees, ({ one }) => ({
     relationName: 'user',
   }),
 }))
-export const relations_admins_department_access = relations(
-  admins_department_access,
-  ({ one }) => ({
-    _parentID: one(admins, {
-      fields: [admins_department_access._parentID],
-      references: [admins.id],
-      relationName: 'departmentAccess',
-    }),
-  }),
-)
-export const relations_admins = relations(admins, ({ one, many }) => ({
+export const relations_admins = relations(admins, ({ one }) => ({
   user: one(users, {
     fields: [admins.user],
     references: [users.id],
     relationName: 'user',
   }),
-  departmentAccess: many(admins_department_access, {
-    relationName: 'departmentAccess',
-  }),
 }))
 export const relations_user_certifications = relations(user_certifications, ({ one }) => ({
   user: one(users, {
     fields: [user_certifications.user],
-    references: [users.id],
-    relationName: 'user',
-  }),
-}))
-export const relations_user_relationships = relations(user_relationships, ({ one }) => ({
-  user: one(users, {
-    fields: [user_relationships.user],
     references: [users.id],
     relationName: 'user',
   }),
@@ -979,26 +1116,93 @@ export const relations__posts_v = relations(_posts_v, ({ one, many }) => ({
     relationName: 'version_author',
   }),
 }))
-export const relations_services_tags = relations(services_tags, ({ one }) => ({
-  _parentID: one(services, {
-    fields: [services_tags._parentID],
-    references: [services.id],
-    relationName: 'tags',
+export const relations_courses_learning_objectives = relations(
+  courses_learning_objectives,
+  ({ one }) => ({
+    _parentID: one(courses, {
+      fields: [courses_learning_objectives._parentID],
+      references: [courses.id],
+      relationName: 'learningObjectives',
+    }),
+  }),
+)
+export const relations_courses_prerequisites = relations(courses_prerequisites, ({ one }) => ({
+  _parentID: one(courses, {
+    fields: [courses_prerequisites._parentID],
+    references: [courses.id],
+    relationName: 'prerequisites',
   }),
 }))
-export const relations_services = relations(services, ({ one, many }) => ({
-  featuredImage: one(media, {
-    fields: [services.featuredImage],
+export const relations_courses_rels = relations(courses_rels, ({ one }) => ({
+  parent: one(courses, {
+    fields: [courses_rels.parent],
+    references: [courses.id],
+    relationName: '_rels',
+  }),
+  instructorsID: one(instructors, {
+    fields: [courses_rels.instructorsID],
+    references: [instructors.id],
+    relationName: 'instructors',
+  }),
+}))
+export const relations_courses = relations(courses, ({ one, many }) => ({
+  instructor: one(instructors, {
+    fields: [courses.instructor],
+    references: [instructors.id],
+    relationName: 'instructor',
+  }),
+  category: one(course_categories, {
+    fields: [courses.category],
+    references: [course_categories.id],
+    relationName: 'category',
+  }),
+  thumbnail: one(media, {
+    fields: [courses.thumbnail],
     references: [media.id],
-    relationName: 'featuredImage',
+    relationName: 'thumbnail',
   }),
-  tags: many(services_tags, {
-    relationName: 'tags',
+  bannerImage: one(media, {
+    fields: [courses.bannerImage],
+    references: [media.id],
+    relationName: 'bannerImage',
   }),
-  author: one(users, {
-    fields: [services.author],
+  learningObjectives: many(courses_learning_objectives, {
+    relationName: 'learningObjectives',
+  }),
+  prerequisites: many(courses_prerequisites, {
+    relationName: 'prerequisites',
+  }),
+  _rels: many(courses_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_course_categories = relations(course_categories, ({ one }) => ({
+  parent: one(course_categories, {
+    fields: [course_categories.parent],
+    references: [course_categories.id],
+    relationName: 'parent',
+  }),
+  icon: one(media, {
+    fields: [course_categories.icon],
+    references: [media.id],
+    relationName: 'icon',
+  }),
+}))
+export const relations_course_enrollments = relations(course_enrollments, ({ one }) => ({
+  student: one(trainees, {
+    fields: [course_enrollments.student],
+    references: [trainees.id],
+    relationName: 'student',
+  }),
+  course: one(courses, {
+    fields: [course_enrollments.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  enrolledBy: one(users, {
+    fields: [course_enrollments.enrolledBy],
     references: [users.id],
-    relationName: 'author',
+    relationName: 'enrolledBy',
   }),
 }))
 export const relations_payload_locked_documents_rels = relations(
@@ -1034,11 +1238,6 @@ export const relations_payload_locked_documents_rels = relations(
       references: [user_certifications.id],
       relationName: 'user-certifications',
     }),
-    'user-relationshipsID': one(user_relationships, {
-      fields: [payload_locked_documents_rels['user-relationshipsID']],
-      references: [user_relationships.id],
-      relationName: 'user-relationships',
-    }),
     'user-eventsID': one(user_events, {
       fields: [payload_locked_documents_rels['user-eventsID']],
       references: [user_events.id],
@@ -1059,10 +1258,20 @@ export const relations_payload_locked_documents_rels = relations(
       references: [posts.id],
       relationName: 'posts',
     }),
-    servicesID: one(services, {
-      fields: [payload_locked_documents_rels.servicesID],
-      references: [services.id],
-      relationName: 'services',
+    coursesID: one(courses, {
+      fields: [payload_locked_documents_rels.coursesID],
+      references: [courses.id],
+      relationName: 'courses',
+    }),
+    'course-categoriesID': one(course_categories, {
+      fields: [payload_locked_documents_rels['course-categoriesID']],
+      references: [course_categories.id],
+      relationName: 'course-categories',
+    }),
+    'course-enrollmentsID': one(course_enrollments, {
+      fields: [payload_locked_documents_rels['course-enrollmentsID']],
+      references: [course_enrollments.id],
+      relationName: 'course-enrollments',
     }),
   }),
 )
@@ -1102,21 +1311,23 @@ type DatabaseSchema = {
   enum_users_role: typeof enum_users_role
   enum_trainees_current_level: typeof enum_trainees_current_level
   enum_admins_admin_level: typeof enum_admins_admin_level
-  enum_user_relationships_related_entity_type: typeof enum_user_relationships_related_entity_type
-  enum_user_relationships_relationship_type: typeof enum_user_relationships_relationship_type
   enum_user_events_event_type: typeof enum_user_events_event_type
   enum_emergency_contacts_relationship: typeof enum_emergency_contacts_relationship
   enum_posts_status: typeof enum_posts_status
   enum__posts_v_version_status: typeof enum__posts_v_version_status
-  enum_services_status: typeof enum_services_status
+  enum_courses_difficulty_level: typeof enum_courses_difficulty_level
+  enum_courses_language: typeof enum_courses_language
+  enum_courses_status: typeof enum_courses_status
+  enum_course_categories_category_type: typeof enum_course_categories_category_type
+  enum_course_enrollments_enrollment_type: typeof enum_course_enrollments_enrollment_type
+  enum_course_enrollments_status: typeof enum_course_enrollments_status
+  enum_course_enrollments_payment_status: typeof enum_course_enrollments_payment_status
   users_sessions: typeof users_sessions
   users: typeof users
   instructors: typeof instructors
   trainees: typeof trainees
-  admins_department_access: typeof admins_department_access
   admins: typeof admins
   user_certifications: typeof user_certifications
-  user_relationships: typeof user_relationships
   user_events: typeof user_events
   emergency_contacts: typeof emergency_contacts
   media: typeof media
@@ -1124,8 +1335,12 @@ type DatabaseSchema = {
   posts: typeof posts
   _posts_v_version_tags: typeof _posts_v_version_tags
   _posts_v: typeof _posts_v
-  services_tags: typeof services_tags
-  services: typeof services
+  courses_learning_objectives: typeof courses_learning_objectives
+  courses_prerequisites: typeof courses_prerequisites
+  courses: typeof courses
+  courses_rels: typeof courses_rels
+  course_categories: typeof course_categories
+  course_enrollments: typeof course_enrollments
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
@@ -1135,10 +1350,8 @@ type DatabaseSchema = {
   relations_users: typeof relations_users
   relations_instructors: typeof relations_instructors
   relations_trainees: typeof relations_trainees
-  relations_admins_department_access: typeof relations_admins_department_access
   relations_admins: typeof relations_admins
   relations_user_certifications: typeof relations_user_certifications
-  relations_user_relationships: typeof relations_user_relationships
   relations_user_events: typeof relations_user_events
   relations_emergency_contacts: typeof relations_emergency_contacts
   relations_media: typeof relations_media
@@ -1146,8 +1359,12 @@ type DatabaseSchema = {
   relations_posts: typeof relations_posts
   relations__posts_v_version_tags: typeof relations__posts_v_version_tags
   relations__posts_v: typeof relations__posts_v
-  relations_services_tags: typeof relations_services_tags
-  relations_services: typeof relations_services
+  relations_courses_learning_objectives: typeof relations_courses_learning_objectives
+  relations_courses_prerequisites: typeof relations_courses_prerequisites
+  relations_courses_rels: typeof relations_courses_rels
+  relations_courses: typeof relations_courses
+  relations_course_categories: typeof relations_course_categories
+  relations_course_enrollments: typeof relations_course_enrollments
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels

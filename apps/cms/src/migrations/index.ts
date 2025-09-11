@@ -22,6 +22,8 @@ import * as migration_20250832_fix_course_enrollments_amount_paid from './202508
 import * as migration_20250904_fix_emergency_contacts from './20250904_fix_emergency_contacts';
 import * as migration_20250904_fix_serial_type_error from './20250904_fix_serial_type_error';
 import * as migration_20250904_re_enable_trainee_trigger from './20250904_re_enable_trainee_trigger';
+import * as migration_20250911_add_service_role from './20250911_add_service_role';
+import * as migration_20250911_fix_service_role_trigger from './20250911_fix_service_role_trigger';
 
 
 export const migrations = [
@@ -144,6 +146,16 @@ export const migrations = [
     up: migration_20250904_re_enable_trainee_trigger.up,
     down: migration_20250904_re_enable_trainee_trigger.down,
     name: '20250904_re_enable_trainee_trigger',
+  },
+  {
+    up: migration_20250911_add_service_role.up,
+    down: migration_20250911_add_service_role.down,
+    name: '20250911_add_service_role',
+  },
+  {
+    up: migration_20250911_fix_service_role_trigger.up,
+    down: migration_20250911_fix_service_role_trigger.down,
+    name: '20250911_fix_service_role_trigger',
   },
 
 ];
