@@ -75,27 +75,17 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
         page: page.toString(),
       });
 
-      // Use the correct CMS API URL
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-      const fullUrl = `${apiUrl}/courses?${params}`;
+      // Use our secure server-side API route
+      const fullUrl = `/api/courses?${params}`;
 
       console.log('🔍 COURSES: Fetching from:', fullUrl);
 
-      // Build headers with API key authentication
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      const apiKey = process.env.NEXT_PUBLIC_PAYLOAD_API_KEY;
-      if (apiKey) {
-        headers['Authorization'] = `users API-Key ${apiKey}`;
-      }
-
-      // Fetch from your CMS API
+      // Fetch from our secure server-side API route (no API key needed client-side)
       const response = await fetch(fullUrl, {
         method: 'GET',
-        headers,
-        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       console.log('📡 COURSES: Response status:', response.status);

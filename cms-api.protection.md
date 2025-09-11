@@ -401,3 +401,9 @@ curl -H "Authorization: users API-Key dd7d67ec-0b85-432e-9d66-54f9e0e400bf" \
      -H "Content-Type: application/json" \
      "https://cms.grandlinemaritime.com/api/courses?where[status][equals]=published&limit=8"
 ```
+
+
+
+
+(TraeAI-36) C:\Users\ACER\Desktop\grandline [1:] $ 
+(TraeAI-36) C:\Users\ACER\Desktop\grandline [1:] $ Invoke-WebRequest -Uri "https://cms.grandlinemaritime.com/api/courses" -Method GET -Headers @{"Authorization"="users API-Key dd7d67ec-0b85-432e-9d66-54f9e0e400bf"; "Content-Type"="application/json"}

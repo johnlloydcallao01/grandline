@@ -44,7 +44,7 @@ export interface CourseServiceOptions {
 }
 
 export class CourseService {
-  private static readonly API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+  private static readonly API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
   
   /**
    * Fetch courses from CMS with ISR optimization
