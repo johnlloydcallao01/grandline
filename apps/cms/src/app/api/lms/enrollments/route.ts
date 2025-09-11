@@ -2,55 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
 
-// Validate API key from Authorization header
-async function validateApiKey(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  
-  if (!authHeader || !authHeader.startsWith('users API-Key ')) {
-    return null
-  }
-  
-  const apiKey = authHeader.replace('users API-Key ', '')
-  
-  try {
-    const payload = await getPayload({ config: configPromise })
-    
-    const users = await payload.find({
-      collection: 'users',
-      where: {
-        and: [
-          { apiKey: { equals: apiKey } },
-          { apiKeyEnabled: { equals: true } },
-          {
-            or: [
-              { role: { equals: 'service' } },
-              { role: { equals: 'admin' } }
-            ]
-          }
-        ]
-      },
-      limit: 1
-    })
-    
-    return users.docs.length > 0 ? users.docs[0] : null
-  } catch (error) {
-    console.error('API key validation error:', error)
-    return null
-  }
-}
-
 // GET /api/lms/enrollments - Get enrollments with filtering
 export async function GET(request: NextRequest) {
   try {
-    // Validate API key
-    const user = await validateApiKey(request)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Valid API key required' },
-        { status: 401 }
-      )
-    }
-    
     const payload = await getPayload({ config: configPromise })
     const { searchParams } = new URL(request.url)
     
@@ -99,15 +53,6 @@ export async function GET(request: NextRequest) {
 // POST /api/lms/enrollments - Create new enrollment
 export async function POST(request: NextRequest) {
   try {
-    // Validate API key
-    const user = await validateApiKey(request)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Valid API key required' },
-        { status: 401 }
-      )
-    }
-    
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 

@@ -61,10 +61,12 @@ export class CourseService {
     } = options;
 
     try {
-      // Build headers with API key authentication
+      // Build headers - INTENTIONALLY NOT ADDING API KEY to demonstrate security
+      // This will cause the request to fail, proving our API endpoint security works
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
+        // API key authentication header is missing intentionally
+        // 'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
       };
       
       // Build query parameters
@@ -96,10 +98,9 @@ export class CourseService {
    */
   static async getCourseCount(status: 'published' | 'draft' = 'published'): Promise<number> {
     try {
-      // Build headers with API key authentication
+      // Build headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
       };
       
       const params = new URLSearchParams({

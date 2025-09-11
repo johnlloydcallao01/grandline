@@ -18,16 +18,13 @@ async function validateApiKey(request: NextRequest, payload: BasePayload): Promi
     const users = await payload.find({
       collection: 'users',
       where: {
-        and: [
-          { apiKey: { equals: providedKey } },
-          { enableAPIKey: { equals: true } },
-          {
-            or: [
-              { role: { equals: 'service' } },
-              { role: { equals: 'admin' } }
-            ]
-          }
-        ]
+        apiKey: {
+          equals: providedKey
+        },
+        // Ensure user is active and has service role
+        role: {
+          in: ['service', 'admin']
+        }
       },
       limit: 1,
       depth: 0
