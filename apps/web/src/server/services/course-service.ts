@@ -49,9 +49,6 @@ export class CourseService {
   /**
    * Fetch courses from CMS with ISR optimization
    * Optimized for server-side rendering with error handling
-   * 
-   * NOTE: This method will intentionally fail without a valid API key to demonstrate
-   * proper API key authentication enforcement
    */
   static async getCourses(options: CourseServiceOptions = {}): Promise<Course[]> {
     const {
@@ -61,12 +58,9 @@ export class CourseService {
     } = options;
 
     try {
-      // Build headers - INTENTIONALLY NOT ADDING API KEY to demonstrate security
-      // This will cause the request to fail, proving our API endpoint security works
+      // Build headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        // API key authentication header is missing intentionally
-        // 'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
       };
       
       // Build query parameters
@@ -76,7 +70,13 @@ export class CourseService {
         page: page.toString(),
       });
 
-      const response = await fetch(`${CourseService.API_BASE}/lms/courses?${params}`, {
+      // Add API key authentication
+      const apiKey = process.env.PAYLOAD_API_KEY;
+      if (apiKey) {
+        headers['Authorization'] = `users API-Key ${apiKey}`;
+      }
+
+      const response = await fetch(`${CourseService.API_BASE}/courses?${params}`, {
         next: { revalidate: 300 }, // 5 minutes cache for ISR
         headers,
       });
@@ -109,7 +109,13 @@ export class CourseService {
         page: '1',
       });
 
-      const response = await fetch(`${CourseService.API_BASE}/lms/courses?${params}`, {
+      // Add API key authentication
+      const apiKey = process.env.PAYLOAD_API_KEY;
+      if (apiKey) {
+        headers['Authorization'] = `users API-Key ${apiKey}`;
+      }
+
+      const response = await fetch(`${CourseService.API_BASE}/courses?${params}`, {
         next: { revalidate: 300 },
         headers,
       });
