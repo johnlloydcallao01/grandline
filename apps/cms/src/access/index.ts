@@ -49,7 +49,7 @@ export const authenticatedUsers: Access = ({ req: { user } }) => {
  * API key-only access control - bypasses user authentication
  * Allows access if valid API key is provided in Authorization header
  */
-export const apiKeyOnly: Access = ({ req }) => {
+export const apiKeyOnly: Access = async ({ req }) => {
   const authHeader = req.headers?.get('authorization')
   if (!authHeader) return false
   
@@ -58,9 +58,34 @@ export const apiKeyOnly: Access = ({ req }) => {
   if (!apiKeyMatch) return false
   
   const providedKey = apiKeyMatch[1]
-  const validApiKey = process.env.PAYLOAD_API_KEY
   
-  return providedKey === validApiKey
+  try {
+    // Professional approach: Validate API key against database
+    const payload = req.payload
+    if (!payload) return false
+    
+    // Find user with matching API key
+    const users = await payload.find({
+      collection: 'users',
+      where: {
+        apiKey: {
+          equals: providedKey
+        },
+        // Ensure user is active and has service role
+        role: {
+          in: ['service', 'admin']
+        }
+      },
+      limit: 1,
+      depth: 0
+    })
+    
+    // API key is valid if we found exactly one matching user
+    return users.docs.length === 1
+  } catch (error) {
+    console.error('API key validation error:', error)
+    return false
+  }
 }
 
 /**
