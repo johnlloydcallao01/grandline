@@ -75,9 +75,8 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
         page: page.toString(),
       });
 
-      // Use the correct CMS API URL
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-      const fullUrl = `${apiUrl}/lms/courses?${params}`;
+      // Use internal API route that handles authentication
+      const fullUrl = `/api/courses?${params}`;
 
       console.log('🔍 COURSES: Fetching from:', fullUrl);
 
@@ -86,11 +85,10 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
         'Content-Type': 'application/json',
       };
 
-      // Fetch from your CMS API
+      // Fetch from internal API route
       const response = await fetch(fullUrl, {
         method: 'GET',
         headers,
-        credentials: 'include', // Include cookies for authentication
       });
 
       console.log('📡 COURSES: Response status:', response.status);

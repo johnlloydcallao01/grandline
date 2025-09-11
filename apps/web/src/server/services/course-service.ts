@@ -49,6 +49,9 @@ export class CourseService {
   /**
    * Fetch courses from CMS with ISR optimization
    * Optimized for server-side rendering with error handling
+   * 
+   * NOTE: This method will intentionally fail without a valid API key to demonstrate
+   * proper API key authentication enforcement
    */
   static async getCourses(options: CourseServiceOptions = {}): Promise<Course[]> {
     const {
@@ -58,9 +61,10 @@ export class CourseService {
     } = options;
 
     try {
-      // Build headers
+      // Build headers with API key authentication
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
       };
       
       // Build query parameters
@@ -92,9 +96,10 @@ export class CourseService {
    */
   static async getCourseCount(status: 'published' | 'draft' = 'published'): Promise<number> {
     try {
-      // Build headers
+      // Build headers with API key authentication
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'Authorization': 'users API-Key ' + process.env.CMS_API_KEY,
       };
       
       const params = new URLSearchParams({
