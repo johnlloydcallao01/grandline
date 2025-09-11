@@ -100,11 +100,17 @@ When you need to change available choices:
 **Apply pending migrations:**
 `pnpm payload migrate`
 
+**Force apply migrations (when dev mode conflicts occur):**
+`pnpm payload migrate --force`
+
 **Check migration status:**
 `pnpm payload migrate:status`
 
 **Undo last migration (dangerous):**
 `pnpm payload migrate:down`
+
+**Reset all migrations (EXTREMELY DANGEROUS - destroys all data):**
+`pnpm payload migrate:fresh` ⚠️ **NEVER USE WITH EXISTING DATA**
 
 ## When Things Go Wrong
 
@@ -119,12 +125,32 @@ When you need to change available choices:
 - Generate new migration if needed
 - Never try to fix by editing database directly
 
+### Dev Mode Conflicts ("data loss will occur" warning)
+**Problem:** PayloadCMS detects you've run in dev mode and warns about data loss
+
+**Solution:**
+1. First check what migrations are pending: `pnpm payload migrate:status`
+2. If you're confident about the changes, use: `pnpm payload migrate --force`
+3. When prompted "Would you like to proceed?", respond with 'y' or 'yes'
+4. Verify the migration applied: `pnpm payload migrate:status`
+
+**Why this happens:** PayloadCMS tracks when you've made schema changes in development mode and wants to ensure you don't accidentally lose data.
+
+### Interactive Terminal Prompts
+**Always respond to terminal prompts when they appear:**
+- PayloadCMS may ask for confirmation before applying migrations
+- Read the prompt carefully and respond appropriately
+- Use 'y' or 'yes' to proceed, 'n' or 'no' to cancel
+- Don't ignore prompts - the process will hang indefinitely
+
 ### Different Environments
 - Always test in development first
 - Use same migration process everywhere
 - Keep all environments synchronized
 
-## Real Example: Removing Unused Fields
+## Real Examples
+
+### Example 1: Removing Unused Fields
 
 **Situation:** You have a table with fields you no longer need
 
@@ -133,6 +159,47 @@ When you need to change available choices:
 **Step 3:** Review the generated migration - should show column removals
 **Step 4:** Run `pnpm payload migrate`
 **Result:** Unused columns removed, all other data preserved
+
+### Example 2: Adding Enum Values (Manual Migration)
+
+**Situation:** You need to add a new role like 'service' to an existing enum
+
+**Step 1:** Create a manual migration file in `src/migrations/`
+```typescript
+import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
+import { sql } from 'drizzle-orm'
+
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
+  await payload.db.execute(sql`
+    ALTER TYPE "public"."enum_users_role" ADD VALUE 'service';
+  `)
+}
+
+export async function down({ payload }: MigrateDownArgs): Promise<void> {
+  // Note: PostgreSQL doesn't support removing enum values
+  // This migration is not reversible
+}
+```
+**Step 2:** Run `pnpm payload migrate --force` if dev mode conflicts occur
+**Step 3:** Respond 'y' when prompted about data loss
+**Step 4:** Verify with `pnpm payload migrate:status`
+**Result:** New enum value added successfully
+
+### Example 3: Handling Dev Mode Conflicts
+
+**Situation:** You get "data loss will occur" warning
+
+**Terminal Output:**
+```
+? It looks like you've run Payload in dev mode, meaning you've 
+dynamically pushed changes to your database.
+
+If you'd like to run migrations, data loss will occur. Would you 
+like to proceed? » (y/N)
+```
+
+**Action:** Type 'y' and press Enter to proceed
+**Result:** Migration applies successfully
 
 ## Key Principles
 

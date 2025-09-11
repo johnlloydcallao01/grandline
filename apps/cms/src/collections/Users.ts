@@ -11,7 +11,7 @@ export const Users: CollectionConfig = {
     tokenExpiration: 30 * 24 * 60 * 60, // 30 days in seconds (2,592,000 seconds)
     maxLoginAttempts: 5,
     lockTime: 600 * 1000, // 10 minutes in milliseconds
-    useAPIKey: false,
+    useAPIKey: true, // Enable API key generation for service accounts
     depth: 2,
     cookies: {
       secure: process.env.NODE_ENV === 'production',
@@ -212,11 +212,15 @@ export const Users: CollectionConfig = {
           label: 'Trainee',
           value: 'trainee',
         },
+        {
+          label: 'Service Account', // Step 2: Add dedicated role for API key users
+          value: 'service',
+        },
       ],
       defaultValue: 'trainee',
       required: true,
       admin: {
-        description: 'User role determines access permissions',
+        description: 'User role determines access permissions. Service accounts are for API key authentication.',
       },
     },
     {

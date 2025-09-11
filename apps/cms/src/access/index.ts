@@ -3,6 +3,7 @@ import type { Access, FieldAccess, AccessArgs } from 'payload'
 // LMS role hierarchy levels
 export const ROLE_LEVELS = {
   TRAINEE: 1,
+  SERVICE: 3, // Step 2: Add service account role level (between trainee and instructor)
   INSTRUCTOR: 5,
   ADMIN: 10,
 } as const
@@ -10,6 +11,7 @@ export const ROLE_LEVELS = {
 // Legacy role mapping for backward compatibility
 export const LEGACY_ROLE_LEVELS = {
   'trainee': ROLE_LEVELS.TRAINEE,
+  'service': ROLE_LEVELS.SERVICE, // Step 2: Map service role for API key users
   'instructor': ROLE_LEVELS.INSTRUCTOR,
   'admin': ROLE_LEVELS.ADMIN,
 } as const
@@ -179,9 +181,26 @@ export const lmsAccess = {
   },
 }
 
+/**
+ * Access control for service accounts (API key users)
+ * Step 2: Service accounts have read-only access to most collections
+ */
+export const serviceAccountAccess: Access = ({ req: { user } }) => {
+  return user?.role === 'service'
+}
+
+/**
+ * Access control for service accounts or above (service, instructor, admin)
+ */
+export const serviceOrAbove: Access = ({ req: { user } }) => {
+  return hasMinimumRoleLevel(user?.role || '', ROLE_LEVELS.SERVICE)
+}
+
 const accessControls = {
   adminOnly,
   instructorOrAbove,
+  serviceAccountAccess, // Step 2: Add service account access control
+  serviceOrAbove, // Step 2: Add service or above access control
   authenticatedUsers,
   usersOwnData,
   courseContentAccess,
