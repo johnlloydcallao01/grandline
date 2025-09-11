@@ -81,17 +81,10 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
 
       console.log('🔍 COURSES: Fetching from:', fullUrl);
 
-      // Get API key from environment
-      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-      
-      // Build headers with API key if available
+      // Build headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      
-      if (apiKey) {
-        headers['Authorization'] = `users API-Key ${apiKey}`;
-      }
 
       // Fetch from your CMS API
       const response = await fetch(fullUrl, {

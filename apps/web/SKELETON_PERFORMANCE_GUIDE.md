@@ -43,7 +43,7 @@ function CoursePage() {
   const { isLoading, data: courses, refetch } = useDataLoading<Course[]>();
 
   useEffect(() => {
-    refetch(() => fetch('/api/courses').then(res => res.json()));
+    refetch(() => fetch('/api/lms/courses').then(res => res.json()));
   }, [refetch]);
 
   return (

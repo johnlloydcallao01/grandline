@@ -391,13 +391,13 @@ export class CourseService {
 ### cURL Examples for Courses
 
 ```bash
-# GET courses with API key
+# GET courses with API key (PayloadCMS built-in endpoint)
 curl -H "Authorization: users API-Key dd7d67ec-0b85-432e-9d66-54f9e0e400bf" \
      -H "Content-Type: application/json" \
      https://cms.grandlinemaritime.com/api/courses
 
-# GET courses with status filter
+# GET courses with status filter (PayloadCMS built-in endpoint)
 curl -H "Authorization: users API-Key dd7d67ec-0b85-432e-9d66-54f9e0e400bf" \
      -H "Content-Type: application/json" \
-     "https://cms.grandlinemaritime.com/api/courses?status=published&limit=8"
+     "https://cms.grandlinemaritime.com/api/courses?where[status][equals]=published&limit=8"
 ```

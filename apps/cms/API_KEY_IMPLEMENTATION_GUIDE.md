@@ -9,7 +9,7 @@ This guide documents the successful implementation of PayloadCMS API key authent
 - **API Key Generated**: `dd7d67ec-0b85-432e-9d66-54f9e0e400bf`
 - **Service Account**: `johnwebsites2@gmail.com` (Role: Service Account)
 - **Environment Variables**: Configured in `.env`
-- **API Service**: `src/lib/payload-api.js`
+- **API Endpoints**: Direct PayloadCMS API endpoints
 - **Test Endpoints**: Working and verified
 
 ## Environment Configuration
@@ -23,16 +23,10 @@ PAYLOAD_API_URL=https://cms.grandlinemaritime.com/api
 
 ## API Service Usage
 
-### Import the Service
+### Direct API Usage
 ```javascript
-import { 
-  getCourses, 
-  getCourse, 
-  getCategories, 
-  createCourse, 
-  updateCourse,
-  checkApiHealth 
-} from '../lib/payload-api.js';
+// Use PayloadCMS built-in endpoints like /api/courses
+// with proper authentication headers
 ```
 
 ### Basic Usage Examples
@@ -71,20 +65,19 @@ console.log(health); // { status: 'healthy', message: '...' }
 ## Available API Endpoints
 
 ### Test Endpoints (Development)
-- `GET /api/test-payload` - Verify API key authentication
-- `GET /api/courses` - Fetch courses with pagination and filters
-- `POST /api/courses` - Create new course (if permissions allow)
+- `GET /api/courses` - Fetch courses with pagination and filters (PayloadCMS built-in)
+- `POST /api/courses` - Create new course (if permissions allow) (PayloadCMS built-in)
 
 ### Example API Calls
 
 #### Get Courses with Filters
 ```bash
-GET /api/courses?limit=5&page=1&status=published
+GET /api/courses?limit=5&page=1&where[status][equals]=published
 ```
 
 #### Get Single Course
 ```bash
-GET /api/courses?id=course-id-here
+GET /api/courses/course-id-here
 ```
 
 ## Security Features Implemented
@@ -173,14 +166,11 @@ if (!process.env.PAYLOAD_API_KEY) {
 
 ```
 src/
-├── lib/
-│   └── payload-api.js          # Main API service
 ├── app/
 │   └── api/
-│       ├── test-payload/
-│       │   └── route.js        # Test endpoint
-│       └── courses/
-│           └── route.js        # Courses API endpoint
+│       └── lms/
+│           └── courses/
+│               └── route.ts    # Direct PayloadCMS endpoint
 └── .env                        # Environment variables
 ```
 
@@ -199,7 +189,7 @@ src/
 For questions about this implementation:
 - Review PayloadCMS documentation: https://payloadcms.com/docs/authentication/api-keys
 - Check the comprehensive guide: `/payload-cms-api.md`
-- Test endpoints: `/api/test-payload` and `/api/courses`
+- Test endpoints: `/api/courses` (PayloadCMS built-in)
 
 ---
 

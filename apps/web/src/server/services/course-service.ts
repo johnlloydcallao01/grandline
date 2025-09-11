@@ -58,6 +58,11 @@ export class CourseService {
     } = options;
 
     try {
+      // Build headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
       // Build query parameters
       const params = new URLSearchParams({
         status,
@@ -67,10 +72,7 @@ export class CourseService {
 
       const response = await fetch(`${CourseService.API_BASE}/lms/courses?${params}`, {
         next: { revalidate: 300 }, // 5 minutes cache for ISR
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Note: credentials not needed for server-side fetching
+        headers,
       });
       
       if (!response.ok) {
@@ -90,6 +92,11 @@ export class CourseService {
    */
   static async getCourseCount(status: 'published' | 'draft' = 'published'): Promise<number> {
     try {
+      // Build headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
       const params = new URLSearchParams({
         status,
         limit: '1', // Minimal fetch for count
@@ -98,9 +105,7 @@ export class CourseService {
 
       const response = await fetch(`${CourseService.API_BASE}/lms/courses?${params}`, {
         next: { revalidate: 300 },
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
       
       if (!response.ok) {
