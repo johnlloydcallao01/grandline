@@ -46,6 +46,24 @@ export const authenticatedUsers: Access = ({ req: { user } }) => {
 }
 
 /**
+ * API key-only access control - bypasses user authentication
+ * Allows access if valid API key is provided in Authorization header
+ */
+export const apiKeyOnly: Access = ({ req }) => {
+  const authHeader = req.headers?.authorization
+  if (!authHeader) return false
+  
+  // Check for API key format: "users API-Key <key>"
+  const apiKeyMatch = authHeader.match(/^users API-Key (.+)$/)
+  if (!apiKeyMatch) return false
+  
+  const providedKey = apiKeyMatch[1]
+  const validApiKey = process.env.PAYLOAD_API_KEY
+  
+  return providedKey === validApiKey
+}
+
+/**
  * Access control for users to read their own data
  */
 export const usersOwnData: Access = ({ req: { user } }) => {
@@ -202,6 +220,7 @@ const accessControls = {
   serviceAccountAccess, // Step 2: Add service account access control
   serviceOrAbove, // Step 2: Add service or above access control
   authenticatedUsers,
+  apiKeyOnly, // API key-only access control
   usersOwnData,
   courseContentAccess,
   sensitiveData,
