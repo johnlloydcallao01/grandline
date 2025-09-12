@@ -24,16 +24,16 @@ export const Courses: CollectionConfig = {
       return false
     },
     create: ({ req: { user } }) => {
-      // Only admins can create courses
-      return user?.role === 'admin' || false
+      // Allow both service accounts and admins to create courses
+      return user?.role === 'service' || user?.role === 'admin' || false
     },
     update: ({ req: { user } }) => {
-      // Only admins can update courses
-      return user?.role === 'admin' || false
+      // Allow both service accounts and admins to update courses
+      return user?.role === 'service' || user?.role === 'admin' || false
     },
     delete: ({ req: { user } }) => {
-      // Only admins can delete courses
-      return user?.role === 'admin' || false
+      // Allow both service accounts and admins to delete courses
+      return user?.role === 'service' || user?.role === 'admin' || false
     },
   },
   fields: [
