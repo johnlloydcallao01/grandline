@@ -1,5 +1,4 @@
 import type { CollectionConfig } from 'payload'
-import { lmsAccess } from '../access'
 
 export const CourseCategories: CollectionConfig = {
   slug: 'course-categories',
@@ -10,10 +9,31 @@ export const CourseCategories: CollectionConfig = {
     description: 'Organize courses into categories and hierarchies',
   },
   access: {
-    read: () => true, // Public can read categories
-    create: lmsAccess.courseManagement, // Instructors and admins can create
-    update: lmsAccess.courseManagement, // Instructors and admins can update
-    delete: lmsAccess.courseManagement, // Instructors and admins can delete
+    // PayloadCMS automatically authenticates API keys and populates req.user
+    read: ({ req: { user } }) => {
+      // If user exists, they've been authenticated (either via API key or login)
+      if (user) {
+        // Allow service accounts (for website display) and admins
+        if (user.role === 'service' || user.role === 'admin') {
+          return true
+        }
+      }
+      
+      // Block all unauthenticated requests and other roles
+      return false
+    },
+    create: ({ req: { user } }) => {
+      // Allow both service accounts and admins to create course categories
+      return user?.role === 'service' || user?.role === 'admin' || false
+    },
+    update: ({ req: { user } }) => {
+      // Allow both service accounts and admins to update course categories
+      return user?.role === 'service' || user?.role === 'admin' || false
+    },
+    delete: ({ req: { user } }) => {
+      // Allow both service accounts and admins to delete course categories
+      return user?.role === 'service' || user?.role === 'admin' || false
+    },
   },
   fields: [
     // === BASIC CATEGORY INFO ===
