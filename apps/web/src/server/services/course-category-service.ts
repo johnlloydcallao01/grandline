@@ -28,11 +28,19 @@ export class CourseCategoryService {
    */
   static async getCourseCategories(limit: number = 50): Promise<CourseCategory[]> {
     try {
-      const response = await fetch(`${CourseCategoryService.API_BASE}/lms/course-categories?limit=${limit}`, {
+      // Build headers with API key authentication
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      const apiKey = process.env.PAYLOAD_API_KEY;
+      if (apiKey) {
+        headers['Authorization'] = `users API-Key ${apiKey}`;
+      }
+
+      const response = await fetch(`${CourseCategoryService.API_BASE}/course-categories?limit=${limit}`, {
         next: { revalidate: 300 }, // 5 minutes cache for ISR
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
       
       if (!response.ok) {
