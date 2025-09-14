@@ -240,7 +240,14 @@ export const Users: CollectionConfig = {
         description: 'Last login timestamp',
       },
     },
-
+    {
+      name: 'profilePicture',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'User profile picture',
+      },
+    },
 
   ],
 }

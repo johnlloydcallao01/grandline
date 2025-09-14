@@ -24,7 +24,7 @@ import * as migration_20250904_fix_serial_type_error from './20250904_fix_serial
 import * as migration_20250904_re_enable_trainee_trigger from './20250904_re_enable_trainee_trigger';
 import * as migration_20250911_add_service_role from './20250911_add_service_role';
 import * as migration_20250911_fix_service_role_trigger from './20250911_fix_service_role_trigger';
-
+import * as migration_20250914_115512 from './20250914_115512';
 
 export const migrations = [
   {
@@ -157,5 +157,9 @@ export const migrations = [
     down: migration_20250911_fix_service_role_trigger.down,
     name: '20250911_fix_service_role_trigger',
   },
-
+  {
+    up: migration_20250914_115512.up,
+    down: migration_20250914_115512.down,
+    name: '20250914_115512'
+  },
 ];
