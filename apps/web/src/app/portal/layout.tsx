@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactElement } from 'react'
 import Link from 'next/link'
 import { Header, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
@@ -139,14 +139,20 @@ function PortalSidebar({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => 
 
           {/* Home Navigation */}
           <div className="space-y-1">
-            <Link href="/" className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-home text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">Home</span>}
-            </Link>
+            {(Link as any)({
+              href: "/",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-home text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Home</span>}
+                </>
+              )
+            }) as ReactElement}
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}
@@ -156,34 +162,52 @@ function PortalSidebar({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => 
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Portal</div>}
             
             {/* Portal Dashboard */}
-            <Link href="/portal/dashboard" className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-tachometer-alt text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">Dashboard</span>}
-            </Link>
+            {(Link as any)({
+              href: "/portal/dashboard",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-tachometer-alt text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Dashboard</span>}
+                </>
+              )
+            }) as ReactElement}
 
             {/* Portal Analytics */}
-            <Link href="/portal/analytics" className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-chart-bar text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">Analytics</span>}
-            </Link>
+            {(Link as any)({
+              href: "/portal/analytics",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-chart-bar text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Analytics</span>}
+                </>
+              )
+            }) as ReactElement}
 
             {/* Portal Settings */}
-            <Link href="/portal/settings" className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-cog text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">Settings</span>}
-            </Link>
+            {(Link as any)({
+              href: "/portal/settings",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-cog text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Settings</span>}
+                </>
+              )
+            }) as ReactElement}
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}
