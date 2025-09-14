@@ -39,6 +39,14 @@ export function UserAvatar({
     xl: 'w-4 h-4'
   };
 
+  // Get profile picture URL with fallback priority
+  const getProfilePictureUrl = () => {
+    if (!user?.profilePicture) return null;
+    return user.profilePicture.cloudinaryURL || user.profilePicture.url || null;
+  };
+
+  const profilePictureUrl = getProfilePictureUrl();
+
   if (!user) {
     return (
       <div className={`${sizeClasses[size]} bg-gray-300 rounded-full flex items-center justify-center ${className}`}>
@@ -49,9 +57,29 @@ export function UserAvatar({
 
   return (
     <div className={`relative ${className}`}>
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold`}>
-        {initials}
-      </div>
+      {profilePictureUrl ? (
+        // Display actual profile picture
+        <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white shadow-sm`}>
+          <img 
+            src={profilePictureUrl} 
+            alt={user.profilePicture?.alt || `${displayName}'s profile picture`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to initials if image fails to load
+              const target = e.target as HTMLImageElement;
+              const parent = target.parentElement;
+              if (parent) {
+                parent.innerHTML = `<div class="${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">${initials}</div>`;
+              }
+            }}
+          />
+        </div>
+      ) : (
+        // Fallback to gradient circle with initials
+        <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold`}>
+          {initials}
+        </div>
+      )}
       
       {showOnlineStatus && (
         <div className={`absolute -bottom-0 -right-0 ${statusSize[size]} bg-green-400 border-2 border-white rounded-full`}></div>

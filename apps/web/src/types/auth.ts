@@ -29,6 +29,17 @@ export interface User {
   completeAddress?: string | null;
   gender?: ('male' | 'female' | 'other' | 'prefer_not_to_say') | null;
   civilStatus?: ('single' | 'married' | 'divorced' | 'widowed' | 'separated') | null;
+  profilePicture?: {
+    id: number;
+    alt?: string | null;
+    url: string;
+    cloudinaryURL?: string;
+    filename: string;
+    mimeType: string;
+    filesize: number;
+    width: number;
+    height: number;
+  } | null;
   // PayloadCMS auth fields
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;

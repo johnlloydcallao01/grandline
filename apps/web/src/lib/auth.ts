@@ -221,7 +221,8 @@ export async function getCurrentUser(): Promise<User | null> {
 
   try {
     // Use token-based authentication instead of cookies
-    const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me`, {
+    // Include depth parameter to fetch profilePicture with related Media data
+    const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me?depth=2`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
