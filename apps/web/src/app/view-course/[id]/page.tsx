@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCourses, type Course, type Media } from '@/server';
 import Image from 'next/image';
+import { ScrollToTop } from './ScrollToTop';
 
 // ISR configuration - revalidate every 5 minutes
 export const revalidate = 300;
@@ -71,7 +72,8 @@ export default async function ViewCoursePage({ params }: ViewCoursePageProps) {
   const thumbnailImageUrl = getImageUrl(course.thumbnail);
 
   return (
-    <div className="min-h-screen bg-white">
+    <ScrollToTop>
+      <div className="min-h-screen bg-white">
 
 
       {/* Breadcrumb Navigation */}
@@ -131,7 +133,8 @@ export default async function ViewCoursePage({ params }: ViewCoursePageProps) {
 
         </div>
       </div>
-    </div>
+      </div>
+    </ScrollToTop>
   );
 }
 
