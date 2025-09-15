@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import Link from 'next/link';
 
 export default function PortalPage() {
@@ -74,7 +74,7 @@ export default function PortalPage() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Current Courses</h2>
-                {(Link as any)({ href: "#", className: "text-blue-600 hover:text-blue-700 text-sm font-medium", children: "View All" }) as ReactElement}
+                <Link href="#" className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</Link>
               </div>
             </div>
             <div className="p-6">
@@ -159,7 +159,7 @@ export default function PortalPage() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Recent Assignments</h2>
-                {(Link as any)({ href: "#", className: "text-blue-600 hover:text-blue-700 text-sm font-medium", children: "View All" }) as ReactElement}
+                <Link href="#" className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</Link>
               </div>
             </div>
             <div className="p-6">
