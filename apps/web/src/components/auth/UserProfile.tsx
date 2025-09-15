@@ -5,8 +5,53 @@
 
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { useUser, useLogout } from '@/hooks/useAuth';
+
+// ========================================
+// USER AVATAR IMAGE COMPONENT
+// ========================================
+
+interface UserAvatarImageProps {
+  src: string;
+  alt: string;
+  size: 'sm' | 'md' | 'lg' | 'xl';
+  initials: string;
+  sizeClasses: Record<string, string>;
+}
+
+function UserAvatarImage({ src, alt, size, initials, sizeClasses }: UserAvatarImageProps) {
+  const [imageError, setImageError] = useState(false);
+  
+  const sizeMap = {
+    sm: { width: 32, height: 32 },
+    md: { width: 40, height: 40 },
+    lg: { width: 48, height: 48 },
+    xl: { width: 64, height: 64 }
+  };
+  
+  if (imageError) {
+    return (
+      <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold`}>
+        {initials}
+      </div>
+    );
+  }
+  
+  return (
+    <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white shadow-sm`}>
+      {React.createElement(Image, {
+        src,
+        alt,
+        width: sizeMap[size].width,
+        height: sizeMap[size].height,
+        className: "w-full h-full object-cover",
+        onError: () => setImageError(true)
+      })}
+    </div>
+  );
+}
 
 // ========================================
 // USER AVATAR COMPONENT
@@ -58,22 +103,13 @@ export function UserAvatar({
   return (
     <div className={`relative ${className}`}>
       {profilePictureUrl ? (
-        // Display actual profile picture
-        <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white shadow-sm`}>
-          <img 
-            src={profilePictureUrl} 
-            alt={user.profilePicture?.alt || `${displayName}'s profile picture`}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback to initials if image fails to load
-              const target = e.target as HTMLImageElement;
-              const parent = target.parentElement;
-              if (parent) {
-                parent.innerHTML = `<div class="${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">${initials}</div>`;
-              }
-            }}
-          />
-        </div>
+        <UserAvatarImage 
+          src={profilePictureUrl}
+          alt={user.profilePicture?.alt || `${displayName}'s profile picture`}
+          size={size}
+          initials={initials}
+          sizeClasses={sizeClasses}
+        />
       ) : (
         // Fallback to gradient circle with initials
         <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold`}>

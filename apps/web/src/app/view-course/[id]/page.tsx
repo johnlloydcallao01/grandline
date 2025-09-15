@@ -1,9 +1,34 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getCourses, type Course, type Media } from '@/server';
+import { getCourses, type Media } from '@/server';
 import Image from 'next/image';
 import { ScrollToTop } from './ScrollToTop';
+import { AuthorAvatar } from './AuthorAvatar';
+
+// Extended Course interface with instructor information
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  profilePicture?: Media | null;
+}
+
+interface Instructor {
+  id: number;
+  user: User;
+  specialization: string;
+}
+
+interface CourseWithInstructor {
+  id: string;
+  title: string;
+  excerpt: string;
+  status: 'published' | 'draft';
+  thumbnail?: Media | null;
+  bannerImage?: Media | null;
+  instructor?: Instructor | null;
+}
 
 // ISR configuration - revalidate every 5 minutes
 export const revalidate = 300;
@@ -17,7 +42,7 @@ interface ViewCoursePageProps {
 /**
  * Fetch individual course data from CMS
  */
-async function getCourseById(id: string): Promise<Course | null> {
+async function getCourseById(id: string): Promise<CourseWithInstructor | null> {
   try {
     // Build headers with API key authentication
     const headers: Record<string, string> = {
@@ -30,7 +55,8 @@ async function getCourseById(id: string): Promise<Course | null> {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
-    const response = await fetch(`${apiUrl}/courses/${id}`, {
+    // Add depth=3 to fetch instructor -> user -> profilePicture data
+    const response = await fetch(`${apiUrl}/courses/${id}?depth=3`, {
       next: { revalidate: 300 }, // 5 minutes cache for ISR
       headers,
     });
@@ -42,7 +68,7 @@ async function getCourseById(id: string): Promise<Course | null> {
       throw new Error(`Failed to fetch course: ${response.status}`);
     }
 
-    const course: Course = await response.json();
+    const course: CourseWithInstructor = await response.json();
     return course;
   } catch (error) {
     console.error('Error fetching course:', error);
@@ -57,6 +83,8 @@ function getImageUrl(media: Media | null | undefined): string | null {
   if (!media) return null;
   return media.cloudinaryURL || media.url || media.thumbnailURL || null;
 }
+
+
 
 /**
  * Dynamic course view page
@@ -89,9 +117,9 @@ export default async function ViewCoursePage({ params }: ViewCoursePageProps) {
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link href="/courses" className="text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium">
-            Courses
-          </Link>
+          <span className="text-gray-600 font-medium">
+            View Course
+          </span>
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -100,15 +128,30 @@ export default async function ViewCoursePage({ params }: ViewCoursePageProps) {
       </div>
 
       {/* Course Content */}
-      <div className="w-full pb-12 pt-4 lg:pt-0">
+      <div className="w-full pb-12">
         <div className="space-y-8">
           {/* Main Content */}
-          <div className="flex flex-col md:flex-row shadow-lg rounded-xl border border-gray-100 p-4 mx-[5px] lg:mx-[15px]">
+          <div className="flex flex-col md:flex-row shadow-lg rounded-xl border border-gray-100 py-4 px-[5px] md:px-4 mx-[5px] lg:mx-[15px]">
             <div className="w-full md:w-[65%]">
               {/* Course Title */}
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-[#201a7c] to-[#ab3b43] bg-clip-text text-transparent leading-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight" style={{color: '#333'}}>
                 {course.title}
               </h1>
+              
+              {/* Author Information */}
+              {course.instructor && course.instructor.user && (
+                <div className="flex items-center space-x-3 mb-6">
+                  <AuthorAvatar user={course.instructor.user} />
+                  <div>
+                    <p className="text-gray-900 font-medium text-base">
+                      {course.instructor.user.firstName} {course.instructor.user.lastName}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      {course.instructor.specialization}
+                    </p>
+                  </div>
+                </div>
+              )}
               
               {course.excerpt && (
                 <div className="mb-8">
