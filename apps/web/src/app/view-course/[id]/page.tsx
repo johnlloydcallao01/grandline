@@ -57,6 +57,10 @@ async function getCourseById(id: string): Promise<CourseWithInstructor | null> {
     // Add depth=3 to fetch instructor -> user -> profilePicture data
     const response = await fetch(`${apiUrl}/courses/${id}?depth=3`, {
       headers,
+      next: {
+        revalidate: 300, // Cache for 5 minutes, matching page-level ISR
+        tags: [`course-${id}`] // Enable tag-based revalidation
+      }
     });
 
     if (!response.ok) {
