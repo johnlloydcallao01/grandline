@@ -94,6 +94,43 @@ export class CourseService {
   }
 
   /**
+   * Fetch individual course by ID from CMS with ISR optimization
+   * Optimized for server-side rendering with error handling
+   */
+  static async getCourseById(id: string): Promise<Course | null> {
+    try {
+      // Build headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add API key authentication
+      const apiKey = process.env.PAYLOAD_API_KEY;
+      if (apiKey) {
+        headers['Authorization'] = `users API-Key ${apiKey}`;
+      }
+
+      const response = await fetch(`${CourseService.API_BASE}/courses/${id}?depth=3`, {
+        next: { revalidate: 300 }, // 5 minutes cache for ISR
+        headers,
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null; // Course not found
+        }
+        throw new Error(`Failed to fetch course: ${response.status}`);
+      }
+      
+      const course: Course = await response.json();
+      return course;
+    } catch (error) {
+      console.error('Error fetching course by ID:', error);
+      return null; // Graceful fallback
+    }
+  }
+
+  /**
    * Get course count for pagination/display purposes
    */
   static async getCourseCount(status: 'published' | 'draft' = 'published'): Promise<number> {
@@ -133,6 +170,7 @@ export class CourseService {
   }
 }
 
-// Export convenience functions
+// Export specific functions for convenience
 export const getCourses = CourseService.getCourses;
 export const getCourseCount = CourseService.getCourseCount;
+export const getCourseById = CourseService.getCourseById;

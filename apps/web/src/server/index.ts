@@ -180,6 +180,7 @@ export {
   CourseService,
   getCourses,
   getCourseCount,
+  getCourseById,
   type Course,
   type Media,
   type CourseServiceOptions,
