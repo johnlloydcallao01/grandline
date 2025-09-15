@@ -59,7 +59,7 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
       </div>
       
       {/* Mobile/Tablet Sticky Header */}
-      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200 py-[3px]">
         <div className="flex items-center justify-between">
           {/* Back Arrow */}
           <button 
