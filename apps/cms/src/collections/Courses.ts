@@ -114,6 +114,14 @@ export const Courses: CollectionConfig = {
       },
     },
     {
+      name: 'discountedPrice',
+      type: 'number',
+      min: 0,
+      admin: {
+        description: 'Discounted course price (leave empty if no discount applies)',
+      },
+    },
+    {
       name: 'maxStudents',
       type: 'number',
       min: 1,

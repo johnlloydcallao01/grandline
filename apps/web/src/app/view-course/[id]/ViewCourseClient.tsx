@@ -42,8 +42,14 @@ interface CourseWithInstructor {
   publishedAt?: string | null;
   updatedAt?: string | null;
   price?: number | null;
+  discountedPrice?: number | null;
   thumbnail?: Media | null;
   instructor?: Instructor;
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 interface ViewCourseClientProps {
@@ -286,16 +292,16 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <span className="text-red-500 text-sm line-through">₱5,000.00</span>
-                            <div className="text-2xl font-bold text-gray-900">{formatPrice(course.price)}</div>
+                            <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
+                            <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                           </div>
-                          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                            Business
+                          <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
+                            {course.category?.name || 'General'}
                           </span>
                         </div>
                         
-                        <button className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors">
-                          ♡ ADD TO WISHLIST
+                        <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
+                          ▶ Start Learning
                         </button>
                         
                         <div className="text-sm text-gray-600 space-y-1">
@@ -372,16 +378,16 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <span className="text-red-500 text-sm line-through">₱5,000.00</span>
-                          <div className="text-2xl font-bold text-gray-900">{formatPrice(course.price)}</div>
+                          <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
+                          <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                         </div>
-                        <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                          Business
+                        <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
+                          {course.category?.name || 'General'}
                         </span>
                       </div>
                       
-                      <button className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors">
-                        ♡ ADD TO WISHLIST
+                      <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
+                        ▶ Start Learning
                       </button>
                       
                       <div className="text-sm text-gray-600 space-y-1">

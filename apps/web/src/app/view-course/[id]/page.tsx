@@ -28,9 +28,15 @@ interface CourseWithInstructor {
   publishedAt?: string | null;
   updatedAt?: string | null;
   price?: number | null;
+  discountedPrice?: number | null;
   thumbnail?: Media | null;
   bannerImage?: Media | null;
   instructor?: Instructor | null;
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 
@@ -57,7 +63,7 @@ async function getCourseById(id: string): Promise<CourseWithInstructor | null> {
     }
 
     const apiUrl = 'https://cms.grandlinemaritime.com/api';
-    // Add depth=3 to fetch instructor -> user -> profilePicture data
+    // Add depth=3 to fetch instructor -> user -> profilePicture and category data
     const response = await fetch(`${apiUrl}/courses/${id}?depth=3`, {
       headers,
       next: {
