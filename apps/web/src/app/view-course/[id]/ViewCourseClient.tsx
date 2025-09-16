@@ -39,6 +39,9 @@ interface CourseWithInstructor {
   id: string;
   title: string;
   excerpt?: string;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  price?: number | null;
   thumbnail?: Media | null;
   instructor?: Instructor;
 }
@@ -124,6 +127,49 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
     }
   };
 
+  // Helper function to format published date
+  const formatPublishedDate = (publishedAt: string | null | undefined): string => {
+    if (!publishedAt) return 'Not published';
+    
+    try {
+      const date = new Date(publishedAt);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
+  // Helper function to format last updated date
+  const formatLastUpdated = (updatedAt: string | null | undefined): string => {
+    if (!updatedAt) return 'Not updated';
+    
+    try {
+      const date = new Date(updatedAt);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
+  // Helper function to format price
+  const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined) return 'Free';
+    if (price === 0) return 'Free';
+    
+    return new Intl.NumberFormat('en-PH', {
+      style: 'currency',
+      currency: 'PHP'
+    }).format(price);
+  };
+
   const thumbnailImageUrl = getImageUrl(course.thumbnail);
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
 
@@ -196,13 +242,9 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               )}
               
               {/* Course Stats */}
-              <div className="flex items-center space-x-6 text-sm text-gray-300 mb-6">
-                <div className="flex items-center space-x-1">
-                  <span className="text-yellow-400">★★★★★</span>
-                  <span>(0 ratings)</span>
-                </div>
-                <span>Aug/2025</span>
-              </div>
+              <div className="flex items-center space-x-6 text-sm text-gray-300">
+             <span>Last Updated: {formatLastUpdated(course.updatedAt)}</span>
+           </div>
             </div>
           </div>
         </div>
@@ -245,7 +287,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <span className="text-red-500 text-sm line-through">₱5,000.00</span>
-                            <div className="text-2xl font-bold text-gray-900">₱4,700.00</div>
+                            <div className="text-2xl font-bold text-gray-900">{formatPrice(course.price)}</div>
                           </div>
                           <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
                             Business
@@ -331,7 +373,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <span className="text-red-500 text-sm line-through">₱5,000.00</span>
-                          <div className="text-2xl font-bold text-gray-900">₱4,700.00</div>
+                          <div className="text-2xl font-bold text-gray-900">{formatPrice(course.price)}</div>
                         </div>
                         <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
                           Business

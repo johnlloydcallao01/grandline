@@ -25,6 +25,9 @@ interface CourseWithInstructor {
   title: string;
   excerpt: string;
   status: 'published' | 'draft';
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  price?: number | null;
   thumbnail?: Media | null;
   bannerImage?: Media | null;
   instructor?: Instructor | null;
