@@ -11,10 +11,27 @@ interface CourseNavigationCarouselProps {
  * Implements physics-based scrolling similar to native mobile apps
  */
 export function CourseNavigationCarousel({
-  sections = ["Description", "Curriculum", "Instructor", "Materials", "Announcements"],
-  activeSection = "Description",
+  sections = ["Overview", "Description", "Curriculum", "Instructor", "Materials", "Announcements"],
+  activeSection = "Overview",
   onSectionChange
 }: CourseNavigationCarouselProps) {
+  // Filter out Overview section on desktop (lg screens and above)
+  const [isDesktop, setIsDesktop] = React.useState(false);
+  
+  React.useEffect(() => {
+    const checkScreenSize = () => {
+      setIsDesktop(window.innerWidth >= 1024); // lg breakpoint
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+  
+  const filteredSections = isDesktop 
+    ? sections.filter(section => section !== "Overview")
+    : sections;
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
@@ -35,10 +52,10 @@ export function CourseNavigationCarousel({
     const containerWidth = container.getBoundingClientRect().width - 48; // minus padding
     const actualItemWidth = 120; // approximate width per tab
     const gapWidth = 24; // gap between items
-    const totalContentWidth = (sections.length * actualItemWidth) + ((sections.length - 1) * gapWidth);
+    const totalContentWidth = (filteredSections.length * actualItemWidth) + ((filteredSections.length - 1) * gapWidth);
 
     return Math.max(0, totalContentWidth - containerWidth);
-  }, [sections.length]);
+  }, [filteredSections.length]);
 
   const [maxTranslate, setMaxTranslate] = useState(1000); // Start with a large value to allow initial movement
 
@@ -282,7 +299,7 @@ export function CourseNavigationCarousel({
             pointerEvents: 'none' // Prevent individual items from blocking events
           }}
         >
-          {sections.map((section) => (
+          {filteredSections.map((section) => (
             <div
               key={section}
               className="flex-shrink-0"
