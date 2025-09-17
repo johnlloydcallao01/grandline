@@ -1,47 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-// Media interface from CMS API
-interface Media {
-  id: number;
-  alt?: string | null;
-  cloudinaryPublicId?: string | null;
-  cloudinaryURL?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-
-// Course type matching your CMS API
-interface Course {
-  id: string;
-  title: string;
-  excerpt: string;
-  status: 'published' | 'draft';
-  thumbnail?: Media | null;
-  bannerImage?: Media | null;
-}
-
-interface CoursesResponse {
-  docs: Course[];
-  totalDocs: number;
-  limit: number;
-  page: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-interface UseCoursesOptions {
-  status?: 'published' | 'draft';
-  limit?: number;
-  page?: number;
-}
+import type { Course, CoursesResponse, CourseQueryParams } from '@/types/course';
 
 interface UseCoursesReturn {
   courses: Course[];
@@ -51,7 +9,7 @@ interface UseCoursesReturn {
   refetch: () => void;
 }
 
-export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
+export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

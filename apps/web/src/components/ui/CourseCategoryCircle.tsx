@@ -1,17 +1,5 @@
 import React from 'react';
-
-// Course category interface
-interface CourseCategory {
-  id: number;
-  name: string;
-  slug: string;
-  icon?: {
-    id: number;
-    url: string;
-    cloudinaryURL?: string;
-    alt?: string;
-  };
-}
+import type { CourseCategory } from '@/types/course';
 
 // Component props interface
 interface CourseCategoryCircleProps {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { type Course, type Media } from '@/server';
+import type { Course, Media } from '@/types/course';
 
 interface CoursesGridProps {
   courses: Course[]; // Required - provided by ISR

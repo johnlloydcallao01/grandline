@@ -5,52 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AuthorAvatar } from './AuthorAvatar';
 import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel';
-
-// Media interface matching CMS API
-interface Media {
-  id: number;
-  alt?: string | null;
-  cloudinaryPublicId?: string | null;
-  cloudinaryURL?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-}
-
-// Types
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-interface Instructor {
-  id: string;
-  user: User;
-  specialization: string;
-}
-
-interface CourseWithInstructor {
-  id: string;
-  title: string;
-  excerpt?: string;
-  publishedAt?: string | null;
-  updatedAt?: string | null;
-  price?: number | null;
-  discountedPrice?: number | null;
-  thumbnail?: Media | null;
-  instructor?: Instructor;
-  category?: {
-    id: number;
-    name: string;
-    slug: string;
-  } | null;
-}
+import type { Media, CourseWithInstructor } from '@/types/course';
 
 interface ViewCourseClientProps {
   course: CourseWithInstructor;
@@ -191,9 +146,9 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
       <div className="w-full px-[10px] md:px-[15px] pt-4 pb-4">
         <nav className="flex items-center space-x-3 text-sm">
           {(Link as any)({
-            href: "/courses",
+            href: "/",
             className: "text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium",
-            children: "Courses"
+            children: "Home"
           })}
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

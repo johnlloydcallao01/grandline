@@ -2,20 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-
-interface Media {
-  id: string;
-  url?: string;
-  cloudinaryURL?: string;
-  thumbnailURL?: string;
-}
-
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  profilePicture?: Media | null;
-}
+import type { Media, User } from '@/types/course';
 
 function getImageUrl(media: Media | null | undefined): string | null {
   if (!media) return null;
