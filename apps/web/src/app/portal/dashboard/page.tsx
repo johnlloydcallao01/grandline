@@ -74,92 +74,11 @@ export default function PortalPage() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Current Courses</h2>
-                <Link href="#" className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</Link>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                    CS
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="font-semibold text-gray-900">Computer Science Fundamentals</h3>
-                    <p className="text-sm text-gray-600">Prof. Sarah Wilson • 3 credits</p>
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">78%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{width: '78%'}}></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      On Track
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
-                    MA
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="font-semibold text-gray-900">Advanced Mathematics</h3>
-                    <p className="text-sm text-gray-600">Prof. Michael Chen • 4 credits</p>
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">65%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                        <div className="bg-purple-600 h-2 rounded-full" style={{width: '65%'}}></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Behind
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
-                    PH
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="font-semibold text-gray-900">Physics Laboratory</h3>
-                    <p className="text-sm text-gray-600">Prof. Emily Rodriguez • 2 credits</p>
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">92%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                        <div className="bg-green-600 h-2 rounded-full" style={{width: '92%'}}></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Excellent
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Assignments */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Assignments</h2>
-                <Link href="#" className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</Link>
+                {(Link as any)({
+                  href: "/courses",
+                  className: "text-blue-600 hover:text-blue-700 text-sm font-medium",
+                  children: "View All"
+                })}
               </div>
             </div>
             <div className="p-6">

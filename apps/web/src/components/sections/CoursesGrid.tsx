@@ -31,6 +31,8 @@ interface CourseCardProps {
 }
 
 function CourseCard({ course }: CourseCardProps) {
+  const LinkComponent = Link as any;
+  
   // Get the best available image URL from thumbnail
   const getImageUrl = (media: Media | null | undefined): string | null => {
     if (!media) return null;
@@ -43,7 +45,7 @@ function CourseCard({ course }: CourseCardProps) {
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
 
   return (
-    <Link href={`/view-course/${course.id}`} className="group cursor-pointer block">
+    <LinkComponent href={`/view-course/${course.id}`} className="group cursor-pointer block">
       <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -93,7 +95,7 @@ function CourseCard({ course }: CourseCardProps) {
           </p>
         )}
       </div>
-    </Link>
+    </LinkComponent>
   );
 }
 

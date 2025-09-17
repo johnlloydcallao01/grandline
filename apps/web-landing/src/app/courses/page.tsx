@@ -161,7 +161,7 @@ export default function CoursesPage() {
       originalPrice: "$449",
       image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=250&fit=crop&crop=center",
       category: "Mobile Development",
-      skills: ["React Native", "JavaScript", "Redux", "Firebase", "iOS", "Android"],
+      skills: ["React Native", "JavaScript", "Redux", "iOS", "Android"],
       description: "Build cross-platform mobile applications with React Native and deploy to app stores.",
       badge: "New",
       lessons: 46,

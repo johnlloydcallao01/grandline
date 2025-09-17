@@ -71,16 +71,20 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   // Check screen size and adjust active section accordingly
   useEffect(() => {
     const checkScreenSize = () => {
+      const wasDesktop = isDesktop;
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
       
-      // If switching to desktop and currently on Overview, switch to Description
-      if (desktop && activeSection === 'Overview') {
-        setActiveSection('Description');
-      }
-      // If switching to mobile/tablet and currently on Description (and it was auto-switched), switch to Overview
-      else if (!desktop && activeSection === 'Description') {
-        setActiveSection('Overview');
+      // Only auto-switch when actually changing screen sizes, not on manual section selection
+      if (wasDesktop !== desktop) {
+        // If switching to desktop and currently on Overview, switch to Description
+        if (desktop && activeSection === 'Overview') {
+          setActiveSection('Description');
+        }
+        // If switching to mobile/tablet and currently on Description, switch to Overview
+        else if (!desktop && activeSection === 'Description') {
+          setActiveSection('Overview');
+        }
       }
     };
     
@@ -88,14 +92,14 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
     window.addEventListener('resize', checkScreenSize);
     
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, [activeSection]);
+  }, [isDesktop, activeSection]);
 
   // Update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       const sections = isDesktop 
-        ? ['Description', 'Curriculum', 'Instructor', 'Materials', 'Announcements']
-        : ['Overview', 'Description', 'Curriculum', 'Instructor', 'Materials', 'Announcements'];
+        ? ['Description', 'Curriculum', 'Materials', 'Announcements']
+        : ['Overview', 'Description', 'Curriculum', 'Materials', 'Announcements'];
       const headerOffset = 150; // Account for sticky header and navigation
       
       for (const section of sections) {
@@ -186,9 +190,11 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
       {/* Breadcrumb Navigation */}
       <div className="w-full px-[10px] md:px-[15px] pt-4 pb-4">
         <nav className="flex items-center space-x-3 text-sm">
-          <Link href="/" className="text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium">
-            Home
-          </Link>
+          {(Link as any)({
+            href: "/courses",
+            className: "text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium",
+            children: "Courses"
+          })}
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -334,21 +340,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                 <p className="text-gray-700">Course curriculum content will be displayed here.</p>
               </div>
               
-              <div id="instructor" className="bg-white rounded-lg shadow-sm p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Instructor</h2>
-                {course.instructor && course.instructor.user && (
-                  <div className="flex items-center space-x-4">
-                    <AuthorAvatar user={course.instructor.user} />
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {course.instructor.user.firstName} {course.instructor.user.lastName}
-                      </h3>
-                      <p className="text-gray-600">{course.instructor.specialization}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
+
               <div id="materials" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Materials</h2>
                 <p className="text-gray-700">Course materials and resources will be displayed here.</p>

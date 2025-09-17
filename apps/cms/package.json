@@ -30,7 +30,6 @@
     "cloudinary": "^2.7.0",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
-    "firebase-admin": "^13.4.0",
     "graphql": "^16.8.1",
     "next": "15.4.2",
     "payload": "3.49.0",

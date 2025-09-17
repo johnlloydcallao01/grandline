@@ -9,7 +9,6 @@
   ],
   "globalPassThroughEnv": [
     "NEXT_PUBLIC_*",
-    "FIREBASE_*",
     "ADMIN_*",
     "PAYLOAD_*",
     "DATABASE_URL",
@@ -24,7 +23,6 @@
       "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"],
       "env": [
         "NEXT_PUBLIC_*",
-        "FIREBASE_*",
         "ADMIN_*",
         "PAYLOAD_*",
         "DATABASE_URL",
@@ -33,21 +31,12 @@
         "SUPABASE_SERVICE_ROLE_KEY"
       ]
     },
-    "build:functions": {
-      "dependsOn": ["^build"],
-      "outputs": ["lib/**"],
-      "inputs": ["src/**", "package.json", "tsconfig.json"],
-      "env": [
-        "FIREBASE_*",
-        "NODE_ENV"
-      ]
-    },
+
     "dev": {
       "cache": false,
       "persistent": true,
       "env": [
         "NEXT_PUBLIC_*",
-        "FIREBASE_*",
         "ADMIN_*",
         "PAYLOAD_*",
         "DATABASE_URL",
@@ -70,14 +59,7 @@
         "SUPABASE_SERVICE_ROLE_KEY"
       ]
     },
-    "dev:functions": {
-      "cache": false,
-      "persistent": true,
-      "env": [
-        "FIREBASE_*",
-        "NODE_ENV"
-      ]
-    },
+
     "lint": {
       "dependsOn": ["^lint"]
     },
@@ -100,14 +82,7 @@
       "env": [
         "NODE_ENV"
       ]
-    },
-    "deploy:functions": {
-      "dependsOn": ["build:functions", "lint:functions", "type-check:functions"],
-      "cache": false,
-      "env": [
-        "FIREBASE_*",
-        "NODE_ENV"
-      ]
     }
+
   }
 }

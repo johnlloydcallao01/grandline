@@ -6,7 +6,7 @@
 'use server';
 
 import 'server-only';
-// import { sendToTopic } from '@encreasl/fcm/server';
+
 import type { ServerActionResult } from '../types/server-types';
 import { LeadQualificationService } from '../services/lead-qualification-service';
 import {
@@ -53,23 +53,11 @@ const _submitContactForm = async (
   const leadScore = await LeadQualificationService.qualifyLead(validatedData);
   submission.leadScore = leadScore;
 
-  // Save to Firestore (this will trigger Firebase Function for email sending)
-  // In a real implementation, you would save to your database here
-  // The Firebase Function will automatically handle email notifications
+  // TODO: Implement database save and email notifications
   console.log('Contact form submission:', submission);
   console.log('Lead qualification:', leadScore);
 
-  // Send FCM notification to admin (commented out - FCM package not available)
-  // await sendToTopic('contact_submissions', {
-  //   title: 'New Contact Form Submission',
-  //   body: `${submission.data.name} submitted a contact form`,
-  //   data: {
-  //     type: 'contact_form',
-  //     submissionId: submission.id,
-  //     name: submission.data.name,
-  //     email: submission.data.email,
-  //   },
-  // });
+
 
   return {
     success: true,

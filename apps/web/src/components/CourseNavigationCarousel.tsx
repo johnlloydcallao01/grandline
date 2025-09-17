@@ -11,7 +11,7 @@ interface CourseNavigationCarouselProps {
  * Implements physics-based scrolling similar to native mobile apps
  */
 export function CourseNavigationCarousel({
-  sections = ["Overview", "Description", "Curriculum", "Instructor", "Materials", "Announcements"],
+  sections = ["Overview", "Description", "Curriculum", "Materials", "Announcements"],
   activeSection = "Overview",
   onSectionChange
 }: CourseNavigationCarouselProps) {

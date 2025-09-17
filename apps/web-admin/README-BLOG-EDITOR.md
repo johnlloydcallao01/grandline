@@ -91,7 +91,7 @@ This document describes the implementation of the blog post editor in the web-ad
 - **Package transpilation**: Payload packages properly transpiled in Next.js
 
 ### **Authentication Integration**
-- **Firebase Auth**: Seamless integration with existing admin auth
+- **Authentication**: Seamless integration with existing admin auth
 - **Token-based API**: Secure communication with CMS backend
 - **Permission handling**: Role-based access control
 
@@ -134,7 +134,7 @@ This document describes the implementation of the blog post editor in the web-ad
 - **SQL injection prevention**: Payload CMS handles database security
 
 ### **Authentication & Authorization**
-- **Firebase tokens**: Secure API authentication
+- **API tokens**: Secure API authentication
 - **Role-based access**: Different permissions for different user roles
 - **Session management**: Automatic token refresh
 

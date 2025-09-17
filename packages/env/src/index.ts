@@ -4,19 +4,8 @@ import { z } from 'zod';
 // LEGACY SCHEMAS (For backward compatibility)
 // ========================================
 
-// Legacy shared schema - now points to client schema for compatibility
-const sharedEnvSchema = z.object({
-  // Firebase Configuration (Client-side) - Required
-  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1, 'Firebase API key is required'),
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1, 'Firebase auth domain is required'),
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1, 'Firebase project ID is required'),
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1, 'Firebase storage bucket is required'),
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1, 'Firebase messaging sender ID is required'),
-  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
-
-  // Firebase Cloud Messaging
-  NEXT_PUBLIC_FIREBASE_VAPID_KEY: z.string().optional(),
-});
+// Legacy shared schema - now empty for compatibility
+const sharedEnvSchema = z.object({});
 
 // Legacy web schema - now points to client schema for compatibility
 const webEnvSchema = sharedEnvSchema.extend({
@@ -62,18 +51,7 @@ const webEnvSchema = sharedEnvSchema.extend({
 // CLIENT-SIDE SCHEMAS (Available in browser)
 // ========================================
 
-const sharedClientEnvSchema = z.object({
-  // Firebase Configuration (Client-side) - Required
-  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1, 'Firebase API key is required'),
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1, 'Firebase auth domain is required'),
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1, 'Firebase project ID is required'),
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1, 'Firebase storage bucket is required'),
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1, 'Firebase messaging sender ID is required'),
-  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
-
-  // Firebase Cloud Messaging
-  NEXT_PUBLIC_FIREBASE_VAPID_KEY: z.string().optional(),
-});
+const sharedClientEnvSchema = z.object({});
 
 const webClientEnvSchema = sharedClientEnvSchema.extend({
   // App Identity
@@ -143,12 +121,7 @@ const adminClientEnvSchema = sharedClientEnvSchema.extend({
 // SERVER-SIDE SCHEMAS (Server-only)
 // ========================================
 
-const serverEnvSchema = z.object({
-  // Firebase Admin (Server-side)
-  FIREBASE_ADMIN_PROJECT_ID: z.string().min(1, 'Firebase admin project ID is required'),
-  FIREBASE_ADMIN_PRIVATE_KEY: z.string().min(1, 'Firebase admin private key is required'),
-  FIREBASE_ADMIN_CLIENT_EMAIL: z.string().email('Firebase admin client email must be valid'),
-});
+const serverEnvSchema = z.object({});
 
 const adminServerEnvSchema = serverEnvSchema.extend({
   // Admin API

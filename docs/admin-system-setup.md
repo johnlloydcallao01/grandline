@@ -43,7 +43,7 @@ cd functions
 npm install
 
 # Deploy admin functions
-firebase deploy --only functions:initializeAdminSystem,functions:checkAdminSystemStatus
+# Firebase functions have been removed - use alternative deployment method
 ```
 
 ### **Step 2: Initialize Admin System**
