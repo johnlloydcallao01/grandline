@@ -22,7 +22,7 @@ export function Header({
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   // Get authenticated user data from PayloadCMS
-  const { user, loading, error } = useAuth();
+  const { user, isLoading, error } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside or pressing Escape
@@ -156,7 +156,7 @@ export function Header({
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  {loading ? (
+                  {isLoading ? (
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse"></div>
                       <div className="flex-1 min-w-0">

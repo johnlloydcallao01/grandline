@@ -1,50 +1,93 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
+import { useAuth } from '@/hooks/useAuth';
+import { PublicRoute } from '@/components/auth';
+import { AuthenticationError } from '@/lib/auth';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login, isLoading, error: authError, clearError } = useAuth();
 
-  // Clear any cached values on mount
+  // Get redirect URL from query params
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
+
+  // Clear form and errors on mount
   useEffect(() => {
     setEmail('');
     setPassword('');
-  }, []);
+    setError('');
+    clearError();
+  }, [clearError]);
+
+  // Update error state when auth error changes
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
+    clearError();
 
     try {
-      console.log('🔐 Mock admin login initiated...');
+      console.log('🔐 Admin login initiated...');
       console.log('📧 Email:', email);
 
-      // Mock login - just simulate a delay and redirect
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await login({ email, password });
 
-      console.log('✅ Mock login successful');
-      console.log('🔄 Redirecting to dashboard...');
+      console.log('✅ Login successful');
+      console.log('🔄 Redirecting to:', redirectTo);
 
       // Small delay to ensure smooth transition
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push(redirectTo);
       }, 100);
     } catch (err: unknown) {
-      console.error('❌ Mock login failed:', err);
-      const errorMessage = 'Mock authentication failed. Please try again.';
+      console.error('❌ Login failed:', err);
+      
+      let errorMessage = 'Authentication failed. Please try again.';
+      
+      if (err instanceof AuthenticationError) {
+        switch (err.type) {
+          case 'INVALID_CREDENTIALS':
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+            break;
+          case 'ACCESS_DENIED':
+            errorMessage = 'Access denied. This application is restricted to admin users only.';
+            break;
+          case 'ACCOUNT_LOCKED':
+            errorMessage = 'Account temporarily locked due to multiple failed attempts. Please try again later.';
+            break;
+          case 'NETWORK_ERROR':
+            errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+            break;
+          default:
+            errorMessage = err.message || errorMessage;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const isFormDisabled = isSubmitting || isLoading;
 
   return (
     <div className="min-h-screen w-full flex">
@@ -130,10 +173,11 @@ export default function AdminLoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter your email"
                     required
-                    disabled={isSubmitting}
+                    disabled={isFormDisabled}
+                    autoComplete="email"
                   />
                 </div>
 
@@ -147,16 +191,18 @@ export default function AdminLoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Enter your password"
                       required
-                      disabled={isSubmitting}
+                      disabled={isFormDisabled}
+                      autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      disabled={isSubmitting}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
+                      disabled={isFormDisabled}
+                      tabIndex={-1}
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -170,10 +216,10 @@ export default function AdminLoginPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
+                disabled={isFormDisabled || !email.trim() || !password.trim()}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
               >
-                {isSubmitting ? (
+                {isFormDisabled ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Signing In...</span>
@@ -200,5 +246,13 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <PublicRoute redirectTo="/dashboard">
+      <AdminLoginForm />
+    </PublicRoute>
   );
 }
