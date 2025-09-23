@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   // If it's the login page, don't wrap with AdminDashboard
-  if (pathname === '/admin/login') {
+  if (pathname === '/login') {
     return children;
   }
 

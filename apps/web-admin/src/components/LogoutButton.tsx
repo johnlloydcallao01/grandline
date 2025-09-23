@@ -14,7 +14,7 @@ export default function LogoutButton() {
     // Redirect to login page
     console.log('🔄 Redirecting to login page...')
     router.refresh()
-    router.replace('/admin/login')
+    router.replace('/login')
   }
 
   return (

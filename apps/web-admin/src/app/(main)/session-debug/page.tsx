@@ -153,7 +153,7 @@ export default function AdminSessionDebugPage() {
             {/* Navigation */}
             <div className="flex justify-between items-center pt-6 border-t border-gray-200">
               <button
-                onClick={() => router.push('/admin/dashboard')}
+                onClick={() => router.push('/dashboard')}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Back to Dashboard

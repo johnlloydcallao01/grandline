@@ -9,7 +9,7 @@ export default function HomePage() {
 
   // Redirect to admin posts page
   useEffect(() => {
-    router.push('/admin/posts');
+    router.push('/posts');
   }, [router]);
 
   return (

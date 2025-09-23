@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
 
       // Small delay to ensure smooth transition
       setTimeout(() => {
-        router.push('/admin/dashboard');
+        router.push('/dashboard');
       }, 100);
     } catch (err: unknown) {
       console.error('❌ Mock login failed:', err);

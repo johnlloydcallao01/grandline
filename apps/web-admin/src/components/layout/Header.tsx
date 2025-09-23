@@ -209,7 +209,7 @@ export function Header({
                   </button>
                   {process.env.NEXT_PUBLIC_DEBUG_ADMIN_AUTH === 'true' && (
                     <button
-                      onClick={() => router.push('/admin/session-debug')}
+                      onClick={() => router.push('/session-debug')}
                       className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <Shield className="w-4 h-4 mr-3 text-gray-400" />

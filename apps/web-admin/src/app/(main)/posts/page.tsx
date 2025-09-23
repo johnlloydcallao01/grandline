@@ -244,7 +244,7 @@ function PostsPageContent() {
 
                         <div className="flex items-center space-x-2">
                           <Link
-                            href={`/admin/posts/${post.id}/preview`}
+                            href={`/posts/${post.id}/preview`}
                             className="p-2 text-gray-400 hover:text-gray-600"
                             title="Preview"
                           >
@@ -252,7 +252,7 @@ function PostsPageContent() {
                           </Link>
                           
                           <Link
-                            href={`/admin/posts/${post.id}/edit`}
+                            href={`/posts/${post.id}/edit`}
                             className="p-2 text-gray-400 hover:text-blue-600"
                             title="Edit"
                           >

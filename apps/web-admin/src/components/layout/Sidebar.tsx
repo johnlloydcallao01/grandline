@@ -31,23 +31,23 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
             <SidebarItem
               icon="dashboard"
               label="Dashboard"
-              active={pathname === '/admin'}
+              active={pathname === '/'}
               collapsed={!isOpen}
-              href="/admin"
+              href="/"
             />
             <SidebarItem
               icon="analytics"
               label="Analytics"
-              active={pathname === '/admin/analytics'}
+              active={pathname === '/analytics'}
               collapsed={!isOpen}
-              href="/admin/analytics"
+              href="/analytics"
             />
             <SidebarItem
               icon="reports"
               label="Reports"
-              active={pathname === '/admin/reports'}
+              active={pathname === '/reports'}
               collapsed={!isOpen}
-              href="/admin/reports"
+              href="/reports"
             />
           </div>
 
@@ -59,44 +59,44 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
             <SidebarItem
               icon="posts"
               label="Blog Posts"
-              active={pathname.startsWith('/admin/posts')}
+              active={pathname.startsWith('/posts')}
               collapsed={!isOpen}
-              href="/admin/posts"
+              href="/posts"
             />
             <SidebarItem
               icon="media"
               label="Media Library"
-              active={pathname.startsWith('/admin/media')}
+              active={pathname.startsWith('/media')}
               collapsed={!isOpen}
-              href="/admin/media"
+              href="/media"
             />
             <SidebarItem
               icon="pages"
               label="Pages"
-              active={pathname.startsWith('/admin/pages')}
+              active={pathname.startsWith('/pages')}
               collapsed={!isOpen}
-              href="/admin/pages"
+              href="/pages"
             />
             <SidebarItem
               icon="categories"
               label="Categories"
-              active={pathname.startsWith('/admin/categories')}
+              active={pathname.startsWith('/categories')}
               collapsed={!isOpen}
-              href="/admin/categories"
+              href="/categories"
             />
             <SidebarItem
               icon="tags"
               label="Tags"
-              active={pathname.startsWith('/admin/tags')}
+              active={pathname.startsWith('/tags')}
               collapsed={!isOpen}
-              href="/admin/tags"
+              href="/tags"
             />
             <SidebarItem
               icon="comments"
               label="Comments"
-              active={pathname.startsWith('/admin/comments')}
+              active={pathname.startsWith('/comments')}
               collapsed={!isOpen}
-              href="/admin/comments"
+              href="/comments"
             />
           </div>
 
@@ -108,44 +108,44 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
             <SidebarItem
               icon="orders"
               label="Orders"
-              active={pathname.startsWith('/admin/orders')}
+              active={pathname.startsWith('/orders')}
               collapsed={!isOpen}
-              href="/admin/orders"
+              href="/orders"
             />
             <SidebarItem
               icon="products"
               label="Products"
-              active={pathname.startsWith('/admin/products')}
+              active={pathname.startsWith('/products')}
               collapsed={!isOpen}
-              href="/admin/products"
+              href="/products"
             />
             <SidebarItem
               icon="inventory"
               label="Inventory"
-              active={pathname.startsWith('/admin/inventory')}
+              active={pathname.startsWith('/inventory')}
               collapsed={!isOpen}
-              href="/admin/inventory"
+              href="/inventory"
             />
             <SidebarItem
               icon="customers"
               label="Customers"
-              active={pathname.startsWith('/admin/customers')}
+              active={pathname.startsWith('/customers')}
               collapsed={!isOpen}
-              href="/admin/customers"
+              href="/customers"
             />
             <SidebarItem
               icon="payments"
               label="Payments"
-              active={pathname.startsWith('/admin/payments')}
+              active={pathname.startsWith('/payments')}
               collapsed={!isOpen}
-              href="/admin/payments"
+              href="/payments"
             />
             <SidebarItem
               icon="shipping"
               label="Shipping"
-              active={pathname.startsWith('/admin/shipping')}
+              active={pathname.startsWith('/shipping')}
               collapsed={!isOpen}
-              href="/admin/shipping"
+              href="/shipping"
             />
           </div>
 
@@ -157,37 +157,37 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
             <SidebarItem
               icon="campaigns"
               label="Campaigns"
-              active={pathname.startsWith('/admin/campaigns')}
+              active={pathname.startsWith('/campaigns')}
               collapsed={!isOpen}
-              href="/admin/campaigns"
+              href="/campaigns"
             />
             <SidebarItem
               icon="email"
               label="Email Marketing"
-              active={pathname.startsWith('/admin/email')}
+              active={pathname.startsWith('/email')}
               collapsed={!isOpen}
-              href="/admin/email"
+              href="/email"
             />
             <SidebarItem
               icon="social"
               label="Social Media"
-              active={pathname.startsWith('/admin/social')}
+              active={pathname.startsWith('/social')}
               collapsed={!isOpen}
-              href="/admin/social"
+              href="/social"
             />
             <SidebarItem
               icon="seo"
               label="SEO"
-              active={pathname.startsWith('/admin/seo')}
+              active={pathname.startsWith('/seo')}
               collapsed={!isOpen}
-              href="/admin/seo"
+              href="/seo"
             />
             <SidebarItem
               icon="ads"
               label="Advertising"
-              active={pathname.startsWith('/admin/ads')}
+              active={pathname.startsWith('/ads')}
               collapsed={!isOpen}
-              href="/admin/ads"
+              href="/ads"
             />
           </div>
 
@@ -199,34 +199,32 @@ export function Sidebar({ isOpen, onToggle: _onToggle }: SidebarProps) {
             <SidebarItem
               icon="users"
               label="Users"
-              active={pathname.startsWith('/admin/users')}
+              active={pathname.startsWith('/users')}
               collapsed={!isOpen}
-              href="/admin/users"
+              href="/users"
             />
             <SidebarItem
               icon="team"
               label="Team"
-              active={pathname.startsWith('/admin/team')}
+              active={pathname.startsWith('/team')}
               collapsed={!isOpen}
-              href="/admin/team"
+              href="/team"
             />
             <SidebarItem
               icon="roles"
               label="Roles"
-              active={pathname.startsWith('/admin/roles')}
+              active={pathname.startsWith('/roles')}
               collapsed={!isOpen}
-              href="/admin/roles"
+              href="/roles"
             />
             <SidebarItem
               icon="permissions"
               label="Permissions"
-              active={pathname.startsWith('/admin/permissions')}
+              active={pathname.startsWith('/permissions')}
               collapsed={!isOpen}
-              href="/admin/permissions"
+              href="/permissions"
             />
           </div>
-
-
 
 
 
