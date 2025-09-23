@@ -18,7 +18,7 @@ import { isAdminUser } from '@/lib/auth';
  */
 export function ProtectedRoute({ 
   children, 
-  redirectTo = '/login' 
+  redirectTo = '/signin' 
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading, isInitialized } = useAuth();
 

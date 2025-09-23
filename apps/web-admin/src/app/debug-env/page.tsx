@@ -44,7 +44,7 @@ export default function DebugEnvPage() {
         {/* Navigation */}
         <div className="mt-8 text-center">
           <a 
-            href="/login" 
+            href="/signin" 
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
           >
             Back to Login

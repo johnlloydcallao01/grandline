@@ -144,7 +144,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
                 <button
                   onClick={() => {
                     if (typeof window !== 'undefined') {
-                      window.location.href = '/login';
+                      window.location.href = '/signin';
                     }
                   }}
                   className="w-full text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"

@@ -16,8 +16,8 @@ const COLLECTION_SLUG = 'users';
 const TOKEN_COOKIE_NAME = 'payload-token';
 
 // Define route patterns
-const PUBLIC_ROUTES = ['/login', '/access-denied'];
-const AUTH_ROUTES = ['/login'];
+const PUBLIC_ROUTES = ['/signin', '/access-denied'];
+const AUTH_ROUTES = ['/signin'];
 const PROTECTED_ROUTES = ['/dashboard', '/users', '/settings', '/analytics'];
 
 // ========================================
@@ -110,7 +110,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
 
   // Handle public routes
@@ -129,7 +129,7 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute(pathname)) {
     // No token - redirect to login
     if (!hasToken) {
-      const loginUrl = new URL('/login', request.url);
+      const loginUrl = new URL('/signin', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -139,7 +139,7 @@ export async function middleware(request: NextRequest) {
     
     if (!isValid) {
       // Invalid token or not admin - clear token and redirect to login
-      const response = NextResponse.redirect(new URL('/login', request.url));
+      const response = NextResponse.redirect(new URL('/signin', request.url));
       response.cookies.delete(TOKEN_COOKIE_NAME);
       return response;
     }
