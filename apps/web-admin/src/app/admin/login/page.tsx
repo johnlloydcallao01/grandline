@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
-import { AdminAuthCookies } from '@/utils/admin-auth-cookies';
-import { useAdminSessionRecovery } from '@/hooks/useAdminSessionRecovery';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -14,41 +12,11 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // 🚀 PROFESSIONAL ADMIN SESSION RECOVERY
-  const {
-    isRecovering,
-    shouldShowAdminApp
-  } = useAdminSessionRecovery({
-    redirectOnSuccess: '/admin/dashboard',
-    enableAutoRecovery: true,
-    enableDebugLogging: process.env.NEXT_PUBLIC_DEBUG_ADMIN_AUTH === 'true'
-  });
-
   // Clear any cached values on mount
   useEffect(() => {
     setEmail('');
     setPassword('');
   }, []);
-
-  // Show loading while recovering admin session
-  if (isRecovering) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-red-600 via-red-700 to-red-800">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl mb-6 shadow-xl border border-white/20">
-            <Shield className="w-8 h-8 text-white" />
-          </div>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Checking admin authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't show login form if admin should be redirected to app
-  if (shouldShowAdminApp) {
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,76 +24,22 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      console.log('🔐 PayloadCMS admin login initiated...');
+      console.log('🔐 Mock admin login initiated...');
       console.log('📧 Email:', email);
-      console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      // Use PayloadCMS REST API for authentication
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important for cookie handling
-      });
+      // Mock login - just simulate a delay and redirect
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Log response details for debugging
-      console.log('📡 Login response status:', response.status);
-      console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
-
-      // Validate user role - ONLY admin allowed
-      if (result.user.role !== 'admin') {
-        throw new Error(`Access denied. Admin panel requires admin role. Current role: ${result.user.role}`);
-      }
-
-      if (!result.user.isActive) {
-        throw new Error('Account is inactive. Please contact administrator.');
-      }
-
-      console.log('✅ PayloadCMS login successful:', {
-        email: result.user.email,
-        role: result.user.role,
-        isActive: result.user.isActive,
-        token: result.token ? 'Present' : 'Missing'
-      });
-
-      // 🚀 PROFESSIONAL PERSISTENT ADMIN AUTHENTICATION
-      console.log('🍪 All cookies after admin login:', document.cookie);
-
-      if (result.token) {
-        console.log('🔐 Setting up persistent admin authentication...');
-
-        // Use professional admin cookie manager for persistent login (30 days)
-        AdminAuthCookies.setPersistentAdminLogin(result.token);
-
-        // Verify admin authentication was set
-        const isAuthenticated = AdminAuthCookies.isAdminAuthenticated();
-        console.log('✅ Persistent admin authentication set:', isAuthenticated);
-
-        // Log admin session info for debugging
-        const sessionInfo = AdminAuthCookies.getAdminSessionInfo();
-        console.log('📊 Admin Session Info:', sessionInfo);
-
-      } else {
-        console.warn('⚠️ No token received from PayloadCMS');
-      }
-
+      console.log('✅ Mock login successful');
       console.log('🔄 Redirecting to dashboard...');
 
-      // Small delay to ensure cookie is processed
+      // Small delay to ensure smooth transition
       setTimeout(() => {
         router.push('/admin/dashboard');
       }, 100);
     } catch (err: unknown) {
-      console.error('❌ Admin login failed:', err);
-      const errorMessage = (err as Error)?.message || 'Authentication failed. Please check your credentials and ensure you have admin privileges.';
+      console.error('❌ Mock login failed:', err);
+      const errorMessage = 'Mock authentication failed. Please try again.';
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -198,95 +112,90 @@ export default function AdminLoginPage() {
 
           {/* Login Form */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-red-800">Authentication Failed</p>
-                    <p className="text-sm text-red-700 mt-1">{error}</p>
-                  </div>
+                <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
 
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 bg-white"
-                  placeholder="Enter your email"
-                  autoComplete="email"
-                />
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="Enter your email"
                     required
-                    value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 bg-white"
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
+                    disabled={isSubmitting}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                      placeholder="Enter your password"
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Signing in...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Signing In...</span>
                   </>
                 ) : (
-                  <>
-                    <span>Sign In</span>
-                    <Shield className="w-4 h-4" />
-                  </>
+                  <span>Sign In</span>
                 )}
               </button>
-
-              {/* Footer */}
-              <div className="text-center pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-500">
-                  Use your admin credentials to access the CMS dashboard
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Admin and Instructor roles only
-                </p>
-              </div>
             </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Need help? Contact your administrator
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-gray-400">
+              © 2024 Encreasl Admin. All rights reserved.
+            </p>
           </div>
         </div>
       </div>

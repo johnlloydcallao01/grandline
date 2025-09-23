@@ -1,8 +1,8 @@
 /**
- * Independent authentication hook for apps/web-admin
- * Uses PayloadCMS official HTTP-only cookie authentication
+ * Mock authentication hook for apps/web-admin
+ * Returns mock data without actual authentication
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export interface AuthUser {
   id: string;
@@ -23,72 +23,23 @@ export interface AuthState {
 }
 
 /**
- * PayloadCMS authentication hook for admin
+ * Mock authentication hook for admin (no actual authentication)
  */
 export function useAuth() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [user] = useState<AuthUser | null>({
+    id: 'mock-admin-id',
+    email: 'admin@example.com',
+    role: 'admin',
+    firstName: 'Admin',
+    lastName: 'User',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
 
-  const isAuthenticated = !!user;
-
-  useEffect(() => {
-    async function fetchCurrentUser() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-        const response = await fetch(`${apiUrl}/users/me`, {
-          method: 'GET',
-          credentials: 'include', // Essential for PayloadCMS HTTP-only cookies
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          const extractedUser = userData.user || userData;
-
-          if (extractedUser && extractedUser.id) {
-            // Check if user has admin role (for this app)
-            if (extractedUser.role !== 'admin') {
-              setError(`Access denied. Admin role required. Current role: ${extractedUser.role}`);
-              setUser(null);
-              setLoading(false);
-              return;
-            }
-
-            // Check if user account is active
-            if (!extractedUser.isActive) {
-              setError('Account has been deactivated. Please contact administrator.');
-              setUser(null);
-              setLoading(false);
-              return;
-            }
-
-            setUser(extractedUser);
-            setError(null);
-          } else {
-            setUser(null);
-            setError('Invalid user data received');
-          }
-        } else {
-          setUser(null);
-          setError('Authentication failed');
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        setError('Authentication check failed');
-        console.error('Authentication error:', errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCurrentUser();
-  }, []);
+  const isAuthenticated = true; // Always authenticated
 
   const authState: AuthState = {
     user,

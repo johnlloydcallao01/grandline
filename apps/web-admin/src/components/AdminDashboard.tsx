@@ -97,7 +97,7 @@ function DefaultDashboardContent() {
           Welcome to Admin Dashboard
         </h2>
         <p className="text-gray-600">
-          You are now authenticated and have access to the admin control panel.
+          Access your admin control panel and manage your content.
         </p>
       </div>
     </div>

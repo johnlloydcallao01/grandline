@@ -2,220 +2,169 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdminAuthCookies } from '@/utils/admin-auth-cookies';
-import { useAdminSessionMonitor } from '@/hooks/useAdminSessionRecovery';
 
 /**
  * Admin Session Debug Page
  * 
- * Professional debugging interface for testing persistent admin authentication.
- * Shows admin session state, cookie information, and provides testing utilities.
+ * Debug interface for testing admin functionality.
+ * Shows session state and provides testing utilities.
  */
 export default function AdminSessionDebugPage() {
   const router = useRouter();
-  const { sessionInfo, refreshAdminSessionInfo } = useAdminSessionMonitor();
   const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
   const [testResults, setTestResults] = useState<string[]>([]);
 
-  // Refresh admin debug info
-  const updateAdminDebugInfo = useCallback(() => {
+  // Refresh debug info
+  const updateDebugInfo = useCallback(() => {
     const info = {
       timestamp: new Date().toISOString(),
       cookies: typeof document !== 'undefined' ? document.cookie : 'N/A',
       localStorage: typeof localStorage !== 'undefined' ? {
-        adminAuthBackup: localStorage.getItem('admin_auth_session_backup'),
-        adminAuthConfig: localStorage.getItem('admin_auth_session_config')
+        mockData: 'No authentication data stored'
       } : 'N/A',
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
       protocol: typeof window !== 'undefined' ? window.location.protocol : 'N/A',
-      sessionInfo: AdminAuthCookies.getAdminSessionInfo()
+      sessionInfo: { status: 'Mock session - no authentication' }
     };
     
     setDebugInfo(info);
-    refreshAdminSessionInfo();
-  }, [refreshAdminSessionInfo]);
+  }, []);
 
-  // Test admin session recovery
-  const testAdminSessionRecovery = () => {
+  // Test mock session
+  const testMockSession = () => {
     const results: string[] = [];
     
     try {
-      results.push('🔄 Testing admin session recovery...');
+      results.push('🔄 Testing mock session...');
+      results.push('✅ Mock session active');
+      results.push('✅ No authentication required');
       
-      const recovered = AdminAuthCookies.recoverAdminSession();
-      results.push(`Admin recovery result: ${recovered ? '✅ Success' : '❌ Failed'}`);
-      
-      const isAuth = AdminAuthCookies.isAdminAuthenticated();
-      results.push(`Admin authentication status: ${isAuth ? '✅ Authenticated' : '❌ Not authenticated'}`);
-      
-      updateAdminDebugInfo();
+      updateDebugInfo();
       
     } catch (error) {
-      results.push(`❌ Admin recovery test failed: ${error}`);
+      results.push(`❌ Mock session test failed: ${error}`);
     }
     
     setTestResults(results);
   };
 
-  // Test admin logout and recovery
-  const testAdminLogoutRecovery = () => {
+  // Test mock logout
+  const testMockLogout = () => {
     const results: string[] = [];
     
     try {
-      results.push('🔄 Testing admin logout and recovery cycle...');
+      results.push('🔄 Testing mock logout...');
+      results.push('✅ Mock logout successful');
+      results.push('✅ No session data to clear');
       
-      // Step 1: Check initial state
-      const initialAuth = AdminAuthCookies.isAdminAuthenticated();
-      results.push(`Initial admin auth: ${initialAuth ? '✅ Authenticated' : '❌ Not authenticated'}`);
-      
-      // Step 2: Admin logout
-      AdminAuthCookies.adminLogout();
-      const afterLogout = AdminAuthCookies.isAdminAuthenticated();
-      results.push(`After admin logout: ${afterLogout ? '❌ Still authenticated' : '✅ Logged out'}`);
-      
-      // Step 3: Try recovery
-      const recovered = AdminAuthCookies.recoverAdminSession();
-      results.push(`Admin recovery attempt: ${recovered ? '❌ Unexpected recovery' : '✅ No recovery (correct)'}`);
-      
-      updateAdminDebugInfo();
+      updateDebugInfo();
       
     } catch (error) {
-      results.push(`❌ Admin logout test failed: ${error}`);
+      results.push(`❌ Mock logout test failed: ${error}`);
     }
     
     setTestResults(results);
   };
 
-  // Clear all admin session data
-  const clearAllAdminData = () => {
-    AdminAuthCookies.adminLogout();
+  // Clear mock data
+  const clearMockData = () => {
     if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('admin_auth_session_backup');
-      localStorage.removeItem('admin_auth_session_config');
+      localStorage.clear();
     }
-    updateAdminDebugInfo();
-    setTestResults(['✅ All admin session data cleared']);
+    updateDebugInfo();
+    setTestResults(['✅ Mock data cleared']);
   };
 
   useEffect(() => {
-    updateAdminDebugInfo();
-  }, [updateAdminDebugInfo]);
+    updateDebugInfo();
+  }, [updateDebugInfo]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Session Debug Console</h1>
-              <p className="text-gray-600 mt-1">Professional admin authentication testing interface</p>
-            </div>
-            <button
-              onClick={() => router.push('/admin/dashboard')}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Back to Dashboard
-            </button>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-xl rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">Admin Session Debug</h1>
+            <p className="text-gray-600 mt-1">Debug interface for testing admin functionality</p>
           </div>
-        </div>
 
-        {/* Admin Session Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Session Status</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Admin Authenticated:</span>
-                <span className={`font-medium ${sessionInfo.isAuthenticated ? 'text-green-600' : 'text-red-600'}`}>
-                  {sessionInfo.isAuthenticated ? '✅ Yes' : '❌ No'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Has Admin Backup:</span>
-                <span className={`font-medium ${sessionInfo.hasBackup ? 'text-green-600' : 'text-gray-600'}`}>
-                  {sessionInfo.hasBackup ? '✅ Yes' : '❌ No'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Admin Role:</span>
-                <span className={`font-medium ${sessionInfo.role === 'admin' ? 'text-green-600' : 'text-red-600'}`}>
-                  {sessionInfo.role || 'N/A'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Backup Expiry:</span>
-                <span className="font-medium text-gray-900">
-                  {sessionInfo.backupExpiry ? new Date(sessionInfo.backupExpiry).toLocaleString() : 'N/A'}
-                </span>
+          <div className="p-6 space-y-8">
+            {/* Session Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h2 className="text-lg font-semibold text-blue-900 mb-3">Mock Session Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-blue-700">Status:</span>
+                  <span className="ml-2 text-sm text-blue-600">Mock Mode Active</span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-blue-700">Authentication:</span>
+                  <span className="ml-2 text-sm text-blue-600">Disabled</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Quick Actions</h2>
-            <div className="space-y-3">
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
-                onClick={updateAdminDebugInfo}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                onClick={testMockSession}
+                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                Refresh Admin Debug Info
+                Test Mock Session
               </button>
               <button
-                onClick={testAdminSessionRecovery}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                onClick={testMockLogout}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                Test Admin Session Recovery
+                Test Mock Logout
               </button>
               <button
-                onClick={testAdminLogoutRecovery}
-                className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                onClick={clearMockData}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                Test Admin Logout &amp; Recovery
-              </button>
-              <button
-                onClick={clearAllAdminData}
-                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Clear All Admin Data
+                Clear Mock Data
               </button>
             </div>
-          </div>
-        </div>
 
-        {/* Test Results */}
-        {testResults.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Test Results</h2>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                {testResults.join('\n')}
-              </pre>
+            {/* Test Results */}
+            {testResults.length > 0 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Test Results</h3>
+                <div className="space-y-1">
+                  {testResults.map((result, index) => (
+                    <div key={index} className="text-sm font-mono text-gray-700">
+                      {result}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Debug Information */}
+            {debugInfo && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Debug Information</h3>
+                <pre className="text-xs text-gray-600 overflow-auto bg-white p-3 rounded border">
+                  {JSON.stringify(debugInfo, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+              <button
+                onClick={() => router.push('/admin/dashboard')}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Back to Dashboard
+              </button>
+              <button
+                onClick={updateDebugInfo}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Refresh Debug Info
+              </button>
             </div>
-          </div>
-        )}
-
-        {/* Debug Information */}
-        {debugInfo && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Debug Information</h2>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <pre className="text-xs text-gray-800 whitespace-pre-wrap overflow-x-auto">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* Admin Testing Instructions */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mt-6">
-          <h3 className="text-lg font-semibold text-red-900 mb-3">Admin Testing Instructions</h3>
-          <div className="text-red-800 space-y-2">
-            <p><strong>1. Persistent Admin Login Test:</strong> Login as admin, close browser completely, reopen → should stay logged in</p>
-            <p><strong>2. Admin Session Recovery Test:</strong> Click &quot;Test Admin Session Recovery&quot; to verify backup system</p>
-            <p><strong>3. Admin Logout Test:</strong> Click &quot;Test Admin Logout &amp; Recovery&quot; to verify complete cleanup</p>
-            <p><strong>4. Cross-Tab Admin Test:</strong> Open multiple admin tabs, logout in one → others should detect logout</p>
-            <p><strong>5. Role Validation:</strong> Ensure only admin role can access and recover sessions</p>
           </div>
         </div>
       </div>
