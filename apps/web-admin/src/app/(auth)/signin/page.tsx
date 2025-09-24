@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from '@/components/ui/IconWrapper';
 import { useAuth } from '@/hooks/useAuth';
 import { PublicRoute } from '@/components/auth';
@@ -11,10 +11,9 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [error, setError] = useState('');
   
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoading, error: authError, clearError } = useAuth();
 
@@ -39,7 +38,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsSubmitting(true);
+
     clearError();
 
     try {
@@ -48,13 +47,17 @@ function LoginForm() {
 
       await login({ email, password });
 
-      console.log('✅ Login successful');
-      console.log('🔄 Redirecting to:', redirectTo);
+      console.log('✅ Login successful - Authentication state will handle redirect');
 
-      // Small delay to ensure smooth transition
-      setTimeout(() => {
-        router.push(redirectTo);
-      }, 100);
+      // Store the redirect URL for the PublicRoute component to use
+      if (redirectTo !== '/dashboard') {
+        sessionStorage.setItem('auth:redirectAfterLogin', redirectTo);
+      }
+
+      console.log('🔄 REDIRECT STORED:', redirectTo);
+
+      // Don't manually redirect - let the authentication system handle it
+      // The PublicRoute component will automatically redirect authenticated users
     } catch (err: unknown) {
       console.error('❌ Login failed:', err);
       
@@ -68,7 +71,6 @@ function LoginForm() {
           case 'INVALID_CREDENTIALS':
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
             break;
-
           case 'ACCOUNT_LOCKED':
             errorMessage = 'Account temporarily locked due to multiple failed attempts. Please try again later.';
             break;
@@ -83,12 +85,10 @@ function LoginForm() {
       }
       
       setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const isFormDisabled = isSubmitting || isLoading;
+
 
   return (
     <div className="min-h-screen w-full flex">
@@ -174,10 +174,10 @@ function LoginForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed placeholder:text-gray-500"
                     placeholder="Enter your email"
                     required
-                    disabled={isFormDisabled}
+                    disabled={isLoading}
                     autoComplete="email"
                   />
                 </div>
@@ -192,17 +192,17 @@ function LoginForm() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed placeholder:text-gray-500"
                       placeholder="Enter your password"
                       required
-                      disabled={isFormDisabled}
+                      disabled={isLoading}
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
-                      disabled={isFormDisabled}
+                      disabled={isLoading}
                       tabIndex={-1}
                     >
                       {showPassword ? (
@@ -217,10 +217,10 @@ function LoginForm() {
 
               <button
                 type="submit"
-                disabled={isFormDisabled || !email.trim() || !password.trim()}
+                disabled={isLoading}
                 className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
               >
-                {isFormDisabled ? (
+                {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Signing In...</span>
@@ -253,7 +253,9 @@ function LoginForm() {
 export default function SignInPage() {
   return (
     <PublicRoute redirectTo="/dashboard">
-      <LoginForm />
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+        <LoginForm />
+      </Suspense>
     </PublicRoute>
   );
 }

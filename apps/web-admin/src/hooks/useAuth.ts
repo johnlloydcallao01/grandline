@@ -151,9 +151,9 @@ export function useRouteProtection() {
     // Should redirect to login if not authenticated and initialization is complete
     shouldRedirectToLogin: isInitialized && !isAuthenticated,
     // Should redirect from auth pages if already authenticated
-    shouldRedirectFromAuth: isInitialized && isAuthenticated,
-    // Still checking authentication status
-    isCheckingAuth: !isInitialized || isLoading,
+    shouldRedirectFromAuth: isAuthenticated, // Allow redirect as soon as authenticated
+    // Still checking authentication status - but not if we're already authenticated
+    isCheckingAuth: !isAuthenticated && (!isInitialized || isLoading),
   };
 }
 

@@ -17,6 +17,7 @@ import { ProtectedRouteProps } from '@/types/auth';
  */
 export function ProtectedRoute({ 
   children, 
+  fallback,
   redirectTo = '/signin' 
 }: ProtectedRouteProps) {
   const router = useRouter();
@@ -40,11 +41,7 @@ export function ProtectedRoute({
 
   // Show loading while checking authentication
   if (isCheckingAuth) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return fallback || null;
   }
 
   // Don't render anything if we should redirect
@@ -66,7 +63,7 @@ export function withProtectedRoute<P extends object>(
   options?: Omit<ProtectedRouteProps, 'children'>
 ) {
   const WrappedComponent = (props: P) => (
-    <ProtectedRoute {...options}>
+    <ProtectedRoute fallback={options?.fallback} redirectTo={options?.redirectTo}>
       <Component {...props} />
     </ProtectedRoute>
   );

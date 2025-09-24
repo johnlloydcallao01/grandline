@@ -32,6 +32,7 @@ import {
 
 type AuthAction =
   | { type: 'AUTH_INIT_START' }
+  | { type: 'AUTH_FAST_SUCCESS'; payload: { user: User } }
   | { type: 'AUTH_INIT_SUCCESS'; payload: { user: User | null } }
   | { type: 'AUTH_INIT_ERROR'; payload: { error: string } }
   | { type: 'LOGIN_START' }
@@ -57,6 +58,16 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         isLoading: true,
+        error: null,
+      };
+
+    case 'AUTH_FAST_SUCCESS':
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        isLoading: false,
+        isInitialized: false, // Keep as false until real validation completes
         error: null,
       };
 
@@ -177,14 +188,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         const tempUser: User = {
           id: 0,
           email: 'validating...',
-          firstName: '',
-          lastName: '',
-          role: 'trainee',
+          firstName: 'Loading',
+          lastName: 'User',
+          role: 'admin',
           isActive: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: tempUser } });
+        dispatch({ type: 'AUTH_FAST_SUCCESS', payload: { user: tempUser } });
 
         // Validate token with server in background
         const user = await getCurrentUser();

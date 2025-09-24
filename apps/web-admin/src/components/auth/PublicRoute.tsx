@@ -6,37 +6,36 @@
 
 'use client';
 
-import React from 'react';
-import { redirect } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useRouteProtection } from '@/hooks/useAuth';
 import { PublicRouteProps } from '@/types/auth';
 
 /**
- * PublicRoute component that redirects authenticated admin users away from public pages
- * Typically used for login, registration, and other auth-related pages
+ * PublicRoute component that redirects authenticated users away from public pages
+ * Used for login, register, and other auth-related pages
  */
 export function PublicRoute({ 
   children, 
-  redirectTo = '/dashboard' 
+  redirectTo = '/' 
 }: PublicRouteProps) {
-  const { user, isAuthenticated, isLoading, isInitialized } = useAuth();
+  const router = useRouter();
+  const { shouldRedirectFromAuth } = useRouteProtection();
 
-  // Show loading state while authentication is being initialized
-  if (!isInitialized || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Immediate redirect for authenticated users
+  useEffect(() => {
+    if (shouldRedirectFromAuth) {
+      const redirectPath = sessionStorage.getItem('auth:redirectAfterLogin') || redirectTo;
+      sessionStorage.removeItem('auth:redirectAfterLogin');
+      router.replace(redirectPath);
+    }
+  }, [shouldRedirectFromAuth, redirectTo, router]);
 
-  // Redirect if user is authenticated
-  if (isAuthenticated && user) {
-    redirect(redirectTo);
+  // Don't render anything if we should redirect
+  if (shouldRedirectFromAuth) {
     return null;
   }
 
-  // Render children if user is not authenticated
   return <>{children}</>;
 }
 
