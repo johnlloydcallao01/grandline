@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types';
-import { ChevronDown, User, Settings, Shield } from '@/components/ui/IconWrapper';
+import { ChevronDown, User, Settings } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
 import { useAuth, getFullName, getUserInitials } from '@/hooks/useAuth';
 
@@ -17,7 +16,6 @@ export function Header({
   onToggleSidebar,
   onSearch
 }: HeaderProps) {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -187,7 +185,6 @@ export function Header({
                           {userEmail}
                         </p>
                         <div className="flex items-center mt-1">
-                          <Shield className="w-3 h-3 text-blue-500 mr-1" />
                           <span className="text-xs text-blue-600 font-medium capitalize">
                             {userRole}
                           </span>
@@ -207,15 +204,7 @@ export function Header({
                     <Settings className="w-4 h-4 mr-3 text-gray-400" />
                     Account Settings
                   </button>
-                  {process.env.NEXT_PUBLIC_DEBUG_ADMIN_AUTH === 'true' && (
-                    <button
-                      onClick={() => router.push('/session-debug')}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <Shield className="w-4 h-4 mr-3 text-gray-400" />
-                      Admin Session Debug
-                    </button>
-                  )}
+
                 </div>
 
                 <div className="border-t border-gray-100 py-1">

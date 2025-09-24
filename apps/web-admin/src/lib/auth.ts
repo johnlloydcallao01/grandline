@@ -10,7 +10,6 @@ import {
   LoginCredentials, 
   AuthResponse, 
   PayloadAuthResponse, 
-  PayloadErrorResponse, 
   PayloadMeResponse,
   SessionInfo,
   AuthErrorType,
@@ -23,9 +22,14 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 const COLLECTION_SLUG = 'users';
-const TOKEN_KEY = 'grandline_auth_token';
-const EXPIRES_KEY = 'grandline_auth_expires';
-const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+
+// Request configuration for cookie-based authentication
+const REQUEST_CONFIG: RequestInit = {
+  credentials: 'include', // Essential for cookie-based auth
+  headers: {
+    'Content-Type': 'application/json',
+  },
+};
 
 // ========================================
 // ERROR HANDLING UTILITIES
@@ -104,107 +108,33 @@ function handleApiError(error: unknown): AuthErrorDetails {
 // API REQUEST UTILITIES
 // ========================================
 
-async function makeAuthenticatedRequest<T>(
-  endpoint: string, 
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getStoredToken();
+async function makeAuthRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE_URL}/${COLLECTION_SLUG}${endpoint}`;
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `JWT ${token}` }),
-    ...options.headers,
-  };
-
   try {
-    const requestUrl = `${API_BASE_URL}/${endpoint}`;
-    console.log('🔗 Making authenticated request:', {
-      url: requestUrl,
-      endpoint,
-      hasToken: !!token
-    });
-    
-    const response = await fetch(requestUrl, {
+    const response = await fetch(url, {
+      ...REQUEST_CONFIG,
       ...options,
-      headers,
-      credentials: 'include',
+      headers: {
+        ...REQUEST_CONFIG.headers,
+        ...options.headers,
+      },
     });
-    
-    console.log('🔗 Authenticated request response:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.url,
-      ok: response.ok
-    });
+
+    const data = await response.json();
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      
-      if (response.status === 401) {
-        clearStoredToken();
-        throw new AuthenticationError('SESSION_EXPIRED', 'Your session has expired. Please log in again.');
-      }
-      
-      if (response.status === 403) {
-        throw new AuthenticationError('INVALID_CREDENTIALS', 'Access denied. Admin privileges required.');
-      }
-
-      const errorMessage = errorData.errors?.[0]?.message || errorData.message || `HTTP ${response.status}`;
-      throw new Error(errorMessage);
+      throw { ...data, status: response.status };
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
-    if (error instanceof AuthenticationError) {
-      throw error;
-    }
-    throw new Error(`Network request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const authError = handleApiError(error);
+    throw new AuthenticationError(authError.type, authError.message, authError.field, authError.retryable);
   }
 }
 
-// ========================================
-// TOKEN MANAGEMENT
-// ========================================
 
-export function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function getStoredExpires(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(EXPIRES_KEY);
-}
-
-export function setStoredToken(token: string, exp?: number): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, token);
-  
-  // Store expiration time (30 days from now if not provided)
-  const expirationTime = exp ? exp * 1000 : Date.now() + SESSION_DURATION;
-  localStorage.setItem(EXPIRES_KEY, expirationTime.toString());
-}
-
-export function clearStoredToken(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(EXPIRES_KEY);
-}
-
-export function hasValidStoredToken(): boolean {
-  const token = getStoredToken();
-  const expires = getStoredExpires();
-  
-  if (!token || !expires) return false;
-  
-  const expirationTime = parseInt(expires);
-  return Date.now() < expirationTime;
-}
-
-export function isTokenExpired(exp?: number): boolean {
-  if (!exp) return true;
-  return Date.now() >= exp * 1000;
-}
 
 // ========================================
 // ROLE VALIDATION
@@ -232,62 +162,14 @@ export function validateAdminAccess(user: User): void {
 
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    const loginUrl = `${API_BASE_URL}/${COLLECTION_SLUG}/login`;
-    console.log('🔐 Login attempt:', {
-      url: loginUrl,
-      apiBaseUrl: API_BASE_URL,
-      collectionSlug: COLLECTION_SLUG,
-      email: credentials.email
-    });
-    
-    const response = await fetch(loginUrl, {
+    const data: PayloadAuthResponse = await makeAuthRequest('/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
       body: JSON.stringify(credentials),
     });
     
-    console.log('🔐 Login response:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.url,
-      ok: response.ok
-    });
-
-    if (!response.ok) {
-      const errorData: PayloadErrorResponse = await response.json().catch(() => ({ 
-        errors: [{ message: `HTTP ${response.status}` }] 
-      }));
-      
-      const errorMessage = errorData.errors?.[0]?.message || 'Login failed';
-      
-      if (response.status === 401) {
-        throw new AuthenticationError('INVALID_CREDENTIALS', 'Invalid email or password.');
-      }
-      
-      if (response.status === 429) {
-        throw new AuthenticationError('ACCOUNT_LOCKED', 'Too many login attempts. Please try again later.', undefined, true);
-      }
-      
-      throw new AuthenticationError('UNKNOWN_ERROR', errorMessage);
-    }
-
-    const data: PayloadAuthResponse = await response.json();
-    
     // Check if user has admin role
     if (data.user.role !== 'admin') {
-      console.log('❌ ROLE DENIED:', data.user.role);
       throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Only admins can access this application.');
-    }
-
-    console.log('✅ ADMIN ROLE CONFIRMED');
-    
-    // Store the token if provided
-    if (data.token) {
-      setStoredToken(data.token, data.exp);
-      console.log('💾 Token stored with expiration:', data.exp);
     }
 
     return {
@@ -300,97 +182,48 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
     if (error instanceof AuthenticationError) {
       throw error;
     }
-    throw new AuthenticationError('NETWORK_ERROR', 'Network connection failed. Please check your internet connection.', undefined, true);
+    
+    const authError = handleApiError(error);
+    throw new AuthenticationError(authError.type, authError.message, authError.field, authError.retryable);
   }
 }
 
 export async function logout(): Promise<void> {
   try {
-    await makeAuthenticatedRequest(`${COLLECTION_SLUG}/logout`, {
+    await makeAuthRequest('/logout', {
       method: 'POST',
     });
   } catch (error) {
+    console.error('Logout error:', error);
     // Continue with logout even if API call fails
-    console.warn('Logout API call failed:', error);
-  } finally {
-    clearStoredToken();
   }
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  console.log('🔍 CHECKING CURRENT USER...');
-
-  // Check if we have a valid stored token first
-  if (!hasValidStoredToken()) {
-    console.log('❌ NO VALID STORED TOKEN');
-    return null;
-  }
-
-  const token = getStoredToken();
-  console.log('✅ VALID TOKEN FOUND, checking with PayloadCMS...');
-
   try {
-    // Use token-based authentication with depth parameter
-    const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me?depth=2`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `JWT ${token}`, // PayloadCMS uses JWT prefix
-      },
-    });
-
-    if (!response.ok) {
-      console.log('❌ TOKEN VALIDATION FAILED');
-      clearStoredToken();
-      return null;
+    const response = await makeAuthRequest<PayloadMeResponse>('/me');
+    
+    if (response.user?.role !== 'admin') {
+      throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Only admins can access this application.');
     }
-
-    const data = await response.json();
-
-    if (data.user) {
-      console.log('✅ USER FOUND:', {
-        email: data.user.email,
-        role: data.user.role,
-        id: data.user.id
-      });
-
-      // Check if user has admin role
-      if (data.user.role !== 'admin') {
-        console.log('❌ ACCESS DENIED: User is not admin');
-        clearStoredToken();
-        throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Admin role required.');
-      }
-
-      console.log('✅ ADMIN ROLE CONFIRMED');
-      return data.user as AdminUser;
-    } else {
-      console.log('❌ NO USER DATA IN RESPONSE');
-      clearStoredToken();
-      return null;
-    }
+    
+    return response.user;
   } catch (error) {
-    console.log('❌ getCurrentUser ERROR:', error);
-    clearStoredToken();
     if (error instanceof AuthenticationError) {
       throw error;
     }
+    
     return null;
   }
 }
 
 export async function refreshSession(): Promise<User | null> {
   try {
-    const token = getStoredToken();
-    if (!token) {
-      throw new AuthenticationError('SESSION_EXPIRED', 'No active session found.');
-    }
-
-    const data: PayloadMeResponse = await makeAuthenticatedRequest(`${COLLECTION_SLUG}/refresh-token`, {
+    const data: PayloadMeResponse = await makeAuthRequest('/refresh-token', {
       method: 'POST',
     });
 
     if (!data.user) {
-      clearStoredToken();
       throw new AuthenticationError('SESSION_EXPIRED', 'Session refresh failed.');
     }
 
@@ -399,7 +232,6 @@ export async function refreshSession(): Promise<User | null> {
 
     return data.user;
   } catch (error) {
-    clearStoredToken();
     if (error instanceof AuthenticationError) {
       throw error;
     }
@@ -417,20 +249,11 @@ export async function checkAuthStatus(): Promise<boolean> {
 }
 
 export function getSessionInfo(): SessionInfo {
-  const token = getStoredToken();
-  
-  if (!token) {
-    return { isValid: false };
-  }
-
   try {
-    // Decode JWT token to get expiration (basic implementation)
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const expiresAt = new Date(payload.exp * 1000);
-    
+    // For cookie-based auth, we can't easily check expiration client-side
+    // Return basic info and let server validation determine actual status
     return {
-      isValid: !isTokenExpired(payload.exp),
-      expiresAt,
+      isValid: true, // Will be validated by server calls
     };
   } catch {
     return { isValid: false };
@@ -485,11 +308,6 @@ export function startSessionMonitoring(): () => void {
   
   const checkSession = async () => {
     try {
-      if (!hasValidStoredToken()) {
-        emitAuthEvent('session_expired');
-        return;
-      }
-      
       // Periodically validate with server
       const user = await getCurrentUser();
       if (!user) {
@@ -511,34 +329,7 @@ export function startSessionMonitoring(): () => void {
   };
 }
 
-export function monitorSessionExpiration(): () => void {
-  let timeoutId: NodeJS.Timeout;
-  
-  const scheduleExpirationCheck = () => {
-    const expires = getStoredExpires();
-    if (!expires) return;
-    
-    const expirationTime = parseInt(expires);
-    const timeUntilExpiration = expirationTime - Date.now();
-    
-    if (timeUntilExpiration > 0) {
-      timeoutId = setTimeout(() => {
-        emitAuthEvent('session_expired');
-      }, timeUntilExpiration);
-    }
-  };
-  
-  scheduleExpirationCheck();
-  
-  return () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  };
-}
-
 export function clearAuthState(): void {
-  clearStoredToken();
   emitAuthEvent('logout');
 }
 

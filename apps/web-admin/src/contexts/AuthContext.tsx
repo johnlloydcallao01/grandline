@@ -22,8 +22,6 @@ import {
   clearAuthState,
   emitAuthEvent,
   startSessionMonitoring,
-  monitorSessionExpiration,
-  hasValidStoredToken,
 } from '@/lib/auth';
 
 // ========================================
@@ -174,45 +172,15 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   // ========================================
 
   const initializeAuth = useCallback(async () => {
-    console.log('🚀 INITIALIZING AUTH...');
-
     try {
-      // Check for stored token first (quick check)
-      const hasToken = hasValidStoredToken();
-      console.log('🔍 STORED TOKEN CHECK:', hasToken ? 'FOUND' : 'NOT FOUND');
+      // For cookie-based auth, check with server directly
+      const user = await getCurrentUser();
+      dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
 
-      if (hasToken) {
-        console.log('⚡ FAST AUTH: Setting authenticated state immediately');
-
-        // Set authenticated immediately to prevent signin flash
-        const tempUser: User = {
-          id: 0,
-          email: 'validating...',
-          firstName: 'Loading',
-          lastName: 'User',
-          role: 'admin',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        dispatch({ type: 'AUTH_FAST_SUCCESS', payload: { user: tempUser } });
-
-        // Validate token with server in background
-        const user = await getCurrentUser();
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
-
-        if (user) {
-          console.log('✅ SESSION RESTORED:', user.email);
-          emitAuthEvent('session_restored', { user });
-        } else {
-          console.log('❌ TOKEN INVALID');
-        }
-      } else {
-        console.log('❌ NO VALID TOKEN');
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: null } });
+      if (user) {
+        emitAuthEvent('session_restored', { user });
       }
     } catch (error: unknown) {
-      console.log('❌ AUTH INIT FAILED:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize authentication';
       dispatch({ type: 'AUTH_INIT_ERROR', payload: { error: errorMessage } });
     }
@@ -310,7 +278,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
     // Start session monitoring
     const stopSessionMonitoring = startSessionMonitoring();
-    const stopExpirationMonitoring = monitorSessionExpiration();
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth:logout', handleAuthEvent as EventListener);
@@ -321,7 +288,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       window.removeEventListener('auth:logout', handleAuthEvent as EventListener);
       window.removeEventListener('auth:session_expired', handleAuthEvent as EventListener);
       stopSessionMonitoring();
-      stopExpirationMonitoring();
     };
   }, [state.isAuthenticated, state.isInitialized]);
 
