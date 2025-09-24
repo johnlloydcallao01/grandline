@@ -21,10 +21,11 @@ import {
 // CONFIGURATION
 // ========================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_PAYLOAD_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 const COLLECTION_SLUG = 'users';
-const TOKEN_KEY = 'payload-token';
-const _SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+const TOKEN_KEY = 'grandline_auth_token';
+const EXPIRES_KEY = 'grandline_auth_expires';
+const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
 // ========================================
 // ERROR HANDLING UTILITIES
@@ -88,7 +89,7 @@ function handleApiError(error: unknown): AuthErrorDetails {
   }
 
   if ((isErrorWithStatus(error) && error.status === 403) || (isErrorWithStatusCode(error) && error.statusCode === 403)) {
-    return createAuthError('ACCESS_DENIED', 'Access denied. Admin privileges required.');
+    return createAuthError('INVALID_CREDENTIALS', 'Access denied. Admin privileges required.');
   }
 
   if ((isErrorWithStatus(error) && error.status === 429) || (isErrorWithStatusCode(error) && error.statusCode === 429)) {
@@ -116,10 +117,24 @@ async function makeAuthenticatedRequest<T>(
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, {
+    const requestUrl = `${API_BASE_URL}/${endpoint}`;
+    console.log('🔗 Making authenticated request:', {
+      url: requestUrl,
+      endpoint,
+      hasToken: !!token
+    });
+    
+    const response = await fetch(requestUrl, {
       ...options,
       headers,
       credentials: 'include',
+    });
+    
+    console.log('🔗 Authenticated request response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      ok: response.ok
     });
 
     if (!response.ok) {
@@ -131,7 +146,7 @@ async function makeAuthenticatedRequest<T>(
       }
       
       if (response.status === 403) {
-        throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Admin privileges required.');
+        throw new AuthenticationError('INVALID_CREDENTIALS', 'Access denied. Admin privileges required.');
       }
 
       const errorMessage = errorData.errors?.[0]?.message || errorData.message || `HTTP ${response.status}`;
@@ -156,14 +171,34 @@ export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
 
-export function setStoredToken(token: string): void {
+export function getStoredExpires(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(EXPIRES_KEY);
+}
+
+export function setStoredToken(token: string, exp?: number): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TOKEN_KEY, token);
+  
+  // Store expiration time (30 days from now if not provided)
+  const expirationTime = exp ? exp * 1000 : Date.now() + SESSION_DURATION;
+  localStorage.setItem(EXPIRES_KEY, expirationTime.toString());
 }
 
 export function clearStoredToken(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(EXPIRES_KEY);
+}
+
+export function hasValidStoredToken(): boolean {
+  const token = getStoredToken();
+  const expires = getStoredExpires();
+  
+  if (!token || !expires) return false;
+  
+  const expirationTime = parseInt(expires);
+  return Date.now() < expirationTime;
 }
 
 export function isTokenExpired(exp?: number): boolean {
@@ -175,17 +210,19 @@ export function isTokenExpired(exp?: number): boolean {
 // ROLE VALIDATION
 // ========================================
 
-export function isAdminUser(user: User | null): user is AdminUser {
-  return user?.role === 'admin';
+// Admin user validation
+export function isAdminUser(user: User): user is AdminUser {
+  return user.role === 'admin';
 }
 
-export function validateAdminAccess(user: User | null): void {
-  if (!user) {
-    throw new AuthenticationError('INVALID_CREDENTIALS', 'Authentication required.');
-  }
-  
+// Validate admin access
+export function validateAdminAccess(user: User): void {
   if (!isAdminUser(user)) {
-    throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Admin privileges required.');
+    throw new AuthenticationError(
+      'ACCESS_DENIED',
+      'Admin access required. Only administrators can access this application.',
+      'role'
+    );
   }
 }
 
@@ -195,13 +232,28 @@ export function validateAdminAccess(user: User | null): void {
 
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/${COLLECTION_SLUG}/login`, {
+    const loginUrl = `${API_BASE_URL}/${COLLECTION_SLUG}/login`;
+    console.log('🔐 Login attempt:', {
+      url: loginUrl,
+      apiBaseUrl: API_BASE_URL,
+      collectionSlug: COLLECTION_SLUG,
+      email: credentials.email
+    });
+    
+    const response = await fetch(loginUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
       body: JSON.stringify(credentials),
+    });
+    
+    console.log('🔐 Login response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      ok: response.ok
     });
 
     if (!response.ok) {
@@ -224,17 +276,23 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 
     const data: PayloadAuthResponse = await response.json();
     
-    // Validate that the user is an admin
-    validateAdminAccess(data.user);
+    // Check if user has admin role
+    if (data.user.role !== 'admin') {
+      console.log('❌ ROLE DENIED:', data.user.role);
+      throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Only admins can access this application.');
+    }
+
+    console.log('✅ ADMIN ROLE CONFIRMED');
     
     // Store the token if provided
     if (data.token) {
-      setStoredToken(data.token);
+      setStoredToken(data.token, data.exp);
+      console.log('💾 Token stored with expiration:', data.exp);
     }
 
     return {
       message: data.message,
-      user: data.user as AdminUser,
+      user: data.user,
       token: data.token,
       exp: data.exp,
     };
@@ -260,30 +318,58 @@ export async function logout(): Promise<void> {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
+  console.log('🔍 CHECKING CURRENT USER...');
+
+  // Check if we have a valid stored token first
+  if (!hasValidStoredToken()) {
+    console.log('❌ NO VALID STORED TOKEN');
+    return null;
+  }
+
+  const token = getStoredToken();
+  console.log('✅ VALID TOKEN FOUND, checking with PayloadCMS...');
+
   try {
-    const token = getStoredToken();
-    if (!token) {
-      return null;
-    }
+    // Use token-based authentication with depth parameter
+    const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me?depth=2`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${token}`, // PayloadCMS uses JWT prefix
+      },
+    });
 
-    const data: PayloadMeResponse = await makeAuthenticatedRequest(`${COLLECTION_SLUG}/me`);
-    
-    if (!data.user) {
+    if (!response.ok) {
+      console.log('❌ TOKEN VALIDATION FAILED');
       clearStoredToken();
       return null;
     }
 
-    // Validate that the user is an admin
-    validateAdminAccess(data.user);
-    
-    // Check if token is expired
-    if (data.exp && isTokenExpired(data.exp)) {
-      clearStoredToken();
-      throw new AuthenticationError('SESSION_EXPIRED', 'Your session has expired. Please log in again.');
-    }
+    const data = await response.json();
 
-    return data.user;
+    if (data.user) {
+      console.log('✅ USER FOUND:', {
+        email: data.user.email,
+        role: data.user.role,
+        id: data.user.id
+      });
+
+      // Check if user has admin role
+      if (data.user.role !== 'admin') {
+        console.log('❌ ACCESS DENIED: User is not admin');
+        clearStoredToken();
+        throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Admin role required.');
+      }
+
+      console.log('✅ ADMIN ROLE CONFIRMED');
+      return data.user as AdminUser;
+    } else {
+      console.log('❌ NO USER DATA IN RESPONSE');
+      clearStoredToken();
+      return null;
+    }
   } catch (error) {
+    console.log('❌ getCurrentUser ERROR:', error);
     clearStoredToken();
     if (error instanceof AuthenticationError) {
       throw error;
@@ -324,7 +410,7 @@ export async function refreshSession(): Promise<User | null> {
 export async function checkAuthStatus(): Promise<boolean> {
   try {
     const user = await getCurrentUser();
-    return user !== null && isAdminUser(user);
+    return user !== null && user.role === 'admin';
   } catch {
     return false;
   }
@@ -359,8 +445,7 @@ export function formatAuthError(error: AuthErrorDetails): string {
   switch (error.type) {
     case 'INVALID_CREDENTIALS':
       return 'Invalid email or password. Please check your credentials and try again.';
-    case 'ACCESS_DENIED':
-      return 'Access denied. This application is restricted to admin users only.';
+
     case 'SESSION_EXPIRED':
       return 'Your session has expired. Please log in again.';
     case 'ACCOUNT_LOCKED':
@@ -372,6 +457,89 @@ export function formatAuthError(error: AuthErrorDetails): string {
     default:
       return error.message || 'An unexpected error occurred. Please try again.';
   }
+}
+
+// ========================================
+// EVENT EMISSION
+// ========================================
+
+export function emitAuthEvent(event: string, data?: unknown): void {
+  if (typeof window !== 'undefined') {
+    const customEvent = new CustomEvent(`auth:${event}`, {
+      detail: {
+        event,
+        data,
+        timestamp: new Date().toISOString(),
+      },
+    });
+    window.dispatchEvent(customEvent);
+  }
+}
+
+// ========================================
+// SESSION MONITORING
+// ========================================
+
+export function startSessionMonitoring(): () => void {
+  let intervalId: NodeJS.Timeout;
+  
+  const checkSession = async () => {
+    try {
+      if (!hasValidStoredToken()) {
+        emitAuthEvent('session_expired');
+        return;
+      }
+      
+      // Periodically validate with server
+      const user = await getCurrentUser();
+      if (!user) {
+        emitAuthEvent('session_expired');
+      }
+    } catch (error) {
+      console.log('Session check failed:', error);
+      emitAuthEvent('session_expired');
+    }
+  };
+  
+  // Check every 5 minutes
+  intervalId = setInterval(checkSession, 5 * 60 * 1000);
+  
+  return () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+  };
+}
+
+export function monitorSessionExpiration(): () => void {
+  let timeoutId: NodeJS.Timeout;
+  
+  const scheduleExpirationCheck = () => {
+    const expires = getStoredExpires();
+    if (!expires) return;
+    
+    const expirationTime = parseInt(expires);
+    const timeUntilExpiration = expirationTime - Date.now();
+    
+    if (timeUntilExpiration > 0) {
+      timeoutId = setTimeout(() => {
+        emitAuthEvent('session_expired');
+      }, timeUntilExpiration);
+    }
+  };
+  
+  scheduleExpirationCheck();
+  
+  return () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  };
+}
+
+export function clearAuthState(): void {
+  clearStoredToken();
+  emitAuthEvent('logout');
 }
 
 export { handleApiError, createAuthError };

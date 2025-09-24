@@ -3,13 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield } from '@/components/ui/IconWrapper';
+import { ProtectedRoute } from '@/components/auth';
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
 
-  // Redirect to admin posts page
+  // Redirect to admin dashboard
   useEffect(() => {
-    router.push('/posts');
+    router.push('/dashboard');
   }, [router]);
 
   return (
@@ -22,6 +23,14 @@ export default function HomePage() {
         <p className="text-gray-600">Please wait while we redirect you to the admin panel...</p>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedRoute redirectTo="/signin">
+      <HomePageContent />
+    </ProtectedRoute>
   );
 }
 

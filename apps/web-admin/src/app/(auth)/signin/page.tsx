@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { PublicRoute } from '@/components/auth';
 import { AuthenticationError } from '@/lib/auth';
 
-function AdminLoginForm() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -62,12 +62,13 @@ function AdminLoginForm() {
       
       if (err instanceof AuthenticationError) {
         switch (err.type) {
+          case 'ACCESS_DENIED':
+            errorMessage = 'Access denied. Only administrators can access this application.';
+            break;
           case 'INVALID_CREDENTIALS':
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
             break;
-          case 'ACCESS_DENIED':
-            errorMessage = 'Access denied. This application is restricted to admin users only.';
-            break;
+
           case 'ACCOUNT_LOCKED':
             errorMessage = 'Account temporarily locked due to multiple failed attempts. Please try again later.';
             break;
@@ -100,28 +101,28 @@ function AdminLoginForm() {
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-5xl font-bold mb-5 leading-tight">
-              Encreasl Admin
+              Encreasl
             </h1>
             <p className="text-2xl text-red-100 mb-8">
-              Content Management System
+              Learning Management System
             </p>
             <p className="text-lg text-red-200/80 leading-relaxed max-w-md">
-              Secure access to your administrative dashboard with comprehensive content management tools.
+              Access your learning dashboard and track your progress through our comprehensive training programs.
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-red-300 rounded-full"></div>
-              <span className="text-red-100 text-base">Content Management</span>
+              <span className="text-red-100 text-base">Course Progress</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-red-300 rounded-full"></div>
-              <span className="text-red-100 text-base">User Administration</span>
+              <span className="text-red-100 text-base">Learning Materials</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-red-300 rounded-full"></div>
-              <span className="text-red-100 text-base">Analytics Dashboard</span>
+              <span className="text-red-100 text-base">Performance Analytics</span>
             </div>
           </div>
         </div>
@@ -136,10 +137,10 @@ function AdminLoginForm() {
               <Shield className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Encreasl Admin
+              Encreasl
             </h1>
             <p className="text-gray-600">
-              Sign in to access the CMS
+              Sign in to your account
             </p>
           </div>
 
@@ -149,7 +150,7 @@ function AdminLoginForm() {
               Welcome Back
             </h2>
             <p className="text-gray-600">
-              Sign in to your admin account
+              Sign in to your account
             </p>
           </div>
 
@@ -249,10 +250,10 @@ function AdminLoginForm() {
   );
 }
 
-export default function AdminLoginPage() {
+export default function SignInPage() {
   return (
     <PublicRoute redirectTo="/dashboard">
-      <AdminLoginForm />
+      <LoginForm />
     </PublicRoute>
   );
 }

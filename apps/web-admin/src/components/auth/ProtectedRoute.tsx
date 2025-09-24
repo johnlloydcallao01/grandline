@@ -6,11 +6,10 @@
 
 'use client';
 
-import React from 'react';
-import { redirect } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useRouteProtection } from '@/hooks/useAuth';
 import { ProtectedRouteProps } from '@/types/auth';
-import { isAdminUser } from '@/lib/auth';
 
 /**
  * ProtectedRoute component that ensures only authenticated admin users can access wrapped content
@@ -20,10 +19,27 @@ export function ProtectedRoute({
   children, 
   redirectTo = '/signin' 
 }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading, isInitialized } = useAuth();
+  const router = useRouter();
+  const {
+    shouldRedirectToLogin,
+    isCheckingAuth
+  } = useRouteProtection();
 
-  // Show loading state while authentication is being initialized
-  if (!isInitialized || isLoading) {
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (shouldRedirectToLogin) {
+      // Store the current path for redirect after login
+      const currentPath = window.location.pathname + window.location.search;
+      if (currentPath !== redirectTo) {
+        sessionStorage.setItem('auth:redirectAfterLogin', currentPath);
+      }
+
+      router.replace(redirectTo);
+    }
+  }, [shouldRedirectToLogin, redirectTo, router]);
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -31,19 +47,14 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect if not authenticated
-  if (!isAuthenticated || !user) {
-    redirect(redirectTo);
+  // Don't render anything if we should redirect
+  if (shouldRedirectToLogin) {
     return null;
   }
 
-  // Redirect if user is not an admin
-  if (!isAdminUser(user)) {
-    redirect('/access-denied');
-    return null;
-  }
+  // No additional role validation needed - auth.ts already handles admin validation
 
-  // Render children if user is authenticated and is an admin
+  // Render children if user is authenticated
   return <>{children}</>;
 }
 

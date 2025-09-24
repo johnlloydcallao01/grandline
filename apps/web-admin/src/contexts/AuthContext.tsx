@@ -1,30 +1,29 @@
 /**
  * @file apps/web-admin/src/contexts/AuthContext.tsx
- * @description Authentication context for admin users
- * Based on apps/web AuthContext but adapted for admin-only access
+ * @description Authentication Context Provider for PayloadCMS
+ * Manages global authentication state with automatic session restoration
  */
 
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
-import { 
-  User, 
-  AuthState, 
-  AuthContextType, 
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import type {
+  User,
+  AuthState,
+  AuthContextType,
   LoginCredentials,
-  AuthErrorDetails,
-  AuthEvent,
-  AuthEventData
 } from '@/types/auth';
-import { 
-  login as authLogin, 
-  logout as authLogout, 
-  getCurrentUser, 
+import {
+  login as authLogin,
+  logout as authLogout,
+  getCurrentUser,
   refreshSession as authRefreshSession,
   checkAuthStatus,
-  handleApiError,
-  isAdminUser,
-  AuthenticationError
+  clearAuthState,
+  emitAuthEvent,
+  startSessionMonitoring,
+  monitorSessionExpiration,
+  hasValidStoredToken,
 } from '@/lib/auth';
 
 // ========================================
@@ -32,55 +31,53 @@ import {
 // ========================================
 
 type AuthAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_USER'; payload: User | null }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_INITIALIZED'; payload: boolean }
+  | { type: 'AUTH_INIT_START' }
+  | { type: 'AUTH_INIT_SUCCESS'; payload: { user: User | null } }
+  | { type: 'AUTH_INIT_ERROR'; payload: { error: string } }
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: User }
-  | { type: 'LOGIN_FAILURE'; payload: string }
+  | { type: 'LOGIN_SUCCESS'; payload: { user: User } }
+  | { type: 'LOGIN_ERROR'; payload: { error: string } }
+  | { type: 'LOGOUT_START' }
   | { type: 'LOGOUT_SUCCESS' }
-  | { type: 'SESSION_EXPIRED' }
+  | { type: 'REFRESH_SUCCESS'; payload: { user: User } }
   | { type: 'CLEAR_ERROR' }
-  | { type: 'RESET_STATE' };
+  | { type: 'SESSION_EXPIRED' };
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  isInitialized: false,
+  isAuthenticated: false, // Start as false, will be set during initialization
+  isLoading: true, // Start as loading
+  isInitialized: false, // Not initialized yet
   error: null,
 };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
-    case 'SET_LOADING':
+    case 'AUTH_INIT_START':
       return {
         ...state,
-        isLoading: action.payload,
-      };
-
-    case 'SET_USER':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: !!action.payload && isAdminUser(action.payload),
-        isLoading: false,
+        isLoading: true,
         error: null,
       };
 
-    case 'SET_ERROR':
+    case 'AUTH_INIT_SUCCESS':
       return {
         ...state,
-        error: action.payload,
+        user: action.payload.user,
+        isAuthenticated: action.payload.user !== null,
         isLoading: false,
+        isInitialized: true,
+        error: null,
       };
 
-    case 'SET_INITIALIZED':
+    case 'AUTH_INIT_ERROR':
       return {
         ...state,
-        isInitialized: action.payload,
-        isLoading: !action.payload,
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        isInitialized: true,
+        error: action.payload.error,
       };
 
     case 'LOGIN_START':
@@ -93,19 +90,26 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     case 'LOGIN_SUCCESS':
       return {
         ...state,
-        user: action.payload,
+        user: action.payload.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
       };
 
-    case 'LOGIN_FAILURE':
+    case 'LOGIN_ERROR':
       return {
         ...state,
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: action.payload,
+        error: action.payload.error,
+      };
+
+    case 'LOGOUT_START':
+      return {
+        ...state,
+        isLoading: true,
+        error: null,
       };
 
     case 'LOGOUT_SUCCESS':
@@ -115,7 +119,15 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: action.type === 'SESSION_EXPIRED' ? 'Your session has expired. Please log in again.' : null,
+        error: null,
+      };
+
+    case 'REFRESH_SUCCESS':
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        error: null,
       };
 
     case 'CLEAR_ERROR':
@@ -124,249 +136,183 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
       };
 
-    case 'RESET_STATE':
-      return {
-        ...initialState,
-        isInitialized: state.isInitialized,
-      };
-
     default:
       return state;
   }
 }
 
 // ========================================
-// AUTHENTICATION CONTEXT
+// CONTEXT CREATION
 // ========================================
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // ========================================
-// AUTHENTICATION PROVIDER
+// AUTH PROVIDER COMPONENT
 // ========================================
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const initializationRef = useRef(false);
-  const sessionCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // ========================================
-  // EVENT HANDLING
-  // ========================================
-
-  const emitAuthEvent = useCallback((event: AuthEvent, user?: User, error?: AuthErrorDetails) => {
-    const eventData: AuthEventData = {
-      event,
-      user,
-      error,
-      timestamp: new Date(),
-    };
-
-    // Emit custom event for other parts of the app to listen to
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('auth-event', { detail: eventData }));
-    }
-
-    // Log important events for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Auth Event:', eventData);
-    }
-  }, []);
 
   // ========================================
   // INITIALIZATION
   // ========================================
 
   const initializeAuth = useCallback(async () => {
-    if (initializationRef.current) return;
-    initializationRef.current = true;
+    console.log('🚀 INITIALIZING AUTH...');
 
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
-      const user = await getCurrentUser();
-      
-      if (user && isAdminUser(user)) {
-        dispatch({ type: 'SET_USER', payload: user });
-        emitAuthEvent('LOGIN_SUCCESS', user);
-      } else {
-        dispatch({ type: 'SET_USER', payload: null });
-        if (user && !isAdminUser(user)) {
-          emitAuthEvent('ACCESS_DENIED', user);
+      // Check for stored token first (quick check)
+      const hasToken = hasValidStoredToken();
+      console.log('🔍 STORED TOKEN CHECK:', hasToken ? 'FOUND' : 'NOT FOUND');
+
+      if (hasToken) {
+        console.log('⚡ FAST AUTH: Setting authenticated state immediately');
+
+        // Set authenticated immediately to prevent signin flash
+        const tempUser: User = {
+          id: 0,
+          email: 'validating...',
+          firstName: '',
+          lastName: '',
+          role: 'trainee',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: tempUser } });
+
+        // Validate token with server in background
+        const user = await getCurrentUser();
+        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
+
+        if (user) {
+          console.log('✅ SESSION RESTORED:', user.email);
+          emitAuthEvent('session_restored', { user });
+        } else {
+          console.log('❌ TOKEN INVALID');
         }
-      }
-    } catch (_error) {
-      console.error('Auth initialization error:', _error);
-      dispatch({ type: 'SET_USER', payload: null });
-      
-      if (_error instanceof AuthenticationError && _error.type === 'SESSION_EXPIRED') {
-        emitAuthEvent('SESSION_EXPIRED');
-      }
-    } finally {
-      dispatch({ type: 'SET_INITIALIZED', payload: true });
-    }
-  }, [emitAuthEvent]);
-
-  // ========================================
-  // AUTHENTICATION METHODS
-  // ========================================
-
-  const login = useCallback(async (credentials: LoginCredentials): Promise<void> => {
-    try {
-      dispatch({ type: 'LOGIN_START' });
-      
-      const response = await authLogin(credentials);
-      
-      if (!isAdminUser(response.user)) {
-        const error = 'Access denied. This application is restricted to admin users only.';
-        dispatch({ type: 'LOGIN_FAILURE', payload: error });
-        emitAuthEvent('ACCESS_DENIED', response.user);
-        throw new AuthenticationError('ACCESS_DENIED', error);
-      }
-      
-      dispatch({ type: 'LOGIN_SUCCESS', payload: response.user });
-      emitAuthEvent('LOGIN_SUCCESS', response.user);
-    } catch (error) {
-      const authError = handleApiError(error);
-      const errorMessage = authError.message;
-      
-      dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage });
-      emitAuthEvent('LOGIN_FAILURE', undefined, authError);
-      
-      throw error;
-    }
-  }, [emitAuthEvent]);
-
-  const logout = useCallback(async (): Promise<void> => {
-    try {
-      const currentUser = state.user;
-      await authLogout();
-      dispatch({ type: 'LOGOUT_SUCCESS' });
-      emitAuthEvent('LOGOUT', currentUser || undefined);
-    } catch (_error) {
-      // Even if logout fails, clear local state
-      dispatch({ type: 'LOGOUT_SUCCESS' });
-      console.error('Logout error:', _error);
-    }
-  }, [state.user, emitAuthEvent]);
-
-  const refreshSession = useCallback(async (): Promise<void> => {
-    try {
-      const user = await authRefreshSession();
-      
-      if (user && isAdminUser(user)) {
-        dispatch({ type: 'SET_USER', payload: user });
-        emitAuthEvent('SESSION_REFRESHED', user);
       } else {
-        dispatch({ type: 'SESSION_EXPIRED' });
-        emitAuthEvent('SESSION_EXPIRED');
+        console.log('❌ NO VALID TOKEN');
+        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: null } });
       }
-    } catch (_error) {
-      dispatch({ type: 'SESSION_EXPIRED' });
-      emitAuthEvent('SESSION_EXPIRED');
-      throw _error;
-    }
-  }, [emitAuthEvent]);
-
-  const clearError = useCallback(() => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  }, []);
-
-  const checkAuth = useCallback(async (): Promise<boolean> => {
-    try {
-      const isValid = await checkAuthStatus();
-      if (!isValid && state.isAuthenticated) {
-        dispatch({ type: 'SESSION_EXPIRED' });
-        emitAuthEvent('SESSION_EXPIRED');
-      }
-      return isValid;
-    } catch {
-      return false;
-    }
-  }, [state.isAuthenticated, emitAuthEvent]);
-
-  // ========================================
-  // SESSION MONITORING
-  // ========================================
-
-  const startSessionMonitoring = useCallback(() => {
-    if (sessionCheckIntervalRef.current) {
-      clearInterval(sessionCheckIntervalRef.current);
-    }
-
-    // Check session every 5 minutes
-    sessionCheckIntervalRef.current = setInterval(async () => {
-      if (state.isAuthenticated) {
-        try {
-          await checkAuth();
-        } catch (_error) {
-          console.error('Session check error:', _error);
-        }
-      }
-    }, 5 * 60 * 1000);
-  }, [state.isAuthenticated, checkAuth]);
-
-  const stopSessionMonitoring = useCallback(() => {
-    if (sessionCheckIntervalRef.current) {
-      clearInterval(sessionCheckIntervalRef.current);
-      sessionCheckIntervalRef.current = null;
+    } catch (error: unknown) {
+      console.log('❌ AUTH INIT FAILED:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize authentication';
+      dispatch({ type: 'AUTH_INIT_ERROR', payload: { error: errorMessage } });
     }
   }, []);
-
-  // ========================================
-  // EFFECTS
-  // ========================================
 
   // Initialize authentication on mount
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
-  // Start/stop session monitoring based on authentication state
-  useEffect(() => {
-    if (state.isAuthenticated && state.isInitialized) {
-      startSessionMonitoring();
-    } else {
-      stopSessionMonitoring();
+  // ========================================
+  // AUTHENTICATION METHODS
+  // ========================================
+
+  const login = useCallback(async (credentials: LoginCredentials) => {
+    dispatch({ type: 'LOGIN_START' });
+
+    try {
+      const response = await authLogin(credentials);
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: response.user } });
+      emitAuthEvent('login_success', { user: response.user });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      dispatch({ type: 'LOGIN_ERROR', payload: { error: errorMessage } });
+      emitAuthEvent('login_failure', { error: errorMessage });
+      throw error;
     }
+  }, []);
 
-    return () => {
-      stopSessionMonitoring();
-    };
-  }, [state.isAuthenticated, state.isInitialized, startSessionMonitoring, stopSessionMonitoring]);
+  const logout = useCallback(async () => {
+    dispatch({ type: 'LOGOUT_START' });
 
-  // Handle visibility change to check session when tab becomes active
+    try {
+      await authLogout();
+      clearAuthState();
+      dispatch({ type: 'LOGOUT_SUCCESS' });
+      emitAuthEvent('logout');
+    } catch {
+      // Always succeed logout locally even if server call fails
+      clearAuthState();
+      dispatch({ type: 'LOGOUT_SUCCESS' });
+      emitAuthEvent('logout');
+    }
+  }, []);
+
+  const refreshSession = useCallback(async () => {
+    try {
+      const user = await authRefreshSession();
+      if (user) {
+        dispatch({ type: 'REFRESH_SUCCESS', payload: { user } });
+        emitAuthEvent('session_refreshed', { user });
+      } else {
+        dispatch({ type: 'SESSION_EXPIRED' });
+        emitAuthEvent('session_expired');
+      }
+    } catch (error: unknown) {
+      // If refresh fails, treat as session expired
+      dispatch({ type: 'SESSION_EXPIRED' });
+      emitAuthEvent('session_expired');
+      throw error;
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    dispatch({ type: 'CLEAR_ERROR' });
+  }, []);
+
+  // ========================================
+  // SESSION MONITORING
+  // ========================================
+
+  // Session monitoring and management
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && state.isAuthenticated) {
-        checkAuth();
+    if (!state.isAuthenticated || !state.isInitialized) return;
+
+    const handleSessionExpired = () => {
+      dispatch({ type: 'SESSION_EXPIRED' });
+      // Don't emit event here to prevent infinite loop
+    };
+
+    // Listen for auth events from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth:logout') {
+        handleSessionExpired();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [state.isAuthenticated, checkAuth]);
-
-  // Handle storage events (logout from another tab)
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'payload-token' && event.newValue === null && state.isAuthenticated) {
-        dispatch({ type: 'LOGOUT_SUCCESS' });
-        emitAuthEvent('LOGOUT');
+    // Listen for custom auth events
+    const handleAuthEvent = (e: CustomEvent) => {
+      if (e.type === 'auth:logout') {
+        handleSessionExpired();
       }
+      // Removed 'auth:session_expired' to prevent infinite loop
     };
+
+    // Start session monitoring
+    const stopSessionMonitoring = startSessionMonitoring();
+    const stopExpirationMonitoring = monitorSessionExpiration();
 
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:logout', handleAuthEvent as EventListener);
+    window.addEventListener('auth:session_expired', handleAuthEvent as EventListener);
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:logout', handleAuthEvent as EventListener);
+      window.removeEventListener('auth:session_expired', handleAuthEvent as EventListener);
+      stopSessionMonitoring();
+      stopExpirationMonitoring();
     };
-  }, [state.isAuthenticated, emitAuthEvent]);
+  }, [state.isAuthenticated, state.isInitialized]);
 
   // ========================================
   // CONTEXT VALUE
@@ -378,18 +324,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     refreshSession,
     clearError,
-    checkAuthStatus: checkAuth,
+    checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+  return React.createElement(
+    AuthContext.Provider,
+    { value: contextValue },
+    children
   );
 }
 
 // ========================================
-// AUTHENTICATION HOOK
+// HOOK FOR USING AUTH CONTEXT
 // ========================================
 
 export function useAuthContext(): AuthContextType {
@@ -402,5 +348,4 @@ export function useAuthContext(): AuthContextType {
   return context;
 }
 
-// Export the context for advanced use cases
 export { AuthContext };

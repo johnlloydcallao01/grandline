@@ -10,8 +10,8 @@ import { env } from './env';
 // ========================================
 
 export const cmsConfig = {
-  apiUrl: env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api',
-  serverUrl: env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://grandline-cms.vercel.app',
+  apiUrl: env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api',
+  serverUrl: env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://cms.grandlinemaritime.com',
   collections: {
     posts: 'posts',
     media: 'media',

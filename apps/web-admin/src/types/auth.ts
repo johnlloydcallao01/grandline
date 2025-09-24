@@ -38,6 +38,11 @@ export interface User {
   updatedAt: string;
 }
 
+// Admin user type (subset of User with admin role)
+export interface AdminUser extends User {
+  role: 'admin';
+}
+
 // ========================================
 // AUTHENTICATION RESPONSE TYPES
 // ========================================
@@ -47,6 +52,10 @@ export interface AuthResponse {
   user: User;
   token?: string;
   exp?: number;
+}
+
+export interface AdminAuthResponse extends AuthResponse {
+  user: AdminUser;
 }
 
 export interface AuthError {
@@ -180,13 +189,7 @@ export interface AuthEventData {
 // ADMIN-SPECIFIC TYPES
 // ========================================
 
-export interface AdminUser extends User {
-  role: 'admin';
-}
 
-export interface AdminAuthResponse extends AuthResponse {
-  user: AdminUser;
-}
 
 // ========================================
 // ROLE CHECKING UTILITIES

@@ -10,7 +10,6 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { PublicRouteProps } from '@/types/auth';
-import { isAdminUser } from '@/lib/auth';
 
 /**
  * PublicRoute component that redirects authenticated admin users away from public pages
@@ -31,13 +30,13 @@ export function PublicRoute({
     );
   }
 
-  // Redirect if user is authenticated and is an admin
-  if (isAuthenticated && user && isAdminUser(user)) {
+  // Redirect if user is authenticated
+  if (isAuthenticated && user) {
     redirect(redirectTo);
     return null;
   }
 
-  // Render children if user is not authenticated or not an admin
+  // Render children if user is not authenticated
   return <>{children}</>;
 }
 
