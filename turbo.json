@@ -31,6 +31,12 @@
         "SUPABASE_SERVICE_ROLE_KEY"
       ]
     },
+    "@encreasl/cms-types#build": {
+      "outputs": []
+    },
+    "@encreasl/redux#build": {
+      "outputs": ["dist/**"]
+    },
 
     "dev": {
       "cache": false,

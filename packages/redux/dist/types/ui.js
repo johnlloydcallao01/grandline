@@ -1,0 +1,4 @@
+/**
+ * UI-related types
+ */
+export {};
