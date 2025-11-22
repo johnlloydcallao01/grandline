@@ -225,10 +225,10 @@ export default function CoursesPage() {
       <section className="pt-24 pb-16 bg-gradient-to-br from-[#201a7c]/5 to-[#ab3b43]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="heading-primary text-4xl md:text-6xl text-gray-900 mb-6">
-              Explore Our <span className="text-[#201a7c]">Courses</span>
+            <h1 className="heading-primary text-4xl md:text-6xl mb-6">
+              <span className="text-[#F5F5F5]">Explore Our</span> <span className="text-[#ab3b43]">Courses</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto mb-8">
               Choose from our comprehensive catalog of expert-led courses designed to advance your career 
               and help you master in-demand skills.
             </p>

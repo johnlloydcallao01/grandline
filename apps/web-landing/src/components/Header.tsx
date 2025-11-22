@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,26 +13,16 @@ export function Header() {
     { href: "/courses", label: "Courses" },
     { href: "/contact", label: "Contact" },
     { href: "/faq", label: "FAQ" },
+    { href: "/instructor", label: "Become an Instructor" },
   ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#201a7c] to-[#ab3b43] rounded-xl flex items-center justify-center">
-                <i className="fas fa-graduation-cap text-white text-lg"></i>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900 heading-primary">
-                  EduPlatform
-                </span>
-                <span className="text-xs text-gray-500 -mt-1">
-                  Learning Excellence
-                </span>
-              </div>
+            <Link href="/" className="flex items-center">
+              <Image src="/logo.png" alt="Logo" width={56} height={56} priority />
             </Link>
           </div>
 

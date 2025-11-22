@@ -61,12 +61,11 @@ export default function AboutPage() {
       <section className="pt-24 pb-16 bg-gradient-to-br from-[#201a7c]/5 to-[#ab3b43]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="heading-primary text-4xl md:text-6xl text-gray-900 mb-6">
-              About <span className="text-[#201a7c]">EduPlatform</span>
+            <h1 className="heading-primary text-4xl md:text-6xl mb-6">
+              <span className="text-[#F5F5F5]">About</span> <span className="text-[#ab3b43]">EduPlatform</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We're on a mission to democratize quality education and empower professionals 
-              worldwide to achieve their career goals through innovative learning experiences.
+            <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto">
+              We're on a mission to democratize quality education and empower professionals worldwide to achieve their career goals through innovative learning experiences.
             </p>
           </div>
         </div>

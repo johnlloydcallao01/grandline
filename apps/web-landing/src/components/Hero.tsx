@@ -19,19 +19,17 @@ export function Hero() {
             {/* Badge */}
             <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6 animate-fade-in-up">
               <i className="fas fa-star text-yellow-300 mr-2"></i>
-              #1 Enterprise LMS Platform
+              #Be a Maritime Pro
             </div>
 
             {/* Main heading */}
             <h1 className="heading-primary text-3xl md:text-4xl lg:text-5xl text-white mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              Transform Your
-              <span className="block text-cyan-300">Learning Journey</span>
+              Shaping the Next Gen of Maritime Professionals
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              Empower your team with our enterprise-grade learning management system.
-              Comprehensive courses, expert instructors, and cutting-edge technology.
+              Grandline Maritime Training and Development Center Inc. sets sail toward your maritime career with expert-led courses to help you become a true maritime professional.
             </p>
 
             {/* CTA Buttons */}
@@ -40,15 +38,15 @@ export function Hero() {
                 href="/courses"
                 className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all duration-300 hover:transform hover:scale-105 shadow-lg inline-flex items-center"
               >
-                <i className="fas fa-play mr-2"></i>
-                Start Learning
+                <i className="fas fa-compass mr-2"></i>
+                Explore Courses
               </Link>
               <Link
-                href="/demo"
+                href="/faq"
                 className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-300 hover:transform hover:scale-105 inline-flex items-center"
               >
-                <i className="fas fa-video mr-2"></i>
-                Watch Demo
+                <i className="fas fa-info-circle mr-2"></i>
+                Learn More
               </Link>
             </div>
 
@@ -77,8 +75,8 @@ export function Hero() {
                     <i className="fas fa-users text-green-600 text-lg"></i>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">50K+</div>
-                    <div className="text-gray-600 text-sm">Active Learners</div>
+                    <div className="text-2xl font-bold text-gray-900">Growing</div>
+                    <div className="text-gray-600 text-sm">Community</div>
                   </div>
                 </div>
               </div>
@@ -89,8 +87,8 @@ export function Hero() {
                     <i className="fas fa-certificate text-blue-600 text-lg"></i>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">1000+</div>
-                    <div className="text-gray-600 text-sm">Courses</div>
+                    <div className="text-2xl font-bold text-gray-900">Full Course</div>
+                    <div className="text-gray-600 text-sm">Catalog</div>
                   </div>
                 </div>
               </div>
@@ -101,8 +99,8 @@ export function Hero() {
                     <i className="fas fa-star text-yellow-600 text-lg"></i>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">4.9</div>
-                    <div className="text-gray-600 text-sm">Rating</div>
+                    <div className="text-2xl font-bold text-gray-900">Expert-Led</div>
+                    <div className="text-gray-600 text-sm">Training</div>
                   </div>
                 </div>
               </div>

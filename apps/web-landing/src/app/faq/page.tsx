@@ -142,10 +142,10 @@ export default function FAQPage() {
       <section className="pt-24 pb-16 bg-gradient-to-br from-[#201a7c]/5 to-[#ab3b43]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="heading-primary text-4xl md:text-6xl text-gray-900 mb-6">
-              Frequently Asked <span className="text-[#201a7c]">Questions</span>
+            <h1 className="heading-primary text-4xl md:text-6xl mb-6">
+              <span className="text-[#F5F5F5]">Frequently Asked</span> <span className="text-[#ab3b43]">Questions</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto mb-8">
               Find answers to common questions about our platform, courses, and services. 
               Can't find what you're looking for? Contact our support team.
             </p>

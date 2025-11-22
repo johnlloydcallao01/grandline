@@ -94,10 +94,10 @@ export default function ContactPage() {
       <section className="pt-24 pb-16 bg-gradient-to-br from-[#201a7c]/5 to-[#ab3b43]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="heading-primary text-4xl md:text-6xl text-gray-900 mb-6">
-              Get in <span className="text-[#201a7c]">Touch</span>
+            <h1 className="heading-primary text-4xl md:text-6xl mb-6">
+              <span className="text-[#F5F5F5]">Get in</span> <span className="text-[#ab3b43]">Touch</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto">
               Have questions about our platform? Want to discuss enterprise solutions? 
               We're here to help you succeed in your learning journey.
             </p>
@@ -127,7 +127,7 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
                       placeholder="Your full name"
                     />
                   </div>
@@ -142,7 +142,7 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
                       placeholder="your.email@example.com"
                     />
                   </div>
@@ -159,7 +159,7 @@ export default function ContactPage() {
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
                       placeholder="Your company name"
                     />
                   </div>
@@ -194,7 +194,7 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
                     placeholder="Brief description of your inquiry"
                   />
                 </div>
@@ -210,7 +210,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
                     placeholder="Tell us more about your inquiry..."
                   ></textarea>
                 </div>
