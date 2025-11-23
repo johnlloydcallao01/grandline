@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 3001",

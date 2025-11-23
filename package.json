@@ -21,12 +21,13 @@
     "deploy:functions": "cd functions && npm run deploy",
     "serve:functions": "cd functions && npm run serve",
     "setup": "node scripts/setup-env.js",
-    "clean": "turbo run clean && cd functions && rm -rf lib"
+    "clean": "turbo run clean && cd functions && rm -rf lib",
+    "prestart": "corepack enable && corepack prepare pnpm@10.12.1 --activate",
+    "start": "pnpm --filter @encreasl/cms start"
   },
   "devDependencies": {
     "turbo": "^2.5.5"
   },
-  "packageManager": "pnpm@10.12.1",
   "dependencies": {
     "dotenv": "^17.2.0"
   }
