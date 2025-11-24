@@ -3,5 +3,5 @@ services:
     name: grandline-cms
     runtime: node
     rootDir: apps/cms
-    buildCommand: corepack enable && corepack prepare pnpm@10.12.1 --activate && pnpm install --frozen-lockfile && pnpm build
-    startCommand: pnpm start
+    buildCommand: corepack enable && corepack prepare pnpm@10.12.1 --activate && pnpm install --frozen-lockfile && pnpm run build
+    startCommand: corepack enable && corepack prepare pnpm@10.12.1 --activate && pnpm run start
