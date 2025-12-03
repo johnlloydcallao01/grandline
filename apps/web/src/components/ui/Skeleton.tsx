@@ -3,10 +3,10 @@ import React from 'react';
 /**
  * Base Skeleton component for loading states
  */
-export function Skeleton({ 
+export const Skeleton: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ 
   className = '', 
   ...props 
-}: React.HTMLAttributes<HTMLDivElement>) {
+}) => {
   return (
     <div
       className={`animate-pulse bg-gray-200 rounded ${className}`}
@@ -20,7 +20,7 @@ export function Skeleton({
 /**
  * Category Circle Skeleton
  */
-export function CategoryCircleSkeleton() {
+export const CategoryCircleSkeleton: React.FC = () => {
   return (
     <div className="flex flex-col items-center space-y-2 flex-shrink-0">
       <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse"></div>
@@ -34,7 +34,7 @@ export function CategoryCircleSkeleton() {
 /**
  * List Item Skeleton - for various list layouts
  */
-export function ListItemSkeleton() {
+export const ListItemSkeleton: React.FC = () => {
   return (
     <div className="flex items-center space-x-4 p-4">
       {/* Icon/Avatar skeleton */}
@@ -55,11 +55,9 @@ export function ListItemSkeleton() {
 /**
  * Card Skeleton - for dashboard cards, stats, etc.
  */
-export function CardSkeleton({ 
+export const CardSkeleton: React.FC<{ className?: string }> = ({ 
   className = "p-6" 
-}: { 
-  className?: string 
-}) {
+}) => {
   return (
     <div className={`bg-white rounded-lg border border-gray-200 ${className}`}>
       {/* Header skeleton */}
@@ -80,7 +78,7 @@ export function CardSkeleton({
 /**
  * Table Row Skeleton
  */
-export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
+export const TableRowSkeleton: React.FC<{ columns?: number }> = ({ columns = 4 }) => {
   return (
     <tr>
       {Array.from({ length: columns }).map((_, index) => (
@@ -95,7 +93,7 @@ export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
 /**
  * Page Header Skeleton
  */
-export function PageHeaderSkeleton() {
+export const PageHeaderSkeleton: React.FC = () => {
   return (
     <div className="mb-8">
       <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse mb-2"></div>

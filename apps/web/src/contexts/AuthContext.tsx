@@ -155,7 +155,7 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
+export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // ========================================

@@ -21,7 +21,7 @@ export const ProtectedRoute = ({
   children,
   fallback,
   redirectTo = '/signin'
-}: ProtectedRouteProps): JSX.Element | null => {
+}: ProtectedRouteProps): React.ReactNode => {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -46,7 +46,6 @@ export const ProtectedRoute = ({
   // Show loading while checking authentication
   if (isCheckingAuth) {
     console.log('⏳ PROTECTED ROUTE: Still checking auth...');
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
@@ -78,7 +77,6 @@ export function withAuth<P extends object>(
   }
 ) {
   const WrappedComponent = (props: P): React.ReactNode => {
-    // @ts-expect-error React 19 component return type compatibility
     return (
       <ProtectedRoute
         fallback={options?.fallback}
@@ -109,7 +107,7 @@ export const RoleProtectedRoute = ({
   fallback,
   fallbackComponent: FallbackComponent,
   redirectTo = '/signin'
-}: RoleProtectedRouteProps): JSX.Element | null => {
+}: RoleProtectedRouteProps): React.ReactNode => {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -134,7 +132,6 @@ export const RoleProtectedRoute = ({
 
   // Show loading screen while checking authentication
   if (isCheckingAuth) {
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
@@ -190,21 +187,18 @@ interface AuthGateProps {
  * Conditional rendering based on authentication status
  * Useful for showing different content to authenticated vs unauthenticated users
  */
-export const AuthGate = ({ children, fallback, requireAuth = true }: AuthGateProps): JSX.Element | null => {
+export const AuthGate = ({ children, fallback, requireAuth = true }: AuthGateProps): React.ReactNode => {
   const { isAuthenticated, isCheckingAuth } = useRouteProtection();
 
   if (isCheckingAuth) {
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
   if (requireAuth && !isAuthenticated) {
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
   if (!requireAuth && isAuthenticated) {
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 

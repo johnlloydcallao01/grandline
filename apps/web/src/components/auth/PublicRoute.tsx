@@ -20,7 +20,7 @@ import type { PublicRouteProps } from '@/types/auth';
 export const PublicRoute = ({
   children,
   redirectTo = '/'
-}: PublicRouteProps): JSX.Element | null => {
+}: PublicRouteProps): React.ReactNode => {
   const router = useRouter();
   const {
     isAuthenticated,
@@ -76,7 +76,6 @@ export function withPublicRoute<P extends object>(
   }
 ) {
   const WrappedComponent = (props: P): React.ReactNode => {
-    // @ts-expect-error React 19 component return type compatibility
     return (
       <PublicRoute redirectTo={options?.redirectTo}>
         {React.createElement(Component, props)}
@@ -103,7 +102,7 @@ interface GuestOnlyProps {
  * Component that only renders for unauthenticated users
  * Similar to PublicRoute but without automatic redirection
  */
-export const GuestOnly = ({ children, fallback, redirectTo }: GuestOnlyProps): JSX.Element | null => {
+export const GuestOnly = ({ children, fallback, redirectTo }: GuestOnlyProps): React.ReactNode => {
   const { isAuthenticated } = useRouteProtection();
   const router = useRouter();
 
@@ -114,7 +113,6 @@ export const GuestOnly = ({ children, fallback, redirectTo }: GuestOnlyProps): J
   }, [isAuthenticated, redirectTo, router]);
 
   if (isAuthenticated) {
-    // @ts-expect-error React 19 fallback type compatibility
     return fallback || null;
   }
 
@@ -139,12 +137,11 @@ export const ConditionalAuth = ({
   children,
   showWhenAuthenticated = false,
   fallback
-}: ConditionalAuthProps): JSX.Element | null => {
+}: ConditionalAuthProps): React.ReactNode => {
   const { isAuthenticated } = useRouteProtection();
 
   const shouldShow = showWhenAuthenticated ? isAuthenticated : !isAuthenticated;
 
-  // @ts-expect-error React 19 fallback type compatibility
   return shouldShow ? <>{children}</> : (fallback || null);
 }
 
@@ -160,7 +157,7 @@ interface AuthStatusIndicatorProps {
  * Visual indicator of authentication status
  * Useful for debugging or admin interfaces
  */
-export const AuthStatusIndicator = ({ className = '' }: AuthStatusIndicatorProps): JSX.Element => {
+export const AuthStatusIndicator = ({ className = '' }: AuthStatusIndicatorProps): React.ReactNode => {
   const { isAuthenticated, isCheckingAuth, isInitialized } = useRouteProtection();
 
   if (!isInitialized) {

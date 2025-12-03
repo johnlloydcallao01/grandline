@@ -78,7 +78,6 @@ export class AuthErrorBoundary extends Component<Props, State> {
       }
 
       // Default error UI
-      // @ts-expect-error React 19 component return type compatibility
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
@@ -180,7 +179,7 @@ interface NetworkErrorProps {
   className?: string;
 }
 
-export const NetworkError = ({ onRetry, className = '' }: NetworkErrorProps): JSX.Element => {
+export const NetworkError = ({ onRetry, className = '' }: NetworkErrorProps): React.ReactNode => {
   return (
     <div className={`text-center p-6 ${className}`}>
       <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -216,7 +215,7 @@ interface SessionExpiredProps {
   className?: string;
 }
 
-export const SessionExpired = ({ onLogin, className = '' }: SessionExpiredProps): JSX.Element => {
+export const SessionExpired = ({ onLogin, className = '' }: SessionExpiredProps): React.ReactNode => {
   const handleLogin = () => {
     if (onLogin) {
       onLogin();

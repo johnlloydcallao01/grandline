@@ -35,7 +35,7 @@ export function CourseCategoryCircle({
       >
         {category.icon && (category.icon.cloudinaryURL || category.icon.url) ? (
           <img
-             src={category.icon.cloudinaryURL || category.icon.url}
+             src={category.icon.cloudinaryURL || category.icon.url || undefined}
              alt={category.icon.alt || category.name}
              className="absolute inset-0 w-full h-full object-cover rounded-full"
            />

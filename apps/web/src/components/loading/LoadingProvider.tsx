@@ -27,7 +27,7 @@ interface LoadingProviderProps {
  * - Does NOT interfere with SPA navigation
  * - Integrates with authentication flow for smooth transitions
  */
-export function LoadingProvider({ children }: LoadingProviderProps): JSX.Element {
+export function LoadingProvider({ children }: LoadingProviderProps): React.ReactNode {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 

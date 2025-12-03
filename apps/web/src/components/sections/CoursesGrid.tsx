@@ -30,7 +30,7 @@ interface CourseCardProps {
   course: Course;
 }
 
-function CourseCard({ course }: CourseCardProps) {
+const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
   const LinkComponent = Link as any;
   
   // Get the best available image URL from thumbnail

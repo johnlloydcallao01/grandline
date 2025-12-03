@@ -19,7 +19,7 @@ interface FacebookLoadingScreenProps {
  * - Integrates with authentication flow
  * - Uses brand colors: #ab3b43 (accent) and #201a7c (primary)
  */
-export function FacebookLoadingScreen({ isVisible, progress = 0 }: FacebookLoadingScreenProps): JSX.Element | null {
+export function FacebookLoadingScreen({ isVisible, progress = 0 }: FacebookLoadingScreenProps): React.ReactNode {
   if (!isVisible) return null;
 
   return (
