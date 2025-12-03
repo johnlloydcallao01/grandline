@@ -149,16 +149,3 @@ export function ToolbarPlugin() {
   );
 }
 
-function _$getNearestNodeOfType<T>(
-  node: unknown,
-  klass: new (...args: unknown[]) => T,
-): T | null {
-  let parent = node as { getParent?: () => unknown } | null;
-  while (parent != null) {
-    if (parent instanceof klass) {
-      return parent as T;
-    }
-    parent = parent.getParent?.() as { getParent?: () => unknown } | null;
-  }
-  return null;
-}

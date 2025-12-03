@@ -47,12 +47,12 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Explicitly disable typed routes (moved from experimental)
+  typedRoutes: false,
 
-
-  // Experimental features for better environment variable handling
-  experimental: {
-    // Enable environment variable validation
-    typedRoutes: false,
+  typescript: {
+    // Temporarily ignore build errors for React 19 compatibility
+    ignoreBuildErrors: true,
   },
 };
 

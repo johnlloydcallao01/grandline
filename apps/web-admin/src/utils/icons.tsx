@@ -1,10 +1,8 @@
-import React from 'react';
 import { IconName } from '@/types';
 
 /**
  * Icon mapping for admin sidebar items
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const getIcon = (iconName: IconName): any => {
   const iconMap: Record<IconName, any> = {
     dashboard: (

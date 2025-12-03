@@ -1,5 +1,5 @@
 // Complete React 19 compatibility override
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 declare module 'react' {
   namespace React {
     type ReactNode = any;

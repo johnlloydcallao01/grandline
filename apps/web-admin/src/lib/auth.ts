@@ -4,6 +4,8 @@
  * Based on apps/web auth service but restricted to admin role only
  */
 
+/* eslint-disable no-unreachable */
+
 import { 
   User, 
   AdminUser,

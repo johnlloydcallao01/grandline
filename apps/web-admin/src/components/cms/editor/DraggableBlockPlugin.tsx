@@ -14,27 +14,7 @@ import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createListNode, $createListItemNode } from '@lexical/list';
 
-const _SPACE = 4;
-const _TARGET_LINE_HALF_HEIGHT = 2;
-const _DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu';
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block';
-const _TEXT_BOX_HORIZONTAL_PADDING = 28;
-
-const _Downward = 1;
-const _Upward = -1;
-const _Indeterminate = 0;
-
-let prevIndex = Infinity;
-
-function _getCurrentIndex(keysLength: number): number {
-  if (keysLength === 0) {
-    return Infinity;
-  }
-  if (prevIndex >= 0 && prevIndex < keysLength) {
-    return prevIndex;
-  }
-  return Math.floor(keysLength / 2);
-}
 
 function getTopLevelNodeKeys(editor: LexicalEditor): string[] {
   return editor.getEditorState().read(() => $getRoot().getChildrenKeys());
@@ -304,7 +284,6 @@ function DraggableBlockMenu({
   onAddBlock: () => void;
 }): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
-  const _targetLineRef = useRef<HTMLDivElement>(null);
   const isDraggingBlockRef = useRef<boolean>(false);
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null);
   const [showBlockPicker, setShowBlockPicker] = useState(false);

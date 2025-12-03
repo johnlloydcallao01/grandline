@@ -25,13 +25,13 @@ function isAuthRoute(pathname: string): boolean {
 // authentication entirely on the client side to prevent redirect loops
 
 // ========================================
-// MIDDLEWARE FUNCTION
+// PROXY FUNCTION (Formerly Middleware)
 // ========================================
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for Next.js internal routes and static files
+  // Skip proxy for Next.js internal routes and static files
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||

@@ -153,7 +153,6 @@ export default function MediaLibraryPage() {
                     <div className="flex justify-center mb-3">
                       {item.type === 'image' ? (
                         <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                          {/* eslint-disable-next-line jsx-a11y/alt-text */}
                           <Image className="w-8 h-8 text-gray-400" />
                         </div>
                       ) : (

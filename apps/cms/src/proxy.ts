@@ -10,7 +10,7 @@ const allowedOrigins = [
   process.env.CMS_LOCAL_URL!,
 ]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Handle CORS for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')

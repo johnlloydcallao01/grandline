@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, File } from '@/components/ui/IconWrapper';
+import { Upload, X, File as FileIcon } from '@/components/ui/IconWrapper';
 // Note: useUploadMediaMutation available but using direct fetch for now
 import { getCMSImageUrl } from '@/lib/cms';
 // Authentication is now handled by middleware
@@ -220,7 +220,6 @@ export function MediaUploader({
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               {isImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={selectedMedia.url}
                   alt={selectedMedia.alt}
@@ -228,7 +227,7 @@ export function MediaUploader({
                 />
               ) : (
                 <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                  <File className="w-8 h-8 text-gray-400" />
+                  <FileIcon className="w-8 h-8 text-gray-400" />
                 </div>
               )}
             </div>

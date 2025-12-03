@@ -44,6 +44,7 @@ const nextConfig = {
 
     return webpackConfig
   },
+  turbopack: {},
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

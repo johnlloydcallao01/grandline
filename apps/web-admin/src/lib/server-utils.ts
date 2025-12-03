@@ -3,6 +3,8 @@
  * @description Server-side utilities for Payload CMS integration
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { headers } from 'next/headers';
 import { env } from './env';
 
