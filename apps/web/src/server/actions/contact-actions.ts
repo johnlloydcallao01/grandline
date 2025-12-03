@@ -14,10 +14,7 @@ import {
   ContactFormStorageSchema,
   type ContactFormData
 } from '../validators/contact-schemas';
-import {
-  withContactFormDefaults,
-  withValidationResult
-} from '../middleware';
+import { withValidationResult } from '../middleware';
 
 // ========================================
 // TYPES
@@ -43,6 +40,9 @@ const _submitContactForm = async (
   validatedData: ContactFormData
 ): Promise<ServerActionResult<ContactFormSubmission>> => {
   // Create submission record
+  // Validate and transform for storage (side-effect validation)
+  ContactFormStorageSchema.parse(validatedData);
+
   const submission: ContactFormSubmission = {
     id: globalThis.crypto.randomUUID(),
     data: validatedData,

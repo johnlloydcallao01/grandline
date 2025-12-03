@@ -190,7 +190,7 @@ export function CourseNavigationCarousel({
     handleMove(e.touches[0].clientX);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = () => {
     handleEnd();
   };
 

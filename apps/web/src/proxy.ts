@@ -14,29 +14,6 @@ import type { NextRequest } from 'next/server';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
 const COLLECTION_SLUG = 'users'; // Authentication is on users collection, not trainees
 
-// Routes that require authentication
-const PROTECTED_ROUTES = [
-  '/',
-  '/trending',
-  '/music',
-  '/gaming',
-  '/news',
-  '/sports',
-  '/subscriptions',
-  '/history',
-  '/liked-videos',
-  '/watch-later',
-  '/playlists',
-  '/notifications',
-  '/portal',
-  '/menu',
-  '/help',
-  '/session-debug',
-  '/auth-test',
-  '/login-status',
-  '/loading-test',
-  '/shorts'
-];
 
 // Routes that should redirect authenticated users
 const AUTH_ROUTES = [
@@ -77,23 +54,12 @@ function matchesPath(pathname: string, patterns: string[]): boolean {
 // Note: checkAuthentication function removed because we're using client-side auth protection
 // instead of middleware-based auth due to cross-domain cookie limitations
 
-/**
- * Create redirect response with proper headers
- */
-function createRedirect(url: string, request: NextRequest): NextResponse {
-  const response = NextResponse.redirect(new URL(url, request.url));
-  
-  // Preserve important headers
-  response.headers.set('x-middleware-cache', 'no-cache');
-  
-  return response;
-}
 
 // ========================================
 // MAIN MIDDLEWARE FUNCTION
 // ========================================
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip middleware for public routes
@@ -155,8 +121,8 @@ export const config = {
  * Middleware for API routes that require authentication
  * Note: checkAuthentication is handled client-side due to domain limitations
  */
-export async function withAuth(handler: (request: NextRequest) => Promise<NextResponse>) {
-  return async (request: NextRequest) => {
+export async function withAuth(_handler: (request: NextRequest) => Promise<NextResponse>) {
+  return async (_request: NextRequest) => {
     // In development with external PayloadCMS, we can't check auth server-side
     // due to cross-domain cookie limitations. Auth is handled client-side.
     
@@ -201,7 +167,7 @@ export function withRole(roles: string[]) {
         }
 
         return handler(request);
-      } catch (error) {
+      } catch {
         return NextResponse.json(
           { error: 'Authentication check failed' },
           { status: 500 }

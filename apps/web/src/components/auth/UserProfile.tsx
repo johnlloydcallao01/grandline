@@ -349,7 +349,7 @@ export function CompactUserProfile({
   className = '',
   showLogout = true 
 }: CompactUserProfileProps) {
-  const { user, displayName } = useUser();
+  const { user } = useUser();
 
   if (!user) {
     return null;

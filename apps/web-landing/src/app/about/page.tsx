@@ -7,25 +7,25 @@ export default function AboutPage() {
     {
       name: "Dr. Sarah Johnson",
       position: "CEO & Founder",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+      image: "https://images.pexels.com/photos/1181685/pexels-photo-1181685.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
       bio: "Former VP of Education at Google with 15+ years in EdTech innovation."
     },
     {
       name: "Michael Chen",
       position: "CTO",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
       bio: "Ex-Microsoft engineer specializing in scalable learning platforms."
     },
     {
       name: "Emily Rodriguez",
       position: "Head of Content",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+      image: "https://images.pexels.com/photos/3771600/pexels-photo-3771600.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
       bio: "Curriculum designer with expertise in adult learning methodologies."
     },
     {
       name: "David Park",
       position: "Head of Partnerships",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+      image: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
       bio: "Former Amazon executive building industry relationships globally."
     }
   ];
@@ -58,7 +58,7 @@ export default function AboutPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-to-br from-[#201a7c]/5 to-[#ab3b43]/5">
+      <section className="pt-24 pb-16 bg-[#0f172a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="heading-primary text-4xl md:text-6xl mb-6">
@@ -96,7 +96,7 @@ export default function AboutPage() {
             </div>
             <div className="relative">
               <Image
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop&crop=center"
+                src="https://images.pexels.com/photos/1181352/pexels-photo-1181352.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
                 alt="Team collaboration"
                 width={600}
                 height={400}

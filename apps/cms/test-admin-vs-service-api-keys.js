@@ -197,14 +197,14 @@ async function investigateRoleDifferences() {
             const key = crypto.scryptSync(payloadSecret, 'salt', 32);
             
             const decipher = crypto.createDecipheriv(algorithm, key, iv);
-            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-            decrypted += decipher.final('utf8');
-            console.log('✅ Decryption successful - API key is valid (modern format)');
+            decipher.update(encrypted, 'hex', 'utf8');
+            decipher.final('utf8');
+          console.log('✅ Decryption successful - API key is valid (modern format)');
           } else {
             // Fallback to deprecated method for old data
             const decipher = crypto.createDecipher(algorithm, payloadSecret);
-            let decrypted = decipher.update(admin.api_key, 'hex', 'utf8');
-            decrypted += decipher.final('utf8');
+            decipher.update(admin.api_key, 'hex', 'utf8');
+            decipher.final('utf8');
             console.log('✅ Decryption successful - API key is valid (legacy format)');
           }
         } catch (error) {
@@ -246,44 +246,7 @@ async function investigateRoleDifferences() {
 /**
  * Modern decryption function to replace deprecated crypto.createDecipher
  */
-function testApiKeyDecryption(encryptedData, secret) {
-  try {
-    const ALGORITHM = 'aes-256-cbc';
-    const KEY_LENGTH = 32;
-    
-    // Check if it's modern format (with IV)
-    if (encryptedData.includes(':')) {
-      // Split IV and encrypted data
-      const parts = encryptedData.split(':');
-      if (parts.length !== 2) {
-        throw new Error('Invalid encrypted data format - missing IV separator');
-      }
-      
-      const iv = Buffer.from(parts[0], 'hex');
-      const encrypted = parts[1];
-      
-      // Create key from secret
-      const key = crypto.scryptSync(secret, 'salt', KEY_LENGTH);
-      
-      // Create decipher with key and IV
-      const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-      
-      // Decrypt the data
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      
-      return decrypted;
-    } else {
-      // Legacy format - try deprecated method
-      const decipher = crypto.createDecipher(ALGORITHM, secret);
-      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      return decrypted;
-    }
-  } catch (error) {
-    throw new Error(`Decryption failed: ${error.message}`);
-  }
-}
+ 
 
 // Run the investigation
 investigateRoleDifferences().catch(console.error);

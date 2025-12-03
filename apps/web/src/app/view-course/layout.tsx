@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Header, OverlaySidebar } from '@/components/layout';
 
 interface ViewCourseLayoutProps {
@@ -12,19 +12,7 @@ interface ViewCourseLayoutProps {
  * This layout uses the shared Header component with an overlay sidebar
  */
 export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
-  const [isDesktop, setIsDesktop] = useState(false);
   const [isOverlaySidebarOpen, setIsOverlaySidebarOpen] = useState(false);
-
-  // Check if we're on desktop
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   const handleToggleOverlaySidebar = () => {
     setIsOverlaySidebarOpen(prev => !prev);

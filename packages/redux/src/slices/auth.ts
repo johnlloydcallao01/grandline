@@ -71,7 +71,7 @@ export const loginUser = createAsyncThunk<
       }
 
       return data;
-    } catch (error) {
+    } catch {
       return rejectWithValue({
         message: 'Network error occurred',
         status: 0,
@@ -114,7 +114,7 @@ export const registerUser = createAsyncThunk<
       localStorage.setItem('encreasl_refresh_token', data.refreshToken);
 
       return data;
-    } catch (error) {
+    } catch {
       return rejectWithValue({
         message: 'Network error occurred',
         status: 0,
@@ -166,7 +166,7 @@ export const refreshToken = createAsyncThunk<
       localStorage.setItem('encreasl_refresh_token', data.refreshToken);
 
       return data;
-    } catch (error) {
+    } catch {
       return rejectWithValue({
         message: 'Network error occurred',
         status: 0,
@@ -203,7 +203,7 @@ export const logoutUser = createAsyncThunk<
       localStorage.removeItem('encreasl_token');
       localStorage.removeItem('encreasl_refresh_token');
       
-    } catch (error) {
+    } catch {
       // Don't reject on logout - always clear local state
       console.warn('Logout API call failed, but continuing with local cleanup');
     }
@@ -245,7 +245,7 @@ export const loadUserFromToken = createAsyncThunk<
 
       const user = await response.json();
       return user;
-    } catch (error) {
+    } catch {
       return rejectWithValue({
         message: 'Network error occurred',
         status: 0,
@@ -285,7 +285,7 @@ export const updateUserProfile = createAsyncThunk<
 
       const updatedUser = await response.json();
       return updatedUser;
-    } catch (error) {
+    } catch {
       return rejectWithValue({
         message: 'Network error occurred',
         status: 0,

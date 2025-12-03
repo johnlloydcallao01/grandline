@@ -12,7 +12,7 @@ import { SidebarItem } from '@/components/ui';
  * @param onToggle - Function to toggle sidebar state
  * @param onScroll - Optional function to handle scroll events for position persistence
  */
-export function Sidebar({ isOpen, onToggle, onScroll }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps) {
   const pathname = usePathname();
 
   return (

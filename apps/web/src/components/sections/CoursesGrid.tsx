@@ -48,7 +48,6 @@ function CourseCard({ course }: CourseCardProps) {
     <LinkComponent href={`/view-course/${course.id}`} className="group cursor-pointer block">
       <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
             alt={altText}

@@ -8,7 +8,7 @@
  */
 
 const { spawn } = require('child_process');
-const readline = require('readline');
+const { setTimeout } = require('timers');
 
 console.log('🔧 Starting PayloadCMS Schema Conflict Resolution...');
 console.log('📋 This script will automatically select "create column/enum" options');
@@ -21,8 +21,6 @@ const devProcess = spawn('pnpm', ['dev'], {
   cwd: process.cwd()
 });
 
-let isWaitingForInput = false;
-let currentQuestion = '';
 
 // Handle stdout (normal output)
 devProcess.stdout.on('data', (data) => {
@@ -31,14 +29,9 @@ devProcess.stdout.on('data', (data) => {
   
   // Check if we're being asked about schema conflicts
   if (output.includes('created or renamed')) {
-    isWaitingForInput = true;
-    currentQuestion = output;
-    
-    // Automatically select the "create" option (first option marked with ❯)
     setTimeout(() => {
       console.log('🤖 Auto-selecting: CREATE column/enum (recommended option)');
-      devProcess.stdin.write('\n'); // Press Enter to select the highlighted option
-      isWaitingForInput = false;
+      devProcess.stdin.write('\n');
     }, 1000);
   }
   

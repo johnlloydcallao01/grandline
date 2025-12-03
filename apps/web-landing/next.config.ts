@@ -12,8 +12,20 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
-    domains: ['images.unsplash.com'],
+    domains: ['images.unsplash.com', 'images.pexels.com', 'cdn.pixabay.com'],
   },
 
   // Security headers for production

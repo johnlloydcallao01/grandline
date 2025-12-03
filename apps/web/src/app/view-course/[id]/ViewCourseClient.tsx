@@ -92,21 +92,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
     }
   };
 
-  // Helper function to format published date
-  const formatPublishedDate = (publishedAt: string | null | undefined): string => {
-    if (!publishedAt) return 'Not published';
-    
-    try {
-      const date = new Date(publishedAt);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid date';
-    }
-  };
+  
 
   // Helper function to format last updated date
   const formatLastUpdated = (updatedAt: string | null | undefined): string => {
@@ -119,7 +105,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
         month: 'short',
         day: 'numeric'
       });
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };

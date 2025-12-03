@@ -25,8 +25,6 @@ export const ProtectedRoute = ({
   const router = useRouter();
   const {
     isAuthenticated,
-    isInitialized,
-    isLoading,
     shouldRedirectToLogin,
     isCheckingAuth
   } = useRouteProtection();
@@ -115,8 +113,6 @@ export const RoleProtectedRoute = ({
   const router = useRouter();
   const {
     isAuthenticated,
-    isInitialized,
-    isLoading,
     shouldRedirectToLogin,
     isCheckingAuth
   } = useRouteProtection();

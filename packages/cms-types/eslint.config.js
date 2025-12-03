@@ -1,3 +1,1 @@
-const baseConfig = require("@encreasl/eslint-config/base");
-
-module.exports = baseConfig;
+module.exports = require("@encreasl/eslint-config/nextjs.js");

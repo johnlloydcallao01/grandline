@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { PublicRoute } from '@/components/auth';
 import { useLogin } from '@/hooks/useAuth';
-import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
+ 
 
 // Simple signin form data type
 type SigninFormData = {
@@ -27,7 +26,6 @@ export default function SignInPage() {
   // 🚀 ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const [isSignUp] = useState(false); // Always false for signin page
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Helper function to get initial form data - simplified for signin only

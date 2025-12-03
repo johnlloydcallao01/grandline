@@ -6,13 +6,13 @@
     "build": "node ../../node_modules/next/dist/bin/next build",
     "dev": "node ../../node_modules/next/dist/bin/next dev --port 3003",
     "dev:turbo": "node ../../node_modules/next/dist/bin/next dev --turbopack --port 3003",
-    "lint": "node ../../node_modules/next/dist/bin/next lint",
+    "lint": "eslint . --max-warnings 0",
     "start": "node ../../node_modules/next/dist/bin/next start --port 3003",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@encreasl/redux": "workspace:*",
-    "next": "15.4.2",
+    "next": "16.0.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "zod": "^3.25.76"
@@ -31,7 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "eslint": "^9",
-    "eslint-config-next": "15.4.2",
+    "eslint-config-next": "16.0.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

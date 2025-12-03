@@ -5,7 +5,7 @@ import Image from "@/components/ui/ImageWrapper";
 import { useRouter, usePathname } from 'next/navigation';
 import { HeaderProps } from '@/types';
 import { useUser, useLogout } from '@/hooks/useAuth';
-import { UserAvatar, UserInfo } from '@/components/auth';
+import { UserAvatar } from '@/components/auth';
 
 /**
  * Header component with navigation, search, and user controls
@@ -27,7 +27,7 @@ export function Header({
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   // Authentication hooks
-  const { user, displayName, initials, isAuthenticated } = useUser();
+  const { user, displayName } = useUser();
   const { logout, isLoggingOut } = useLogout();
   const dropdownRef = useRef<HTMLDivElement>(null);
 

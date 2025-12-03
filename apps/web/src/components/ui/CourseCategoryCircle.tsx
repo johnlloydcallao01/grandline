@@ -34,7 +34,6 @@ export function CourseCategoryCircle({
         }`}
       >
         {category.icon && (category.icon.cloudinaryURL || category.icon.url) ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
              src={category.icon.cloudinaryURL || category.icon.url}
              alt={category.icon.alt || category.name}

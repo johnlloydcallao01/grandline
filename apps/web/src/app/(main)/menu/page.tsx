@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter } from 'next/navigation';
 import { useLogout } from '@/hooks/useAuth';

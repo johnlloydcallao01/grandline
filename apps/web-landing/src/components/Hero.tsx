@@ -59,8 +59,8 @@ export function Hero() {
               {/* Main hero image */}
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
                 <Image
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop&crop=center"
-                  alt="Students learning together"
+                  src="https://images.pexels.com/photos/3184301/pexels-photo-3184301.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
+                  alt="Team collaborating in training session"
                   width={600}
                   height={400}
                   className="rounded-xl shadow-lg"

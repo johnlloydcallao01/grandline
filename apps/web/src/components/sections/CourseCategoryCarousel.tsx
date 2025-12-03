@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CategoryCarouselProps } from '@/types';
 import { CourseCategoryCircle } from '@/components/ui/CourseCategoryCircle';
 import { CourseCategory } from '@/server';
 
@@ -182,7 +181,7 @@ export function CourseCategoryCarousel({
     handleMove(e.touches[0].clientX);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = () => {
     handleEnd();
   };
 

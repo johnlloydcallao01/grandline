@@ -105,7 +105,7 @@ export default function PortalLayout({
 /**
  * Portal Sidebar Component - Custom sidebar for portal functionality
  */
-function PortalSidebar({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
+function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onToggle: () => void }) {
   return (
     <aside
       data-sidebar="portal"

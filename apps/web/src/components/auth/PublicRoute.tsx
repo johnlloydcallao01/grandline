@@ -25,9 +25,7 @@ export const PublicRoute = ({
   const {
     isAuthenticated,
     isInitialized,
-    isLoading,
-    shouldRedirectFromAuth,
-    isCheckingAuth
+    isLoading
   } = useRouteProtection();
 
   // Redirect authenticated users away from auth pages

@@ -56,7 +56,7 @@ function generateEncryptedAPIKey() {
 /**
  * Verify the admin user exists and get their details
  */
-async function verifyAdminUser(client, email, password) {
+async function verifyAdminUser(client, email, _password) {
   try {
     console.log(`🔍 Looking for admin user: ${email}`);
     

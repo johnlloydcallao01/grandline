@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getCourseByIdWithInstructor, type CourseWithInstructor } from '@/server';
+import { getCourseByIdWithInstructor } from '@/server';
 import ViewCourseClient from './ViewCourseClient';
 
 // ISR configuration - revalidate every 5 minutes

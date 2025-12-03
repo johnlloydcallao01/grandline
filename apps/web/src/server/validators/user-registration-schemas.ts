@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { EmailSchema, PhoneSchema, PasswordSchema, NameSchema, DateSchema } from './common-schemas';
+import { EmailSchema, PhoneSchema, PasswordSchema, DateSchema } from './common-schemas';
 
 // ========================================
 // PERSONAL INFORMATION SCHEMA
@@ -15,19 +15,19 @@ export const PersonalInformationSchema = z.object({
     .string()
     .min(1, 'First name is required')
     .max(100, 'First name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'First name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'First name contains invalid characters')
     .transform(val => val.trim()),
   middleName: z
     .string()
     .max(100, 'Middle name too long')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Middle name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]*$/, 'Middle name contains invalid characters')
     .optional()
     .transform(val => val?.trim()),
   lastName: z
     .string()
     .min(1, 'Last name is required')
     .max(100, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Last name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Last name contains invalid characters')
     .transform(val => val.trim()),
   nameExtension: z
     .string()
@@ -115,19 +115,19 @@ export const EmergencyContactSchema = z.object({
     .string()
     .min(1, 'Emergency contact first name is required')
     .max(100, 'Emergency contact first name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Emergency contact first name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Emergency contact first name contains invalid characters')
     .transform(val => val.trim()),
   middleName: z
     .string()
     .max(100, 'Emergency contact middle name too long')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Emergency contact middle name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]*$/, 'Emergency contact middle name contains invalid characters')
     .optional()
     .transform(val => val?.trim()),
   lastName: z
     .string()
     .min(1, 'Emergency contact last name is required')
     .max(100, 'Emergency contact last name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Emergency contact last name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Emergency contact last name contains invalid characters')
     .transform(val => val.trim()),
   contactNumber: PhoneSchema,
   relationship: z
@@ -166,19 +166,19 @@ export const FlatUserRegistrationSchema = z.object({
     .string()
     .min(1, 'First name is required')
     .max(100, 'First name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'First name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'First name contains invalid characters')
     .transform(val => val.trim()),
   middleName: z
     .string()
     .max(100, 'Middle name too long')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Middle name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]*$/, 'Middle name contains invalid characters')
     .optional()
     .transform(val => val?.trim()),
   lastName: z
     .string()
     .min(1, 'Last name is required')
     .max(100, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Last name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Last name contains invalid characters')
     .transform(val => val.trim()),
   nameExtension: z
     .string()
@@ -239,19 +239,19 @@ export const FlatUserRegistrationSchema = z.object({
     .string()
     .min(1, 'Emergency contact first name is required')
     .max(100, 'Emergency contact first name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Emergency contact first name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Emergency contact first name contains invalid characters')
     .transform(val => val.trim()),
   emergencyMiddleName: z
     .string()
     .max(100, 'Emergency contact middle name too long')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Emergency contact middle name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]*$/, 'Emergency contact middle name contains invalid characters')
     .optional()
     .transform(val => val?.trim()),
   emergencyLastName: z
     .string()
     .min(1, 'Emergency contact last name is required')
     .max(100, 'Emergency contact last name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Emergency contact last name contains invalid characters')
+    .regex(/^[a-zA-Z\s'.-]+$/, 'Emergency contact last name contains invalid characters')
     .transform(val => val.trim()),
   emergencyContactNumber: PhoneSchema,
   emergencyRelationship: z

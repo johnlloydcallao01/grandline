@@ -188,7 +188,7 @@ export function withUserRateLimit<T extends unknown[], R>(
 ) {
   return withAdvancedRateLimit<T, R>(baseKey, {
     ...config,
-    keyGenerator: (...args) => {
+    keyGenerator: (..._args) => {
       // Extract user ID from arguments or auth context
       // This would typically be injected by auth middleware
       const userId = 'anonymous'; // Placeholder

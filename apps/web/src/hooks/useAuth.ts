@@ -84,12 +84,8 @@ export function useLogin() {
   const handleLogin = useCallback(async (credentials: LoginCredentials) => {
     setIsSubmitting(true);
     clearError();
-    
     try {
       await login(credentials);
-    } catch (error) {
-      // Error is already handled by the context
-      throw error;
     } finally {
       setIsSubmitting(false);
     }

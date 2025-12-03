@@ -229,7 +229,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       clearAuthState();
       dispatch({ type: 'LOGOUT_SUCCESS' });
       emitAuthEvent('logout');
-    } catch (error) {
+    } catch (_error) {
       // Always succeed logout locally even if server call fails
       clearAuthState();
       dispatch({ type: 'LOGOUT_SUCCESS' });
@@ -242,11 +242,11 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       const response = await authRefreshSession();
       dispatch({ type: 'REFRESH_SUCCESS', payload: { user: response.user } });
       emitAuthEvent('session_refreshed', { user: response.user });
-    } catch (error) {
+    } catch (_error) {
       // If refresh fails, treat as session expired
       dispatch({ type: 'SESSION_EXPIRED' });
       emitAuthEvent('session_expired');
-      throw error;
+      throw _error;
     }
   }, []);
 

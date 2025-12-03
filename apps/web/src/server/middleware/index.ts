@@ -72,9 +72,9 @@ export function createPipeline<T extends unknown[], R>(
  * TODO: Implement missing middleware functions
  */
 export function withWebAppDefaults<T extends unknown[], R>(
-  actionName: string,
-  rateLimitKey: string,
-  rateLimitConfig: { windowMs: number; maxRequests: number }
+  _actionName: string,
+  _rateLimitKey: string,
+  _rateLimitConfig: { windowMs: number; maxRequests: number }
 ) {
   // Temporarily disabled until middleware functions are implemented
   return (fn: (...args: T) => Promise<R>) => fn;
@@ -91,7 +91,7 @@ export function withWebAppDefaults<T extends unknown[], R>(
  * TODO: Implement missing middleware functions
  */
 export function withContactFormDefaults<T extends unknown[], R>(
-  actionName: string = 'contact-form'
+  _actionName: string = 'contact-form'
 ) {
   // Temporarily disabled until middleware functions are implemented
   return (fn: (...args: T) => Promise<R>) => fn;
@@ -108,7 +108,7 @@ export function withContactFormDefaults<T extends unknown[], R>(
  * TODO: Implement missing middleware functions
  */
 export function withNewsletterDefaults<T extends unknown[], R>(
-  actionName: string = 'newsletter'
+  _actionName: string = 'newsletter'
 ) {
   // Temporarily disabled until middleware functions are implemented
   return (fn: (...args: T) => Promise<R>) => fn;
@@ -125,7 +125,7 @@ export function withNewsletterDefaults<T extends unknown[], R>(
  * TODO: Implement missing middleware functions
  */
 export function withAnalyticsDefaults<T extends unknown[], R>(
-  actionName: string = 'analytics'
+  _actionName: string = 'analytics'
 ) {
   // Temporarily disabled until middleware functions are implemented
   return (fn: (...args: T) => Promise<R>) => fn;

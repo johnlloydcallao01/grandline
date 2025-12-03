@@ -27,23 +27,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Environment variables configuration
+  // Environment variables configuration (use NEXT_PUBLIC_ for client exposure)
   env: {
-    // Custom environment variables that should be available at build time
     CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-
-  // Public runtime configuration (deprecated in favor of NEXT_PUBLIC_ prefix)
-  publicRuntimeConfig: {
-    // These will be available on both server and client
-    appName: process.env.NEXT_PUBLIC_APP_NAME,
-    appVersion: process.env.NEXT_PUBLIC_APP_VERSION,
-  },
-
-  // Server runtime configuration
-  serverRuntimeConfig: {
-    // These will only be available on the server side
-    // Add server-only environment variables here if needed
   },
 
   // Proxy API requests to avoid CORS during development
@@ -93,11 +79,11 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Experimental features for better environment variable handling
+  // Experimental features
   experimental: {
-    // Enable environment variable validation
-    typedRoutes: true,
+    
   },
+  typedRoutes: true,
 };
 
 export default nextConfig;

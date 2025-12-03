@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { validateUserRegistration, type FlatUserRegistrationData } from '@/server/validators/user-registration-schemas';
 
@@ -14,7 +13,6 @@ export default function RegisterPage() {
   const router = useRouter();
 
   // 🚀 ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
-  const [isSignUp] = useState(true); // Always true for register page
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -123,14 +121,7 @@ export default function RegisterPage() {
     { value: 'separated', label: 'Separated' }
   ];
 
-  const referralSourceOptions = [
-    { value: 'social_media', label: 'Social Media' },
-    { value: 'search_engine', label: 'Search Engine' },
-    { value: 'friend_referral', label: 'Friend Referral' },
-    { value: 'advertisement', label: 'Advertisement' },
-    { value: 'relative', label: 'Relative' },
-    { value: 'other', label: 'Other' }
-  ];
+  
 
   const relationshipOptions = [
     { value: 'parent', label: 'Parent' },
@@ -232,7 +223,7 @@ export default function RegisterPage() {
         let error: any;
         try {
           error = JSON.parse(responseText);
-        } catch (parseError) {
+        } catch (_parseError) {
           error = { error: 'Server returned invalid JSON', rawResponse: responseText };
         }
 

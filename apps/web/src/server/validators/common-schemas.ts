@@ -57,7 +57,7 @@ export const NameSchema = z
   .string()
   .min(1, 'Name is required')
   .max(100, 'Name too long')
-  .regex(/^[a-zA-Z\s\-'\.]+$/, 'Name contains invalid characters')
+  .regex(/^[a-zA-Z\s'.-]+$/, 'Name contains invalid characters')
   .transform(val => val.trim());
 
 /**
@@ -128,7 +128,7 @@ export const PostalCodeSchema = z
   .string()
   .min(3, 'Postal code too short')
   .max(10, 'Postal code too long')
-  .regex(/^[A-Za-z0-9\s\-]+$/, 'Invalid postal code format');
+  .regex(/^[A-Za-z0-9\s-]+$/, 'Invalid postal code format');
 
 // ========================================
 // CONTENT VALIDATORS
@@ -256,7 +256,7 @@ export const FileUploadSchema = z.object({
   
   mimeType: z
     .string()
-    .regex(/^[a-zA-Z0-9][a-zA-Z0-9!#$&\-\^_]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&\-\^_.]*$/, 'Invalid MIME type'),
+    .regex(/^[a-zA-Z0-9][a-zA-Z0-9!#$&^_-]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&^_.-]*$/, 'Invalid MIME type'),
   
   size: z
     .number()

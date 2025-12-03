@@ -273,7 +273,7 @@ export const eventRateLimitValidator = z
     timestamp: z.string().datetime(),
   })
   .refine(
-    async (data) => {
+    async (_data) => {
       // In a real implementation, check if this event type
       // has been sent too frequently from this session
       return true;

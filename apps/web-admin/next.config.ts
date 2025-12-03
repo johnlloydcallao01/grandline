@@ -49,13 +49,6 @@ const nextConfig: NextConfig = {
 
 
 
-  // ESLint configuration
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
-  },
-
   // Experimental features for better environment variable handling
   experimental: {
     // Enable environment variable validation

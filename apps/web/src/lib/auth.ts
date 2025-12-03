@@ -9,7 +9,6 @@ import type {
   AuthResponse,
   LoginCredentials,
   PayloadAuthResponse,
-  PayloadErrorResponse,
   PayloadMeResponse,
   SessionInfo,
   AuthErrorDetails,
@@ -388,7 +387,7 @@ export async function checkAuthStatus(): Promise<boolean> {
   try {
     const user = await getCurrentUser();
     return user !== null;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -433,7 +432,7 @@ export async function getSessionInfo(): Promise<SessionInfo> {
       user: response.user || undefined,
       expiresAt: response.exp ? new Date(response.exp * 1000) : undefined,
     };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
     };

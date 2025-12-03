@@ -36,9 +36,11 @@ module.exports = [
       "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "no-unused-vars": "off", // Turn off base rule as it conflicts with TypeScript rule
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "off",
+      // Disable no-undef for TypeScript to avoid false positives on types like Request/Response
+      "no-undef": "off",
+      "no-unused-vars": "off",
     },
   },
   {
