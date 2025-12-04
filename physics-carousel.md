@@ -1,19 +1,39 @@
+"use client";
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CategoryCarouselProps } from '@/types';
-import { CategoryCircle } from '@/components/ui';
+import { ProductCategoryCircle } from '@/components/ui/ProductCategoryCircle';
+import { useAddressChange } from '@/hooks/useAddressChange';
+import { LocationBasedMerchantService, getLocationBasedMerchantCategories, type MerchantCategoryDisplay } from '@/lib/client-services/location-based-merchant-service';
+import type { Media } from '@/types/merchant';
+
+interface LocationBasedProductCategoriesCarouselProps {
+  customerId?: string;
+  limit?: number;
+  sortBy?: 'name' | 'popularity' | 'productCount';
+  includeInactive?: boolean;
+  selectedCategorySlug?: string | null;
+  onCategorySelect?: (categoryId: string | null, categorySlug: string | null, categoryName?: string) => void;
+  onCategoryIdResolved?: (categoryId: string | null) => void;
+}
 
 /**
- * Professional CategoryCarousel with smooth momentum scrolling
- * Implements physics-based scrolling similar to native mobile apps
+ * LocationBasedProductCategoriesCarousel with smooth momentum scrolling
+ * Implements physics-based scrolling with smooth momentum
+ * 100% CSR - fetches data client-side
  */
-export function CategoryCarousel({
-  categories = [
-    "All", "Business", "Technology", "Marketing", "Analytics",
-    "E-commerce", "Growth", "Strategy", "Innovation", "Leadership"
-  ],
-  activeCategory = "All",
-  onCategoryChange
-}: CategoryCarouselProps) {
+
+export const LocationBasedProductCategoriesCarousel = ({
+  customerId,
+  limit = 20,
+  sortBy = 'popularity',
+  includeInactive = false,
+  selectedCategorySlug,
+  onCategorySelect,
+  onCategoryIdResolved,
+}: LocationBasedProductCategoriesCarouselProps): JSX.Element => {
+  // CSR state management for location-based categories
+  const [categories, setCategories] = useState<MerchantCategoryDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
@@ -21,27 +41,110 @@ export function CategoryCarousel({
   const [startTranslateX, setStartTranslateX] = useState(0);
   const [lastTime, setLastTime] = useState(0);
   const [velocityX, setVelocityX] = useState(0);
+  const [resolvedCustomerId, setResolvedCustomerId] = useState<string | null>(customerId || null);
+
+  const activeCategory = selectedCategorySlug 
+    ? (categories.find(cat => cat.slug === selectedCategorySlug)?.name 
+        || categories.find(cat => cat.name.toLowerCase().replace(/\s+/g, '-') === selectedCategorySlug)?.name 
+        || '')
+    : '';
+  
+  useEffect(() => {
+    if (selectedCategorySlug && categories.length > 0 && onCategoryIdResolved) {
+      const category = categories.find(cat => cat.slug === selectedCategorySlug) 
+        || categories.find(cat => cat.name.toLowerCase().replace(/\s+/g, '-') === selectedCategorySlug);
+      onCategoryIdResolved(category ? String(category.id) : null);
+    } else if (!selectedCategorySlug && onCategoryIdResolved) {
+      onCategoryIdResolved(null);
+    }
+  }, [selectedCategorySlug, categories, onCategoryIdResolved]);
+  const [error, setError] = useState<string | null>(null);
+  
   const carouselRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const boundsCalculatedRef = useRef(false);
+  const [viewportWidth, setViewportWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+  const isUltraWide = viewportWidth >= 1500;
+  const itemWidth = isUltraWide ? 80 : 64;
+  const gapWidth = isUltraWide ? 56 : 48;
 
-  // Calculate proper maxTranslate to ensure last item is fully visible
+  const fetchMerchantCategories = useCallback(async (customerIdToUse: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const cats = await getLocationBasedMerchantCategories({ customerId: customerIdToUse, includeInactive, limit: limit });
+      let mapped = cats || [];
+      if (sortBy === 'name') {
+        mapped = mapped.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (sortBy === 'productCount') {
+        mapped = mapped.slice().sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+      }
+      setCategories(mapped.slice(0, limit));
+    } catch (err) {
+      setError('Failed to load categories');
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [includeInactive, limit, sortBy]);
+
+  // Resolve customer ID if not provided
+  useEffect(() => {
+    const resolveCustomerId = async () => {
+      if (customerId) {
+        setResolvedCustomerId(customerId);
+        return;
+      }
+
+      try {
+        const currentCustomerId = await LocationBasedMerchantService.getCurrentCustomerId();
+        if (currentCustomerId) {
+          setResolvedCustomerId(currentCustomerId);
+        } else {
+          setError('Unable to determine customer location');
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('❌ Error resolving customer ID:', err);
+        setError('Failed to determine customer location');
+        setLoading(false);
+      }
+    };
+
+    resolveCustomerId();
+  }, [customerId]);
+
+  // Fetch categories when customer ID is resolved
+  useEffect(() => {
+    if (resolvedCustomerId) {
+      fetchMerchantCategories(resolvedCustomerId);
+    }
+  }, [resolvedCustomerId, fetchMerchantCategories]);
+
+  useAddressChange((addressId: string) => {
+    if (resolvedCustomerId) {
+      LocationBasedMerchantService.clearCache(resolvedCustomerId);
+      fetchMerchantCategories(resolvedCustomerId);
+    } else {
+    }
+  });
+
+  // Calculate proper maxTranslate to ensure last item is fully visible - identical to ProductCategoryCarousel
   const getMaxTranslate = useCallback(() => {
     if (!carouselRef.current) return 0;
     const container = carouselRef.current.parentElement;
     if (!container) return 0;
 
-    const containerWidth = container.getBoundingClientRect().width - 48; // minus padding
-    const actualItemWidth = 64; // circle width only
-    const gapWidth = 48; // gap between items
-    const totalContentWidth = (categories.length * actualItemWidth) + ((categories.length - 1) * gapWidth);
+    const containerWidth = container.getBoundingClientRect().width - 20;
+    const totalItems = categories.length;
+    const totalContentWidth = (totalItems * itemWidth) + ((totalItems - 1) * gapWidth);
 
     return Math.max(0, totalContentWidth - containerWidth);
-  }, [categories.length]); // Include dependency to fix warning
+  }, [categories.length, itemWidth, gapWidth]);
 
-  const [maxTranslate, setMaxTranslate] = useState(1000); // Start with a large value to allow initial movement
+  const [maxTranslate, setMaxTranslate] = useState(0);
 
-  // Smooth scrolling with momentum physics
+  // Smooth scrolling with momentum physics - identical to ProductCategoryCarousel
   const animateToPosition = useCallback((targetX: number, duration = 300) => {
     const startX = translateX;
     const distance = targetX - startX;
@@ -70,8 +173,6 @@ export function CategoryCarousel({
 
   const scrollLeft = () => {
     // Equivalent to a gentle swipe gesture (about 1.5 items worth)
-    const itemWidth = 64; // Circle width
-    const gapWidth = 48; // Gap between items
     const swipeDistance = (itemWidth + gapWidth) * 1.5; // Gentle swipe distance
     const newPosition = Math.max(0, translateX - swipeDistance);
     animateToPosition(newPosition, 400); // Smooth animation like normal swipe
@@ -79,20 +180,25 @@ export function CategoryCarousel({
 
   const scrollRight = () => {
     // Equivalent to a gentle swipe gesture (about 1.5 items worth)
-    const itemWidth = 64; // Circle width
-    const gapWidth = 48; // Gap between items
     const swipeDistance = (itemWidth + gapWidth) * 1.5; // Gentle swipe distance
-    const newPosition = Math.min(-maxTranslate, translateX - swipeDistance);
+    const newPosition = Math.min(-maxTranslate, translateX + swipeDistance);
     animateToPosition(newPosition, 400); // Smooth animation like normal swipe
   };
 
-  const handleCategoryClick = (category: string) => {
-    if (onCategoryChange && !isDragging) {
-      onCategoryChange(category);
+  const handleCategoryClick = (categoryName: string) => {
+    const category = categories.find(cat => cat.name === categoryName);
+    if (!isDragging && category) {
+      const categorySlug = category.slug || category.name.toLowerCase().replace(/\s+/g, '-');
+      if (onCategorySelect) {
+        onCategorySelect(String(category.id), categorySlug, categoryName);
+      }
+      if (onCategoryIdResolved) {
+        onCategoryIdResolved(String(category.id));
+      }
     }
   };
 
-  // Professional touch/drag handling with momentum
+  // Professional touch/drag handling with momentum - identical to ProductCategoryCarousel
   const handleStart = (clientX: number) => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -108,45 +214,53 @@ export function CategoryCarousel({
   const handleMove = useCallback((clientX: number) => {
     if (!isDragging) return;
 
-    const now = Date.now();
-    const deltaTime = now - lastTime;
+    const currentTime = Date.now();
+    const deltaTime = currentTime - lastTime;
     const deltaX = clientX - currentX;
 
-    // Calculate velocity for momentum (pixels per millisecond)
+    // Calculate velocity for momentum
     if (deltaTime > 0) {
       setVelocityX(deltaX / deltaTime);
     }
 
-    // Direct 1:1 movement - finger follows exactly
-    // Add the drag distance to the starting position
+    setCurrentX(clientX);
+    setLastTime(currentTime);
+
+    // Calculate new position
     const dragDistance = clientX - startX;
     const newTranslateX = startTranslateX + dragDistance;
 
-    // Constrain to bounds
-    const constrainedX = Math.max(-maxTranslate, Math.min(0, newTranslateX));
+    // Apply bounds with elastic resistance
+    let boundedTranslateX = newTranslateX;
+    if (newTranslateX > 0) {
+      // Left boundary - elastic resistance
+      boundedTranslateX = newTranslateX * 0.3;
+    } else if (newTranslateX < -maxTranslate) {
+      // Right boundary - elastic resistance
+      const overflow = newTranslateX + maxTranslate;
+      boundedTranslateX = -maxTranslate + overflow * 0.3;
+    }
 
-    setTranslateX(constrainedX);
-    setCurrentX(clientX);
-    setLastTime(now);
-  }, [isDragging, currentX, startX, startTranslateX, maxTranslate, lastTime]);
+    setTranslateX(boundedTranslateX);
+  }, [isDragging, startX, startTranslateX, currentX, lastTime, maxTranslate]);
 
   const handleEnd = useCallback(() => {
     if (!isDragging) return;
 
     setIsDragging(false);
 
-    // Apply momentum based on velocity
-    const momentum = velocityX * 300; // Momentum multiplier
-    const targetX = translateX + momentum;
+    // Apply momentum with physics
+    const momentum = velocityX * 200; // Momentum factor
+    let finalPosition = translateX + momentum;
 
-    // Constrain to bounds
-    const constrainedX = Math.max(-maxTranslate, Math.min(0, targetX));
+    // Apply bounds
+    finalPosition = Math.max(-maxTranslate, Math.min(0, finalPosition));
 
-    // Animate to final position with momentum
-    animateToPosition(constrainedX, 600);
+    // Smooth animation to final position
+    animateToPosition(finalPosition, 400);
   }, [isDragging, velocityX, translateX, maxTranslate, animateToPosition]);
 
-  // Mouse events
+  // Mouse events - identical to ProductCategoryCarousel
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     handleStart(e.clientX);
@@ -160,7 +274,7 @@ export function CategoryCarousel({
     handleEnd();
   };
 
-  // Touch events - optimized for mobile
+  // Touch events - optimized for mobile - identical to ProductCategoryCarousel
   const handleTouchStart = (e: React.TouchEvent) => {
     handleStart(e.touches[0].clientX);
   };
@@ -172,40 +286,46 @@ export function CategoryCarousel({
     handleMove(e.touches[0].clientX);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = () => {
     handleEnd();
   };
 
-  // Calculate maxTranslate on mount and resize
+  // Calculate bounds when categories change or component mounts - identical to ProductCategoryCarousel
   useEffect(() => {
-    const updateMaxTranslate = () => {
-      // Only calculate once to prevent breaking bounds
-      if (!boundsCalculatedRef.current) {
-        const newMaxTranslate = getMaxTranslate();
-        setMaxTranslate(newMaxTranslate);
-        boundsCalculatedRef.current = true;
+    const calculateBounds = () => {
+      const newMaxTranslate = getMaxTranslate();
+      setMaxTranslate(newMaxTranslate);
+      
+      // Reset position if current position is out of bounds
+      if (translateX < -newMaxTranslate) {
+        setTranslateX(-newMaxTranslate);
+      }
+      
+      boundsCalculatedRef.current = true;
+    };
+
+    if (categories.length > 0) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(calculateBounds, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [categories.length, getMaxTranslate, translateX]);
+
+  // Handle window resize - identical to ProductCategoryCarousel
+  useEffect(() => {
+    const onResize = () => {
+      setViewportWidth(window.innerWidth);
+      const newMaxTranslate = getMaxTranslate();
+      setMaxTranslate(newMaxTranslate);
+      if (translateX < -newMaxTranslate) {
+        animateToPosition(-newMaxTranslate);
       }
     };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [getMaxTranslate, translateX, animateToPosition]);
 
-    updateMaxTranslate();
-
-    const handleResize = () => {
-      // Allow recalculation on resize
-      boundsCalculatedRef.current = false;
-      updateMaxTranslate();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [getMaxTranslate]);
-
-  // Global mouse event listeners for smooth dragging
+  // Global mouse events for drag continuation - identical to ProductCategoryCarousel
   useEffect(() => {
     if (isDragging) {
       const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -228,76 +348,115 @@ export function CategoryCarousel({
 
   return (
     <div className="relative">
-      {/* Left Arrow - Hidden on mobile/tablet, visible on desktop */}
-      {translateX < 0 && (
-        <button
-          onClick={scrollLeft}
-          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
-          aria-label="Scroll left"
-        >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      )}
-
-      {/* Right Arrow - Hidden on mobile/tablet, visible on desktop */}
-      {translateX > -maxTranslate && (
-        <button
-          onClick={scrollRight}
-          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
-          aria-label="Scroll right"
-        >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
-
-      {/* Carousel Container */}
-      <div
-        className="overflow-hidden px-6"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseMove={isDragging ? handleMouseMove : undefined}
-        onMouseUp={isDragging ? handleMouseUp : undefined}
-        style={{
-          touchAction: 'pan-x',
-          cursor: isDragging ? 'grabbing' : 'grab'
-        }}
-      >
-        <div
-          ref={carouselRef}
-          className="flex py-2.5 select-none"
-          style={{
-            transform: `translateX(${translateX}px)`,
-            gap: '48px',
-            WebkitUserSelect: 'none',
-            userSelect: 'none',
-            transition: 'none', // Using requestAnimationFrame for smooth animations
-            willChange: 'transform',
-            pointerEvents: 'none' // Prevent individual items from blocking events
-          }}
-        >
-          {categories.map((category) => (
-            <div
-              key={category}
-              className="flex-shrink-0"
-              style={{ pointerEvents: 'auto' }} // Re-enable pointer events for clicking
-            >
-              <CategoryCircle
-                label={category}
-                active={activeCategory === category}
-                onClick={() => handleCategoryClick(category)}
-              />
-            </div>
-          ))}
+      {/* Loading state - show skeleton while fetching data - identical to ProductCategoryCarousel */}
+      {loading ? (
+        <div className="overflow-hidden px-2.5">
+          <div className="flex py-2.5" style={{ gap: '48px' }}>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="flex-shrink-0">
+                <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-12 h-3 bg-gray-200 rounded mt-2 mx-auto animate-pulse"></div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : error ? (
+        // Error state
+        <div className="overflow-hidden px-2.5">
+          <div className="flex items-center justify-center py-8 text-gray-500">
+            <p>{error}</p>
+          </div>
+        </div>
+      ) : categories.length === 0 ? (
+        // No categories found
+        <div className="overflow-hidden px-2.5">
+          <div className="flex items-center justify-center py-8 text-gray-500">
+            <p>No categories available in your area</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Left Arrow - Hidden on mobile/tablet, visible on desktop - identical to ProductCategoryCarousel */}
+          {translateX < 0 && (
+            <button
+              onClick={scrollLeft}
+              className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Scroll left"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
 
+          {/* Right Arrow - Hidden on mobile/tablet, visible on desktop - identical to ProductCategoryCarousel */}
+          {translateX > -maxTranslate && (
+            <button
+              onClick={scrollRight}
+              className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Scroll right"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
 
+          {/* Carousel Container - identical to ProductCategoryCarousel */}
+          <div
+            className="overflow-hidden px-2.5"
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseMove={isDragging ? handleMouseMove : undefined}
+            onMouseUp={isDragging ? handleMouseUp : undefined}
+            style={{
+            touchAction: 'pan-y',
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+          >
+            <div
+              ref={carouselRef}
+              className="flex py-2.5 select-none"
+              style={{
+                transform: `translateX(${translateX}px)`,
+                gap: `${gapWidth}px`,
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                transition: 'none', // Using requestAnimationFrame for smooth animations
+                willChange: 'transform',
+                pointerEvents: 'none' // Prevent individual items from blocking events
+              }}
+            >
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex-shrink-0"
+                  style={{ pointerEvents: 'auto' }} // Re-enable pointer events for clicking
+                >
+                  <ProductCategoryCircle
+                    category={{
+                      id: category.id as any,
+                      name: category.name,
+                      slug: category.slug,
+                      description: category.description,
+                      displayOrder: category.displayOrder,
+                      isActive: category.isActive,
+                      isFeatured: category.isFeatured,
+                      media: category.media,
+                      updatedAt: category.updatedAt,
+                      createdAt: category.createdAt,
+                    }}
+                    active={activeCategory === category.name}
+                    onClick={() => handleCategoryClick(category.name)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
-}
+};

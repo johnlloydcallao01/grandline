@@ -26,6 +26,7 @@ import * as migration_20250911_add_service_role from './20250911_add_service_rol
 import * as migration_20250911_fix_service_role_trigger from './20250911_fix_service_role_trigger';
 import * as migration_20250914_115512 from './20250914_115512';
 import * as migration_20250916_103718 from './20250916_103718';
+import * as migration_20251204_112549_enable_multiple_categories from './20251204_112549_enable_multiple_categories';
 
 export const migrations = [
   {
@@ -166,6 +167,11 @@ export const migrations = [
   {
     up: migration_20250916_103718.up,
     down: migration_20250916_103718.down,
-    name: '20250916_103718'
+    name: '20250916_103718',
+  },
+  {
+    up: migration_20251204_112549_enable_multiple_categories.up,
+    down: migration_20251204_112549_enable_multiple_categories.down,
+    name: '20251204_112549_enable_multiple_categories'
   },
 ];

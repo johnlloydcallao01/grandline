@@ -243,7 +243,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                             <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                           </div>
                           <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
-                            {course.category?.name || 'General'}
+                            {course.category?.map(c => c.name).join(', ') || 'General'}
                           </span>
                         </div>
                         
@@ -315,7 +315,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                           <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                         </div>
                         <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
-                          {course.category?.name || 'General'}
+                          {course.category?.map(c => c.name).join(', ') || 'General'}
                         </span>
                       </div>
                       

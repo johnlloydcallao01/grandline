@@ -60,7 +60,7 @@ export interface CourseWithInstructor extends Course {
   price?: number | null;
   discountedPrice?: number | null;
   instructor?: Instructor | null;
-  category?: CourseCategory | null;
+  category?: CourseCategory[] | null;
 }
 
 // API Response interfaces

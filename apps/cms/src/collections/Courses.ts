@@ -80,6 +80,7 @@ export const Courses: CollectionConfig = {
       name: 'category',
       type: 'relationship',
       relationTo: 'course-categories',
+      hasMany: true,
       admin: {
         description: 'Course category for organization',
       },
