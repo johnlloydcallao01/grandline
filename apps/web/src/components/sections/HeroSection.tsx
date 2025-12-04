@@ -42,10 +42,6 @@ export function HeroSection() {
 
             {/* Call-to-Action */}
             <div className="mt-6 lg:mt-0 lg:ml-8 flex gap-3">
-              <button className="bg-white text-blue-900 px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base hover:bg-blue-50 transition-colors duration-200 shadow-lg hover:shadow-xl">
-                View Courses
-              </button>
-
               <button className="border-2 border-white text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base hover:bg-white hover:text-blue-900 transition-colors duration-200">
                 Learn More
               </button>

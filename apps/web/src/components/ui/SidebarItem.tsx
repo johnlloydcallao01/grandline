@@ -19,7 +19,8 @@ export function SidebarItem({
   active = false, 
   collapsed = false, 
   onClick,
-  href 
+  href,
+  target
 }: SidebarItemProps) {
   const baseClasses = "w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors";
   const activeClasses = active
@@ -40,6 +41,7 @@ export function SidebarItem({
     return (
       <LinkComponent
         href={href}
+        target={target}
         className={`${baseClasses} ${activeClasses}`}
         onClick={onClick}
       >

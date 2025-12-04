@@ -223,6 +223,14 @@ export function Header({
 
         {/* Right section - Desktop */}
         <div className="flex items-center space-x-4">
+          {/* Notification Button */}
+          <button
+            onClick={() => router.push('/notifications')}
+            className="w-10 h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+          >
+            <i className="fas fa-bell text-gray-600 text-lg"></i>
+          </button>
+
           {/* My Portal Button - Hidden when on portal pages */}
           {!pathname.startsWith('/portal') && (
             <button

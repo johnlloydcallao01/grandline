@@ -84,20 +84,7 @@ export function OverlaySidebar({ isOpen, onClose }: OverlaySidebarProps) {
               />
             </div>
 
-            <hr className="my-3 border-gray-200" />
 
-            {/* Account section */}
-            <div className="space-y-1">
-              <div className="px-3 py-2 text-sm font-medium text-gray-900">Account</div>
-              <SidebarItem
-                icon="user"
-                label="Login Status"
-                active={pathname === '/login-status'}
-                collapsed={false}
-                href="/login-status"
-                onClick={onClose}
-              />
-            </div>
 
             <hr className="my-3 border-gray-200" />
 

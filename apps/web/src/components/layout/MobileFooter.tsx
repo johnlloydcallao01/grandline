@@ -32,10 +32,10 @@ export function MobileFooter() {
       isHelp: true,
     },
     {
-      id: 'blogs',
-      label: 'Blogs',
-      icon: <i className="fa fa-edit text-lg"></i>,
-      path: '/trending',
+      id: 'recents',
+      label: 'Recents',
+      icon: <i className="fa fa-history text-lg"></i>,
+      path: '/history',
     },
     {
       id: 'menu',

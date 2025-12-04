@@ -42,6 +42,20 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
               collapsed={!isOpen}
               href="/"
             />
+            <SidebarItem
+              icon="wishlist"
+              label="Wishlists"
+              active={pathname === '/wishlists'}
+              collapsed={!isOpen}
+              href="/wishlists"
+            />
+            <SidebarItem
+              icon="history"
+              label="Recently Viewed"
+              active={pathname === '/history'}
+              collapsed={!isOpen}
+              href="/history"
+            />
 
           </div>
 
@@ -51,28 +65,137 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Account</div>}
             <SidebarItem
-              icon="user"
-              label="Login Status"
-              active={pathname === '/login-status'}
+              icon="profile"
+              label="Profile"
+              active={pathname === '/profile'}
               collapsed={!isOpen}
-              href="/login-status"
+              href="/profile"
+            />
+            <SidebarItem
+              icon="payment-history"
+              label="Payment History"
+              active={pathname === '/payment-history'}
+              collapsed={!isOpen}
+              href="/payment-history"
+            />
+            <SidebarItem
+              icon="settings"
+              label="Settings"
+              active={pathname === '/settings'}
+              collapsed={!isOpen}
+              href="/settings"
+            />
+
+          </div>
+
+          {isOpen && <hr className="my-3 border-gray-200" />}
+
+          {/* Resources section */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Resources</div>}
+            <SidebarItem
+              icon="certificate"
+              label="Certificates"
+              active={pathname === '/certificates'}
+              collapsed={!isOpen}
+              href="/certificates"
+            />
+            <SidebarItem
+              icon="training-materials"
+              label="Training Materials"
+              active={pathname === '/training-materials'}
+              collapsed={!isOpen}
+              href="/training-materials"
+            />
+            <SidebarItem
+              icon="download"
+              label="Downloads"
+              active={pathname === '/downloads'}
+              collapsed={!isOpen}
+              href="/downloads"
+            />
+            <SidebarItem
+              icon="announcement"
+              label="Announcements"
+              active={pathname === '/announcements'}
+              collapsed={!isOpen}
+              href="/announcements"
             />
           </div>
 
           {isOpen && <hr className="my-3 border-gray-200" />}
 
-          {/* Explore section */}
+          {/* Support section */}
           <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Explore</div>}
-            <SidebarItem icon="trending" label="Trending" collapsed={!isOpen} href="/trending" />
-            <SidebarItem icon="music" label="Music" collapsed={!isOpen} href="/music" />
-            <SidebarItem icon="gaming" label="Gaming" collapsed={!isOpen} href="/gaming" />
-            <SidebarItem icon="news" label="News" collapsed={!isOpen} href="/news" />
-            <SidebarItem icon="sports" label="Sports" collapsed={!isOpen} href="/sports" />
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Support</div>}
+            <SidebarItem
+              icon="support"
+              label="Support"
+              active={pathname === '/support'}
+              collapsed={!isOpen}
+              href="/support"
+            />
+            <SidebarItem
+              icon="faqs"
+              label="FAQs"
+              active={pathname === '/faqs'}
+              collapsed={!isOpen}
+              href="/faqs"
+            />
+            <SidebarItem
+              icon="contact-us"
+              label="Contact Us"
+              active={pathname === '/contact-us'}
+              collapsed={!isOpen}
+              href="/contact-us"
+            />
+            <SidebarItem
+              icon="knowledge-base"
+              label="Knowledge Base"
+              active={pathname === '/knowledge-base'}
+              collapsed={!isOpen}
+              href="/knowledge-base"
+            />
           </div>
 
+          {isOpen && <hr className="my-3 border-gray-200" />}
 
-
+          {/* General section */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">General</div>}
+            <SidebarItem
+              icon="about-us"
+              label="About Us"
+              active={false}
+              collapsed={!isOpen}
+              href="https://grandlinemaritime.com/about-us"
+              target="_blank"
+            />
+            <SidebarItem
+              icon="blogs"
+              label="Blogs"
+              active={false}
+              collapsed={!isOpen}
+              href="https://grandlinemaritime.com/blogs"
+              target="_blank"
+            />
+            <SidebarItem
+              icon="terms-conditions"
+              label="Terms & Conditions"
+              active={false}
+              collapsed={!isOpen}
+              href="https://grandlinemaritime.com/terms-and-conditions"
+              target="_blank"
+            />
+            <SidebarItem
+              icon="privacy-policy"
+              label="Privacy Policy"
+              active={false}
+              collapsed={!isOpen}
+              href="https://grandlinemaritime.com/privacy-policy"
+              target="_blank"
+            />
+          </div>
 
         </nav>
       </div>

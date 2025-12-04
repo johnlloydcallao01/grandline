@@ -159,7 +159,7 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
 
           {/* Portal Navigation */}
           <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Portal</div>}
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Learning</div>}
             
             {/* Portal Dashboard */}
             {(Link as any)({
@@ -177,23 +177,227 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
               )
             })}
 
-            {/* Portal Analytics */}
+            {/* Portal Courses */}
             {(Link as any)({
-              href: "/portal/analytics",
+              href: "/portal/courses",
               className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
                 isOpen ? 'justify-start' : 'justify-center'
               }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-chart-bar text-gray-600"></i>
+                    <i className="fa fa-book text-gray-600"></i>
                   </div>
-                  {isOpen && <span className="ml-3 text-gray-700">Analytics</span>}
+                  {isOpen && <span className="ml-3 text-gray-700">Courses</span>}
                 </>
               )
             })}
 
-            {/* Portal Settings */}
+            {/* Portal Instructors */}
+            {(Link as any)({
+              href: "/portal/instructors",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-chalkboard-teacher text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Instructors</span>}
+                </>
+              )
+            })}
+          </div>
+
+          {isOpen && <hr className="my-3 border-gray-200" />}
+
+          {/* Activities Navigation */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Activities</div>}
+            
+            {/* Assignments */}
+            {(Link as any)({
+              href: "/portal/assignments",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-tasks text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Assignments</span>}
+                </>
+              )
+            })}
+
+            {/* H5P Items */}
+            {(Link as any)({
+              href: "/portal/h5p-items",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-cubes text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">H5P Items</span>}
+                </>
+              )
+            })}
+
+            {/* Quizzes & Exams */}
+            {(Link as any)({
+              href: "/portal/quizzes-exams",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-graduation-cap text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Quizzes & Exams</span>}
+                </>
+              )
+            })}
+
+            {/* Submitted Work */}
+            {(Link as any)({
+              href: "/portal/submitted-work",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-clipboard-check text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Submitted Work</span>}
+                </>
+              )
+            })}
+
+            {/* Feedback & Comments */}
+            {(Link as any)({
+              href: "/portal/feedback-comments",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-comment-dots text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Feedback & Comments</span>}
+                </>
+              )
+            })}
+          </div>
+
+          {isOpen && <hr className="my-3 border-gray-200" />}
+
+          {/* Achievements Navigation */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Achievements</div>}
+            
+            {/* Learning Streak */}
+            {(Link as any)({
+              href: "/portal/learning-streak",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-fire text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Learning Streak</span>}
+                </>
+              )
+            })}
+
+            {/* Certificates Earned */}
+            {(Link as any)({
+              href: "/portal/certificates",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-certificate text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Certificates Earned</span>}
+                </>
+              )
+            })}
+          </div>
+
+          {isOpen && <hr className="my-3 border-gray-200" />}
+
+          {/* Interaction Navigation */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Interaction</div>}
+            
+            {/* Discussion Board */}
+            {(Link as any)({
+              href: "/portal/discussion-board",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-comments text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Discussion Board</span>}
+                </>
+              )
+            })}
+
+            {/* Ask Instructor */}
+            {(Link as any)({
+              href: "/portal/ask-instructor",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-question-circle text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Ask Instructor</span>}
+                </>
+              )
+            })}
+
+            {/* Announcements */}
+            {(Link as any)({
+              href: "/portal/announcements",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-bullhorn text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Announcements</span>}
+                </>
+              )
+            })}
+          </div>
+
+          {isOpen && <hr className="my-3 border-gray-200" />}
+
+          {/* General Navigation */}
+          <div className="space-y-1">
+            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">General</div>}
+            
+            {/* Settings */}
             {(Link as any)({
               href: "/portal/settings",
               className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
@@ -208,31 +412,22 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
                 </>
               )
             })}
-          </div>
 
-          {isOpen && <hr className="my-3 border-gray-200" />}
-
-          {/* Portal Tools */}
-          <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Tools</div>}
-            
-            <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-users text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">User Management</span>}
-            </div>
-
-            <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-              isOpen ? 'justify-start' : 'justify-center'
-            }`}>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <i className="fa fa-file-alt text-gray-600"></i>
-              </div>
-              {isOpen && <span className="ml-3 text-gray-700">Reports</span>}
-            </div>
+            {/* Requirements */}
+            {(Link as any)({
+              href: "/portal/requirements",
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
+                isOpen ? 'justify-start' : 'justify-center'
+              }`,
+              children: (
+                <>
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="fa fa-list-check text-gray-600"></i>
+                  </div>
+                  {isOpen && <span className="ml-3 text-gray-700">Requirements</span>}
+                </>
+              )
+            })}
           </div>
         </nav>
       </div>

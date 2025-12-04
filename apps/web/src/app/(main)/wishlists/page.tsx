@@ -103,7 +103,7 @@ export default function WishlistsPage() {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-[10px]">
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div>
@@ -122,7 +122,7 @@ export default function WishlistsPage() {
       </div>
 
       {/* Wishlist Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-[10px] py-8">
         {wishlistItems.length === 0 ? (
           /* Empty State */
           <div className="text-center py-16">

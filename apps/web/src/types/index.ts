@@ -12,6 +12,7 @@ export interface SidebarItemProps {
   collapsed?: boolean;
   onClick?: () => void;
   href?: string;
+  target?: string;
 }
 
 
@@ -49,11 +50,6 @@ export interface LayoutProps {
 // Icon mapping type
 export type IconName =
   | 'home'
-  | 'trending'
-  | 'music'
-  | 'gaming'
-  | 'news'
-  | 'sports'
   | 'growth'
   | 'strategy'
   | 'innovation'
@@ -68,7 +64,22 @@ export type IconName =
   | 'integrations'
   | 'api'
   | 'security'
-  | 'backup';
+  | 'backup'
+  | 'wishlist'
+  | 'history'
+  | 'payment-history'
+  | 'certificate'
+  | 'training-materials'
+  | 'download'
+  | 'announcement'
+  | 'support'
+  | 'faqs'
+  | 'contact-us'
+  | 'knowledge-base'
+  | 'about-us'
+  | 'blogs'
+  | 'terms-conditions'
+  | 'privacy-policy';
 
 // Category icon mapping type
 export interface CategoryIconConfig {
