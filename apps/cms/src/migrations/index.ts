@@ -27,6 +27,7 @@ import * as migration_20250911_fix_service_role_trigger from './20250911_fix_ser
 import * as migration_20250914_115512 from './20250914_115512';
 import * as migration_20250916_103718 from './20250916_103718';
 import * as migration_20251204_112549_enable_multiple_categories from './20251204_112549_enable_multiple_categories';
+import * as migration_20251206_135946 from './20251206_135946';
 
 export const migrations = [
   {
@@ -172,6 +173,11 @@ export const migrations = [
   {
     up: migration_20251204_112549_enable_multiple_categories.up,
     down: migration_20251204_112549_enable_multiple_categories.down,
-    name: '20251204_112549_enable_multiple_categories'
+    name: '20251204_112549_enable_multiple_categories',
+  },
+  {
+    up: migration_20251206_135946.up,
+    down: migration_20251206_135946.down,
+    name: '20251206_135946'
   },
 ];

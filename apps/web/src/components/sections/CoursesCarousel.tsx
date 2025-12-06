@@ -62,12 +62,12 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
   const [translateX, setTranslateX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
-  const [startTranslate, setStartTranslate] = useState(0)
-  const [maxTranslate, setMaxTranslate] = useState(0)
-  const [lastX, setLastX] = useState(0)
+  const [currentX, setCurrentX] = useState(0)
+  const [startTranslateX, setStartTranslateX] = useState(0)
   const [lastTime, setLastTime] = useState(0)
-  const [velocity, setVelocity] = useState(0)
-  const rafRef = useRef<number | null>(null)
+  const [velocityX, setVelocityX] = useState(0)
+  const [maxTranslate, setMaxTranslate] = useState(0)
+  const animationRef = useRef<number | null>(null)
 
   const clamp = useCallback((x: number) => {
     return Math.max(-maxTranslate, Math.min(0, x))
@@ -89,49 +89,65 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
     return () => window.removeEventListener("resize", onResize)
   }, [measure, courses.length])
 
+  const animateToPosition = useCallback((targetX: number, duration = 400) => {
+    const start = translateX
+    const distance = targetX - start
+    const startTs = Date.now()
+    const step = () => {
+      const elapsed = Date.now() - startTs
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      const curr = start + distance * easeOut
+      setTranslateX(curr)
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(step)
+      }
+    }
+    if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    step()
+  }, [translateX])
+
   const onStart = useCallback((clientX: number) => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current)
     setIsDragging(true)
     setStartX(clientX)
-    setStartTranslate(translateX)
-    setLastX(clientX)
+    setCurrentX(clientX)
+    setStartTranslateX(translateX)
     setLastTime(Date.now())
-    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    setVelocityX(0)
   }, [translateX])
 
   const onMove = useCallback((clientX: number) => {
     if (!isDragging) return
-    const dx = clientX - startX
-    const next = clamp(startTranslate + dx)
-    setTranslateX(next)
     const now = Date.now()
-    const dt = Math.max(1, now - lastTime)
-    const vx = (clientX - lastX) / dt
-    setVelocity(vx)
-    setLastX(clientX)
+    const dt = now - lastTime
+    const dx = clientX - currentX
+    if (dt > 0) setVelocityX(dx / dt)
+    setCurrentX(clientX)
     setLastTime(now)
-  }, [isDragging, startX, startTranslate, clamp, lastTime, lastX])
+    const dragDistance = clientX - startX
+    const newTranslateX = startTranslateX + dragDistance
+    let bounded = newTranslateX
+    if (newTranslateX > 0) {
+      bounded = newTranslateX * 0.3
+    } else if (newTranslateX < -maxTranslate) {
+      const overflow = newTranslateX + maxTranslate
+      bounded = -maxTranslate + overflow * 0.3
+    }
+    setTranslateX(bounded)
+  }, [isDragging, lastTime, currentX, startX, startTranslateX, maxTranslate])
 
   const onEnd = useCallback(() => {
     if (!isDragging) return
     setIsDragging(false)
-    const friction = 0.92
-    const step = () => {
-      const v = velocity * 16
-      const next = clamp(translateX + v)
-      setTranslateX(next)
-      const nv = velocity * friction
-      setVelocity(nv)
-      if (Math.abs(nv) > 0.001 && next !== 0 && next !== -maxTranslate) {
-        rafRef.current = requestAnimationFrame(step)
-      } else {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
-      }
-    }
-    rafRef.current = requestAnimationFrame(step)
-  }, [isDragging, velocity, translateX, clamp, maxTranslate])
+    const momentum = velocityX * 200
+    let final = translateX + momentum
+    final = Math.max(-maxTranslate, Math.min(0, final))
+    animateToPosition(final, 400)
+  }, [isDragging, velocityX, translateX, maxTranslate, animateToPosition])
 
   const onMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
     onStart(e.clientX)
   }
   const onMouseMove = (e: React.MouseEvent) => {
@@ -140,30 +156,55 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
   const onMouseUp = () => {
     onEnd()
   }
-  const onMouseLeave = () => {
-    if (isDragging) onEnd()
-  }
   const onTouchStart = (e: React.TouchEvent) => {
     onStart(e.touches[0].clientX)
   }
   const onTouchMove = (e: React.TouchEvent) => {
+    if (isDragging) e.stopPropagation()
     onMove(e.touches[0].clientX)
   }
   const onTouchEnd = () => {
     onEnd()
   }
 
+  useEffect(() => {
+    if (!isDragging) return
+    const handleMove = (e: MouseEvent) => onMove(e.clientX)
+    const handleUp = () => onEnd()
+    document.addEventListener("mousemove", handleMove, { passive: false })
+    document.addEventListener("mouseup", handleUp)
+    return () => {
+      document.removeEventListener("mousemove", handleMove)
+      document.removeEventListener("mouseup", handleUp)
+    }
+  }, [isDragging, onMove, onEnd])
+
   if (isLoading) {
     return (
-      <div className="lg:hidden p-6">
-        <div className="mb-6">
+      <div className="lg:hidden p-[10px]">
+        <div className="mb-[10px]">
           <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
-          <p className="text-gray-600">Explore our published courses</p>
         </div>
-        <div className="overflow-hidden" ref={containerRef}>
-          <div className="flex gap-4" ref={trackRef} style={{ transform: `translateX(${translateX}px)` }}>
+        <div
+          className="overflow-hidden select-none"
+          ref={containerRef}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          style={{ touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab" }}
+        >
+          <div
+            className="flex gap-4"
+            ref={trackRef}
+            style={{ transform: `translateX(${translateX}px)`, willChange: "transform", pointerEvents: "none" }}
+          >
             {Array.from({ length: skeletonCount }).map((_, i) => (
-              <CourseCardSkeleton key={i} />
+              <div key={i} className="flex-shrink-0" style={{ pointerEvents: "auto" }}>
+                <CourseCardSkeleton />
+              </div>
             ))}
           </div>
         </div>
@@ -172,10 +213,9 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
   }
 
   return (
-    <div className="lg:hidden p-6">
-      <div className="mb-6">
+    <div className="lg:hidden p-[10px]">
+      <div className="mb-[10px]">
         <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
-        <p className="text-gray-600">Explore our published courses</p>
       </div>
       <div
         className="overflow-hidden select-none"
@@ -183,18 +223,23 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
-        onMouseLeave={onMouseLeave}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        style={{ touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab" }}
       >
-        <div className="flex gap-4 will-change-transform" ref={trackRef} style={{ transform: `translateX(${translateX}px)` }}>
-          {courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+        <div
+          className="flex gap-4"
+          ref={trackRef}
+          style={{ transform: `translateX(${translateX}px)`, willChange: "transform", pointerEvents: "none" }}
+        >
+          {courses.filter((c) => c.status === 'published').map((course) => (
+            <div key={course.id} className="flex-shrink-0" style={{ pointerEvents: "auto" }}>
+              <CourseCard course={course} />
+            </div>
           ))}
         </div>
       </div>
     </div>
   )
 }
-

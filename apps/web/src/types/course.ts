@@ -49,6 +49,7 @@ export interface Course {
   title: string;
   excerpt: string;
   status: 'published' | 'draft';
+  isFeatured?: boolean;
   thumbnail?: Media | null;
   bannerImage?: Media | null;
 }

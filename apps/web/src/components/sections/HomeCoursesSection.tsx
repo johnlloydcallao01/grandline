@@ -18,24 +18,32 @@ export function HomeCoursesSection() {
     return Number.isFinite(n) ? n : undefined;
   })();
   const [categoryId, setCategoryId] = useState<number | undefined>(initialIdFromUrl);
-  const { courses, isLoading, isLoadingMore, hasMore, loadMore } = useCourses({ status: 'published', limit: 4, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
+  const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+  const { courses, isLoading, isLoadingMore, hasMore, loadMore } = useCourses({ status: 'published', limit: isMobile ? 4 : 8, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
+  const [visibleCount, setVisibleCount] = useState<number>(8);
+  const displayCourses = useMemo(() => {
+    return (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
+  }, [courses]);
 
   useEffect(() => {
     const targetInitial = 8;
-    if (!isLoading && courses.length < targetInitial && hasMore && !isLoadingMore) {
+    if (!isLoading && displayCourses.length < targetInitial && hasMore && !isLoadingMore) {
       loadMore();
     }
-  }, [isLoading, isLoadingMore, hasMore, courses.length, categoryId, loadMore]);
+  }, [isLoading, isLoadingMore, hasMore, displayCourses.length, categoryId, loadMore]);
 
 
   const { categories, isLoading: loadingCategories } = useCourseCategories();
-  const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   useEffect(() => {
     const updateViewport = () => setIsMobile(window.innerWidth < 1024);
     updateViewport();
     window.addEventListener('resize', updateViewport);
     return () => window.removeEventListener('resize', updateViewport);
   }, []);
+
+  useEffect(() => {
+    setVisibleCount(isMobile ? 4 : 8);
+  }, [isMobile]);
 
   const hasMoreRef = useRef(hasMore);
   const isLoadingMoreRef = useRef(isLoadingMore);
@@ -56,9 +64,6 @@ export function HomeCoursesSection() {
     return () => clearInterval(interval);
   }, [isMobile, categoryId, loadMore]);
 
-  const displayCourses = useMemo(() => {
-    return courses;
-  }, [courses]);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
@@ -87,14 +92,14 @@ export function HomeCoursesSection() {
       </div>
       <div className="hidden lg:block">
         <CoursesGrid
-          courses={displayCourses}
+          courses={displayCourses.slice(0, Math.min(visibleCount, displayCourses.length))}
           isLoading={isLoading}
           skeletonCount={categoryId ? 4 : 8}
         />
       </div>
       <CoursesCarousel courses={displayCourses} isLoading={isLoading} skeletonCount={categoryId ? 4 : 8} />
-      <div className="hidden lg:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {hasMore && (
+      <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
+        {(displayCourses.length > visibleCount || hasMore) && (
           isLoadingMore ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, i) => (<CardSkeleton key={i} />))}
@@ -102,8 +107,14 @@ export function HomeCoursesSection() {
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={loadMore}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                onClick={() => {
+                  const nextVisible = visibleCount + 4;
+                  setVisibleCount(nextVisible);
+                  if (displayCourses.length < nextVisible && hasMore && !isLoadingMore) {
+                    loadMore();
+                  }
+                }}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Load More
               </button>

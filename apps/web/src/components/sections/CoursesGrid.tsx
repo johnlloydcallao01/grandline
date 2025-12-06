@@ -33,7 +33,7 @@ interface CourseCardProps {
 
 const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
   const LinkComponent = Link as any;
-  
+
   // Get the best available image URL from thumbnail
   const getImageUrl = (media: Media | null | undefined): string | null => {
     if (!media) return null;
@@ -73,24 +73,24 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
           </div>
         </div>
       </div>
-      
+
       {/* Course Info */}
       <div className="space-y-1">
         <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors overflow-hidden"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical'
+          }}>
+          {course.title}
+        </h3>
+        {course.excerpt && (
+          <p className="text-sm text-gray-600 overflow-hidden"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical'
             }}>
-          {course.title}
-        </h3>
-        {course.excerpt && (
-          <p className="text-sm text-gray-600 overflow-hidden"
-             style={{
-               display: '-webkit-box',
-               WebkitLineClamp: 2,
-               WebkitBoxOrient: 'vertical'
-             }}>
             {course.excerpt}
           </p>
         )}
@@ -106,9 +106,8 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: C
   if (isLoading) {
     return (
       <div className="p-6">
-        <div className="mb-6">
+        <div className="mb-[10px]">
           <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
-          <p className="text-gray-600">Explore our published courses</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: skeletonCount }).map((_, index) => (
@@ -123,9 +122,8 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: C
   if (!courses || courses.length === 0) {
     return (
       <div className="p-6">
-        <div className="mb-6">
+        <div className="mb-[10px]">
           <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
-          <p className="text-gray-600">Explore our published courses</p>
         </div>
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
@@ -142,12 +140,11 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: C
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <div className="mb-[10px]">
         <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
-        <p className="text-gray-600">Explore our published courses</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {courses.map((course) => (
+        {courses.filter((c) => c.status === 'published').map((course) => (
           <CourseCard
             key={course.id}
             course={course}

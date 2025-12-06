@@ -195,6 +195,14 @@ export const Courses: CollectionConfig = {
       },
     },
     {
+      name: 'isFeatured',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Mark this course as featured',
+      },
+    },
+    {
       name: 'language',
       type: 'select',
       options: [
