@@ -163,16 +163,11 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
   // ========================================
 
   const initializeAuth = useCallback(async () => {
-    console.log('🚀 INITIALIZING AUTH...');
-
     try {
       // Check for stored token first (quick check)
       const hasToken = hasValidStoredToken();
-      console.log('🔍 STORED TOKEN CHECK:', hasToken ? 'FOUND' : 'NOT FOUND');
 
       if (hasToken) {
-        console.log('⚡ FAST AUTH: Setting authenticated state immediately');
-
         // Set authenticated immediately to prevent signin flash
         dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: { email: 'validating...' } as any } });
 
@@ -181,17 +176,12 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
         dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
 
         if (user) {
-          console.log('✅ SESSION RESTORED:', user.email);
           emitAuthEvent('session_restored', { user });
-        } else {
-          console.log('❌ TOKEN INVALID');
         }
       } else {
-        console.log('❌ NO VALID TOKEN');
         dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: null } });
       }
     } catch (error) {
-      console.log('❌ AUTH INIT FAILED:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize authentication';
       dispatch({ type: 'AUTH_INIT_ERROR', payload: { error: errorMessage } });
     }
@@ -325,10 +315,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
 
 export function useAuthContext(): AuthContextType {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
-  
+
   return context;
 }
