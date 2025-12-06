@@ -91,7 +91,7 @@ export default buildConfig({
         const requestId = crypto.randomUUID();
         const userAgent = req.headers.get('user-agent') || 'Unknown';
         const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'Unknown';
-        
+
         try {
           console.log(`🔄 [${requestId}] REFRESH TOKEN REQUEST:`, {
             timestamp: new Date().toISOString(),
@@ -100,18 +100,18 @@ export default buildConfig({
           });
 
           const { payload, user } = req;
-          
+
           // Security Check 1: Verify user authentication
           if (!user) {
             const logContext = createAuthLogContext(requestId, req, undefined, undefined, undefined, Date.now() - startTime);
             authLogger.logRefreshFailure(logContext, 'Not authenticated', { endpoint: '/refresh-token' });
-            
+
             return new Response(
-              JSON.stringify({ 
+              JSON.stringify({
                 error: 'Authentication required',
                 code: 'UNAUTHENTICATED',
                 timestamp: new Date().toISOString(),
-                requestId 
+                requestId
               }),
               { status: 401, headers: { 'Content-Type': 'application/json' } }
             );
@@ -120,15 +120,15 @@ export default buildConfig({
           // Security Check 2: Verify user is active
           if (!user.isActive) {
             const logContext = createAuthLogContext(requestId, req, user.id, user.email, user.role, Date.now() - startTime);
-            authLogger.logRefreshFailure(logContext, 'Account inactive', { 
+            authLogger.logRefreshFailure(logContext, 'Account inactive', {
               endpoint: '/refresh-token',
               securityIssue: 'INACTIVE_ACCOUNT'
             });
-            
+
             return new Response(
-              JSON.stringify({ 
+              JSON.stringify({
                 error: 'Account is inactive',
-                code: 'ACCOUNT_INACTIVE', 
+                code: 'ACCOUNT_INACTIVE',
                 timestamp: new Date().toISOString(),
                 requestId
               }),
@@ -140,12 +140,12 @@ export default buildConfig({
           if (user.role !== 'trainee') {
             const logContext = createAuthLogContext(requestId, req, user.id, user.email, user.role, Date.now() - startTime);
             authLogger.logRoleViolation(logContext, 'trainee', user.role);
-            
+
             return new Response(
-              JSON.stringify({ 
+              JSON.stringify({
                 error: 'Access denied. Only trainees can access this application.',
                 code: 'ROLE_DENIED',
-                timestamp: new Date().toISOString(), 
+                timestamp: new Date().toISOString(),
                 requestId
               }),
               { status: 403, headers: { 'Content-Type': 'application/json' } }
@@ -154,7 +154,7 @@ export default buildConfig({
 
           // Security Check 4: Rate limiting check (basic implementation)
           const now = Date.now();
-          
+
           // For PayloadCMS v3, use the existing token from the authenticated user
           // The 30-day expiration is already configured in the Users collection
           const token = 'refreshed-token-placeholder'; // Will be replaced with actual PayloadCMS token
@@ -175,7 +175,7 @@ export default buildConfig({
           }
 
           const responseTime = Date.now() - startTime;
-          
+
           // Log successful refresh with enterprise logging
           const successLogContext = createAuthLogContext(requestId, req, user.id, user.email, user.role, responseTime);
           authLogger.logRefreshSuccess(successLogContext, {
@@ -223,7 +223,7 @@ export default buildConfig({
           const responseTime = Date.now() - startTime;
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           const errorStack = error instanceof Error ? error.stack : undefined;
-          
+
           // Log error with enterprise logging
           const errorLogContext = createAuthLogContext(requestId, req, req.user?.id, req.user?.email, req.user?.role, responseTime);
           authLogger.logRefreshFailure(errorLogContext, errorMessage, {
@@ -231,7 +231,7 @@ export default buildConfig({
             errorType: 'INTERNAL_SERVER_ERROR',
             stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
           });
-          
+
           console.error(`🚨 [${requestId}] REFRESH ERROR:`, {
             error: errorMessage,
             stack: process.env.NODE_ENV === 'development' ? errorStack : undefined,
@@ -254,6 +254,72 @@ export default buildConfig({
             { status: 500, headers: { 'Content-Type': 'application/json' } }
           );
         }
+      }) as PayloadHandler,
+    },
+    {
+      path: '/course-categories/assigned',
+      method: 'get',
+      handler: (async (req: PayloadRequest) => {
+        const { payload, user } = req
+        if (!user || (user.role !== 'service' && user.role !== 'admin')) {
+          return new Response(
+            JSON.stringify({ error: 'Access denied' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        const base = process.env.CMS_PROD_URL || process.env.CMS_LOCAL_URL || 'http://localhost'
+        const url = new URL(req.url || base, base)
+        const strict = url.searchParams.get('strict') === 'true' || url.searchParams.get('requireAll') === 'true'
+
+        const coursesResult = await payload.find({
+          collection: 'courses',
+          limit: 10000,
+          depth: 0,
+        })
+
+        const courses = coursesResult.docs as Array<{ category?: number[] }>
+
+        let ids: number[] = []
+        if (strict) {
+          if (courses.length === 0) {
+            ids = []
+          } else {
+            let set = new Set<number>((Array.isArray(courses[0].category) ? courses[0].category : []) as number[])
+            for (let i = 1; i < courses.length; i++) {
+              const catIds = (Array.isArray(courses[i].category) ? courses[i].category : []) as number[]
+              if (set.size === 0) break
+              set = new Set(Array.from(set).filter(id => catIds.includes(id)))
+            }
+            ids = Array.from(set)
+          }
+        } else {
+          const set = new Set<number>()
+          for (const course of courses) {
+            const catIds = (Array.isArray(course.category) ? course.category : []) as number[]
+            for (const id of catIds) set.add(id)
+          }
+          ids = Array.from(set)
+        }
+
+        if (ids.length === 0) {
+          return new Response(
+            JSON.stringify({ count: 0, categories: [] }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        const categoriesResult = await payload.find({
+          collection: 'course-categories',
+          where: { id: { in: ids } },
+          limit: ids.length,
+          depth: 0,
+        })
+
+        return new Response(
+          JSON.stringify({ count: categoriesResult.totalDocs, categories: categoriesResult.docs }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
       }) as PayloadHandler,
     },
   ],
