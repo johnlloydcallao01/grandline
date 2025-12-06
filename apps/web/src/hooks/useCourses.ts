@@ -4,24 +4,29 @@ import type { Course, CoursesResponse, CourseQueryParams } from '@/types/course'
 interface UseCoursesReturn {
   courses: Course[];
   isLoading: boolean;
+  isLoadingMore: boolean;
+  hasMore: boolean;
   error: string | null;
   totalCourses: number;
   refetch: () => void;
+  loadMore: () => void;
 }
 
 export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCourses, setTotalCourses] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   const {
     status = 'published',
     limit = 10,
-    page = 1
+    category
   } = options;
 
-  const fetchCourses = useCallback(async () => {
+  const fetchCourses = useCallback(async (pageToFetch: number, replace: boolean) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -30,8 +35,11 @@ export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
       const params = new URLSearchParams({
         status,
         limit: limit.toString(),
-        page: page.toString(),
+        page: String(pageToFetch),
       });
+      if (typeof category === 'string' && category.length > 0) {
+        params.set('course-category', category);
+      }
 
       // Use our secure server-side API route
       const fullUrl = `/api/courses?${params}`;
@@ -53,29 +61,44 @@ export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
       }
 
       const data: CoursesResponse = await response.json();
-      console.log('📋 COURSES: Data received:', data);
-
-      setCourses(data.docs || []);
+      setCourses(prev => replace ? (data.docs || []) : [...prev, ...(data.docs || [])]);
       setTotalCourses(data.totalDocs || 0);
+      setHasMore(Boolean(data.hasNextPage));
     } catch (err) {
       console.error('❌ COURSES: Error fetching courses:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch courses');
       setCourses([]);
       setTotalCourses(0);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
-  }, [status, limit, page]);
+  }, [status, limit, category]);
 
   useEffect(() => {
-    fetchCourses();
+    fetchCourses(1, true);
   }, [fetchCourses]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoading || isLoadingMore || !hasMore) return;
+    try {
+      setIsLoadingMore(true);
+      const currentPage = Math.max(1, Math.ceil(courses.length / Math.max(1, options.limit || 10)));
+      const nextPage = currentPage + 1;
+      await fetchCourses(nextPage, false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoading, isLoadingMore, hasMore, courses.length, options.limit, fetchCourses]);
 
   return {
     courses,
     isLoading,
+    isLoadingMore,
+    hasMore,
     error,
     totalCourses,
-    refetch: fetchCourses,
+    refetch: () => fetchCourses(1, true),
+    loadMore,
   };
 }

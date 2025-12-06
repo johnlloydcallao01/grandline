@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'published';
     const limit = searchParams.get('limit') || '8';
     const page = searchParams.get('page') || '1';
-    const categoryId = searchParams.get('categoryId') || '';
+    const categoryId = searchParams.get('course-category') || searchParams.get('categoryId') || '';
 
     // Build query parameters for PayloadCMS API
     const params = new URLSearchParams({
@@ -43,8 +43,7 @@ export async function GET(request: NextRequest) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
     const response = await fetch(`${apiUrl}/courses?${params}`, {
       headers,
-      // Add cache control for better performance
-      next: { revalidate: 300 }, // 5 minutes cache
+      cache: 'no-store',
     });
 
     if (!response.ok) {

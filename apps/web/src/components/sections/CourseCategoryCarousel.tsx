@@ -13,14 +13,12 @@ export function CourseCategoryCarousel({
   onCategoryChange
 }: {
   categories: CourseCategory[];
-  onCategoryChange?: (category: string) => void;
+  onCategoryChange?: (categoryId?: number) => void;
 }) {
   // Initialize with provided data (no loading state needed)
   const [categories] = useState<CourseCategory[]>(initialCategories);
-  const [activeCategory, setActiveCategory] = useState<string>(
-    initialCategories[0]?.name || ''
-  );
-  
+  const [activeCategoryId, setActiveCategoryId] = useState<number>(0);
+
   // Physics state
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -29,7 +27,7 @@ export function CourseCategoryCarousel({
   const [startTranslateX, setStartTranslateX] = useState(0);
   const [lastTime, setLastTime] = useState(0);
   const [velocityX, setVelocityX] = useState(0);
-  
+
   const carouselRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const boundsCalculatedRef = useRef(false);
@@ -254,15 +252,18 @@ export function CourseCategoryCarousel({
     //
     // The operations (+/-) and the bounds (0/-max) seem completely mixed up in the source.
     // I will fix it.
-    
+
     animateToPosition(newPosition, 400); // Smooth animation like normal swipe
   };
 
-  const handleCategoryClick = (category: string) => {
+  const handleCategoryClick = (category: string, id: number) => {
     if (!isDragging) {
-      setActiveCategory(category);
-      if (onCategoryChange) {
-        onCategoryChange(category);
+      if (id === activeCategoryId) {
+        setActiveCategoryId(0);
+        onCategoryChange?.(undefined);
+      } else {
+        setActiveCategoryId(id);
+        onCategoryChange?.(id);
       }
     }
   };
@@ -364,12 +365,12 @@ export function CourseCategoryCarousel({
     const calculateBounds = () => {
       const newMaxTranslate = getMaxTranslate();
       setMaxTranslate(newMaxTranslate);
-      
+
       // Reset position if current position is out of bounds
       if (translateX < -newMaxTranslate) {
         setTranslateX(-newMaxTranslate);
       }
-      
+
       boundsCalculatedRef.current = true;
     };
 
@@ -478,8 +479,8 @@ export function CourseCategoryCarousel({
             >
               <CourseCategoryCircle
                 category={category}
-                active={activeCategory === category.name}
-                onClick={() => handleCategoryClick(category.name)}
+                active={activeCategoryId === category.id}
+                onClick={() => handleCategoryClick(category.name, category.id)}
               />
             </div>
           ))}

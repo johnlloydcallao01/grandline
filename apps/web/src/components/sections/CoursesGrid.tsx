@@ -5,8 +5,9 @@ import Link from 'next/link';
 import type { Course, Media } from '@/types/course';
 
 interface CoursesGridProps {
-  courses: Course[]; // Required - provided by ISR
-  isLoading?: boolean; // Optional - for backward compatibility
+  courses: Course[];
+  isLoading?: boolean;
+  skeletonCount?: number;
 }
 
 // Course Card Skeleton
@@ -99,7 +100,7 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
 }
 
 // Main Courses Grid Component
-export function CoursesGrid({ courses, isLoading = false }: CoursesGridProps) {
+export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: CoursesGridProps) {
   // Remove loading logic since ISR provides data immediately
   // Keep for backward compatibility during migration
   if (isLoading) {
@@ -110,7 +111,7 @@ export function CoursesGrid({ courses, isLoading = false }: CoursesGridProps) {
           <p className="text-gray-600">Explore our published courses</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
+          {Array.from({ length: skeletonCount }).map((_, index) => (
             <CourseCardSkeleton key={index} />
           ))}
         </div>

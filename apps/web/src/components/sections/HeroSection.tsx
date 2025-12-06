@@ -40,17 +40,7 @@ export function HeroSection() {
               </p>
             </div>
 
-            {/* Call-to-Action */}
-            <div className="mt-6 lg:mt-0 lg:ml-8 flex gap-3">
-              <a 
-                href="https://www.grandlinemaritime.com/about"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border-2 border-white text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base hover:bg-white hover:text-blue-900 transition-colors duration-200"
-              >
-                Learn More
-              </a>
-            </div>
+            
           </div>
         </div>
 
