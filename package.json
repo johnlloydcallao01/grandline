@@ -38,7 +38,13 @@
       "eslint-config-next": "16.0.6",
       "react": "19.1.0",
       "react-dom": "19.1.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
