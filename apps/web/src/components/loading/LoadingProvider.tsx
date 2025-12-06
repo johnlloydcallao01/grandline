@@ -30,6 +30,7 @@ interface LoadingProviderProps {
 export function LoadingProvider({ children }: LoadingProviderProps): React.ReactNode {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
 
   useEffect(() => {
     // Check if this is a full page reload or direct URL visit
@@ -40,7 +41,7 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
 
     // Show loading screen on all full page loads (authenticated AND non-authenticated)
     if (isFullPageLoad) {
-      console.log('🔄 LOADING PROVIDER: Full page reload detected, showing loading screen');
+      if (debug) console.log('🔄 LOADING PROVIDER: Full page reload detected, showing loading screen');
       setIsLoading(true);
       setProgress(10); // Start with some progress
 
@@ -69,19 +70,19 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
         clearTimeout(autoHideTimeout);
       };
     } else {
-      console.log('🔄 LOADING PROVIDER: No loading screen needed (SPA navigation)');
+      if (debug) console.log('🔄 LOADING PROVIDER: No loading screen needed (SPA navigation)');
       setIsLoading(false);
     }
   }, []); // Run once on mount
 
   const showLoadingScreen = () => {
-    console.log('🔄 LOADING PROVIDER: Manually showing loading screen');
+    if (debug) console.log('🔄 LOADING PROVIDER: Manually showing loading screen');
     setIsLoading(true);
     setProgress(10);
   };
 
   const hideLoadingScreen = () => {
-    console.log('🔄 LOADING PROVIDER: Hiding loading screen');
+    if (debug) console.log('🔄 LOADING PROVIDER: Hiding loading screen');
     setProgress(100);
     
     // Smooth fade out after reaching 100%

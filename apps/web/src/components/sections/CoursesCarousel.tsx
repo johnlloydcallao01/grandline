@@ -55,7 +55,7 @@ function CourseCard({ course }: { course: Course }) {
   )
 }
 
-export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number }) {
+export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses' }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -183,7 +183,7 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
     return (
       <div className="lg:hidden p-[10px]">
         <div className="mb-[10px]">
-          <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         </div>
         <div
           className="overflow-hidden select-none"
@@ -215,7 +215,7 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8 
   return (
     <div className="lg:hidden p-[10px]">
       <div className="mb-[10px]">
-        <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
       </div>
       <div
         className="overflow-hidden select-none"

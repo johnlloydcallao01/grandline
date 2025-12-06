@@ -291,24 +291,23 @@ export async function checkAuthStatus(): Promise<boolean> {
  */
 export function hasValidStoredToken(): boolean {
   if (typeof window === 'undefined') {
-    console.log('🔍 hasValidStoredToken: window undefined');
     return false;
   }
 
   const storedToken = localStorage.getItem('grandline_auth_token');
   const storedExpires = localStorage.getItem('grandline_auth_expires');
-
-  console.log('🔍 hasValidStoredToken: token exists?', !!storedToken);
-  console.log('🔍 hasValidStoredToken: expires exists?', !!storedExpires);
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
+  if (debug) console.log('🔍 hasValidStoredToken: token exists?', !!storedToken);
+  if (debug) console.log('🔍 hasValidStoredToken: expires exists?', !!storedExpires);
 
   if (!storedToken || !storedExpires) {
-    console.log('🔍 hasValidStoredToken: missing token or expires');
+    if (debug) console.log('🔍 hasValidStoredToken: missing token or expires');
     return false;
   }
 
   const expirationTime = parseInt(storedExpires);
   const isValid = Date.now() < expirationTime;
-  console.log('🔍 hasValidStoredToken: is valid?', isValid);
+  if (debug) console.log('🔍 hasValidStoredToken: is valid?', isValid);
 
   return isValid;
 }
@@ -343,8 +342,8 @@ export function clearAuthState(): void {
     localStorage.removeItem('grandline_auth_token');
     localStorage.removeItem('grandline_auth_expires');
     sessionStorage.removeItem('auth:redirectAfterLogin');
-
-    console.log('🧹 CLEARED AUTH STATE');
+    const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
+    if (debug) console.log('🧹 CLEARED AUTH STATE');
 
     // Dispatch custom event for auth state changes
     window.dispatchEvent(new CustomEvent('auth:logout'));

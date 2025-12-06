@@ -8,6 +8,8 @@ interface CoursesGridProps {
   courses: Course[];
   isLoading?: boolean;
   skeletonCount?: number;
+  title?: string;
+  paddingClass?: string;
 }
 
 // Course Card Skeleton
@@ -100,14 +102,14 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
 }
 
 // Main Courses Grid Component
-export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: CoursesGridProps) {
+export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6' }: CoursesGridProps) {
   // Remove loading logic since ISR provides data immediately
   // Keep for backward compatibility during migration
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className={paddingClass}>
         <div className="mb-[10px]">
-          <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: skeletonCount }).map((_, index) => (
@@ -121,9 +123,9 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: C
   // Show message if no courses
   if (!courses || courses.length === 0) {
     return (
-      <div className="p-6">
+      <div className={paddingClass}>
         <div className="mb-[10px]">
-          <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         </div>
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
@@ -139,9 +141,9 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8 }: C
   }
 
   return (
-    <div className="p-6">
+    <div className={paddingClass}>
       <div className="mb-[10px]">
-        <h2 className="text-xl font-semibold text-gray-900">Available Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {courses.filter((c) => c.status === 'published').map((course) => (

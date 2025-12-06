@@ -13,6 +13,7 @@ interface UseCoursesReturn {
 }
 
 export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -44,7 +45,7 @@ export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
       // Use our secure server-side API route
       const fullUrl = `/api/courses?${params}`;
 
-      console.log('🔍 COURSES: Fetching from:', fullUrl);
+      if (debug) console.log('🔍 COURSES: Fetching from:', fullUrl);
 
       // Fetch from our secure server-side API route (no API key needed client-side)
       const response = await fetch(fullUrl, {
@@ -54,7 +55,7 @@ export function useCourses(options: CourseQueryParams = {}): UseCoursesReturn {
         },
       });
 
-      console.log('📡 COURSES: Response status:', response.status);
+      if (debug) console.log('📡 COURSES: Response status:', response.status);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch courses: ${response.status}`);

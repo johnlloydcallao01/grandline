@@ -11,7 +11,7 @@ import { HomeCoursesSection } from "@/components/sections/HomeCoursesSection";
  */
 export default async function Home() {
   return (
-    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+    <div className="bg-gray-50 lg:min-h-screen home-no-min" style={{ backgroundColor: '#f9fafb' }}>
       {/* Hero Section */}
       <HeroSection />
 

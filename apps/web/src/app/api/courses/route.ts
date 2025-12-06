@@ -12,15 +12,21 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') || '8';
     const page = searchParams.get('page') || '1';
     const categoryId = searchParams.get('course-category') || searchParams.get('categoryId') || '';
+    const featured = searchParams.get('featured') || '';
+    const sort = searchParams.get('sort') || '-updatedAt';
 
     // Build query parameters for PayloadCMS API
     const params = new URLSearchParams({
       status,
       limit,
       page,
+      sort,
     });
     if (categoryId) {
       params.set('where[category][contains]', categoryId);
+    }
+    if (featured === 'true') {
+      params.set('where[isFeatured][equals]', 'true');
     }
 
     // Build headers with API key authentication (server-side only)

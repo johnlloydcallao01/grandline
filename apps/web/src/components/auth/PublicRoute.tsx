@@ -27,11 +27,12 @@ export const PublicRoute = ({
     isInitialized,
     isLoading
   } = useRouteProtection();
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
 
   // Redirect authenticated users away from auth pages
   useEffect(() => {
     if (isAuthenticated && isInitialized && !isLoading) {
-      console.log('🔄 PUBLIC ROUTE: Redirecting authenticated user');
+      if (debug) console.log('🔄 PUBLIC ROUTE: Redirecting authenticated user');
 
       // Small delay to ensure authentication state is fully settled
       const redirectTimer = setTimeout(() => {
@@ -39,11 +40,11 @@ export const PublicRoute = ({
         const storedRedirect = sessionStorage.getItem('auth:redirectAfterLogin');
 
         if (storedRedirect) {
-          console.log('🔄 REDIRECTING TO STORED PATH:', storedRedirect);
+          if (debug) console.log('🔄 REDIRECTING TO STORED PATH:', storedRedirect);
           sessionStorage.removeItem('auth:redirectAfterLogin');
           router.replace(storedRedirect as any);
         } else {
-          console.log('🔄 REDIRECTING TO DEFAULT:', redirectTo);
+          if (debug) console.log('🔄 REDIRECTING TO DEFAULT:', redirectTo);
           router.replace(redirectTo as any);
         }
       }, 100); // Small delay to ensure state is settled
@@ -84,7 +85,7 @@ export function withPublicRoute<P extends object>(
   };
 
   WrappedComponent.displayName = `withPublicRoute(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }
 

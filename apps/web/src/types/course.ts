@@ -52,6 +52,7 @@ export interface Course {
   isFeatured?: boolean;
   thumbnail?: Media | null;
   bannerImage?: Media | null;
+  updatedAt?: string | null;
 }
 
 // Extended Course interface with instructor information

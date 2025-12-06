@@ -5,6 +5,7 @@ import { CourseCategoryCarousel } from '@/components/sections/CourseCategoryCaro
 import { CoursesGrid } from '@/components/sections/CoursesGrid';
 import { CoursesCarousel } from '@/components/sections/CoursesCarousel';
 import { useCourses } from '@/hooks/useCourses';
+import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCourseCategories } from '@/hooks/useCourseCategories';
 import { CategoryCircleSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
@@ -22,8 +23,21 @@ export function HomeCoursesSection() {
   const { courses, isLoading, isLoadingMore, hasMore, loadMore } = useCourses({ status: 'published', limit: isMobile ? 4 : 8, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
   const [visibleCount, setVisibleCount] = useState<number>(8);
   const displayCourses = useMemo(() => {
-    return (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
+    const filtered = (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
+    return filtered.sort((a, b) => {
+      const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return tb - ta;
+    });
   }, [courses]);
+
+  // Featured Courses (only when no category filter)
+  const showFeatured = typeof categoryId !== 'number';
+  const { courses: featuredCourses, isLoading: isLoadingFeatured, isLoadingMore: isLoadingMoreFeatured, hasMore: hasMoreFeatured, loadMore: loadMoreFeatured } = useFeaturedCourses(isMobile ? 4 : 8);
+  const [visibleFeaturedCount, setVisibleFeaturedCount] = useState<number>(8);
+  const featuredDisplay = useMemo(() => {
+    return (Array.isArray(featuredCourses) ? featuredCourses : []).filter((c) => c.status === 'published' && c.isFeatured);
+  }, [featuredCourses]);
 
   useEffect(() => {
     const targetInitial = 8;
@@ -31,6 +45,13 @@ export function HomeCoursesSection() {
       loadMore();
     }
   }, [isLoading, isLoadingMore, hasMore, displayCourses.length, categoryId, loadMore]);
+
+  useEffect(() => {
+    const targetInitial = 8;
+    if (showFeatured && !isLoadingFeatured && featuredDisplay.length < targetInitial && hasMoreFeatured && !isLoadingMoreFeatured) {
+      loadMoreFeatured();
+    }
+  }, [showFeatured, isLoadingFeatured, isLoadingMoreFeatured, hasMoreFeatured, featuredDisplay.length, loadMoreFeatured]);
 
 
   const { categories, isLoading: loadingCategories } = useCourseCategories();
@@ -43,6 +64,7 @@ export function HomeCoursesSection() {
 
   useEffect(() => {
     setVisibleCount(isMobile ? 4 : 8);
+    setVisibleFeaturedCount(isMobile ? 4 : 8);
   }, [isMobile]);
 
   const hasMoreRef = useRef(hasMore);
@@ -64,9 +86,23 @@ export function HomeCoursesSection() {
     return () => clearInterval(interval);
   }, [isMobile, categoryId, loadMore]);
 
+  useEffect(() => {
+    if (!isMobile || !showFeatured) return;
+    const interval = setInterval(() => {
+      if (!hasMoreFeatured) {
+        clearInterval(interval);
+        return;
+      }
+      if (!isLoadingMoreFeatured) {
+        void loadMoreFeatured();
+      }
+    }, 150);
+    return () => clearInterval(interval);
+  }, [isMobile, showFeatured, hasMoreFeatured, isLoadingMoreFeatured, loadMoreFeatured]);
+
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+    <div className="bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
       <div className="bg-white border-b border-gray-200">
         {loadingCategories ? (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex space-x-6 overflow-hidden">
@@ -95,9 +131,22 @@ export function HomeCoursesSection() {
           courses={displayCourses.slice(0, Math.min(visibleCount, displayCourses.length))}
           isLoading={isLoading}
           skeletonCount={categoryId ? 4 : 8}
+          title="Available Courses"
         />
       </div>
-      <CoursesCarousel courses={displayCourses} isLoading={isLoading} skeletonCount={categoryId ? 4 : 8} />
+      {typeof categoryId === 'number' ? (
+        <div className="lg:hidden">
+          <CoursesGrid
+            title="Available Courses"
+            courses={displayCourses}
+            isLoading={isLoading}
+            skeletonCount={4}
+            paddingClass="p-[10px]"
+          />
+        </div>
+      ) : (
+        <CoursesCarousel courses={displayCourses} isLoading={isLoading} skeletonCount={8} title="Available Courses" />
+      )}
       <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
         {(displayCourses.length > visibleCount || hasMore) && (
           isLoadingMore ? (
@@ -122,6 +171,44 @@ export function HomeCoursesSection() {
           )
         )}
       </div>
+
+      {showFeatured && (
+        <>
+          <div className="hidden lg:block">
+            <CoursesGrid
+              title="Featured Courses"
+              courses={featuredDisplay.slice(0, Math.min(visibleFeaturedCount, featuredDisplay.length))}
+              isLoading={isLoadingFeatured}
+              skeletonCount={8}
+            />
+          </div>
+          <CoursesCarousel courses={featuredDisplay} isLoading={isLoadingFeatured} skeletonCount={4} title="Featured Courses" />
+          <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
+            {(featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
+              isLoadingMoreFeatured ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {Array.from({ length: 4 }).map((_, i) => (<CardSkeleton key={i} />))}
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      const nextVisible = visibleFeaturedCount + 4;
+                      setVisibleFeaturedCount(nextVisible);
+                      if (featuredDisplay.length < nextVisible && hasMoreFeatured && !isLoadingMoreFeatured) {
+                        loadMoreFeatured();
+                      }
+                    }}
+                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
+                    Load More
+                  </button>
+                </div>
+              )
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
