@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'published';
     const limit = searchParams.get('limit') || '8';
     const page = searchParams.get('page') || '1';
+    const categoryId = searchParams.get('categoryId') || '';
 
     // Build query parameters for PayloadCMS API
     const params = new URLSearchParams({
@@ -18,6 +19,9 @@ export async function GET(request: NextRequest) {
       limit,
       page,
     });
+    if (categoryId) {
+      params.set('where[category][contains]', categoryId);
+    }
 
     // Build headers with API key authentication (server-side only)
     const headers: Record<string, string> = {
@@ -52,7 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     // Return the data with proper CORS headers
     return NextResponse.json(data, {
       headers: {
