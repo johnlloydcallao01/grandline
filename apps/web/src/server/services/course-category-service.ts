@@ -20,8 +20,8 @@ export interface CourseCategoryResponse {
 }
 
 export class CourseCategoryService {
-  private static readonly API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-  
+  private static readonly API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
+
   /**
    * Fetch course categories from CMS
    * Optimized for server-side rendering with error handling
@@ -35,20 +35,20 @@ export class CourseCategoryService {
 
       const apiKey = process.env.PAYLOAD_API_KEY;
       if (apiKey) {
-        headers['Authorization'] = `users API-Key ${apiKey}`;
+        headers['PAYLOAD_API_KEY'] = apiKey;
       }
 
-      const response = await fetch(`${CourseCategoryService.API_BASE}/course-categories?limit=${limit}`, {
+      const response = await fetch(`${CourseCategoryService.API_BASE}/course-categories/active`, {
         next: { revalidate: 300 }, // 5 minutes cache for ISR
         headers,
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch categories: ${response.status}`);
       }
-      
-      const data: CourseCategoryResponse = await response.json();
-      return data.docs || [];
+
+      const data = await response.json() as { count: number; categories: CourseCategory[] };
+      return Array.isArray(data.categories) ? data.categories.slice(0, limit) : [];
     } catch (error) {
       console.error('Error fetching course categories:', error);
       return []; // Graceful fallback

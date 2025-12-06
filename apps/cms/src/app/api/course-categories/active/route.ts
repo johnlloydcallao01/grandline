@@ -5,9 +5,10 @@ import configPromise from '@payload-config'
 export async function GET(request: NextRequest) {
   try {
     const payload = await getPayload({ config: configPromise })
-
-    const { searchParams } = new URL(request.url)
-    const strict = searchParams.get('strict') === 'true' || searchParams.get('requireAll') === 'true'
+    const apiKey = request.headers.get('PAYLOAD_API_KEY')
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
 
     const coursesResult = await payload.find({
       collection: 'courses',
@@ -17,27 +18,12 @@ export async function GET(request: NextRequest) {
 
     const courses = coursesResult.docs as Array<{ category?: number[] }>
 
-    let ids: number[] = []
-    if (strict) {
-      if (courses.length === 0) {
-        ids = []
-      } else {
-        let set = new Set<number>((Array.isArray(courses[0].category) ? courses[0].category : []) as number[])
-        for (let i = 1; i < courses.length; i++) {
-          const catIds = (Array.isArray(courses[i].category) ? courses[i].category : []) as number[]
-          if (set.size === 0) break
-          set = new Set(Array.from(set).filter(id => catIds.includes(id)))
-        }
-        ids = Array.from(set)
-      }
-    } else {
-      const set = new Set<number>()
-      for (const course of courses) {
-        const catIds = (Array.isArray(course.category) ? course.category : []) as number[]
-        for (const id of catIds) set.add(id)
-      }
-      ids = Array.from(set)
+    const set = new Set<number>()
+    for (const course of courses) {
+      const catIds = (Array.isArray(course.category) ? course.category : []) as number[]
+      for (const id of catIds) set.add(id)
     }
+    const ids = Array.from(set)
 
     if (ids.length === 0) {
       return NextResponse.json({ count: 0, categories: [] })
@@ -45,9 +31,9 @@ export async function GET(request: NextRequest) {
 
     const categoriesResult = await payload.find({
       collection: 'course-categories',
-      where: { id: { in: ids } },
+      where: { id: { in: ids }, isActive: { equals: true } },
       limit: ids.length,
-      depth: 0,
+      depth: 2,
     })
 
     return NextResponse.json({ count: categoriesResult.totalDocs, categories: categoriesResult.docs })
@@ -56,4 +42,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-
