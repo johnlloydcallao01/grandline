@@ -1,28 +1,10 @@
-/**
- * @file apps/web/src/middleware.ts
- * @description Next.js middleware for authentication and route protection
- * Handles automatic redirects and session validation
- */
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api'
+const COLLECTION_SLUG = 'users'
 
-// ========================================
-// CONFIGURATION
-// ========================================
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
-const COLLECTION_SLUG = 'users'; // Authentication is on users collection, not trainees
-
-
-// Routes that should redirect authenticated users
-const AUTH_ROUTES = [
-  '/signin',
-  '/register',
-  '/forgot-password'
-];
-
-// Routes that are always public (no authentication check)
+const AUTH_ROUTES = ['/signin', '/register', '/forgot-password']
 const PUBLIC_ROUTES = [
   '/api',
   '/_next',
@@ -32,110 +14,51 @@ const PUBLIC_ROUTES = [
   '/globe.svg',
   '/next.svg',
   '/vercel.svg',
-  '/window.svg'
-];
+  '/window.svg',
+]
 
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
-/**
- * Check if a path matches any of the given patterns
- */
 function matchesPath(pathname: string, patterns: string[]): boolean {
-  return patterns.some(pattern => {
+  return patterns.some((pattern) => {
     if (pattern.endsWith('*')) {
-      return pathname.startsWith(pattern.slice(0, -1));
+      return pathname.startsWith(pattern.slice(0, -1))
     }
-    return pathname === pattern || pathname.startsWith(pattern + '/');
-  });
+    return pathname === pattern || pathname.startsWith(pattern + '/')
+  })
 }
-
-// Note: checkAuthentication function removed because we're using client-side auth protection
-// instead of middleware-based auth due to cross-domain cookie limitations
-
-
-// ========================================
-// MAIN MIDDLEWARE FUNCTION
-// ========================================
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname } = request.nextUrl
 
-  // Skip middleware for public routes
   if (matchesPath(pathname, PUBLIC_ROUTES)) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
-  // Skip middleware for API routes (except auth endpoints)
   if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
-  // For development with external PayloadCMS, we can't rely on cookie-based auth in middleware
-  // because cookies are domain-specific (grandline-cms.vercel.app vs localhost:3000).
-  // Instead, we'll handle auth protection on the client side with ProtectedRoute components.
-
-  // Handle auth routes (signin, register, etc.) - always allow access
   if (matchesPath(pathname, AUTH_ROUTES)) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
-  // For protected routes, let the client-side ProtectedRoute component handle the auth check
-  // This is necessary because PayloadCMS cookies are set for grandline-cms.vercel.app domain
-  // and cannot be accessed by localhost:3000 due to browser security policies
-
-  return NextResponse.next();
+  return NextResponse.next()
 }
-
-// ========================================
-// MIDDLEWARE CONFIGURATION
-// ========================================
 
 export const config = {
-  /*
-   * Match all request paths except for the ones starting with:
-   * - api (API routes)
-   * - _next/static (static files)
-   * - _next/image (image optimization files)
-   * - favicon.ico (favicon file)
-   * - public files (images, etc.)
-   */
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-};
-
-// ========================================
-// ADDITIONAL MIDDLEWARE UTILITIES
-// ========================================
-
-/**
- * Middleware for API routes that require authentication
- * Note: checkAuthentication is handled client-side due to domain limitations
- */
-export async function withAuth(_handler: (request: NextRequest) => Promise<NextResponse>) {
-  return async (_request: NextRequest) => {
-    // In development with external PayloadCMS, we can't check auth server-side
-    // due to cross-domain cookie limitations. Auth is handled client-side.
-    
-    return NextResponse.json(
-      { error: 'Server-side auth check not available in this configuration' },
-      { status: 501 }
-    );
-  };
 }
 
-/**
- * Middleware for API routes that require specific roles
- */
+export async function withAuth(_handler: (request: NextRequest) => Promise<NextResponse>) {
+  return async (_request: NextRequest) => {
+    return NextResponse.json(
+      { error: 'Server-side auth check not available in this configuration' },
+      { status: 501 },
+    )
+  }
+}
+
 export function withRole(roles: string[]) {
   return (handler: (request: NextRequest) => Promise<NextResponse>) => {
     return async (request: NextRequest) => {
@@ -143,36 +66,30 @@ export function withRole(roles: string[]) {
         const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me`, {
           method: 'GET',
           headers: {
-            'Cookie': request.headers.get('cookie') || '',
+            Cookie: request.headers.get('cookie') || '',
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-        });
+        })
 
         if (!response.ok) {
-          return NextResponse.json(
-            { error: 'Unauthorized' },
-            { status: 401 }
-          );
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const data = await response.json();
-        const user = data.user;
+        const data = await response.json()
+        const user = data.user
 
         if (!user || !roles.includes(user.role)) {
-          return NextResponse.json(
-            { error: 'Forbidden' },
-            { status: 403 }
-          );
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        return handler(request);
+        return handler(request)
       } catch {
         return NextResponse.json(
           { error: 'Authentication check failed' },
-          { status: 500 }
-        );
+          { status: 500 },
+        )
       }
-    };
-  };
+    }
+  }
 }
