@@ -20,6 +20,13 @@ function CourseCard({ course }: { course: Course }) {
   const media = course.thumbnail
   const imageUrl = media?.cloudinaryURL || media?.url || media?.thumbnailURL || null
   const altText = media?.alt || `${course.title} thumbnail`
+  const [wishlisted, setWishlisted] = useState(false)
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(`gl:wishlist:course:${course.id}`)
+      setWishlisted(!!v)
+    } catch { void 0; }
+  }, [course.id])
 
   return (
     <Link href={`/view-course/${course.id}`} scroll className="w-64 flex-shrink-0 block">
@@ -45,6 +52,25 @@ function CourseCard({ course }: { course: Course }) {
             <p className="text-xs">Course Image</p>
           </div>
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            const next = !wishlisted
+            setWishlisted(next)
+            try {
+              if (next) {
+                localStorage.setItem(`gl:wishlist:course:${course.id}`, '1')
+              } else {
+                localStorage.removeItem(`gl:wishlist:course:${course.id}`)
+              }
+            } catch { void 0; }
+          }}
+          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"
+          aria-label="Toggle wishlist"
+        >
+          <i className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'}`}></i>
+        </button>
       </div>
       <div className="space-y-1">
         <h3 className="font-medium text-gray-900 overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{course.title}</h3>

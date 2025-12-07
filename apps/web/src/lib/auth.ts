@@ -184,9 +184,23 @@ export async function logout(): Promise<void> {
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2');
+    let headers: Record<string, string> | undefined;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('grandline_auth_token');
+      if (token) headers = { Authorization: `users JWT ${token}` };
+    }
+
+    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2', { headers });
 
     if (!response.user) {
+      // Fallback to cached user if available to prevent aggressive logout on reload
+      try {
+        const cached = localStorage.getItem('grandline_auth_user');
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch { void 0; }
+
       clearAuthState();
       return null;
     }
@@ -201,8 +215,22 @@ export async function getCurrentUser(): Promise<User | null> {
     } catch { void 0; }
 
     return response.user;
-  } catch {
-    clearAuthState();
+  } catch (error: any) {
+    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
+    const status = isAuthStatus ? (error as { status: number }).status : undefined;
+
+    if (status === 401 || status === 403) {
+      clearAuthState();
+      return null;
+    }
+
+    try {
+      const cached = localStorage.getItem('grandline_auth_user');
+      if (cached) {
+        return JSON.parse(cached) as User;
+      }
+    } catch { void 0; }
+
     return null;
   }
 }
@@ -223,6 +251,7 @@ export async function refreshSession(): Promise<AuthResponse> {
     // Make refresh request to the new enterprise endpoint
     const response = await makeAuthRequest<PayloadAuthResponse>('/refresh-token', {
       method: 'POST',
+      headers: { Authorization: `users JWT ${currentToken}` },
     });
 
     // Security validation: Check if user has trainee role
@@ -305,17 +334,27 @@ export function hasValidStoredToken(): boolean {
  */
 export async function getSessionInfo(): Promise<SessionInfo> {
   try {
-    const response = await makeAuthRequest<PayloadMeResponse>('/me');
+    let headers: Record<string, string> | undefined;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('grandline_auth_token');
+      if (token) headers = { Authorization: `users JWT ${token}` };
+    }
+    const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
 
     return {
       isValid: response.user !== null,
       user: response.user || undefined,
       expiresAt: response.exp ? new Date(response.exp * 1000) : undefined,
     };
-  } catch {
-    return {
-      isValid: false,
-    };
+  } catch (error: any) {
+    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
+    const status = isAuthStatus ? (error as { status: number }).status : undefined;
+
+    if (status === 401 || status === 403) {
+      return { isValid: false };
+    }
+
+    return { isValid: true };
   }
 }
 

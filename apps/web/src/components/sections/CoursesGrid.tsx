@@ -46,6 +46,13 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
 
   const imageUrl = getImageUrl(course.thumbnail);
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
+  const [wishlisted, setWishlisted] = React.useState(false);
+  React.useEffect(() => {
+    try {
+      const v = localStorage.getItem(`gl:wishlist:course:${course.id}`);
+      setWishlisted(!!v);
+    } catch { void 0; }
+  }, [course.id]);
 
   return (
     <LinkComponent href={`/view-course/${course.id}`} scroll className="group cursor-pointer block">
@@ -74,6 +81,25 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
             <p className="text-xs">Course Image</p>
           </div>
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = !wishlisted;
+            setWishlisted(next);
+            try {
+              if (next) {
+                localStorage.setItem(`gl:wishlist:course:${course.id}`, '1');
+              } else {
+                localStorage.removeItem(`gl:wishlist:course:${course.id}`);
+              }
+            } catch { void 0; }
+          }}
+          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"
+          aria-label="Toggle wishlist"
+        >
+          <i className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'}`}></i>
+        </button>
       </div>
 
       {/* Course Info */}
