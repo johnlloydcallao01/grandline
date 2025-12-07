@@ -38,6 +38,28 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
     return (Array.isArray(featuredCourses) ? featuredCourses : []).filter((c) => c.status === 'published' && c.isFeatured);
   }, [featuredCourses]);
 
+  const [categoriesState, setCategoriesState] = useState<CourseCategory[]>(Array.isArray(categories) ? categories : []);
+  useEffect(() => {
+    setCategoriesState(Array.isArray(categories) ? categories : []);
+  }, [categories]);
+
+  useEffect(() => {
+    try {
+      const entries = (performance.getEntriesByType('navigation') as any) || [];
+      const isReload = entries[0] && entries[0].type === 'reload';
+      if (isReload) {
+        (async () => {
+          const res = await fetch('/api/course-categories?fresh=1', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            const arr = Array.isArray(data?.categories) ? data.categories : Array.isArray(data?.docs) ? data.docs : [];
+            if (Array.isArray(arr) && arr.length >= 0) setCategoriesState(arr as CourseCategory[]);
+          }
+        })();
+      }
+    } catch { void 0 }
+  }, []);
+
   const availableCoursesLink = totalCourses > 8
     ? (categoryId ? `/courses/available?course-category=${categoryId}` : '/courses/available')
     : undefined;
@@ -85,7 +107,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
     <div className="bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
       <div className="bg-white border-b border-gray-200">
         <CourseCategoryCarousel
-          categories={categories as CourseCategory[]}
+          categories={categoriesState as CourseCategory[]}
           onCategoryChange={(id) => {
             setCategoryId(id);
             const params = new URLSearchParams(searchParams.toString());

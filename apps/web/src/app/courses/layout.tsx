@@ -43,7 +43,7 @@ export default function CoursesLayout({
         </div>
 
         {/* Main Content */}
-        <main className="flex-1">
+        <main className="flex-1 pb-[30px]">
           {children}
         </main>
 

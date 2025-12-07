@@ -39,7 +39,7 @@ export class CourseCategoryService {
       }
 
       const response = await fetch(`${CourseCategoryService.API_BASE}/course-categories/active`, {
-        next: { revalidate: 300 }, // 5 minutes cache for ISR
+        next: { revalidate: 300, tags: ['course-categories'] },
         headers,
       });
 

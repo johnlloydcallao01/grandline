@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const apiKey = process.env.PAYLOAD_API_KEY
     if (!apiKey) {
@@ -13,9 +13,11 @@ export async function GET(_request: NextRequest) {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
+    const { searchParams } = new URL(request.url)
+    const fresh = searchParams.get('fresh') === '1'
     const response = await fetch(`${apiUrl}/course-categories/active`, {
       headers,
-      cache: 'no-store',
+      cache: fresh ? 'no-store' : 'force-cache',
     })
 
     if (!response.ok) {
@@ -25,7 +27,7 @@ export async function GET(_request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+        'Cache-Control': fresh ? 'no-store' : 'public, s-maxage=300, stale-while-revalidate=600'
       }
     })
   } catch (_error) {
