@@ -72,7 +72,7 @@ export default function MainLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+      <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }} data-fixed-header="true">
         {/* Header - Persistent across all pages */}
         <Header
           sidebarOpen={sidebarOpen}
@@ -88,9 +88,8 @@ export default function MainLayout({
 
         {/* Main Content Area - Only this changes during navigation */}
         <main
-          className={`transition-all duration-300 bg-gray-50 ${
-            sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
-          }`}
+          className={`transition-all duration-300 bg-gray-50 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+            }`}
           style={{ backgroundColor: '#f9fafb' }}
         >
           <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>

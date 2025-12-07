@@ -10,6 +10,7 @@ interface CoursesGridProps {
   skeletonCount?: number;
   title?: string;
   paddingClass?: string;
+  viewAllLink?: string;
 }
 
 // Course Card Skeleton
@@ -128,14 +129,19 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
 }
 
 // Main Courses Grid Component
-export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6' }: CoursesGridProps) {
+export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink }: CoursesGridProps) {
   // Remove loading logic since ISR provides data immediately
   // Keep for backward compatibility during migration
   if (isLoading) {
     return (
       <div className={paddingClass}>
-        <div className="mb-[10px]">
+        <div className="mb-[10px] flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          {viewAllLink && (
+            <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+              <i className="fa fa-chevron-right"></i>
+            </Link>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: skeletonCount }).map((_, index) => (
@@ -150,7 +156,7 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
   if (!courses || courses.length === 0) {
     return (
       <div className={paddingClass}>
-        <div className="mb-[10px]">
+        <div className="mb-[10px] flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
         </div>
         <div className="text-center py-12">
@@ -168,8 +174,13 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
 
   return (
     <div className={paddingClass}>
-      <div className="mb-[10px]">
+      <div className="mb-[10px] flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        {viewAllLink && (
+          <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <i className="fa fa-chevron-right"></i>
+          </Link>
+        )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {courses.filter((c) => c.status === 'published').map((course) => (

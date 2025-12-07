@@ -44,59 +44,51 @@ body {
 /* Mobile layout adjustments for footer and header */
 @media (max-width: 1023px) {
   body {
-    padding-bottom: 0; /* Remove body padding */
-    padding-top: 0; /* Remove padding - header is fixed positioned */
-    background-color: #ffffff; /* Use white background for consistency */
+    padding-bottom: 0;
+    padding-top: 0;
+    background-color: #ffffff;
   }
 
-  /* Ensure main content fills viewport and accounts for mobile footer and header */
-  main {
-    min-height: calc(100vh - 56px); /* Full viewport height minus header */
-    margin-top: 56px; /* Push content below fixed header (h-14 = 56px) */
-    background-color: #ffffff; /* Use white background for consistency */
+  [data-fixed-header="true"] main {
+    min-height: calc(100vh - 56px);
+    margin-top: 56px;
+    background-color: #ffffff;
     box-sizing: border-box;
   }
 
-  /* Remove any default margins on first child to eliminate gaps */
-  main > div > *:first-child {
+  [data-fixed-header="true"] main > div > *:first-child {
     margin-top: 0 !important;
   }
 }
 
 /* Mobile-only adjustments for footer */
 @media (max-width: 767px) {
-  main {
-    padding-bottom: calc(55px + env(safe-area-inset-bottom, 0px)); /* Footer height + safe area */
+  [data-fixed-header="true"] main {
+    padding-bottom: calc(55px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* Ensure the main layout container also fills height */
   .min-h-screen {
     min-height: 100vh;
     background-color: #ffffff;
   }
 
-/* Mobile-only page content adjustments */
-@media (max-width: 767px) {
-  /* Ensure page content extends to fill available space and has consistent background */
-  main > div {
-    min-height: calc(100vh - 56px - 55px - env(safe-area-inset-bottom, 0px)); /* Account for header + footer */
+  [data-fixed-header="true"] main > div {
+    min-height: calc(100vh - 56px - 55px - env(safe-area-inset-bottom, 0px));
     background-color: #ffffff;
   }
 }
 
 /* Tablet-only page content adjustments */
 @media (min-width: 768px) and (max-width: 1023px) {
-  main > div {
-    min-height: calc(100vh - 56px); /* Account for header only, no footer on tablet */
+  [data-fixed-header="true"] main > div {
+    min-height: calc(100vh - 56px);
     background-color: #ffffff;
   }
 }
 
-  /* Ensure no gaps between content sections */
   main * {
     box-sizing: border-box;
   }
-}
 
 /* Ensure sidebar is completely hidden on mobile and tablet */
 @media (max-width: 1023px) {

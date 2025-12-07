@@ -82,7 +82,7 @@ function CourseCard({ course }: { course: Course }) {
   )
 }
 
-export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses' }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string }) {
+export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', viewAllLink }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string; viewAllLink?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -209,8 +209,13 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
   if (isLoading) {
     return (
       <div className="lg:hidden p-[10px]">
-        <div className="mb-[10px]">
+        <div className="mb-[10px] flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          {viewAllLink && (
+            <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+              <i className="fa fa-chevron-right"></i>
+            </Link>
+          )}
         </div>
         <div
           className="overflow-hidden select-none"
@@ -241,8 +246,13 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
 
   return (
     <div className="lg:hidden p-[10px]">
-      <div className="mb-[10px]">
+      <div className="mb-[10px] flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        {viewAllLink && (
+          <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <i className="fa fa-chevron-right"></i>
+          </Link>
+        )}
       </div>
       <div
         className="overflow-hidden select-none"

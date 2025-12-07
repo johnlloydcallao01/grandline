@@ -25,6 +25,7 @@ import { Posts } from './collections/Posts'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
 import { CourseEnrollments } from './collections/CourseEnrollments'
+import { RecentSearches } from './collections/RecentSearches'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -54,6 +55,7 @@ export default buildConfig({
     Courses,
     CourseCategories,
     CourseEnrollments,
+    RecentSearches,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

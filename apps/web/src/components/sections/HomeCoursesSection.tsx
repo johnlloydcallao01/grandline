@@ -20,7 +20,7 @@ export function HomeCoursesSection() {
   })();
   const [categoryId, setCategoryId] = useState<number | undefined>(initialIdFromUrl);
   const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
-  const { courses, isLoading, isLoadingMore, hasMore, loadMore } = useCourses({ status: 'published', limit: isMobile ? 4 : 8, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
+  const { courses, isLoading, isLoadingMore, hasMore, loadMore, totalCourses } = useCourses({ status: 'published', limit: isMobile ? 4 : 8, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
   const [visibleCount, setVisibleCount] = useState<number>(8);
   const displayCourses = useMemo(() => {
     const filtered = (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
@@ -33,11 +33,17 @@ export function HomeCoursesSection() {
 
   // Featured Courses (only when no category filter)
   const showFeatured = typeof categoryId !== 'number';
-  const { courses: featuredCourses, isLoading: isLoadingFeatured, isLoadingMore: isLoadingMoreFeatured, hasMore: hasMoreFeatured, loadMore: loadMoreFeatured } = useFeaturedCourses(isMobile ? 4 : 8);
+  const { courses: featuredCourses, isLoading: isLoadingFeatured, isLoadingMore: isLoadingMoreFeatured, hasMore: hasMoreFeatured, loadMore: loadMoreFeatured, totalCourses: totalFeaturedCourses } = useFeaturedCourses(isMobile ? 4 : 8);
   const [visibleFeaturedCount, setVisibleFeaturedCount] = useState<number>(8);
   const featuredDisplay = useMemo(() => {
     return (Array.isArray(featuredCourses) ? featuredCourses : []).filter((c) => c.status === 'published' && c.isFeatured);
   }, [featuredCourses]);
+
+  const availableCoursesLink = totalCourses > 8
+    ? (categoryId ? `/courses/available?course-category=${categoryId}` : '/courses/available')
+    : undefined;
+
+  const featuredCoursesLink = totalFeaturedCourses > 8 ? '/courses/featured' : undefined;
 
   useEffect(() => {
     const targetInitial = 8;
@@ -72,33 +78,9 @@ export function HomeCoursesSection() {
   useEffect(() => { hasMoreRef.current = hasMore; }, [hasMore]);
   useEffect(() => { isLoadingMoreRef.current = isLoadingMore; }, [isLoadingMore]);
 
-  useEffect(() => {
-    if (!isMobile) return;
-    const interval = setInterval(() => {
-      if (!hasMoreRef.current) {
-        clearInterval(interval);
-        return;
-      }
-      if (!isLoadingMoreRef.current) {
-        void loadMore();
-      }
-    }, 150);
-    return () => clearInterval(interval);
-  }, [isMobile, categoryId, loadMore]);
+  // Removed continuous mobile auto-loading; we only fetch up to initial 8 via effect above
 
-  useEffect(() => {
-    if (!isMobile || !showFeatured) return;
-    const interval = setInterval(() => {
-      if (!hasMoreFeatured) {
-        clearInterval(interval);
-        return;
-      }
-      if (!isLoadingMoreFeatured) {
-        void loadMoreFeatured();
-      }
-    }, 150);
-    return () => clearInterval(interval);
-  }, [isMobile, showFeatured, hasMoreFeatured, isLoadingMoreFeatured, loadMoreFeatured]);
+  // Removed continuous mobile auto-loading for featured; we only fetch up to initial 8
 
 
   return (
@@ -132,6 +114,7 @@ export function HomeCoursesSection() {
           isLoading={isLoading}
           skeletonCount={categoryId ? 4 : 8}
           title="Available Courses"
+          viewAllLink={availableCoursesLink}
         />
       </div>
       {typeof categoryId === 'number' ? (
@@ -142,10 +125,17 @@ export function HomeCoursesSection() {
             isLoading={isLoading}
             skeletonCount={4}
             paddingClass="p-[10px]"
+            viewAllLink={availableCoursesLink}
           />
         </div>
       ) : (
-        <CoursesCarousel courses={displayCourses} isLoading={isLoading} skeletonCount={8} title="Available Courses" />
+        <CoursesCarousel
+          courses={displayCourses.slice(0, 8)}
+          isLoading={isLoading}
+          skeletonCount={8}
+          title="Available Courses"
+          viewAllLink={availableCoursesLink}
+        />
       )}
       <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
         {(displayCourses.length > visibleCount || hasMore) && (
@@ -180,9 +170,16 @@ export function HomeCoursesSection() {
               courses={featuredDisplay.slice(0, Math.min(visibleFeaturedCount, featuredDisplay.length))}
               isLoading={isLoadingFeatured}
               skeletonCount={8}
+              viewAllLink={featuredCoursesLink}
             />
           </div>
-          <CoursesCarousel courses={featuredDisplay} isLoading={isLoadingFeatured} skeletonCount={4} title="Featured Courses" />
+          <CoursesCarousel
+            courses={featuredDisplay.slice(0, 8)}
+            isLoading={isLoadingFeatured}
+            skeletonCount={8}
+            title="Featured Courses"
+            viewAllLink={featuredCoursesLink}
+          />
           <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
             {(featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
               isLoadingMoreFeatured ? (
