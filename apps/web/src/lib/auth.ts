@@ -79,7 +79,7 @@ function handleApiError(error: any): AuthErrorDetails {
 // API UTILITIES
 // ========================================
 
-async function makeAuthRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function makeAuthRequest<T>(endpoint: string, options: RequestInit & { suppressErrorLog?: boolean } = {}): Promise<T> {
   const url = `${API_BASE_URL}/${COLLECTION_SLUG}${endpoint}`;
 
   try {
@@ -100,7 +100,9 @@ async function makeAuthRequest<T>(endpoint: string, options: RequestInit = {}): 
 
     return data;
   } catch (error) {
-    console.error(`Auth API Error [${endpoint}]:`, error);
+    if (!options.suppressErrorLog) {
+      console.error(`Auth API Error [${endpoint}]:`, error);
+    }
     throw error;
   }
 }
@@ -135,6 +137,10 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
       localStorage.setItem('grandline_auth_expires', expirationTime.toString());
     }
 
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
+
     return {
       message: response.message,
       user: response.user,
@@ -153,16 +159,21 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
  */
 export async function logout(): Promise<void> {
   try {
-    // Clear stored token first
+    const user = await getCurrentUser();
+    if (user) {
+      try {
+        await makeAuthRequest('/logout', {
+          method: 'POST',
+          suppressErrorLog: true,
+        });
+      } catch (error: any) {
+        if (!(error && typeof error === 'object' && 'status' in error && error.status === 400)) {
+          console.error('Logout error:', error);
+        }
+      }
+    }
+  } finally {
     clearAuthState();
-
-    // Also try to logout from PayloadCMS server (best effort)
-    await makeAuthRequest('/logout', {
-      method: 'POST',
-    });
-  } catch (error) {
-    // Log error but don't throw - logout should always succeed locally
-    console.error('Logout error:', error);
   }
 }
 
@@ -172,53 +183,25 @@ export async function logout(): Promise<void> {
  * Only returns user if they have 'trainee' role
  */
 export async function getCurrentUser(): Promise<User | null> {
-  // Check if we have a stored token
-  const storedToken = localStorage.getItem('grandline_auth_token');
-  const storedExpires = localStorage.getItem('grandline_auth_expires');
-
-  if (!storedToken || !storedExpires) {
-    return null;
-  }
-
-  // Check if token is expired
-  const expirationTime = parseInt(storedExpires);
-  if (Date.now() > expirationTime) {
-    clearAuthState();
-    return null;
-  }
-
   try {
-    // Use token-based authentication instead of cookies
-    // Include depth parameter to fetch profilePicture with related Media data
-    const response = await fetch(`${API_BASE_URL}/${COLLECTION_SLUG}/me?depth=2`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `JWT ${storedToken}`, // PayloadCMS uses JWT prefix
-      },
-    });
+    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2');
 
-    if (!response.ok) {
+    if (!response.user) {
       clearAuthState();
       return null;
     }
 
-    const data = await response.json();
-
-    if (data.user) {
-      // Check if user exists and has trainee role
-      if (data.user.role === 'trainee') {
-        return data.user;
-      } else {
-        clearAuthState();
-        return null;
-      }
-    } else {
+    if (response.user.role !== 'trainee') {
       clearAuthState();
       return null;
     }
-  } catch (error) {
-    console.error('Get user failed:', error);
+
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
+
+    return response.user;
+  } catch {
     clearAuthState();
     return null;
   }
@@ -256,6 +239,10 @@ export async function refreshSession(): Promise<AuthResponse> {
       const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
       localStorage.setItem('grandline_auth_expires', expirationTime.toString());
     }
+
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
 
     return {
       message: response.message,
@@ -341,6 +328,7 @@ export function clearAuthState(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('grandline_auth_token');
     localStorage.removeItem('grandline_auth_expires');
+    localStorage.removeItem('grandline_auth_user');
     sessionStorage.removeItem('auth:redirectAfterLogin');
     const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
     if (debug) console.log('🧹 CLEARED AUTH STATE');

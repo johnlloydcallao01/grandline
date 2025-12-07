@@ -196,8 +196,7 @@ export default function RegisterPage() {
         return;
       }
 
-      // CORS is completely disabled on the CMS - use direct URL
-      const registrationUrl = 'https://grandline-cms.vercel.app/api/trainee-register';
+      const registrationUrl = `${process.env.NEXT_PUBLIC_API_URL}/trainee-register`;
 
       const response = await fetch(registrationUrl, {
         method: 'POST',

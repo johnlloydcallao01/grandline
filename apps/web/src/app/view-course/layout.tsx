@@ -13,6 +13,14 @@ interface ViewCourseLayoutProps {
  */
 export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
   const [isOverlaySidebarOpen, setIsOverlaySidebarOpen] = useState(false);
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (typeof history !== 'undefined' && (history as any).scrollRestoration !== undefined) {
+        (history as any).scrollRestoration = 'manual';
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, []);
 
   const handleToggleOverlaySidebar = () => {
     setIsOverlaySidebarOpen(prev => !prev);
@@ -37,7 +45,7 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
           onSearch={handleSearch}
         />
       </div>
-      
+
       {/* Overlay Sidebar - only on desktop */}
       <div className="hidden lg:block">
         <OverlaySidebar
@@ -45,12 +53,12 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
           onClose={handleCloseOverlaySidebar}
         />
       </div>
-      
+
       {/* Mobile/Tablet Sticky Header */}
       <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200 py-[3px]">
         <div className="flex items-center justify-between">
           {/* Back Arrow */}
-          <button 
+          <button
             onClick={() => window.history.back()}
             className="w-10 h-10 rounded-full flex items-center justify-center transition-colors
 "
@@ -59,7 +67,7 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          
+
           {/* Ellipsis Menu */}
           <button className="w-10 h-10 rounded-full flex items-center justify-center transition-colors">
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +76,7 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
           </button>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="bg-white">
         {children}

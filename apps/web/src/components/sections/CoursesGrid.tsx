@@ -48,7 +48,7 @@ const CourseCard = ({ course }: CourseCardProps): React.ReactNode => {
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
 
   return (
-    <LinkComponent href={`/view-course/${course.id}`} className="group cursor-pointer block">
+    <LinkComponent href={`/view-course/${course.id}`} scroll className="group cursor-pointer block">
       <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
         {imageUrl ? (
           <img

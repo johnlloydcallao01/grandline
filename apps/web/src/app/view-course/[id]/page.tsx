@@ -1,37 +1,85 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
-import { getCourseByIdWithInstructor } from '@/server';
+"use client";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import ViewCourseClient from './ViewCourseClient';
+import type { CourseWithInstructor } from '@/types/course';
 
-// ISR configuration - revalidate every 5 minutes
-export const revalidate = 300;
+export default function ViewCoursePage() {
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
+  const [course, setCourse] = useState<CourseWithInstructor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-interface ViewCoursePageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (typeof history !== 'undefined' && (history as any).scrollRestoration !== undefined) {
+        (history as any).scrollRestoration = 'manual';
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, []);
 
+  useEffect(() => {
+    let active = true;
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`/api/courses/${id}`, {
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+        });
+        if (!res.ok) {
+          if (active) {
+            setError('Failed to load course');
+            setCourse(null);
+          }
+          return;
+        }
+        const data: CourseWithInstructor = await res.json();
+        if (active) {
+          setCourse(data);
+        }
+      } catch {
+        if (active) {
+          setError('Network error');
+          setCourse(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+    if (id) fetchCourse();
+    return () => { active = false; };
+  }, [id]);
 
-
-/**
- * Server-side course view page with ISR - FULLY ISR OPTIMIZED
- * 
- * PERFORMANCE OPTIMIZED: Course data is pre-fetched server-side with ISR.
- * This eliminates client-side loading states and provides optimal SEO performance.
- */
-export default async function ViewCoursePage({ params }: ViewCoursePageProps) {
-  // Resolve params server-side
-  const resolvedParams = await params;
-  
-  // Fetch course data server-side with ISR using centralized service
-  const course = await getCourseByIdWithInstructor(resolvedParams.id);
-  
-  if (!course) {
-    notFound();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="w-full px-[10px] md:px-[15px] pt-4 pb-4">
+          <div className="h-6 w-1/3 bg-gray-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="w-full bg-gray-50">
+          <div className="max-w-7xl px-2.5 md:px-4 py-6">
+            <div className="h-6 bg-gray-200 rounded w-2/3 animate-pulse mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <ViewCourseClient course={course} />
-  );
+  if (error || !course) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="w-full px-[10px] py-10 text-center text-gray-600">Course not available</div>
+      </div>
+    );
+  }
+
+  return <ViewCourseClient course={course} />;
 }

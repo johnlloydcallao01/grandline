@@ -1,5 +1,6 @@
 "use client"
 import React, { useRef, useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import type { Course } from "@/types/course"
 
 function CourseCardSkeleton() {
@@ -21,7 +22,7 @@ function CourseCard({ course }: { course: Course }) {
   const altText = media?.alt || `${course.title} thumbnail`
 
   return (
-    <a href={`/view-course/${course.id}`} className="w-64 flex-shrink-0 block">
+    <Link href={`/view-course/${course.id}`} scroll className="w-64 flex-shrink-0 block">
       <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
         {imageUrl ? (
           <img
@@ -51,7 +52,7 @@ function CourseCard({ course }: { course: Course }) {
           <p className="text-sm text-gray-600 overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{course.excerpt}</p>
         ) : null}
       </div>
-    </a>
+    </Link>
   )
 }
 

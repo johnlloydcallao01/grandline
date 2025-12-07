@@ -23,7 +23,6 @@ import {
   emitAuthEvent,
   startSessionMonitoring,
   monitorSessionExpiration,
-  hasValidStoredToken,
 } from '@/lib/auth';
 
 // ========================================
@@ -164,22 +163,20 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
 
   const initializeAuth = useCallback(async () => {
     try {
-      // Check for stored token first (quick check)
-      const hasToken = hasValidStoredToken();
-
-      if (hasToken) {
-        // Set authenticated immediately to prevent signin flash
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: { email: 'validating...' } as any } });
-
-        // Validate token with server in background
-        const user = await getCurrentUser();
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
-
-        if (user) {
-          emitAuthEvent('session_restored', { user });
+      let initialUser: User | null = null;
+      try {
+        const cached = localStorage.getItem('grandline_auth_user');
+        if (cached) {
+          initialUser = JSON.parse(cached);
+          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser } });
         }
-      } else {
-        dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: null } });
+      } catch { void 0; }
+
+      const user = await getCurrentUser();
+      dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
+
+      if (user) {
+        emitAuthEvent('session_restored', { user });
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize authentication';
@@ -266,10 +263,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
 
     // Listen for custom auth events
     const handleAuthEvent = (e: CustomEvent) => {
-      if (e.type === 'auth:logout') {
+      if (e.type === 'auth:logout' || e.type === 'auth:session_expired') {
         handleSessionExpired();
       }
-      // Removed 'auth:session_expired' to prevent infinite loop
     };
 
     // Start session monitoring
