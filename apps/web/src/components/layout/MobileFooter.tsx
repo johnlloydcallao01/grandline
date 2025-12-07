@@ -7,7 +7,11 @@ import { useRouter, usePathname } from 'next/navigation';
  * Mobile app-like sticky footer navigation
  * Only visible on mobile devices (hidden on tablet and desktop)
  */
-export function MobileFooter() {
+interface MobileFooterProps {
+  hideAt?: 'md' | 'lg'
+}
+
+export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -57,7 +61,7 @@ export function MobileFooter() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:hidden h-[55px]">
+    <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 h-[55px] ${hideAt === 'lg' ? 'lg:hidden' : 'md:hidden'}`}>
       <div className="flex items-center justify-around h-full px-1">
         {navigationItems.map((item) => (
           <button

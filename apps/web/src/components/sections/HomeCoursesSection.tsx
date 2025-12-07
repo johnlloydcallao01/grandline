@@ -7,10 +7,9 @@ import { CoursesCarousel } from '@/components/sections/CoursesCarousel';
 import { useCourses } from '@/hooks/useCourses';
 import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCourseCategories } from '@/hooks/useCourseCategories';
-import { CategoryCircleSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 
-export function HomeCoursesSection() {
+export function HomeCoursesSection({ categories }: { categories: CourseCategory[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialIdFromUrl = (() => {
@@ -60,7 +59,6 @@ export function HomeCoursesSection() {
   }, [showFeatured, isLoadingFeatured, isLoadingMoreFeatured, hasMoreFeatured, featuredDisplay.length, loadMoreFeatured]);
 
 
-  const { categories, isLoading: loadingCategories } = useCourseCategories();
   useEffect(() => {
     const updateViewport = () => setIsMobile(window.innerWidth < 1024);
     updateViewport();
@@ -86,27 +84,21 @@ export function HomeCoursesSection() {
   return (
     <div className="bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
       <div className="bg-white border-b border-gray-200">
-        {loadingCategories ? (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex space-x-6 overflow-hidden">
-            {Array.from({ length: 8 }).map((_, i) => (<CategoryCircleSkeleton key={i} />))}
-          </div>
-        ) : (
-          <CourseCategoryCarousel
-            categories={categories as CourseCategory[]}
-            onCategoryChange={(id) => {
-              setCategoryId(id);
-              const params = new URLSearchParams(searchParams.toString());
-              if (typeof id === 'number') {
-                params.set('course-category', String(id));
-                router.replace(`/?${params.toString()}`, { scroll: false });
-              } else {
-                params.delete('course-category');
-                const qs = params.toString();
-                router.replace(qs ? `/?${qs}` : '/', { scroll: false });
-              }
-            }}
-          />
-        )}
+        <CourseCategoryCarousel
+          categories={categories as CourseCategory[]}
+          onCategoryChange={(id) => {
+            setCategoryId(id);
+            const params = new URLSearchParams(searchParams.toString());
+            if (typeof id === 'number') {
+              params.set('course-category', String(id));
+              router.replace(`/?${params.toString()}`, { scroll: false });
+            } else {
+              params.delete('course-category');
+              const qs = params.toString();
+              router.replace(qs ? `/?${qs}` : '/', { scroll: false });
+            }
+          }}
+        />
       </div>
       <div className="hidden lg:block">
         <CoursesGrid

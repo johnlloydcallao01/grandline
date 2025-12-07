@@ -15,7 +15,7 @@ export function HomePageSkeleton() {
     <>
       {/* Category Carousel Skeleton */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="w-full px-2.5 py-4">
           <div className="flex space-x-6 overflow-hidden">
             {Array.from({ length: 8 }).map((_, index) => (
               <CategoryCircleSkeleton key={index} />

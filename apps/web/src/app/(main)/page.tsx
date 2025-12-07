@@ -1,6 +1,7 @@
 import React from "react";
 import { HeroSection } from "@/components/sections";
 import { HomeCoursesSection } from "@/components/sections/HomeCoursesSection";
+import { getCourseCategories } from "@/server";
 
 /**
  * Home page component - FULLY ISR OPTIMIZED
@@ -10,12 +11,13 @@ import { HomeCoursesSection } from "@/components/sections/HomeCoursesSection";
  * and provides optimal SEO performance.
  */
 export default async function Home() {
+  const categories = await getCourseCategories(50);
   return (
     <div className="bg-gray-50 lg:min-h-screen home-no-min" style={{ backgroundColor: '#f9fafb' }}>
       {/* Hero Section */}
       <HeroSection />
 
-      <HomeCoursesSection />
+      <HomeCoursesSection categories={categories} />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth';
+import { MobileFooter } from '@/components/layout';
 
 /**
  * Standalone layout for full-page course listings
@@ -45,6 +46,8 @@ export default function CoursesLayout({
         <main className="flex-1">
           {children}
         </main>
+
+        <MobileFooter hideAt="lg" />
       </div>
     </ProtectedRoute>
   );
