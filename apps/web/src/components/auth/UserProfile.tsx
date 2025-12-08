@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUser, useLogout } from '@/hooks/useAuth';
 
@@ -178,12 +179,14 @@ export function LogoutButton({
   onLogoutComplete
 }: LogoutButtonProps) {
   const { logout, isLoggingOut } = useLogout();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       onLogoutStart?.();
       await logout();
       onLogoutComplete?.();
+      router.replace('/signin' as any);
     } catch (error) {
       console.error('Logout failed:', error);
     }

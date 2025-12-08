@@ -166,6 +166,7 @@ export default function MenuPage() {
               onClick={async () => {
                 try {
                   await logout();
+                  router.replace('/signin' as any);
                 } catch (error) {
                   console.error('Logout failed:', error);
                 }

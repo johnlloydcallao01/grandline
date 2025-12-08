@@ -42,17 +42,32 @@ export const ProtectedRoute = ({
     }
   }, [shouldRedirectToLogin, redirectTo, router]);
 
-  // Show loading while checking authentication
   if (isCheckingAuth) {
-    return fallback || null;
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Checking authentication...</p>
+          </div>
+        </div>
+      )
+    );
   }
 
-  // Don't render children if not authenticated
   if (!isAuthenticated) {
-    return null;
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecting to sign in...</p>
+          </div>
+        </div>
+      )
+    );
   }
 
-  // Render protected content
   return <>{children}</>;
 };
 
@@ -83,7 +98,7 @@ export function withAuth<P extends object>(
   };
 
   WrappedComponent.displayName = `withAuth(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }
 
@@ -120,7 +135,7 @@ export const RoleProtectedRoute = ({
       if (currentPath !== redirectTo) {
         sessionStorage.setItem('auth:redirectAfterLogin', currentPath);
       }
-      
+
       router.replace(redirectTo as any);
     }
   }, [shouldRedirectToLogin, redirectTo, router]);
@@ -143,7 +158,7 @@ export const RoleProtectedRoute = ({
     if (FallbackComponent) {
       return React.createElement(FallbackComponent);
     }
-    
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">

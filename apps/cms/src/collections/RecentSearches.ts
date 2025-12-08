@@ -27,9 +27,9 @@ export const RecentSearches: CollectionConfig = {
             name: 'scope',
             type: 'select',
             options: [
-                { label: 'restaurants', value: 'restaurants' },
+                { label: 'courses', value: 'courses' },
             ],
-            defaultValue: 'restaurants',
+            defaultValue: 'courses',
             required: true,
         },
         {
