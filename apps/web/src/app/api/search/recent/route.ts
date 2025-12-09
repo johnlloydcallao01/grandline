@@ -10,14 +10,25 @@ export async function POST(request: NextRequest) {
     const deviceId = request.headers.get('user-agent') || null
     if (!keyword || !userId || !apiKey) return NextResponse.json({ error: 'invalid' }, { status: 400 })
 
+    const normalized = keyword.toLowerCase().replace(/\s+/g, ' ')
+    const scope = 'courses'
+    const compositeKey = `${userId}:${normalized}:${scope}`
+
     const res = await fetch(`${apiUrl}/recent-searches`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `users API-Key ${apiKey}`,
-        'PAYLOAD_API_KEY': apiKey,
       },
-      body: JSON.stringify({ keyword, userId, deviceId }),
+      body: JSON.stringify({
+        user: userId,
+        query: keyword,
+        normalizedQuery: normalized,
+        scope,
+        compositeKey,
+        deviceId,
+        source: 'unknown',
+      }),
     })
 
     if (!res.ok) return NextResponse.json({ error: 'cms_error' }, { status: res.status })

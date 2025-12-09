@@ -14,6 +14,8 @@ export function DesktopSearchDropdown(): React.ReactNode {
     query,
     recentKeywords,
     search,
+    saveRecentKeyword,
+    persistRecentKeyword,
   } = useSearch()
 
   if (!isDropdownOpen) return null
@@ -30,7 +32,15 @@ export function DesktopSearchDropdown(): React.ReactNode {
               <ul className="divide-y divide-gray-100">
                 {recentKeywords.map((kw, idx) => (
                   <li key={`${kw}-${idx}`} className="p-3 hover:bg-gray-50">
-                    <button type="button" onClick={() => search(kw)} className="flex items-center gap-3 w-full text-left">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        saveRecentKeyword(kw)
+                        await persistRecentKeyword(kw)
+                        await search(kw)
+                      }}
+                      className="flex items-center gap-3 w-full text-left"
+                    >
                       <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
                         <i className="fa fa-search"></i>
                       </div>

@@ -124,9 +124,9 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    await search(query)
     saveRecentKeyword(query)
     await persistRecentKeyword(query)
+    await search(query)
     if (onSearch) {
       onSearch(query)
     }

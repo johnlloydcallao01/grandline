@@ -18,6 +18,8 @@ export function MobileSearchOverlay(): React.ReactNode {
     recentKeywords,
     search,
     loadRecentKeywords,
+    saveRecentKeyword,
+    persistRecentKeyword,
   } = useSearch()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -64,7 +66,15 @@ export function MobileSearchOverlay(): React.ReactNode {
                 <ul className="divide-y divide-gray-100">
                   {recentKeywords.map((kw, idx) => (
                     <li key={`${kw}-${idx}`} className="p-4">
-                      <button type="button" onClick={() => search(kw)} className="flex items-center gap-3 w-full text-left">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          saveRecentKeyword(kw)
+                          await persistRecentKeyword(kw)
+                          await search(kw)
+                        }}
+                        className="flex items-center gap-3 w-full text-left"
+                      >
                         <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
                           <i className="fa fa-search"></i>
                         </div>

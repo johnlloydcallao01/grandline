@@ -1,71 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
+import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+async function getServiceUser(request: NextRequest) {
+    const authHeader = request.headers.get('authorization') || ''
+    const match = authHeader.match(/^users API-Key (.+)$/)
+    if (!match) return null
+
+    const payload = await getPayload({ config: configPromise })
+    const users = await payload.find({
+        collection: 'users',
+        where: {
+            apiKey: { equals: match[1] },
+            role: { in: ['service', 'admin'] },
+            isActive: { equals: true },
+        },
+        limit: 1,
+        depth: 0,
+    })
+
+    return users.docs[0] || null
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        const payload = await getPayload({ config: configPromise })
+        const { searchParams } = new URL(request.url)
+
+        const where: Where = {}
+        const limit = parseInt(searchParams.get('limit') || '10')
+        const page = parseInt(searchParams.get('page') || '1')
+
+        const userEq = searchParams.get('where[user][equals]')
+        if (userEq) {
+            const num = Number(userEq)
+            where.user = { equals: Number.isNaN(num) ? userEq : num }
+        }
+
+        const compositeEq = searchParams.get('where[compositeKey][equals]')
+        if (compositeEq) {
+            where.compositeKey = { equals: compositeEq }
+        }
+
+        const results = await payload.find({
+            collection: 'recent-searches',
+            where,
+            limit,
+            page,
+            depth: 2,
+            sort: '-updatedAt',
+        })
+
+        return NextResponse.json(results)
+    } catch (_error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200, headers: corsHeaders })
+    return new NextResponse(null, { status: 200 })
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const payload = await getPayload({ config: configPromise })
-    const authHeader = request.headers.get('authorization') || ''
-    const apiKeyHeader = request.headers.get('PAYLOAD_API_KEY') || ''
-    const match = authHeader.match(/^users API-Key (.+)$/)
-    const apiKey = match ? match[1] : apiKeyHeader
-    if (!apiKey) return NextResponse.json({ error: 'unauthorized' }, { status: 401, headers: corsHeaders })
-    const users = await payload.find({ collection: 'users', where: { apiKey: { equals: apiKey }, role: { in: ['service', 'admin'] } }, limit: 1, depth: 0 })
-    if (users.docs.length !== 1) return NextResponse.json({ error: 'unauthorized' }, { status: 401, headers: corsHeaders })
+    try {
+        const serviceUser = await getServiceUser(request)
+        const serverKey = request.headers.get('PAYLOAD_API_KEY')
+        const hasServerAccess = !!serverKey
 
-    const body = await request.json()
-    const keyword = String(body?.keyword || '').trim()
-    const userId = Number(body?.userId || 0)
-    const deviceId = body?.deviceId ? String(body.deviceId) : null
-    if (!keyword || !userId) return NextResponse.json({ error: 'invalid' }, { status: 400, headers: corsHeaders })
+        const payload = await getPayload({ config: configPromise })
+        const body = await request.json()
+        const q = String(body.query || '').trim()
+        const normalized = q.toLowerCase().replace(/\s+/g, ' ')
 
-    const traineeCheck = await payload.find({ collection: 'users', where: { id: { equals: userId }, role: { equals: 'trainee' } }, limit: 1, depth: 0 })
-    if (traineeCheck.docs.length !== 1) return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: corsHeaders })
+        if (!serviceUser && !hasServerAccess) {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+        }
 
-    const normalized = keyword.toLowerCase().replace(/\s+/g, ' ')
-    const scope = 'courses'
-    const composite = `${userId}:${normalized}:${scope}`
+        const created = await payload.create({
+            collection: 'recent-searches',
+            data: {
+                user: body.user,
+                query: q,
+                normalizedQuery: normalized,
+                frequency: body.frequency ?? 1,
+                scope: body.scope || 'courses',
+                source: body.source || 'unknown',
+                deviceId: body.deviceId || null,
+            },
+            ...(serviceUser ? { user: serviceUser } : { overrideAccess: true }),
+        })
 
-    const existing = await payload.find({ collection: 'recent-searches', where: { compositeKey: { equals: composite } }, limit: 1, depth: 0 })
-    if (existing.docs.length === 0) {
-      await payload.create({
-        collection: 'recent-searches',
-        data: {
-          user: userId,
-          query: keyword,
-          normalizedQuery: normalized,
-          scope,
-          compositeKey: composite,
-          frequency: 1,
-          source: 'unknown',
-          deviceId,
-        },
-      })
-    } else {
-      const doc = existing.docs[0] as any
-      await payload.update({
-        collection: 'recent-searches',
-        id: doc.id,
-        data: {
-          query: keyword,
-          frequency: (doc.frequency || 1) + 1,
-          deviceId: deviceId ?? doc.deviceId ?? null,
-        },
-      })
+        return NextResponse.json(
+            { doc: created, message: 'Recent Search successfully created.' },
+            { status: 201 },
+        )
+    } catch (_error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
-
-    return NextResponse.json({ ok: true }, { status: 200, headers: corsHeaders })
-  } catch (error) {
-    return NextResponse.json({ error: 'server_error', details: error instanceof Error ? error.message : String(error) }, { status: 500, headers: corsHeaders })
-  }
 }
+
