@@ -80,7 +80,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [query, setDropdownOpen, setMode])
 
   useEffect(() => {
     const handleScroll = () => {

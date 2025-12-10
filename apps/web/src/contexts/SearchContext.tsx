@@ -123,19 +123,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const cached = cache.get(v)
     if (cached && now - cached.ts < 60000) {
       setResults(cached.data)
+      setMode('results')
       return
     }
     if (abortRef.current) abortRef.current.abort()
     const ac = new AbortController()
     abortRef.current = ac
     setLoading(true)
+    setMode('results')
     try {
       const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
       const json = await resp.json()
       const data: SearchResult[] = json.results || []
       setResults(data)
       cache.set(v, { ts: Date.now(), data })
-      setMode('results')
     } catch (e: any) {
       if (e?.name !== 'AbortError') setError('Search failed')
       setResults([])
@@ -169,12 +170,12 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const ac = new AbortController()
     abortRef.current = ac
     setLoading(true)
+    setMode('results')
     try {
       const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
       const json = await resp.json()
       const data: SearchResult[] = json.results || []
       setResults(data)
-      setMode('results')
     } catch (e: any) {
       if (e?.name !== 'AbortError') setError('Search failed')
       setResults([])
