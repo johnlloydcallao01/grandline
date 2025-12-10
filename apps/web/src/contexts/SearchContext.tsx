@@ -19,9 +19,12 @@ interface SearchContextValue {
   isOverlayOpen: boolean
   setOverlayOpen: (v: boolean) => void
   isLoading: boolean
+  isRecentLoading: boolean
   error?: string
   selectIndex: number
   setSelectIndex: (i: number) => void
+  isTyping: boolean
+  setTyping: (v: boolean) => void
   search: (q: string) => Promise<void>
   getSuggestions: (q: string) => Promise<Suggestion[]>
   searchByCategory: (categoryLabel: string) => Promise<void>
@@ -46,42 +49,43 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const [isOverlayOpen, setOverlayOpen] = useState(false)
   const [isLoading, setLoading] = useState(false)
+  const [isRecentLoading, setRecentLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [selectIndex, setSelectIndex] = useState(0)
   const abortRef = useRef<AbortController | null>(null)
+  const [isTyping, setTyping] = useState(false)
+  const suggSeqRef = useRef(0)
   const { user } = useUser()
 
   const loadRecentKeywords = () => {
     try {
-      const raw = localStorage.getItem('search:recentKeywords')
-      if (raw) setRecentKeywords(JSON.parse(raw))
+      if (user && user.role === 'trainee') {
+        setRecentLoading(true)
+        fetch(`/api/search/recent?userId=${encodeURIComponent(String(user.id))}`)
+          .then(r => r.json())
+          .then(j => {
+            const remote = Array.isArray(j?.keywords) ? j.keywords as string[] : []
+            setRecentKeywords(remote)
+          })
+          .catch(() => setRecentKeywords([]))
+          .finally(() => setRecentLoading(false))
+      } else {
+        setRecentKeywords([])
+        setRecentLoading(false)
+      }
     } catch (_e) { void 0 }
   }
 
-  const saveRecentKeyword = (kw: string) => {
-    try {
-      const v = kw.trim()
-      if (!v) return
-      const next = [v, ...recentKeywords.filter(k => k.toLowerCase() !== v.toLowerCase())].slice(0, 10)
-      setRecentKeywords(next)
-      localStorage.setItem('search:recentKeywords', JSON.stringify(next))
-    } catch (_e) { void 0 }
+  const saveRecentKeyword = (_kw: string) => {
+    try { void 0 } catch (_e) { void 0 }
   }
 
-  const removeRecentKeyword = (kw: string) => {
-    try {
-      const v = kw.trim()
-      const next = recentKeywords.filter(k => k.toLowerCase() !== v.toLowerCase())
-      setRecentKeywords(next)
-      localStorage.setItem('search:recentKeywords', JSON.stringify(next))
-    } catch (_e) { void 0 }
+  const removeRecentKeyword = (_kw: string) => {
+    try { void 0 } catch (_e) { void 0 }
   }
 
   const clearRecentKeywords = () => {
-    try {
-      setRecentKeywords([])
-      localStorage.removeItem('search:recentKeywords')
-    } catch (_e) { void 0 }
+    try { setRecentKeywords([]) } catch (_e) { void 0 }
   }
 
   const persistRecentKeyword = async (kw: string) => {
@@ -94,6 +98,15 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keyword: v, userId: user.id }),
       })
+      setRecentLoading(true)
+      await fetch(`/api/search/recent?userId=${encodeURIComponent(String(user.id))}`)
+        .then(r => r.json())
+        .then(j => {
+          const remote = Array.isArray(j?.keywords) ? j.keywords as string[] : []
+          setRecentKeywords(remote)
+        })
+        .catch(() => void 0)
+        .finally(() => setRecentLoading(false))
     } catch (_e) { void 0 }
   }
 
@@ -101,6 +114,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const v = q.trim().toLowerCase().replace(/\s+/g, ' ')
     setQuery(v)
     setError(undefined)
+    setTyping(false)
     if (v.length < 2) {
       setResults([])
       return
@@ -132,14 +146,17 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
   const getSuggestions = async (q: string) => {
     try {
+      const seq = ++suggSeqRef.current
       const resp = await fetch(`/api/search/suggestions?q=${encodeURIComponent(q)}`)
       const json = await resp.json()
       const items: Suggestion[] = json.suggestions || []
-      setSuggestions(items)
-      setMode('suggestions')
+      if (suggSeqRef.current === seq && isTyping) {
+        setSuggestions(items)
+        setMode('suggestions')
+      }
       return items
     } catch {
-      setSuggestions([])
+      if (isTyping) setSuggestions([])
       return []
     }
   }
@@ -167,6 +184,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   }
 
   const onSuggestionClick = async (s: Suggestion) => {
+    setTyping(false)
     if (s.kind === 'category') {
       saveRecentKeyword(s.label)
       await persistRecentKeyword(s.label)
@@ -187,7 +205,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     isDropdownOpen, setDropdownOpen,
     isOverlayOpen, setOverlayOpen,
     isLoading, error,
+    isRecentLoading,
     selectIndex, setSelectIndex,
+    isTyping, setTyping,
     search,
     getSuggestions,
     searchByCategory,

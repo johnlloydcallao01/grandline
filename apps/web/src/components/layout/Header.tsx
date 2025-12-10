@@ -36,8 +36,8 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const { user, displayName } = useUser()
   const { logout, isLoggingOut } = useLogout()
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, search, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword } = useSearch()
+  const searchRef = useRef<HTMLFormElement>(null)
+  const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, search, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
 
   const handleMyPortalClick = () => {
     router.push('/portal')
@@ -64,14 +64,14 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
       }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setDropdownOpen(false)
-        setMode('suggestions')
+        if (query.trim().length === 0) setMode('suggestions')
       }
     }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsProfileDropdownOpen(false)
         setDropdownOpen(false)
-        setMode('suggestions')
+        if (query.trim().length === 0) setMode('suggestions')
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -124,6 +124,15 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
+    const v = query.trim()
+    setDropdownOpen(true)
+    setTyping(false)
+    if (v.length < 2) {
+      setMode('suggestions')
+      loadRecentKeywords()
+      return
+    }
+    setMode('results')
     saveRecentKeyword(query)
     await persistRecentKeyword(query)
     await search(query)
@@ -156,23 +165,39 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
         </div>
 
         <div className="flex flex-1 max-w-2xl mx-8">
-          <form onSubmit={handleSearch} className="flex w-full">
-            <div className="flex-1 relative" ref={searchRef}>
+          <form ref={searchRef} onSubmit={handleSearch} className="flex w-full">
+            <div className="flex-1 relative">
               <input
                 type="text"
                 placeholder="Search"
                 value={query}
-                onFocus={() => { setDropdownOpen(true); loadRecentKeywords(); getSuggestions(query); }}
+                onFocus={() => {
+                  setDropdownOpen(true)
+                  const hasQuery = query.trim().length > 0
+                  loadRecentKeywords()
+                  setMode(hasQuery ? 'results' : 'suggestions')
+                }}
                 onChange={e => {
                   const v = (e.target as HTMLInputElement).value
                   setQuery(v)
+                  setTyping(true)
                   getSuggestions(v)
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] text-gray-900 placeholder-gray-500"
               />
+              {query.trim().length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false) }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                  aria-label="Clear"
+                >
+                  <i className="fa fa-times"></i>
+                </button>
+              )}
               <DesktopSearchDropdown />
             </div>
-            <button type="submit" className="px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700" aria-label="Search">
+            <button type="submit" className="px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700 focus:outline-none" aria-label="Search">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </button>
           </form>
