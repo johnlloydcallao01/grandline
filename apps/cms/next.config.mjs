@@ -12,18 +12,9 @@ const nextConfig = {
       },
     ]
   },
-  // Security headers and CORS configuration
+  // Security headers
   async headers() {
     return [
-      {
-        source: '/api/(.*)',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: `${process.env.ADMIN_PROD_URL},${process.env.ADMIN_LOCAL_URL},${process.env.WEB_PROD_URL},${process.env.WEB_LOCAL_URL}` },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization,X-Requested-With' },
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-        ],
-      },
       {
         source: '/(.*)',
         headers: [

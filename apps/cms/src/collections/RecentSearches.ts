@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 export const RecentSearches: CollectionConfig = {
   slug: 'recent-searches',
+  lockDocuments: false, // Disable document locking - not needed for search history
   admin: {
     useAsTitle: 'query',
     defaultColumns: ['user', 'query', 'scope', 'frequency', 'updatedAt'],
@@ -24,61 +25,55 @@ export const RecentSearches: CollectionConfig = {
       return user?.role === 'service' || user?.role === 'admin' || false
     },
     delete: ({ req: { user } }) => {
-      return user?.role === 'admin' || false
+      return user?.role === 'service' || user?.role === 'admin' || false
     },
   },
   fields: [
-        {
-            name: 'user',
-            type: 'relationship',
-            relationTo: 'users',
-            required: true,
-        },
-        {
-            name: 'query',
-            type: 'text',
-            required: true,
-        },
-        {
-            name: 'normalizedQuery',
-            type: 'text',
-            required: true,
-        },
-        {
-            name: 'scope',
-            type: 'select',
-            options: [
-                { label: 'courses', value: 'courses' },
-            ],
-            defaultValue: 'courses',
-            required: true,
-        },
-        {
-            name: 'compositeKey',
-            type: 'text',
-            unique: true,
-        },
-        {
-            name: 'frequency',
-            type: 'number',
-            required: true,
-            defaultValue: 1,
-        },
-        {
-            name: 'source',
-            type: 'select',
-            options: [
-                { label: 'unknown', value: 'unknown' },
-            ],
-            defaultValue: 'unknown',
-        },
+    {
+      name: 'user',
+      type: 'relationship',
+      relationTo: 'users',
+      required: true,
+    },
+    {
+      name: 'query',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'normalizedQuery',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'scope',
+      type: 'text',
+      defaultValue: 'courses',
+      required: true,
+    },
+    {
+      name: 'compositeKey',
+      type: 'text',
+      unique: true,
+    },
+    {
+      name: 'frequency',
+      type: 'number',
+      required: true,
+      defaultValue: 1,
+    },
+    {
+      name: 'source',
+      type: 'text',
+      defaultValue: 'unknown',
+    },
     {
       name: 'deviceId',
       type: 'text',
     },
   ],
   hooks: {
-    beforeValidate: [
+    beforeChange: [
       ({ data }) => {
         if (!data) return data
         const q = String(data.query || '').trim()

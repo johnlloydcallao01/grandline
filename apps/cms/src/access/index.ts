@@ -50,7 +50,9 @@ export const authenticatedUsers: Access = ({ req: { user } }) => {
  * Allows access if valid API key is provided in Authorization header
  */
 export const apiKeyOnly: Access = async ({ req }) => {
-  const authHeader = req.headers?.get('authorization')
+  const authHeader = typeof (req as any)?.headers?.get === 'function'
+    ? (req as any).headers.get('authorization')
+    : ((req as any)?.headers?.authorization || (req as any)?.headers?.Authorization)
   if (!authHeader) return false
   
   // Check for API key format: "users API-Key <key>"

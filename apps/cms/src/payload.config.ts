@@ -58,7 +58,7 @@ export default buildConfig({
     RecentSearches,
   ],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',
   cors: [
     // Production web-admin
     process.env.ADMIN_PROD_URL!,

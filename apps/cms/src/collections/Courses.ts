@@ -19,7 +19,7 @@ export const Courses: CollectionConfig = {
           return true
         }
       }
-      
+
       // Block all unauthenticated requests and other roles
       return false
     },

@@ -16,8 +16,8 @@ export const Users: CollectionConfig = {
     cookies: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
-      domain: process.env.NODE_ENV === 'production' 
-        ? process.env.COOKIE_DOMAIN 
+      domain: process.env.NODE_ENV === 'production'
+        ? process.env.COOKIE_DOMAIN
         : undefined,
     },
   },
@@ -29,79 +29,15 @@ export const Users: CollectionConfig = {
       if (user?.role === 'admin') return true;
       return { id: { equals: user?.id } };
     },
-    delete: adminOnly, // Only admins can delete users
+    delete: ({ req: { user } }) => {
+      if (user?.role === 'admin' || user?.role === 'service') return true;
+      return false;
+    },
   },
   hooks: {
     beforeDelete: [
-      async ({ req, id }) => {
+      async ({ id }) => {
         console.log(`🗑️ Attempting to delete user ${id}`);
-
-        // Delete related records first to avoid foreign key constraint errors
-        const payload = req.payload;
-
-        try {
-          // Delete related trainee records
-          const trainees = await payload.find({
-            collection: 'trainees',
-            where: { user: { equals: id } },
-          });
-
-          for (const trainee of trainees.docs) {
-            console.log(`🗑️ Deleting trainee record ${trainee.id}`);
-            await payload.delete({
-              collection: 'trainees',
-              id: trainee.id,
-            });
-          }
-
-          // Delete related emergency contacts
-          const emergencyContacts = await payload.find({
-            collection: 'emergency-contacts',
-            where: { user: { equals: id } },
-          });
-
-          for (const contact of emergencyContacts.docs) {
-            console.log(`🗑️ Deleting emergency contact ${contact.id}`);
-            await payload.delete({
-              collection: 'emergency-contacts',
-              id: contact.id,
-            });
-          }
-
-          // Delete related instructor records
-          const instructors = await payload.find({
-            collection: 'instructors',
-            where: { user: { equals: id } },
-          });
-
-          for (const instructor of instructors.docs) {
-            console.log(`🗑️ Deleting instructor record ${instructor.id}`);
-            await payload.delete({
-              collection: 'instructors',
-              id: instructor.id,
-            });
-          }
-
-          // Delete related admin records
-          const admins = await payload.find({
-            collection: 'admins',
-            where: { user: { equals: id } },
-          });
-
-          for (const admin of admins.docs) {
-            console.log(`🗑️ Deleting admin record ${admin.id}`);
-            await payload.delete({
-              collection: 'admins',
-              id: admin.id,
-            });
-          }
-
-          console.log(`✅ Successfully cleaned up related records for user ${id}`);
-        } catch (error) {
-          console.error(`❌ Error cleaning up related records for user ${id}:`, error);
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-          throw new Error(`Failed to delete user: ${errorMessage}`);
-        }
       },
     ],
   },

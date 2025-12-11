@@ -43,7 +43,6 @@ export function SearchList(): React.ReactNode {
         suggestions,
         results,
         onSuggestionClick,
-        setMode,
         query,
         recentKeywords,
         search,
@@ -91,7 +90,7 @@ export function SearchList(): React.ReactNode {
                     )}
                     {query.trim().length === 0 ? (
                         recentKeywords.length === 0 ? (
-                            isRecentLoading ? (
+                            (isRecentLoading || isLoading) ? (
                                 <ul className="divide-y divide-gray-100">
                                     {Array.from({ length: 4 }).map((_, idx) => (
                                         <li key={idx} className="p-3">
@@ -133,9 +132,8 @@ export function SearchList(): React.ReactNode {
                 </div>
             ) : (
                 <div>
-                    <div className="flex items-center justify-between p-2 border-b border-gray-100">
+                    <div className="p-2 border-b border-gray-100">
                         <div className="text-xs text-gray-500">Results for "{query}"</div>
-                        <button type="button" onClick={() => setMode('suggestions')} className="text-xs text-blue-600 hover:underline">Back</button>
                     </div>
                     {isLoading ? (
                         <ul className="divide-y divide-gray-100">

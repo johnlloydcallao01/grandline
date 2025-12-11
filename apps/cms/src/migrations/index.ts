@@ -29,6 +29,14 @@ import * as migration_20250916_103718 from './20250916_103718';
 import * as migration_20251204_112549_enable_multiple_categories from './20251204_112549_enable_multiple_categories';
 import * as migration_20251206_135946 from './20251206_135946';
 import * as migration_20251207_131842 from './20251207_131842';
+import * as migration_20251208_181200_change_recent_searches_scope_to_text from './20251208_181200_change_recent_searches_scope_to_text';
+import * as migration_20251211_134800_fk_cascade from './20251211_134800_fk_cascade';
+import * as migration_20251211_140410_courses_instructor_cascade from './20251211_140410_courses_instructor_cascade';
+import * as migration_20251211_155634 from './20251211_155634';
+import * as migration_20251211_fix_cleanup_service_role from './20251211_fix_cleanup_service_role';
+import * as migration_20251211_fix_users_api_keys from './20251211_fix_users_api_keys';
+import * as migration_20251212_000000_fix_remaining_fks from './20251212_000000_fix_remaining_fks';
+import * as migration_20251212_000001_force_cascade_delete from './20251212_000001_force_cascade_delete';
 
 export const migrations = [
   {
@@ -184,6 +192,46 @@ export const migrations = [
   {
     up: migration_20251207_131842.up,
     down: migration_20251207_131842.down,
-    name: '20251207_131842'
+    name: '20251207_131842',
+  },
+  {
+    up: migration_20251208_181200_change_recent_searches_scope_to_text.up,
+    down: migration_20251208_181200_change_recent_searches_scope_to_text.down,
+    name: '20251208_181200_change_recent_searches_scope_to_text',
+  },
+  {
+    up: migration_20251211_134800_fk_cascade.up,
+    down: migration_20251211_134800_fk_cascade.down,
+    name: '20251211_134800_fk_cascade',
+  },
+  {
+    up: migration_20251211_140410_courses_instructor_cascade.up,
+    down: migration_20251211_140410_courses_instructor_cascade.down,
+    name: '20251211_140410_courses_instructor_cascade',
+  },
+  {
+    up: migration_20251211_155634.up,
+    down: migration_20251211_155634.down,
+    name: '20251211_155634',
+  },
+  {
+    up: migration_20251211_fix_cleanup_service_role.up,
+    down: migration_20251211_fix_cleanup_service_role.down,
+    name: '20251211_fix_cleanup_service_role',
+  },
+  {
+    up: migration_20251211_fix_users_api_keys.up,
+    down: migration_20251211_fix_users_api_keys.down,
+    name: '20251211_fix_users_api_keys',
+  },
+  {
+    up: migration_20251212_000000_fix_remaining_fks.up,
+    down: migration_20251212_000000_fix_remaining_fks.down,
+    name: '20251212_000000_fix_remaining_fks',
+  },
+  {
+    up: migration_20251212_000001_force_cascade_delete.up,
+    down: migration_20251212_000001_force_cascade_delete.down,
+    name: '20251212_000001_force_cascade_delete'
   },
 ];

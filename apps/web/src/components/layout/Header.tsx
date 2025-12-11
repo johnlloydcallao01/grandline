@@ -151,7 +151,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
         <button onClick={() => router.push('/notifications')} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
           <i className="fas fa-bell text-gray-600 text-lg"></i>
         </button>
-        <button onClick={() => setOverlayOpen(true)} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
+        <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
           <i className="fa fa-search text-gray-600 text-lg"></i>
         </button>
       </div>
