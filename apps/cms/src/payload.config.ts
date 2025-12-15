@@ -258,6 +258,332 @@ export default buildConfig({
         }
       }) as PayloadHandler,
     },
+    {
+      path: '/forgot-password',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        const requestId = crypto.randomUUID();
+
+        try {
+          const body = await (req as any).json();
+          const rawEmail = body?.email ?? body?.Email ?? body?.username ?? '';
+          const email = String(rawEmail || '').trim().toLowerCase();
+
+          if (!email) {
+            return new Response(
+              JSON.stringify({
+                success: true,
+                message: 'If an account exists, a password reset email has been sent.',
+              }),
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const { payload } = req;
+
+          const usersResult = await payload.find({
+            collection: 'users',
+            where: {
+              email: {
+                equals: email,
+              },
+            },
+            limit: 1,
+          });
+
+          const user = usersResult.docs[0];
+
+          if (!user || user.isActive === false) {
+            return new Response(
+              JSON.stringify({
+                success: true,
+                message: 'If an account exists, a password reset email has been sent.',
+              }),
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const rawToken = crypto.randomBytes(32).toString('hex');
+          const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+          const ttlMs = 60 * 60 * 1000;
+          const now = Date.now();
+          const expiresAt = new Date(now + ttlMs).toISOString();
+
+          const existingTokens = Array.isArray((user as any).resetPasswordTokens)
+            ? (user as any).resetPasswordTokens
+            : [];
+
+          const filteredTokens = existingTokens.filter((entry: any) => {
+            const entryExpiresAt = entry?.expiresAt ? new Date(entry.expiresAt).getTime() : 0;
+            return entryExpiresAt > now;
+          });
+
+          filteredTokens.push({
+            token: hashedToken,
+            expiresAt,
+          });
+
+          await payload.update({
+            collection: 'users',
+            id: user.id,
+            data: {
+              resetPasswordTokens: filteredTokens,
+            },
+          });
+
+          const appBaseUrl =
+            process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com';
+          const appUrl = appBaseUrl.replace(/\/$/, '');
+          const resetUrl = `${appUrl}/signin/reset-password?token=${encodeURIComponent(
+            rawToken
+          )}`;
+
+          const resendApiKey = process.env.RESEND_API_KEY;
+          const enableEmailNotifications =
+            process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
+          const fromEmail =
+            process.env.RESEND_FROM_EMAIL || 'no-reply@tap2goph.com';
+          const fromName = process.env.EMAIL_FROM_NAME || 'Tap2Go';
+          const replyTo = process.env.EMAIL_REPLY_TO || fromEmail;
+
+          if (resendApiKey && enableEmailNotifications) {
+            try {
+              await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${resendApiKey}`,
+                },
+                body: JSON.stringify({
+                  from: `${fromName} <${fromEmail}>`,
+                  to: user.email,
+                  subject: 'Reset your Grandline Maritime password',
+                  html: `
+                    <p>Hello ${user.firstName || ''},</p>
+                    <p>You requested to reset your password for your Grandline Maritime account.</p>
+                    <p>Click the link below to set a new password:</p>
+                    <p><a href="${resetUrl}">${resetUrl}</a></p>
+                    <p>If you did not request this, you can safely ignore this email.</p>
+                  `,
+                  reply_to: replyTo,
+                }),
+              });
+            } catch (emailError) {
+              console.error(
+                `Password reset email failed to send [${requestId}]:`,
+                emailError
+              );
+            }
+          } else {
+            console.warn(
+              `Resend email not sent for forgot-password [${requestId}]: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not 'true'`
+            );
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'If an account exists, a password reset email has been sent.',
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        } catch (error) {
+          console.error('Forgot password error:', error);
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'If an account exists, a password reset email has been sent.',
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }) as PayloadHandler,
+    },
+    {
+      path: '/reset-password',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        try {
+          const body = await (req as any).json();
+          const rawToken = String(body?.token || '').trim();
+          const newPassword = String(body?.newPassword || '').trim();
+
+          if (!rawToken || !newPassword) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Token and newPassword are required.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (newPassword.length < 8 || newPassword.length > 40) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Password must be between 8 and 40 characters.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (!/[A-Z]/.test(newPassword)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Password must contain at least one uppercase letter.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (!/\d/.test(newPassword)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Password must contain at least one number.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (!/[^A-Za-z0-9]/.test(newPassword)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Password must contain at least one special character.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+          const { payload } = req;
+
+          const usersResult = await payload.find({
+            collection: 'users',
+            where: {
+              'resetPasswordTokens.token': {
+                equals: hashedToken,
+              },
+            },
+            limit: 1,
+          });
+
+          const user = usersResult.docs[0] as any;
+
+          if (!user || !Array.isArray(user.resetPasswordTokens)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Invalid or expired password reset token.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const now = Date.now();
+          const validTokens = user.resetPasswordTokens.filter((entry: any) => {
+            const entryExpiresAt = entry?.expiresAt ? new Date(entry.expiresAt).getTime() : 0;
+            return entryExpiresAt > now;
+          });
+
+          const matchingToken = validTokens.find(
+            (entry: any) => entry.token === hashedToken
+          );
+
+          if (!matchingToken) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Invalid or expired password reset token.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const remainingTokens = validTokens.filter(
+            (entry: any) => entry.token !== hashedToken
+          );
+
+          await payload.update({
+            collection: 'users',
+            id: user.id,
+            data: {
+              password: newPassword,
+              resetPasswordTokens: remainingTokens,
+              loginAttempts: 0,
+              lockUntil: null,
+            },
+          });
+
+          const appBaseUrl =
+            process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com';
+          const appUrl = appBaseUrl.replace(/\/$/, '');
+
+          const resendApiKey = process.env.RESEND_API_KEY;
+          const enableEmailNotifications =
+            process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
+          const fromEmail =
+            process.env.RESEND_FROM_EMAIL || 'no-reply@tap2goph.com';
+          const fromName = process.env.EMAIL_FROM_NAME || 'Tap2Go';
+          const replyTo = process.env.EMAIL_REPLY_TO || fromEmail;
+
+          if (resendApiKey && enableEmailNotifications) {
+            try {
+              await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${resendApiKey}`,
+                },
+                body: JSON.stringify({
+                  from: `${fromName} <${fromEmail}>`,
+                  to: user.email,
+                  subject: 'Your Grandline Maritime password has been changed',
+                  html: `
+                    <p>Hello ${user.firstName || ''},</p>
+                    <p>Your Grandline Maritime password has been updated.</p>
+                    <p>If you did not perform this change, please contact support immediately.</p>
+                    <p>You can sign in again here: <a href="${appUrl}/signin">${appUrl}/signin</a></p>
+                  `,
+                  reply_to: replyTo,
+                }),
+              });
+            } catch (emailError) {
+              console.error(
+                'Password reset confirmation email failed to send:',
+                emailError
+              );
+            }
+          } else {
+            console.warn(
+              'Resend email not sent for reset-password: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not \'true\''
+            );
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'Password has been reset successfully.',
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        } catch (error) {
+          console.error('Reset password error:', error);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              message: 'Failed to reset password. Please try again.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }) as PayloadHandler,
+    },
   ],
 
   // sharp,

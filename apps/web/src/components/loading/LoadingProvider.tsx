@@ -33,15 +33,14 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
   const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
 
   useEffect(() => {
-    // Check if this is a full page reload or direct URL visit
+    // Check if this is a manual browser reload (F5, Ctrl+R, refresh button)
+    // Do NOT show loading screen on initial visits or SPA navigation
     const navigationEntries = window.performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-    const isFullPageLoad = !navigationEntries[0] ||
-      navigationEntries[0].type === 'reload' ||
-      navigationEntries[0].type === 'navigate';
+    const isManualReload = navigationEntries[0]?.type === 'reload';
 
-    // Show loading screen on all full page loads (authenticated AND non-authenticated)
-    if (isFullPageLoad) {
-      if (debug) console.log('🔄 LOADING PROVIDER: Full page reload detected, showing loading screen');
+    // Show loading screen ONLY on manual browser reload
+    if (isManualReload) {
+      if (debug) console.log('🔄 LOADING PROVIDER: Manual browser reload detected, showing loading screen');
       setIsLoading(true);
       setProgress(10); // Start with some progress
 
@@ -70,10 +69,11 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
         clearTimeout(autoHideTimeout);
       };
     } else {
-      if (debug) console.log('🔄 LOADING PROVIDER: No loading screen needed (SPA navigation)');
+      if (debug) console.log('🔄 LOADING PROVIDER: No loading screen needed (not a manual reload)');
       setIsLoading(false);
     }
   }, []); // Run once on mount
+
 
   const showLoadingScreen = () => {
     if (debug) console.log('🔄 LOADING PROVIDER: Manually showing loading screen');
@@ -84,7 +84,7 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
   const hideLoadingScreen = () => {
     if (debug) console.log('🔄 LOADING PROVIDER: Hiding loading screen');
     setProgress(100);
-    
+
     // Smooth fade out after reaching 100%
     setTimeout(() => {
       setIsLoading(false);

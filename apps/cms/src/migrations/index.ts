@@ -37,6 +37,7 @@ import * as migration_20251211_fix_cleanup_service_role from './20251211_fix_cle
 import * as migration_20251211_fix_users_api_keys from './20251211_fix_users_api_keys';
 import * as migration_20251212_000000_fix_remaining_fks from './20251212_000000_fix_remaining_fks';
 import * as migration_20251212_000001_force_cascade_delete from './20251212_000001_force_cascade_delete';
+import * as migration_20251215_141702 from './20251215_141702';
 
 export const migrations = [
   {
@@ -232,6 +233,11 @@ export const migrations = [
   {
     up: migration_20251212_000001_force_cascade_delete.up,
     down: migration_20251212_000001_force_cascade_delete.down,
-    name: '20251212_000001_force_cascade_delete'
+    name: '20251212_000001_force_cascade_delete',
+  },
+  {
+    up: migration_20251215_141702.up,
+    down: migration_20251215_141702.down,
+    name: '20251215_141702'
   },
 ];

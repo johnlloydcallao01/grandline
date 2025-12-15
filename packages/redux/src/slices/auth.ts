@@ -45,7 +45,7 @@ export const loginUser = createAsyncThunk<
   async (credentials, { rejectWithValue }) => {
     try {
       // Use the configured API URL for PayloadCMS
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const response = await fetch(`${apiUrl}/users/login`, {
         method: 'POST',
         headers: {
@@ -89,7 +89,7 @@ export const registerUser = createAsyncThunk<
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const response = await fetch(`${apiUrl}/users/register`, {
         method: 'POST',
         headers: {
@@ -142,7 +142,7 @@ export const refreshToken = createAsyncThunk<
         } as ApiError);
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const response = await fetch(`${apiUrl}/users/refresh-token`, {
         method: 'POST',
         headers: {
@@ -188,7 +188,7 @@ export const logoutUser = createAsyncThunk<
       
       // Call logout API if we have a refresh token
       if (auth.refreshToken) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         await fetch(`${apiUrl}/users/logout`, {
           method: 'POST',
           headers: {
@@ -228,7 +228,7 @@ export const loadUserFromToken = createAsyncThunk<
         } as ApiError);
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const response = await fetch(`${apiUrl}/users/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -265,7 +265,7 @@ export const updateUserProfile = createAsyncThunk<
     try {
       const { auth } = getState();
       
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const response = await fetch(`${apiUrl}/users/me`, {
         method: 'PATCH',
         headers: {

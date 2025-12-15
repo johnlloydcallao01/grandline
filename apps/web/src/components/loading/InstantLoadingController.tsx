@@ -8,26 +8,23 @@ import { useEffect } from 'react';
  */
 export function InstantLoadingController() {
   useEffect(() => {
-    // Only show loading screen on full page loads (not SPA navigation)
+    // Only show loading screen on manual browser reload (F5, Ctrl+R, refresh button)
+    // Do NOT show on initial visits or SPA navigation
     const navigationEntries = window.performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-    const isFullPageLoad = !navigationEntries[0] ||
-      (navigationEntries[0].type === 'reload') ||
-      (navigationEntries[0].type === 'navigate');
+    const isManualReload = navigationEntries[0]?.type === 'reload';
 
     const isAuthPage = window.location.pathname.includes('/signin') ||
-                      window.location.pathname.includes('/register');
+      window.location.pathname.includes('/register');
 
     const loadingScreen = document.getElementById('instant-loading-screen');
-    
+
     if (!loadingScreen) return;
 
-    // Hide loading screen only if not a full page load or on auth pages
-    if (!isFullPageLoad || isAuthPage) {
-      loadingScreen.style.display = 'none';
-    } else {
-      // Show the loading screen for full page loads
+    // Show loading screen ONLY on manual browser reload (not on auth pages)
+    if (isManualReload && !isAuthPage) {
+      // Show the loading screen for manual reloads
       loadingScreen.style.display = 'block';
-      
+
       // Auto-hide after 3 seconds max
       const autoHideTimeout = setTimeout(() => {
         loadingScreen.style.opacity = '0';
@@ -40,6 +37,9 @@ export function InstantLoadingController() {
       return () => {
         clearTimeout(autoHideTimeout);
       };
+    } else {
+      // Hide loading screen for initial visits, SPA navigation, or auth pages
+      loadingScreen.style.display = 'none';
     }
   }, []);
 

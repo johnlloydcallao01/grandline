@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PublicRoute } from '@/components/auth';
 import { useLogin } from '@/hooks/useAuth';
@@ -347,9 +348,12 @@ export default function SignInPage() {
                   {/* Forgot Password (Sign In only) */}
                   {!isSignUp && (
                     <div className="text-right">
-                      <a href="#" className="text-sm text-[#201a7c] hover:underline font-medium">
+                      <Link
+                        href={{ pathname: '/signin/forgot-password' }}
+                        className="text-sm text-[#201a7c] hover:underline font-medium"
+                      >
                         Forgot your password?
-                      </a>
+                      </Link>
                     </div>
                   )}
 

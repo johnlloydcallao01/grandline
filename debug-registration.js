@@ -41,8 +41,8 @@ async function debugRegistration() {
 
   try {
     console.log('📡 Sending registration request...');
-    
-    const response = await fetch('https://grandline-cms.vercel.app/api/trainee-register', {
+
+    const response = await fetch('https://cms.grandlinemaritime.com/api/trainee-register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

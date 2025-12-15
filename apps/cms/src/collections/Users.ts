@@ -184,6 +184,21 @@ export const Users: CollectionConfig = {
         description: 'User profile picture',
       },
     },
-
+    {
+      name: 'resetPasswordTokens',
+      type: 'array',
+      fields: [
+        {
+          name: 'token',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'expiresAt',
+          type: 'date',
+          required: true,
+        },
+      ],
+    },
   ],
 }
