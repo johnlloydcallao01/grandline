@@ -26,7 +26,7 @@ const initialState = {
 export const loginUser = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
     try {
         // Use the configured API URL for PayloadCMS
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         const response = await fetch(`${apiUrl}/users/login`, {
             method: 'POST',
             headers: {
@@ -49,7 +49,7 @@ export const loginUser = createAsyncThunk('auth/login', async (credentials, { re
         }
         return data;
     }
-    catch (error) {
+    catch {
         return rejectWithValue({
             message: 'Network error occurred',
             status: 0,
@@ -59,7 +59,7 @@ export const loginUser = createAsyncThunk('auth/login', async (credentials, { re
 // Register user
 export const registerUser = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
     try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         const response = await fetch(`${apiUrl}/users/register`, {
             method: 'POST',
             headers: {
@@ -81,7 +81,7 @@ export const registerUser = createAsyncThunk('auth/register', async (userData, {
         localStorage.setItem('encreasl_refresh_token', data.refreshToken);
         return data;
     }
-    catch (error) {
+    catch {
         return rejectWithValue({
             message: 'Network error occurred',
             status: 0,
@@ -99,7 +99,7 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (_, { ge
                 status: 401,
             });
         }
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         const response = await fetch(`${apiUrl}/users/refresh-token`, {
             method: 'POST',
             headers: {
@@ -120,7 +120,7 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (_, { ge
         localStorage.setItem('encreasl_refresh_token', data.refreshToken);
         return data;
     }
-    catch (error) {
+    catch {
         return rejectWithValue({
             message: 'Network error occurred',
             status: 0,
@@ -133,7 +133,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async (_, { getState }
         const { auth } = getState();
         // Call logout API if we have a refresh token
         if (auth.refreshToken) {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
             await fetch(`${apiUrl}/users/logout`, {
                 method: 'POST',
                 headers: {
@@ -147,7 +147,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async (_, { getState }
         localStorage.removeItem('encreasl_token');
         localStorage.removeItem('encreasl_refresh_token');
     }
-    catch (error) {
+    catch {
         // Don't reject on logout - always clear local state
         console.warn('Logout API call failed, but continuing with local cleanup');
     }
@@ -162,7 +162,7 @@ export const loadUserFromToken = createAsyncThunk('auth/loadUserFromToken', asyn
                 status: 401,
             });
         }
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         const response = await fetch(`${apiUrl}/users/me`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -178,7 +178,7 @@ export const loadUserFromToken = createAsyncThunk('auth/loadUserFromToken', asyn
         const user = await response.json();
         return user;
     }
-    catch (error) {
+    catch {
         return rejectWithValue({
             message: 'Network error occurred',
             status: 0,
@@ -189,7 +189,7 @@ export const loadUserFromToken = createAsyncThunk('auth/loadUserFromToken', asyn
 export const updateUserProfile = createAsyncThunk('auth/updateProfile', async (updates, { getState, rejectWithValue }) => {
     try {
         const { auth } = getState();
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://grandline-cms.vercel.app/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
         const response = await fetch(`${apiUrl}/users/me`, {
             method: 'PATCH',
             headers: {
@@ -208,7 +208,7 @@ export const updateUserProfile = createAsyncThunk('auth/updateProfile', async (u
         const updatedUser = await response.json();
         return updatedUser;
     }
-    catch (error) {
+    catch {
         return rejectWithValue({
             message: 'Network error occurred',
             status: 0,
