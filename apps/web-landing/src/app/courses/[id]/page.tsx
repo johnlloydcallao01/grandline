@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -48,7 +47,7 @@ export default function CourseDetailPage() {
     {
       title: "Supervised Learning Algorithms",
       lessons: 12,
-      duration: "3.5 hours", 
+      duration: "3.5 hours",
       topics: ["Linear Regression", "Decision Trees", "Random Forest", "SVM", "Ensemble Methods"]
     },
     {
@@ -82,7 +81,7 @@ export default function CourseDetailPage() {
       text: "This course completely transformed my understanding of machine learning. The projects are incredibly practical!"
     },
     {
-      name: "Maria Garcia", 
+      name: "Maria Garcia",
       role: "ML Engineer at Google",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&face",
       text: "Dr. Chen's teaching style is exceptional. Complex concepts are explained in a very understandable way."
@@ -92,7 +91,7 @@ export default function CourseDetailPage() {
   return (
     <main className="min-h-screen">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="pt-24 pb-16 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,15 +105,15 @@ export default function CourseDetailPage() {
                   {course.level}
                 </span>
               </div>
-              
+
               <h1 className="heading-primary text-3xl md:text-5xl text-gray-900 mb-4">
                 {course.title}
               </h1>
-              
+
               <p className="text-xl text-gray-600 mb-6">
                 {course.description}
               </p>
-              
+
               <div className="flex items-center space-x-6 mb-6">
                 <div className="flex items-center text-yellow-500">
                   <div className="flex">
@@ -129,7 +128,7 @@ export default function CourseDetailPage() {
                   {course.students} students
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-4 mb-8">
                 <Image
                   src={course.instructorImage}
@@ -143,7 +142,7 @@ export default function CourseDetailPage() {
                   <div className="text-gray-600 text-sm">Course Instructor</div>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <button className="btn-primary text-lg px-8 py-4">
                   <i className="fas fa-play mr-2"></i>
@@ -155,7 +154,7 @@ export default function CourseDetailPage() {
                 </button>
               </div>
             </div>
-            
+
             <div className="relative">
               <Image
                 src={course.image}

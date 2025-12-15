@@ -170,8 +170,8 @@ export function Testimonials() {
           </button>
 
           {/* Dots indicator */}
-          <div className="flex justify-center space-x-2 mt-8">
-            {testimonials.map((_, index) => (
+        <div className="flex justify-center space-x-2 mt-8">
+          {testimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
@@ -185,7 +185,7 @@ export function Testimonials() {
 
         {/* Testimonial grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.slice(0, 3).map((testimonial, index) => (
+          {testimonials.slice(0, 3).map((testimonial) => (
             <div
               key={testimonial.id}
               className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 card-hover"
