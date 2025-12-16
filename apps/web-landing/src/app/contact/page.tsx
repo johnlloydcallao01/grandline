@@ -8,11 +8,13 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    company: "",
     subject: "",
-    message: "",
-    inquiryType: "general"
+    message: ""
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -21,19 +23,50 @@ export default function ContactPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      subject: "",
-      message: "",
-      inquiryType: "general"
-    });
+    setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      // Build API URL
+      const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || 'https://cms.grandlinemaritime.com/api';
+      const apiUrl = `${apiBase.replace(/\/$/, '')}/contact`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage(data.message || 'Thank you for contacting us!');
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: ""
+        });
+      } else {
+        setError(data.message || 'Failed to send message. Please try again.');
+      }
+    } catch (err) {
+      console.error('Contact form error:', err);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -89,7 +122,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="pt-24 pb-16 bg-[#0f172a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,7 +131,7 @@ export default function ContactPage() {
               <span className="text-[#F5F5F5]">Get in</span> <span className="text-[#ab3b43]">Touch</span>
             </h1>
             <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto">
-              Have questions about our platform? Want to discuss enterprise solutions? 
+              Have questions about our platform? Want to discuss enterprise solutions?
               We're here to help you succeed in your learning journey.
             </p>
           </div>
@@ -114,6 +147,19 @@ export default function ContactPage() {
               <h2 className="heading-secondary text-2xl font-bold text-gray-900 mb-6">
                 Send us a Message
               </h2>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800">{successMessage}</p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -148,40 +194,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                      Company
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors placeholder:text-[#777]"
-                      placeholder="Your company name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="inquiryType" className="block text-sm font-medium text-gray-700 mb-2">
-                      Inquiry Type
-                    </label>
-                    <select
-                      id="inquiryType"
-                      name="inquiryType"
-                      value={formData.inquiryType}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent transition-colors"
-                    >
-                      <option value="general">General Inquiry</option>
-                      <option value="sales">Sales</option>
-                      <option value="support">Technical Support</option>
-                      <option value="partnership">Partnership</option>
-                      <option value="media">Media/Press</option>
-                    </select>
-                  </div>
-                </div>
 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
@@ -217,10 +229,11 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full btn-primary py-4 text-lg"
+                  disabled={isSubmitting}
+                  className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i className="fas fa-paper-plane mr-2"></i>
-                  Send Message
+                  <i className={`fas ${isSubmitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'} mr-2`}></i>
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>
@@ -291,21 +304,21 @@ export default function ContactPage() {
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-2">How do I get started?</h3>
               <p className="text-gray-600">
-                Simply sign up for a free account and browse our course catalog. You can start with our free courses 
+                Simply sign up for a free account and browse our course catalog. You can start with our free courses
                 or begin a 14-day trial of our premium content.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-2">Do you offer enterprise solutions?</h3>
               <p className="text-gray-600">
-                Yes! We provide custom enterprise solutions including bulk licensing, custom content creation, 
+                Yes! We provide custom enterprise solutions including bulk licensing, custom content creation,
                 and dedicated support. Contact our sales team for more information.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-2">What support do you provide?</h3>
               <p className="text-gray-600">
-                We offer 24/7 technical support, live chat assistance, comprehensive documentation, 
+                We offer 24/7 technical support, live chat assistance, comprehensive documentation,
                 and regular webinars to help you succeed.
               </p>
             </div>

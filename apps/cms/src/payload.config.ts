@@ -71,6 +71,10 @@ export default buildConfig({
     // CMS admin panel itself
     process.env.CMS_PROD_URL!,
     process.env.CMS_LOCAL_URL!,
+    // Production web-landing
+    process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
+    // Local web-landing development
+    process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -578,6 +582,128 @@ export default buildConfig({
             JSON.stringify({
               success: false,
               message: 'Failed to reset password. Please try again.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }) as PayloadHandler,
+    },
+    {
+      path: '/contact',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        const requestId = crypto.randomUUID();
+
+        try {
+          const body = await (req as any).json();
+          const name = String(body?.name || '').trim();
+          const email = String(body?.email || '').trim().toLowerCase();
+          const subject = String(body?.subject || '').trim();
+          const message = String(body?.message || '').trim();
+
+          // Validation
+          if (!name || !email || !subject || !message) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'All fields are required.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          // Email validation
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Please provide a valid email address.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          // Send email via Resend
+          const resendApiKey = process.env.RESEND_API_KEY;
+          const enableEmailNotifications = process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
+          const fromEmail = process.env.RESEND_FROM_EMAIL || 'info@grandlinemaritime.com';
+          const fromName = process.env.EMAIL_FROM_NAME || 'Grandline Maritime';
+
+          if (resendApiKey && enableEmailNotifications) {
+            try {
+              const resendResponse = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${resendApiKey}`,
+                },
+                body: JSON.stringify({
+                  from: `${fromName} <${fromEmail}>`,
+                  to: 'info@grandlinemaritime.com',
+                  replyTo: email,
+                  subject: `Contact Form: ${subject}`,
+                  html: `
+                    <h2>New Contact Form Submission</h2>
+                    <p><strong>From:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Subject:</strong> ${subject}</p>
+                    <hr />
+                    <p><strong>Message:</strong></p>
+                    <p>${message.replace(/\n/g, '<br />')}</p>
+                    <hr />
+                    <p style="color: #666; font-size: 12px;">This message was sent from the Grandline Maritime contact form.</p>
+                  `,
+                }),
+              });
+
+              if (!resendResponse.ok) {
+                const errorData = await resendResponse.text();
+                console.error(`Resend API error [${requestId}]:`, errorData);
+                throw new Error('Resend API request failed');
+              }
+
+              console.log(`✅ [${requestId}] Contact email sent successfully:`, {
+                from: name,
+                email: email,
+                subject: subject
+              });
+            } catch (emailError) {
+              console.error(`Contact email failed to send [${requestId}]:`, emailError);
+              return new Response(
+                JSON.stringify({
+                  success: false,
+                  message: 'Failed to send message. Please try again later.',
+                }),
+                { status: 500, headers: { 'Content-Type': 'application/json' } }
+              );
+            }
+          } else {
+            console.warn(
+              `Contact email not sent [${requestId}]: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not 'true'`
+            );
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Email service is not configured.',
+              }),
+              { status: 500, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'Thank you for contacting us! We will get back to you soon.',
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        } catch (error) {
+          console.error(`Contact form error [${requestId}]:`, error);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              message: 'An error occurred. Please try again.',
             }),
             { status: 500, headers: { 'Content-Type': 'application/json' } }
           );
