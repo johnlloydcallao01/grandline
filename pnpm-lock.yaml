@@ -139,6 +139,9 @@ importers:
       '@encreasl/redux':
         specifier: workspace:*
         version: link:../../packages/redux
+      '@encreasl/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.0.7
         version: 16.0.7(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
@@ -161,9 +164,6 @@ importers:
       '@encreasl/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@encreasl/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@eslint/js':
         specifier: ^9
         version: 9.34.0
@@ -504,6 +504,9 @@ importers:
       react:
         specifier: 19.1.0
         version: 19.1.0
+      server-only:
+        specifier: 0.0.1
+        version: 0.0.1
     devDependencies:
       '@encreasl/eslint-config':
         specifier: workspace:*
@@ -5192,6 +5195,9 @@ packages:
     resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
     hasBin: true
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -11438,6 +11444,8 @@ snapshots:
   semver@7.7.2: {}
 
   semver@7.7.3: {}
+
+  server-only@0.0.1: {}
 
   set-function-length@1.2.2:
     dependencies:

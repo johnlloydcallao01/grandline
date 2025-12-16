@@ -92,4 +92,6 @@ export interface CourseQueryParams {
   limit?: number;
   page?: number;
   category?: string;
+  featured?: boolean;
+  sort?: string;
 }

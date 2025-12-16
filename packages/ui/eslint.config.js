@@ -13,6 +13,13 @@ module.exports = [
         module: "readonly",
         require: "readonly",
         exports: "readonly",
+        window: "readonly",
+        document: "readonly",
+        ResizeObserver: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
+        HTMLElement: "readonly",
+        MouseEvent: "readonly",
       },
     },
     rules: {

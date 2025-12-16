@@ -29,7 +29,7 @@ export function CourseCategoryCircle({
       <div 
         className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 overflow-hidden bg-gray-100 relative ${
           active 
-            ? 'scale-110 shadow-lg' 
+            ? 'scale-110 shadow-lg ring-2 ring-gray-300' 
             : 'group-hover:scale-105'
         }`}
       >

@@ -19,20 +19,15 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
   })();
   const [categoryId, setCategoryId] = useState<number | undefined>(initialIdFromUrl);
   const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
-  const { courses, isLoading, isLoadingMore, hasMore, loadMore, totalCourses } = useCourses({ status: 'published', limit: isMobile ? 4 : 8, page: 1, category: typeof categoryId === 'number' ? String(categoryId) : undefined });
+  const { courses, isLoading, isLoadingMore, hasMore, loadMore, totalCourses } = useCourses({ status: 'published', limit: 4, page: 1, sort: '-updatedAt', category: typeof categoryId === 'number' ? String(categoryId) : undefined });
   const [visibleCount, setVisibleCount] = useState<number>(8);
   const displayCourses = useMemo(() => {
-    const filtered = (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
-    return filtered.sort((a, b) => {
-      const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-      return tb - ta;
-    });
+    return (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
   }, [courses]);
 
   // Featured Courses (only when no category filter)
   const showFeatured = typeof categoryId !== 'number';
-  const { courses: featuredCourses, isLoading: isLoadingFeatured, isLoadingMore: isLoadingMoreFeatured, hasMore: hasMoreFeatured, loadMore: loadMoreFeatured, totalCourses: totalFeaturedCourses } = useFeaturedCourses(isMobile ? 4 : 8);
+  const { courses: featuredCourses, isLoading: isLoadingFeatured, isLoadingMore: isLoadingMoreFeatured, hasMore: hasMoreFeatured, loadMore: loadMoreFeatured, totalCourses: totalFeaturedCourses } = useFeaturedCourses(4, { enabled: showFeatured });
   const [visibleFeaturedCount, setVisibleFeaturedCount] = useState<number>(8);
   const featuredDisplay = useMemo(() => {
     return (Array.isArray(featuredCourses) ? featuredCourses : []).filter((c) => c.status === 'published' && c.isFeatured);

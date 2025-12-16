@@ -8,8 +8,9 @@ const allowedOrigins = [
   process.env.WEB_LOCAL_URL!,
   process.env.CMS_PROD_URL!,
   process.env.CMS_LOCAL_URL!,
-  // Web-landing URLs
+  // Web-landing URLs (both www and non-www)
   process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
+  'https://www.grandlinemaritime.com', // www variant
   process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',
 ]
 

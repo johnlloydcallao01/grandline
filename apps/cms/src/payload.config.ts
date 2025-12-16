@@ -71,8 +71,9 @@ export default buildConfig({
     // CMS admin panel itself
     process.env.CMS_PROD_URL!,
     process.env.CMS_LOCAL_URL!,
-    // Production web-landing
+    // Production web-landing (both www and non-www)
     process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
+    'https://www.grandlinemaritime.com', // www variant
     // Local web-landing development
     process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',
   ],

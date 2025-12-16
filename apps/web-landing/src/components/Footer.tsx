@@ -8,17 +8,8 @@ export function Footer() {
   const quickLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About Us" },
-    { href: "/courses", label: "Courses" },
     { href: "/contact", label: "Contact" },
     { href: "/faq", label: "FAQ" }
-  ];
-
-  const courses = [
-    { href: "/courses/data-science", label: "Data Science" },
-    { href: "/courses/web-development", label: "Web Development" },
-    { href: "/courses/cloud-computing", label: "Cloud Computing" },
-    { href: "/courses/digital-marketing", label: "Digital Marketing" },
-    { href: "/courses/cybersecurity", label: "Cybersecurity" }
   ];
 
   const company = [
@@ -57,7 +48,7 @@ export function Footer() {
     <footer className="bg-gray-900 text-white">
       {/* Main footer content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company info */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-3 mb-6">
@@ -100,23 +91,6 @@ export function Footer() {
                     className="text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Popular Courses */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6 heading-secondary">Popular Courses</h3>
-            <ul className="space-y-3">
-              {courses.map((course, index) => (
-                <li key={index}>
-                  <Link
-                    href={course.href}
-                    className="text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
-                  >
-                    {course.label}
                   </Link>
                 </li>
               ))}
