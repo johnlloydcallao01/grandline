@@ -51,7 +51,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
     try {
       await logout()
       setIsProfileDropdownOpen(false)
-      router.replace('/signin' as any)
+      window.location.href = 'https://grandlinemaritime.com'
     } catch (error) {
       console.error('Logout failed:', error)
     }

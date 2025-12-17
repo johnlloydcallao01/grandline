@@ -3,9 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { SearchProvider } from "@/contexts/SearchContext";
+import { useSearch } from "@/hooks/useSearch";
+import { MobileSearchOverlay } from "@/components/search/MobileSearchOverlay";
 
-export function Header() {
+function HeaderInner() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {
+    setOverlayOpen,
+    loadRecentKeywords
+  } = useSearch();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -27,7 +34,7 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {navItems.map((item) => (
                 <Link
@@ -42,8 +49,11 @@ export function Header() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button className="p-3 text-gray-600 hover:text-[#201a7c] hover:bg-gray-50 rounded-lg transition-colors">
+          <div className="hidden lg:flex items-center space-x-4">
+            <button
+              onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }}
+              className="p-3 text-gray-600 hover:text-[#201a7c] hover:bg-gray-50 rounded-lg transition-colors"
+            >
               <i className="fas fa-search text-lg"></i>
             </button>
             <Link
@@ -56,7 +66,7 @@ export function Header() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-[#201a7c] focus:outline-none focus:text-[#201a7c] p-2"
@@ -68,7 +78,7 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200 shadow-lg">
               {navItems.map((item) => (
                 <Link
@@ -81,7 +91,10 @@ export function Header() {
                 </Link>
               ))}
               <div className="pt-4 pb-2 border-t border-gray-200 mt-4 space-y-3">
-                <button className="w-full p-3 text-gray-600 hover:text-[#201a7c] hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center">
+                <button
+                  onClick={() => { setOverlayOpen(true); loadRecentKeywords(); setIsMenuOpen(false); }}
+                  className="w-full p-3 text-gray-600 hover:text-[#201a7c] hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center"
+                >
                   <i className="fas fa-search text-lg mr-2"></i>
                   Search
                 </button>
@@ -99,5 +112,14 @@ export function Header() {
         )}
       </nav>
     </header>
+  );
+}
+
+export function Header() {
+  return (
+    <SearchProvider>
+      <HeaderInner />
+      <MobileSearchOverlay />
+    </SearchProvider>
   );
 }

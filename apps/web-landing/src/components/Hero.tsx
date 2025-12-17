@@ -41,6 +41,13 @@ export function Hero() {
                 <i className="fas fa-info-circle mr-2"></i>
                 Learn More
               </Link>
+              <Link
+                href="https://app.grandlinemaritime.com/signin"
+                className="bg-white text-[#201a7c] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-opacity-90 transition-all duration-300 hover:transform hover:scale-105 inline-flex items-center shadow-lg"
+              >
+                <i className="fas fa-rocket mr-2"></i>
+                Start Now
+              </Link>
             </div>
 
 
@@ -60,7 +67,7 @@ export function Hero() {
                   priority
                 />
               </div>
-              
+
               {/* Floating stats cards */}
               <div className="absolute -top-4 -left-4 bg-white rounded-xl p-4 shadow-lg animate-float">
                 <div className="flex items-center space-x-3">

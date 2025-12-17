@@ -6,7 +6,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUser, useLogout } from '@/hooks/useAuth';
 
@@ -24,14 +23,14 @@ interface UserAvatarImageProps {
 
 function UserAvatarImage({ src, alt, size, initials, sizeClasses }: UserAvatarImageProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   const sizeMap = {
     sm: { width: 32, height: 32 },
     md: { width: 40, height: 40 },
     lg: { width: 48, height: 48 },
     xl: { width: 64, height: 64 }
   };
-  
+
   if (imageError) {
     return (
       <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold`}>
@@ -39,7 +38,7 @@ function UserAvatarImage({ src, alt, size, initials, sizeClasses }: UserAvatarIm
       </div>
     );
   }
-  
+
   return (
     <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white shadow-sm`}>
       {React.createElement(Image, {
@@ -64,10 +63,10 @@ interface UserAvatarProps {
   showOnlineStatus?: boolean;
 }
 
-export function UserAvatar({ 
-  size = 'md', 
+export function UserAvatar({
+  size = 'md',
   className = '',
-  showOnlineStatus = false 
+  showOnlineStatus = false
 }: UserAvatarProps) {
   const { user, displayName, initials } = useUser();
 
@@ -104,7 +103,7 @@ export function UserAvatar({
   return (
     <div className={`relative ${className}`}>
       {profilePictureUrl ? (
-        <UserAvatarImage 
+        <UserAvatarImage
           src={profilePictureUrl}
           alt={user.profilePicture?.alt || `${displayName}'s profile picture`}
           size={size}
@@ -117,7 +116,7 @@ export function UserAvatar({
           {initials}
         </div>
       )}
-      
+
       {showOnlineStatus && (
         <div className={`absolute -bottom-0 -right-0 ${statusSize[size]} bg-green-400 border-2 border-white rounded-full`}></div>
       )}
@@ -135,10 +134,10 @@ interface UserInfoProps {
   className?: string;
 }
 
-export function UserInfo({ 
-  showEmail = true, 
+export function UserInfo({
+  showEmail = true,
   showRole = false,
-  className = '' 
+  className = ''
 }: UserInfoProps) {
   const { user, displayName } = useUser();
 
@@ -171,7 +170,7 @@ interface LogoutButtonProps {
   onLogoutComplete?: () => void;
 }
 
-export function LogoutButton({ 
+export function LogoutButton({
   variant = 'button',
   size = 'md',
   className = '',
@@ -179,14 +178,13 @@ export function LogoutButton({
   onLogoutComplete
 }: LogoutButtonProps) {
   const { logout, isLoggingOut } = useLogout();
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       onLogoutStart?.();
       await logout();
       onLogoutComplete?.();
-      router.replace('/signin' as any);
+      window.location.href = 'https://grandlinemaritime.com';
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -291,11 +289,11 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           ></div>
-          
+
           {/* Dropdown Menu */}
           <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
             <div className="p-4 border-b border-gray-200">
@@ -310,7 +308,7 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-2">
               <button className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
                 <i className="fa fa-user mr-3 text-gray-400"></i>
@@ -325,10 +323,10 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
                 Notifications
               </button>
             </div>
-            
+
             <div className="p-2 border-t border-gray-200">
-              <LogoutButton 
-                variant="link" 
+              <LogoutButton
+                variant="link"
                 className="w-full text-left px-3 py-2 rounded-md hover:bg-red-50"
               />
             </div>
@@ -348,9 +346,9 @@ interface CompactUserProfileProps {
   showLogout?: boolean;
 }
 
-export function CompactUserProfile({ 
+export function CompactUserProfile({
   className = '',
-  showLogout = true 
+  showLogout = true
 }: CompactUserProfileProps) {
   const { user } = useUser();
 
@@ -364,7 +362,7 @@ export function CompactUserProfile({
         <UserAvatar size="md" showOnlineStatus />
         <UserInfo showEmail={false} />
       </div>
-      
+
       {showLogout && (
         <LogoutButton variant="icon" />
       )}
