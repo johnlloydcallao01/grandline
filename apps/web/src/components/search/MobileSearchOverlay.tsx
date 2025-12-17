@@ -35,6 +35,18 @@ export function MobileSearchOverlay(): React.ReactNode {
     }
   }, [isOverlayOpen])
 
+  // Prevent body scroll when overlay is open
+  useEffect(() => {
+    if (isOverlayOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOverlayOpen])
+
   if (!isOverlayOpen) return null
 
   return (
@@ -44,6 +56,21 @@ export function MobileSearchOverlay(): React.ReactNode {
           <i className="fa fa-arrow-left"></i>
         </button>
         <div className="relative flex-1">
+          <button
+            type="button"
+            onClick={async () => {
+              const v = query.trim()
+              if (!v) return
+              setTyping(false)
+              await persistRecentKeyword(v)
+              setOverlayOpen(false)
+              router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
+            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+            aria-label="Search"
+          >
+            <i className="fa fa-search"></i>
+          </button>
           <input
             ref={inputRef}
             value={query}
@@ -63,7 +90,7 @@ export function MobileSearchOverlay(): React.ReactNode {
                 router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
               }
             }}
-            className="w-full h-10 border border-gray-300 rounded-md pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"
+            className="w-full h-10 border border-gray-300 rounded-md pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"
             placeholder="Search courses"
           />
           {query.trim().length > 0 && (

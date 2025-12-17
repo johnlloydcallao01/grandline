@@ -14,7 +14,7 @@ interface ViewCourseClientProps {
 // Helper function to get image URL - same pattern as CoursesGrid
 function getImageUrl(media: Media | null | undefined): string | null {
   if (!media) return null;
-  
+
   // Priority: cloudinaryURL > url > thumbnailURL
   return media.cloudinaryURL || media.url || media.thumbnailURL || null;
 }
@@ -22,14 +22,14 @@ function getImageUrl(media: Media | null | undefined): string | null {
 export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const [activeSection, setActiveSection] = useState('Overview');
   const [isDesktop, setIsDesktop] = useState(false);
-  
+
   // Check screen size and adjust active section accordingly
   useEffect(() => {
     const checkScreenSize = () => {
       const wasDesktop = isDesktop;
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      
+
       // Only auto-switch when actually changing screen sizes, not on manual section selection
       if (wasDesktop !== desktop) {
         // If switching to desktop and currently on Overview, switch to Description
@@ -42,21 +42,21 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
         }
       }
     };
-    
+
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
-    
+
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isDesktop, activeSection]);
 
   // Update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      const sections = isDesktop 
+      const sections = isDesktop
         ? ['Description', 'Curriculum', 'Materials', 'Announcements']
         : ['Overview', 'Description', 'Curriculum', 'Materials', 'Announcements'];
       const headerOffset = 150; // Account for sticky header and navigation
-      
+
       for (const section of sections) {
         const sectionId = section.toLowerCase().replace(/\s+/g, '-');
         const element = document.getElementById(sectionId);
@@ -76,7 +76,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
-    
+
     // Scroll to the corresponding section
     const sectionId = section.toLowerCase().replace(/\s+/g, '-');
     const element = document.getElementById(sectionId);
@@ -84,7 +84,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
       const headerOffset = 120; // Account for sticky header and navigation
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      
+
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
@@ -92,16 +92,16 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
     }
   };
 
-  
+
 
   // Helper function to format last updated date
   const formatLastUpdated = (updatedAt: string | null | undefined): string => {
     if (!updatedAt) return 'Not updated';
-    
+
     try {
       const date = new Date(updatedAt);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
         month: 'short',
         day: 'numeric'
       });
@@ -114,7 +114,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const formatPrice = (price: number | null | undefined): string => {
     if (price === null || price === undefined) return 'Free';
     if (price === 0) return 'Free';
-    
+
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP'
@@ -139,18 +139,12 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-gray-600 font-medium">
-            View Course
-          </span>
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
           <span className="text-[#201a7c] font-semibold truncate max-w-xs">{course.title}</span>
         </nav>
       </div>
 
       {/* Course Header - Full Width Dark Section */}
-      <div 
+      <div
         className="w-full text-white relative overflow-hidden"
         style={{
           background: '#201a7c'
@@ -171,14 +165,14 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               <h1 className="text-3xl lg:text-4xl font-bold mb-4 leading-tight">
                 {course.title}
               </h1>
-              
+
               {/* Course Description */}
               {course.excerpt && (
                 <p className="text-gray-300 text-lg mb-6 leading-relaxed">
                   {course.excerpt}
                 </p>
               )}
-              
+
               {/* Author Information */}
               {course.instructor && course.instructor.user && (
                 <div className="flex items-center space-x-3 mb-6">
@@ -193,19 +187,19 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                   </div>
                 </div>
               )}
-              
+
               {/* Course Stats */}
               <div className="flex items-center space-x-6 text-sm text-gray-300">
-             <span>Last Updated: {formatLastUpdated(course.updatedAt)}</span>
-           </div>
+                <span>Last Updated: {formatLastUpdated(course.updatedAt)}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
 
 
-      
+
+
       {/* Course Content Sections - Two Column Layout */}
       <div className="w-full bg-gray-50 min-h-screen">
         <div className="w-full lg:pr-5">
@@ -214,12 +208,12 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
             <div className="flex-1 lg:flex-[1_1_0%] min-w-0">
               {/* Course Navigation Carousel - Sticky positioned below header */}
               <div className="sticky top-[45px] lg:top-16 z-40 mb-8">
-                <CourseNavigationCarousel 
+                <CourseNavigationCarousel
                   activeSection={activeSection}
                   onSectionChange={handleSectionChange}
                 />
               </div>
-              
+
               {/* Overview Section - Hidden on desktop */}
               <div id="overview" className="lg:hidden bg-white rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
                 {/* Mobile/Tablet Course Card - Only visible on smaller screens */}
@@ -234,7 +228,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                         height={180}
                         className="w-full h-45 object-cover"
                       />
-                      
+
                       {/* Price and Action */}
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -242,15 +236,15 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                             <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
                             <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                           </div>
-                          <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
+                          <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#f5f5f5', color: '#333' }}>
                             {course.category?.map(c => c.name).join(', ') || 'General'}
                           </span>
                         </div>
-                        
+
                         <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
                           ▶ Start Learning
                         </button>
-                        
+
                         <div className="text-sm text-gray-600 space-y-1">
                           <div>100% positive reviews</div>
                           <div>0 student</div>
@@ -264,7 +258,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                   </div>
                 )}
               </div>
-              
+
               {/* Description Section */}
               <div id="description" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Course Description</h2>
@@ -274,25 +268,25 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                   </div>
                 )}
               </div>
-              
+
               {/* Additional content sections can be added here */}
               <div id="curriculum" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Curriculum</h2>
                 <p className="text-gray-700">Course curriculum content will be displayed here.</p>
               </div>
-              
+
 
               <div id="materials" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Materials</h2>
                 <p className="text-gray-700">Course materials and resources will be displayed here.</p>
               </div>
-              
+
               <div id="announcements" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Announcements</h2>
                 <p className="text-gray-700">Course announcements and updates will be displayed here.</p>
               </div>
             </div>
-            
+
             {/* Sticky Sidebar - Right Column - Hidden on mobile/tablet */}
             <div className="hidden lg:block lg:flex-[0_0_320px] lg:max-w-[320px]">
               <div className="sticky top-20 -mt-55">
@@ -306,7 +300,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                       height={180}
                       className="w-full h-45 object-cover"
                     />
-                    
+
                     {/* Price and Action */}
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
@@ -314,15 +308,15 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                           <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
                           <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
                         </div>
-                        <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
+                        <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#f5f5f5', color: '#333' }}>
                           {course.category?.map(c => c.name).join(', ') || 'General'}
                         </span>
                       </div>
-                      
+
                       <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
                         ▶ Start Learning
                       </button>
-                      
+
                       <div className="text-sm text-gray-600 space-y-1">
                         <div>100% positive reviews</div>
                         <div>0 student</div>
