@@ -590,6 +590,283 @@ export default buildConfig({
       }) as PayloadHandler,
     },
     {
+      path: '/instructor-application',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        const requestId = crypto.randomUUID();
+
+        try {
+          const escapeHtml = (input: string) =>
+            input
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+
+          const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
+          const safeLink = (value: string) => {
+            const v = String(value || '').trim();
+            if (!v) return 'N/A';
+            if (!isHttpUrl(v)) return escapeHtml(v);
+            const escaped = escapeHtml(v);
+            return `<a href="${escaped}">${escaped}</a>`;
+          };
+
+          const contentType = req.headers.get('content-type') || '';
+          const isMultipart = contentType.toLowerCase().includes('multipart/form-data');
+
+          const body: any = isMultipart ? null : await (req as any).json();
+          const form = isMultipart ? await (req as any).formData() : null;
+
+          const getValue = (key: string) => {
+            if (form) {
+              const v = form.get(key);
+              return v === null || v === undefined ? '' : String(v);
+            }
+            return body?.[key] === null || body?.[key] === undefined ? '' : String(body[key]);
+          };
+
+          const fullName = getValue('fullName').trim();
+          const email = getValue('email').trim().toLowerCase();
+          const phone = getValue('phone').trim();
+          const linkedin = getValue('linkedin').trim();
+          const portfolio = getValue('portfolio').trim();
+          const expertise = getValue('expertise').trim();
+          const experienceYearsRaw = form ? form.get('experienceYears') : body?.experienceYears;
+          const qualifications = getValue('qualifications').trim();
+          const certifications = getValue('certifications').trim();
+          const preferredTopics = getValue('preferredTopics').trim();
+          const availability = getValue('availability').trim();
+          const teachingExperience = getValue('teachingExperience').trim();
+          const bio = getValue('bio').trim();
+          const agree = getValue('agree').trim() === 'true' || Boolean(body?.agree);
+
+          const resumeFile = form ? form.get('resume') : null;
+          const resumeName =
+            resumeFile && typeof resumeFile === 'object' && 'name' in resumeFile
+              ? String((resumeFile as any).name || '').trim()
+              : getValue('resumeName').trim();
+
+          if (
+            !fullName ||
+            !email ||
+            !phone ||
+            !expertise ||
+            experienceYearsRaw === undefined ||
+            experienceYearsRaw === null ||
+            !qualifications ||
+            !teachingExperience ||
+            !agree
+          ) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message:
+                  'Please complete all required fields and confirm the agreement.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Please provide a valid email address.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const years =
+            typeof experienceYearsRaw === 'number'
+              ? experienceYearsRaw
+              : parseFloat(String(experienceYearsRaw));
+
+          if (!Number.isFinite(years) || years < 0) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Years of experience must be a valid number.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const normalizedAvailability = availability || 'Full-time';
+          const allowedAvailability = ['Full-time', 'Part-time', 'Contract'];
+          if (!allowedAvailability.includes(normalizedAvailability)) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Availability is invalid.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const resendApiKey = process.env.RESEND_API_KEY;
+          const enableEmailNotifications =
+            process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
+          const fromEmail =
+            process.env.RESEND_FROM_EMAIL || 'info@grandlinemaritime.com';
+          const fromName = process.env.EMAIL_FROM_NAME || 'Grandline Maritime';
+
+          const getResumeAttachment = async (): Promise<
+            | { filename: string; content: string }
+            | null
+          > => {
+            if (!resumeFile) return null;
+            if (!(typeof resumeFile === 'object' && resumeFile !== null)) return null;
+            if (!('arrayBuffer' in resumeFile) || !('size' in resumeFile)) return null;
+
+            const filename =
+              typeof (resumeFile as any).name === 'string' && (resumeFile as any).name.trim()
+                ? (resumeFile as any).name.trim()
+                : resumeName || 'resume';
+
+            const size = Number((resumeFile as any).size);
+            const type = String((resumeFile as any).type || '').toLowerCase();
+
+            const maxBytes = 10 * 1024 * 1024;
+            if (!Number.isFinite(size) || size <= 0) return null;
+            if (size > maxBytes) {
+              throw new Error('Resume file is too large');
+            }
+
+            const allowedTypes = [
+              'application/pdf',
+              'image/png',
+              'image/jpeg',
+              'image/jpg',
+            ];
+            if (type && !allowedTypes.includes(type)) {
+              throw new Error('Unsupported resume file type');
+            }
+
+            const buffer = Buffer.from(await (resumeFile as any).arrayBuffer());
+            return { filename, content: buffer.toString('base64') };
+          };
+
+          if (resendApiKey && enableEmailNotifications) {
+            try {
+              let resumeAttachment: { filename: string; content: string } | null = null;
+              try {
+                resumeAttachment = await getResumeAttachment();
+              } catch (resumeError) {
+                const message =
+                  resumeError instanceof Error && resumeError.message
+                    ? resumeError.message
+                    : 'Invalid resume file.';
+                return new Response(
+                  JSON.stringify({
+                    success: false,
+                    message,
+                  }),
+                  { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+              }
+              const resendResponse = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${resendApiKey}`,
+                },
+                body: JSON.stringify({
+                  from: `${fromName} <${fromEmail}>`,
+                  to: 'info@grandlinemaritime.com',
+                  reply_to: email,
+                  subject: `Instructor Application: ${escapeHtml(fullName)} (${escapeHtml(expertise)})`,
+                  html: `
+                    <h2>New Instructor Application</h2>
+                    <p><strong>Full Name:</strong> ${escapeHtml(fullName)}</p>
+                    <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+                    <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+                    <p><strong>LinkedIn:</strong> ${safeLink(linkedin)}</p>
+                    <p><strong>Portfolio/Website:</strong> ${safeLink(portfolio)}</p>
+                    <hr />
+                    <p><strong>Area of Expertise:</strong> ${escapeHtml(expertise)}</p>
+                    <p><strong>Years of Experience:</strong> ${escapeHtml(String(years))}</p>
+                    <p><strong>Availability:</strong> ${escapeHtml(normalizedAvailability)}</p>
+                    <p><strong>Preferred Topics:</strong> ${preferredTopics ? escapeHtml(preferredTopics) : 'N/A'}</p>
+                    <hr />
+                    <p><strong>Qualifications:</strong></p>
+                    <p>${escapeHtml(qualifications).replace(/\n/g, '<br />')}</p>
+                    <p><strong>Certifications:</strong></p>
+                    <p>${certifications ? escapeHtml(certifications).replace(/\n/g, '<br />') : 'N/A'}</p>
+                    <hr />
+                    <p><strong>Teaching Experience:</strong></p>
+                    <p>${escapeHtml(teachingExperience).replace(/\n/g, '<br />')}</p>
+                    <p><strong>Professional Bio:</strong></p>
+                    <p>${bio ? escapeHtml(bio).replace(/\n/g, '<br />') : 'N/A'}</p>
+                    <hr />
+                    <p><strong>Resume/CV:</strong> ${resumeAttachment ? 'Attached' : resumeName ? escapeHtml(resumeName) : 'N/A'}</p>
+                    <p style="color: #666; font-size: 12px;">Request ID: ${escapeHtml(requestId)}</p>
+                  `,
+                  attachments: resumeAttachment ? [resumeAttachment] : undefined,
+                }),
+              });
+
+              if (!resendResponse.ok) {
+                const errorData = await resendResponse.text();
+                console.error(
+                  `Resend API error [${requestId}] (instructor-application):`,
+                  errorData
+                );
+                throw new Error('Resend API request failed');
+              }
+            } catch (emailError) {
+              console.error(
+                `Instructor application email failed to send [${requestId}]:`,
+                emailError
+              );
+              return new Response(
+                JSON.stringify({
+                  success: false,
+                  message: 'Failed to submit application. Please try again later.',
+                }),
+                { status: 500, headers: { 'Content-Type': 'application/json' } }
+              );
+            }
+          } else {
+            console.warn(
+              `Instructor application email not sent [${requestId}]: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not 'true'`
+            );
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: 'Email service is not configured.',
+              }),
+              { status: 500, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message:
+                'Thank you for applying! We will review your application and get back to you soon.',
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        } catch (error) {
+          console.error(
+            `Instructor application error [${requestId}]:`,
+            error
+          );
+          return new Response(
+            JSON.stringify({
+              success: false,
+              message: 'An error occurred. Please try again.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }) as PayloadHandler,
+    },
+    {
       path: '/contact',
       method: 'post',
       handler: (async (req: PayloadRequest) => {

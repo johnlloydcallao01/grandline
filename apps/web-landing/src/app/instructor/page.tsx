@@ -23,6 +23,13 @@ export default function InstructorPage() {
     agree: false,
   });
 
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [resumeInputKey, setResumeInputKey] = useState(0);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -37,12 +44,82 @@ export default function InstructorPage() {
 
   const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setResumeFile(file || null);
     setFormData((prev) => ({ ...prev, resumeName: file ? file.name : "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Instructor application:", formData);
+    setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const apiBase =
+        process.env.NEXT_PUBLIC_CMS_API_URL ||
+        "https://cms.grandlinemaritime.com/api";
+      const apiUrl = `${apiBase.replace(/\/$/, "")}/instructor-application`;
+
+      const form = new FormData();
+      form.set("fullName", formData.fullName);
+      form.set("email", formData.email);
+      form.set("phone", formData.phone);
+      form.set("linkedin", formData.linkedin);
+      form.set("portfolio", formData.portfolio);
+      form.set("expertise", formData.expertise);
+      form.set("experienceYears", formData.experienceYears);
+      form.set("qualifications", formData.qualifications);
+      form.set("certifications", formData.certifications);
+      form.set("preferredTopics", formData.preferredTopics);
+      form.set("availability", formData.availability);
+      form.set("teachingExperience", formData.teachingExperience);
+      form.set("bio", formData.bio);
+      form.set("agree", String(formData.agree));
+      if (resumeFile) {
+        form.set("resume", resumeFile, resumeFile.name);
+      }
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: form,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage(
+          data.message || "Thank you for applying! We'll get back to you soon."
+        );
+        setFormData({
+          fullName: "",
+          email: "",
+          phone: "",
+          linkedin: "",
+          portfolio: "",
+          expertise: "",
+          experienceYears: "",
+          qualifications: "",
+          certifications: "",
+          bio: "",
+          teachingExperience: "",
+          preferredTopics: "",
+          availability: "Full-time",
+          resumeName: "",
+          agree: false,
+        });
+        setResumeFile(null);
+        setResumeInputKey((k) => k + 1);
+      } else {
+        setError(
+          data.message || "Failed to submit application. Please try again."
+        );
+      }
+    } catch (err) {
+      console.error("Instructor application error:", err);
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,6 +144,19 @@ export default function InstructorPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <h2 className="heading-secondary text-2xl font-bold text-gray-900 mb-6">Instructor Application</h2>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800">{successMessage}</p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -218,9 +308,11 @@ export default function InstructorPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Resume/CV</label>
                     <div className="flex items-center gap-3">
                       <input
+                        key={resumeInputKey}
                         type="file"
                         name="resume"
                         onChange={handleResumeChange}
+                        accept=".pdf,.png,.jpg,.jpeg"
                         className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#201a7c] file:text-white hover:file:bg-[#1a1569]"
                       />
                       {formData.resumeName && (
@@ -261,6 +353,7 @@ export default function InstructorPage() {
                     name="agree"
                     checked={formData.agree}
                     onChange={handleChange}
+                    required
                     className="h-4 w-4 text-[#201a7c] focus:ring-[#201a7c] border-gray-300 rounded"
                   />
                   <label className="ml-2 block text-sm text-gray-700">
@@ -268,8 +361,12 @@ export default function InstructorPage() {
                   </label>
                 </div>
 
-                <button type="submit" className="btn-primary w-full py-4 text-lg">
-                  Submit Application
+                <button
+                  type="submit"
+                  className="btn-primary w-full py-4 text-lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
               </form>
             </div>
