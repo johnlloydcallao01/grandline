@@ -132,7 +132,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setMode('results')
     try {
-      const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
+      const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
       const json = await resp.json()
       const data: SearchResult[] = json.results || []
       setResults(data)
@@ -163,7 +163,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   }
 
   const searchByCategory = async (categoryLabel: string) => {
-    const v = categoryLabel.trim().toLowerCase().replace(/\s+/g, ' ')
+    const v = categoryLabel.trim().replace(/\s+/g, ' ')
     setQuery(categoryLabel)
     setError(undefined)
     if (abortRef.current) abortRef.current.abort()
@@ -172,7 +172,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setMode('results')
     try {
-      const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
+      const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
       const json = await resp.json()
       const data: SearchResult[] = json.results || []
       setResults(data)

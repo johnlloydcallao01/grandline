@@ -1,19 +1,38 @@
-"use client";
-
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { Stats } from "@/components/Stats";
 import { CTA } from "@/components/CTA";
 import { Footer } from "@/components/Footer";
+import { FeaturedCoursesClient } from "@/components/FeaturedCourses";
+import { fetchCoursesServer, fetchTotalCoursesCount, type Course } from "@/lib/server-fetch-courses";
 import Link from "next/link";
-import { useFeaturedCourses } from "@encreasl/ui/courses-hooks";
-import { CourseCard, type CourseCardCourse } from "@encreasl/ui/course-card";
 
-type LandingCourse = CourseCardCourse;
+/**
+ * Home page - Server-Side Rendered for SEO optimization
+ * Courses are fetched on the server and rendered into HTML like WordPress
+ */
+export default async function Home() {
+  let courses: Course[] = [];
+  let error: string | null = null;
+  let totalCoursesCount = 0;
 
-export default function Home() {
-  const { courses, isLoading, error } = useFeaturedCourses<LandingCourse>(6);
+  try {
+    // Fetch both featured courses and total count in parallel
+    const [coursesResponse, totalCount] = await Promise.all([
+      fetchCoursesServer({
+        status: "published",
+        limit: 6,
+        featured: true,
+      }),
+      fetchTotalCoursesCount(),
+    ]);
+    courses = coursesResponse.docs;
+    totalCoursesCount = totalCount;
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Failed to fetch courses";
+    console.error("Error fetching courses:", error);
+  }
 
   return (
     <main className="min-h-screen">
@@ -33,33 +52,19 @@ export default function Home() {
 
           {error ? (
             <div className="text-center text-gray-600">{error}</div>
-          ) : isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
-                  <div className="aspect-video bg-gray-200 rounded-lg mb-3" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-gray-200 rounded w-full" />
-                </div>
-              ))}
-            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center text-gray-600">No featured courses available</div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {courses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    course={course}
-                    href={`https://app.grandlinemaritime.com/view-course/${course.id}`}
-                  />
-                ))}
-              </div>
-              <div className="text-center mt-12">
-                <Link href="/courses" className="btn-primary text-lg px-8 py-4 inline-flex items-center">
-                  <span>View All</span>
-                  <i className="fas fa-arrow-right ml-2"></i>
-                </Link>
-              </div>
+              <FeaturedCoursesClient courses={courses} />
+              {totalCoursesCount > 6 && (
+                <div className="text-center mt-12">
+                  <Link href="/courses" className="btn-primary text-lg px-8 py-4 inline-flex items-center">
+                    <span>View All</span>
+                    <i className="fas fa-arrow-right ml-2"></i>
+                  </Link>
+                </div>
+              )}
             </>
           )}
         </div>

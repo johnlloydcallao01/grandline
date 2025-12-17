@@ -12,7 +12,6 @@ export function MobileSearchOverlay(): React.ReactNode {
         setQuery,
         getSuggestions,
         setMode,
-        search,
         loadRecentKeywords,
         persistRecentKeyword,
         setTyping,
@@ -66,7 +65,8 @@ export function MobileSearchOverlay(): React.ReactNode {
                                     if (!v) return
                                     setTyping(false)
                                     await persistRecentKeyword(v)
-                                    await search(v)
+                                    setOverlayOpen(false)
+                                    window.location.href = `https://app.grandlinemaritime.com/results?search_query=${encodeURIComponent(v)}`
                                 }
                             }}
                             className="w-full h-10 border border-gray-300 rounded-md pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"

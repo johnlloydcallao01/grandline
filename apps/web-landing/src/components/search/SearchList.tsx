@@ -42,11 +42,8 @@ export function SearchList(): React.ReactNode {
         mode,
         suggestions,
         results,
-        onSuggestionClick,
         query,
         recentKeywords,
-        search,
-        saveRecentKeyword,
         persistRecentKeyword,
         setTyping,
         isRecentLoading,
@@ -69,9 +66,8 @@ export function SearchList(): React.ReactNode {
                                             type="button"
                                             onClick={async () => {
                                                 setTyping(false)
-                                                saveRecentKeyword(kw)
                                                 await persistRecentKeyword(kw)
-                                                await search(kw)
+                                                window.location.href = `https://app.grandlinemaritime.com/results?search_query=${encodeURIComponent(kw)}`
                                             }}
                                             className="flex items-center gap-3 w-full text-left"
                                         >
@@ -115,7 +111,11 @@ export function SearchList(): React.ReactNode {
                             <ul className="divide-y divide-gray-100">
                                 {suggestions.map((s, idx) => (
                                     <li key={`${s.label}-${idx}`} className="p-3 hover:bg-gray-50">
-                                        <button type="button" onClick={() => onSuggestionClick(s)} className="flex items-center gap-3 w-full text-left">
+                                        <button type="button" onClick={async () => {
+                                            setTyping(false)
+                                            await persistRecentKeyword(s.label)
+                                            window.location.href = `https://app.grandlinemaritime.com/results?search_query=${encodeURIComponent(s.label)}`
+                                        }} className="flex items-center gap-3 w-full text-left">
                                             <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
                                                 <i className={`fa ${s.kind === 'category' ? 'fa-folder' : 'fa-book'}`}></i>
                                             </div>

@@ -5,7 +5,7 @@ Wherever app directory you are working on, make sure to run the following comman
 1. pnpm exec tsc --noEmit
 2. pnpm exec eslint
 
-Make sure both above will have no errors or warnings. Fix all issues properly and professionally. You must not apply poor rushed loq quality temporary fix. ALWAYS FIX BOTH PROPERLY AND PROFESSIONALLY.
+Make sure both above will have no errors or warnings. Fix all issues properly and professionally. You must not apply poor rushed low quality temporary fix. ALWAYS FIX BOTH PROPERLY AND PROFESSIONALLY.
 
 FINAL OUTPUT:
 

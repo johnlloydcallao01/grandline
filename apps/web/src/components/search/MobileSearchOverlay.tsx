@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSearch } from '@/hooks/useSearch'
 import { SearchList } from './SearchList'
 
 export function MobileSearchOverlay(): React.ReactNode {
+  const router = useRouter()
   const {
     isOverlayOpen,
     setOverlayOpen,
@@ -12,7 +14,6 @@ export function MobileSearchOverlay(): React.ReactNode {
     setQuery,
     getSuggestions,
     setMode,
-    search,
     loadRecentKeywords,
     persistRecentKeyword,
     setTyping,
@@ -58,7 +59,8 @@ export function MobileSearchOverlay(): React.ReactNode {
                 if (!v) return
                 setTyping(false)
                 await persistRecentKeyword(v)
-                await search(v)
+                setOverlayOpen(false)
+                router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
               }
             }}
             className="w-full h-10 border border-gray-300 rounded-md pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"

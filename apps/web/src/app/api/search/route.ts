@@ -4,8 +4,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const q = (searchParams.get('q') || '').trim().toLowerCase().replace(/\s+/g, ' ')
-    const limit = parseInt(searchParams.get('limit') || '8', 10)
-    const categoryLabel = (searchParams.get('categoryLabel') || '').trim().toLowerCase().replace(/\s+/g, ' ')
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+    const categoryLabel = (searchParams.get('categoryLabel') || '').trim().replace(/\s+/g, ' ')
 
     const apiKey = process.env.PAYLOAD_API_KEY
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
@@ -18,19 +18,27 @@ export async function GET(request: NextRequest) {
     params.set('limit', String(limit))
     params.set('page', '1')
     params.set('depth', '2')
-    if (q.length >= 2) params.set('where[title][contains]', q)
+
+    // Server-side filtering: Use PayloadCMS where parameter for category
+    if (categoryLabel) {
+      // Filter by category name on the server side
+      params.set('where[category.name][equals]', categoryLabel)
+    } else if (q.length >= 2) {
+      // Search by both title AND category name using OR logic
+      // This allows searching for "Deck Department" to find courses in that category
+      params.set('where[or][0][title][contains]', q)
+      params.set('where[or][1][category.name][contains]', q)
+    }
+
+    // Early return if invalid query
+    if (q.length < 2 && !categoryLabel) {
+      return NextResponse.json({ results: [] })
+    }
 
     const res = await fetch(`${apiUrl}/courses?${params.toString()}`, { headers, cache: 'no-store' })
     if (!res.ok) return NextResponse.json({ results: [] }, { status: res.status })
     const data = await res.json()
-    let docs = Array.isArray(data.docs) ? data.docs : []
-
-    if (!q && categoryLabel) {
-      docs = docs.filter((c: any) => Array.isArray(c.category) && c.category.some((x: any) => String(x?.name || '').trim().toLowerCase() === categoryLabel))
-    }
-    if (q.length < 2 && !categoryLabel) {
-      return NextResponse.json({ results: [] })
-    }
+    const docs = Array.isArray(data.docs) ? data.docs : []
 
     const results = docs.map((c: any) => {
       const thumb = c.thumbnail?.cloudinaryURL || c.thumbnail?.url || undefined

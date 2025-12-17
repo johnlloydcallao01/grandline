@@ -37,7 +37,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const { logout, isLoggingOut } = useLogout()
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLFormElement>(null)
-  const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, search, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
+  const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
 
   const handleMyPortalClick = () => {
     router.push('/portal')
@@ -125,17 +125,17 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     const v = query.trim()
-    setDropdownOpen(true)
     setTyping(false)
     if (v.length < 2) {
+      setDropdownOpen(true)
       setMode('suggestions')
       loadRecentKeywords()
       return
     }
-    setMode('results')
     saveRecentKeyword(query)
     await persistRecentKeyword(query)
-    await search(query)
+    setDropdownOpen(false)
+    router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
     if (onSearch) {
       onSearch(query)
     }
