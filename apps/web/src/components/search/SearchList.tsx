@@ -10,12 +10,15 @@ export function SearchList(): React.ReactNode {
         mode,
         suggestions,
         query,
+        setQuery,
+        setMode,
         recentKeywords,
         persistRecentKeyword,
         setTyping,
         isRecentLoading,
         setDropdownOpen,
         setOverlayOpen,
+        search,
     } = useSearch()
 
     return (
@@ -32,12 +35,27 @@ export function SearchList(): React.ReactNode {
                                     <li key={`${kw}-${idx}`} className="p-3 hover:bg-gray-50">
                                         <button
                                             type="button"
-                                            onClick={async () => {
-                                                setTyping(false)
-                                                await persistRecentKeyword(kw)
+                                            onClick={() => {
+                                                // Close UI immediately to prevent flash
                                                 setDropdownOpen(false)
                                                 setOverlayOpen(false)
-                                                router.push(`/results?search_query=${encodeURIComponent(kw)}` as any)
+                                                // Update search input instantly
+                                                setQuery(kw)
+                                                // Set mode to results (not suggestions)
+                                                setMode('results')
+                                                setTyping(false)
+
+                                                // Check if already on results page
+                                                if (window.location.pathname === '/results') {
+                                                    // Trigger search directly instead of navigating
+                                                    search(kw)
+                                                } else {
+                                                    // Navigate to results page
+                                                    router.push(`/results?search_query=${encodeURIComponent(kw)}` as any)
+                                                }
+
+                                                // Persist in background
+                                                persistRecentKeyword(kw)
                                             }}
                                             className="flex items-center gap-3 w-full text-left"
                                         >
@@ -81,12 +99,27 @@ export function SearchList(): React.ReactNode {
                             <ul className="divide-y divide-gray-100">
                                 {suggestions.map((s, idx) => (
                                     <li key={`${s.label}-${idx}`} className="p-3 hover:bg-gray-50">
-                                        <button type="button" onClick={async () => {
-                                            setTyping(false)
-                                            await persistRecentKeyword(s.label)
+                                        <button type="button" onClick={() => {
+                                            // Close UI immediately to prevent flash
                                             setDropdownOpen(false)
                                             setOverlayOpen(false)
-                                            router.push(`/results?search_query=${encodeURIComponent(s.label)}` as any)
+                                            // Update search input instantly
+                                            setQuery(s.label)
+                                            // Set mode to results (not suggestions)
+                                            setMode('results')
+                                            setTyping(false)
+
+                                            // Check if already on results page
+                                            if (window.location.pathname === '/results') {
+                                                // Trigger search directly instead of navigating
+                                                search(s.label)
+                                            } else {
+                                                // Navigate to results page
+                                                router.push(`/results?search_query=${encodeURIComponent(s.label)}` as any)
+                                            }
+
+                                            // Persist in background
+                                            persistRecentKeyword(s.label)
                                         }} className="flex items-center gap-3 w-full text-left">
                                             <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
                                                 <i className={`fa ${s.kind === 'category' ? 'fa-folder' : 'fa-book'}`}></i>

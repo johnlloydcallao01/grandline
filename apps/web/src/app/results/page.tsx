@@ -18,6 +18,8 @@ function ResultsPageContent() {
         search,
         results,
         isLoading,
+        lastCompletedKey,
+        error,
         getSuggestions,
         setTyping,
         persistRecentKeyword,
@@ -27,26 +29,23 @@ function ResultsPageContent() {
         loadRecentKeywords,
         saveRecentKeyword,
     } = useSearch()
-    const hasSearched = useRef(false)
-    const previousSearchQuery = useRef<string>('')
+
+    const normalizedQueryParam = searchQuery.trim().toLowerCase().replace(/\s+/g, ' ')
+    const hasValidQueryParam = normalizedQueryParam.length >= 2
+    const queryParamKey = hasValidQueryParam ? `q:${normalizedQueryParam}` : ''
+    const isProcessing = hasValidQueryParam && (isLoading || lastCompletedKey !== queryParamKey)
 
     useEffect(() => {
-        // Always update query when searchQuery changes (from URL)
-        if (searchQuery && searchQuery !== previousSearchQuery.current) {
+        // Trigger search whenever URL query changes
+        if (searchQuery) {
             setQuery(searchQuery)
-            previousSearchQuery.current = searchQuery
-
-            // Perform search if we haven't just done this one
-            if (!hasSearched.current || searchQuery !== query) {
-                const performSearch = async () => {
-                    await persistRecentKeyword(searchQuery)
-                    await search(searchQuery)
-                }
-                performSearch()
-                hasSearched.current = true
+            const performSearch = async () => {
+                await persistRecentKeyword(searchQuery)
+                await search(searchQuery)
             }
+            performSearch()
         }
-    }, [searchQuery, setQuery, persistRecentKeyword, search, query])
+    }, [searchQuery]) // Only searchQuery dependency to avoid loops
 
     // Handle click outside and keyboard events (same as Header)
     useEffect(() => {
@@ -84,7 +83,6 @@ function ResultsPageContent() {
         await persistRecentKeyword(v)
         setDropdownOpen(false)
         router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
-        hasSearched.current = false
     }
 
 
@@ -92,56 +90,53 @@ function ResultsPageContent() {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto">
 
-
-
-                {/* Desktop Back Button (hidden on mobile) */}
-                <div className="mb-4 px-2.5 hidden lg:block">
+                {/* Desktop Search Form with inline Back button (hidden on mobile) */}
+                <div className="hidden lg:flex items-center gap-3 w-full px-2.5 pt-4 mb-6">
                     <button
+                        type="button"
                         onClick={() => router.back()}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                        className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                        aria-label="Back"
                     >
                         <i className="fa fa-arrow-left"></i>
-                        <span className="text-sm font-medium">Back</span>
                     </button>
+                    <form ref={searchRef} onSubmit={handleSearch} className="flex-1 flex">
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                value={query}
+                                onFocus={() => {
+                                    setDropdownOpen(true)
+                                    const hasQuery = query.trim().length > 0
+                                    loadRecentKeywords()
+                                    setMode(hasQuery ? 'results' : 'suggestions')
+                                }}
+                                onChange={e => {
+                                    const v = e.target.value
+                                    setQuery(v)
+                                    setTyping(true)
+                                    getSuggestions(v)
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] text-gray-900 placeholder-gray-500"
+                            />
+                            {query.trim().length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false); setDropdownOpen(true) }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                    aria-label="Clear"
+                                >
+                                    <i className="fa fa-times"></i>
+                                </button>
+                            )}
+                            <DesktopSearchDropdown />
+                        </div>
+                        <button type="submit" className="px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700 focus:outline-none" aria-label="Search">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </button>
+                    </form>
                 </div>
-
-                {/* Desktop Search Form (hidden on mobile) */}
-                <form ref={searchRef} onSubmit={handleSearch} className="hidden lg:flex w-full px-2.5 mb-6">
-                    <div className="flex-1 relative">
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            value={query}
-                            onFocus={() => {
-                                setDropdownOpen(true)
-                                const hasQuery = query.trim().length > 0
-                                loadRecentKeywords()
-                                setMode(hasQuery ? 'results' : 'suggestions')
-                            }}
-                            onChange={e => {
-                                const v = e.target.value
-                                setQuery(v)
-                                setTyping(true)
-                                getSuggestions(v)
-                            }}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] text-gray-900 placeholder-gray-500"
-                        />
-                        {query.trim().length > 0 && (
-                            <button
-                                type="button"
-                                onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false); setDropdownOpen(true) }}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                aria-label="Clear"
-                            >
-                                <i className="fa fa-times"></i>
-                            </button>
-                        )}
-                        <DesktopSearchDropdown />
-                    </div>
-                    <button type="submit" className="px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700 focus:outline-none" aria-label="Search">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </button>
-                </form>
 
                 {/* Mobile Search Form (visible on mobile only) */}
                 <div className="lg:hidden">
@@ -185,21 +180,10 @@ function ResultsPageContent() {
                 </div>
                 <MobileSearchOverlay />
 
-                {/* Results Header */}
-                {searchQuery && (
-                    <div className="my-2.5 px-2.5">
-                        <h1 className="text-xl font-semibold text-gray-900">
-                            Results for "{searchQuery}"
-                        </h1>
-                        <p className="text-sm text-gray-600 mt-1">
-                            {isLoading ? 'Searching...' : `${results.length} course${results.length !== 1 ? 's' : ''} found`}
-                        </p>
-                    </div>
-                )}
 
                 {/* Results List */}
                 <div className="bg-white rounded-lg shadow">
-                    {(isLoading || (searchQuery && !hasSearched.current)) ? (
+                    {isProcessing ? (
                         <div className="divide-y divide-gray-100">
                             {Array.from({ length: 6 }).map((_, idx) => (
                                 <div key={idx} className="p-4">
@@ -213,13 +197,19 @@ function ResultsPageContent() {
                                 </div>
                             ))}
                         </div>
-                    ) : results.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <i className="fa fa-search text-4xl text-gray-300 mb-3"></i>
-                            <p className="text-gray-600">No courses found</p>
-                            <p className="text-sm text-gray-500 mt-1">Try adjusting your search terms</p>
+                    ) : error ? (
+                        <div className="p-6 text-sm text-gray-700">
+                            {error}
                         </div>
-                    ) : (
+                    ) : results.length === 0 && hasValidQueryParam ? (
+                        <div className="p-10 text-center">
+                            <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                <i className="fa fa-search"></i>
+                            </div>
+                            <div className="text-base font-medium text-gray-900">No results found</div>
+                            <div className="mt-1 text-sm text-gray-600">Try different keywords.</div>
+                        </div>
+                    ) : results.length > 0 ? (
                         <div className="divide-y divide-gray-100">
                             {results.map(r => (
                                 <Link
@@ -250,7 +240,7 @@ function ResultsPageContent() {
                                 </Link>
                             ))}
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>
