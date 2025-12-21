@@ -137,7 +137,7 @@ function PostsPageContent() {
             </div>
             
             <Link
-              href="/admin/posts/new"
+              href="/posts/new"
               className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -206,7 +206,7 @@ function PostsPageContent() {
                 <div className="p-6 text-center">
                   <p className="text-gray-600">No posts found.</p>
                   <Link
-                    href="/admin/posts/new"
+                    href="/posts/new"
                     className="mt-2 inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
                   >
                     <Plus className="w-4 h-4 mr-1" />

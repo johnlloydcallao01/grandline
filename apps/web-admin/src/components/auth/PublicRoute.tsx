@@ -1,7 +1,7 @@
 /**
  * @file apps/web-admin/src/components/auth/PublicRoute.tsx
- * @description Public route component that redirects authenticated admin users
- * Based on apps/web PublicRoute but adapted for admin-only access
+ * @description Public route component for authentication pages
+ * Redirects authenticated users away from auth pages (signin, register)
  */
 
 'use client';
@@ -9,35 +9,47 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRouteProtection } from '@/hooks/useAuth';
-import { PublicRouteProps } from '@/types/auth';
+import type { PublicRouteProps } from '@/types/auth';
 
-/**
- * PublicRoute component that redirects authenticated users away from public pages
- * Used for login, register, and other auth-related pages
- */
-export function PublicRoute({ 
-  children, 
-  redirectTo = '/' 
-}: PublicRouteProps) {
+export const PublicRoute = ({
+  children,
+  redirectTo = '/'
+}: PublicRouteProps): React.ReactNode => {
   const router = useRouter();
-  const { shouldRedirectFromAuth } = useRouteProtection();
+  const {
+    isAuthenticated,
+    isInitialized,
+    isLoading
+  } = useRouteProtection();
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
 
-  // Immediate redirect for authenticated users
   useEffect(() => {
-    if (shouldRedirectFromAuth) {
-      const redirectPath = sessionStorage.getItem('auth:redirectAfterLogin') || redirectTo;
-      sessionStorage.removeItem('auth:redirectAfterLogin');
-      router.replace(redirectPath);
-    }
-  }, [shouldRedirectFromAuth, redirectTo, router]);
+    if (isAuthenticated && isInitialized && !isLoading) {
+      if (debug) console.log('🔄 PUBLIC ROUTE: Redirecting authenticated user');
 
-  // Don't render anything if we should redirect
-  if (shouldRedirectFromAuth) {
+      const redirectTimer = setTimeout(() => {
+        const storedRedirect = sessionStorage.getItem('auth:redirectAfterLogin');
+
+        if (storedRedirect) {
+          if (debug) console.log('🔄 REDIRECTING TO STORED PATH:', storedRedirect);
+          sessionStorage.removeItem('auth:redirectAfterLogin');
+          router.replace(storedRedirect as any);
+        } else {
+          if (debug) console.log('🔄 REDIRECTING TO DEFAULT:', redirectTo);
+          router.replace(redirectTo as any);
+        }
+      }, 100);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [isAuthenticated, isInitialized, isLoading, redirectTo, router]);
+
+  if (isAuthenticated) {
     return null;
   }
 
   return <>{children}</>;
-}
+};
 
 /**
  * Higher-order component version of PublicRoute
@@ -46,9 +58,9 @@ export function withPublicRoute<P extends object>(
   Component: React.ComponentType<P>,
   options?: Omit<PublicRouteProps, 'children'>
 ) {
-  const WrappedComponent = (props: P) => (
+  const WrappedComponent = (props: P): React.ReactNode => (
     <PublicRoute {...options}>
-      <Component {...props} />
+      {React.createElement(Component, props)}
     </PublicRoute>
   );
 

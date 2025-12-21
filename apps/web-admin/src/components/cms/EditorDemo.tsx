@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { RichTextEditor } from './RichTextEditor';
 
 export function EditorDemo() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState<unknown>(undefined);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -30,8 +30,7 @@ export function EditorDemo() {
         </div>
         <div className="bg-white">
           <RichTextEditor
-            value={content}
-            onChange={(value) => setContent(value as string)}
+            onChange={setContent}
             placeholder="Start writing..."
             className="border-0"
           />
@@ -45,7 +44,7 @@ export function EditorDemo() {
           </summary>
           <div className="px-4 py-3 border-t border-gray-200">
             <pre className="text-xs text-gray-600 overflow-x-auto whitespace-pre-wrap">
-              {content || 'No content yet...'}
+              {content ? JSON.stringify(content, null, 2) : 'No content yet...'}
             </pre>
           </div>
         </details>
@@ -76,7 +75,7 @@ export function EditorDemo() {
             <h4 className="font-medium text-gray-900 mb-2">✅ Rich Block Types</h4>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Paragraph (default)</li>
-              <li>• Headings (H1, H2, H3)</li>
+              <li>• Headings (H1–H6)</li>
               <li>• Quote blocks</li>
               <li>• Bulleted & Numbered Lists</li>
               <li>• Code blocks (coming soon)</li>

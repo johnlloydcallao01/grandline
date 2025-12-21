@@ -33,7 +33,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const [_currentUser, _setCurrentUser] = useState<Record<string, unknown> | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const contentRef = useRef<string | null>(null);
+  const contentRef = useRef<any>(null);
 
   const {
     control,
@@ -523,7 +523,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
               <RichTextEditor
                 value={contentRef.current}
                 onChange={(value) => {
-                  contentRef.current = value as string;
+                  contentRef.current = value as any;
                   setValue('content', value, { shouldValidate: false });
                 }}
                 placeholder="Start writing your post..."

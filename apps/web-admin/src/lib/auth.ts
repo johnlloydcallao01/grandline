@@ -1,118 +1,93 @@
 /**
  * @file apps/web-admin/src/lib/auth.ts
- * @description Authentication service for admin users
- * Based on apps/web auth service but restricted to admin role only
+ * @description PayloadCMS Authentication Service
+ * Enterprise-grade authentication with HTTP-only cookies and 30-day sessions
  */
 
-/* eslint-disable no-unreachable */
-
-import { 
-  User, 
-  AdminUser,
-  LoginCredentials, 
-  AuthResponse, 
-  PayloadAuthResponse, 
+import type {
+  User,
+  AuthResponse,
+  LoginCredentials,
+  PayloadAuthResponse,
   PayloadMeResponse,
   SessionInfo,
-  AuthErrorType,
-  AuthErrorDetails
+  AuthErrorDetails,
+  AuthErrorType
 } from '@/types/auth';
 
-// ========================================
-// CONFIGURATION
-// ========================================
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 const COLLECTION_SLUG = 'users';
 
-// Request configuration for cookie-based authentication
+function normalizeApiBaseUrl(raw?: string): string {
+  const fallback = 'https://cms.grandlinemaritime.com/api';
+  const trimmed = (raw || '').trim();
+  let base = trimmed || fallback;
+
+  if (!/^https?:\/\//i.test(base)) {
+    base = `https://${base}`;
+  }
+
+  base = base.replace(/\/+$/, '');
+
+  if (!/\/api$/i.test(base)) {
+    base = `${base}/api`;
+  }
+
+  return base;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+
 const REQUEST_CONFIG: RequestInit = {
-  credentials: 'include', // Essential for cookie-based auth
+  credentials: 'include',
   headers: {
     'Content-Type': 'application/json',
   },
 };
 
-// ========================================
-// ERROR HANDLING UTILITIES
-// ========================================
-
-export class AuthenticationError extends Error {
-  public type: AuthErrorType;
-  public field?: string;
-  public retryable: boolean;
-
-  constructor(type: AuthErrorType, message: string, field?: string, retryable = false) {
-    super(message);
-    this.name = 'AuthenticationError';
-    this.type = type;
-    this.field = field;
-    this.retryable = retryable;
-  }
-}
-
-function createAuthError(type: AuthErrorType, message: string, field?: string, retryable = false): AuthErrorDetails {
+function createAuthError(type: AuthErrorType, message: string, field?: string): AuthErrorDetails {
   return {
     type,
     message,
     field,
-    retryable
+    retryable: type === 'NETWORK_ERROR',
   };
 }
 
-// Type guard functions for error handling
-function isErrorWithName(error: unknown): error is { name: string } {
-  return typeof error === 'object' && error !== null && 'name' in error;
-}
-
-function isErrorWithCode(error: unknown): error is { code: string } {
-  return typeof error === 'object' && error !== null && 'code' in error;
-}
-
-function isErrorWithStatus(error: unknown): error is { status: number } {
-  return typeof error === 'object' && error !== null && 'status' in error;
-}
-
-function isErrorWithStatusCode(error: unknown): error is { statusCode: number } {
-  return typeof error === 'object' && error !== null && 'statusCode' in error;
-}
-
-function isErrorWithMessage(error: unknown): error is { message: string } {
-  return typeof error === 'object' && error !== null && 'message' in error;
-}
-
-function handleApiError(error: unknown): AuthErrorDetails {
-  if (error instanceof AuthenticationError) {
-    return createAuthError(error.type, error.message, error.field, error.retryable);
+function handleApiError(error: any): AuthErrorDetails {
+  if (error instanceof TypeError && error.message.includes('fetch')) {
+    return createAuthError('NETWORK_ERROR', 'Network connection failed. Please check your internet connection.');
   }
 
-  if ((isErrorWithName(error) && error.name === 'NetworkError') || (isErrorWithCode(error) && error.code === 'NETWORK_ERROR')) {
-    return createAuthError('NETWORK_ERROR', 'Network connection failed. Please check your internet connection.', undefined, true);
+  if (error.errors && Array.isArray(error.errors)) {
+    const firstError = error.errors[0];
+    if (firstError.message.toLowerCase().includes('invalid login credentials')) {
+      return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
+    }
+    if (firstError.message.toLowerCase().includes('account locked')) {
+      return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
+    }
+    return createAuthError('VALIDATION_ERROR', firstError.message, firstError.field);
   }
 
-  if ((isErrorWithStatus(error) && error.status === 401) || (isErrorWithStatusCode(error) && error.statusCode === 401)) {
+  if (error.status === 401) {
     return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
   }
-
-  if ((isErrorWithStatus(error) && error.status === 403) || (isErrorWithStatusCode(error) && error.statusCode === 403)) {
-    return createAuthError('INVALID_CREDENTIALS', 'Access denied. Admin privileges required.');
+  if (error.status === 423) {
+    return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
+  }
+  if (error.status >= 500) {
+    return createAuthError('NETWORK_ERROR', 'Server error. Please try again later.');
   }
 
-  if ((isErrorWithStatus(error) && error.status === 429) || (isErrorWithStatusCode(error) && error.statusCode === 429)) {
-    return createAuthError('ACCOUNT_LOCKED', 'Too many login attempts. Please try again later.', undefined, true);
-  }
-
-  const errorMessage = isErrorWithMessage(error) ? error.message : 'An unexpected error occurred.';
-  return createAuthError('UNKNOWN_ERROR', errorMessage);
+  return createAuthError('UNKNOWN_ERROR', error.message || 'An unexpected error occurred.');
 }
 
-// ========================================
-// API REQUEST UTILITIES
-// ========================================
-
-async function makeAuthRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function makeAuthRequest<T>(
+  endpoint: string,
+  options: RequestInit & { suppressErrorLog?: boolean } = {}
+): Promise<T> {
   const url = `${API_BASE_URL}/${COLLECTION_SLUG}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       ...REQUEST_CONFIG,
@@ -131,208 +106,311 @@ async function makeAuthRequest<T>(endpoint: string, options: RequestInit = {}): 
 
     return data;
   } catch (error) {
-    const authError = handleApiError(error);
-    throw new AuthenticationError(authError.type, authError.message, authError.field, authError.retryable);
+    if (!options.suppressErrorLog) {
+      console.error(`Auth API Error [${endpoint}]:`, error);
+    }
+    throw error;
   }
 }
-
-
-
-// ========================================
-// ROLE VALIDATION
-// ========================================
-
-// Admin user validation
-export function isAdminUser(user: User): user is AdminUser {
-  return user.role === 'admin';
-}
-
-// Validate admin access
-export function validateAdminAccess(user: User): void {
-  if (!isAdminUser(user)) {
-    throw new AuthenticationError(
-      'ACCESS_DENIED',
-      'Admin access required. Only administrators can access this application.',
-      'role'
-    );
-  }
-}
-
-// ========================================
-// CORE AUTHENTICATION FUNCTIONS
-// ========================================
 
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    const data: PayloadAuthResponse = await makeAuthRequest('/login', {
+    const response = await makeAuthRequest<PayloadAuthResponse>('/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
-    
-    // Check if user has admin role
-    if (data.user.role !== 'admin') {
-      throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Only admins can access this application.');
+
+    if (response.user.role !== 'admin') {
+      throw new Error('Access denied. Only administrators can access this application.');
     }
 
+    if (response.token) {
+      localStorage.setItem('grandline_auth_token', response.token);
+
+      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+    }
+
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
+
     return {
-      message: data.message,
-      user: data.user,
-      token: data.token,
-      exp: data.exp,
+      message: response.message,
+      user: response.user,
+      token: response.token,
+      exp: response.exp,
     };
   } catch (error) {
-    if (error instanceof AuthenticationError) {
-      throw error;
-    }
-    
     const authError = handleApiError(error);
-    throw new AuthenticationError(authError.type, authError.message, authError.field, authError.retryable);
+    throw new Error(authError.message);
   }
 }
 
 export async function logout(): Promise<void> {
   try {
-    await makeAuthRequest('/logout', {
-      method: 'POST',
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-    // Continue with logout even if API call fails
+    const user = await getCurrentUser();
+    if (user) {
+      try {
+        await makeAuthRequest('/logout', {
+          method: 'POST',
+          suppressErrorLog: true,
+        });
+      } catch (error: any) {
+        if (!(error && typeof error === 'object' && 'status' in error && error.status === 400)) {
+          console.error('Logout error:', error);
+        }
+      }
+    }
+  } finally {
+    clearAuthState();
   }
 }
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const response = await makeAuthRequest<PayloadMeResponse>('/me');
-    
-    if (response.user?.role !== 'admin') {
-      throw new AuthenticationError('ACCESS_DENIED', 'Access denied. Only admins can access this application.');
+    let headers: Record<string, string> | undefined;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('grandline_auth_token');
+      if (token) headers = { Authorization: `users JWT ${token}` };
     }
-    
+
+    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2', { headers });
+
+    if (!response.user) {
+      try {
+        const cached = localStorage.getItem('grandline_auth_user');
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch { void 0; }
+
+      clearAuthState();
+      return null;
+    }
+
+    if (response.user.role !== 'admin') {
+      clearAuthState();
+      return null;
+    }
+
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
+
     return response.user;
-  } catch (error) {
-    if (error instanceof AuthenticationError) {
-      throw error;
+  } catch (error: any) {
+    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
+    const status = isAuthStatus ? (error as { status: number }).status : undefined;
+
+    if (status === 401 || status === 403) {
+      clearAuthState();
+      return null;
     }
-    
+
+    try {
+      const cached = localStorage.getItem('grandline_auth_user');
+      if (cached) {
+        return JSON.parse(cached) as User;
+      }
+    } catch { void 0; }
+
     return null;
   }
 }
 
-export async function refreshSession(): Promise<User | null> {
+export async function refreshSession(): Promise<AuthResponse> {
   try {
-    const data: PayloadMeResponse = await makeAuthRequest('/refresh-token', {
+    const currentToken = localStorage.getItem('grandline_auth_token');
+    if (!currentToken) {
+      throw new Error('No authentication token available for refresh');
+    }
+
+    const response = await makeAuthRequest<PayloadAuthResponse>('/refresh-token', {
       method: 'POST',
+      headers: { Authorization: `users JWT ${currentToken}` },
     });
 
-    if (!data.user) {
-      throw new AuthenticationError('SESSION_EXPIRED', 'Session refresh failed.');
+    if (response.user.role !== 'admin') {
+      clearAuthState();
+      throw new Error('Access denied during refresh');
     }
 
-    // Validate that the user is still an admin
-    validateAdminAccess(data.user);
+    if (response.token) {
+      localStorage.setItem('grandline_auth_token', response.token);
 
-    return data.user;
+      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+    }
+
+    try {
+      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+    } catch { void 0; }
+
+    return {
+      message: response.message,
+      user: response.user,
+      token: response.token,
+      exp: response.exp,
+    };
   } catch (error) {
-    if (error instanceof AuthenticationError) {
-      throw error;
-    }
-    throw new AuthenticationError('SESSION_EXPIRED', 'Session refresh failed.');
+    const authError = handleApiError(error);
+    throw new Error(authError.message);
   }
 }
 
 export async function checkAuthStatus(): Promise<boolean> {
   try {
     const user = await getCurrentUser();
-    return user !== null && user.role === 'admin';
+    return user !== null;
   } catch {
     return false;
   }
 }
 
-export function getSessionInfo(): SessionInfo {
+export function hasValidStoredToken(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const storedToken = localStorage.getItem('grandline_auth_token');
+  const storedExpires = localStorage.getItem('grandline_auth_expires');
+  const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
+  if (debug) console.log('🔍 hasValidStoredToken: token exists?', !!storedToken);
+  if (debug) console.log('🔍 hasValidStoredToken: expires exists?', !!storedExpires);
+
+  if (!storedToken || !storedExpires) {
+    if (debug) console.log('🔍 hasValidStoredToken: missing token or expires');
+    return false;
+  }
+
+  const expirationTime = parseInt(storedExpires);
+  const isValid = Date.now() < expirationTime;
+  if (debug) console.log('🔍 hasValidStoredToken: is valid?', isValid);
+
+  return isValid;
+}
+
+export async function getSessionInfo(): Promise<SessionInfo> {
   try {
-    // For cookie-based auth, we can't easily check expiration client-side
-    // Return basic info and let server validation determine actual status
+    let headers: Record<string, string> | undefined;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('grandline_auth_token');
+      if (token) headers = { Authorization: `users JWT ${token}` };
+    }
+    const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
+
     return {
-      isValid: true, // Will be validated by server calls
+      isValid: response.user !== null,
+      user: response.user || undefined,
+      expiresAt: response.exp ? new Date(response.exp * 1000) : undefined,
     };
-  } catch {
-    return { isValid: false };
-  }
-}
+  } catch (error: any) {
+    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
+    const status = isAuthStatus ? (error as { status: number }).status : undefined;
 
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
-export function formatAuthError(error: AuthErrorDetails): string {
-  switch (error.type) {
-    case 'INVALID_CREDENTIALS':
-      return 'Invalid email or password. Please check your credentials and try again.';
-
-    case 'SESSION_EXPIRED':
-      return 'Your session has expired. Please log in again.';
-    case 'ACCOUNT_LOCKED':
-      return 'Account temporarily locked due to multiple failed attempts. Please try again later.';
-    case 'NETWORK_ERROR':
-      return 'Network connection failed. Please check your internet connection and try again.';
-    case 'VALIDATION_ERROR':
-      return error.message || 'Please check your input and try again.';
-    default:
-      return error.message || 'An unexpected error occurred. Please try again.';
-  }
-}
-
-// ========================================
-// EVENT EMISSION
-// ========================================
-
-export function emitAuthEvent(event: string, data?: unknown): void {
-  if (typeof window !== 'undefined') {
-    const customEvent = new CustomEvent(`auth:${event}`, {
-      detail: {
-        event,
-        data,
-        timestamp: new Date().toISOString(),
-      },
-    });
-    window.dispatchEvent(customEvent);
-  }
-}
-
-// ========================================
-// SESSION MONITORING
-// ========================================
-
-export function startSessionMonitoring(): () => void {
-  let intervalId: NodeJS.Timeout;
-  
-  const checkSession = async () => {
-    try {
-      // Periodically validate with server
-      const user = await getCurrentUser();
-      if (!user) {
-        emitAuthEvent('session_expired');
-      }
-    } catch (error) {
-      console.log('Session check failed:', error);
-      emitAuthEvent('session_expired');
+    if (status === 401 || status === 403) {
+      return { isValid: false };
     }
-  };
-  
-  // Check every 5 minutes
-  intervalId = setInterval(checkSession, 5 * 60 * 1000);
-  
-  return () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
-  };
+
+    return { isValid: true };
+  }
 }
 
 export function clearAuthState(): void {
-  emitAuthEvent('logout');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('grandline_auth_token');
+    localStorage.removeItem('grandline_auth_expires');
+    localStorage.removeItem('grandline_auth_user');
+    sessionStorage.removeItem('auth:redirectAfterLogin');
+    const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
+    if (debug) console.log('🧹 CLEARED AUTH STATE');
+
+    window.dispatchEvent(new CustomEvent('auth:logout'));
+  }
 }
 
-export { handleApiError, createAuthError };
+export function isSessionExpired(exp?: number): boolean {
+  if (!exp) return true;
+  return Date.now() >= exp * 1000;
+}
+
+export function getTimeUntilExpiry(exp?: number): number {
+  if (!exp) return 0;
+  return Math.max(0, exp * 1000 - Date.now());
+}
+
+export function getUserDisplayName(user: User): string {
+  if (user.firstName && user.lastName) {
+    return `${user.firstName} ${user.lastName}`;
+  }
+  if (user.username) {
+    return user.username;
+  }
+  return user.email;
+}
+
+export function emitAuthEvent(event: string, data?: any): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(`auth:${event}`, { detail: data }));
+  }
+}
+
+export function startSessionMonitoring(): () => void {
+  if (typeof window === 'undefined') {
+    return () => { };
+  }
+
+  const REFRESH_INTERVAL = 25 * 60 * 1000;
+
+  const intervalId = setInterval(async () => {
+    try {
+      const isAuth = await checkAuthStatus();
+      if (isAuth) {
+        await refreshSession();
+        emitAuthEvent('session_refreshed_auto');
+      }
+    } catch (error) {
+      console.error('Auto session refresh failed:', error);
+      emitAuthEvent('session_refresh_failed', { error });
+    }
+  }, REFRESH_INTERVAL);
+
+  return () => {
+    clearInterval(intervalId);
+  };
+}
+
+export function monitorSessionExpiration(): () => void {
+  if (typeof window === 'undefined') {
+    return () => { };
+  }
+
+  const CHECK_INTERVAL = 5 * 60 * 1000;
+
+  const intervalId = setInterval(async () => {
+    try {
+      const sessionInfo = await getSessionInfo();
+
+      if (!sessionInfo.isValid) {
+        emitAuthEvent('session_expired');
+        clearInterval(intervalId);
+      } else if (sessionInfo.expiresAt) {
+        const timeUntilExpiry = sessionInfo.expiresAt.getTime() - Date.now();
+
+        if (timeUntilExpiry < 10 * 60 * 1000 && timeUntilExpiry > 0) {
+          emitAuthEvent('session_expiring_soon', {
+            expiresAt: sessionInfo.expiresAt,
+            timeUntilExpiry
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Session monitoring error:', error);
+    }
+  }, CHECK_INTERVAL);
+
+  return () => {
+    clearInterval(intervalId);
+  };
+}

@@ -22,6 +22,7 @@ import {
   clearAuthState,
   emitAuthEvent,
   startSessionMonitoring,
+  monitorSessionExpiration,
 } from '@/lib/auth';
 
 // ========================================
@@ -30,7 +31,6 @@ import {
 
 type AuthAction =
   | { type: 'AUTH_INIT_START' }
-  | { type: 'AUTH_FAST_SUCCESS'; payload: { user: User } }
   | { type: 'AUTH_INIT_SUCCESS'; payload: { user: User | null } }
   | { type: 'AUTH_INIT_ERROR'; payload: { error: string } }
   | { type: 'LOGIN_START' }
@@ -56,16 +56,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         isLoading: true,
-        error: null,
-      };
-
-    case 'AUTH_FAST_SUCCESS':
-      return {
-        ...state,
-        user: action.payload.user,
-        isAuthenticated: true,
-        isLoading: false,
-        isInitialized: false, // Keep as false until real validation completes
         error: null,
       };
 
@@ -173,7 +163,15 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
   const initializeAuth = useCallback(async () => {
     try {
-      // For cookie-based auth, check with server directly
+      let initialUser: User | null = null;
+      try {
+        const cached = localStorage.getItem('grandline_auth_user');
+        if (cached) {
+          initialUser = JSON.parse(cached);
+          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser } });
+        }
+      } catch { void 0; }
+
       const user = await getCurrentUser();
       dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
 
@@ -228,19 +226,13 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
   const refreshSession = useCallback(async () => {
     try {
-      const user = await authRefreshSession();
-      if (user) {
-        dispatch({ type: 'REFRESH_SUCCESS', payload: { user } });
-        emitAuthEvent('session_refreshed', { user });
-      } else {
-        dispatch({ type: 'SESSION_EXPIRED' });
-        emitAuthEvent('session_expired');
-      }
-    } catch (error: unknown) {
-      // If refresh fails, treat as session expired
+      const response = await authRefreshSession();
+      dispatch({ type: 'REFRESH_SUCCESS', payload: { user: response.user } });
+      emitAuthEvent('session_refreshed', { user: response.user });
+    } catch (_error) {
       dispatch({ type: 'SESSION_EXPIRED' });
       emitAuthEvent('session_expired');
-      throw error;
+      throw _error;
     }
   }, []);
 
@@ -270,14 +262,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
     // Listen for custom auth events
     const handleAuthEvent = (e: CustomEvent) => {
-      if (e.type === 'auth:logout') {
+      if (e.type === 'auth:logout' || e.type === 'auth:session_expired') {
         handleSessionExpired();
       }
-      // Removed 'auth:session_expired' to prevent infinite loop
     };
 
     // Start session monitoring
     const stopSessionMonitoring = startSessionMonitoring();
+    const stopExpirationMonitoring = monitorSessionExpiration();
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth:logout', handleAuthEvent as EventListener);
@@ -288,6 +280,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       window.removeEventListener('auth:logout', handleAuthEvent as EventListener);
       window.removeEventListener('auth:session_expired', handleAuthEvent as EventListener);
       stopSessionMonitoring();
+      stopExpirationMonitoring();
     };
   }, [state.isAuthenticated, state.isInitialized]);
 

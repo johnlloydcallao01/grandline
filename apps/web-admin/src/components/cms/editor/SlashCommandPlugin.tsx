@@ -14,6 +14,7 @@ import { Type, Heading1, Heading2, Heading3, Quote, Code, Image, List, ListOrder
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createListNode, $createListItemNode } from '@lexical/list';
+import { $createCodeNode } from '@lexical/code';
 
 interface SlashCommand {
   key: string;
@@ -90,6 +91,54 @@ const SLASH_COMMANDS: SlashCommand[] = [
     },
   },
   {
+    key: 'heading4',
+    name: 'Heading 4',
+    icon: Heading3,
+    description: 'Subsection heading',
+    keywords: ['heading', 'h4'],
+    onSelect: (editor, textNode) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          textNode.remove();
+          $setBlocksType(selection, () => $createHeadingNode('h4'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading5',
+    name: 'Heading 5',
+    icon: Heading3,
+    description: 'Small subsection heading',
+    keywords: ['heading', 'h5'],
+    onSelect: (editor, textNode) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          textNode.remove();
+          $setBlocksType(selection, () => $createHeadingNode('h5'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading6',
+    name: 'Heading 6',
+    icon: Heading3,
+    description: 'Tiny subsection heading',
+    keywords: ['heading', 'h6'],
+    onSelect: (editor, textNode) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          textNode.remove();
+          $setBlocksType(selection, () => $createHeadingNode('h6'));
+        }
+      });
+    },
+  },
+  {
     key: 'quote',
     name: 'Quote',
     icon: Quote,
@@ -154,10 +203,12 @@ const SLASH_COMMANDS: SlashCommand[] = [
     description: 'Capture a code snippet',
     keywords: ['code', 'snippet', 'pre'],
     onSelect: (editor, textNode) => {
-      // TODO: Implement code block creation
-      // TODO: Implement code block creation
       editor.update(() => {
-        textNode.remove();
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          textNode.remove();
+          $setBlocksType(selection, () => $createCodeNode());
+        }
       });
     },
   },
@@ -168,10 +219,13 @@ const SLASH_COMMANDS: SlashCommand[] = [
     description: 'Upload or embed with a link',
     keywords: ['image', 'img', 'picture', 'photo'],
     onSelect: (editor, textNode) => {
-      // TODO: Implement image insertion
-      // TODO: Implement image insertion
       editor.update(() => {
-        textNode.remove();
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          textNode.remove();
+          $setBlocksType(selection, () => $createParagraphNode());
+          selection.insertText('Image');
+        }
       });
     },
   },
@@ -316,7 +370,7 @@ export default function SlashCommandPlugin(): React.JSX.Element {
             
             // Look for slash command pattern
             const beforeCursor = text.slice(0, offset);
-            const slashMatch = beforeCursor.match(/\/([a-zA-Z]*)$/);
+            const slashMatch = beforeCursor.match(/^\/([a-zA-Z]*)$/);
             
             if (slashMatch) {
               const query = slashMatch[1];

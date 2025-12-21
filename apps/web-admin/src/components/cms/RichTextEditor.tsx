@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   $createParagraphNode,
   $getRoot,
@@ -143,11 +143,18 @@ function OnChangeStatePlugin({
 // Plugin to set initial value
 function InitialValuePlugin({ value }: { value?: unknown }) {
   const [editor] = useLexicalComposerContext();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
+    if (initializedRef.current) {
+      return;
+    }
+
     if (value && editor) {
+      initializedRef.current = true;
       try {
-        const editorState = editor.parseEditorState(value as string);
+        const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+        const editorState = editor.parseEditorState(serialized);
         editor.setEditorState(editorState);
       } catch (error) {
         console.warn('Failed to parse initial editor state:', error);
@@ -203,14 +210,12 @@ export function RichTextEditor({
 
   const handleChange = useCallback((editorState: EditorState) => {
     if (onChange) {
-      // Convert editor state to JSON for storage
-      const serializedState = JSON.stringify(editorState.toJSON());
-      onChange(serializedState);
+      onChange(editorState.toJSON());
     }
   }, [onChange]);
 
   return (
-    <div className={`relative border border-gray-300 rounded-lg overflow-hidden ${className}`}>
+    <div className={`relative border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 ${className}`}>
       <LexicalComposer initialConfig={EDITOR_CONFIG}>
         <div className="editor-container relative bg-white">
         <div className="editor-inner bg-white relative leading-5 font-normal text-left rounded-t-lg">
@@ -220,7 +225,7 @@ export function RichTextEditor({
               __html: `
                 .editor-content .editor-paragraph {
                   margin: 0;
-                  padding: 12px 20px;
+                  padding: 12px 20px 12px 44px;
                   min-height: 1.5em;
                   position: relative;
                   border-radius: 4px;
@@ -233,7 +238,7 @@ export function RichTextEditor({
                   font-size: 2.25em;
                   font-weight: 700;
                   margin: 0;
-                  padding: 16px 20px;
+                  padding: 16px 20px 16px 44px;
                   min-height: 1.2em;
                   line-height: 1.2;
                   border-radius: 4px;
@@ -246,7 +251,7 @@ export function RichTextEditor({
                   font-size: 1.75em;
                   font-weight: 600;
                   margin: 0;
-                  padding: 14px 20px;
+                  padding: 14px 20px 14px 44px;
                   min-height: 1.3em;
                   line-height: 1.3;
                   border-radius: 4px;
@@ -259,7 +264,7 @@ export function RichTextEditor({
                   font-size: 1.375em;
                   font-weight: 600;
                   margin: 0;
-                  padding: 12px 20px;
+                  padding: 12px 20px 12px 44px;
                   min-height: 1.4em;
                   line-height: 1.4;
                   border-radius: 4px;
@@ -268,9 +273,51 @@ export function RichTextEditor({
                 .editor-content .editor-heading-h3:hover {
                   background-color: #f9fafb;
                 }
+                .editor-content .editor-heading-h4 {
+                  font-size: 1.2em;
+                  font-weight: 600;
+                  margin: 0;
+                  padding: 10px 20px 10px 44px;
+                  min-height: 1.4em;
+                  line-height: 1.45;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-heading-h4:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-heading-h5 {
+                  font-size: 1.05em;
+                  font-weight: 600;
+                  margin: 0;
+                  padding: 10px 20px 10px 44px;
+                  min-height: 1.4em;
+                  line-height: 1.5;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                }
+                .editor-content .editor-heading-h5:hover {
+                  background-color: #f9fafb;
+                }
+                .editor-content .editor-heading-h6 {
+                  font-size: 0.95em;
+                  font-weight: 600;
+                  margin: 0;
+                  padding: 10px 20px 10px 44px;
+                  min-height: 1.4em;
+                  line-height: 1.55;
+                  border-radius: 4px;
+                  transition: background-color 0.15s ease;
+                  text-transform: uppercase;
+                  letter-spacing: 0.02em;
+                  color: #334155;
+                }
+                .editor-content .editor-heading-h6:hover {
+                  background-color: #f9fafb;
+                }
                 .editor-content .editor-quote {
                   border-left: 4px solid #3b82f6;
-                  padding: 16px 20px 16px 24px;
+                  padding: 16px 20px 16px 48px;
                   margin: 8px 0;
                   font-style: italic;
                   background-color: #f8fafc;
@@ -282,7 +329,7 @@ export function RichTextEditor({
                 .editor-content .editor-list-ol,
                 .editor-content .editor-list-ul {
                   margin: 8px 0;
-                  padding: 8px 20px 8px 44px;
+                  padding: 8px 20px 8px 64px;
                 }
                 .editor-content .editor-listitem {
                   margin: 6px 0;
@@ -296,7 +343,7 @@ export function RichTextEditor({
                   background-color: #f1f5f9;
                   border: 1px solid #e2e8f0;
                   border-radius: 6px;
-                  padding: 16px 20px;
+                  padding: 16px 20px 16px 44px;
                   margin: 8px 0;
                   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
                   font-size: 0.875em;
@@ -320,7 +367,7 @@ export function RichTextEditor({
                 })
               }
               placeholder={
-                <div className="editor-placeholder absolute text-gray-400 pointer-events-none" style={{ top: '22px', left: '30px', lineHeight: '1.5em' }}>
+                <div className="editor-placeholder absolute text-gray-400 pointer-events-none" style={{ top: '22px', left: '54px', lineHeight: '1.5em' }}>
                   <span>{placeholder || "Start writing..."}</span>
                 </div>
               }

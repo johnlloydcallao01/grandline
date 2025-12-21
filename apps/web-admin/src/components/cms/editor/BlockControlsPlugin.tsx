@@ -5,16 +5,270 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $createParagraphNode,
   LexicalEditor,
+  TextNode,
 } from 'lexical';
-import { Plus } from '@/components/ui/IconWrapper';
-
-
-
-
+import { createPortal } from 'react-dom';
+import { Plus, Type, Heading1, Heading2, Heading3, Quote, Code, List, ListOrdered, type LucideIcon } from '@/components/ui/IconWrapper';
+import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
+import { $setBlocksType } from '@lexical/selection';
+import { $createListItemNode, $createListNode } from '@lexical/list';
+import { $createCodeNode } from '@lexical/code';
 
 interface BlockControlsProps {
   editor: LexicalEditor;
+}
+
+interface BlockType {
+  key: string;
+  name: string;
+  icon: LucideIcon;
+  description: string;
+  onSelect: (editor: LexicalEditor) => void;
+}
+
+const BLOCK_TYPES: BlockType[] = [
+  {
+    key: 'paragraph',
+    name: 'Paragraph',
+    icon: Type,
+    description: 'Start writing with plain text',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => {
+            const node = selection.anchor.getNode();
+            if (node instanceof TextNode) {
+              node.setTextContent(node.getTextContent().replace(/^\/[a-zA-Z]*$/, ''));
+            }
+            return $createParagraphNode();
+          });
+        }
+      });
+    },
+  },
+  {
+    key: 'heading1',
+    name: 'Heading 1',
+    icon: Heading1,
+    description: 'Big section heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h1'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading2',
+    name: 'Heading 2',
+    icon: Heading2,
+    description: 'Medium section heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h2'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading3',
+    name: 'Heading 3',
+    icon: Heading3,
+    description: 'Small section heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h3'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading4',
+    name: 'Heading 4',
+    icon: Heading3,
+    description: 'Subsection heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h4'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading5',
+    name: 'Heading 5',
+    icon: Heading3,
+    description: 'Small subsection heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h5'));
+        }
+      });
+    },
+  },
+  {
+    key: 'heading6',
+    name: 'Heading 6',
+    icon: Heading3,
+    description: 'Tiny subsection heading',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode('h6'));
+        }
+      });
+    },
+  },
+  {
+    key: 'quote',
+    name: 'Quote',
+    icon: Quote,
+    description: 'Capture a quote',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createQuoteNode());
+        }
+      });
+    },
+  },
+  {
+    key: 'bulleted-list',
+    name: 'Bulleted List',
+    icon: List,
+    description: 'Create a simple bulleted list',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => {
+            const listNode = $createListNode('bullet');
+            const listItemNode = $createListItemNode();
+            listNode.append(listItemNode);
+            return listNode;
+          });
+        }
+      });
+    },
+  },
+  {
+    key: 'numbered-list',
+    name: 'Numbered List',
+    icon: ListOrdered,
+    description: 'Create a list with numbering',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => {
+            const listNode = $createListNode('number');
+            const listItemNode = $createListItemNode();
+            listNode.append(listItemNode);
+            return listNode;
+          });
+        }
+      });
+    },
+  },
+  {
+    key: 'code',
+    name: 'Code',
+    icon: Code,
+    description: 'Capture a code snippet',
+    onSelect: (editor) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createCodeNode());
+        }
+      });
+    },
+  },
+];
+
+function BlockPickerMenu({
+  editor,
+  onClose,
+  position,
+}: {
+  editor: LexicalEditor;
+  onClose: () => void;
+  position: { top: number; left: number };
+}): React.JSX.Element {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]);
+
+  const handleBlockSelect = useCallback((blockType: BlockType) => {
+    blockType.onSelect(editor);
+    onClose();
+  }, [editor, onClose]);
+
+  return createPortal(
+    <div
+      ref={menuRef}
+      className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[280px] max-h-[400px] overflow-y-auto"
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
+    >
+      <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
+        Add a block
+      </div>
+      {BLOCK_TYPES.map((blockType) => (
+        <button
+          key={blockType.key}
+          className="w-full flex items-center px-3 py-2 text-left hover:bg-gray-50 transition-colors focus:bg-gray-50 focus:outline-none"
+          onClick={() => handleBlockSelect(blockType)}
+        >
+          <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 rounded mr-3">
+            <blockType.icon className="w-4 h-4 text-gray-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-gray-900">{blockType.name}</div>
+            <div className="text-xs text-gray-500 truncate">{blockType.description}</div>
+          </div>
+        </button>
+      ))}
+    </div>,
+    document.body
+  );
 }
 
 function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
@@ -22,6 +276,8 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [currentBlockElement, setCurrentBlockElement] = useState<HTMLElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [showBlockPicker, setShowBlockPicker] = useState(false);
+  const [blockPickerPosition, setBlockPickerPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const updateButtonPosition = () => {
@@ -60,15 +316,15 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
       // Find the closest block-level element within the editor
       while (blockElement && blockElement !== rootElement) {
         const element = blockElement as HTMLElement;
-        if (element.tagName && ['P', 'H1', 'H2', 'H3', 'BLOCKQUOTE', 'LI', 'DIV'].includes(element.tagName)) {
+        if (element.tagName && ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'LI', 'DIV', 'PRE'].includes(element.tagName)) {
           // Ensure this element is actually inside the editor
           if (rootElement.contains(element)) {
             const rect = element.getBoundingClientRect();
             const rootRect = rootElement.getBoundingClientRect();
 
             setButtonPosition({
-              top: rect.top - rootRect.top + 2,
-              left: rect.right - rootRect.left - 30, // 30px from right edge of block
+              top: rect.top - rootRect.top + 8,
+              left: 10,
             });
             setCurrentBlockElement(element);
             setShowButton(true);
@@ -104,6 +360,7 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
       if (rootElement && !rootElement.contains(event.target as Node)) {
         setShowButton(false);
         setCurrentBlockElement(null);
+        setShowBlockPicker(false);
       }
     };
 
@@ -113,6 +370,7 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
       if (rootElement && !rootElement.contains(event.relatedTarget as Node)) {
         setShowButton(false);
         setCurrentBlockElement(null);
+        setShowBlockPicker(false);
       }
     };
 
@@ -129,19 +387,33 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
   }, [editor]);
 
   const handleButtonClick = useCallback((event: React.MouseEvent) => {
-    // Prevent form submission and event bubbling
     event.preventDefault();
     event.stopPropagation();
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
 
-    // Instead of showing our own menu, trigger the slash command
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        // Insert a "/" character to trigger the slash command menu
-        selection.insertText('/');
+      let top = rect.bottom + 6;
+      let left = rect.left;
+
+      const menuWidth = 280;
+      const menuHeight = 400;
+
+      if (left + menuWidth > window.innerWidth) {
+        left = window.innerWidth - menuWidth - 10;
       }
-    });
-  }, [editor]);
+
+      if (top + menuHeight > window.innerHeight) {
+        top = rect.top - menuHeight - 6;
+      }
+
+      if (top < 10) {
+        top = rect.bottom + 6;
+      }
+
+      setBlockPickerPosition({ top, left });
+      setShowBlockPicker(true);
+    }
+  }, []);
 
   return (
     <>
@@ -149,7 +421,7 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
         <button
           ref={buttonRef}
           type="button"
-          className="absolute z-40 w-6 h-6 flex items-center justify-center bg-gray-800 text-white rounded-sm hover:bg-gray-900 transition-colors opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+          className="absolute z-40 w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-colors"
           style={{
             top: buttonPosition.top,
             left: buttonPosition.left,
@@ -159,8 +431,15 @@ function BlockControls({ editor }: BlockControlsProps): React.JSX.Element {
           title="Add block"
           aria-label="Add block"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-3.5 h-3.5 text-gray-600" />
         </button>
+      )}
+      {showBlockPicker && (
+        <BlockPickerMenu
+          editor={editor}
+          onClose={() => setShowBlockPicker(false)}
+          position={blockPickerPosition}
+        />
       )}
     </>
   );

@@ -1,7 +1,7 @@
 /**
  * @file apps/web-admin/src/components/auth/ProtectedRoute.tsx
- * @description Protected route component for admin-only access
- * Based on apps/web ProtectedRoute but adapted for admin-only access
+ * @description Route protection component for authenticated pages
+ * Redirects unauthenticated users to signin page
  */
 
 'use client';
@@ -9,66 +9,82 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRouteProtection } from '@/hooks/useAuth';
-import { ProtectedRouteProps } from '@/types/auth';
+import type { ProtectedRouteProps } from '@/types/auth';
 
-/**
- * ProtectedRoute component that ensures only authenticated admin users can access wrapped content
- * Redirects non-admin users or unauthenticated users to the login page
- */
-export function ProtectedRoute({ 
-  children, 
+export const ProtectedRoute = ({
+  children,
   fallback,
-  redirectTo = '/signin' 
-}: ProtectedRouteProps) {
+  redirectTo = '/signin'
+}: ProtectedRouteProps): React.ReactNode => {
   const router = useRouter();
   const {
+    isAuthenticated,
     shouldRedirectToLogin,
     isCheckingAuth
   } = useRouteProtection();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (shouldRedirectToLogin) {
-      // Store the current path for redirect after login
       const currentPath = window.location.pathname + window.location.search;
       if (currentPath !== redirectTo) {
         sessionStorage.setItem('auth:redirectAfterLogin', currentPath);
       }
 
-      router.replace(redirectTo);
+      router.replace(redirectTo as any);
     }
   }, [shouldRedirectToLogin, redirectTo, router]);
 
-  // Show loading while checking authentication
   if (isCheckingAuth) {
-    return fallback || null;
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Checking authentication...</p>
+          </div>
+        </div>
+      )
+    );
   }
 
-  // Don't render anything if we should redirect
-  if (shouldRedirectToLogin) {
-    return null;
+  if (!isAuthenticated) {
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecting to sign in...</p>
+          </div>
+        </div>
+      )
+    );
   }
 
-  // No additional role validation needed - auth.ts already handles admin validation
-
-  // Render children if user is authenticated
   return <>{children}</>;
-}
+};
 
 /**
  * Higher-order component version of ProtectedRoute
  */
-export function withProtectedRoute<P extends object>(
+export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
-  options?: Omit<ProtectedRouteProps, 'children'>
+  options?: {
+    fallback?: React.ReactNode;
+    redirectTo?: string;
+  }
 ) {
-  const WrappedComponent = (props: P) => (
-    <ProtectedRoute fallback={options?.fallback} redirectTo={options?.redirectTo}>
-      <Component {...props} />
-    </ProtectedRoute>
-  );
+  const WrappedComponent = (props: P): React.ReactNode => {
+    return (
+      <ProtectedRoute
+        fallback={options?.fallback}
+        redirectTo={options?.redirectTo}
+      >
+        {React.createElement(Component, props)}
+      </ProtectedRoute>
+    );
+  };
 
-  WrappedComponent.displayName = `withProtectedRoute(${Component.displayName || Component.name})`;
+  WrappedComponent.displayName = `withAuth(${Component.displayName || Component.name})`;
   
   return WrappedComponent;
 }

@@ -1,25 +1,23 @@
 /**
  * @file apps/web-admin/src/components/auth/AuthErrorBoundary.tsx
- * @description Error boundary component for authentication-related errors
- * Based on apps/web AuthErrorBoundary but adapted for admin-only access
+ * @description Error boundary for authentication-related errors
  */
 
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AuthErrorDetails, AuthErrorType } from '@/types/auth';
-import { formatAuthError, AuthenticationError } from '@/lib/auth';
+import React, { Component, ReactNode } from 'react';
+import { emitAuthEvent } from '@/lib/auth';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
-  errorDetails: AuthErrorDetails | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
 export class AuthErrorBoundary extends Component<Props, State> {
@@ -28,54 +26,40 @@ export class AuthErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      errorDetails: null,
+      errorInfo: null,
     };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    let errorDetails: AuthErrorDetails | null = null;
-
-    if (error instanceof AuthenticationError) {
-      errorDetails = {
-        type: error.type,
-        message: error.message,
-        field: error.field,
-        retryable: error.retryable,
-      };
-    } else {
-      errorDetails = {
-        type: 'UNKNOWN_ERROR' as AuthErrorType,
-        message: error.message || 'An unexpected error occurred',
-        retryable: false,
-      };
-    }
-
     return {
       hasError: true,
       error,
-      errorDetails,
+      errorInfo: null,
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('AuthErrorBoundary caught an error:', error, errorInfo);
-    
-    // Call the onError callback if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    this.setState({
+      error,
+      errorInfo,
+    });
 
-    // Log to external error reporting service if available
-    if (typeof window !== 'undefined' && 'reportError' in window && typeof (window as Window & { reportError?: (error: Error) => void }).reportError === 'function') {
-      (window as Window & { reportError: (error: Error) => void }).reportError(error);
-    }
+    console.error('Authentication Error Boundary caught an error:', error, errorInfo);
+
+    emitAuthEvent('auth_error', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+    });
+
+    this.props.onError?.(error, errorInfo);
   }
 
   handleRetry = () => {
     this.setState({
       hasError: false,
       error: null,
-      errorDetails: null,
+      errorInfo: null,
     });
   };
 
@@ -87,83 +71,52 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      const { errorDetails } = this.state;
-      const isRetryable = errorDetails?.retryable ?? false;
-      const errorMessage = errorDetails ? formatAuthError(errorDetails) : 'An unexpected error occurred';
-
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-              <svg
-                className="w-6 h-6 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fa fa-exclamation-triangle text-red-600 text-2xl"></i>
             </div>
+            
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Authentication Error
+            </h2>
+            
+            <p className="text-gray-600 mb-6">
+              Something went wrong with the authentication system. Please try again.
+            </p>
 
-            <div className="text-center">
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">
-                Authentication Error
-              </h1>
-              
-              <p className="text-gray-600 mb-6">
-                {errorMessage}
-              </p>
-
-              <div className="space-y-3">
-                {isRetryable && (
-                  <button
-                    onClick={this.handleRetry}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                )}
-                
-                <button
-                  onClick={this.handleReload}
-                  className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                >
-                  Reload Page
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/signin';
-                    }
-                  }}
-                  className="w-full text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                >
-                  Go to Login
-                </button>
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
+                <h3 className="text-sm font-medium text-red-800 mb-2">Error Details:</h3>
+                <pre className="text-xs text-red-700 whitespace-pre-wrap break-words">
+                  {this.state.error.message}
+                </pre>
               </div>
+            )}
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <details className="mt-6 text-left">
-                  <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-                    Error Details (Development)
-                  </summary>
-                  <pre className="mt-2 text-xs text-gray-600 bg-gray-100 p-2 rounded overflow-auto">
-                    {this.state.error.stack}
-                  </pre>
-                </details>
-              )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={this.handleRetry}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={this.handleReload}
+                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Reload Page
+              </button>
             </div>
+
+            <p className="text-xs text-gray-500 mt-4">
+              If this problem persists, please contact support.
+            </p>
           </div>
         </div>
       );
@@ -173,22 +126,41 @@ export class AuthErrorBoundary extends Component<Props, State> {
   }
 }
 
-/**
- * Higher-order component version of AuthErrorBoundary
- */
-export function withAuthErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<Props, 'children'>
-) {
-  const WrappedComponent = (props: P) => (
-    <AuthErrorBoundary {...errorBoundaryProps}>
-      <Component {...props} />
-    </AuthErrorBoundary>
-  );
+interface UseAuthErrorBoundaryReturn {
+  hasError: boolean;
+  error: Error | null;
+  resetError: () => void;
+}
 
-  WrappedComponent.displayName = `withAuthErrorBoundary(${Component.displayName || Component.name})`;
-  
-  return WrappedComponent;
+export function useAuthErrorBoundary(): UseAuthErrorBoundaryReturn {
+  const [hasError, setHasError] = React.useState(false);
+  const [error, setError] = React.useState<Error | null>(null);
+
+  React.useEffect(() => {
+    const handleAuthError = (event: CustomEvent) => {
+      if (event.type === 'auth:auth_error') {
+        setHasError(true);
+        setError(new Error(event.detail?.error || 'Authentication error occurred'));
+      }
+    };
+
+    window.addEventListener('auth:auth_error', handleAuthError as EventListener);
+
+    return () => {
+      window.removeEventListener('auth:auth_error', handleAuthError as EventListener);
+    };
+  }, []);
+
+  const resetError = React.useCallback(() => {
+    setHasError(false);
+    setError(null);
+  }, []);
+
+  return {
+    hasError,
+    error,
+    resetError,
+  };
 }
 
 export default AuthErrorBoundary;

@@ -1,49 +1,42 @@
 /**
  * @file apps/web-admin/src/hooks/useAuth.ts
- * @description Authentication hooks for PayloadCMS
- * Provides convenient hooks for authentication state and actions
+ * @description Custom hook for accessing authentication state and methods
+ * Provides a simplified interface for components to interact with auth
  */
 
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
-import type { User, LoginCredentials } from '@/types/auth';
+import type { UseAuthReturn, User, LoginCredentials } from '@/types/auth';
+import { getUserDisplayName } from '@/lib/auth';
 
-// ========================================
-// MAIN AUTH HOOK
-// ========================================
+export function useAuth(): UseAuthReturn {
+  const context = useAuthContext();
 
-/**
- * Main authentication hook
- * Provides access to all authentication state and methods
- */
-export function useAuth() {
-  return useAuthContext();
+  return {
+    ...context,
+  };
 }
 
-// ========================================
-// USER HOOK
-// ========================================
+export function useUser() {
+  const { user, isAuthenticated, isLoading } = useAuth();
 
-/**
- * Hook for accessing current user data
- */
-export function useUser(): User | null {
-  const { user } = useAuthContext();
-  return user;
+  const displayName = user ? getUserDisplayName(user) : '';
+  const initials = user ? getInitials(user) : '';
+
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    displayName,
+    initials,
+  };
 }
 
-// ========================================
-// AUTH ACTIONS HOOKS
-// ========================================
-
-/**
- * Hook for authentication actions
- */
 export function useAuthActions() {
-  const { login, logout, refreshSession, clearError } = useAuthContext();
-  
+  const { login, logout, refreshSession, clearError } = useAuth();
+
   return {
     login,
     logout,
@@ -52,186 +45,172 @@ export function useAuthActions() {
   };
 }
 
-// ========================================
-// AUTH STATUS HOOKS
-// ========================================
-
-/**
- * Hook for authentication status
- */
 export function useAuthStatus() {
-  const { isAuthenticated, isLoading, isInitialized, error } = useAuthContext();
-  
+  const { isAuthenticated, isLoading, isInitialized, error } = useAuth();
+
   return {
     isAuthenticated,
     isLoading,
     isInitialized,
     error,
+    isReady: isInitialized && !isLoading,
   };
 }
 
-// ========================================
-// SPECIFIC ACTION HOOKS
-// ========================================
-
-/**
- * Hook for login functionality
- */
 export function useLogin() {
-  const { login, isLoading, error } = useAuthContext();
-  
+  const { login, isLoading, error, clearError } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleLogin = useCallback(async (credentials: LoginCredentials) => {
-    return await login(credentials);
-  }, [login]);
-  
+    setIsSubmitting(true);
+    clearError();
+    try {
+      await login(credentials);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [login, clearError]);
+
   return {
     login: handleLogin,
-    isLoading,
+    isLoading: isLoading || isSubmitting,
     error,
+    clearError,
   };
 }
 
-/**
- * Hook for logout functionality
- */
 export function useLogout() {
-  const { logout, isLoading } = useAuthContext();
-  
+  const { logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = useCallback(async () => {
-    return await logout();
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   }, [logout]);
-  
+
   return {
     logout: handleLogout,
-    isLoading,
+    isLoggingOut,
   };
 }
 
-// ========================================
-// SESSION HOOKS
-// ========================================
-
-/**
- * Hook for session management
- */
 export function useSession() {
-  const { user, isAuthenticated, refreshSession, checkAuthStatus } = useAuthContext();
-  
-  const refresh = useCallback(async () => {
-    return await refreshSession();
+  const { user, isAuthenticated, refreshSession, checkAuthStatus } = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+
+    try {
+      await refreshSession();
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+      throw error;
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [refreshSession]);
-  
-  const checkStatus = useCallback(async () => {
-    return await checkAuthStatus();
-  }, [checkAuthStatus]);
-  
+
   return {
     user,
     isAuthenticated,
-    refresh,
-    checkStatus,
+    refreshSession: handleRefresh,
+    checkAuthStatus,
+    isRefreshing,
   };
 }
 
-// ========================================
-// ROUTE PROTECTION HOOK
-// ========================================
-
-/**
- * Hook for route protection logic
- * Provides computed values for route protection decisions
- */
 export function useRouteProtection() {
-  const { isAuthenticated, isInitialized, isLoading } = useAuthContext();
-  
+  const { isAuthenticated, isInitialized, isLoading } = useAuth();
+
   return {
     isAuthenticated,
     isInitialized,
     isLoading,
-    // Should redirect to login if not authenticated and initialization is complete
-    shouldRedirectToLogin: isInitialized && !isAuthenticated,
-    // Should redirect from auth pages if already authenticated
-    shouldRedirectFromAuth: isAuthenticated, // Allow redirect as soon as authenticated
-    // Still checking authentication status - but not if we're already authenticated
-    isCheckingAuth: !isAuthenticated && (!isInitialized || isLoading),
+    shouldRedirectToLogin: isInitialized && !isLoading && !isAuthenticated,
+    shouldRedirectFromAuth: isInitialized && !isLoading && isAuthenticated,
+    isCheckingAuth: !isInitialized || isLoading,
   };
 }
 
-// ========================================
-// AUTH EVENTS HOOK
-// ========================================
-
-/**
- * Hook for listening to authentication events
- */
 export function useAuthEvents() {
-  const { user, isAuthenticated, error } = useAuthContext();
-  
+  const [events, setEvents] = useState<Array<{ type: string; data?: any; timestamp: Date }>>([]);
+
+  useEffect(() => {
+    const handleAuthEvent = (e: CustomEvent) => {
+      const eventType = e.type.replace('auth:', '');
+      setEvents(prev => [...prev.slice(-9), {
+        type: eventType,
+        data: e.detail,
+        timestamp: new Date(),
+      }]);
+    };
+
+    const eventTypes = ['login_success', 'login_failure', 'logout', 'session_expired', 'session_refreshed'];
+
+    eventTypes.forEach(type => {
+      window.addEventListener(`auth:${type}`, handleAuthEvent as EventListener);
+    });
+
+    return () => {
+      eventTypes.forEach(type => {
+        window.removeEventListener(`auth:${type}`, handleAuthEvent as EventListener);
+      });
+    };
+  }, []);
+
+  return events;
+}
+
+export function usePermissions() {
+  const { user, isAuthenticated } = useAuth();
+
+  const hasRole = useCallback((role: string) => {
+    return isAuthenticated && user?.role === role;
+  }, [isAuthenticated, user?.role]);
+
+  const hasAnyRole = useCallback((roles: string[]) => {
+    return isAuthenticated && user?.role && roles.includes(user.role);
+  }, [isAuthenticated, user?.role]);
+
   return {
-    user,
-    isAuthenticated,
-    error,
+    hasRole,
+    hasAnyRole,
+    userRole: user?.role,
+    isTrainee: hasRole('trainee'),
+    isAdmin: hasRole('admin'),
+    isInstructor: hasRole('instructor'),
   };
 }
 
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
+function getInitials(user: User): string {
+  if (user.firstName && user.lastName) {
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  }
 
-/**
- * Get user initials from name or email
- */
-export function getInitials(user: User | null): string {
-  if (!user) return '';
-  
-  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-  if (fullName) {
-    return fullName
-      .split(' ')
-      .map(name => name.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  if (user.username) {
+    return user.username.substring(0, 2).toUpperCase();
   }
-  
-  if (user.email) {
-    return user.email.charAt(0).toUpperCase();
-  }
-  
-  return '';
+
+  return user.email.substring(0, 2).toUpperCase();
 }
 
-/**
- * Get full name or fallback to email
- */
+export function getUserInitials(user: User | null): string {
+  if (!user) return '';
+  return getInitials(user);
+}
+
 export function getFullName(user: User | null): string {
   if (!user) return '';
   const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
   return fullName || user.email || '';
 }
 
-/**
- * Get user initials (alias for getInitials)
- */
-export function getUserInitials(user: User | null): string {
-  return getInitials(user);
-}
-
-// ========================================
-// PERMISSIONS HOOK
-// ========================================
-
-/**
- * Hook for user permissions (placeholder for future implementation)
- */
-export function usePermissions() {
-  const { user, isAuthenticated } = useAuthContext();
-  
-  return {
-    user,
-    isAuthenticated,
-    // Add permission checks here as needed
-    canAccess: (_resource: string) => isAuthenticated,
-    hasRole: (_role: string) => isAuthenticated,
-  };
-}
+export default useAuth;

@@ -83,7 +83,7 @@ export function ToolbarPlugin() {
 
   return (
     <div
-      className="toolbar flex items-center space-x-1 p-2 border-b border-gray-200 bg-gray-50"
+      className="toolbar sticky top-0 z-30 flex items-center space-x-1 p-2 border-b border-gray-200 bg-gray-50/95 backdrop-blur"
       ref={toolbarRef}
     >
       <button
