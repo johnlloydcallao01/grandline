@@ -9,6 +9,7 @@ import { MobileSearchOverlay } from "@/components/search/MobileSearchOverlay";
 
 function HeaderInner() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const {
     setOverlayOpen,
     loadRecentKeywords
@@ -20,6 +21,11 @@ function HeaderInner() {
     { href: "/courses", label: "Courses" },
     { href: "/contact", label: "Contact" },
     { href: "/faq", label: "FAQ" },
+  ];
+
+  const resourcesItems = [
+    { href: "/blogs", label: "Blogs" },
+    { href: "/knowledge-base", label: "Knowledge Base" },
     { href: "/instructor", label: "Become an Instructor" },
   ];
 
@@ -45,6 +51,35 @@ function HeaderInner() {
                   {item.label}
                 </Link>
               ))}
+
+
+              {/* Resources Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setIsResourcesOpen(true)}
+                onMouseLeave={() => setIsResourcesOpen(false)}
+              >
+                <button className="nav-link text-gray-700 hover:text-[#201a7c] px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1">
+                  Resources
+                  <i className={`fas fa-chevron-down text-xs transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`}></i>
+                </button>
+
+                {isResourcesOpen && (
+                  <div className="absolute top-full left-0 pt-2 z-50">
+                    <div className="w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                      {resourcesItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#201a7c] transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -90,6 +125,23 @@ function HeaderInner() {
                   {item.label}
                 </Link>
               ))}
+
+              {/* Resources submenu in mobile */}
+              <div className="pt-2">
+                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Resources
+                </div>
+                {resourcesItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-3 py-2 pl-6 text-base font-medium text-gray-600 hover:text-[#201a7c] hover:bg-gray-50 rounded-md transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
               <div className="pt-4 pb-2 border-t border-gray-200 mt-4 space-y-3">
                 <button
                   onClick={() => { setOverlayOpen(true); loadRecentKeywords(); setIsMenuOpen(false); }}

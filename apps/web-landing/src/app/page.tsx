@@ -2,7 +2,6 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { Stats } from "@/components/Stats";
-import { CTA } from "@/components/CTA";
 import { Footer } from "@/components/Footer";
 import { FeaturedCoursesClient } from "@/components/FeaturedCourses";
 import { fetchCoursesServer, fetchTotalCoursesCount, type Course } from "@/lib/server-fetch-courses";
@@ -71,7 +70,6 @@ export default async function Home() {
       </section>
       <Features />
       <Stats />
-      <CTA />
       <Footer />
     </main>
   );

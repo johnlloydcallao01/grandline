@@ -3,24 +3,6 @@
 export function Stats() {
   const stats = [
     {
-      number: "50,000+",
-      label: "Active Learners",
-      icon: "fas fa-users",
-      color: "from-[#201a7c] to-[#1a1569]"
-    },
-    {
-      number: "1,000+",
-      label: "Expert Courses",
-      icon: "fas fa-book-open",
-      color: "from-[#ab3b43] to-[#8f2f36]"
-    },
-    {
-      number: "98%",
-      label: "Success Rate",
-      icon: "fas fa-chart-line",
-      color: "from-[#201a7c] to-[#ab3b43]"
-    },
-    {
       number: "500+",
       label: "Partner Companies",
       icon: "fas fa-building",
