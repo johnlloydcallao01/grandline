@@ -38,6 +38,8 @@ import * as migration_20251211_fix_users_api_keys from './20251211_fix_users_api
 import * as migration_20251212_000000_fix_remaining_fks from './20251212_000000_fix_remaining_fks';
 import * as migration_20251212_000001_force_cascade_delete from './20251212_000001_force_cascade_delete';
 import * as migration_20251215_141702 from './20251215_141702';
+import * as migration_20251228_114011 from './20251228_114011';
+import * as migration_20251228_115048 from './20251228_115048';
 
 export const migrations = [
   {
@@ -238,6 +240,16 @@ export const migrations = [
   {
     up: migration_20251215_141702.up,
     down: migration_20251215_141702.down,
-    name: '20251215_141702'
+    name: '20251215_141702',
+  },
+  {
+    up: migration_20251228_114011.up,
+    down: migration_20251228_114011.down,
+    name: '20251228_114011',
+  },
+  {
+    up: migration_20251228_115048.up,
+    down: migration_20251228_115048.down,
+    name: '20251228_115048'
   },
 ];

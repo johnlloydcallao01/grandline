@@ -2,70 +2,104 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import Image from "next/image";
 
-export default function AboutPage() {
-  const team = [
-    {
-      name: "Dr. Sarah Johnson",
-      position: "CEO & Founder",
-      image: "https://images.pexels.com/photos/1181685/pexels-photo-1181685.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
-      bio: "Former VP of Education at Google with 15+ years in EdTech innovation."
-    },
-    {
-      name: "Michael Chen",
-      position: "CTO",
-      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
-      bio: "Ex-Microsoft engineer specializing in scalable learning platforms."
-    },
-    {
-      name: "Emily Rodriguez",
-      position: "Head of Content",
-      image: "https://images.pexels.com/photos/3771600/pexels-photo-3771600.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
-      bio: "Curriculum designer with expertise in adult learning methodologies."
-    },
-    {
-      name: "David Park",
-      position: "Head of Partnerships",
-      image: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
-      bio: "Former Amazon executive building industry relationships globally."
+// Force dynamic rendering since we fetch CMS data
+export const dynamic = 'force-dynamic';
+
+
+interface CompanyMember {
+  id: number;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  position: string;
+  bio?: string;
+  profilePicture?: {
+    cloudinaryURL: string;
+  };
+  isActive: boolean;
+}
+
+interface CompanyMembersResponse {
+  docs: CompanyMember[];
+  totalDocs: number;
+}
+
+async function getCompanyMembers(): Promise<CompanyMember[]> {
+  try {
+    // Use environment variables with fallback
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiKey = process.env.PAYLOAD_API_KEY || 'db6c3436-72f8-47d0-855a-30112b7e9214';
+
+    const fullUrl = `${apiUrl}/company-members`;
+
+    console.log('🔍 Fetching company members from:', fullUrl);
+
+    const response = await fetch(fullUrl, {
+      headers: {
+        'Authorization': `users API-Key ${apiKey}`,
+      },
+      cache: 'no-store', // Always fetch fresh data
+    });
+
+    if (!response.ok) {
+      console.error('❌ Failed to fetch company members:', response.status, response.statusText);
+      console.error('URL:', fullUrl);
+      return [];
     }
-  ];
+
+    const data: CompanyMembersResponse = await response.json();
+    console.log('✅ Successfully fetched', data.totalDocs, 'company members');
+
+    // Filter active members and sort by order
+    return data.docs.filter(member => member.isActive);
+  } catch (error) {
+    console.error('❌ Error fetching company members:', error);
+    return [];
+  }
+}
+
+export default async function AboutPage() {
+  // Fetch real company members from CMS
+  const companyMembers = await getCompanyMembers();
+
+
 
   const values = [
     {
       icon: "fas fa-lightbulb",
       title: "Innovation",
-      description: "We continuously push the boundaries of educational technology to create better learning experiences."
+      description: "We advance maritime training by integrating modern technology with hands-on seafaring expertise, ensuring learners gain practical and up-to-date skills."
     },
     {
       icon: "fas fa-users",
       title: "Accessibility",
-      description: "Quality education should be accessible to everyone, regardless of background or location."
+      description: "We make maritime education attainable for aspiring seafarers everywhere, providing flexible learning that fits diverse schedules and locations."
     },
     {
       icon: "fas fa-star",
       title: "Excellence",
-      description: "We maintain the highest standards in content quality, instruction, and student support."
+      description: "We uphold the highest standards in maritime instruction, course quality, and student support, preparing professionals to excel at sea and in their careers."
     },
     {
       icon: "fas fa-handshake",
       title: "Community",
-      description: "Learning is better together. We foster a supportive community of learners and educators."
+      description: "We foster a collaborative maritime learning environment, connecting learners and instructors to share knowledge, experience, and guidance throughout their professional journey."
     }
   ];
 
   return (
     <main className="min-h-screen">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="pt-24 pb-16 bg-[#0f172a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="heading-primary text-4xl md:text-6xl mb-6">
-              <span className="text-[#F5F5F5]">About</span> <span className="text-[#ab3b43]">EduPlatform</span>
+              <span className="text-[#F5F5F5]">About</span> <span className="text-[#ab3b43]">Us</span>
             </h1>
             <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto">
-              We're on a mission to democratize quality education and empower professionals worldwide to achieve their career goals through innovative learning experiences.
+              We’re on a mission to make expert maritime training accessible to aspiring professionals, helping them build skills and confidence to advance their careers through innovative learning experiences.
             </p>
           </div>
         </div>
@@ -77,21 +111,13 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-6">
-                Our Story
+                Background
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Founded in 2018 by a team of education and technology veterans, EduPlatform was born 
-                from a simple observation: traditional education wasn't keeping pace with the rapidly 
-                evolving demands of the modern workplace.
-              </p>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                We set out to create a learning platform that combines the best of human expertise 
-                with cutting-edge technology, making high-quality professional education accessible 
-                to anyone, anywhere.
+                Grandline Maritime Training and Development Center Inc. was created to make maritime learning efficient, professional, and accessible. Our intuitive online platform lets learners track their progress, study on their own schedule, and gain confidence in their skills without feeling overwhelmed.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Today, we're proud to serve over 50,000 learners across 150+ countries, helping 
-                them advance their careers and achieve their professional goals.
+                With expert-led courses designed to shape the next generation of maritime professionals, we equip aspiring seafarers with the knowledge and practical skills needed to excel in their careers.
               </p>
             </div>
             <div className="relative">
@@ -103,8 +129,8 @@ export default function AboutPage() {
                 className="rounded-2xl shadow-lg"
               />
               <div className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-lg">
-                <div className="text-2xl font-bold text-blue-600">50K+</div>
-                <div className="text-gray-600 text-sm">Happy Learners</div>
+                <div className="text-2xl font-bold text-blue-600">50+</div>
+                <div className="text-gray-600 text-sm">Expert-Led Courses</div>
               </div>
             </div>
           </div>
@@ -119,20 +145,18 @@ export default function AboutPage() {
               <div className="w-16 h-16 bg-[#201a7c]/10 rounded-2xl flex items-center justify-center mb-6">
                 <i className="fas fa-bullseye text-2xl text-[#201a7c]"></i>
               </div>
-              <h3 className="heading-secondary text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
+              <h3 className="heading-secondary text-2xl font-bold text-gray-900 mb-4">Mission</h3>
               <p className="text-gray-600 leading-relaxed">
-                To empower professionals worldwide with the skills and knowledge they need to thrive
-                in the digital economy through innovative, accessible, and high-quality education.
+                To provide aspiring maritime professionals with comprehensive, high-quality, and accessible training that blends expert-led instruction, practical skills development, and innovative learning technology, empowering learners to navigate their careers with confidence, competence, and professionalism.
               </p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-lg">
               <div className="w-16 h-16 bg-[#ab3b43]/10 rounded-2xl flex items-center justify-center mb-6">
                 <i className="fas fa-eye text-2xl text-[#ab3b43]"></i>
               </div>
-              <h3 className="heading-secondary text-2xl font-bold text-gray-900 mb-4">Our Vision</h3>
+              <h3 className="heading-secondary text-2xl font-bold text-gray-900 mb-4">Vision</h3>
               <p className="text-gray-600 leading-relaxed">
-                A world where anyone, regardless of their background or location, can access
-                world-class education and unlock their full potential in their chosen career path.
+                To become a globally recognized maritime training center that shapes the next generation of skilled and confident maritime professionals, fostering a culture of excellence, continuous learning, and innovation in the maritime industry.
               </p>
             </div>
           </div>
@@ -168,44 +192,58 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-4">
-              Meet Our Team
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our diverse team of educators, technologists, and industry experts is passionate 
-              about transforming education.
-            </p>
+
+
+      {/* Real Company Members from CMS */}
+      {companyMembers.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-4">
+                Meet Our Team
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Our diverse team of educators, technologists, and industry experts is passionate about transforming education.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {companyMembers.map((member) => {
+                const fullName = member.middleName
+                  ? `${member.firstName} ${member.middleName} ${member.lastName}`
+                  : `${member.firstName} ${member.lastName}`;
+
+                const imageUrl = member.profilePicture?.cloudinaryURL ||
+                  'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop';
+
+                return (
+                  <div key={member.id} className="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
+                    <Image
+                      src={imageUrl}
+                      alt={fullName}
+                      width={300}
+                      height={300}
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="p-6">
+                      <h3 className="heading-secondary text-xl font-semibold text-gray-900 mb-2">
+                        {fullName}
+                      </h3>
+                      <p className="text-blue-600 font-medium mb-3">
+                        {member.position}
+                      </p>
+                      {member.bio && (
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          {member.bio}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
-                <Image
-                  src={member.image}
-                  alt={member.name}
-                  width={300}
-                  height={300}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="heading-secondary text-xl font-semibold text-gray-900 mb-2">
-                    {member.name}
-                  </h3>
-                  <p className="text-blue-600 font-medium mb-3">
-                    {member.position}
-                  </p>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {member.bio}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Stats */}
       <section className="py-20 bg-gradient-to-r from-[#201a7c] to-[#ab3b43]">
@@ -214,26 +252,25 @@ export default function AboutPage() {
             <h2 className="heading-primary text-3xl md:text-4xl text-white mb-4">
               Our Impact
             </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Numbers that reflect our commitment to educational excellence.
+            <p className="text-xl text-white font-semibold mb-4">
+              Empowering the Next Generation of Maritime Professionals
+            </p>
+            <p className="text-lg text-blue-100 max-w-3xl mx-auto">
+              Set sail toward success with our comprehensive learning platform, designed to equip you with the skills and confidence to excel in your maritime career.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">50K+</div>
-              <div className="text-blue-200">Students Enrolled</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">50+</div>
+              <div className="text-blue-200">Expert-Led Courses</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">1K+</div>
-              <div className="text-blue-200">Courses Available</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">100%</div>
+              <div className="text-blue-200">Legally Compliant</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">150+</div>
-              <div className="text-blue-200">Countries Served</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">98%</div>
-              <div className="text-blue-200">Satisfaction Rate</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">24/7</div>
+              <div className="text-blue-200">Support from Dedicated Maritime Instructors</div>
             </div>
           </div>
         </div>

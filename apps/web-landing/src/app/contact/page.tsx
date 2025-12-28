@@ -73,49 +73,32 @@ export default function ContactPage() {
     {
       icon: "fas fa-map-marker-alt",
       title: "Visit Our Office",
-      content: "123 Education Street, Learning City, LC 12345",
-      action: "Get Directions"
+      content: "667 Kalaw Ave, Ermita, Manila, Philippines, 1000"
     },
     {
       icon: "fas fa-phone",
       title: "Call Us",
-      content: "+1 (555) 123-4567",
-      action: "Call Now"
+      content: "+63976 636 4761"
     },
     {
       icon: "fas fa-envelope",
       title: "Email Us",
-      content: "hello@eduplatform.com",
-      action: "Send Email"
+      content: "info@grandlinemaritime.com"
     },
     {
       icon: "fas fa-clock",
       title: "Business Hours",
-      content: "Mon - Fri: 9:00 AM - 6:00 PM PST",
-      action: "Schedule Call"
-    }
-  ];
-
-  const departments = [
-    {
-      name: "Sales",
-      email: "sales@eduplatform.com",
-      description: "Questions about pricing, plans, and enterprise solutions"
-    },
-    {
-      name: "Support",
-      email: "support@eduplatform.com",
-      description: "Technical support and account assistance"
-    },
-    {
-      name: "Partnerships",
-      email: "partners@eduplatform.com",
-      description: "Business partnerships and collaboration opportunities"
-    },
-    {
-      name: "Media",
-      email: "press@eduplatform.com",
-      description: "Press inquiries and media relations"
+      content: (
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between"><span>Sunday</span><span>Closed</span></div>
+          <div className="flex justify-between"><span>Monday</span><span>7:30 AM – 5:30 PM</span></div>
+          <div className="flex justify-between"><span>Tuesday</span><span>7:30 AM – 5:30 PM</span></div>
+          <div className="flex justify-between"><span>Wednesday</span><span>7:30 AM – 5:30 PM</span></div>
+          <div className="flex justify-between"><span>Thursday</span><span>7:30 AM – 5:30 PM</span></div>
+          <div className="flex justify-between"><span>Friday</span><span>7:30 AM – 5:30 PM</span></div>
+          <div className="flex justify-between"><span>Saturday</span><span>8 AM – 5 PM</span></div>
+        </div>
+      )
     }
   ];
 
@@ -252,75 +235,12 @@ export default function ContactPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
-                        <p className="text-gray-600 mb-2">{info.content}</p>
-                        <button className="text-[#201a7c] hover:text-[#1a1569] font-medium text-sm">
-                          {info.action} →
-                        </button>
+                        <div className="text-gray-600 mb-2">{info.content}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Department Contacts */}
-              <div>
-                <h3 className="heading-secondary text-xl font-bold text-gray-900 mb-4">
-                  Department Contacts
-                </h3>
-                <div className="space-y-4">
-                  {departments.map((dept, index) => (
-                    <div key={index} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-gray-900">{dept.name}</h4>
-                        <a
-                          href={`mailto:${dept.email}`}
-                          className="text-[#201a7c] hover:text-[#1a1569] text-sm font-medium"
-                        >
-                          {dept.email}
-                        </a>
-                      </div>
-                      <p className="text-gray-600 text-sm">{dept.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-xl text-gray-600">
-              Quick answers to common questions about our platform.
-            </p>
-          </div>
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-2">How do I get started?</h3>
-              <p className="text-gray-600">
-                Simply sign up for a free account and browse our course catalog. You can start with our free courses
-                or begin a 14-day trial of our premium content.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-2">Do you offer enterprise solutions?</h3>
-              <p className="text-gray-600">
-                Yes! We provide custom enterprise solutions including bulk licensing, custom content creation,
-                and dedicated support. Contact our sales team for more information.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-2">What support do you provide?</h3>
-              <p className="text-gray-600">
-                We offer 24/7 technical support, live chat assistance, comprehensive documentation,
-                and regular webinars to help you succeed.
-              </p>
             </div>
           </div>
         </div>

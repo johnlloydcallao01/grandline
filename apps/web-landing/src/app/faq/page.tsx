@@ -6,7 +6,6 @@ import { Footer } from "@/components/Footer";
 
 export default function FAQPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const faqCategories = [
     {
@@ -126,14 +125,6 @@ export default function FAQPage() {
     setOpenFAQ(openFAQ === uniqueIndex ? null : uniqueIndex);
   };
 
-  const filteredCategories = faqCategories.map(category => ({
-    ...category,
-    faqs: category.faqs.filter(faq =>
-      faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  })).filter(category => category.faqs.length > 0);
-
   return (
     <main className="min-h-screen">
       <Header />
@@ -149,20 +140,6 @@ export default function FAQPage() {
               Find answers to common questions about our platform, courses, and services. 
               Can't find what you're looking for? Contact our support team.
             </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for answers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-6 py-4 pl-12 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#201a7c] focus:border-transparent shadow-lg"
-                />
-                <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -170,70 +147,51 @@ export default function FAQPage() {
       {/* FAQ Content */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {filteredCategories.length === 0 ? (
-            <div className="text-center py-12">
-              <i className="fas fa-search text-6xl text-gray-300 mb-4"></i>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No results found</h3>
-              <p className="text-gray-600 mb-6">
-                We couldn't find any FAQs matching your search. Try different keywords or browse our categories below.
-              </p>
-              <button
-                onClick={() => setSearchTerm("")}
-                className="btn-primary"
-              >
-                Clear Search
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-12">
-              {filteredCategories.map((category, categoryIndex) => (
-                <div key={categoryIndex}>
-                  <div className="flex items-center mb-8">
-                    <div className="w-12 h-12 bg-[#201a7c]/10 rounded-xl flex items-center justify-center mr-4">
-                      <i className={`${category.icon} text-[#201a7c] text-lg`}></i>
-                    </div>
-                    <h2 className="heading-secondary text-2xl font-bold text-gray-900">
-                      {category.title}
-                    </h2>
+          <div className="space-y-12">
+            {faqCategories.map((category, categoryIndex) => (
+              <div key={categoryIndex}>
+                <div className="flex items-center mb-8">
+                  <div className="w-12 h-12 bg-[#201a7c]/10 rounded-xl flex items-center justify-center mr-4">
+                    <i className={`${category.icon} text-[#201a7c] text-lg`}></i>
                   </div>
-                  
-                  <div className="space-y-4">
-                    {category.faqs.map((faq, faqIndex) => {
-                      const uniqueIndex = categoryIndex * 1000 + faqIndex;
-                      const isOpen = openFAQ === uniqueIndex;
-                      
-                      return (
-                        <div
-                          key={faqIndex}
-                          className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
-                        >
-                          <button
-                            onClick={() => toggleFAQ(categoryIndex, faqIndex)}
-                            className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                          >
-                            <h3 className="font-semibold text-gray-900 pr-4">
-                              {faq.question}
-                            </h3>
-                            <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'} text-gray-400 flex-shrink-0 transition-transform`}></i>
-                          </button>
-                          
-                          {isOpen && (
-                            <div className="px-6 pb-4">
-                              <div className="border-t border-gray-100 pt-4">
-                                <p className="text-gray-600 leading-relaxed">
-                                  {faq.answer}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <h2 className="heading-secondary text-2xl font-bold text-gray-900">
+                    {category.title}
+                  </h2>
                 </div>
-              ))}
-            </div>
-          )}
+                
+                <div className="space-y-4">
+                  {category.faqs.map((faq, faqIndex) => {
+                    const uniqueIndex = categoryIndex * 1000 + faqIndex;
+                    const isOpen = openFAQ === uniqueIndex;
+                    
+                    return (
+                      <div 
+                        key={faqIndex}
+                        className={`border rounded-xl transition-all ${isOpen ? 'border-[#201a7c] ring-1 ring-[#201a7c]' : 'border-gray-200 hover:border-gray-300'}`}
+                      >
+                        <button
+                          onClick={() => toggleFAQ(categoryIndex, faqIndex)}
+                          className="w-full flex items-center justify-between p-6 text-left"
+                        >
+                          <span className="text-lg font-semibold text-gray-900">{faq.question}</span>
+                          <i className={`fas fa-chevron-down transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#201a7c]' : 'text-gray-400'}`}></i>
+                        </button>
+                        {isOpen && (
+                          <div className="px-6 pb-6">
+                            <div className="pt-2 border-t border-gray-100">
+                              <p className="text-gray-600 leading-relaxed">
+                                {faq.answer}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
