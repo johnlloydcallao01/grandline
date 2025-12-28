@@ -1,22 +1,24 @@
 "use client";
 
+import Link from "next/link";
+
 export function Stats() {
   const stats = [
     {
-      number: "500+",
-      label: "Partner Companies",
-      icon: "fas fa-building",
+      number: "50+",
+      label: "Expert-Led Courses",
+      icon: "fas fa-anchor",
       color: "from-[#ab3b43] to-[#201a7c]"
     },
     {
-      number: "4.9/5",
-      label: "Student Rating",
-      icon: "fas fa-star",
+      number: "100%",
+      label: "Legally Compliant",
+      icon: "fas fa-shield-alt",
       color: "from-[#1a1569] to-[#201a7c]"
     },
     {
       number: "24/7",
-      label: "Support Available",
+      label: "Support from Dedicated Maritime Instructors",
       icon: "fas fa-headset",
       color: "from-[#8f2f36] to-[#ab3b43]"
     }
@@ -32,11 +34,11 @@ export function Stats() {
             Our Impact
           </div>
           <h2 className="heading-primary text-3xl md:text-4xl lg:text-5xl text-gray-900 mb-4">
-            Trusted by Learners
-            <span className="text-[#ab3b43]"> Worldwide</span>
+            Empowering the Next Generation of
+            <span className="text-[#ab3b43]"> Maritime Professionals</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join thousands of professionals who have transformed their careers through our comprehensive learning platform.
+            Set sail toward success with our comprehensive learning platform, designed to equip you with the skills and confidence to excel in your maritime career.
           </p>
         </div>
 
@@ -65,20 +67,26 @@ export function Stats() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="heading-primary text-3xl md:text-4xl mb-6">
-                Ready to Join Our Success Story?
+                Ready to Start Your Maritime Journey?
               </h3>
               <p className="text-xl text-blue-100 mb-8">
-                Start your learning journey today and become part of our growing community of successful professionals.
+                Embark on your learning adventure today and explore our platform designed to help aspiring maritime professionals build real skills.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-[#201a7c] px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
+                <Link 
+                  href="https://app.grandlinemaritime.com/" 
+                  className="bg-white text-[#201a7c] px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
+                >
                   <i className="fas fa-rocket mr-2"></i>
-                  Start Free Trial
-                </button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-[#201a7c] transition-colors inline-flex items-center justify-center">
-                  <i className="fas fa-calendar mr-2"></i>
-                  Schedule Demo
-                </button>
+                  Start Now!
+                </Link>
+                <Link 
+                  href="/courses" 
+                  className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-[#201a7c] transition-colors inline-flex items-center justify-center"
+                >
+                  <i className="fas fa-book mr-2"></i>
+                  View Courses
+                </Link>
               </div>
             </div>
             <div className="text-center lg:text-right">
@@ -92,15 +100,15 @@ export function Stats() {
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
-                    <i className="fas fa-star"></i>
+                    <i className="fas fa-star-half-alt"></i>
                   </div>
-                  <span className="text-white font-semibold">5.0 Rating</span>
+                  <span className="text-white font-semibold">4.9/5 User Satisfaction</span>
                 </div>
-                <p className="text-blue-100">
-                  "Best LMS platform we've ever used!"
+                <p className="text-blue-100 text-sm">
+                  (based on initial feedback from early users)
                 </p>
-                <p className="text-blue-200 text-sm">
-                  - Fortune 500 Company
+                <p className="text-blue-100 italic">
+                  "Trusted by Learners in the Maritime Industry"
                 </p>
               </div>
             </div>

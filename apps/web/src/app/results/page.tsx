@@ -107,10 +107,14 @@ function ResultsPageContent() {
                                 placeholder="Search"
                                 value={query}
                                 onFocus={() => {
+                                    setTyping(false)
                                     setDropdownOpen(true)
                                     const hasQuery = query.trim().length > 0
                                     loadRecentKeywords()
-                                    setMode(hasQuery ? 'results' : 'suggestions')
+                                    setMode('suggestions')
+                                    if (hasQuery) {
+                                        getSuggestions(query)
+                                    }
                                 }}
                                 onChange={e => {
                                     const v = e.target.value
@@ -242,8 +246,8 @@ function ResultsPageContent() {
                         </div>
                     ) : null}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }
 

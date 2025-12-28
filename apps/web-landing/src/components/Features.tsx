@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export function Features() {
   const features = [
@@ -43,15 +44,15 @@ export function Features() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-4 py-2 bg-[#201a7c]/10 text-[#201a7c] rounded-full text-sm font-medium mb-4">
             <i className="fas fa-rocket mr-2"></i>
-            Why Choose EduPlatform
+            Why Choose Us
           </div>
           <h2 className="heading-primary text-3xl md:text-4xl lg:text-5xl text-gray-900 mb-4">
-            Everything You Need to
-            <span className="text-[#201a7c]"> Excel</span>
+            All Aboard for
+            <span className="text-[#201a7c]"> Excellence</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our comprehensive learning platform combines cutting-edge technology with proven educational methodologies 
-            to deliver an unparalleled learning experience.
+            Our advanced learning platform navigates you through expertly crafted courses and innovative training tools, 
+            empowering you to excel and steer your maritime career toward success.
           </p>
         </div>
 
@@ -86,11 +87,11 @@ export function Features() {
               Advanced Learning Platform
             </div>
             <h3 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-6">
-              Learn Smarter, Not Harder
+              Set Sail for Mastery
             </h3>
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Our platform uses advanced analytics and machine learning to create personalized learning experiences 
-              that adapt to your unique needs and learning style.
+              Our platform combines cutting-edge technology with expert-led guidance to create a personalized maritime learning journey, 
+              helping you navigate your career with precision and confidence.
             </p>
 
             {/* Feature list */}
@@ -99,32 +100,32 @@ export function Features() {
                 <div className="w-6 h-6 bg-[#201a7c] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <i className="fas fa-check text-white text-sm"></i>
                 </div>
-                <p className="text-gray-700">Adaptive learning algorithms that adjust to your pace</p>
+                <p className="text-gray-700">Adaptive learning that moves at your pace</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-[#201a7c] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <i className="fas fa-check text-white text-sm"></i>
                 </div>
-                <p className="text-gray-700">Real-time progress tracking and performance analytics</p>
+                <p className="text-gray-700">Real-time progress tracking and performance insights</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-[#201a7c] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <i className="fas fa-check text-white text-sm"></i>
                 </div>
-                <p className="text-gray-700">Interactive content with hands-on projects and assessments</p>
+                <p className="text-gray-700">Hands-on, interactive projects and assessments</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-[#201a7c] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <i className="fas fa-check text-white text-sm"></i>
                 </div>
-                <p className="text-gray-700">24/7 support from expert instructors and mentors</p>
+                <p className="text-gray-700">24/7 support from seasoned maritime instructors and mentors</p>
               </div>
             </div>
 
-            <button className="btn-primary">
-              <span>Explore Features</span>
+            <Link href="/courses" className="btn-primary inline-flex items-center">
+              <span>Explore Courses</span>
               <i className="fas fa-arrow-right ml-2"></i>
-            </button>
+            </Link>
           </div>
 
           {/* Right image */}

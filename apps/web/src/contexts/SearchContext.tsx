@@ -55,7 +55,12 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | undefined>(undefined)
   const [selectIndex, setSelectIndex] = useState(0)
   const abortRef = useRef<AbortController | null>(null)
-  const [isTyping, setTyping] = useState(false)
+  const [isTyping, setTypingValue] = useState(false)
+  const typingRef = useRef(false)
+  const setTyping = (v: boolean) => {
+    typingRef.current = v
+    setTypingValue(v)
+  }
   const suggSeqRef = useRef(0)
   const { user } = useUser()
 
@@ -168,13 +173,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       const resp = await fetch(`/api/search/suggestions?q=${encodeURIComponent(q)}`)
       const json = await resp.json()
       const items: Suggestion[] = json.suggestions || []
-      if (suggSeqRef.current === seq && isTyping) {
+      if (suggSeqRef.current === seq && typingRef.current) {
         setSuggestions(items)
         setMode('suggestions')
       }
       return items
     } catch {
-      if (isTyping) setSuggestions([])
+      if (typingRef.current) setSuggestions([])
       return []
     }
   }
@@ -250,7 +255,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     clearRecentKeywords: () => void
     persistRecentKeyword: (kw: string) => Promise<void>
   }), [
-    query, results, recentKeywords, suggestions, mode, isDropdownOpen, isOverlayOpen, isLoading, lastCompletedKey, error, selectIndex, user
+    query,
+    results,
+    recentKeywords,
+    suggestions,
+    mode,
+    isDropdownOpen,
+    isOverlayOpen,
+    isLoading,
+    lastCompletedKey,
+    isRecentLoading,
+    error,
+    selectIndex,
+    isTyping,
+    user,
   ])
 
   return React.createElement(SearchContext.Provider, { value }, children)

@@ -37,6 +37,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const { logout, isLoggingOut } = useLogout()
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLFormElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
 
   const handleMyPortalClick = () => {
@@ -168,14 +169,19 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
           <form ref={searchRef} onSubmit={handleSearch} className="flex w-full">
             <div className="flex-1 relative">
               <input
+                ref={inputRef}
                 type="text"
                 placeholder="Search"
                 value={query}
                 onFocus={() => {
+                  setTyping(false)
                   setDropdownOpen(true)
                   const hasQuery = query.trim().length > 0
                   loadRecentKeywords()
-                  setMode(hasQuery ? 'results' : 'suggestions')
+                  setMode('suggestions')
+                  if (hasQuery) {
+                    getSuggestions(query)
+                  }
                 }}
                 onChange={e => {
                   const v = (e.target as HTMLInputElement).value
@@ -188,7 +194,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
               {query.trim().length > 0 && (
                 <button
                   type="button"
-                  onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false); setDropdownOpen(true) }}
+                  onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false); setDropdownOpen(true); inputRef.current?.focus(); }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
                   aria-label="Clear"
                 >

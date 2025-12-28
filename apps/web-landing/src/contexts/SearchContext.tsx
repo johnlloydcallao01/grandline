@@ -18,6 +18,7 @@ interface SearchContextValue {
     isOverlayOpen: boolean
     setOverlayOpen: (v: boolean) => void
     isLoading: boolean
+    lastCompletedKey: string
     isRecentLoading: boolean
     error?: string
     selectIndex: number
@@ -48,11 +49,17 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const [isDropdownOpen, setDropdownOpen] = useState(false)
     const [isOverlayOpen, setOverlayOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
+    const [lastCompletedKey, setLastCompletedKey] = useState('')
     const [isRecentLoading, setRecentLoading] = useState(false)
     const [error, setError] = useState<string | undefined>(undefined)
     const [selectIndex, setSelectIndex] = useState(0)
     const abortRef = useRef<AbortController | null>(null)
-    const [isTyping, setTyping] = useState(false)
+    const [isTyping, setTypingValue] = useState(false)
+    const typingRef = useRef(false)
+    const setTyping = (v: boolean) => {
+        typingRef.current = v
+        setTypingValue(v)
+    }
     const suggSeqRef = useRef(0)
 
     // Using localStorage for recent searches (no authentication in web-landing)
@@ -132,36 +139,51 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
     const search = async (q: string) => {
         const v = q.trim().toLowerCase().replace(/\s+/g, ' ')
+        const requestKey = `q:${v}`
+
+        if (abortRef.current) abortRef.current.abort()
+        abortRef.current = null
+
+        // Set loading and clear results IMMEDIATELY (synchronously) before any async work
+        setLoading(true)
+        setResults([])
+        setMode('results')
         setQuery(v)
         setError(undefined)
         setTyping(false)
+
         if (v.length < 2) {
             setResults([])
+            setLoading(false)
+            setLastCompletedKey(requestKey)
             return
         }
         const now = Date.now()
         const cached = cache.get(v)
         if (cached && now - cached.ts < 60000) {
             setResults(cached.data)
-            setMode('results')
+            setLoading(false)
+            setLastCompletedKey(requestKey)
             return
         }
-        if (abortRef.current) abortRef.current.abort()
         const ac = new AbortController()
         abortRef.current = ac
-        setLoading(true)
-        setMode('results')
         try {
-            const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
+            const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
             const json = await resp.json()
             const data: SearchResult[] = json.results || []
             setResults(data)
             cache.set(v, { ts: Date.now(), data })
         } catch (e: any) {
-            if (e?.name !== 'AbortError') setError('Search failed')
-            setResults([])
+            if (e?.name !== 'AbortError') {
+                setError('Search failed')
+                setResults([])
+            }
         } finally {
-            setLoading(false)
+            if (abortRef.current === ac) {
+                setLoading(false)
+                setLastCompletedKey(requestKey)
+            }
         }
     }
 
@@ -171,19 +193,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
             const resp = await fetch(`/api/search/suggestions?q=${encodeURIComponent(q)}`)
             const json = await resp.json()
             const items: Suggestion[] = json.suggestions || []
-            if (suggSeqRef.current === seq && isTyping) {
+            if (suggSeqRef.current === seq && typingRef.current) {
                 setSuggestions(items)
                 setMode('suggestions')
             }
             return items
         } catch {
-            if (isTyping) setSuggestions([])
+            if (typingRef.current) setSuggestions([])
             return []
         }
     }
 
     const searchByCategory = async (categoryLabel: string) => {
         const v = categoryLabel.trim().toLowerCase().replace(/\s+/g, ' ')
+        const requestKey = `category:${v}`
         setQuery(categoryLabel)
         setError(undefined)
         if (abortRef.current) abortRef.current.abort()
@@ -192,15 +215,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         setLoading(true)
         setMode('results')
         try {
-            const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=8`, { signal: ac.signal })
+            const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
             const json = await resp.json()
             const data: SearchResult[] = json.results || []
             setResults(data)
         } catch (e: any) {
-            if (e?.name !== 'AbortError') setError('Search failed')
-            setResults([])
+            if (e?.name !== 'AbortError') {
+                setError('Search failed')
+                setResults([])
+            }
         } finally {
-            setLoading(false)
+            if (abortRef.current === ac) {
+                setLoading(false)
+                setLastCompletedKey(requestKey)
+            }
         }
     }
 
@@ -225,7 +253,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         mode, setMode,
         isDropdownOpen, setDropdownOpen,
         isOverlayOpen, setOverlayOpen,
-        isLoading, error,
+        isLoading,
+        lastCompletedKey,
+        error,
         isRecentLoading,
         selectIndex, setSelectIndex,
         isTyping, setTyping,
@@ -245,7 +275,19 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         clearRecentKeywords: () => void
         persistRecentKeyword: (kw: string) => Promise<void>
     }), [
-        query, results, recentKeywords, suggestions, mode, isDropdownOpen, isOverlayOpen, isLoading, error, selectIndex, isTyping
+        query,
+        results,
+        recentKeywords,
+        suggestions,
+        mode,
+        isDropdownOpen,
+        isOverlayOpen,
+        isLoading,
+        lastCompletedKey,
+        isRecentLoading,
+        error,
+        selectIndex,
+        isTyping,
     ])
 
     return React.createElement(SearchContext.Provider, { value }, children)
