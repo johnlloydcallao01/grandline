@@ -17,9 +17,9 @@ export function Stats() {
       color: "from-[#1a1569] to-[#201a7c]"
     },
     {
-      number: "24/7",
-      label: "Support from Dedicated Maritime Instructors",
-      icon: "fas fa-headset",
+      number: "100%",
+      label: "Unified Learning Platform",
+      icon: "fas fa-layer-group",
       color: "from-[#8f2f36] to-[#ab3b43]"
     }
   ];

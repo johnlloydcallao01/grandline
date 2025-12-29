@@ -7,63 +7,63 @@ export function Testimonials() {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      position: "Senior Data Scientist",
-      company: "Microsoft",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      content: "EduPlatform transformed my career completely. The machine learning course was incredibly comprehensive and the hands-on projects gave me the confidence to transition into data science. The instructors are world-class!",
+      name: "Capt. Manuel Santos",
+      position: "Master Mariner",
+      company: "Maersk Line",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      content: "Grandline Maritime Training and Development Center Inc. transformed my career completely. The advanced navigation course was incredibly comprehensive and the simulator exercises gave me the confidence to handle complex port entries. The instructors are world-class!",
       rating: 5,
-      course: "Advanced Data Science & ML"
+      course: "Advanced Ship Handling"
     },
     {
       id: 2,
-      name: "Michael Chen",
-      position: "Full Stack Developer",
-      company: "Google",
+      name: "Engr. Antonio Reyes",
+      position: "Chief Engineer",
+      company: "MSC Cruises",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      content: "The web development bootcamp exceeded all my expectations. The curriculum is up-to-date with industry standards, and the project-based learning approach helped me build a strong portfolio that landed me my dream job.",
+      content: "The marine engineering refresher course exceeded all my expectations. The curriculum is up-to-date with the latest engine room technologies and MARPOL regulations. The practical approach helped me prepare for my next contract with ease.",
       rating: 5,
-      course: "Full-Stack Web Development"
+      course: "Modern Marine Propulsion Systems"
     },
     {
       id: 3,
-      name: "Emily Rodriguez",
-      position: "Cloud Architect",
-      company: "Amazon",
+      name: "Maria Clara",
+      position: "Second Officer",
+      company: "Stena Bulk",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      content: "The cloud architecture course provided exactly what I needed to advance my career. The real-world scenarios and hands-on labs with AWS were invaluable. I got promoted within 3 months of completing the course!",
+      content: "The ECDIS training provided exactly what I needed to advance my career. The real-world scenarios and hands-on labs were invaluable. I felt much more competent and prepared for my promotion assessment!",
       rating: 5,
-      course: "Cloud Architecture & DevOps"
+      course: "Electronic Chart Display & Information Systems"
     },
     {
       id: 4,
-      name: "David Park",
-      position: "Marketing Director",
-      company: "Meta",
+      name: "Juan Dela Cruz",
+      position: "Safety Officer",
+      company: "Hapag-Lloyd",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      content: "As someone transitioning from traditional marketing to digital, this platform was a game-changer. The growth hacking strategies I learned helped increase our user acquisition by 300% in just 6 months.",
+      content: "As someone moving into safety management, this platform was a game-changer. The risk assessment strategies I learned helped me implement better safety protocols on our vessels, significantly reducing incidents.",
       rating: 5,
-      course: "Digital Marketing & Growth"
+      course: "Maritime Safety Management"
     },
     {
       id: 5,
-      name: "Lisa Thompson",
-      position: "UX Design Lead",
-      company: "Apple",
+      name: "Elena Garcia",
+      position: "Training Coordinator",
+      company: "NYK Line",
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      content: "The UI/UX design course is phenomenal! The instructor's industry experience really shows, and the design thinking methodology has completely changed how I approach product design. Highly recommended!",
+      content: "The crew management course is phenomenal! The instructor's industry experience really shows, and the leadership modules have completely changed how I approach team dynamics on board. Highly recommended!",
       rating: 5,
-      course: "UI/UX Design & Product Strategy"
+      course: "Leadership and Teamwork (BRM/ERM)"
     },
     {
       id: 6,
-      name: "Robert Kim",
-      position: "Cybersecurity Analyst",
-      company: "Tesla",
+      name: "Ricardo Gomez",
+      position: "Electro-Technical Officer",
+      company: "Evergreen Marine",
       image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
-      content: "The cybersecurity course provided cutting-edge knowledge and practical skills. The ethical hacking labs were incredibly realistic, and I now feel confident protecting our organization from advanced threats.",
+      content: "The high voltage safety course provided cutting-edge knowledge and practical skills. The simulation labs were incredibly realistic, and I now feel confident managing advanced electrical systems on modern vessels.",
       rating: 5,
-      course: "Cybersecurity & Ethical Hacking"
+      course: "High Voltage Safety & Maintenance"
     }
   ];
 

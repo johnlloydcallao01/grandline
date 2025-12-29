@@ -26,7 +26,7 @@ function HeaderInner() {
   const resourcesItems = [
     { href: "/blogs", label: "Blogs" },
     { href: "/knowledge-base", label: "Knowledge Base" },
-    { href: "/instructor", label: "Become an Instructor" },
+    { href: "/become-an-instructor", label: "Become an Instructor" },
   ];
 
   return (

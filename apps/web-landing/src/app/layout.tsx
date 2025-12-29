@@ -14,13 +14,13 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "EduPlatform - Professional Learning Management System",
-  description: "Transform your learning experience with our enterprise-grade LMS platform. Comprehensive courses, expert instructors, and cutting-edge technology.",
-  keywords: "LMS, learning management system, online courses, education platform, professional training",
-  authors: [{ name: "EduPlatform Team" }],
+  title: "Grandline Maritime Training and Development Center Inc. - Professional Maritime Training",
+  description: "Transform your maritime career with Grandline Maritime Training and Development Center Inc. Comprehensive courses, expert instructors, and cutting-edge maritime training technology.",
+  keywords: "maritime training, seafarer courses, marine engineering, navigation, maritime safety, STCW",
+  authors: [{ name: "Grandline Maritime Team" }],
   openGraph: {
-    title: "EduPlatform - Professional Learning Management System",
-    description: "Transform your learning experience with our enterprise-grade LMS platform.",
+    title: "Grandline Maritime Training and Development Center Inc. - Professional Maritime Training",
+    description: "Transform your maritime career with our professional maritime training platform.",
     type: "website",
   },
 };

@@ -21,6 +21,7 @@ import { UserEvents } from './collections/UserEvents'
 import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { PostCategories } from './collections/PostCategories'
 import { CompanyMembers } from './collections/CompanyMembers'
 // LMS Collections
 import { Courses } from './collections/Courses'
@@ -51,6 +52,7 @@ export default buildConfig({
     // Content & Media
     Media,
     Posts,
+    PostCategories,
     CompanyMembers,
 
     // Learning Management System

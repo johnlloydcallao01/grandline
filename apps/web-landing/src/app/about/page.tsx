@@ -269,8 +269,8 @@ export default async function AboutPage() {
               <div className="text-blue-200">Legally Compliant</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">24/7</div>
-              <div className="text-blue-200">Support from Dedicated Maritime Instructors</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">100%</div>
+              <div className="text-blue-200">Unified Learning Platform</div>
             </div>
           </div>
         </div>

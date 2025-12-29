@@ -17,7 +17,7 @@ export function Footer() {
 
   const resources = [
     { href: "https://app.grandlinemaritime.com/signin", label: "Start Now" },
-    { href: "/instructor", label: "Become an Instructor" },
+    { href: "/become-an-instructor", label: "Become an Instructor" },
     { href: "/blogs", label: "Blogs" },
     { href: "/knowledge-base", label: "Knowledge Base" },
     { href: "/support", label: "Support" }

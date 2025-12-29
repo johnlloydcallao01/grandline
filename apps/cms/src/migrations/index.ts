@@ -40,6 +40,8 @@ import * as migration_20251212_000001_force_cascade_delete from './20251212_0000
 import * as migration_20251215_141702 from './20251215_141702';
 import * as migration_20251228_114011 from './20251228_114011';
 import * as migration_20251228_115048 from './20251228_115048';
+import * as migration_20251229_124749 from './20251229_124749';
+import * as migration_20251229_161038 from './20251229_161038';
 
 export const migrations = [
   {
@@ -250,6 +252,16 @@ export const migrations = [
   {
     up: migration_20251228_115048.up,
     down: migration_20251228_115048.down,
-    name: '20251228_115048'
+    name: '20251228_115048',
+  },
+  {
+    up: migration_20251229_124749.up,
+    down: migration_20251229_124749.down,
+    name: '20251229_124749',
+  },
+  {
+    up: migration_20251229_161038.up,
+    down: migration_20251229_161038.down,
+    name: '20251229_161038'
   },
 ];

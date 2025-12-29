@@ -48,39 +48,6 @@ export default function KnowledgeBasePage() {
         }
     ];
 
-    const popularArticles = [
-        {
-            title: "How to Get Started with STCW Certification",
-            category: "Certifications",
-            readTime: "5 min read",
-            views: "2.4k"
-        },
-        {
-            title: "Understanding Maritime Training Requirements in the Philippines",
-            category: "Regulations",
-            readTime: "8 min read",
-            views: "1.8k"
-        },
-        {
-            title: "Complete Guide to Online Course Enrollment",
-            category: "Enrollment",
-            readTime: "4 min read",
-            views: "3.1k"
-        },
-        {
-            title: "Payment Options and Installment Plans",
-            category: "Payment",
-            readTime: "3 min read",
-            views: "1.5k"
-        },
-        {
-            title: "Technical Requirements for Online Learning",
-            category: "Technical Support",
-            readTime: "6 min read",
-            views: "2.2k"
-        }
-    ];
-
     return (
         <main className="min-h-screen">
             <Header />
@@ -144,52 +111,6 @@ export default function KnowledgeBasePage() {
                                     <i className="fas fa-arrow-right ml-2"></i>
                                 </div>
                             </Link>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Popular Articles Section */}
-            <section className="py-20 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="heading-primary text-3xl md:text-4xl text-gray-900 mb-4">
-                            Popular Articles
-                        </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Most viewed and helpful articles from our knowledge base
-                        </p>
-                    </div>
-
-                    <div className="space-y-4 max-w-4xl mx-auto">
-                        {popularArticles.map((article, index) => (
-                            <div
-                                key={index}
-                                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-[#201a7c] transition-colors">
-                                            {article.title}
-                                        </h3>
-                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                            <span className="inline-flex items-center">
-                                                <i className="fas fa-folder-open mr-2 text-[#201a7c]"></i>
-                                                {article.category}
-                                            </span>
-                                            <span className="inline-flex items-center">
-                                                <i className="fas fa-clock mr-2"></i>
-                                                {article.readTime}
-                                            </span>
-                                            <span className="inline-flex items-center">
-                                                <i className="fas fa-eye mr-2"></i>
-                                                {article.views} views
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <i className="fas fa-chevron-right text-gray-400"></i>
-                                </div>
-                            </div>
                         ))}
                     </div>
                 </div>

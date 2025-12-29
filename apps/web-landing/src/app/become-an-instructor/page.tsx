@@ -374,29 +374,29 @@ export default function InstructorPage() {
             <div className="bg-gradient-to-br from-[#201a7c] to-[#ab3b43] rounded-2xl p-8 text-white shadow-lg">
               <div className="space-y-6">
                 <div>
-                  <div className="text-2xl font-bold mb-2">Why Teach With Us</div>
-                  <p className="text-blue-100">Impact real careers, access modern teaching tools, and grow your professional brand in the maritime industry.</p>
+                  <div className="text-2xl font-bold mb-2">Why Teach With Grandline</div>
+                  <p className="text-blue-100">Contribute to the development of future maritime professionals through structured, standards-based training supported by a modern learning platform and a professional teaching environment.</p>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <i className="fas fa-users"></i>
-                    <span>Global learner community</span>
+                    <span>Focused maritime learner base</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <i className="fas fa-chalkboard-teacher"></i>
-                    <span>Modern LMS & interactive labs</span>
+                    <span>Structured LMS with practical training tools</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <i className="fas fa-award"></i>
-                    <span>Recognition and certifications</span>
+                    <span>Professionally delivered courses aligned with industry standards</span>
                   </div>
                 </div>
                 <div className="mt-6">
                   <div className="text-2xl font-bold mb-2">Application Tips</div>
                   <ul className="list-disc list-inside text-blue-100 space-y-2">
-                    <li>Highlight measurable teaching outcomes</li>
-                    <li>Link to sample lesson plans or videos</li>
-                    <li>Include maritime certifications and licenses</li>
+                    <li>Clearly outline your maritime experience, including sea-going roles or instructional background</li>
+                    <li>Include relevant maritime certifications, licenses, and formal training credentials</li>
+                    <li>Provide a concise professional summary that reflects your areas of expertise and teaching focus</li>
                   </ul>
                 </div>
               </div>

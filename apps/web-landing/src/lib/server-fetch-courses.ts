@@ -22,6 +22,20 @@ export type CoursesResponse = {
     hasPrevPage?: boolean;
 };
 
+async function fetchWithTimeout(
+    url: string,
+    init: (RequestInit & { timeoutMs?: number }) | undefined = undefined,
+) {
+    const { timeoutMs = 10000, ...rest } = init || {};
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(url, { ...rest, signal: controller.signal });
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
 /**
  * Server-side function to fetch courses from the CMS API
  * Used for SSR in web-landing app for SEO optimization
@@ -74,7 +88,7 @@ export async function fetchCoursesServer(options: {
         process.env.NEXT_PUBLIC_CMS_API_URL ||
         "https://cms.grandlinemaritime.com/api";
 
-    const response = await fetch(`${apiUrl}/courses?${params}`, {
+    const response = await fetchWithTimeout(`${apiUrl}/courses?${params}`, {
         headers,
         // Use ISR with 5 minute revalidation for static generation
         // This allows the page to be built statically while staying relatively fresh
@@ -117,7 +131,7 @@ export async function fetchTotalCoursesCount(): Promise<number> {
         page: "1",
     });
 
-    const response = await fetch(`${apiUrl}/courses?${params}`, {
+    const response = await fetchWithTimeout(`${apiUrl}/courses?${params}`, {
         headers,
         // Use ISR with 5 minute revalidation
         next: { revalidate: 300 }, // 5 minutes
