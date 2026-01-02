@@ -87,11 +87,10 @@ function CategoryItem({
         <button
             type="button"
             onClick={onClick}
-            className={`px-4 py-2 rounded-lg border text-xs font-medium whitespace-nowrap transition-colors cursor-pointer select-none ${
-                active
+            className={`px-4 py-2 rounded-lg border text-xs font-medium whitespace-nowrap transition-colors cursor-pointer select-none ${active
                     ? "bg-[#201a7c] text-white border-[#201a7c]"
                     : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-            }`}
+                }`}
             style={{ WebkitTapHighlightColor: "transparent" }}
         >
             {name}
@@ -375,8 +374,8 @@ function FeaturedPostsCarousel({
                                                 </span>
                                             </div>
                                             <Link
-                                            href={`/blogs/${enriched.slug}`}
-                                            className="text-[#201a7c] hover:text-[#1a1569] font-medium inline-flex items-center gap-2"
+                                                href={`/blogs/${enriched.slug}`}
+                                                className="text-[#201a7c] hover:text-[#1a1569] font-medium inline-flex items-center gap-2"
                                             >
                                                 Read Article
                                                 <i className="fas fa-arrow-right"></i>
@@ -577,7 +576,7 @@ export function BlogsClient({ categories }: { categories: BlogCategory[] }) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <h1 className="heading-primary text-4xl md:text-6xl mb-6">
-                            <span className="text-[#F5F5F5]">Our</span> <span className="text-[#ab3b43]">Blog</span>
+                            <span className="text-[#F5F5F5]">Our</span> <span className="text-[#ab3b43]">Blogs</span>
                         </h1>
                         <p className="text-xl text-[#F5F5F5] max-w-3xl mx-auto">
                             Stay informed with the latest insights, industry news, and expert advice on maritime training and career
@@ -599,11 +598,10 @@ export function BlogsClient({ categories }: { categories: BlogCategory[] }) {
                             <button
                                 type="button"
                                 onClick={() => onCategoryChange(undefined)}
-                                className={`text-sm font-medium px-3 py-1 rounded-full border ${
-                                    typeof categoryId === "number"
+                                className={`text-sm font-medium px-3 py-1 rounded-full border ${typeof categoryId === "number"
                                         ? "text-gray-700 border-gray-300 hover:bg-gray-50"
                                         : "text-white bg-[#201a7c] border-[#201a7c]"
-                                }`}
+                                    }`}
                             >
                                 All Posts
                             </button>
