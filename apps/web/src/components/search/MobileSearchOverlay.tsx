@@ -28,10 +28,20 @@ export function MobileSearchOverlay(): React.ReactNode {
   }, [isOverlayOpen])
 
   useEffect(() => {
-    if (isOverlayOpen) {
-      loadRecentKeywords()
-      const hasQuery = query.trim().length > 0
-      setMode(hasQuery ? 'results' : 'suggestions')
+    if (!isOverlayOpen) {
+      setTyping(false)
+      return
+    }
+
+    loadRecentKeywords()
+
+    const v = query.trim()
+    if (v.length > 0) {
+      setTyping(true)
+      getSuggestions(v)
+    } else {
+      setTyping(false)
+      setMode('suggestions')
     }
   }, [isOverlayOpen])
 

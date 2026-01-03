@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Header, Sidebar, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
 
@@ -19,6 +20,7 @@ export default function MainLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
+  const pathname = usePathname()
 
   // Hide instant loading screen when main app loads
   useEffect(() => {
@@ -72,7 +74,11 @@ export default function MainLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }} data-fixed-header="true">
+      <div
+        className="min-h-screen bg-gray-50"
+        style={{ backgroundColor: '#f9fafb' }}
+        data-fixed-header={pathname === '/results' ? undefined : 'true'}
+      >
         {/* Header - Persistent across all pages */}
         <Header
           sidebarOpen={sidebarOpen}

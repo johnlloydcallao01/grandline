@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from "@/components/ui/ImageWrapper";
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { HeaderProps } from '@/types';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import { UserAvatar } from '@/components/auth';
@@ -30,6 +30,7 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
 function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
@@ -123,6 +124,34 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
     }
   }, [lastScrollY])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ clearQuery?: boolean }>).detail
+      if (detail?.clearQuery) {
+        setQuery('')
+      }
+      setTyping(false)
+      setOverlayOpen(true)
+      loadRecentKeywords()
+      setMode('suggestions')
+    }
+    window.addEventListener('gl:open-search-overlay', handler as EventListener)
+    return () => {
+      window.removeEventListener('gl:open-search-overlay', handler as EventListener)
+    }
+  }, [setOverlayOpen, loadRecentKeywords, setMode, setTyping, setQuery])
+
+  useEffect(() => {
+    if (pathname === '/results') {
+      const qp = (searchParams.get('search_query') || '').trim()
+      if (qp) {
+        setQuery(qp)
+        setMode('results')
+      }
+    }
+  }, [pathname, searchParams, setQuery, setMode])
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     const v = query.trim()
@@ -145,17 +174,19 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   return (
     <header className={`lg:sticky lg:top-0 fixed top-0 left-0 right-0 bg-white z-50 lg:transition-none transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : 'lg:translate-y-0 -translate-y-full'
       }`}>
-      <div className="lg:hidden flex items-center px-3 py-1.5 space-x-1 sm:space-x-2 h-14">
-        <div className="w-[80%] flex items-center justify-start">
-          {React.createElement(Image, { src: '/calsiter-inc-logo.png', alt: 'Calsiter Inc Logo', width: 210, height: 56, className: 'h-14 w-auto', priority: true })}
+      {pathname !== '/results' && (
+        <div className="lg:hidden flex items-center px-3 py-1.5 space-x-1 sm:space-x-2 h-14">
+          <div className="w-[80%] flex items-center justify-start">
+            {React.createElement(Image, { src: '/calsiter-inc-logo.png', alt: 'Calsiter Inc Logo', width: 210, height: 56, className: 'h-14 w-auto', priority: true })}
+          </div>
+          <button onClick={() => router.push('/notifications')} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
+            <i className="fas fa-bell text-gray-600 text-lg"></i>
+          </button>
+          <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
+            <i className="fa fa-search text-gray-600 text-lg"></i>
+          </button>
         </div>
-        <button onClick={() => router.push('/notifications')} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-          <i className="fas fa-bell text-gray-600 text-lg"></i>
-        </button>
-        <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
-          <i className="fa fa-search text-gray-600 text-lg"></i>
-        </button>
-      </div>
+      )}
 
       <div className="hidden lg:flex items-center justify-between px-4">
         <div className="flex items-center space-x-4">

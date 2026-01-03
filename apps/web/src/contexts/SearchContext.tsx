@@ -55,12 +55,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | undefined>(undefined)
   const [selectIndex, setSelectIndex] = useState(0)
   const abortRef = useRef<AbortController | null>(null)
-  const [isTyping, setTypingValue] = useState(false)
-  const typingRef = useRef(false)
-  const setTyping = (v: boolean) => {
-    typingRef.current = v
-    setTypingValue(v)
-  }
+  const [isTyping, setTyping] = useState(false)
   const suggSeqRef = useRef(0)
   const { user } = useUser()
 
@@ -173,13 +168,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       const resp = await fetch(`/api/search/suggestions?q=${encodeURIComponent(q)}`)
       const json = await resp.json()
       const items: Suggestion[] = json.suggestions || []
-      if (suggSeqRef.current === seq && typingRef.current) {
+      if (suggSeqRef.current === seq) {
         setSuggestions(items)
         setMode('suggestions')
       }
       return items
     } catch {
-      if (typingRef.current) setSuggestions([])
+      setSuggestions([])
       return []
     }
   }

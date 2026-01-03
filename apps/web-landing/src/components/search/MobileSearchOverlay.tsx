@@ -26,10 +26,20 @@ export function MobileSearchOverlay(): React.ReactNode {
     }, [isOverlayOpen])
 
     useEffect(() => {
-        if (isOverlayOpen) {
-            loadRecentKeywords()
-            const hasQuery = query.trim().length > 0
-            setMode(hasQuery ? 'results' : 'suggestions')
+        if (!isOverlayOpen) {
+            setTyping(false)
+            return
+        }
+
+        loadRecentKeywords()
+
+        const v = query.trim()
+        if (v.length > 0) {
+            setTyping(true)
+            getSuggestions(v)
+        } else {
+            setTyping(false)
+            setMode('suggestions')
         }
     }, [isOverlayOpen])
 
@@ -47,7 +57,7 @@ export function MobileSearchOverlay(): React.ReactNode {
                         onClick={() => { setTyping(false); setOverlayOpen(false) }}
                         className="w-8 h-8 rounded-full bg-white md:bg-gray-100 border md:border-0 shadow-md md:shadow-none flex items-center justify-center hover:bg-gray-100 transition-colors"
                     >
-                        <i className="fa fa-arrow-left"></i>
+                        <i className="fa fa-arrow-left text-gray-900"></i>
                     </button>
                     <div className="relative flex-1">
                         <input
@@ -69,7 +79,7 @@ export function MobileSearchOverlay(): React.ReactNode {
                                     window.location.href = `https://app.grandlinemaritime.com/results?search_query=${encodeURIComponent(v)}`
                                 }
                             }}
-                            className="w-full h-10 border border-gray-300 rounded-md pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"
+                            className="w-full h-10 border border-gray-300 rounded-md pl-3 pr-10 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"
                             placeholder="Search courses"
                         />
                         {query.trim().length > 0 && (

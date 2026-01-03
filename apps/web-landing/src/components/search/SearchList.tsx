@@ -117,7 +117,7 @@ export function SearchList(): React.ReactNode {
                                             window.location.href = `https://app.grandlinemaritime.com/results?search_query=${encodeURIComponent(s.label)}`
                                         }} className="flex items-center gap-3 w-full text-left">
                                             <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
-                                                <i className={`fa ${s.kind === 'category' ? 'fa-folder' : 'fa-book'}`}></i>
+                                                <i className={`fa ${s.kind === 'category' ? 'fa-folder' : 'fa-book'} text-gray-900`}></i>
                                             </div>
                                             <div className="min-w-0">
                                                 <div className="text-sm font-medium text-gray-900 truncate">{s.label}</div>

@@ -18,7 +18,6 @@ export function SearchList(): React.ReactNode {
         isRecentLoading,
         setDropdownOpen,
         setOverlayOpen,
-        search,
     } = useSearch()
 
     return (
@@ -33,7 +32,7 @@ export function SearchList(): React.ReactNode {
                             <ul className="divide-y divide-gray-100">
                                 {recentKeywords.map((kw, idx) => (
                                     <li key={`${kw}-${idx}`} className="p-3 hover:bg-gray-50">
-                                        <button
+                                <button
                                             type="button"
                                             onClick={() => {
                                                 // Close UI immediately to prevent flash
@@ -45,14 +44,8 @@ export function SearchList(): React.ReactNode {
                                                 setMode('results')
                                                 setTyping(false)
 
-                                                // Check if already on results page
-                                                if (window.location.pathname === '/results') {
-                                                    // Trigger search directly instead of navigating
-                                                    search(kw)
-                                                } else {
-                                                    // Navigate to results page
-                                                    router.push(`/results?search_query=${encodeURIComponent(kw)}` as any)
-                                                }
+                                                // Always navigate to results page so URL drives results
+                                                router.push(`/results?search_query=${encodeURIComponent(kw)}` as any)
 
                                                 // Persist in background
                                                 persistRecentKeyword(kw)
@@ -109,14 +102,8 @@ export function SearchList(): React.ReactNode {
                                             setMode('results')
                                             setTyping(false)
 
-                                            // Check if already on results page
-                                            if (window.location.pathname === '/results') {
-                                                // Trigger search directly instead of navigating
-                                                search(s.label)
-                                            } else {
-                                                // Navigate to results page
-                                                router.push(`/results?search_query=${encodeURIComponent(s.label)}` as any)
-                                            }
+                                            // Always navigate to results page so URL drives results
+                                            router.push(`/results?search_query=${encodeURIComponent(s.label)}` as any)
 
                                             // Persist in background
                                             persistRecentKeyword(s.label)
