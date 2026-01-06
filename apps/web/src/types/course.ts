@@ -43,11 +43,60 @@ export interface CourseCategory {
   icon?: Media | null;
 }
 
+// JSON block content types for rich course descriptions
+export interface HeadingBlock {
+  type: 'heading';
+  level: 1 | 2 | 3 | 4;
+  text: string;
+}
+
+export interface ParagraphBlock {
+  type: 'paragraph';
+  text: string;
+}
+
+export interface ListBlock {
+  type: 'list';
+  style: 'ordered' | 'unordered';
+  items: string[];
+}
+
+export interface ImageBlock {
+  type: 'image';
+  url: string;
+  alt?: string;
+  caption?: string;
+  width?: string;
+  height?: string;
+}
+
+export interface QuoteBlock {
+  type: 'quote';
+  text: string;
+  attribution?: string;
+}
+
+export interface CodeBlock {
+  type: 'code';
+  language?: string;
+  code: string;
+}
+
+export type ContentBlock =
+  | HeadingBlock
+  | ParagraphBlock
+  | ListBlock
+  | ImageBlock
+  | QuoteBlock
+  | CodeBlock;
+
 // Base Course interface
 export interface Course {
   id: string;
   title: string;
   excerpt: string;
+  description?: any;
+  descriptionBlocks?: ContentBlock[] | null;
   status: 'published' | 'draft';
   isFeatured?: boolean;
   thumbnail?: Media | null;

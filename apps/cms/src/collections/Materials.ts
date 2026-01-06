@@ -1,0 +1,89 @@
+import type { CollectionConfig } from 'payload'
+
+export const Materials: CollectionConfig = {
+  slug: 'materials',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'type', 'materialSource', 'createdAt'],
+    group: 'Learning Management',
+    description: 'Reusable learning materials and assets for courses and lessons',
+  },
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'service' || user.role === 'admin' || user.role === 'instructor') {
+        return true
+      }
+      return false
+    },
+    create: ({ req: { user } }) => {
+      if (!user) return false
+      return user.role === 'admin' || user.role === 'instructor'
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      return user.role === 'admin' || user.role === 'instructor'
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      return user.role === 'admin' || user.role === 'instructor'
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'type',
+      type: 'select',
+      options: [
+        { label: 'Video', value: 'video' },
+        { label: 'PDF', value: 'pdf' },
+        { label: 'Image', value: 'image' },
+        { label: 'Audio', value: 'audio' },
+        { label: 'Link', value: 'link' },
+        { label: 'SCORM', value: 'scorm' },
+        { label: 'ZIP Archive', value: 'zip' },
+        { label: 'Other', value: 'other' },
+      ],
+      defaultValue: 'other',
+      required: true,
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+    },
+    {
+      name: 'materialSource',
+      type: 'select',
+      options: [
+        { label: 'Uploaded Media', value: 'media' },
+        { label: 'External URL', value: 'external' },
+      ],
+      defaultValue: 'media',
+      required: true,
+    },
+    {
+      name: 'media',
+      type: 'relationship',
+      relationTo: 'media',
+      admin: {
+        condition: (_, siblingData) => siblingData.materialSource === 'media',
+      },
+    },
+    {
+      name: 'externalUrl',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData.materialSource === 'external',
+      },
+    },
+    {
+      name: 'metadata',
+      type: 'json',
+    },
+  ],
+}
+

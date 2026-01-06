@@ -64,6 +64,144 @@ export interface Config {
   globals: any[];
 }
 
+export type CourseDifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export type CourseLanguage = 'en' | 'es' | 'fr' | 'de';
+
+export type CourseStatus = 'draft' | 'published';
+
+export interface Course {
+  id: string;
+  title: string;
+  courseCode: string;
+  excerpt?: string;
+  description?: any;
+  descriptionBlocks?: ContentBlock[];
+  instructor: User | string;
+  coInstructors?: Array<User | string>;
+  category?: Array<string>;
+  thumbnail?: Media | string;
+  bannerImage?: Media | string;
+  price?: number;
+  discountedPrice?: number;
+  maxStudents?: number;
+  enrollmentStartDate?: string;
+  enrollmentEndDate?: string;
+  courseStartDate?: string;
+  courseEndDate?: string;
+  estimatedDuration?: number;
+  difficultyLevel: CourseDifficultyLevel;
+  isFeatured: boolean;
+  language: CourseLanguage;
+  passingGrade: number;
+  learningObjectives?: Array<{ objective: string }>;
+  prerequisites?: Array<{ prerequisite: string }>;
+  status: CourseStatus;
+  publishedAt?: string;
+  settings?: Record<string, unknown>;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  course: Course | string;
+  order: number;
+  releaseAt?: string;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface CourseLesson {
+  id: string;
+  title: string;
+  module: CourseModule | string;
+  order: number;
+  bodyBlocks?: ContentBlock[];
+  estimatedDuration?: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export type MaterialType = 'video' | 'pdf' | 'image' | 'audio' | 'link' | 'scorm' | 'zip' | 'other';
+
+export type MaterialSource = 'media' | 'external';
+
+export interface Material {
+  id: string;
+  title: string;
+  type: MaterialType;
+  description?: string;
+  materialSource: MaterialSource;
+  media?: Media | string | null;
+  externalUrl?: string;
+  metadata?: Record<string, unknown>;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  course: Course | string;
+  bodyBlocks?: ContentBlock[];
+  pinned: boolean;
+  visibleFrom?: string;
+  visibleUntil?: string;
+  createdBy?: User | string;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export type BlockType = 'heading' | 'paragraph' | 'list' | 'image' | 'quote' | 'code';
+
+export interface HeadingBlock {
+  type: 'heading';
+  level: 1 | 2 | 3 | 4;
+  text: string;
+}
+
+export interface ParagraphBlock {
+  type: 'paragraph';
+  text: string;
+}
+
+export interface ListBlock {
+  type: 'list';
+  style: 'ordered' | 'unordered';
+  items: string[];
+}
+
+export interface ImageBlock {
+  type: 'image';
+  url: string;
+  alt?: string;
+  caption?: string;
+  width?: string;
+  height?: string;
+}
+
+export interface QuoteBlock {
+  type: 'quote';
+  text: string;
+  attribution?: string;
+}
+
+export interface CodeBlock {
+  type: 'code';
+  language?: string;
+  code: string;
+}
+
+export type ContentBlock =
+  | HeadingBlock
+  | ParagraphBlock
+  | ListBlock
+  | ImageBlock
+  | QuoteBlock
+  | CodeBlock;
+
 // ========================================
 // CUSTOM TYPES
 // ========================================

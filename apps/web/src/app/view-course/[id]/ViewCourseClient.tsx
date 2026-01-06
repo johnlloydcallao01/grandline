@@ -1,11 +1,21 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { AuthorAvatar } from './AuthorAvatar';
-import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel';
-import type { Media, CourseWithInstructor } from '@/types/course';
+import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { AuthorAvatar } from './AuthorAvatar'
+import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel'
+import type {
+  Media,
+  CourseWithInstructor,
+  ContentBlock,
+  HeadingBlock,
+  ParagraphBlock,
+  ListBlock,
+  ImageBlock,
+  QuoteBlock,
+  CodeBlock,
+} from '@/types/course'
 
 interface ViewCourseClientProps {
   course: CourseWithInstructor;
@@ -13,116 +23,471 @@ interface ViewCourseClientProps {
 
 // Helper function to get image URL - same pattern as CoursesGrid
 function getImageUrl(media: Media | null | undefined): string | null {
-  if (!media) return null;
+  if (!media) return null
 
-  // Priority: cloudinaryURL > url > thumbnailURL
-  return media.cloudinaryURL || media.url || media.thumbnailURL || null;
+  return media.cloudinaryURL || media.url || media.thumbnailURL || null
+}
+
+function renderHeadingBlock(block: HeadingBlock, index: number) {
+  const baseClass = 'font-semibold text-gray-900'
+  const spacingClass = index === 0 ? 'mt-0 mb-3' : 'mt-6 mb-3'
+
+  if (block.level === 1) {
+    return (
+      <h3 key={index} className={`text-2xl ${baseClass} ${spacingClass}`}>
+        {block.text}
+      </h3>
+    )
+  }
+
+  if (block.level === 2) {
+    return (
+      <h4 key={index} className={`text-xl ${baseClass} ${spacingClass}`}>
+        {block.text}
+      </h4>
+    )
+  }
+
+  return (
+    <h5 key={index} className={`text-lg ${baseClass} ${spacingClass}`}>
+      {block.text}
+    </h5>
+  )
+}
+
+function renderParagraphBlock(block: ParagraphBlock, index: number) {
+  return (
+    <p key={index} className="text-gray-700 leading-relaxed">
+      {block.text}
+    </p>
+  )
+}
+
+function renderListBlock(block: ListBlock, index: number) {
+  const ListTag = block.style === 'ordered' ? 'ol' : 'ul'
+  return (
+    <ListTag
+      key={index}
+      className="pl-5 space-y-1 text-gray-700 leading-relaxed"
+    >
+      {block.items.map((item, i) => (
+        <li key={i}>{item}</li>
+      ))}
+    </ListTag>
+  )
+}
+
+function renderImageBlock(block: ImageBlock, index: number) {
+  if (!block.url) return null
+
+  const style: React.CSSProperties = {
+    width: block.width || '100%',
+    height: block.height || 'auto',
+  }
+
+  return (
+    <figure key={index} className="w-full">
+      {/* @ts-ignore */}
+      <Image
+        src={block.url}
+        alt={block.alt || ''}
+        width={800}
+        height={450}
+        style={style}
+        className="rounded-lg border border-gray-200 object-cover"
+      />
+      {block.caption && (
+        <figcaption className="mt-2 text-sm text-gray-500">
+          {block.caption}
+        </figcaption>
+      )}
+    </figure>
+  )
+}
+
+function renderQuoteBlock(block: QuoteBlock, index: number) {
+  return (
+    <blockquote
+      key={index}
+      className="border-l-4 border-gray-300 pl-4 italic text-gray-700"
+    >
+      <p>{block.text}</p>
+      {block.attribution && (
+        <footer className="mt-1 text-sm text-gray-500">
+          — {block.attribution}
+        </footer>
+      )}
+    </blockquote>
+  )
+}
+
+function renderCodeBlock(block: CodeBlock, index: number) {
+  return (
+    <pre
+      key={index}
+      className="bg-gray-900 text-gray-100 text-sm rounded-md p-4 overflow-x-auto"
+    >
+      <code>{block.code}</code>
+    </pre>
+  )
+}
+
+function renderLexicalTextNode(node: any, key: string): React.ReactNode {
+  const raw = typeof node.text === 'string' ? node.text : ''
+  let content: React.ReactNode = raw
+
+  const format = typeof node.format === 'number' ? node.format : 0
+
+  if (!raw) {
+    return null
+  }
+
+  if (format & 16) {
+    content = <code key={`${key}-code`}>{content}</code>
+  }
+  if (format & 1) {
+    content = <strong key={`${key}-bold`}>{content}</strong>
+  }
+  if (format & 2) {
+    content = <em key={`${key}-italic`}>{content}</em>
+  }
+  if (format & 4) {
+    content = <u key={`${key}-underline`}>{content}</u>
+  }
+  if (format & 8) {
+    content = <s key={`${key}-strikethrough`}>{content}</s>
+  }
+  if (format & 32) {
+    content = <sub key={`${key}-sub`}>{content}</sub>
+  }
+  if (format & 64) {
+    content = <sup key={`${key}-sup`}>{content}</sup>
+  }
+
+  return content
+}
+
+function renderLexicalChildren(node: any, keyPrefix: string): React.ReactNode[] {
+  const children = Array.isArray(node?.children) ? node.children : []
+  return children
+    .map((child, index) => renderLexicalNode(child, `${keyPrefix}-${index}`))
+    .filter(Boolean) as React.ReactNode[]
+}
+
+function renderLexicalNode(node: any, key: string): React.ReactNode {
+  if (!node || typeof node !== 'object') {
+    return null
+  }
+
+  const type = node.type
+
+  if (type === 'text') {
+    return renderLexicalTextNode(node, key)
+  }
+
+  if (type === 'paragraph') {
+    return (
+      <p key={key} className="text-gray-700 leading-relaxed">
+        {renderLexicalChildren(node, key)}
+      </p>
+    )
+  }
+
+  if (type === 'heading') {
+    const tag = node.tag
+    const baseClass = 'font-semibold text-gray-900'
+    const spacingClass = 'mt-6 mb-3'
+
+    if (tag === 'h1') {
+      return (
+        <h3 key={key} className={`text-2xl ${baseClass} ${spacingClass}`}>
+          {renderLexicalChildren(node, key)}
+        </h3>
+      )
+    }
+
+    if (tag === 'h2') {
+      return (
+        <h4 key={key} className={`text-xl ${baseClass} ${spacingClass}`}>
+          {renderLexicalChildren(node, key)}
+        </h4>
+      )
+    }
+
+    return (
+      <h5 key={key} className={`text-lg ${baseClass} ${spacingClass}`}>
+        {renderLexicalChildren(node, key)}
+      </h5>
+    )
+  }
+
+  if (type === 'quote') {
+    return (
+      <blockquote
+        key={key}
+        className="border-l-4 border-gray-300 pl-4 italic text-gray-700"
+      >
+        {renderLexicalChildren(node, key)}
+      </blockquote>
+    )
+  }
+
+  if (type === 'list') {
+    const listType = node.listType === 'number' ? 'ol' : 'ul'
+    const ListTag = listType === 'ol' ? 'ol' : 'ul'
+    return (
+      <ListTag
+        key={key}
+        className="pl-5 space-y-1 text-gray-700 leading-relaxed"
+      >
+        {renderLexicalChildren(node, key)}
+      </ListTag>
+    )
+  }
+
+  if (type === 'listitem') {
+    return (
+      <li key={key}>
+        {renderLexicalChildren(node, key)}
+      </li>
+    )
+  }
+
+  if (type === 'code') {
+    const children = renderLexicalChildren(node, key)
+    return (
+      <pre
+        key={key}
+        className="bg-gray-900 text-gray-100 text-sm rounded-md p-4 overflow-x-auto"
+      >
+        <code>{children}</code>
+      </pre>
+    )
+  }
+
+  if (type === 'upload' && node.relationTo === 'media') {
+    const media = node.value
+    const src =
+      media?.cloudinaryURL ||
+      media?.url ||
+      media?.thumbnailURL ||
+      null
+
+    if (!src) {
+      return null
+    }
+
+    const alt = media?.alt || ''
+
+    return (
+      <figure key={key} className="w-full">
+        {/* @ts-ignore */}
+        <Image
+          src={src}
+          alt={alt}
+          width={800}
+          height={450}
+          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+        />
+      </figure>
+    )
+  }
+
+  if (type === 'image') {
+    const src = node.src || node.url || null
+    if (!src) {
+      return null
+    }
+
+    const alt = node.altText || node.alt || ''
+    const caption = node.caption
+
+    return (
+      <figure key={key} className="w-full">
+        {/* @ts-ignore */}
+        <Image
+          src={src}
+          alt={alt}
+          width={800}
+          height={450}
+          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+        />
+        {caption && (
+          <figcaption className="mt-2 text-sm text-gray-500">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+
+  return (
+    <span key={key}>
+      {renderLexicalChildren(node, key)}
+    </span>
+  )
+}
+
+function renderRichDescription(description: any): React.ReactNode {
+  if (!description || typeof description !== 'object') {
+    return null
+  }
+
+  const root = (description as any).root
+  if (!root || !Array.isArray(root.children)) {
+    return null
+  }
+
+  const rendered = root.children
+    .map((node: any, index: number) => renderLexicalNode(node, `root-${index}`))
+    .filter(Boolean)
+
+  if (!rendered.length) {
+    return null
+  }
+
+  return (
+    <div className="space-y-4 text-gray-700 leading-relaxed">
+      {rendered}
+    </div>
+  )
+}
+
+function CourseDescriptionBlocks({
+  blocks,
+  description,
+}: {
+  blocks: ContentBlock[] | null | undefined
+  description?: any
+}) {
+  if (blocks && blocks.length > 0) {
+    return (
+      <div className="space-y-4 text-gray-700 leading-relaxed">
+        {blocks.map((block, index) => {
+          if (block.type === 'heading') return renderHeadingBlock(block, index)
+          if (block.type === 'paragraph') return renderParagraphBlock(block, index)
+          if (block.type === 'list') return renderListBlock(block, index)
+          if (block.type === 'image') return renderImageBlock(block, index)
+          if (block.type === 'quote') return renderQuoteBlock(block, index)
+          if (block.type === 'code') return renderCodeBlock(block, index)
+          return null
+        })}
+      </div>
+    )
+  }
+
+  const rich = renderRichDescription(description)
+  if (rich) {
+    return rich
+  }
+
+  return null
 }
 
 export default function ViewCourseClient({ course }: ViewCourseClientProps) {
-  const [activeSection, setActiveSection] = useState('Overview');
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [activeSection, setActiveSection] = useState('Overview')
+  const [isDesktop, setIsDesktop] = useState(false)
 
   // Check screen size and adjust active section accordingly
   useEffect(() => {
     const checkScreenSize = () => {
-      const wasDesktop = isDesktop;
-      const desktop = window.innerWidth >= 1024;
-      setIsDesktop(desktop);
+      const wasDesktop = isDesktop
+      const desktop = window.innerWidth >= 1024
+      setIsDesktop(desktop)
 
       // Only auto-switch when actually changing screen sizes, not on manual section selection
       if (wasDesktop !== desktop) {
         // If switching to desktop and currently on Overview, switch to Description
         if (desktop && activeSection === 'Overview') {
-          setActiveSection('Description');
+          setActiveSection('Description')
         }
         // If switching to mobile/tablet and currently on Description, switch to Overview
         else if (!desktop && activeSection === 'Description') {
-          setActiveSection('Overview');
+          setActiveSection('Overview')
         }
       }
     };
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
 
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, [isDesktop, activeSection]);
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [isDesktop, activeSection])
 
   // Update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       const sections = isDesktop
         ? ['Description', 'Curriculum', 'Materials', 'Announcements']
-        : ['Overview', 'Description', 'Curriculum', 'Materials', 'Announcements'];
-      const headerOffset = 150; // Account for sticky header and navigation
+        : ['Overview', 'Description', 'Curriculum', 'Materials', 'Announcements']
+      const headerOffset = 150
 
       for (const section of sections) {
-        const sectionId = section.toLowerCase().replace(/\s+/g, '-');
-        const element = document.getElementById(sectionId);
+        const sectionId = section.toLowerCase().replace(/\s+/g, '-')
+        const element = document.getElementById(sectionId)
         if (element) {
-          const rect = element.getBoundingClientRect();
+          const rect = element.getBoundingClientRect()
           if (rect.top <= headerOffset && rect.bottom > headerOffset) {
-            setActiveSection(section);
-            break;
+            setActiveSection(section)
+            break
           }
         }
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isDesktop]);
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isDesktop])
 
   const handleSectionChange = (section: string) => {
-    setActiveSection(section);
+    setActiveSection(section)
 
     // Scroll to the corresponding section
-    const sectionId = section.toLowerCase().replace(/\s+/g, '-');
-    const element = document.getElementById(sectionId);
+    const sectionId = section.toLowerCase().replace(/\s+/g, '-')
+    const element = document.getElementById(sectionId)
     if (element) {
-      const headerOffset = 120; // Account for sticky header and navigation
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const headerOffset = 120
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
-      });
+        behavior: 'smooth',
+      })
     }
-  };
+  }
 
 
 
   // Helper function to format last updated date
   const formatLastUpdated = (updatedAt: string | null | undefined): string => {
-    if (!updatedAt) return 'Not updated';
+    if (!updatedAt) return 'Not updated'
 
     try {
-      const date = new Date(updatedAt);
+      const date = new Date(updatedAt)
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
-      });
+        day: 'numeric',
+      })
     } catch {
-      return 'Invalid date';
+      return 'Invalid date'
     }
   };
 
   // Helper function to format price
   const formatPrice = (price: number | null | undefined): string => {
-    if (price === null || price === undefined) return 'Free';
-    if (price === 0) return 'Free';
+    if (price === null || price === undefined) return 'Free'
+    if (price === 0) return 'Free'
 
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
-      currency: 'PHP'
-    }).format(price);
-  };
+      currency: 'PHP',
+    }).format(price)
+  }
 
-  const thumbnailImageUrl = getImageUrl(course.thumbnail);
-  const altText = course.thumbnail?.alt || `${course.title} thumbnail`;
+  const thumbnailImageUrl = getImageUrl(course.thumbnail)
+  const altText = course.thumbnail?.alt || `${course.title} thumbnail`
 
   return (
     <div className="min-h-screen bg-white">
@@ -132,14 +497,17 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
       <div className="w-full px-[10px] md:px-[15px] pt-4 pb-4">
         <nav className="flex items-center space-x-3 text-sm">
           {(Link as any)({
-            href: "/",
-            className: "text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium",
-            children: "Home"
+            href: '/',
+            className:
+              'text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium',
+            children: 'Home',
           })}
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-[#201a7c] font-semibold truncate max-w-xs">{course.title}</span>
+          <span className="text-[#201a7c] font-semibold truncate max-w-xs">
+            {course.title}
+          </span>
         </nav>
       </div>
 
@@ -166,7 +534,6 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                 {course.title}
               </h1>
 
-              {/* Course Description */}
               {course.excerpt && (
                 <p className="text-gray-300 text-lg mb-6 leading-relaxed">
                   {course.excerpt}
@@ -261,29 +628,36 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
 
               {/* Description Section */}
               <div id="description" className="bg-white rounded-lg shadow-sm p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Course Description</h2>
-                {course.excerpt && (
-                  <div className="prose max-w-none">
-                    <p className="text-gray-700 leading-relaxed">{course.excerpt}</p>
-                  </div>
-                )}
+                <h2 className="text-xl font-semibold mb-4">
+                  Course Description
+                </h2>
+                <CourseDescriptionBlocks
+                  blocks={course.descriptionBlocks || null}
+                  description={course.description}
+                />
               </div>
 
               {/* Additional content sections can be added here */}
               <div id="curriculum" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Curriculum</h2>
-                <p className="text-gray-700">Course curriculum content will be displayed here.</p>
+                <p className="text-gray-700">
+                  Course curriculum content will be displayed here.
+                </p>
               </div>
 
 
               <div id="materials" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Materials</h2>
-                <p className="text-gray-700">Course materials and resources will be displayed here.</p>
+                <p className="text-gray-700">
+                  Course materials and resources will be displayed here.
+                </p>
               </div>
 
               <div id="announcements" className="bg-white rounded-lg shadow-sm p-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Announcements</h2>
-                <p className="text-gray-700">Course announcements and updates will be displayed here.</p>
+                <p className="text-gray-700">
+                  Course announcements and updates will be displayed here.
+                </p>
               </div>
             </div>
 
@@ -306,9 +680,14 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
-                          <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
+                          <div className="text-2xl font-bold text-gray-900">
+                            {formatPrice(course.discountedPrice)}
+                          </div>
                         </div>
-                        <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#f5f5f5', color: '#333' }}>
+                        <span
+                          className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded"
+                          style={{ backgroundColor: '#f5f5f5', color: '#333' }}
+                        >
                           {course.category?.map(c => c.name).join(', ') || 'General'}
                         </span>
                       </div>
@@ -334,5 +713,5 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

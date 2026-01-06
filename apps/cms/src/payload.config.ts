@@ -27,6 +27,12 @@ import { CompanyMembers } from './collections/CompanyMembers'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
 import { CourseEnrollments } from './collections/CourseEnrollments'
+import { CourseModules } from './collections/CourseModules'
+import { CourseLessons } from './collections/CourseLessons'
+import { Materials } from './collections/Materials'
+import { CourseMaterials } from './collections/CourseMaterials'
+import { LessonMaterials } from './collections/LessonMaterials'
+import { Announcements } from './collections/Announcements'
 import { RecentSearches } from './collections/RecentSearches'
 
 const filename = fileURLToPath(import.meta.url)
@@ -59,9 +65,18 @@ export default buildConfig({
     Courses,
     CourseCategories,
     CourseEnrollments,
+    CourseModules,
+    CourseLessons,
+    Materials,
+    CourseMaterials,
+    LessonMaterials,
+    Announcements,
     RecentSearches,
   ],
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) =>
+      defaultFeatures.filter((feature) => feature.key !== 'upload'),
+  }),
   secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',
   cors: [
     // Production web-admin

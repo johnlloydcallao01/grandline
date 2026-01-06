@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { titleField, excerptField, statusField, publishedAtField } from '../fields'
 
 export const Courses: CollectionConfig = {
@@ -52,11 +53,21 @@ export const Courses: CollectionConfig = {
     {
       name: 'description',
       type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) =>
+          defaultFeatures.filter((feature) => feature.key !== 'upload'),
+      }),
       admin: {
         description: 'Detailed course description with rich formatting',
       },
     },
-
+    {
+      name: 'descriptionBlocks',
+      type: 'json',
+      admin: {
+        hidden: true,
+      },
+    },
     // === INSTRUCTOR & CATEGORY ===
     {
       name: 'instructor',
