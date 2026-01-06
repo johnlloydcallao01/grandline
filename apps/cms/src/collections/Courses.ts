@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+// Field component is referenced via admin importMap
 import { titleField, excerptField, statusField, publishedAtField } from '../fields'
 
 export const Courses: CollectionConfig = {
@@ -53,12 +54,12 @@ export const Courses: CollectionConfig = {
     {
       name: 'description',
       type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) =>
-          defaultFeatures.filter((feature) => feature.key !== 'upload'),
-      }),
+      editor: lexicalEditor(),
       admin: {
         description: 'Detailed course description with rich formatting',
+        components: {
+          Field: '/components/fields/CourseDescriptionEditor#CourseDescriptionEditor',
+        },
       },
     },
     {

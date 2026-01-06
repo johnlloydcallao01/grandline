@@ -186,10 +186,46 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
   }
 
   if (type === 'paragraph') {
+    const children = Array.isArray((node as any).children)
+      ? (node as any).children
+      : []
+
+    const hasBlockChild = children.some((child: any) => {
+      if (!child || typeof child !== 'object') return false
+      const childType = child.type
+      if (childType === 'image' || childType === 'course-image') return true
+      if (childType === 'list' || childType === 'quote' || childType === 'code') return true
+      if (childType === 'upload' && child.relationTo === 'media') return true
+      return false
+    })
+
+    if (!hasBlockChild) {
+      return (
+        <p key={key} className="text-gray-700 leading-relaxed">
+          {renderLexicalChildren(node, key)}
+        </p>
+      )
+    }
+
     return (
-      <p key={key} className="text-gray-700 leading-relaxed">
-        {renderLexicalChildren(node, key)}
-      </p>
+      <div key={key} className="space-y-4">
+        {children.map((child: any, index: number) => {
+          if (!child || typeof child !== 'object') return null
+
+          if (child.type === 'text') {
+            return (
+              <p
+                key={`${key}-p-${index}`}
+                className="text-gray-700 leading-relaxed"
+              >
+                {renderLexicalTextNode(child, `${key}-text-${index}`)}
+              </p>
+            )
+          }
+
+          return renderLexicalNode(child, `${key}-${index}`)
+        })}
+      </div>
     )
   }
 
@@ -300,6 +336,34 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     }
 
     const alt = node.altText || node.alt || ''
+    const caption = node.caption
+
+    return (
+      <figure key={key} className="w-full">
+        {/* @ts-ignore */}
+        <Image
+          src={src}
+          alt={alt}
+          width={800}
+          height={450}
+          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+        />
+        {caption && (
+          <figcaption className="mt-2 text-sm text-gray-500">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+
+  if (type === 'course-image') {
+    const src = node.url || null
+    if (!src) {
+      return null
+    }
+
+    const alt = node.alt || ''
     const caption = node.caption
 
     return (

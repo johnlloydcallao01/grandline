@@ -73,10 +73,7 @@ export default buildConfig({
     Announcements,
     RecentSearches,
   ],
-  editor: lexicalEditor({
-    features: ({ defaultFeatures }) =>
-      defaultFeatures.filter((feature) => feature.key !== 'upload'),
-  }),
+  editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',
   cors: [
     // Production web-admin
