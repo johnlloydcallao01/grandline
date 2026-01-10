@@ -14,7 +14,8 @@
     "./table": "./src/table.tsx",
     "./sidebar": "./src/sidebar.tsx",
     "./stats-card": "./src/stats-card.tsx",
-    "./physics-carousel": "./src/physics-carousel.ts"
+    "./physics-carousel": "./src/physics-carousel.ts",
+    "./lexical-course-editor": "./src/lexical-course-editor.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
