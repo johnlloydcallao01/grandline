@@ -34,6 +34,29 @@ export type SharedMediaItem = {
   mimeType?: string;
 };
 
+type PayloadMediaDoc = {
+  id?: unknown;
+  _id?: unknown;
+  filename?: unknown;
+  cloudinaryURL?: unknown;
+  thumbnailURL?: unknown;
+  url?: unknown;
+  alt?: unknown;
+  mimeType?: unknown;
+};
+
+export function mapPayloadMediaDocsToSharedMediaItems(docs: unknown): SharedMediaItem[] {
+  const list = Array.isArray(docs) ? (docs as PayloadMediaDoc[]) : [];
+  return list
+    .filter((d) => (typeof d?.mimeType === 'string' ? d.mimeType.startsWith('image/') : true))
+    .map((d) => ({
+      id: String(d.id ?? d._id ?? d.filename ?? Math.random().toString(36)),
+      url: String(d.cloudinaryURL ?? d.thumbnailURL ?? d.url ?? ''),
+      alt: typeof d.alt === 'string' ? d.alt : '',
+      mimeType: typeof d.mimeType === 'string' ? d.mimeType : '',
+    }));
+}
+
 type ImageNodeJSON = {
   type: 'course-image';
   version: 1;

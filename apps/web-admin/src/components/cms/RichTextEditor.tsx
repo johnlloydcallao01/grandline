@@ -1,7 +1,11 @@
 'use client';
 
 import React from 'react';
-import { LexicalCourseEditor, type SharedMediaItem } from '@encreasl/ui/lexical-course-editor';
+import {
+  LexicalCourseEditor,
+  type SharedMediaItem,
+  mapPayloadMediaDocsToSharedMediaItems,
+} from '@encreasl/ui/lexical-course-editor';
 
 interface RichTextEditorProps {
   value?: unknown;
@@ -42,18 +46,7 @@ async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
   }
 
   const json = await res.json();
-  const docs = Array.isArray(json?.docs) ? json.docs : [];
-
-  return docs
-    .filter((d: any) =>
-      typeof d?.mimeType === 'string' ? d.mimeType.startsWith('image/') : true,
-    )
-    .map((d: any) => ({
-      id: String(d.id ?? d._id ?? d.filename ?? Math.random().toString(36)),
-      url: d.cloudinaryURL ?? d.thumbnailURL ?? d.url ?? '',
-      alt: d.alt ?? '',
-      mimeType: d.mimeType ?? '',
-    }));
+  return mapPayloadMediaDocsToSharedMediaItems(json?.docs);
 }
 
 export function RichTextEditor({
