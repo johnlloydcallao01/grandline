@@ -32,14 +32,10 @@ export type IconName =
   | 'posts'
   | 'settings'
   | 'users'
-  | 'analytics'
-  | 'reports'
+
   | 'content'
   | 'media'
-  | 'pages'
-  | 'categories'
-  | 'tags'
-  | 'comments'
+
   | 'orders'
   | 'products'
   | 'inventory'

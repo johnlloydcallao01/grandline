@@ -22,6 +22,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { CourseDescriptionEditor as CourseDescriptionEditor_b1ccd74dcd97f9694af830af8cbf4d62 } from '../../../components/fields/CourseDescriptionEditor'
+import { LessonDescriptionEditor as LessonDescriptionEditor_efa1eec10e5f35d6e7eab54e9c42c8d8 } from '../../../components/fields/LessonDescriptionEditor'
 import { BlockEditorField as BlockEditorField_0207b01302bfcf0405479e5c11c77a0a } from '../../../components/fields/BlockEditorField'
 
 export const importMap = {
@@ -49,5 +50,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/components/fields/CourseDescriptionEditor#CourseDescriptionEditor": CourseDescriptionEditor_b1ccd74dcd97f9694af830af8cbf4d62,
+  "/components/fields/LessonDescriptionEditor#LessonDescriptionEditor": LessonDescriptionEditor_efa1eec10e5f35d6e7eab54e9c42c8d8,
   "/components/fields/BlockEditorField#BlockEditorField": BlockEditorField_0207b01302bfcf0405479e5c11c77a0a
 }

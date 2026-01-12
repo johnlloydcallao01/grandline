@@ -23,7 +23,6 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { PostCategories } from './collections/PostCategories'
 import { CompanyMembers } from './collections/CompanyMembers'
-// LMS Collections
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
 import { CourseEnrollments } from './collections/CourseEnrollments'
@@ -34,6 +33,8 @@ import { CourseMaterials } from './collections/CourseMaterials'
 import { LessonMaterials } from './collections/LessonMaterials'
 import { Announcements } from './collections/Announcements'
 import { RecentSearches } from './collections/RecentSearches'
+import { Questions } from './collections/Questions'
+import { Assessments } from './collections/Assessments'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -72,6 +73,8 @@ export default buildConfig({
     LessonMaterials,
     Announcements,
     RecentSearches,
+    Questions,
+    Assessments,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',

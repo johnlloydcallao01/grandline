@@ -656,6 +656,8 @@ export function LexicalCourseEditor({
                 <div
                   style={{
                     position: 'absolute',
+                    top: 0,
+                    left: 0,
                     color: '#9ca3af',
                     pointerEvents: 'none',
                   }}

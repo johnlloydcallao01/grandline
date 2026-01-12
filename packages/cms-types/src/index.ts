@@ -202,6 +202,43 @@ export type ContentBlock =
   | QuoteBlock
   | CodeBlock;
 
+export type QuizQuestionType = 'single_choice' | 'multiple_choice' | 'true_false';
+
+export interface QuizQuestionOption {
+  id: string;
+  label: string;
+  isCorrect: boolean;
+}
+
+export interface QuizQuestion {
+  id: string;
+  type: QuizQuestionType;
+  prompt: string;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  status: 'draft' | 'active' | 'deprecated';
+  tags?: string[];
+  options: QuizQuestionOption[];
+}
+
+export interface Assessment {
+  id: string;
+  title: string;
+  module: CourseModule | string;
+  order: number;
+  isRequired: boolean;
+  estimatedDuration?: number;
+  passMark: number;
+  maxAttempts: number;
+  items: Array<{
+    question: QuizQuestion | string;
+    order?: number;
+    points?: number;
+  }>;
+  updatedAt: string;
+  createdAt: string;
+}
+
 // ========================================
 // CUSTOM TYPES
 // ========================================

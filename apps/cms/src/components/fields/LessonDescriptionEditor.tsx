@@ -9,14 +9,6 @@ import {
   mapPayloadMediaDocsToSharedMediaItems,
 } from '@encreasl/ui/lexical-course-editor'
 
-type CourseDescriptionEditorProps = {
-  path?: string
-  label?: string
-  admin?: {
-    placeholder?: string
-  }
-}
-
 async function loadCmsMedia(): Promise<SharedMediaItem[]> {
   const res = await fetch('/api/media?limit=60', {
     credentials: 'include',
@@ -30,25 +22,21 @@ async function loadCmsMedia(): Promise<SharedMediaItem[]> {
   return mapPayloadMediaDocsToSharedMediaItems(json?.docs)
 }
 
-export const CourseDescriptionEditor: React.FC<CourseDescriptionEditorProps> = (props) => {
-  const fieldPath = props.path || 'description'
-  const fieldLabel = props.label || 'Description'
-  const placeholder =
-    (props.admin && props.admin.placeholder) || 'Start writing the course or lesson content'
-
-  const { value, setValue } = useField<any>({ path: fieldPath })
+export const LessonDescriptionEditor: React.FC = () => {
+  const { value, setValue } = useField<any>({ path: 'description' })
 
   return (
     <div>
-      <FieldLabel htmlFor={fieldPath} label={fieldLabel} />
+      <FieldLabel htmlFor="description" label="Lesson Content" />
       <LexicalCourseEditor
         value={value}
         onChange={(json) => {
           setValue(json)
         }}
-        placeholder={placeholder}
+        placeholder="Start writing lesson content"
         loadMedia={loadCmsMedia}
       />
     </div>
   )
 }
+

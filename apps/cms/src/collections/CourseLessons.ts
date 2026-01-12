@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const CourseLessons: CollectionConfig = {
   slug: 'course-lessons',
@@ -48,11 +49,13 @@ export const CourseLessons: CollectionConfig = {
       defaultValue: 1,
     },
     {
-      name: 'bodyBlocks',
-      type: 'json',
+      name: 'description',
+      type: 'richText',
+      editor: lexicalEditor(),
       admin: {
+        description: 'Lesson content with rich formatting',
         components: {
-          Field: '/components/fields/BlockEditorField#BlockEditorField',
+          Field: '/components/fields/LessonDescriptionEditor#LessonDescriptionEditor',
         },
       },
     },
@@ -87,8 +90,8 @@ export const CourseLessons: CollectionConfig = {
         if (operation === 'update' && data.module && originalDoc) {
           const originalModule =
             typeof originalDoc.module === 'object' &&
-            originalDoc.module !== null &&
-            'id' in originalDoc.module
+              originalDoc.module !== null &&
+              'id' in originalDoc.module
               ? (originalDoc.module as any).id
               : originalDoc.module
 
