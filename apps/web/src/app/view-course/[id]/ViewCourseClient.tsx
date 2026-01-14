@@ -553,6 +553,43 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const thumbnailImageUrl = getImageUrl(course.thumbnail)
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`
 
+  const curriculum = course.curriculum
+
+  const totalLessons =
+    curriculum?.modules?.reduce((sum, m) => sum + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0) || 0
+
+  const totalQuizzes =
+    curriculum?.modules?.reduce(
+      (sum, m) =>
+        sum +
+        (Array.isArray(m.assessments)
+          ? m.assessments.filter((a) => a.assessmentType === 'quiz').length
+          : 0),
+      0,
+    ) || 0
+
+  const totalExams =
+    (curriculum?.modules?.reduce(
+      (sum, m) =>
+        sum +
+        (Array.isArray(m.assessments)
+          ? m.assessments.filter((a) => a.assessmentType === 'exam').length
+          : 0),
+      0,
+    ) || 0) + (curriculum?.finalExam ? 1 : 0)
+
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (curriculum?.modules && curriculum.modules.length > 0) {
+      setExpandedItem(curriculum.modules[0].id)
+    } else if (curriculum?.finalExam) {
+      setExpandedItem('finalExam')
+    } else {
+      setExpandedItem(null)
+    }
+  }, [curriculum])
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -703,10 +740,245 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
 
               {/* Additional content sections can be added here */}
               <div id="curriculum" className="bg-white rounded-lg shadow-sm p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Curriculum</h2>
-                <p className="text-gray-700">
-                  Course curriculum content will be displayed here.
-                </p>
+                <h2 className="text-xl font-semibold mb-2">Curriculum</h2>
+                {curriculum && curriculum.modules && curriculum.modules.length > 0 ? (
+                  <>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
+                      <span className="inline-flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-[#201a7c]" />
+                        {totalLessons} lesson{totalLessons === 1 ? '' : 's'}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-amber-500" />
+                        {totalQuizzes} quiz{totalQuizzes === 1 ? '' : 'zes'}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-rose-500" />
+                        {totalExams} exam{totalExams === 1 ? '' : 's'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {curriculum.modules.map((module) => {
+                        const lessonCount = Array.isArray(module.lessons) ? module.lessons.length : 0
+                        const quizCount = Array.isArray(module.assessments)
+                          ? module.assessments.filter((a) => a.assessmentType === 'quiz').length
+                          : 0
+                        const examCount = Array.isArray(module.assessments)
+                          ? module.assessments.filter((a) => a.assessmentType === 'exam').length
+                          : 0
+                        const isExpanded = expandedItem === module.id
+                        return (
+                          <div
+                            key={module.id}
+                            className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+                          >
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between gap-4 px-4 py-3"
+                              onClick={() =>
+                                setExpandedItem(isExpanded ? null : module.id)
+                              }
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1">
+                                  <span className="text-[11px] font-semibold text-[#201a7c] tracking-wide uppercase">
+                                    Module {module.order || 1}
+                                  </span>
+                                </span>
+                                <span className="font-medium text-sm md:text-base text-gray-900 truncate">
+                                  {module.title}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-[11px] md:text-xs text-gray-500">
+                                <span>
+                                  {lessonCount} lesson{lessonCount === 1 ? '' : 's'}
+                                </span>
+                                <span>
+                                  {quizCount} quiz{quizCount === 1 ? '' : 'zes'}
+                                </span>
+                                {examCount > 0 && (
+                                  <span>
+                                    {examCount} exam{examCount === 1 ? '' : 's'}
+                                  </span>
+                                )}
+                                <span
+                                  className={
+                                    isExpanded
+                                      ? 'transform rotate-180 transition-transform duration-150'
+                                      : 'transform rotate-0 transition-transform duration-150'
+                                  }
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 9l-7 7-7-7"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
+                                <ul className="space-y-1">
+                                  {Array.isArray(module.lessons) && module.lessons.length > 0 ? (
+                                    module.lessons.map((lesson) => (
+                                      <li
+                                        key={lesson.id}
+                                        className="flex items-center justify-between gap-3 text-sm text-gray-700"
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-xs text-gray-400 w-6">
+                                            {lesson.order || 1}.
+                                          </span>
+                                          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                          <span className="truncate">{lesson.title}</span>
+                                        </div>
+                                        {lesson.estimatedDurationMinutes ? (
+                                          <span className="text-xs text-gray-400">
+                                            {lesson.estimatedDurationMinutes} min
+                                          </span>
+                                        ) : null}
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <li className="text-sm text-gray-400">
+                                      Lessons for this module will appear here.
+                                    </li>
+                                  )}
+                                </ul>
+
+                                {Array.isArray(module.assessments) &&
+                                  module.assessments.length > 0 && (
+                                    <div className="mt-3">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                          Assessments
+                                        </span>
+                                        <span className="h-px flex-1 bg-gray-200" />
+                                      </div>
+                                      <ul className="space-y-1">
+                                        {module.assessments.map((assessment) => (
+                                          <li
+                                            key={assessment.id}
+                                            className="flex items-center justify-between gap-3 text-sm"
+                                          >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                              <span
+                                                className={
+                                                  assessment.assessmentType === 'exam'
+                                                    ? 'inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-600'
+                                                    : 'inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700'
+                                                }
+                                              >
+                                                {assessment.assessmentType === 'exam'
+                                                  ? 'Exam'
+                                                  : 'Quiz'}
+                                              </span>
+                                              <span className="truncate text-gray-800">
+                                                {assessment.title}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                              {assessment.isRequired === false ? (
+                                                <span className="rounded-full border border-gray-200 px-2 py-0.5">
+                                                  Optional
+                                                </span>
+                                              ) : (
+                                                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                                  Required
+                                                </span>
+                                              )}
+                                              {assessment.estimatedDurationMinutes ? (
+                                                <span>
+                                                  {assessment.estimatedDurationMinutes} min
+                                                </span>
+                                              ) : null}
+                                            </div>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+
+                      {curriculum.finalExam && (
+                        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                          <button
+                            type="button"
+                            className="w-full flex items-center justify-between gap-4 px-4 py-3"
+                            onClick={() =>
+                              setExpandedItem(expandedItem === 'finalExam' ? null : 'finalExam')
+                            }
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className="inline-flex items-center gap-2 rounded-full bg-[#201a7c] px-3 py-1">
+                                <span className="text-[11px] font-semibold text-white tracking-wide uppercase">
+                                  Final Exam
+                                </span>
+                              </span>
+                              <span className="font-medium text-sm md:text-base text-gray-900 truncate">
+                                {curriculum.finalExam.title}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[11px] md:text-xs text-gray-500">
+                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                {curriculum.finalExam.isRequired === false ? 'Optional' : 'Required'}
+                              </span>
+                              {curriculum.finalExam.estimatedDurationMinutes ? (
+                                <span>{curriculum.finalExam.estimatedDurationMinutes} min</span>
+                              ) : null}
+                              <span
+                                className={
+                                  expandedItem === 'finalExam'
+                                    ? 'transform rotate-180 transition-transform duration-150'
+                                    : 'transform rotate-0 transition-transform duration-150'
+                                }
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                          </button>
+                          {expandedItem === 'finalExam' && (
+                            <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                              <p>
+                                This final exam evaluates your mastery of the overall course outcomes.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-gray-500">
+                    Curriculum will be displayed here once modules and lessons are added for this
+                    course.
+                  </p>
+                )}
               </div>
 
 

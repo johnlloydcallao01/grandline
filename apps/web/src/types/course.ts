@@ -112,6 +112,35 @@ export interface CourseWithInstructor extends Course {
   discountedPrice?: number | null;
   instructor?: Instructor | null;
   category?: CourseCategory[] | null;
+  curriculum?: {
+    modules: Array<{
+      id: string;
+      title: string;
+      order: number;
+      estimatedDurationMinutes?: number | null;
+      lessons: Array<{
+        id: string;
+        title: string;
+        order: number;
+        estimatedDurationMinutes?: number | null;
+      }>;
+      assessments: Array<{
+        id: string;
+        title: string;
+        assessmentType: 'quiz' | 'exam';
+        order: number;
+        estimatedDurationMinutes?: number | null;
+        isRequired?: boolean;
+      }>;
+    }>;
+    finalExam?: {
+      id: string;
+      title: string;
+      order: number;
+      estimatedDurationMinutes?: number | null;
+      isRequired?: boolean;
+    } | null;
+  } | null;
 }
 
 // API Response interfaces

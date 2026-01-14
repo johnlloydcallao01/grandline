@@ -107,6 +107,7 @@ export interface CourseModule {
   id: string;
   title: string;
   course: Course | string;
+   description?: any;
   order: number;
   releaseAt?: string;
   updatedAt: string;
@@ -226,6 +227,7 @@ export interface Assessment {
   title: string;
   module: CourseModule | string;
   order: number;
+  description?: any;
   isRequired: boolean;
   estimatedDuration?: number;
   passMark: number;
