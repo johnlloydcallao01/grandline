@@ -8,6 +8,7 @@ import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel'
 import type {
   Media,
   CourseWithInstructor,
+  CourseAnnouncement,
   ContentBlock,
   HeadingBlock,
   ParagraphBlock,
@@ -81,7 +82,7 @@ function renderImageBlock(block: ImageBlock, index: number) {
   if (!block.url) return null
 
   const style: React.CSSProperties = {
-    width: block.width || '100%',
+    width: '50%',
     height: block.height || 'auto',
   }
 
@@ -323,7 +324,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
         />
       </figure>
     )
@@ -346,7 +347,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
         />
         {caption && (
           <figcaption className="mt-2 text-sm text-gray-500">
@@ -374,7 +375,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
         />
         {caption && (
           <figcaption className="mt-2 text-sm text-gray-500">
@@ -451,6 +452,7 @@ function CourseDescriptionBlocks({
 export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const [activeSection, setActiveSection] = useState('Overview')
   const [isDesktop, setIsDesktop] = useState(false)
+  const [expandedAnnouncementId, setExpandedAnnouncementId] = useState<string | null>(null)
 
   // Check screen size and adjust active section accordingly
   useEffect(() => {
@@ -539,6 +541,20 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
     }
   };
 
+  const formatAnnouncementDate = (iso: string | null | undefined): string => {
+    if (!iso) return ''
+    try {
+      const date = new Date(iso)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    } catch {
+      return ''
+    }
+  }
+
   // Helper function to format price
   const formatPrice = (price: number | null | undefined): string => {
     if (price === null || price === undefined) return 'Free'
@@ -554,6 +570,9 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const altText = course.thumbnail?.alt || `${course.title} thumbnail`
 
   const curriculum = course.curriculum
+  const announcements: CourseAnnouncement[] = Array.isArray(course.announcements)
+    ? course.announcements
+    : []
 
   const totalLessons =
     curriculum?.modules?.reduce((sum, m) => sum + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0) || 0
@@ -578,7 +597,154 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
       0,
     ) || 0) + (curriculum?.finalExam ? 1 : 0)
 
+  const courseMaterials = Array.isArray(course.courseMaterials)
+    ? course.courseMaterials
+    : []
+
+  const getPrimaryMediaForMaterial = (material: { media: Media[] }) => {
+    if (!material || !Array.isArray(material.media) || material.media.length === 0) {
+      return null
+    }
+    return material.media[0]
+  }
+
+  const getMaterialTypeLabel = (
+    materialSource: 'media' | 'external',
+    primaryMedia: Media | null,
+  ) => {
+    if (materialSource === 'external') {
+      return 'External Link'
+    }
+
+    const mime = primaryMedia?.mimeType || ''
+    const lower = mime.toLowerCase()
+
+    if (!lower) {
+      return 'File'
+    }
+
+    if (lower.includes('pdf')) {
+      return 'PDF'
+    }
+
+    if (lower.includes('presentation') || lower.includes('powerpoint') || lower.includes('ppt')) {
+      return 'Presentation'
+    }
+
+    if (lower.includes('word') || lower.includes('officedocument.wordprocessingml')) {
+      return 'Document'
+    }
+
+    if (lower.includes('excel') || lower.includes('spreadsheet')) {
+      return 'Spreadsheet'
+    }
+
+    if (lower.startsWith('video/')) {
+      return 'Video'
+    }
+
+    if (lower.startsWith('audio/')) {
+      return 'Audio'
+    }
+
+    if (lower.startsWith('image/')) {
+      return 'Image'
+    }
+
+    if (lower.includes('zip')) {
+      return 'Archive'
+    }
+
+    return 'File'
+  }
+
+  const buildCloudinaryDownloadUrl = (
+    url: string | null | undefined,
+    mimeType: string | null | undefined,
+  ): string | null => {
+    if (!url) return null
+
+    const lowerUrl = url.toLowerCase()
+    const lowerMime = (mimeType || '').toLowerCase()
+
+    const isPdf = lowerMime.includes('pdf') || lowerUrl.includes('.pdf')
+    if (!isPdf) {
+      return url
+    }
+
+    if (!lowerUrl.includes('res.cloudinary.com')) {
+      return url
+    }
+
+    const uploadSegment = '/upload/'
+    const uploadIndex = url.indexOf(uploadSegment)
+    if (uploadIndex === -1) {
+      return url
+    }
+
+    const prefix = url.slice(0, uploadIndex + uploadSegment.length)
+    const rest = url.slice(uploadIndex + uploadSegment.length)
+
+    if (rest.startsWith('fl_attachment') || rest.startsWith('fl_attachment,')) {
+      return url
+    }
+
+    return `${prefix}fl_attachment/${rest}`
+  }
+
+  const getMaterialHref = (
+    materialSource: 'media' | 'external',
+    primaryMedia: Media | null,
+    externalUrl: string | null | undefined,
+  ) => {
+    if (materialSource === 'external' && externalUrl) {
+      return externalUrl
+    }
+
+    if (!primaryMedia) {
+      return null
+    }
+
+    const rawUrl = primaryMedia.cloudinaryURL || primaryMedia.url || null
+    return buildCloudinaryDownloadUrl(rawUrl, primaryMedia.mimeType || null)
+  }
+
+  const getMaterialViewHref = (
+    materialSource: 'media' | 'external',
+    primaryMedia: Media | null,
+    externalUrl: string | null | undefined,
+  ) => {
+    if (materialSource === 'external' && externalUrl) {
+      return externalUrl
+    }
+
+    if (!primaryMedia) {
+      return null
+    }
+
+    const rawUrl = primaryMedia.cloudinaryURL || primaryMedia.url || null
+    if (!rawUrl) {
+      return null
+    }
+
+    const mime = primaryMedia.mimeType || ''
+    const lowerMime = mime.toLowerCase()
+
+    const isPresentation =
+      lowerMime.includes('presentation') ||
+      lowerMime.includes('powerpoint') ||
+      lowerMime.includes('ppt')
+
+    if (isPresentation) {
+      const encoded = encodeURIComponent(rawUrl)
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encoded}`
+    }
+
+    return rawUrl
+  }
+
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
+  const [expandedMaterials, setExpandedMaterials] = useState<string[]>([])
 
   useEffect(() => {
     if (curriculum?.modules && curriculum.modules.length > 0) {
@@ -728,7 +894,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               </div>
 
               {/* Description Section */}
-              <div id="description" className="bg-white rounded-lg shadow-sm p-8 mb-8">
+              <div id="description" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">
                   Course Description
                 </h2>
@@ -739,20 +905,20 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               </div>
 
               {/* Additional content sections can be added here */}
-              <div id="curriculum" className="bg-white rounded-lg shadow-sm p-8 mb-8">
+              <div id="curriculum" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
                 <h2 className="text-xl font-semibold mb-2">Curriculum</h2>
                 {curriculum && curriculum.modules && curriculum.modules.length > 0 ? (
                   <>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                      <span className="inline-flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600 mb-6">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1">
                         <span className="w-2 h-2 rounded-full bg-[#201a7c]" />
                         {totalLessons} lesson{totalLessons === 1 ? '' : 's'}
                       </span>
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1">
                         <span className="w-2 h-2 rounded-full bg-amber-500" />
                         {totalQuizzes} quiz{totalQuizzes === 1 ? '' : 'zes'}
                       </span>
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1">
                         <span className="w-2 h-2 rounded-full bg-rose-500" />
                         {totalExams} exam{totalExams === 1 ? '' : 's'}
                       </span>
@@ -775,13 +941,13 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                           >
                             <button
                               type="button"
-                              className="w-full flex items-center justify-between gap-4 px-4 py-3"
+                              className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3"
                               onClick={() =>
                                 setExpandedItem(isExpanded ? null : module.id)
                               }
                             >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1">
+                              <div className="flex flex-col items-start gap-1 min-w-0">
+                                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-2.5 py-1">
                                   <span className="text-[11px] font-semibold text-[#201a7c] tracking-wide uppercase">
                                     Module {module.order || 1}
                                   </span>
@@ -790,18 +956,20 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                                   {module.title}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-3 text-[11px] md:text-xs text-gray-500">
-                                <span>
-                                  {lessonCount} lesson{lessonCount === 1 ? '' : 's'}
-                                </span>
-                                <span>
-                                  {quizCount} quiz{quizCount === 1 ? '' : 'zes'}
-                                </span>
-                                {examCount > 0 && (
+                              <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 w-full sm:w-auto">
+                                <div className="flex items-center gap-3">
                                   <span>
-                                    {examCount} exam{examCount === 1 ? '' : 's'}
+                                    {lessonCount} lesson{lessonCount === 1 ? '' : 's'}
                                   </span>
-                                )}
+                                  <span>
+                                    {quizCount} quiz{quizCount === 1 ? '' : 'zes'}
+                                  </span>
+                                  {examCount > 0 && (
+                                    <span>
+                                      {examCount} exam{examCount === 1 ? '' : 's'}
+                                    </span>
+                                  )}
+                                </div>
                                 <span
                                   className={
                                     isExpanded
@@ -826,8 +994,8 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                               </div>
                             </button>
                             {isExpanded && (
-                              <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
-                                <ul className="space-y-1">
+                              <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 py-3">
+                                <ul className="space-y-2">
                                   {Array.isArray(module.lessons) && module.lessons.length > 0 ? (
                                     module.lessons.map((lesson) => (
                                       <li
@@ -857,18 +1025,18 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
 
                                 {Array.isArray(module.assessments) &&
                                   module.assessments.length > 0 && (
-                                    <div className="mt-3">
-                                      <div className="flex items-center gap-2 mb-1">
+                                    <div className="mt-4">
+                                      <div className="flex items-center gap-2 mb-2">
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                                           Assessments
                                         </span>
                                         <span className="h-px flex-1 bg-gray-200" />
                                       </div>
-                                      <ul className="space-y-1">
+                                      <ul className="space-y-2">
                                         {module.assessments.map((assessment) => (
                                           <li
                                             key={assessment.id}
-                                            className="flex items-center justify-between gap-3 text-sm"
+                                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-sm"
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
                                               <span
@@ -917,12 +1085,12 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                         <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
                           <button
                             type="button"
-                            className="w-full flex items-center justify-between gap-4 px-4 py-3"
+                            className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3"
                             onClick={() =>
                               setExpandedItem(expandedItem === 'finalExam' ? null : 'finalExam')
                             }
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex flex-col items-start gap-1 min-w-0">
                               <span className="inline-flex items-center gap-2 rounded-full bg-[#201a7c] px-3 py-1">
                                 <span className="text-[11px] font-semibold text-white tracking-wide uppercase">
                                   Final Exam
@@ -932,13 +1100,15 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                                 {curriculum.finalExam.title}
                               </span>
                             </div>
-                            <div className="flex items-center gap-3 text-[11px] md:text-xs text-gray-500">
-                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
-                                {curriculum.finalExam.isRequired === false ? 'Optional' : 'Required'}
-                              </span>
-                              {curriculum.finalExam.estimatedDurationMinutes ? (
-                                <span>{curriculum.finalExam.estimatedDurationMinutes} min</span>
-                              ) : null}
+                            <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 w-full sm:w-auto">
+                              <div className="flex items-center gap-3">
+                                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                  {curriculum.finalExam.isRequired === false ? 'Optional' : 'Required'}
+                                </span>
+                                {curriculum.finalExam.estimatedDurationMinutes ? (
+                                  <span>{curriculum.finalExam.estimatedDurationMinutes} min</span>
+                                ) : null}
+                              </div>
                               <span
                                 className={
                                   expandedItem === 'finalExam'
@@ -963,7 +1133,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                             </div>
                           </button>
                           {expandedItem === 'finalExam' && (
-                            <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                            <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700">
                               <p>
                                 This final exam evaluates your mastery of the overall course outcomes.
                               </p>
@@ -982,18 +1152,385 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               </div>
 
 
-              <div id="materials" className="bg-white rounded-lg shadow-sm p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Materials</h2>
-                <p className="text-gray-700">
-                  Course materials and resources will be displayed here.
-                </p>
+              <div id="materials" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-2">Materials</h2>
+                {courseMaterials.length === 0 ? (
+                  <p className="text-gray-500">
+                    Course materials and resources will be displayed here once they are attached
+                    to this course.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-500 mb-4">
+                      All official materials attached to this course are listed below.
+                    </p>
+                    <div className="space-y-3">
+                      {courseMaterials.map((item) => {
+                        const hasMultipleFiles = Array.isArray(item.media) && item.media.length > 1
+                        const primaryMedia = getPrimaryMediaForMaterial(item)
+                        const baseTypeLabel = getMaterialTypeLabel(item.materialSource, primaryMedia)
+                        const typeLabel = hasMultipleFiles ? 'Multiple files' : baseTypeLabel
+                        const viewHref = hasMultipleFiles
+                          ? null
+                          : getMaterialViewHref(
+                            item.materialSource,
+                            primaryMedia,
+                            item.externalUrl,
+                          )
+                        const downloadHref = hasMultipleFiles
+                          ? null
+                          : getMaterialHref(
+                            item.materialSource,
+                            primaryMedia,
+                            item.externalUrl,
+                          )
+                        const isExpandedMaterial = expandedMaterials.includes(item.id)
+                        const singleFileDownloadName =
+                          item.materialSource === 'media' && primaryMedia?.filename
+                            ? primaryMedia.filename
+                            : ''
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex flex-col gap-2 border border-gray-200 rounded-lg px-4 py-3 hover:border-[#201a7c] hover:bg-indigo-50/40 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-start gap-3 min-w-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 flex-shrink-0">
+                                  <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={1.5}
+                                      d="M7 21h10a2 2 0 002-2v-9.586a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center flex-wrap gap-2 mb-1">
+                                    <p className="font-medium text-gray-900 truncate">
+                                      {item.title}
+                                    </p>
+                                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700">
+                                      {typeLabel}
+                                    </span>
+                                    <span
+                                      className={
+                                        item.isRequired
+                                          ? 'inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700'
+                                          : 'inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-500 border border-gray-200'
+                                      }
+                                    >
+                                      {item.isRequired ? 'Required' : 'Optional'}
+                                    </span>
+                                    {Array.isArray(item.media) && item.media.length > 1 && (
+                                      <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                                        {item.media.length} files
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.description && (
+                                    <p className="text-sm text-gray-600 line-clamp-2">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0">
+                                {hasMultipleFiles ? (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setExpandedMaterials((prev) =>
+                                        prev.includes(item.id)
+                                          ? prev.filter((x) => x !== item.id)
+                                          : [...prev, item.id],
+                                      )
+                                    }
+                                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+                                  >
+                                    <span>{isExpandedMaterial ? 'Hide files' : 'View files'}</span>
+                                    <svg
+                                      className={
+                                        isExpandedMaterial
+                                          ? 'w-4 h-4 transform rotate-180 transition-transform duration-150'
+                                          : 'w-4 h-4 transform rotate-0 transition-transform duration-150'
+                                      }
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  </button>
+                                ) : viewHref || downloadHref ? (
+                                  <div className="flex items-center gap-2">
+                                    {viewHref && (
+                                      <a
+                                        href={viewHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+                                      >
+                                        <span>{item.materialSource === 'external' ? 'Open' : 'View'}</span>
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M10 6h8m0 0v8m0-8L9 15"
+                                          />
+                                        </svg>
+                                      </a>
+                                    )}
+                                    {downloadHref && item.materialSource === 'media' && (
+                                      <a
+                                        href={downloadHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        download={singleFileDownloadName || undefined}
+                                        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-[#201a7c] hover:text-white hover:border-[#201a7c] transition-colors"
+                                      >
+                                        <span>Download</span>
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                          />
+                                        </svg>
+                                      </a>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-400 cursor-default"
+                                  >
+                                    <span>Not available</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            {hasMultipleFiles && isExpandedMaterial && (
+                              <div className="mt-3 border-t border-gray-200 pt-3">
+                                <ul className="space-y-1">
+                                  {item.media.map((file, index) => {
+                                    const fileTypeLabel = getMaterialTypeLabel('media', file)
+                                    const fileViewHref = getMaterialViewHref('media', file, null)
+                                    const fileDownloadHref = getMaterialHref('media', file, null)
+                                    const fileName =
+                                      file.filename && file.filename.length > 0
+                                        ? file.filename
+                                        : `File ${index + 1}`
+
+                                    return (
+                                      <li
+                                        key={file.id ?? `${item.id}-${index}`}
+                                        className="flex items-center justify-between gap-3 text-sm"
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                          <span className="truncate text-gray-800">
+                                            {fileName}
+                                          </span>
+                                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700">
+                                            {fileTypeLabel}
+                                          </span>
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                          {fileViewHref || fileDownloadHref ? (
+                                            <div className="flex items-center gap-2">
+                                              {fileViewHref && (
+                                                <a
+                                                  href={fileViewHref}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+                                                >
+                                                  <span>View</span>
+                                                  <svg
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                  >
+                                                    <path
+                                                      strokeLinecap="round"
+                                                      strokeLinejoin="round"
+                                                      strokeWidth={2}
+                                                      d="M10 6h8m0 0v8m0-8L9 15"
+                                                    />
+                                                  </svg>
+                                                </a>
+                                              )}
+                                              {fileDownloadHref && (
+                                                <a
+                                                  href={fileDownloadHref}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  download={fileName}
+                                                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-[#201a7c] hover:text-white hover:border-[#201a7c] transition-colors"
+                                                >
+                                                  <span>Download</span>
+                                                  <svg
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                  >
+                                                    <path
+                                                      strokeLinecap="round"
+                                                      strokeLinejoin="round"
+                                                      strokeWidth={2}
+                                                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                    />
+                                                  </svg>
+                                                </a>
+                                              )}
+                                            </div>
+                                          ) : (
+                                            <span className="text-xs text-gray-400">
+                                              Not available
+                                            </span>
+                                          )}
+                                        </div>
+                                      </li>
+                                    )
+                                  })}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+              <div id="instructors" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4">Instructors</h2>
+                {course.instructor && course.instructor.user ? (
+                  <div className="flex items-start gap-4">
+                    <AuthorAvatar user={course.instructor.user} />
+                    <div>
+                      <p className="text-gray-900 font-semibold">
+                        {course.instructor.user.firstName} {course.instructor.user.lastName}
+                      </p>
+                      {course.instructor.specialization && (
+                        <p className="text-sm text-[#201a7c] font-medium">
+                          {course.instructor.specialization}
+                        </p>
+                      )}
+                      {course.instructor.user.email && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {course.instructor.user.email}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">
+                    Instructor information will be displayed here once available.
+                  </p>
+                )}
               </div>
 
-              <div id="announcements" className="bg-white rounded-lg shadow-sm p-8 mb-8">
+              <div id="announcements" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Announcements</h2>
-                <p className="text-gray-700">
-                  Course announcements and updates will be displayed here.
-                </p>
+                {announcements.length === 0 ? (
+                  <p className="text-gray-600">No announcements have been posted for this course yet.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {announcements.map((announcement) => {
+                      const dateLabel =
+                        formatAnnouncementDate(announcement.visibleFrom || announcement.createdAt)
+                      const isExpanded = expandedAnnouncementId === announcement.id
+                      return (
+                        <button
+                          key={announcement.id}
+                          type="button"
+                          onClick={() =>
+                            setExpandedAnnouncementId(
+                              isExpanded ? null : announcement.id,
+                            )
+                          }
+                          className="w-full text-left border border-gray-200 rounded-lg px-4 py-3 hover:border-[#201a7c] hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                {announcement.pinned && (
+                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-yellow-800">
+                                    Pinned
+                                  </span>
+                                )}
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {announcement.title}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-gray-500">
+                                {announcement.authorName && (
+                                  <span className="mr-2">
+                                    Posted by {announcement.authorName}
+                                  </span>
+                                )}
+                                {dateLabel && (
+                                  <span>
+                                    • {dateLabel}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <span className="ml-3 flex-shrink-0 text-gray-400">
+                              <svg
+                                className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'
+                                  }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </span>
+                          </div>
+                          {isExpanded && announcement.body && (
+                            <div className="mt-3 text-sm text-gray-700">
+                              {renderRichDescription(announcement.body)}
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 

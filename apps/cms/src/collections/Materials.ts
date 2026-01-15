@@ -4,7 +4,7 @@ export const Materials: CollectionConfig = {
   slug: 'materials',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'type', 'materialSource', 'createdAt'],
+    defaultColumns: ['title', 'materialSource', 'createdAt'],
     group: 'Learning Management',
     description: 'Reusable learning materials and assets for courses and lessons',
   },
@@ -36,22 +36,6 @@ export const Materials: CollectionConfig = {
       required: true,
     },
     {
-      name: 'type',
-      type: 'select',
-      options: [
-        { label: 'Video', value: 'video' },
-        { label: 'PDF', value: 'pdf' },
-        { label: 'Image', value: 'image' },
-        { label: 'Audio', value: 'audio' },
-        { label: 'Link', value: 'link' },
-        { label: 'SCORM', value: 'scorm' },
-        { label: 'ZIP Archive', value: 'zip' },
-        { label: 'Other', value: 'other' },
-      ],
-      defaultValue: 'other',
-      required: true,
-    },
-    {
       name: 'description',
       type: 'textarea',
     },
@@ -69,6 +53,7 @@ export const Materials: CollectionConfig = {
       name: 'media',
       type: 'relationship',
       relationTo: 'media',
+      hasMany: true,
       admin: {
         condition: (_, siblingData) => siblingData.materialSource === 'media',
       },
@@ -86,4 +71,3 @@ export const Materials: CollectionConfig = {
     },
   ],
 }
-

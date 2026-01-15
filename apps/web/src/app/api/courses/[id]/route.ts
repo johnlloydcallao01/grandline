@@ -37,6 +37,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     const courseId = courseData?.id
 
     let curriculum: any = null
+    let courseMaterials: any[] = []
+    let announcements: any[] = []
 
     if (courseId) {
       const paramsModules = new URLSearchParams()
@@ -200,11 +202,166 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         modules: modulesForCurriculum,
         finalExam,
       }
+
+      const paramsCourseMaterials = new URLSearchParams()
+      paramsCourseMaterials.set('where[course][equals]', String(courseId))
+      paramsCourseMaterials.set('sort', 'order')
+      paramsCourseMaterials.set('limit', '200')
+      paramsCourseMaterials.set('depth', '2')
+
+      const courseMaterialsRes = await fetch(
+        `${apiUrl}/course-materials?${paramsCourseMaterials.toString()}`,
+        {
+          headers,
+          cache: 'no-store',
+        },
+      )
+
+      const courseMaterialsJson = courseMaterialsRes.ok ? await courseMaterialsRes.json() : { docs: [] }
+      const attachments: any[] = Array.isArray(courseMaterialsJson?.docs) ? courseMaterialsJson.docs : []
+
+      const mappedAttachments = attachments.map((attachment: any) => {
+        const materialValue = attachment.material
+        const material =
+          materialValue && typeof materialValue === 'object' && 'id' in materialValue
+            ? materialValue
+            : null
+
+        const materialId =
+          material && material.id != null
+            ? String(material.id)
+            : materialValue != null
+              ? String(materialValue)
+              : ''
+
+        const title =
+          material && typeof material.title === 'string'
+            ? material.title
+            : ''
+
+        const description =
+          material && typeof material.description === 'string'
+            ? material.description
+            : null
+
+        const materialSourceRaw =
+          material && typeof material.materialSource === 'string'
+            ? material.materialSource
+            : 'media'
+
+        const materialSource = materialSourceRaw === 'external' ? 'external' as const : 'media' as const
+
+        const externalUrl =
+          material && typeof material.externalUrl === 'string'
+            ? material.externalUrl
+            : null
+
+        let media: any[] = []
+        if (material && Array.isArray(material.media)) {
+          media = material.media
+            .map((m: any) => (m && typeof m === 'object' ? m : null))
+            .filter((m: any) => m !== null)
+        }
+
+        const orderValue = attachment.order
+        const order =
+          typeof orderValue === 'number'
+            ? orderValue
+            : parseInt(String(orderValue ?? '0'), 10) || 0
+
+        const isRequiredValue = attachment.isRequired
+        const isRequired =
+          typeof isRequiredValue === 'boolean'
+            ? isRequiredValue
+            : false
+
+        return {
+          id: String(attachment.id),
+          order,
+          isRequired,
+          materialId,
+          title: String(title),
+          description,
+          materialSource,
+          externalUrl,
+          media,
+        }
+      })
+
+      courseMaterials = mappedAttachments.sort((a, b) => a.order - b.order)
+
+      const paramsAnnouncements = new URLSearchParams()
+      paramsAnnouncements.set('where[course][equals]', String(courseId))
+      paramsAnnouncements.set('sort', '-visibleFrom')
+      paramsAnnouncements.set('limit', '100')
+      paramsAnnouncements.set('depth', '1')
+
+      const announcementsRes = await fetch(
+        `${apiUrl}/announcements?${paramsAnnouncements.toString()}`,
+        {
+          headers,
+          cache: 'no-store',
+        },
+      )
+
+      const announcementsJson = announcementsRes.ok ? await announcementsRes.json() : { docs: [] }
+      const announcementDocs: any[] = Array.isArray(announcementsJson?.docs) ? announcementsJson.docs : []
+
+      announcements = announcementDocs.map((a: any) => {
+        const createdBy = a.createdBy
+        let authorName: string | null = null
+
+        if (createdBy && typeof createdBy === 'object') {
+          const first =
+            typeof createdBy.firstName === 'string'
+              ? createdBy.firstName
+              : typeof createdBy.first_name === 'string'
+                ? createdBy.first_name
+                : ''
+          const last =
+            typeof createdBy.lastName === 'string'
+              ? createdBy.lastName
+              : typeof createdBy.last_name === 'string'
+                ? createdBy.last_name
+                : ''
+          const fullName = `${first} ${last}`.trim()
+          const email =
+            typeof createdBy.email === 'string' ? createdBy.email : null
+
+          authorName = fullName || email
+        }
+
+        return {
+          id: String(a.id),
+          title: String(a.title || ''),
+          body: a.bodyBlocks ?? null,
+          pinned: Boolean(a.pinned),
+          visibleFrom: a.visibleFrom || null,
+          visibleUntil: a.visibleUntil || null,
+          createdAt: a.createdAt || null,
+          authorName: authorName || null,
+        }
+      })
+
+      announcements.sort((a, b) => {
+        const aPinned = a.pinned ? 1 : 0
+        const bPinned = b.pinned ? 1 : 0
+        if (aPinned !== bPinned) {
+          return bPinned - aPinned
+        }
+        const aDate = a.visibleFrom || a.createdAt || ''
+        const bDate = b.visibleFrom || b.createdAt || ''
+        const aTime = aDate ? new Date(aDate).getTime() : 0
+        const bTime = bDate ? new Date(bDate).getTime() : 0
+        return bTime - aTime
+      })
     }
 
     const responseBody = {
       ...courseData,
       curriculum,
+      courseMaterials,
+      announcements,
     }
 
     return NextResponse.json(responseBody, {

@@ -82,6 +82,29 @@ export interface CodeBlock {
   code: string;
 }
 
+export interface CourseAnnouncement {
+  id: string;
+  title: string;
+  body?: any;
+  pinned?: boolean;
+  visibleFrom?: string | null;
+  visibleUntil?: string | null;
+  createdAt?: string | null;
+  authorName?: string | null;
+}
+
+export interface CourseMaterialAttachment {
+  id: string;
+  order: number;
+  isRequired: boolean;
+  materialId: string;
+  title: string;
+  description?: string | null;
+  materialSource: 'media' | 'external';
+  externalUrl?: string | null;
+  media: Media[];
+}
+
 export type ContentBlock =
   | HeadingBlock
   | ParagraphBlock
@@ -102,6 +125,7 @@ export interface Course {
   thumbnail?: Media | null;
   bannerImage?: Media | null;
   updatedAt?: string | null;
+  courseMaterials?: CourseMaterialAttachment[] | null;
 }
 
 // Extended Course interface with instructor information
@@ -112,6 +136,7 @@ export interface CourseWithInstructor extends Course {
   discountedPrice?: number | null;
   instructor?: Instructor | null;
   category?: CourseCategory[] | null;
+   announcements?: CourseAnnouncement[] | null;
   curriculum?: {
     modules: Array<{
       id: string;

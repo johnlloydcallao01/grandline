@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import { FieldLabel } from '@payloadcms/ui/fields/FieldLabel'
 import {
@@ -13,6 +13,7 @@ type CourseDescriptionEditorProps = {
   path?: string
   label?: string
   admin?: {
+    label?: string
     placeholder?: string
   }
 }
@@ -31,12 +32,28 @@ async function loadCmsMedia(): Promise<SharedMediaItem[]> {
 }
 
 export const CourseDescriptionEditor: React.FC<CourseDescriptionEditorProps> = (props) => {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const fieldPath = props.path || 'description'
-  const fieldLabel = props.label || 'Description'
+  const fieldLabel =
+    props.label || props.admin?.label || (fieldPath === 'bodyBlocks' ? 'Content' : 'Description')
   const placeholder =
     (props.admin && props.admin.placeholder) || 'Start writing the course or lesson content'
 
   const { value, setValue } = useField<any>({ path: fieldPath })
+
+  if (!mounted) {
+    return (
+      <div>
+        <FieldLabel htmlFor={fieldPath} label={fieldLabel} />
+        <div className="mt-2 h-32 rounded-md border border-gray-200 bg-gray-50" />
+      </div>
+    )
+  }
 
   return (
     <div>

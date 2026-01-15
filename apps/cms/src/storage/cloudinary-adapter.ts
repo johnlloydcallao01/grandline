@@ -83,7 +83,6 @@ export const cloudinaryAdapter = ({
         data.filesize = result.bytes
         data.width = result.width
         data.height = result.height
-        data.mimeType = `${result.resource_type}/${result.format}`
 
         console.log('=== CLOUDINARY UPLOAD SUCCESS ===')
       } catch (error) {

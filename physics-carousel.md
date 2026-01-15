@@ -1,3 +1,18 @@
+1. USER FRUSTRATION:
+"It is extremely annoying behavior when we are sliding the carousel and stop the sliding, that stop of the mouse is considered as a click. Therefore, it will click the carousel item and will of course go to the carousel category link like bullshit!!!!!!!!!!! Can you make sure the click will only work if we clearly intentionally click a category carousel item?"
+
+
+2. PROPOSED SOLUTION:
+Changes Made:
+Added hasDragged flag: Tracks whether the user actually dragged the carousel
+Added dragThreshold: Set to 5 pixels - if movement exceeds this, it's considered a drag, not a click
+Updated handleCategoryClick(): Now prevents navigation if hasDragged is true
+Track drag distance in handleMove(): Measures total movement from start position
+Reset after drag ends: hasDragged resets to false after 100ms delay
+
+
+3. EXAMPLE:
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -20,6 +35,7 @@ interface LocationBasedProductCategoriesCarouselProps {
  * LocationBasedProductCategoriesCarousel with smooth momentum scrolling
  * Implements physics-based scrolling with smooth momentum
  * 100% CSR - fetches data client-side
+ * Fixed: Prevents accidental clicks when dragging/sliding
  */
 
 export const LocationBasedProductCategoriesCarousel = ({
@@ -35,6 +51,7 @@ export const LocationBasedProductCategoriesCarousel = ({
   const [categories, setCategories] = useState<MerchantCategoryDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false); // NEW: Track if user actually dragged
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const [translateX, setTranslateX] = useState(0);
@@ -42,16 +59,18 @@ export const LocationBasedProductCategoriesCarousel = ({
   const [lastTime, setLastTime] = useState(0);
   const [velocityX, setVelocityX] = useState(0);
   const [resolvedCustomerId, setResolvedCustomerId] = useState<string | null>(customerId || null);
+  
+  const dragThreshold = 5; // NEW: Minimum pixels to consider it a drag vs click
 
-  const activeCategory = selectedCategorySlug 
-    ? (categories.find(cat => cat.slug === selectedCategorySlug)?.name 
-        || categories.find(cat => cat.name.toLowerCase().replace(/\s+/g, '-') === selectedCategorySlug)?.name 
+  const activeCategory = selectedCategorySlug
+    ? (categories.find(cat => cat.slug === selectedCategorySlug)?.name
+        || categories.find(cat => cat.name.toLowerCase().replace(/\s+/g, '-') === selectedCategorySlug)?.name
         || '')
     : '';
-  
+ 
   useEffect(() => {
     if (selectedCategorySlug && categories.length > 0 && onCategoryIdResolved) {
-      const category = categories.find(cat => cat.slug === selectedCategorySlug) 
+      const category = categories.find(cat => cat.slug === selectedCategorySlug)
         || categories.find(cat => cat.name.toLowerCase().replace(/\s+/g, '-') === selectedCategorySlug);
       onCategoryIdResolved(category ? String(category.id) : null);
     } else if (!selectedCategorySlug && onCategoryIdResolved) {
@@ -59,7 +78,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     }
   }, [selectedCategorySlug, categories, onCategoryIdResolved]);
   const [error, setError] = useState<string | null>(null);
-  
+ 
   const carouselRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const boundsCalculatedRef = useRef(false);
@@ -125,11 +144,10 @@ export const LocationBasedProductCategoriesCarousel = ({
     if (resolvedCustomerId) {
       LocationBasedMerchantService.clearCache(resolvedCustomerId);
       fetchMerchantCategories(resolvedCustomerId);
-    } else {
     }
   });
 
-  // Calculate proper maxTranslate to ensure last item is fully visible - identical to ProductCategoryCarousel
+  // Calculate proper maxTranslate to ensure last item is fully visible
   const getMaxTranslate = useCallback(() => {
     if (!carouselRef.current) return 0;
     const container = carouselRef.current.parentElement;
@@ -144,7 +162,7 @@ export const LocationBasedProductCategoriesCarousel = ({
 
   const [maxTranslate, setMaxTranslate] = useState(0);
 
-  // Smooth scrolling with momentum physics - identical to ProductCategoryCarousel
+  // Smooth scrolling with momentum physics
   const animateToPosition = useCallback((targetX: number, duration = 300) => {
     const startX = translateX;
     const distance = targetX - startX;
@@ -172,22 +190,26 @@ export const LocationBasedProductCategoriesCarousel = ({
   }, [translateX]);
 
   const scrollLeft = () => {
-    // Equivalent to a gentle swipe gesture (about 1.5 items worth)
-    const swipeDistance = (itemWidth + gapWidth) * 1.5; // Gentle swipe distance
+    const swipeDistance = (itemWidth + gapWidth) * 1.5;
     const newPosition = Math.max(0, translateX - swipeDistance);
-    animateToPosition(newPosition, 400); // Smooth animation like normal swipe
+    animateToPosition(newPosition, 400);
   };
 
   const scrollRight = () => {
-    // Equivalent to a gentle swipe gesture (about 1.5 items worth)
-    const swipeDistance = (itemWidth + gapWidth) * 1.5; // Gentle swipe distance
+    const swipeDistance = (itemWidth + gapWidth) * 1.5;
     const newPosition = Math.min(-maxTranslate, translateX + swipeDistance);
-    animateToPosition(newPosition, 400); // Smooth animation like normal swipe
+    animateToPosition(newPosition, 400);
   };
 
+  // FIXED: Only allow click if user didn't drag
   const handleCategoryClick = (categoryName: string) => {
+    // Prevent click if user was dragging
+    if (hasDragged) {
+      return;
+    }
+    
     const category = categories.find(cat => cat.name === categoryName);
-    if (!isDragging && category) {
+    if (category) {
       const categorySlug = category.slug || category.name.toLowerCase().replace(/\s+/g, '-');
       if (onCategorySelect) {
         onCategorySelect(String(category.id), categorySlug, categoryName);
@@ -198,15 +220,16 @@ export const LocationBasedProductCategoriesCarousel = ({
     }
   };
 
-  // Professional touch/drag handling with momentum - identical to ProductCategoryCarousel
+  // Professional touch/drag handling with momentum
   const handleStart = (clientX: number) => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
     setIsDragging(true);
+    setHasDragged(false); // NEW: Reset drag flag
     setStartX(clientX);
     setCurrentX(clientX);
-    setStartTranslateX(translateX); // Remember where we started dragging from
+    setStartTranslateX(translateX);
     setLastTime(Date.now());
     setVelocityX(0);
   };
@@ -217,6 +240,12 @@ export const LocationBasedProductCategoriesCarousel = ({
     const currentTime = Date.now();
     const deltaTime = currentTime - lastTime;
     const deltaX = clientX - currentX;
+
+    // NEW: Check if user has dragged beyond threshold
+    const totalDragDistance = Math.abs(clientX - startX);
+    if (totalDragDistance > dragThreshold) {
+      setHasDragged(true);
+    }
 
     // Calculate velocity for momentum
     if (deltaTime > 0) {
@@ -242,7 +271,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     }
 
     setTranslateX(boundedTranslateX);
-  }, [isDragging, startX, startTranslateX, currentX, lastTime, maxTranslate]);
+  }, [isDragging, startX, startTranslateX, currentX, lastTime, maxTranslate, dragThreshold]);
 
   const handleEnd = useCallback(() => {
     if (!isDragging) return;
@@ -250,7 +279,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     setIsDragging(false);
 
     // Apply momentum with physics
-    const momentum = velocityX * 200; // Momentum factor
+    const momentum = velocityX * 200;
     let finalPosition = translateX + momentum;
 
     // Apply bounds
@@ -258,9 +287,14 @@ export const LocationBasedProductCategoriesCarousel = ({
 
     // Smooth animation to final position
     animateToPosition(finalPosition, 400);
+
+    // NEW: Reset hasDragged after a short delay to prevent accidental clicks
+    setTimeout(() => {
+      setHasDragged(false);
+    }, 100);
   }, [isDragging, velocityX, translateX, maxTranslate, animateToPosition]);
 
-  // Mouse events - identical to ProductCategoryCarousel
+  // Mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     handleStart(e.clientX);
@@ -274,7 +308,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     handleEnd();
   };
 
-  // Touch events - optimized for mobile - identical to ProductCategoryCarousel
+  // Touch events - optimized for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     handleStart(e.touches[0].clientX);
   };
@@ -290,17 +324,17 @@ export const LocationBasedProductCategoriesCarousel = ({
     handleEnd();
   };
 
-  // Calculate bounds when categories change or component mounts - identical to ProductCategoryCarousel
+  // Calculate bounds when categories change or component mounts
   useEffect(() => {
     const calculateBounds = () => {
       const newMaxTranslate = getMaxTranslate();
       setMaxTranslate(newMaxTranslate);
-      
+     
       // Reset position if current position is out of bounds
       if (translateX < -newMaxTranslate) {
         setTranslateX(-newMaxTranslate);
       }
-      
+     
       boundsCalculatedRef.current = true;
     };
 
@@ -311,7 +345,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     }
   }, [categories.length, getMaxTranslate, translateX]);
 
-  // Handle window resize - identical to ProductCategoryCarousel
+  // Handle window resize
   useEffect(() => {
     const onResize = () => {
       setViewportWidth(window.innerWidth);
@@ -325,7 +359,7 @@ export const LocationBasedProductCategoriesCarousel = ({
     return () => window.removeEventListener('resize', onResize);
   }, [getMaxTranslate, translateX, animateToPosition]);
 
-  // Global mouse events for drag continuation - identical to ProductCategoryCarousel
+  // Global mouse events for drag continuation
   useEffect(() => {
     if (isDragging) {
       const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -348,7 +382,7 @@ export const LocationBasedProductCategoriesCarousel = ({
 
   return (
     <div className="relative">
-      {/* Loading state - show skeleton while fetching data - identical to ProductCategoryCarousel */}
+      {/* Loading state - show skeleton while fetching data */}
       {loading ? (
         <div className="overflow-hidden px-2.5">
           <div className="flex py-2.5" style={{ gap: '48px' }}>
@@ -376,7 +410,7 @@ export const LocationBasedProductCategoriesCarousel = ({
         </div>
       ) : (
         <>
-          {/* Left Arrow - Hidden on mobile/tablet, visible on desktop - identical to ProductCategoryCarousel */}
+          {/* Left Arrow - Hidden on mobile/tablet, visible on desktop */}
           {translateX < 0 && (
             <button
               onClick={scrollLeft}
@@ -389,7 +423,7 @@ export const LocationBasedProductCategoriesCarousel = ({
             </button>
           )}
 
-          {/* Right Arrow - Hidden on mobile/tablet, visible on desktop - identical to ProductCategoryCarousel */}
+          {/* Right Arrow - Hidden on mobile/tablet, visible on desktop */}
           {translateX > -maxTranslate && (
             <button
               onClick={scrollRight}
@@ -402,7 +436,7 @@ export const LocationBasedProductCategoriesCarousel = ({
             </button>
           )}
 
-          {/* Carousel Container - identical to ProductCategoryCarousel */}
+          {/* Carousel Container */}
           <div
             className="overflow-hidden px-2.5"
             onMouseDown={handleMouseDown}
@@ -412,7 +446,7 @@ export const LocationBasedProductCategoriesCarousel = ({
             onMouseMove={isDragging ? handleMouseMove : undefined}
             onMouseUp={isDragging ? handleMouseUp : undefined}
             style={{
-            touchAction: 'pan-y',
+              touchAction: 'pan-y',
               cursor: isDragging ? 'grabbing' : 'grab'
             }}
           >
@@ -424,16 +458,16 @@ export const LocationBasedProductCategoriesCarousel = ({
                 gap: `${gapWidth}px`,
                 WebkitUserSelect: 'none',
                 userSelect: 'none',
-                transition: 'none', // Using requestAnimationFrame for smooth animations
+                transition: 'none',
                 willChange: 'transform',
-                pointerEvents: 'none' // Prevent individual items from blocking events
+                pointerEvents: 'none'
               }}
             >
               {categories.map((category) => (
                 <div
                   key={category.id}
                   className="flex-shrink-0"
-                  style={{ pointerEvents: 'auto' }} // Re-enable pointer events for clicking
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <ProductCategoryCircle
                     category={{

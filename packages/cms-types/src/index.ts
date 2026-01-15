@@ -125,17 +125,14 @@ export interface CourseLesson {
   createdAt: string;
 }
 
-export type MaterialType = 'video' | 'pdf' | 'image' | 'audio' | 'link' | 'scorm' | 'zip' | 'other';
-
 export type MaterialSource = 'media' | 'external';
 
 export interface Material {
   id: string;
   title: string;
-  type: MaterialType;
   description?: string;
   materialSource: MaterialSource;
-  media?: Media | string | null;
+  media?: Media | string | (Media | string)[] | null;
   externalUrl?: string;
   metadata?: Record<string, unknown>;
   updatedAt: string;

@@ -113,7 +113,7 @@ function CategoriesCarousel({
     const isUltraWide = viewportWidth >= 1500;
     const gapWidth = isUltraWide ? 56 : 48;
 
-    const { translateX, isDragging, maxTranslate, scrollBy, onStart, onMove, onEnd } = usePhysicsCarousel({
+    const { translateX, isDragging, hasDragged, maxTranslate, scrollBy, onStart, onMove, onEnd } = usePhysicsCarousel({
         containerRef,
         trackRef,
         momentumMultiplier: 200,
@@ -204,7 +204,10 @@ function CategoriesCarousel({
                             <CategoryItem
                                 name={cat.name}
                                 active={activeCategoryId === cat.id}
-                                onClick={() => onCategoryChange(cat.id)}
+                                onClick={() => {
+                                    if (hasDragged) return;
+                                    onCategoryChange(cat.id);
+                                }}
                             />
                         </div>
                     ))}

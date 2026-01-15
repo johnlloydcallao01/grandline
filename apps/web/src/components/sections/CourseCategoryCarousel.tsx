@@ -29,7 +29,7 @@ export function CourseCategoryCarousel({
   const itemWidth = isUltraWide ? 80 : 64;
   const gapWidth = isUltraWide ? 56 : 48;
 
-  const { translateX, isDragging, maxTranslate, scrollBy, onStart, onMove, onEnd } = usePhysicsCarousel({
+  const { translateX, isDragging, hasDragged, maxTranslate, scrollBy, onStart, onMove, onEnd } = usePhysicsCarousel({
     containerRef,
     trackRef,
     momentumMultiplier: 200,
@@ -49,14 +49,13 @@ export function CourseCategoryCarousel({
   };
 
   const handleCategoryClick = (id: number) => {
-    if (!isDragging) {
-      if (id === activeCategoryId) {
-        setActiveCategoryId(0);
-        onCategoryChange?.(undefined);
-      } else {
-        setActiveCategoryId(id);
-        onCategoryChange?.(id);
-      }
+    if (hasDragged) return;
+    if (id === activeCategoryId) {
+      setActiveCategoryId(0);
+      onCategoryChange?.(undefined);
+    } else {
+      setActiveCategoryId(id);
+      onCategoryChange?.(id);
     }
   };
 

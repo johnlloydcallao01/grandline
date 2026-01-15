@@ -9,6 +9,7 @@ export type UsePhysicsCarouselOptions = {
   rubberBandFactor?: number;
   defaultAnimationDurationMs?: number;
   measureDeps?: DependencyList;
+  dragThreshold?: number;
 };
 
 export function usePhysicsCarousel({
@@ -18,10 +19,12 @@ export function usePhysicsCarousel({
   rubberBandFactor = 0.3,
   defaultAnimationDurationMs = 400,
   measureDeps = [],
+  dragThreshold = 5,
 }: UsePhysicsCarouselOptions) {
   const [translateX, setTranslateXState] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [maxTranslate, setMaxTranslate] = useState(0);
+  const [hasDragged, setHasDragged] = useState(false);
 
   const translateXRef = useRef(0);
   const animationRef = useRef<number | null>(null);
@@ -91,6 +94,7 @@ export function usePhysicsCarousel({
     (clientX: number) => {
       cancelAnimation();
       setIsDragging(true);
+      setHasDragged(false);
       startXRef.current = clientX;
       currentXRef.current = clientX;
       startTranslateXRef.current = translateXRef.current;
@@ -115,6 +119,11 @@ export function usePhysicsCarousel({
       const dragDistance = clientX - startXRef.current;
       const next = startTranslateXRef.current + dragDistance;
 
+      const totalDragDistance = Math.abs(clientX - startXRef.current);
+      if (totalDragDistance > dragThreshold) {
+        setHasDragged(true);
+      }
+
       let bounded = next;
       if (next > 0) {
         bounded = next * rubberBandFactor;
@@ -125,7 +134,7 @@ export function usePhysicsCarousel({
 
       setTranslateX(bounded);
     },
-    [isDragging, maxTranslate, rubberBandFactor, setTranslateX]
+    [isDragging, maxTranslate, rubberBandFactor, setTranslateX, dragThreshold]
   );
 
   const onEnd = useCallback(() => {
@@ -135,6 +144,9 @@ export function usePhysicsCarousel({
     const momentum = velocityXRef.current * momentumMultiplier;
     const target = clamp(translateXRef.current + momentum);
     animateTo(target, defaultAnimationDurationMs);
+    window.setTimeout(() => {
+      setHasDragged(false);
+    }, 100);
   }, [animateTo, clamp, defaultAnimationDurationMs, isDragging, momentumMultiplier]);
 
   const scrollBy = useCallback(
@@ -193,6 +205,7 @@ export function usePhysicsCarousel({
   return {
     translateX,
     isDragging,
+    hasDragged,
     maxTranslate,
     measure,
     animateTo,
@@ -202,4 +215,3 @@ export function usePhysicsCarousel({
     onEnd,
   };
 }
-

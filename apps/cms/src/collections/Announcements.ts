@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 export const Announcements: CollectionConfig = {
   slug: 'announcements',
   admin: {
@@ -43,10 +43,13 @@ export const Announcements: CollectionConfig = {
     },
     {
       name: 'bodyBlocks',
-      type: 'json',
+      type: 'richText',
+      label: 'Content',
+      editor: lexicalEditor(),
       admin: {
+        description: 'Announcement content with rich formatting',
         components: {
-          Field: '/components/fields/BlockEditorField#BlockEditorField',
+          Field: '/components/fields/CourseDescriptionEditor#CourseDescriptionEditor',
         },
       },
     },
