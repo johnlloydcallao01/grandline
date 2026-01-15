@@ -25,6 +25,8 @@ export interface CourseCardProps {
     renderLink?: (props: { href: string; className: string; children: React.ReactNode }) => React.ReactNode;
     className?: string;
     wishlistStorageKey?: string;
+    onToggleWishlist?: (courseId: string | number, next: boolean) => void;
+    isWishlisted?: boolean;
 }
 
 export function CourseCard({
@@ -34,6 +36,8 @@ export function CourseCard({
     renderLink,
     className = "",
     wishlistStorageKey,
+    onToggleWishlist,
+    isWishlisted,
 }: CourseCardProps): React.ReactNode {
     const media = course.thumbnail;
     const imageUrl = media?.cloudinaryURL || media?.url || media?.thumbnailURL || null;
@@ -43,13 +47,17 @@ export function CourseCard({
     const [wishlisted, setWishlisted] = React.useState(false);
 
     React.useEffect(() => {
+        if (typeof isWishlisted === "boolean") {
+            setWishlisted(isWishlisted);
+            return;
+        }
         try {
             const v = globalThis?.localStorage?.getItem(storageKey);
             setWishlisted(Boolean(v));
         } catch {
             setWishlisted(false);
         }
-    }, [storageKey]);
+    }, [storageKey, isWishlisted]);
 
     const baseLinkClassName =
         variant === "carousel" ? "w-64 flex-shrink-0 block" : "group cursor-pointer block";
@@ -104,14 +112,18 @@ export function CourseCard({
                         e.stopPropagation();
                         const next = !wishlisted;
                         setWishlisted(next);
-                        try {
-                            if (next) {
-                                globalThis?.localStorage?.setItem(storageKey, "1");
-                            } else {
-                                globalThis?.localStorage?.removeItem(storageKey);
+                        if (onToggleWishlist) {
+                            onToggleWishlist(course.id, next);
+                        } else {
+                            try {
+                                if (next) {
+                                    globalThis?.localStorage?.setItem(storageKey, "1");
+                                } else {
+                                    globalThis?.localStorage?.removeItem(storageKey);
+                                }
+                            } catch {
+                                void 0;
                             }
-                        } catch {
-                            void 0;
                         }
                     }}
                     className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"

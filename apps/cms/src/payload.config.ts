@@ -35,6 +35,7 @@ import { Announcements } from './collections/Announcements'
 import { RecentSearches } from './collections/RecentSearches'
 import { Questions } from './collections/Questions'
 import { Assessments } from './collections/Assessments'
+import { Wishlists } from './collections/Wishlists'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -72,6 +73,7 @@ export default buildConfig({
     CourseMaterials,
     LessonMaterials,
     Announcements,
+    Wishlists,
     RecentSearches,
     Questions,
     Assessments,

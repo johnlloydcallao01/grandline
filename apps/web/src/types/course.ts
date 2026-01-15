@@ -124,6 +124,8 @@ export interface Course {
   isFeatured?: boolean;
   thumbnail?: Media | null;
   bannerImage?: Media | null;
+  estimatedDuration?: number | null;
+  estimatedDurationUnit?: 'minutes' | 'hours' | 'days' | 'weeks' | null;
   updatedAt?: string | null;
   courseMaterials?: CourseMaterialAttachment[] | null;
 }

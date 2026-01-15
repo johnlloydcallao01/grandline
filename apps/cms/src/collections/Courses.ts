@@ -188,7 +188,21 @@ export const Courses: CollectionConfig = {
       name: 'estimatedDuration',
       type: 'number',
       admin: {
-        description: 'Estimated course duration in hours',
+        description: 'Estimated course duration value',
+      },
+    },
+    {
+      name: 'estimatedDurationUnit',
+      type: 'select',
+      options: [
+        { label: 'Minute(s)', value: 'minutes' },
+        { label: 'Hour(s)', value: 'hours' },
+        { label: 'Day(s)', value: 'days' },
+        { label: 'Week(s)', value: 'weeks' },
+      ],
+      defaultValue: 'hours',
+      admin: {
+        description: 'Unit for estimated course duration',
       },
     },
 

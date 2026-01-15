@@ -7,7 +7,6 @@ import { CoursesCarousel } from '@/components/sections/CoursesCarousel';
 import { useCourses } from '@/hooks/useCourses';
 import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CardSkeleton } from '@/components/ui/Skeleton';
 
 export function HomeCoursesSection({ categories }: { categories: CourseCategory[] }) {
   const searchParams = useSearchParams();
@@ -148,26 +147,21 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
       )}
       <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
         {(displayCourses.length > visibleCount || hasMore) && (
-          isLoadingMore ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (<CardSkeleton key={i} />))}
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <button
-                onClick={() => {
-                  const nextVisible = visibleCount + 4;
-                  setVisibleCount(nextVisible);
-                  if (displayCourses.length < nextVisible && hasMore && !isLoadingMore) {
-                    loadMore();
-                  }
-                }}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
-              >
-                Load More
-              </button>
-            </div>
-          )
+          <div className="flex justify-center">
+            <button
+              onClick={() => {
+                const nextVisible = visibleCount + 4;
+                setVisibleCount(nextVisible);
+                if (displayCourses.length < nextVisible && hasMore && !isLoadingMore) {
+                  loadMore();
+                }
+              }}
+              disabled={isLoadingMore}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isLoadingMore ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -191,26 +185,21 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
           />
           <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
             {(featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
-              isLoadingMoreFeatured ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {Array.from({ length: 4 }).map((_, i) => (<CardSkeleton key={i} />))}
-                </div>
-              ) : (
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => {
-                      const nextVisible = visibleFeaturedCount + 4;
-                      setVisibleFeaturedCount(nextVisible);
-                      if (featuredDisplay.length < nextVisible && hasMoreFeatured && !isLoadingMoreFeatured) {
-                        loadMoreFeatured();
-                      }
-                    }}
-                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    const nextVisible = visibleFeaturedCount + 4;
+                    setVisibleFeaturedCount(nextVisible);
+                    if (featuredDisplay.length < nextVisible && hasMoreFeatured && !isLoadingMoreFeatured) {
+                      loadMoreFeatured();
+                    }
+                  }}
+                  disabled={isLoadingMoreFeatured}
+                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoadingMoreFeatured ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
             )}
           </div>
         </>

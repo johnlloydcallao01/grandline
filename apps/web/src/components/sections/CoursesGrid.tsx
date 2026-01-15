@@ -1,7 +1,9 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { Course } from '@/types/course';
 import { CourseCard } from '@encreasl/ui/course-card';
+import { toggleWishlist, isCourseWishlisted } from '@/lib/wishlist';
 
 interface CoursesGridProps {
   courses: Course[];
@@ -28,11 +30,57 @@ function CourseCardSkeleton() {
   );
 }
 
-// Main Courses Grid Component
 export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink }: CoursesGridProps) {
-  // Remove loading logic since ISR provides data immediately
-  // Keep for backward compatibility during migration
-  if (isLoading) {
+  const [wishlistMap, setWishlistMap] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadWishlist() {
+      try {
+        const published = courses.filter((c) => c.status === 'published');
+        if (published.length === 0) {
+          if (active) {
+            setWishlistMap({});
+          }
+          return;
+        }
+
+        const entries = await Promise.all(
+          published.map(async (course) => {
+            const id = String(course.id);
+            const wishlisted = await isCourseWishlisted(course.id);
+            return [id, wishlisted] as const;
+          })
+        );
+
+        if (!active) return;
+
+        const nextMap: Record<string, boolean> = {};
+        for (const [id, wishlisted] of entries) {
+          nextMap[id] = wishlisted;
+        }
+        setWishlistMap(nextMap);
+      } catch {
+        if (active) {
+          setWishlistMap({});
+        }
+      }
+    }
+
+    if (courses && courses.length > 0) {
+      setWishlistMap({});
+      loadWishlist();
+    } else {
+      setWishlistMap({});
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [courses]);
+
+  if (isLoading && (!courses || courses.length === 0)) {
     return (
       <div className={paddingClass}>
         <div className="mb-[10px] flex items-center justify-between">
@@ -83,18 +131,38 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {courses.filter((c) => c.status === 'published').map((course) => (
-          <CourseCard
-            key={course.id}
-            course={course}
-            variant="grid"
-            renderLink={({ href, className, children }) => (
-              <Link href={href as any} scroll className={className}>
-                {children}
-              </Link>
-            )}
-          />
-        ))}
+        {courses
+          .filter((c) => c.status === 'published')
+          .map((course) => {
+            const idKey = String(course.id);
+            const isWishlisted = wishlistMap ? wishlistMap[idKey] ?? false : false;
+
+            return (
+              <CourseCard
+                key={course.id}
+                course={course}
+                variant="grid"
+                isWishlisted={isWishlisted}
+                onToggleWishlist={async (courseId) => {
+                  try {
+                    const next = await toggleWishlist(courseId);
+                    const key = String(courseId);
+                    setWishlistMap((prev) => ({
+                      ...prev,
+                      [key]: next,
+                    }));
+                  } catch {
+                    void 0;
+                  }
+                }}
+                renderLink={({ href, className, children }) => (
+                  <Link href={href as any} scroll className={className}>
+                    {children}
+                  </Link>
+                )}
+              />
+            );
+          })}
       </div>
     </div>
   );

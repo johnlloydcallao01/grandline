@@ -49,6 +49,7 @@ import * as migration_20260106_054302 from './20260106_054302';
 import * as migration_20260106_103058 from './20260106_103058';
 import * as migration_20260106_104305 from './20260106_104305';
 import * as migration_20260112_120820 from './20260112_120820';
+import * as migration_20260115_090000_add_courses_estimated_duration_unit from './20260115_090000_add_courses_estimated_duration_unit';
 
 export const migrations = [
   {
@@ -305,5 +306,10 @@ export const migrations = [
     up: migration_20260112_120820.up,
     down: migration_20260112_120820.down,
     name: '20260112_120820'
+  },
+  {
+    up: migration_20260115_090000_add_courses_estimated_duration_unit.up,
+    down: migration_20260115_090000_add_courses_estimated_duration_unit.down,
+    name: '20260115_090000_add_courses_estimated_duration_unit',
   },
 ];

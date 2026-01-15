@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AuthorAvatar } from './AuthorAvatar'
 import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel'
+import { isCourseWishlisted, toggleWishlist } from '@/lib/wishlist'
 import type {
   Media,
   CourseWithInstructor,
@@ -20,6 +21,143 @@ import type {
 
 interface ViewCourseClientProps {
   course: CourseWithInstructor;
+}
+
+function CourseOverviewCard({
+  course,
+  thumbnailImageUrl,
+  altText,
+  totalLessons,
+  totalModules,
+  totalQuizzes,
+  formatPrice,
+  formatLastUpdated,
+}: {
+  course: CourseWithInstructor;
+  thumbnailImageUrl: string;
+  altText: string;
+  totalLessons: number;
+  totalModules: number;
+  totalQuizzes: number;
+  formatPrice: (price: number | null | undefined) => string;
+  formatLastUpdated: (updatedAt: string | null | undefined) => string;
+}) {
+  const [isWishlisted, setIsWishlisted] = useState<boolean | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadWishlist() {
+      try {
+        const wishlisted = await isCourseWishlisted(course.id);
+        if (active) {
+          setIsWishlisted(wishlisted);
+        }
+      } catch {
+        if (active) {
+          setIsWishlisted(false);
+        }
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      setIsWishlisted(null);
+      loadWishlist();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [course.id]);
+
+  const showHeart = typeof window !== 'undefined';
+  const wishlisted = !!isWishlisted;
+
+  return (
+    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+      {/* @ts-ignore */}
+      <div className="relative">
+        <Image
+          src={thumbnailImageUrl}
+          alt={altText}
+          width={320}
+          height={180}
+          className="w-full h-45 object-cover"
+        />
+        {showHeart && (
+          <button
+            type="button"
+            className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"
+            aria-label="Toggle wishlist"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isToggling || isWishlisted === null) return;
+              const next = !wishlisted;
+              setIsWishlisted(next);
+              setIsToggling(true);
+              try {
+                const serverNext = await toggleWishlist(course.id);
+                setIsWishlisted(serverNext);
+              } catch {
+                setIsWishlisted(!next);
+              } finally {
+                setIsToggling(false);
+              }
+            }}
+          >
+            <i
+              className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'
+                } ${isWishlisted === null ? 'opacity-50' : ''}`}
+            ></i>
+          </button>
+        )}
+      </div>
+
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <span className="text-red-500 text-sm line-through">
+              {formatPrice(course.price)}
+            </span>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatPrice(course.discountedPrice)}
+            </div>
+          </div>
+          <span
+            className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded"
+            style={{ backgroundColor: '#f5f5f5', color: '#333' }}
+          >
+            {course.category?.map((c) => c.name).join(', ') || 'General'}
+          </span>
+        </div>
+
+        <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
+          ▶ Start Learning
+        </button>
+
+        <div className="text-sm text-gray-600 space-y-1">
+          <div>Modules: {totalModules}</div>
+          <div>Lessons: {totalLessons}</div>
+          <div>Quizzes: {totalQuizzes}</div>
+          <div>Language: English</div>
+          <div>With certificate: Yes</div>
+          {typeof course.estimatedDuration === 'number' && course.estimatedDuration > 0 && course.estimatedDurationUnit ? (
+            <div>
+              Estimated Duration:{' '}
+              {course.estimatedDuration}{' '}
+              {course.estimatedDurationUnit === 'minutes' && (course.estimatedDuration === 1 ? 'minute' : 'minutes')}
+              {course.estimatedDurationUnit === 'hours' && (course.estimatedDuration === 1 ? 'hour' : 'hours')}
+              {course.estimatedDurationUnit === 'days' && (course.estimatedDuration === 1 ? 'day' : 'days')}
+              {course.estimatedDurationUnit === 'weeks' && (course.estimatedDuration === 1 ? 'week' : 'weeks')}
+            </div>
+          ) : null}
+          <div>Last Updated: {formatLastUpdated(course.updatedAt)}</div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Helper function to get image URL - same pattern as CoursesGrid
@@ -347,7 +485,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
         />
         {caption && (
           <figcaption className="mt-2 text-sm text-gray-500">
@@ -375,7 +513,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
         />
         {caption && (
           <figcaption className="mt-2 text-sm text-gray-500">
@@ -573,6 +711,8 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
   const announcements: CourseAnnouncement[] = Array.isArray(course.announcements)
     ? course.announcements
     : []
+
+  const totalModules = Array.isArray(curriculum?.modules) ? curriculum!.modules.length : 0
 
   const totalLessons =
     curriculum?.modules?.reduce((sum, m) => sum + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0) || 0
@@ -848,47 +988,19 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                 />
               </div>
 
-              {/* Overview Section - Hidden on desktop */}
               <div id="overview" className="lg:hidden bg-white rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
-                {/* Mobile/Tablet Course Card - Only visible on smaller screens */}
                 {thumbnailImageUrl && (
                   <div className="lg:hidden">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-                      {/* @ts-ignore */}
-                      <Image
-                        src={thumbnailImageUrl}
-                        alt={altText}
-                        width={320}
-                        height={180}
-                        className="w-full h-45 object-cover"
-                      />
-
-                      {/* Price and Action */}
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
-                            <div className="text-2xl font-bold text-gray-900">{formatPrice(course.discountedPrice)}</div>
-                          </div>
-                          <span className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#f5f5f5', color: '#333' }}>
-                            {course.category?.map(c => c.name).join(', ') || 'General'}
-                          </span>
-                        </div>
-
-                        <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
-                          ▶ Start Learning
-                        </button>
-
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <div>100% positive reviews</div>
-                          <div>0 student</div>
-                          <div>1 lesson</div>
-                          <div>Language: English</div>
-                          <div>0 quiz</div>
-                          <div>Assessments: Yes</div>
-                        </div>
-                      </div>
-                    </div>
+                    <CourseOverviewCard
+                      course={course}
+                      thumbnailImageUrl={thumbnailImageUrl}
+                      altText={altText}
+                      totalLessons={totalLessons}
+                      totalModules={totalModules}
+                      totalQuizzes={totalQuizzes}
+                      formatPrice={formatPrice}
+                      formatLastUpdated={formatLastUpdated}
+                    />
                   </div>
                 )}
               </div>
@@ -1534,50 +1646,20 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               </div>
             </div>
 
-            {/* Sticky Sidebar - Right Column - Hidden on mobile/tablet */}
             <div className="hidden lg:block lg:flex-[0_0_320px] lg:max-w-[320px]">
               <div className="sticky top-20 -mt-55">
                 {thumbnailImageUrl && (
-                  <div className="bg-white rounded-lg overflow-hidden shadow-lg mb-4">
-                    {/* @ts-ignore */}
-                    <Image
-                      src={thumbnailImageUrl}
-                      alt={altText}
-                      width={320}
-                      height={180}
-                      className="w-full h-45 object-cover"
+                  <div className="mb-4">
+                    <CourseOverviewCard
+                      course={course}
+                      thumbnailImageUrl={thumbnailImageUrl}
+                      altText={altText}
+                      totalLessons={totalLessons}
+                      totalModules={totalModules}
+                      totalQuizzes={totalQuizzes}
+                      formatPrice={formatPrice}
+                      formatLastUpdated={formatLastUpdated}
                     />
-
-                    {/* Price and Action */}
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <span className="text-red-500 text-sm line-through">{formatPrice(course.price)}</span>
-                          <div className="text-2xl font-bold text-gray-900">
-                            {formatPrice(course.discountedPrice)}
-                          </div>
-                        </div>
-                        <span
-                          className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded"
-                          style={{ backgroundColor: '#f5f5f5', color: '#333' }}
-                        >
-                          {course.category?.map(c => c.name).join(', ') || 'General'}
-                        </span>
-                      </div>
-
-                      <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
-                        ▶ Start Learning
-                      </button>
-
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <div>100% positive reviews</div>
-                        <div>0 student</div>
-                        <div>1 lesson</div>
-                        <div>Language: English</div>
-                        <div>0 quiz</div>
-                        <div>Assessments: Yes</div>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
