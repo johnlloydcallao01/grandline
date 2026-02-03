@@ -1,10 +1,10 @@
 "use client"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef } from "react"
 import Link from "next/link"
 import type { Course } from "@/types/course"
 import { CourseCard } from "@encreasl/ui/course-card"
 import { usePhysicsCarousel } from "@encreasl/ui/physics-carousel"
-import { toggleWishlist, isCourseWishlisted } from "@/lib/wishlist"
+import { useWishlist } from "@/contexts/WishlistContext"
 
 function CourseCardSkeleton() {
   return (
@@ -22,7 +22,7 @@ function CourseCardSkeleton() {
 export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', viewAllLink }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string; viewAllLink?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const [wishlistMap, setWishlistMap] = useState<Record<string, boolean>>({})
+  const { wishlistMap, toggleWishlist } = useWishlist()
 
   const { translateX, isDragging, onStart, onMove, onEnd } = usePhysicsCarousel({
     containerRef,
@@ -32,53 +32,6 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
     defaultAnimationDurationMs: 400,
     measureDeps: [courses.length, isLoading, skeletonCount]
   })
-
-  useEffect(() => {
-    let active = true
-
-    async function loadWishlist() {
-      try {
-        const published = courses.filter((c) => c.status === "published")
-        if (published.length === 0) {
-          if (active) {
-            setWishlistMap({})
-          }
-          return
-        }
-
-        const entries = await Promise.all(
-          published.map(async (course) => {
-            const id = String(course.id)
-            const wishlisted = await isCourseWishlisted(course.id)
-            return [id, wishlisted] as const
-          })
-        )
-
-        if (!active) return
-
-        const nextMap: Record<string, boolean> = {}
-        for (const [id, wishlisted] of entries) {
-          nextMap[id] = wishlisted
-        }
-        setWishlistMap(nextMap)
-      } catch {
-        if (active) {
-          setWishlistMap({})
-        }
-      }
-    }
-
-    if (courses && courses.length > 0) {
-      setWishlistMap({})
-      loadWishlist()
-    } else {
-      setWishlistMap({})
-    }
-
-    return () => {
-      active = false
-    }
-  }, [courses])
 
   const onMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -179,12 +132,7 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
                     isWishlisted={isWishlisted}
                     onToggleWishlist={async (courseId) => {
                       try {
-                        const next = await toggleWishlist(courseId)
-                        const key = String(courseId)
-                        setWishlistMap((prev) => ({
-                          ...prev,
-                          [key]: next,
-                        }))
+                        await toggleWishlist(courseId)
                       } catch {
                         void 0
                       }

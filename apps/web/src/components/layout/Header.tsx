@@ -10,6 +10,7 @@ import { SearchProvider } from '@/contexts/SearchContext';
 import { useSearch } from '@/hooks/useSearch';
 import { DesktopSearchDropdown } from '@/components/search/DesktopSearchDropdown';
 import { MobileSearchOverlay } from '@/components/search/MobileSearchOverlay';
+import { NotificationsPanel } from '@/components/notifications/NotificationsPanel';
 
 /**
  * Header component with navigation, search, and user controls
@@ -34,12 +35,122 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const isNotificationsPage = pathname === '/notifications'
   const { user, displayName } = useUser()
   const { logout, isLoggingOut } = useLogout()
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
+
+  const mockNotifications = [
+    {
+      id: 1,
+      type: 'course_completion',
+      title: 'Course Completed!',
+      message: 'Congratulations! You have successfully completed "STCW Basic Safety Training"',
+      timestamp: '2 hours ago',
+      read: false,
+      icon: 'fa-graduation-cap',
+      iconColor: 'text-green-600',
+      iconBg: 'bg-green-100',
+      actionText: 'View Certificate',
+      actionPath: '/certificates',
+    },
+    {
+      id: 2,
+      type: 'assignment_due',
+      title: 'Assignment Due Soon',
+      message: 'Your assignment for "Advanced Bridge Management" is due in 2 days',
+      timestamp: '4 hours ago',
+      read: false,
+      icon: 'fa-clock',
+      iconColor: 'text-orange-600',
+      iconBg: 'bg-orange-100',
+      actionText: 'Complete Assignment',
+      actionPath: '/assignments',
+    },
+    {
+      id: 3,
+      type: 'new_course',
+      title: 'New Course Available',
+      message: 'Check out the new "Maritime Cybersecurity" course now available',
+      timestamp: '1 day ago',
+      read: true,
+      icon: 'fa-plus-circle',
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-100',
+      actionText: 'View Course',
+      actionPath: '/courses',
+    },
+    {
+      id: 4,
+      type: 'certificate_issued',
+      title: 'Certificate Issued',
+      message: 'Your IMO certificate for "Maritime Security Awareness" has been issued',
+      timestamp: '2 days ago',
+      read: true,
+      icon: 'fa-certificate',
+      iconColor: 'text-purple-600',
+      iconBg: 'bg-purple-100',
+      actionText: 'Download Certificate',
+      actionPath: '/certificates',
+    },
+    {
+      id: 5,
+      type: 'system_update',
+      title: 'System Update',
+      message: 'New features have been added to improve your learning experience',
+      timestamp: '3 days ago',
+      read: true,
+      icon: 'fa-sync-alt',
+      iconColor: 'text-indigo-600',
+      iconBg: 'bg-indigo-100',
+      actionText: 'Learn More',
+      actionPath: '/updates',
+    },
+    {
+      id: 6,
+      type: 'reminder',
+      title: 'Study Reminder',
+      message: 'Don\'t forget to continue your "Engine Room Operations" course',
+      timestamp: '5 days ago',
+      read: true,
+      icon: 'fa-bell',
+      iconColor: 'text-yellow-600',
+      iconBg: 'bg-yellow-100',
+      actionText: 'Continue Learning',
+      actionPath: '/portal',
+    },
+    {
+      id: 7,
+      type: 'achievement',
+      title: 'Achievement Unlocked!',
+      message: 'You\'ve earned the "Safety Expert" badge for completing 5 safety courses',
+      timestamp: '1 week ago',
+      read: true,
+      icon: 'fa-trophy',
+      iconColor: 'text-yellow-600',
+      iconBg: 'bg-yellow-100',
+      actionText: 'View Achievements',
+      actionPath: '/achievements',
+    },
+    {
+      id: 8,
+      type: 'payment',
+      title: 'Payment Successful',
+      message: 'Your payment for "Cargo Handling & Stowage" course has been processed',
+      timestamp: '1 week ago',
+      read: true,
+      icon: 'fa-credit-card',
+      iconColor: 'text-green-600',
+      iconBg: 'bg-green-100',
+      actionText: 'View Receipt',
+      actionPath: '/billing',
+    },
+  ]
 
   const handleMyPortalClick = () => {
     router.push('/portal')
@@ -64,6 +175,9 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsProfileDropdownOpen(false)
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false)
+      }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setDropdownOpen(false)
         if (query.trim().length === 0) setMode('suggestions')
@@ -72,6 +186,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsProfileDropdownOpen(false)
+        setIsNotificationsOpen(false)
         setDropdownOpen(false)
         if (query.trim().length === 0) setMode('suggestions')
       }
@@ -179,7 +294,10 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
           <div className="w-[80%] flex items-center justify-start">
             {React.createElement(Image, { src: '/calsiter-inc-logo.png', alt: 'Calsiter Inc Logo', width: 210, height: 56, className: 'h-14 w-auto', priority: true })}
           </div>
-          <button onClick={() => router.push('/notifications')} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => router.push('/notifications')}
+            className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+          >
             <i className="fas fa-bell text-gray-600 text-lg"></i>
           </button>
           <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
@@ -241,9 +359,63 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button onClick={() => router.push('/notifications')} className="w-10 h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-            <i className="fas fa-bell text-gray-600 text-lg"></i>
-          </button>
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => {
+                if (isNotificationsPage) return
+                setIsNotificationsOpen((prev) => !prev)
+              }}
+              className={`w-10 h-10 rounded-md flex items-center justify-center transition-colors ${
+                isNotificationsPage ? 'bg-[#e6e5f7]' : 'bg-white hover:bg-gray-50'
+              }`}
+              aria-label="Notifications"
+              aria-expanded={!isNotificationsPage && isNotificationsOpen}
+            >
+              <i
+                className={`fas fa-bell text-lg ${
+                  isNotificationsPage ? 'text-[#201a7c]' : 'text-gray-600'
+                }`}
+              ></i>
+            </button>
+            {!isNotificationsPage && isNotificationsOpen && (
+              <div className="absolute right-0 mt-3 w-[420px] max-w-[95vw] max-h-[80vh] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="max-h-[80vh] overflow-y-auto">
+                  <NotificationsPanel
+                    items={mockNotifications}
+                    filters={[
+                      { id: 'all', label: 'All', count: mockNotifications.length },
+                      {
+                        id: 'unread',
+                        label: 'Unread',
+                        count: mockNotifications.filter((n) => !n.read).length,
+                      },
+                      {
+                        id: 'learning',
+                        label: 'Learning',
+                        count: mockNotifications.filter((n) =>
+                          ['course_completion', 'assignment_due', 'new_course', 'reminder', 'achievement'].includes(
+                            n.type,
+                          ),
+                        ).length,
+                      },
+                      {
+                        id: 'account',
+                        label: 'Account',
+                        count: mockNotifications.filter((n) =>
+                          ['payment', 'certificate_issued'].includes(n.type),
+                        ).length,
+                      },
+                      {
+                        id: 'system_update',
+                        label: 'System Updates',
+                        count: mockNotifications.filter((n) => n.type === 'system_update').length,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           {!pathname.startsWith('/portal') && (
             <button onClick={handleMyPortalClick} className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:scale-105 hover:shadow-lg" style={{ backgroundColor: '#fff', color: '#201a7c', boxShadow: '0 0 10px rgba(0, 0, 0, 0.15)' }} onMouseEnter={(e: any) => { e.currentTarget.style.boxShadow = '0 0 15px rgba(32, 26, 124, 0.25)' }} onMouseLeave={(e: any) => { e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.15)' }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>

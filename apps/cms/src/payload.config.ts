@@ -36,6 +36,11 @@ import { RecentSearches } from './collections/RecentSearches'
 import { Questions } from './collections/Questions'
 import { Assessments } from './collections/Assessments'
 import { Wishlists } from './collections/Wishlists'
+import { RecentlyViewedCourses } from './collections/RecentlyViewedCourses'
+import { CourseFeedbacks } from './collections/CourseFeedbacks'
+import { NotificationTemplates } from './collections/NotificationTemplates'
+import { Notifications } from './collections/Notifications'
+import { UserNotifications } from './collections/UserNotifications'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -73,10 +78,15 @@ export default buildConfig({
     CourseMaterials,
     LessonMaterials,
     Announcements,
+    CourseFeedbacks,
     Wishlists,
+    RecentlyViewedCourses,
     RecentSearches,
     Questions,
     Assessments,
+    NotificationTemplates,
+    Notifications,
+    UserNotifications,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',

@@ -1,9 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { Course } from '@/types/course';
 import { CourseCard } from '@encreasl/ui/course-card';
-import { toggleWishlist, isCourseWishlisted } from '@/lib/wishlist';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface CoursesGridProps {
   courses: Course[];
@@ -31,54 +30,7 @@ function CourseCardSkeleton() {
 }
 
 export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink }: CoursesGridProps) {
-  const [wishlistMap, setWishlistMap] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadWishlist() {
-      try {
-        const published = courses.filter((c) => c.status === 'published');
-        if (published.length === 0) {
-          if (active) {
-            setWishlistMap({});
-          }
-          return;
-        }
-
-        const entries = await Promise.all(
-          published.map(async (course) => {
-            const id = String(course.id);
-            const wishlisted = await isCourseWishlisted(course.id);
-            return [id, wishlisted] as const;
-          })
-        );
-
-        if (!active) return;
-
-        const nextMap: Record<string, boolean> = {};
-        for (const [id, wishlisted] of entries) {
-          nextMap[id] = wishlisted;
-        }
-        setWishlistMap(nextMap);
-      } catch {
-        if (active) {
-          setWishlistMap({});
-        }
-      }
-    }
-
-    if (courses && courses.length > 0) {
-      setWishlistMap({});
-      loadWishlist();
-    } else {
-      setWishlistMap({});
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [courses]);
+  const { wishlistMap, toggleWishlist } = useWishlist();
 
   if (isLoading && (!courses || courses.length === 0)) {
     return (
@@ -145,12 +97,7 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
                 isWishlisted={isWishlisted}
                 onToggleWishlist={async (courseId) => {
                   try {
-                    const next = await toggleWishlist(courseId);
-                    const key = String(courseId);
-                    setWishlistMap((prev) => ({
-                      ...prev,
-                      [key]: next,
-                    }));
+                    await toggleWishlist(courseId);
                   } catch {
                     void 0;
                   }

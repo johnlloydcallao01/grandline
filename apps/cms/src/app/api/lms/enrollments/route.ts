@@ -7,27 +7,53 @@ export async function GET(request: NextRequest) {
   try {
     const payload = await getPayload({ config: configPromise })
     const { searchParams } = new URL(request.url)
-    
+
     // Extract query parameters
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const student = searchParams.get('student')
     const course = searchParams.get('course')
     const status = searchParams.get('status')
+    const userId = searchParams.get('userId')
 
     // Build where clause
     const where: Where = {}
-    
-    if (student) {
-      where.student = { equals: student }
+
+    // Resolve student from userId when provided
+    let effectiveStudent = student
+
+    if (!effectiveStudent && userId) {
+      try {
+        const traineesForUser = await payload.find({
+          collection: 'trainees',
+          where: {
+            user: { equals: userId },
+          } as Where,
+          limit: 1,
+        })
+
+        const firstTrainee = Array.isArray(traineesForUser.docs)
+          ? traineesForUser.docs[0]
+          : null
+
+        if (firstTrainee && (firstTrainee as any).id != null) {
+          effectiveStudent = String((firstTrainee as any).id)
+        }
+      } catch (resolveError) {
+        console.error('Error resolving trainee from userId:', resolveError)
+      }
     }
-    
+
+    if (effectiveStudent) {
+      ; (where as any).student = { equals: effectiveStudent }
+    }
+
     if (course) {
-      where.course = { equals: course }
+      ; (where as any).course = { equals: course }
     }
-    
+
     if (status) {
-      where.status = { equals: status }
+      ; (where as any).status = { equals: status }
     }
 
     // Get enrollments with relationships

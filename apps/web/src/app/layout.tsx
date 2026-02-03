@@ -4,7 +4,7 @@ import Image from "next/image";
 import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
-// import { ReduxProvider } from "@encreasl/redux"; // Removed - replaced with AuthProvider
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -105,9 +105,11 @@ export default function RootLayout({
 
         <AuthErrorBoundary>
           <AuthProvider>
-            <LoadingScreenWrapper>
-              {children}
-            </LoadingScreenWrapper>
+            <WishlistProvider>
+              <LoadingScreenWrapper>
+                {children}
+              </LoadingScreenWrapper>
+            </WishlistProvider>
           </AuthProvider>
         </AuthErrorBoundary>
       </body>

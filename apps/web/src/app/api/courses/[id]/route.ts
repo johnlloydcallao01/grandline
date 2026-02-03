@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params
     if (!id) {
@@ -19,6 +19,9 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
+
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
 
     const courseRes = await fetch(`${apiUrl}/courses/${id}?depth=2`, {
       headers,
@@ -39,6 +42,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     let curriculum: any = null
     let courseMaterials: any[] = []
     let announcements: any[] = []
+    let enrollmentStatus: string | null = null
 
     if (courseId) {
       const paramsModules = new URLSearchParams()
@@ -357,11 +361,41 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       })
     }
 
+    if (userId && courseId) {
+      try {
+        const enrollmentParams = new URLSearchParams()
+        enrollmentParams.set('userId', String(userId))
+        enrollmentParams.set('course', String(courseId))
+        enrollmentParams.set('limit', '1')
+
+        const enrollmentRes = await fetch(
+          `${apiUrl}/lms/enrollments?${enrollmentParams.toString()}`,
+          {
+            headers,
+            cache: 'no-store',
+          },
+        )
+
+        if (enrollmentRes.ok) {
+          const enrollmentJson = await enrollmentRes.json()
+          const docs: any[] = Array.isArray(enrollmentJson?.docs) ? enrollmentJson.docs : []
+          const first = docs.length > 0 ? docs[0] : null
+          const rawStatus = first && typeof first.status === 'string' ? first.status : null
+          if (rawStatus) {
+            enrollmentStatus = rawStatus
+          }
+        }
+      } catch (enrollmentError) {
+        console.error('Error fetching enrollment status for course detail:', enrollmentError)
+      }
+    }
+
     const responseBody = {
       ...courseData,
       curriculum,
       courseMaterials,
       announcements,
+      enrollmentStatus,
     }
 
     return NextResponse.json(responseBody, {

@@ -52,9 +52,15 @@ export default function WishlistsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">My Wishlists</h1>
-                <p className="mt-2 text-gray-600">
-                  {items.length === 0 ? 'No courses saved yet' : `${items.length} courses saved for later`}
-                </p>
+                {isLoading ? (
+                  <div className="mt-3 h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                ) : (
+                  <p className="mt-2 text-gray-600">
+                    {items.length === 0
+                      ? 'No courses saved yet'
+                      : `${items.length} courses saved for later`}
+                  </p>
+                )}
               </div>
             </div>
           </div>

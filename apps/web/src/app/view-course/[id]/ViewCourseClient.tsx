@@ -5,7 +5,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { AuthorAvatar } from './AuthorAvatar'
 import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel'
-import { isCourseWishlisted, toggleWishlist } from '@/lib/wishlist'
+import { recordRecentlyViewed } from '@/lib/recentlyViewed'
+import { useWishlist } from '@/contexts/WishlistContext'
+import { useUser } from '@/hooks/useAuth'
 import type {
   Media,
   CourseWithInstructor,
@@ -21,6 +23,7 @@ import type {
 
 interface ViewCourseClientProps {
   course: CourseWithInstructor;
+  initialEnrollmentStatus?: string | null;
 }
 
 function CourseOverviewCard({
@@ -32,6 +35,7 @@ function CourseOverviewCard({
   totalQuizzes,
   formatPrice,
   formatLastUpdated,
+  initialEnrollmentStatus,
 }: {
   course: CourseWithInstructor;
   thumbnailImageUrl: string;
@@ -41,38 +45,131 @@ function CourseOverviewCard({
   totalQuizzes: number;
   formatPrice: (price: number | null | undefined) => string;
   formatLastUpdated: (updatedAt: string | null | undefined) => string;
+  initialEnrollmentStatus?: string | null;
 }) {
-  const [isWishlisted, setIsWishlisted] = useState<boolean | null>(null);
-  const [isToggling, setIsToggling] = useState(false);
+  const { wishlistMap, toggleWishlist } = useWishlist()
+  const { user, isAuthenticated } = useUser()
+  const [isToggling, setIsToggling] = useState(false)
+  const [buttonLabel, setButtonLabel] = useState(() => {
+    const raw = initialEnrollmentStatus
+    if (!raw) {
+      return 'Enroll Now'
+    }
+    const status = String(raw)
+    if (status === 'active') {
+      return 'Continue Learning'
+    }
+    if (
+      status === 'suspended' ||
+      status === 'completed' ||
+      status === 'dropped' ||
+      status === 'expired' ||
+      status === 'pending'
+    ) {
+      return 'View Enrollment Status'
+    }
+    return 'Enroll Now'
+  })
+  const [isLoadingEnrollment, setIsLoadingEnrollment] = useState(false)
+
+  const showHeart = typeof window !== 'undefined'
+  const wishlisted = !!wishlistMap[String(course.id)]
+
+  const handlePrimaryAction = () => {
+    if (buttonLabel === 'Continue Learning') {
+      window.location.href = `/portal/courses/${course.id}/player`
+      return
+    }
+  }
 
   useEffect(() => {
-    let active = true;
+    if (typeof window === 'undefined') {
+      return
+    }
 
-    async function loadWishlist() {
+    if (!isAuthenticated || !user?.id) {
+      setButtonLabel('Enroll Now')
+      return
+    }
+
+    let cancelled = false
+
+    const fetchEnrollment = async () => {
+      setIsLoadingEnrollment(true)
       try {
-        const wishlisted = await isCourseWishlisted(course.id);
-        if (active) {
-          setIsWishlisted(wishlisted);
+        const token = localStorage.getItem('grandline_auth_token')
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+
+        if (token) {
+          headers.Authorization = `users JWT ${token}`
+        }
+
+        const apiBase =
+          process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
+
+        const params = new URLSearchParams()
+        params.set('userId', String(user.id))
+        params.set('course', String(course.id))
+        params.set('limit', '1')
+
+        const res = await fetch(`${apiBase}/lms/enrollments?${params.toString()}`, {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        })
+
+        if (!res.ok) {
+          if (!cancelled) {
+            setButtonLabel('Enroll Now')
+          }
+          return
+        }
+
+        const json = (await res.json()) as { docs?: any[] }
+
+        const enrollment = Array.isArray(json.docs) && json.docs.length > 0 ? json.docs[0] : null
+
+        let nextLabel = 'Enroll Now'
+
+        if (enrollment && typeof (enrollment as any).status === 'string') {
+          const status = String((enrollment as any).status)
+
+          if (status === 'active') {
+            nextLabel = 'Continue Learning'
+          } else if (
+            status === 'suspended' ||
+            status === 'completed' ||
+            status === 'dropped' ||
+            status === 'expired' ||
+            status === 'pending'
+          ) {
+            nextLabel = 'View Enrollment Status'
+          }
+        }
+
+        if (!cancelled) {
+          setButtonLabel(nextLabel)
         }
       } catch {
-        if (active) {
-          setIsWishlisted(false);
+        if (!cancelled) {
+          setButtonLabel('Enroll Now')
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingEnrollment(false)
         }
       }
     }
 
-    if (typeof window !== 'undefined') {
-      setIsWishlisted(null);
-      loadWishlist();
-    }
+    fetchEnrollment()
 
     return () => {
-      active = false;
-    };
-  }, [course.id]);
-
-  const showHeart = typeof window !== 'undefined';
-  const wishlisted = !!isWishlisted;
+      cancelled = true
+    }
+  }, [isAuthenticated, user?.id, course.id])
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg">
@@ -93,23 +190,19 @@ function CourseOverviewCard({
             onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (isToggling || isWishlisted === null) return;
-              const next = !wishlisted;
-              setIsWishlisted(next);
+              if (isToggling) return;
               setIsToggling(true);
               try {
-                const serverNext = await toggleWishlist(course.id);
-                setIsWishlisted(serverNext);
+                await toggleWishlist(course.id);
               } catch {
-                setIsWishlisted(!next);
+                void 0;
               } finally {
                 setIsToggling(false);
               }
             }}
           >
             <i
-              className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'
-                } ${isWishlisted === null ? 'opacity-50' : ''}`}
+              className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'}`}
             ></i>
           </button>
         )}
@@ -133,8 +226,12 @@ function CourseOverviewCard({
           </span>
         </div>
 
-        <button className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]">
-          ▶ Start Learning
+        <button
+          className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]"
+          disabled={isLoadingEnrollment}
+          onClick={handlePrimaryAction}
+        >
+          ▶ {buttonLabel}
         </button>
 
         <div className="text-sm text-gray-600 space-y-1">
@@ -587,10 +684,16 @@ function CourseDescriptionBlocks({
   return null
 }
 
-export default function ViewCourseClient({ course }: ViewCourseClientProps) {
+export default function ViewCourseClient({ course, initialEnrollmentStatus }: ViewCourseClientProps) {
   const [activeSection, setActiveSection] = useState('Overview')
   const [isDesktop, setIsDesktop] = useState(false)
   const [expandedAnnouncementId, setExpandedAnnouncementId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const id = course?.id
+    if (!id) return
+    recordRecentlyViewed(id).catch(() => undefined)
+  }, [course?.id])
 
   // Check screen size and adjust active section accordingly
   useEffect(() => {
@@ -991,16 +1094,17 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
               <div id="overview" className="lg:hidden bg-white rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
                 {thumbnailImageUrl && (
                   <div className="lg:hidden">
-                    <CourseOverviewCard
-                      course={course}
-                      thumbnailImageUrl={thumbnailImageUrl}
-                      altText={altText}
-                      totalLessons={totalLessons}
-                      totalModules={totalModules}
-                      totalQuizzes={totalQuizzes}
-                      formatPrice={formatPrice}
-                      formatLastUpdated={formatLastUpdated}
-                    />
+                        <CourseOverviewCard
+                          course={course}
+                          thumbnailImageUrl={thumbnailImageUrl}
+                          altText={altText}
+                          totalLessons={totalLessons}
+                          totalModules={totalModules}
+                          totalQuizzes={totalQuizzes}
+                          formatPrice={formatPrice}
+                          formatLastUpdated={formatLastUpdated}
+                          initialEnrollmentStatus={initialEnrollmentStatus}
+                        />
                   </div>
                 )}
               </div>
@@ -1659,6 +1763,7 @@ export default function ViewCourseClient({ course }: ViewCourseClientProps) {
                       totalQuizzes={totalQuizzes}
                       formatPrice={formatPrice}
                       formatLastUpdated={formatLastUpdated}
+                      initialEnrollmentStatus={initialEnrollmentStatus}
                     />
                   </div>
                 )}

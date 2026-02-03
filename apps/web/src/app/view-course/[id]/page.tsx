@@ -8,6 +8,7 @@ export default function ViewCoursePage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
   const [course, setCourse] = useState<CourseWithInstructor | null>(null);
+  const [enrollmentStatus, setEnrollmentStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +27,34 @@ export default function ViewCoursePage() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/courses/${id}`, {
+
+        let userIdParam: string | null = null;
+        if (typeof window !== 'undefined') {
+          try {
+            const raw = localStorage.getItem('grandline_auth_user');
+            if (raw) {
+              const parsed = JSON.parse(raw) as { id?: string | number } | null;
+              const value = parsed && parsed.id;
+              if (value !== undefined && value !== null) {
+                userIdParam = String(value);
+              }
+            }
+          } catch {
+            void 0;
+          }
+        }
+
+        const params = new URLSearchParams();
+        if (userIdParam) {
+          params.set('userId', userIdParam);
+        }
+
+        const url =
+          params.toString().length > 0
+            ? `/api/courses/${id}?${params.toString()}`
+            : `/api/courses/${id}`;
+
+        const res = await fetch(url, {
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
         });
@@ -34,17 +62,24 @@ export default function ViewCoursePage() {
           if (active) {
             setError('Failed to load course');
             setCourse(null);
+            setEnrollmentStatus(null);
           }
           return;
         }
-        const data: CourseWithInstructor = await res.json();
+        const data = await res.json() as CourseWithInstructor & { enrollmentStatus?: string | null };
         if (active) {
           setCourse(data);
+          const status =
+            data && typeof data.enrollmentStatus === 'string'
+              ? data.enrollmentStatus
+              : null;
+          setEnrollmentStatus(status);
         }
       } catch {
         if (active) {
           setError('Network error');
           setCourse(null);
+          setEnrollmentStatus(null);
         }
       } finally {
         if (active) {
@@ -81,5 +116,5 @@ export default function ViewCoursePage() {
     );
   }
 
-  return <ViewCourseClient course={course} />;
+  return <ViewCourseClient course={course} initialEnrollmentStatus={enrollmentStatus} />;
 }

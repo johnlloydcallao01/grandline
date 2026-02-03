@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Header, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
 
@@ -20,6 +21,12 @@ export default function PortalLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
+  const pathname = usePathname()
+
+  const isCoursePlayer =
+    typeof pathname === 'string' &&
+    pathname.startsWith('/portal/courses/') &&
+    pathname.endsWith('/player')
 
   // Hide instant loading screen when portal loads
   useEffect(() => {
@@ -56,7 +63,9 @@ export default function PortalLayout({
   }, [])
 
   const toggleSidebar = () => {
-    // Only allow toggling on desktop
+    if (isCoursePlayer) {
+      return
+    }
     if (isDesktop) {
       setSidebarOpen(prev => !prev)
     }
@@ -71,22 +80,26 @@ export default function PortalLayout({
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
         {/* Header - Same as main app for consistency */}
-        <Header
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          onSearch={handleSearch}
-        />
+        {!isCoursePlayer && (
+          <Header
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
+            onSearch={handleSearch}
+          />
+        )}
 
         {/* Portal Sidebar - Custom sidebar for portal pages */}
-        <PortalSidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
+        {!isCoursePlayer && (
+          <PortalSidebar
+            isOpen={sidebarOpen}
+            onToggle={toggleSidebar}
+          />
+        )}
 
         {/* Main Content Area - Portal pages content */}
         <main
           className={`transition-all duration-300 bg-gray-50 ${
-            sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+            isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
           }`}
           style={{ backgroundColor: '#f9fafb' }}
         >
@@ -96,7 +109,7 @@ export default function PortalLayout({
         </main>
 
         {/* Mobile Footer - Same as main app */}
-        <MobileFooter />
+        {!isCoursePlayer && <MobileFooter />}
       </div>
     </ProtectedRoute>
   )
@@ -232,22 +245,6 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
               )
             })}
 
-            {/* H5P Items */}
-            {(Link as any)({
-              href: "/portal/h5p-items",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
-              children: (
-                <>
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-cubes text-gray-600"></i>
-                  </div>
-                  {isOpen && <span className="ml-3 text-gray-700">H5P Items</span>}
-                </>
-              )
-            })}
-
             {/* Quizzes & Exams */}
             {(Link as any)({
               href: "/portal/quizzes-exams",
@@ -296,47 +293,6 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
               )
             })}
           </div>
-
-          {isOpen && <hr className="my-3 border-gray-200" />}
-
-          {/* Achievements Navigation */}
-          <div className="space-y-1">
-            {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Achievements</div>}
-            
-            {/* Learning Streak */}
-            {(Link as any)({
-              href: "/portal/learning-streak",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
-              children: (
-                <>
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-fire text-gray-600"></i>
-                  </div>
-                  {isOpen && <span className="ml-3 text-gray-700">Learning Streak</span>}
-                </>
-              )
-            })}
-
-            {/* Certificates Earned */}
-            {(Link as any)({
-              href: "/portal/certificates",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
-              children: (
-                <>
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-certificate text-gray-600"></i>
-                  </div>
-                  {isOpen && <span className="ml-3 text-gray-700">Certificates Earned</span>}
-                </>
-              )
-            })}
-          </div>
-
-          {isOpen && <hr className="my-3 border-gray-200" />}
 
           {/* Interaction Navigation */}
           <div className="space-y-1">

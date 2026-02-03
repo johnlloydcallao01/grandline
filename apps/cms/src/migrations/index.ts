@@ -49,7 +49,14 @@ import * as migration_20260106_054302 from './20260106_054302';
 import * as migration_20260106_103058 from './20260106_103058';
 import * as migration_20260106_104305 from './20260106_104305';
 import * as migration_20260112_120820 from './20260112_120820';
+import * as migration_20260112_130501_assessments_course_final_exam from './20260112_130501_assessments_course_final_exam';
+import * as migration_20260112_140201_remove_quizzes from './20260112_140201_remove_quizzes';
+import * as migration_20260114_120001_add_assessments_description from './20260114_120001_add_assessments_description';
+import * as migration_20260114_120101_add_course_modules_description from './20260114_120101_add_course_modules_description';
 import * as migration_20260115_090000_add_courses_estimated_duration_unit from './20260115_090000_add_courses_estimated_duration_unit';
+import * as migration_20260116_024259 from './20260116_024259';
+import * as migration_20260116_065844 from './20260116_065844';
+import * as migration_20260201_092442 from './20260201_092442';
 
 export const migrations = [
   {
@@ -305,11 +312,46 @@ export const migrations = [
   {
     up: migration_20260112_120820.up,
     down: migration_20260112_120820.down,
-    name: '20260112_120820'
+    name: '20260112_120820',
+  },
+  {
+    up: migration_20260112_130501_assessments_course_final_exam.up,
+    down: migration_20260112_130501_assessments_course_final_exam.down,
+    name: '20260112_130501_assessments_course_final_exam',
+  },
+  {
+    up: migration_20260112_140201_remove_quizzes.up,
+    down: migration_20260112_140201_remove_quizzes.down,
+    name: '20260112_140201_remove_quizzes',
+  },
+  {
+    up: migration_20260114_120001_add_assessments_description.up,
+    down: migration_20260114_120001_add_assessments_description.down,
+    name: '20260114_120001_add_assessments_description',
+  },
+  {
+    up: migration_20260114_120101_add_course_modules_description.up,
+    down: migration_20260114_120101_add_course_modules_description.down,
+    name: '20260114_120101_add_course_modules_description',
   },
   {
     up: migration_20260115_090000_add_courses_estimated_duration_unit.up,
     down: migration_20260115_090000_add_courses_estimated_duration_unit.down,
     name: '20260115_090000_add_courses_estimated_duration_unit',
+  },
+  {
+    up: migration_20260116_024259.up,
+    down: migration_20260116_024259.down,
+    name: '20260116_024259',
+  },
+  {
+    up: migration_20260116_065844.up,
+    down: migration_20260116_065844.down,
+    name: '20260116_065844',
+  },
+  {
+    up: migration_20260201_092442.up,
+    down: migration_20260201_092442.down,
+    name: '20260201_092442'
   },
 ];
