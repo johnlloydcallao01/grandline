@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       paramsModules.set('where[course][equals]', String(courseId))
       paramsModules.set('sort', 'order')
       paramsModules.set('limit', '100')
-      paramsModules.set('depth', '0')
+      paramsModules.set('depth', '2')
 
       const modulesRes = await fetch(`${apiUrl}/course-modules?${paramsModules.toString()}`, {
         headers,
@@ -59,41 +59,6 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       const modulesJson = modulesRes.ok ? await modulesRes.json() : { docs: [] }
       const modules = Array.isArray(modulesJson?.docs) ? modulesJson.docs : []
 
-      const moduleIds = modules.map((m: any) => m.id).filter((id: unknown) => id !== null && id !== undefined)
-
-      let lessons: any[] = []
-      if (moduleIds.length > 0) {
-        const paramsLessons = new URLSearchParams()
-        paramsLessons.set('sort', 'order')
-        paramsLessons.set('limit', '500')
-        paramsLessons.set('depth', '0')
-        paramsLessons.set('where[module][in]', moduleIds.join(','))
-
-        const lessonsRes = await fetch(
-          `${apiUrl}/course-lessons?${paramsLessons.toString()}`,
-          {
-            headers,
-            cache: 'no-store',
-          },
-        )
-
-        const lessonsJson = lessonsRes.ok ? await lessonsRes.json() : { docs: [] }
-        lessons = Array.isArray(lessonsJson?.docs) ? lessonsJson.docs : []
-      }
-
-      const paramsAssessments = new URLSearchParams()
-      paramsAssessments.set('sort', 'order')
-      paramsAssessments.set('limit', '500')
-      paramsAssessments.set('depth', '0')
-
-      const assessmentsRes = await fetch(`${apiUrl}/assessments?${paramsAssessments.toString()}`, {
-        headers,
-        cache: 'no-store',
-      })
-
-      const assessmentsJson = assessmentsRes.ok ? await assessmentsRes.json() : { docs: [] }
-      const assessments: any[] = Array.isArray(assessmentsJson?.docs) ? assessmentsJson.docs : []
-
       const moduleMap: Record<string, {
         id: string;
         title: string;
@@ -101,6 +66,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         estimatedDurationMinutes?: number | null;
         lessons: any[];
         assessments: any[];
+        items: any[];
       }> = {}
 
       for (const m of modules) {
@@ -110,94 +76,41 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
           title: String(m.title || ''),
           order: typeof m.order === 'number' ? m.order : parseInt(String(m.order ?? '0'), 10) || 0,
           estimatedDurationMinutes: null,
-          lessons: [],
-          assessments: [],
+          lessons: [], // Legacy array, kept empty as we use items
+          assessments: [], // Legacy array, kept empty as we use items
+          items: Array.isArray(m.items) ? m.items : [],
         }
       }
 
-      for (const lesson of lessons) {
-        const moduleValue = lesson.module
-        const moduleId =
-          moduleValue && typeof moduleValue === 'object' && 'id' in moduleValue
-            ? String((moduleValue as any).id)
-            : String(moduleValue ?? '')
-
-        if (!moduleId || !moduleMap[moduleId]) continue
-
-        moduleMap[moduleId].lessons.push({
-          id: String(lesson.id),
-          title: String(lesson.title || ''),
-          order:
-            typeof lesson.order === 'number'
-              ? lesson.order
-              : parseInt(String(lesson.order ?? '0'), 10) || 0,
-          estimatedDurationMinutes:
-            typeof lesson.estimatedDuration === 'number'
-              ? lesson.estimatedDuration
-              : null,
-        })
-      }
-
-      for (const mod of Object.values(moduleMap)) {
-        mod.lessons.sort((a, b) => a.order - b.order)
-      }
-
+      // Fetch Final Exam separately
       let finalExam: any = null
 
-      for (const a of assessments) {
-        const type = String(a.assessmentType || 'quiz') as 'quiz' | 'exam' | 'final_exam'
-        if (type === 'final_exam') {
-          const courseRel = a.course
-          const assessmentCourseId =
-            courseRel && typeof courseRel === 'object' && 'id' in courseRel
-              ? String((courseRel as any).id)
-              : String(courseRel ?? '')
+      const paramsFinalExam = new URLSearchParams()
+      paramsFinalExam.set('where[course][equals]', String(courseId))
+      paramsFinalExam.set('where[assessmentType][equals]', 'final_exam')
+      paramsFinalExam.set('limit', '1')
+      paramsFinalExam.set('depth', '0')
 
-          if (!assessmentCourseId || String(assessmentCourseId) !== String(courseId)) {
-            continue
-          }
+      const finalExamRes = await fetch(`${apiUrl}/assessments?${paramsFinalExam.toString()}`, {
+        headers,
+        cache: 'no-store',
+      })
 
-          if (!finalExam) {
-            finalExam = {
-              id: String(a.id),
-              title: String(a.title || 'Final Exam'),
-              order:
-                typeof a.order === 'number'
-                  ? a.order
-                  : parseInt(String(a.order ?? '0'), 10) || 0,
-              estimatedDurationMinutes:
-                typeof a.estimatedDuration === 'number'
-                  ? a.estimatedDuration
-                  : null,
-              isRequired: typeof a.isRequired === 'boolean' ? a.isRequired : true,
-            }
-          }
+      const finalExamJson = finalExamRes.ok ? await finalExamRes.json() : { docs: [] }
+      const finalExamDocs = Array.isArray(finalExamJson?.docs) ? finalExamJson.docs : []
 
-          continue
-        }
-
-        const moduleRel = a.module
-        const moduleId =
-          moduleRel && typeof moduleRel === 'object' && 'id' in moduleRel
-            ? String((moduleRel as any).id)
-            : String(moduleRel ?? '')
-
-        if (!moduleId || !moduleMap[moduleId]) continue
-
-        moduleMap[moduleId].assessments.push({
+      if (finalExamDocs.length > 0) {
+        const a = finalExamDocs[0]
+        finalExam = {
           id: String(a.id),
-          title: String(a.title || ''),
-          assessmentType: type === 'exam' ? 'exam' : 'quiz',
-          order:
-            typeof a.order === 'number'
-              ? a.order
-              : parseInt(String(a.order ?? '0'), 10) || 0,
+          title: String(a.title || 'Final Exam'),
+          order: 0, // Field removed from DB
           estimatedDurationMinutes:
             typeof a.estimatedDuration === 'number'
               ? a.estimatedDuration
               : null,
           isRequired: typeof a.isRequired === 'boolean' ? a.isRequired : true,
-        })
+        }
       }
 
       const modulesForCurriculum = Object.values(moduleMap).sort((a, b) => a.order - b.order)

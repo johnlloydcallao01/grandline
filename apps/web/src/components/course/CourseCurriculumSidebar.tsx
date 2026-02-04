@@ -38,13 +38,22 @@ export function CourseCurriculumSidebar({
               .sort((a, b) => a.order - b.order)
               .map((mod, index) => {
                 const isExpanded = expandedModules.includes(mod.id);
-                const lessonCount = Array.isArray(mod.lessons) ? mod.lessons.length : 0;
-                const quizCount = Array.isArray(mod.assessments)
-                  ? mod.assessments.filter((a) => a.assessmentType === 'quiz').length
-                  : 0;
-                const examCount = Array.isArray(mod.assessments)
-                  ? mod.assessments.filter((a) => a.assessmentType === 'exam').length
-                  : 0;
+                let lessonCount = 0;
+                let quizCount = 0;
+                let examCount = 0;
+
+                if (Array.isArray(mod.items)) {
+                  for (const item of mod.items) {
+                    if (typeof item.value === 'string') continue;
+                    if (item.relationTo === 'course-lessons') {
+                      lessonCount++;
+                    } else if (item.relationTo === 'assessments') {
+                      const a = item.value;
+                      if (a.assessmentType === 'exam') examCount++;
+                      else quizCount++;
+                    }
+                  }
+                }
 
                 return (
                   <div
@@ -88,12 +97,13 @@ export function CourseCurriculumSidebar({
                     </button>
                     {isExpanded && (
                       <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
-                        {Array.isArray(mod.lessons) && mod.lessons.length > 0 && (
+                        {Array.isArray(mod.items) && mod.items.length > 0 ? (
                           <ul className="space-y-1">
-                            {mod.lessons
-                              .slice()
-                              .sort((a, b) => a.order - b.order)
-                              .map((lesson) => {
+                            {mod.items.map((item) => {
+                              if (typeof item.value === 'string') return null;
+
+                              if (item.relationTo === 'course-lessons') {
+                                const lesson = item.value;
                                 const itemKey = buildItemKey('lesson', lesson.id);
                                 const isActive = selectedKey === itemKey;
 
@@ -122,15 +132,8 @@ export function CourseCurriculumSidebar({
                                     </button>
                                   </li>
                                 );
-                              })}
-                          </ul>
-                        )}
-                        {Array.isArray(mod.assessments) && mod.assessments.length > 0 && (
-                          <ul className="space-y-1 mt-2">
-                            {mod.assessments
-                              .slice()
-                              .sort((a, b) => a.order - b.order)
-                              .map((assessment) => {
+                              } else if (item.relationTo === 'assessments') {
+                                const assessment = item.value;
                                 const itemKey = buildItemKey('assessment', assessment.id);
                                 const isActive = selectedKey === itemKey;
                                 const isQuiz = assessment.assessmentType === 'quiz';
@@ -163,9 +166,11 @@ export function CourseCurriculumSidebar({
                                     </button>
                                   </li>
                                 );
-                              })}
+                              }
+                              return null;
+                            })}
                           </ul>
-                        )}
+                        ) : null}
                       </div>
                     )}
                   </div>

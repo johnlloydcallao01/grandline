@@ -48,6 +48,15 @@ export const CourseModules: CollectionConfig = {
       },
     },
     {
+      name: 'items',
+      type: 'relationship',
+      relationTo: ['course-lessons', 'assessments'],
+      hasMany: true,
+      admin: {
+        description: 'Manage the order of lessons and assessments in this module.',
+      },
+    },
+    {
       name: 'course',
       type: 'relationship',
       relationTo: 'courses',

@@ -57,6 +57,8 @@ import * as migration_20260115_090000_add_courses_estimated_duration_unit from '
 import * as migration_20260116_024259 from './20260116_024259';
 import * as migration_20260116_065844 from './20260116_065844';
 import * as migration_20260201_092442 from './20260201_092442';
+import * as migration_20260204_041555_add_items_to_course_modules from './20260204_041555_add_items_to_course_modules';
+import * as migration_20260204_043328_remove_order_fields from './20260204_043328_remove_order_fields';
 
 export const migrations = [
   {
@@ -352,6 +354,16 @@ export const migrations = [
   {
     up: migration_20260201_092442.up,
     down: migration_20260201_092442.down,
-    name: '20260201_092442'
+    name: '20260201_092442',
+  },
+  {
+    up: migration_20260204_041555_add_items_to_course_modules.up,
+    down: migration_20260204_041555_add_items_to_course_modules.down,
+    name: '20260204_041555_add_items_to_course_modules',
+  },
+  {
+    up: migration_20260204_043328_remove_order_fields.up,
+    down: migration_20260204_043328_remove_order_fields.down,
+    name: '20260204_043328_remove_order_fields'
   },
 ];

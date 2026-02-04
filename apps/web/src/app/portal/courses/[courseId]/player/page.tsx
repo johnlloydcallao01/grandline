@@ -7,6 +7,7 @@ import type { CourseWithInstructor } from '@/types/course';
 import { PlayerItem } from '@/types/player';
 import { buildItemKey } from '@/utils/course-player';
 import { CourseCurriculumSidebar } from '@/components/course/CourseCurriculumSidebar';
+import { RichTextRenderer } from '@/components/RichTextRenderer';
 
 function formatEnrollmentStatus(status: string | null) {
   if (!status) return 'Not enrolled';
@@ -142,6 +143,7 @@ export default function CoursePlayerPage() {
     const items: PlayerItem[] = [];
     if (!curriculum || !Array.isArray(curriculum.modules)) {
       if (curriculum?.finalExam) {
+        const questionsCount = curriculum.finalExam.questions?.length || 0;
         items.push({
           key: buildItemKey('finalExam', curriculum.finalExam.id),
           type: 'finalExam',
@@ -149,6 +151,13 @@ export default function CoursePlayerPage() {
           title: curriculum.finalExam.title,
           assessmentKind: 'final',
           estimatedDurationMinutes: curriculum.finalExam.estimatedDurationMinutes ?? null,
+          content: curriculum.finalExam.description,
+          assessmentDetails: {
+            passingScore: curriculum.finalExam.passingScore,
+            timeLimitMinutes: curriculum.finalExam.timeLimitMinutes,
+            maxAttempts: curriculum.finalExam.maxAttempts,
+            questionsCount,
+          }
         });
       }
       return items;
@@ -157,38 +166,51 @@ export default function CoursePlayerPage() {
     const sortedModules = [...curriculum.modules].sort((a, b) => a.order - b.order);
 
     for (const mod of sortedModules) {
-      const lessons = Array.isArray(mod.lessons)
-        ? [...mod.lessons].sort((a, b) => a.order - b.order)
-        : [];
-      const assessments = Array.isArray(mod.assessments)
-        ? [...mod.assessments].sort((a, b) => a.order - b.order)
-        : [];
+      if (Array.isArray(mod.items) && mod.items.length > 0) {
+        // Use the new polymorphic items array if available
+        for (const item of mod.items) {
+          if (typeof item.value === 'string') continue; // Skip unexpanded relationships
 
-      for (const lesson of lessons) {
-        items.push({
-          key: buildItemKey('lesson', lesson.id),
-          type: 'lesson',
-          id: lesson.id,
-          moduleId: mod.id,
-          title: lesson.title,
-          estimatedDurationMinutes: lesson.estimatedDurationMinutes ?? null,
-        });
-      }
-
-      for (const assessment of assessments) {
-        items.push({
-          key: buildItemKey('assessment', assessment.id),
-          type: 'assessment',
-          id: assessment.id,
-          moduleId: mod.id,
-          title: assessment.title,
-          assessmentKind: assessment.assessmentType === 'exam' ? 'exam' : 'quiz',
-          estimatedDurationMinutes: assessment.estimatedDurationMinutes ?? null,
-        });
+          if (item.relationTo === 'course-lessons') {
+            const lesson = item.value;
+            items.push({
+              key: buildItemKey('lesson', lesson.id),
+              type: 'lesson',
+              id: lesson.id,
+              moduleId: mod.id,
+              title: lesson.title,
+              estimatedDurationMinutes: lesson.estimatedDurationMinutes ?? null,
+              content: lesson.description,
+            });
+          } else if (item.relationTo === 'assessments') {
+            const assessment = item.value;
+            // The items array in assessment value might not be populated if depth isn't sufficient
+            // But we can check if it exists
+            const questionsCount = (assessment as any).items?.length || 0;
+            
+            items.push({
+              key: buildItemKey('assessment', assessment.id),
+              type: 'assessment',
+              id: assessment.id,
+              moduleId: mod.id,
+              title: assessment.title,
+              assessmentKind: assessment.assessmentType === 'exam' ? 'exam' : 'quiz',
+              estimatedDurationMinutes: assessment.estimatedDurationMinutes ?? null,
+              content: assessment.description,
+              assessmentDetails: {
+                passingScore: assessment.passingScore,
+                timeLimitMinutes: assessment.timeLimitMinutes,
+                maxAttempts: assessment.maxAttempts,
+                questionsCount,
+              }
+            });
+          }
+        }
       }
     }
 
     if (curriculum.finalExam) {
+      const questionsCount = curriculum.finalExam.questions?.length || 0;
       items.push({
         key: buildItemKey('finalExam', curriculum.finalExam.id),
         type: 'finalExam',
@@ -196,6 +218,13 @@ export default function CoursePlayerPage() {
         title: curriculum.finalExam.title,
         assessmentKind: 'final',
         estimatedDurationMinutes: curriculum.finalExam.estimatedDurationMinutes ?? null,
+        content: curriculum.finalExam.description,
+        assessmentDetails: {
+          passingScore: curriculum.finalExam.passingScore,
+          timeLimitMinutes: curriculum.finalExam.timeLimitMinutes,
+          maxAttempts: curriculum.finalExam.maxAttempts,
+          questionsCount,
+        }
       });
     }
 
@@ -222,13 +251,16 @@ export default function CoursePlayerPage() {
     let examsCount = 0;
 
     for (const mod of curriculum.modules) {
-      if (Array.isArray(mod.lessons)) {
-        lessonsCount += mod.lessons.length;
-      }
-      if (Array.isArray(mod.assessments)) {
-        for (const a of mod.assessments) {
-          if (a.assessmentType === 'quiz') quizzesCount += 1;
-          if (a.assessmentType === 'exam') examsCount += 1;
+      if (Array.isArray(mod.items)) {
+        for (const item of mod.items) {
+          if (typeof item.value === 'string') continue;
+          if (item.relationTo === 'course-lessons') {
+            lessonsCount += 1;
+          } else if (item.relationTo === 'assessments') {
+            const a = item.value;
+            if (a.assessmentType === 'exam') examsCount += 1;
+            else quizzesCount += 1;
+          }
         }
       }
     }
@@ -360,7 +392,7 @@ export default function CoursePlayerPage() {
   const currentModuleTitle =
     currentItem && currentItem.moduleId ? moduleTitleMap[currentItem.moduleId] || null : null;
 
-  const hasMaterials = Array.isArray(course.courseMaterials) && course.courseMaterials.length > 0;
+// hasMaterials definition removed
 
   return (
     <div className="h-screen overflow-hidden bg-[#f5f5f7] flex flex-col">
@@ -510,7 +542,7 @@ export default function CoursePlayerPage() {
 
         <main className="flex-1 flex flex-col bg-[#f5f5f7] min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
+            <div className="px-[10px] py-8">
               <div className="flex items-start justify-between gap-6">
                 <div className="min-w-0 space-y-2">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -565,93 +597,96 @@ export default function CoursePlayerPage() {
                 </div>
               </div>
 
-              <div className="mt-8 space-y-4">
-                <div className="bg-[#f5f7ff] rounded-xl border border-[#d6dcff] p-5">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    Activity overview
-                  </h3>
-                  <p className="text-sm text-gray-700">
-                    {currentItem ? (
-                      currentTypeLabel === 'Final Exam' || currentTypeLabel === 'Exam' ? (
-                        <>
-                          This assessment evaluates your understanding of the course outcomes. Make
-                          sure you have completed all required lessons before attempting this
-                          activity.
-                        </>
-                      ) : currentTypeLabel === 'Quiz' ? (
-                        <>
-                          This quiz helps you check your understanding of the topics covered in
-                          this module. You can use it as a self-check before moving forward.
-                        </>
+              <div className="mt-8 space-y-8">
+                {currentItem ? (
+                  <div className="prose prose-slate max-w-none">
+                    {currentItem.type === 'lesson' && (
+                      currentItem.content ? (
+                        <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+                          <RichTextRenderer content={currentItem.content} />
+                        </div>
                       ) : (
-                        <>
-                          This learning activity focuses on the key concepts for this part of the
-                          course. Follow along with the training content and review any attached
-                          materials.
-                        </>
+                        <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                          <p className="text-gray-500">No content available for this lesson.</p>
+                        </div>
                       )
-                    ) : (
-                      <>
-                        Select a lesson or assessment from the curriculum to see its details and
-                        available resources.
-                      </>
                     )}
-                  </p>
-                </div>
 
-                {hasMaterials && (
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      Course materials
-                    </h3>
-                    <ul className="space-y-3">
-                      {course.courseMaterials!.map((material) => (
-                        <li
-                          key={material.id}
-                          className="flex items-start justify-between gap-3"
-                        >
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium text-gray-900 truncate">
-                              {material.title}
+                    {(currentItem.type === 'assessment' || currentItem.type === 'finalExam') && (
+                      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="p-6 md:p-8">
+                          <h2 className="text-xl font-semibold text-gray-900 mb-4 mt-0">
+                            {currentItem.assessmentKind === 'final' 
+                              ? 'Final Exam Instructions' 
+                              : currentItem.assessmentKind === 'exam' 
+                                ? 'Exam Instructions' 
+                                : 'Quiz Instructions'}
+                          </h2>
+                          
+                          {currentItem.content && (
+                            <div className="mb-8 text-gray-600">
+                              <RichTextRenderer content={currentItem.content} />
                             </div>
-                            {material.description && (
-                              <p className="mt-1 text-xs text-gray-500">
-                                {material.description}
-                              </p>
-                            )}
-                            {material.externalUrl && (
-                              <a
-                                href={material.externalUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="mt-1 inline-flex items-center text-xs font-medium text-[#0056d2] hover:underline"
-                              >
-                                Open external resource
-                                <i className="fa fa-external-link-alt ml-1" />
-                              </a>
-                            )}
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <div className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
-                              {material.materialSource === 'external' ? 'External link' : 'Media'}
+                          )}
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 not-prose">
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Time Limit</div>
+                              <div className="font-semibold text-gray-900">
+                                {currentItem.assessmentDetails?.timeLimitMinutes 
+                                  ? `${currentItem.assessmentDetails.timeLimitMinutes} mins` 
+                                  : 'None'}
+                              </div>
                             </div>
-                            {Array.isArray(material.media) && material.media.length > 0 && (
-                              <div className="mt-1 text-[10px] text-gray-400">
-                                {material.media.length} file
-                                {material.media.length === 1 ? '' : 's'}
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Passing Score</div>
+                              <div className="font-semibold text-gray-900">
+                                {currentItem.assessmentDetails?.passingScore ?? 70}%
                               </div>
-                            )}
-                            {material.isRequired && (
-                              <div className="mt-1 text-[10px] text-amber-600">
-                                Required
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Attempts</div>
+                              <div className="font-semibold text-gray-900">
+                                {currentItem.assessmentDetails?.maxAttempts ?? 1}
                               </div>
-                            )}
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Questions</div>
+                              <div className="font-semibold text-gray-900">
+                                {currentItem.assessmentDetails?.questionsCount ?? '-'}
+                              </div>
+                            </div>
                           </div>
-                        </li>
-                      ))}
-                    </ul>
+
+                          <div className="flex flex-col sm:flex-row gap-4 not-prose">
+                            <button 
+                              type="button"
+                              className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-[#0056d2] hover:bg-[#0041a8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0056d2] transition-colors"
+                            >
+                              Start {currentItem.assessmentKind === 'final' ? 'Final Exam' : currentItem.assessmentKind === 'exam' ? 'Exam' : 'Quiz'}
+                            </button>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <i className="fa fa-info-circle mr-2" />
+                              Click start when you are ready to begin.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
+                      <i className="fa fa-book-open text-2xl text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900">Select a learning item</h3>
+                    <p className="text-gray-500 mt-1 max-w-sm mx-auto">
+                      Choose a lesson or assessment from the curriculum sidebar to view its content.
+                    </p>
                   </div>
                 )}
+
+{/* Materials removed */}
               </div>
             </div>
           </div>

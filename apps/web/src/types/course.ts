@@ -143,19 +143,33 @@ export interface CourseWithInstructor extends Course {
     modules: Array<{
       id: string;
       title: string;
-      order: number;
       estimatedDurationMinutes?: number | null;
+      items: Array<{
+        relationTo: 'course-lessons' | 'assessments';
+        value: {
+          id: string;
+          title: string;
+          estimatedDurationMinutes?: number | null;
+          // For lessons
+          estimatedDuration?: number | null;
+          description?: any;
+          // For assessments
+          assessmentType?: 'quiz' | 'exam';
+          passingScore?: number | null;
+          timeLimitMinutes?: number | null;
+          maxAttempts?: number | null;
+          isRequired?: boolean;
+        } | string; // Could be string ID if depth is shallow
+      }>;
       lessons: Array<{
         id: string;
         title: string;
-        order: number;
         estimatedDurationMinutes?: number | null;
       }>;
       assessments: Array<{
         id: string;
         title: string;
         assessmentType: 'quiz' | 'exam';
-        order: number;
         estimatedDurationMinutes?: number | null;
         isRequired?: boolean;
       }>;
@@ -163,9 +177,13 @@ export interface CourseWithInstructor extends Course {
     finalExam?: {
       id: string;
       title: string;
-      order: number;
       estimatedDurationMinutes?: number | null;
       isRequired?: boolean;
+      description?: any;
+      passingScore?: number | null;
+      timeLimitMinutes?: number | null;
+      maxAttempts?: number | null;
+      questions?: any[];
     } | null;
   } | null;
 }

@@ -818,27 +818,41 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
   const totalModules = Array.isArray(curriculum?.modules) ? curriculum!.modules.length : 0
 
   const totalLessons =
-    curriculum?.modules?.reduce((sum, m) => sum + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0) || 0
+    curriculum?.modules?.reduce((sum, m) => {
+      if (!Array.isArray(m.items)) return sum
+      return (
+        sum +
+        m.items.filter(
+          (item) => item.relationTo === 'course-lessons' && typeof item.value !== 'string',
+        ).length
+      )
+    }, 0) || 0
 
   const totalQuizzes =
-    curriculum?.modules?.reduce(
-      (sum, m) =>
+    curriculum?.modules?.reduce((sum, m) => {
+      if (!Array.isArray(m.items)) return sum
+      return (
         sum +
-        (Array.isArray(m.assessments)
-          ? m.assessments.filter((a) => a.assessmentType === 'quiz').length
-          : 0),
-      0,
-    ) || 0
+        m.items.filter((item) => {
+          if (item.relationTo !== 'assessments' || typeof item.value === 'string') return false
+          const a = item.value as any
+          return a.assessmentType === 'quiz'
+        }).length
+      )
+    }, 0) || 0
 
   const totalExams =
-    (curriculum?.modules?.reduce(
-      (sum, m) =>
+    (curriculum?.modules?.reduce((sum, m) => {
+      if (!Array.isArray(m.items)) return sum
+      return (
         sum +
-        (Array.isArray(m.assessments)
-          ? m.assessments.filter((a) => a.assessmentType === 'exam').length
-          : 0),
-      0,
-    ) || 0) + (curriculum?.finalExam ? 1 : 0)
+        m.items.filter((item) => {
+          if (item.relationTo !== 'assessments' || typeof item.value === 'string') return false
+          const a = item.value as any
+          return a.assessmentType === 'exam'
+        }).length
+      )
+    }, 0) || 0) + (curriculum?.finalExam ? 1 : 0)
 
   const courseMaterials = Array.isArray(course.courseMaterials)
     ? course.courseMaterials
@@ -1141,14 +1155,23 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                     </div>
 
                     <div className="space-y-3">
-                      {curriculum.modules.map((module) => {
-                        const lessonCount = Array.isArray(module.lessons) ? module.lessons.length : 0
-                        const quizCount = Array.isArray(module.assessments)
-                          ? module.assessments.filter((a) => a.assessmentType === 'quiz').length
-                          : 0
-                        const examCount = Array.isArray(module.assessments)
-                          ? module.assessments.filter((a) => a.assessmentType === 'exam').length
-                          : 0
+                      {curriculum.modules.map((module, moduleIndex) => {
+                        let lessonCount = 0
+                        let quizCount = 0
+                        let examCount = 0
+                        if (Array.isArray(module.items)) {
+                          for (const item of module.items) {
+                            if (typeof item.value === 'string') continue
+                            if (item.relationTo === 'course-lessons') {
+                              lessonCount++
+                            } else if (item.relationTo === 'assessments') {
+                              const a = item.value as any
+                              if (a.assessmentType === 'exam') examCount++
+                              else quizCount++
+                            }
+                          }
+                        }
+
                         const isExpanded = expandedItem === module.id
                         return (
                           <div
@@ -1165,7 +1188,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                               <div className="flex flex-col items-start gap-1 min-w-0">
                                 <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-2.5 py-1">
                                   <span className="text-[11px] font-semibold text-[#201a7c] tracking-wide uppercase">
-                                    Module {module.order || 1}
+                                    Module {moduleIndex + 1}
                                   </span>
                                 </span>
                                 <span className="font-medium text-sm md:text-base text-gray-900 truncate">
@@ -1212,49 +1235,42 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                             {isExpanded && (
                               <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 py-3">
                                 <ul className="space-y-2">
-                                  {Array.isArray(module.lessons) && module.lessons.length > 0 ? (
-                                    module.lessons.map((lesson) => (
-                                      <li
-                                        key={lesson.id}
-                                        className="flex items-center justify-between gap-3 text-sm text-gray-700"
-                                      >
-                                        <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-xs text-gray-400 w-6">
-                                            {lesson.order || 1}.
-                                          </span>
-                                          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                                          <span className="truncate">{lesson.title}</span>
-                                        </div>
-                                        {lesson.estimatedDurationMinutes ? (
-                                          <span className="text-xs text-gray-400">
-                                            {lesson.estimatedDurationMinutes} min
-                                          </span>
-                                        ) : null}
-                                      </li>
-                                    ))
-                                  ) : (
-                                    <li className="text-sm text-gray-400">
-                                      Lessons for this module will appear here.
-                                    </li>
-                                  )}
-                                </ul>
+                                  {Array.isArray(module.items) && module.items.length > 0 ? (
+                                    module.items.map((item, itemIndex) => {
+                                      if (typeof item.value === 'string') return null
 
-                                {Array.isArray(module.assessments) &&
-                                  module.assessments.length > 0 && (
-                                    <div className="mt-4">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                          Assessments
-                                        </span>
-                                        <span className="h-px flex-1 bg-gray-200" />
-                                      </div>
-                                      <ul className="space-y-2">
-                                        {module.assessments.map((assessment) => (
+                                      if (item.relationTo === 'course-lessons') {
+                                        const lesson = item.value as any
+                                        return (
+                                          <li
+                                            key={lesson.id}
+                                            className="flex items-center justify-between gap-3 text-sm text-gray-700"
+                                          >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                              <span className="text-xs text-gray-400 w-6">
+                                                {itemIndex + 1}.
+                                              </span>
+                                              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                              <span className="truncate">{lesson.title}</span>
+                                            </div>
+                                            {lesson.estimatedDurationMinutes ? (
+                                              <span className="text-xs text-gray-400">
+                                                {lesson.estimatedDurationMinutes} min
+                                              </span>
+                                            ) : null}
+                                          </li>
+                                        )
+                                      } else if (item.relationTo === 'assessments') {
+                                        const assessment = item.value as any
+                                        return (
                                           <li
                                             key={assessment.id}
                                             className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-sm"
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
+                                              <span className="text-xs text-gray-400 w-6">
+                                                {itemIndex + 1}.
+                                              </span>
                                               <span
                                                 className={
                                                   assessment.assessmentType === 'exam'
@@ -1287,10 +1303,16 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                               ) : null}
                                             </div>
                                           </li>
-                                        ))}
-                                      </ul>
-                                    </div>
+                                        )
+                                      }
+                                      return null
+                                    })
+                                  ) : (
+                                    <li className="text-sm text-gray-400">
+                                      Content for this module will appear here.
+                                    </li>
                                   )}
+                                </ul>
                               </div>
                             )}
                           </div>

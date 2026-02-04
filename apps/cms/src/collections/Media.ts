@@ -29,6 +29,10 @@ export const Media: CollectionConfig = {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/x-cfb', // Old Office format (doc, xls, ppt)
+      'application/vnd.ms-powerpoint.presentation.macroEnabled.12', // .pptm
+      'application/vnd.ms-powerpoint.slideshow.macroEnabled.12', // .ppsm
+      'application/vnd.openxmlformats-officedocument.presentationml.slideshow', // .ppsx
     ],
   },
 }

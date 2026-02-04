@@ -48,7 +48,16 @@ type PayloadMediaDoc = {
 export function mapPayloadMediaDocsToSharedMediaItems(docs: unknown): SharedMediaItem[] {
   const list = Array.isArray(docs) ? (docs as PayloadMediaDoc[]) : [];
   return list
-    .filter((d) => (typeof d?.mimeType === 'string' ? d.mimeType.startsWith('image/') : true))
+    .filter((d) => {
+      if (typeof d?.mimeType !== 'string') return true;
+      return (
+        d.mimeType.startsWith('image/') ||
+        d.mimeType === 'application/vnd.ms-powerpoint' ||
+        d.mimeType ===
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        d.mimeType === 'application/x-cfb'
+      );
+    })
     .map((d) => ({
       id: String(d.id ?? d._id ?? d.filename ?? Math.random().toString(36)),
       url: String(d.cloudinaryURL ?? d.thumbnailURL ?? d.url ?? ''),
@@ -65,6 +74,7 @@ type ImageNodeJSON = {
   caption?: string;
   width?: string;
   height?: string;
+  mimeType?: string;
 } & SerializedLexicalNode;
 
 class ImageNode extends DecoratorNode<React.ReactNode> {
@@ -73,27 +83,45 @@ class ImageNode extends DecoratorNode<React.ReactNode> {
   __caption: string;
   __width: string;
   __height: string;
+  __mimeType: string;
 
   static getType() {
     return 'course-image';
   }
 
   static clone(node: ImageNode) {
-    return new ImageNode(node.__url, node.__alt, node.__caption, node.__width, node.__height, node.__key);
+    return new ImageNode(
+      node.__url,
+      node.__alt,
+      node.__caption,
+      node.__width,
+      node.__height,
+      node.__mimeType,
+      node.__key,
+    );
   }
 
-  constructor(url: string, alt = '', caption = '', width?: string, height?: string, key?: NodeKey) {
+  constructor(
+    url: string,
+    alt = '',
+    caption = '',
+    width?: string,
+    height?: string,
+    mimeType?: string,
+    key?: NodeKey,
+  ) {
     super(key);
     this.__url = url;
     this.__alt = alt;
     this.__caption = caption;
     this.__width = width || '';
     this.__height = height || '';
+    this.__mimeType = mimeType || '';
   }
 
   static importJSON(serializedNode: ImageNodeJSON) {
-    const { url, alt, caption, width, height } = serializedNode;
-    return new ImageNode(url, alt || '', caption || '', width, height);
+    const { url, alt, caption, width, height, mimeType } = serializedNode;
+    return new ImageNode(url, alt || '', caption || '', width, height, mimeType);
   }
 
   exportJSON(): ImageNodeJSON {
@@ -106,6 +134,7 @@ class ImageNode extends DecoratorNode<React.ReactNode> {
       caption: this.__caption || undefined,
       width: this.__width || undefined,
       height: this.__height || undefined,
+      mimeType: this.__mimeType || undefined,
     };
   }
 
@@ -120,20 +149,68 @@ class ImageNode extends DecoratorNode<React.ReactNode> {
     figure.style.alignItems = 'flex-start';
     figure.style.margin = '12px 0';
 
-    const img = document.createElement('img');
-    img.src = this.__url;
-    img.alt = this.__alt;
-    img.style.maxWidth = '100%';
-    img.style.borderRadius = '4px';
-    img.style.border = '1px solid #e5e7eb';
-    if (this.__width) {
-      img.style.width = this.__width;
-    }
-    if (this.__height) {
-      img.style.height = this.__height;
-    }
+    const isImage =
+      !this.__mimeType ||
+      this.__mimeType.startsWith('image/') ||
+      this.__url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i);
 
-    figure.appendChild(img);
+    if (isImage) {
+      const img = document.createElement('img');
+      img.src = this.__url;
+      img.alt = this.__alt;
+      img.style.maxWidth = '100%';
+      img.style.borderRadius = '4px';
+      img.style.border = '1px solid #e5e7eb';
+      if (this.__width) {
+        img.style.width = this.__width;
+      }
+      if (this.__height) {
+        img.style.height = this.__height;
+      }
+      figure.appendChild(img);
+    } else {
+      // Render file card for PPT/Docs
+      const card = document.createElement('a');
+      card.href = this.__url;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.style.display = 'flex';
+      card.style.alignItems = 'center';
+      card.style.gap = '12px';
+      card.style.padding = '12px';
+      card.style.border = '1px solid #e5e7eb';
+      card.style.borderRadius = '8px';
+      card.style.backgroundColor = '#f9fafb';
+      card.style.textDecoration = 'none';
+      card.style.color = 'inherit';
+      card.style.width = '100%';
+      card.style.maxWidth = '400px';
+
+      const icon = document.createElement('div');
+      icon.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-presentation"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M2 15h10"/><path d="m2 15 2 6"/><path d="m12 15-2 6"/></svg>';
+      icon.style.color = '#e11d48'; // Rose color for PPT
+
+      const info = document.createElement('div');
+      info.style.display = 'flex';
+      info.style.flexDirection = 'column';
+
+      const title = document.createElement('span');
+      title.textContent = this.__alt || 'Presentation File';
+      title.style.fontWeight = '500';
+      title.style.fontSize = '14px';
+
+      const type = document.createElement('span');
+      type.textContent = 'PowerPoint Presentation';
+      type.style.fontSize = '12px';
+      type.style.color = '#6b7280';
+
+      info.appendChild(title);
+      info.appendChild(type);
+      card.appendChild(icon);
+      card.appendChild(info);
+      figure.appendChild(card);
+    }
 
     if (this.__caption) {
       const caption = document.createElement('figcaption');
@@ -148,21 +225,43 @@ class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 
   updateDOM(prevNode: ImageNode, dom: HTMLElement) {
-    if (prevNode.__width === this.__width && prevNode.__height === this.__height) {
+    if (
+      prevNode.__width === this.__width &&
+      prevNode.__height === this.__height &&
+      prevNode.__url === this.__url
+    ) {
       return false;
     }
-    const img = dom.querySelector('img') as globalThis.HTMLImageElement | null;
-    if (img) {
-      if (this.__width) {
-        img.style.width = this.__width;
+    // Re-create DOM if URL changes or type changes significantly
+    // For simplicity, we can return true to force re-render if fundamental props change
+    // But for width/height on images, we can optimize
+    const isImage =
+      !this.__mimeType ||
+      this.__mimeType.startsWith('image/') ||
+      this.__url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i);
+
+    if (isImage) {
+      const img = dom.querySelector('img') as globalThis.HTMLImageElement | null;
+      if (img) {
+        if (this.__width) {
+          img.style.width = this.__width;
+        } else {
+          img.style.removeProperty('width');
+        }
+        if (this.__height) {
+          img.style.height = this.__height;
+        } else {
+          img.style.removeProperty('height');
+        }
+        if (img.src !== this.__url) img.src = this.__url;
       } else {
-        img.style.removeProperty('width');
+        return true; // Structure changed
       }
-      if (this.__height) {
-        img.style.height = this.__height;
-      } else {
-        img.style.removeProperty('height');
-      }
+    } else {
+      // Check if we have a card
+      const card = dom.querySelector('a');
+      if (!card) return true; // Structure changed
+      if (card.href !== this.__url) card.href = this.__url;
     }
     return false;
   }
@@ -172,8 +271,8 @@ class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 }
 
-function $createImageNode(config: { url: string; alt?: string }) {
-  return new ImageNode(config.url, config.alt || '');
+function $createImageNode(config: { url: string; alt?: string; mimeType?: string }) {
+  return new ImageNode(config.url, config.alt || '', undefined, undefined, undefined, config.mimeType);
 }
 
 const ToolbarButton: React.FC<React.ButtonHTMLAttributes<globalThis.HTMLButtonElement>> = (props) => {
@@ -374,209 +473,257 @@ const SlashPopupPlugin: React.FC<{
 
   const slashMenu = open
     ? React.createElement('div', {
-        ref: menuRef,
+      ref: menuRef,
+      style: {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 260,
+        border: '1px solid #e5e7eb',
+        borderRadius: 8,
+        background: '#ffffff',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        padding: 8,
+        zIndex: 9999,
+      },
+      children: React.createElement('button', {
+        type: 'button',
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          width: '100%',
+          padding: '8px 10px',
+          borderRadius: 6,
+          border: '1px solid #e5e7eb',
+          background: '#f9fafb',
+          cursor: 'pointer',
+          fontSize: 13,
+        },
+        children: 'Media Assets',
+        onClick: () => {
+          editor.update(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+              const node = selection.anchor.getNode();
+              const offset: number =
+                (selection as unknown as { anchor: { offset: number } }).anchor.offset ?? 0;
+              if (node instanceof TextNode) {
+                const text = node.getTextContent();
+                if (offset > 0 && text.charAt(offset - 1) === '/') {
+                  const before = text.slice(0, offset - 1);
+                  const after = text.slice(offset);
+                  node.setTextContent(before + after);
+                }
+              }
+            }
+          });
+          setOpen(false);
+          setOpenLibrary(true);
+        },
+      }),
+    })
+    : null;
+
+  const libraryModal = openLibrary
+    ? React.createElement('div', {
+      style: {
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.35)',
+        zIndex: 9998,
+      },
+      children: React.createElement('div', {
+        ref: libraryRef,
         style: {
           position: 'fixed',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 260,
+          width: 800,
+          maxWidth: '95vw',
+          height: 420,
+          maxHeight: '80vh',
           border: '1px solid #e5e7eb',
-          borderRadius: 8,
+          borderRadius: 10,
           background: '#ffffff',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-          padding: 8,
-          zIndex: 9999,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+          display: 'flex',
+          flexDirection: 'column',
         },
-        children: React.createElement('button', {
-          type: 'button',
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            width: '100%',
-            padding: '8px 10px',
-            borderRadius: 6,
-            border: '1px solid #e5e7eb',
-            background: '#f9fafb',
-            cursor: 'pointer',
-            fontSize: 13,
-          },
-          children: 'Image',
-          onClick: () => {
-            editor.update(() => {
-              const selection = $getSelection();
-              if ($isRangeSelection(selection)) {
-                const node = selection.anchor.getNode();
-                const offset: number =
-                  (selection as unknown as { anchor: { offset: number } }).anchor.offset ?? 0;
-                if (node instanceof TextNode) {
-                  const text = node.getTextContent();
-                  if (offset > 0 && text.charAt(offset - 1) === '/') {
-                    const before = text.slice(0, offset - 1);
-                    const after = text.slice(offset);
-                    node.setTextContent(before + after);
-                  }
-                }
-              }
-            });
-            setOpen(false);
-            setOpenLibrary(true);
-          },
-        }),
-      })
-    : null;
-
-  const libraryModal = openLibrary
-    ? React.createElement('div', {
-        style: {
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.35)',
-          zIndex: 9998,
-        },
-        children: React.createElement('div', {
-          ref: libraryRef,
-          style: {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 800,
-            maxWidth: '95vw',
-            height: 420,
-            maxHeight: '80vh',
-            border: '1px solid #e5e7eb',
-            borderRadius: 10,
-            background: '#ffffff',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-          children: [
-            React.createElement('div', {
-              key: 'header',
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 16px',
-                borderBottom: '1px solid #e5e7eb',
-              },
-              children: [
-                React.createElement('div', {
-                  key: 'title',
-                  style: { fontSize: 16, fontWeight: 600 },
-                  children: 'Media Library',
-                }),
-                React.createElement('button', {
-                  key: 'close',
-                  type: 'button',
+        children: [
+          React.createElement('div', {
+            key: 'header',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              borderBottom: '1px solid #e5e7eb',
+            },
+            children: [
+              React.createElement('div', {
+                key: 'title',
+                style: { fontSize: 16, fontWeight: 600 },
+                children: 'Media Library',
+              }),
+              React.createElement('button', {
+                key: 'close',
+                type: 'button',
+                style: {
+                  height: 28,
+                  padding: '0 10px',
+                  borderRadius: 6,
+                  border: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                },
+                children: 'Close',
+                onClick: () => setOpenLibrary(false),
+              }),
+            ],
+          }),
+          React.createElement('div', {
+            key: 'body',
+            style: {
+              flex: 1,
+              padding: 16,
+              overflow: 'auto',
+            },
+            children:
+              loading
+                ? React.createElement('div', {
                   style: {
-                    height: 28,
-                    padding: '0 10px',
-                    borderRadius: 6,
-                    border: '1px solid #e5e7eb',
-                    background: '#f9fafb',
-                    cursor: 'pointer',
-                    fontSize: 13,
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#6b7280',
                   },
-                  children: 'Close',
-                  onClick: () => setOpenLibrary(false),
-                }),
-              ],
-            }),
-            React.createElement('div', {
-              key: 'body',
-              style: {
-                flex: 1,
-                padding: 16,
-                overflow: 'auto',
-              },
-              children:
-                loading
+                  children: 'Loading…',
+                })
+                : error
                   ? React.createElement('div', {
+                    style: { color: '#ef4444', fontSize: 13 },
+                    children: error,
+                  })
+                  : React.createElement(
+                    'div',
+                    {
                       style: {
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#6b7280',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                        gap: 12,
                       },
-                      children: 'Loading…',
-                    })
-                  : error
-                    ? React.createElement('div', {
-                        style: { color: '#ef4444', fontSize: 13 },
-                        children: error,
-                      })
-                    : React.createElement(
-                        'div',
+                    },
+                    items.map((item) => {
+                      const isImage =
+                        !item.mimeType || item.mimeType.startsWith('image/');
+
+                      return React.createElement(
+                        'button',
                         {
+                          key: item.id,
+                          type: 'button',
                           style: {
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                            gap: 12,
+                            display: 'block',
+                            width: '100%',
+                            borderRadius: 8,
+                            border: '1px solid #e5e7eb',
+                            background: '#ffffff',
+                            padding: 6,
+                            cursor: 'pointer',
+                          },
+                          onClick: () => {
+                            editor.update(() => {
+                              const selection = $getSelection();
+                              if ($isRangeSelection(selection)) {
+                                const node = selection.anchor.getNode();
+                                const offset: number =
+                                  (selection as unknown as { anchor: { offset: number } })
+                                    .anchor.offset ?? 0;
+                                if (node instanceof TextNode) {
+                                  const text = node.getTextContent();
+                                  if (offset > 0 && text.charAt(offset - 1) === '/') {
+                                    const before = text.slice(0, offset - 1);
+                                    const after = text.slice(offset);
+                                    node.setTextContent(before + after);
+                                  }
+                                }
+                                const url = item.url;
+                                const alt = item.alt || '';
+                                const mimeType = item.mimeType;
+                                const imageNode = $createImageNode({ url, alt, mimeType });
+                                selection.insertNodes([imageNode]);
+                                if (commitRef) commitRef.current = true;
+                              }
+                            });
+                            setOpenLibrary(false);
                           },
                         },
-                        items.map((item) =>
-                          React.createElement(
-                            'button',
-                            {
-                              key: item.id,
-                              type: 'button',
-                              style: {
-                                display: 'block',
-                                width: '100%',
-                                borderRadius: 8,
-                                border: '1px solid #e5e7eb',
-                                background: '#ffffff',
-                                padding: 6,
-                                cursor: 'pointer',
-                              },
-                              onClick: () => {
-                                editor.update(() => {
-                                  const selection = $getSelection();
-                                  if ($isRangeSelection(selection)) {
-                                    const node = selection.anchor.getNode();
-                                    const offset: number =
-                                      (selection as unknown as { anchor: { offset: number } }).anchor.offset ?? 0;
-                                    if (node instanceof TextNode) {
-                                      const text = node.getTextContent();
-                                      if (offset > 0 && text.charAt(offset - 1) === '/') {
-                                        const before = text.slice(0, offset - 1);
-                                        const after = text.slice(offset);
-                                        node.setTextContent(before + after);
-                                      }
-                                    }
-                                    const url = item.url;
-                                    const alt = item.alt || '';
-                                    const imageNode = $createImageNode({ url, alt });
-                                    selection.insertNodes([imageNode]);
-                                    if (commitRef) commitRef.current = true;
-                                  }
-                                });
-                                setOpenLibrary(false);
-                              },
+                        isImage
+                          ? React.createElement('img', {
+                            src: item.url,
+                            alt: item.alt || '',
+                            style: {
+                              width: '100%',
+                              height: 100,
+                              objectFit: 'cover',
+                              borderRadius: 6,
+                              background: '#f3f4f6',
                             },
-                            React.createElement('img', {
-                              src: item.url,
-                              alt: item.alt || '',
+                          })
+                          : React.createElement(
+                            'div',
+                            {
                               style: {
                                 width: '100%',
                                 height: 100,
-                                objectFit: 'cover',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 borderRadius: 6,
                                 background: '#f3f4f6',
+                                color: '#6b7280',
+                                gap: 8,
+                                padding: 4,
                               },
-                            }),
+                            },
+                            [
+                              React.createElement('div', {
+                                key: 'icon',
+                                dangerouslySetInnerHTML: {
+                                  __html:
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>',
+                                },
+                              }),
+                              React.createElement(
+                                'div',
+                                {
+                                  key: 'text',
+                                  style: {
+                                    fontSize: 10,
+                                    textAlign: 'center',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    width: '100%',
+                                  },
+                                },
+                                item.alt || 'File',
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-            }),
-          ],
-        }),
-      })
+                      );
+                    }),
+                  ),
+          }),
+        ],
+      }),
+    })
     : null;
 
   return (
