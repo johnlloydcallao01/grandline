@@ -118,6 +118,15 @@ export const Assessments: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'showCorrectAnswer',
+      type: 'checkbox',
+      label: 'Show Correct Answer',
+      defaultValue: false,
+      admin: {
+        description: 'Allow students to view the correct answer to the question in reviewing this quiz',
+      },
+    },
+    {
       name: 'items',
       type: 'array',
       required: true,

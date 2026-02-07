@@ -1,6 +1,5 @@
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import type {
   ContentBlock,
   HeadingBlock,
@@ -354,7 +353,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     const isPPT =
       mimeType === 'application/vnd.ms-powerpoint' ||
       mimeType ===
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
       /\.(ppt|pptx)$/i.test(src)
 
     if (isPPT) {
@@ -368,8 +367,8 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
               frameBorder="0"
               title={alt || 'Presentation'}
             >
-              This browser does not support PDFs. Please download the PDF to view it:
-              <a href={src}>Download PDF</a>
+              This browser does not support presentations. Please download the file to view it:
+              <a href={src}>Download Presentation</a>
             </iframe>
           </div>
           <div className="mt-2 flex items-center justify-between">
@@ -419,6 +418,57 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
             {caption}
           </figcaption>
         )}
+      </figure>
+    )
+  }
+
+  if (type === 'iframe') {
+    const src = node.src
+    if (!src) return null
+
+    const wStr = String(node.width || '100%')
+    const hStr = String(node.height || '450')
+
+    const w = parseInt(wStr, 10)
+    const h = parseInt(hStr, 10)
+    const isPixel =
+      !isNaN(w) &&
+      !isNaN(h) &&
+      w > 0 &&
+      h > 0 &&
+      !wStr.includes('%') &&
+      !hStr.includes('%')
+
+    return (
+      <figure key={key} className="w-full mb-6">
+        <div
+          className="w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+          style={
+            isPixel
+              ? {
+                  width: '100%',
+                  maxWidth: `${w}px`,
+                  aspectRatio: `${w} / ${h}`,
+                  height: 'auto',
+                }
+              : {
+                  width: wStr,
+                  height: hStr.includes('%')
+                    ? hStr
+                    : `${hStr.replace('px', '')}px`,
+                }
+          }
+        >
+          <iframe
+            src={src}
+            width={isPixel ? '100%' : wStr}
+            height={isPixel ? '100%' : '100%'}
+            style={{ minHeight: '100%' }}
+            allowFullScreen
+            loading="lazy"
+            className="w-full h-full"
+          />
+        </div>
       </figure>
     )
   }

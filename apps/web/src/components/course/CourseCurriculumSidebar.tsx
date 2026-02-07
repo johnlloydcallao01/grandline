@@ -10,6 +10,7 @@ interface CourseCurriculumSidebarProps {
   selectedKey: string | null;
   onSelectItem: (item: PlayerItem) => void;
   flatItems: PlayerItem[];
+  completedLessonIds?: string[];
 }
 
 export function CourseCurriculumSidebar({
@@ -19,6 +20,7 @@ export function CourseCurriculumSidebar({
   selectedKey,
   onSelectItem,
   flatItems,
+  completedLessonIds = [],
 }: CourseCurriculumSidebarProps) {
   return (
     <div className="flex-1 flex flex-col min-w-0 w-full">
@@ -34,8 +36,6 @@ export function CourseCurriculumSidebar({
         {curriculum && Array.isArray(curriculum.modules) && curriculum.modules.length > 0 ? (
           <>
             {curriculum.modules
-              .slice()
-              .sort((a, b) => a.order - b.order)
               .map((mod, index) => {
                 const isExpanded = expandedModules.includes(mod.id);
                 let lessonCount = 0;
@@ -106,6 +106,7 @@ export function CourseCurriculumSidebar({
                                 const lesson = item.value;
                                 const itemKey = buildItemKey('lesson', lesson.id);
                                 const isActive = selectedKey === itemKey;
+                                const isCompleted = completedLessonIds.includes(String(lesson.id));
 
                                 return (
                                   <li key={lesson.id}>
@@ -121,7 +122,11 @@ export function CourseCurriculumSidebar({
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#201a7c]" />
+                                        {isCompleted ? (
+                                          <i className="fa fa-check-circle text-green-500 text-xs" />
+                                        ) : (
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[#201a7c]" />
+                                        )}
                                         <span className="truncate">{lesson.title}</span>
                                       </span>
                                       {lesson.estimatedDurationMinutes ? (
@@ -137,6 +142,7 @@ export function CourseCurriculumSidebar({
                                 const itemKey = buildItemKey('assessment', assessment.id);
                                 const isActive = selectedKey === itemKey;
                                 const isQuiz = assessment.assessmentType === 'quiz';
+                                const isCompleted = completedLessonIds.includes(String(assessment.id));
 
                                 return (
                                   <li key={assessment.id}>
@@ -152,10 +158,14 @@ export function CourseCurriculumSidebar({
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
-                                        <i
-                                          className={`fa ${isQuiz ? 'fa-question-circle' : 'fa-file-alt'} text-[10px] w-3 text-center ${isActive ? 'text-[#201a7c]' : 'text-gray-400'
-                                            }`}
-                                        />
+                                        {isCompleted ? (
+                                          <i className="fa fa-check-circle text-green-500 text-xs" />
+                                        ) : (
+                                          <i
+                                            className={`fa ${isQuiz ? 'fa-question-circle' : 'fa-file-alt'} text-[10px] w-3 text-center ${isActive ? 'text-[#201a7c]' : 'text-gray-400'
+                                              }`}
+                                          />
+                                        )}
                                         <span className="truncate">{assessment.title}</span>
                                       </span>
                                       {assessment.estimatedDurationMinutes ? (

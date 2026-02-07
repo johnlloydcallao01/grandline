@@ -59,6 +59,13 @@ import * as migration_20260116_065844 from './20260116_065844';
 import * as migration_20260201_092442 from './20260201_092442';
 import * as migration_20260204_041555_add_items_to_course_modules from './20260204_041555_add_items_to_course_modules';
 import * as migration_20260204_043328_remove_order_fields from './20260204_043328_remove_order_fields';
+import * as migration_20260205_091817_add_show_correct_answer from './20260205_091817_add_show_correct_answer';
+import * as migration_20260205_115601_add_modules_to_courses from './20260205_115601_add_modules_to_courses';
+import * as migration_20260205_122212_remove_course_and_order_from_modules from './20260205_122212_remove_course_and_order_from_modules';
+import * as migration_20260206_072527_add_evaluation_mode from './20260206_072527_add_evaluation_mode';
+import * as migration_20260206_080033_add_completed_lessons_to_enrollments from './20260206_080033_add_completed_lessons_to_enrollments';
+import * as migration_20260206_095021_remove_completed_lessons from './20260206_095021_remove_completed_lessons';
+import * as migration_20260206_101113_add_course_item_progress from './20260206_101113_add_course_item_progress';
 
 export const migrations = [
   {
@@ -364,6 +371,41 @@ export const migrations = [
   {
     up: migration_20260204_043328_remove_order_fields.up,
     down: migration_20260204_043328_remove_order_fields.down,
-    name: '20260204_043328_remove_order_fields'
+    name: '20260204_043328_remove_order_fields',
+  },
+  {
+    up: migration_20260205_091817_add_show_correct_answer.up,
+    down: migration_20260205_091817_add_show_correct_answer.down,
+    name: '20260205_091817_add_show_correct_answer',
+  },
+  {
+    up: migration_20260205_115601_add_modules_to_courses.up,
+    down: migration_20260205_115601_add_modules_to_courses.down,
+    name: '20260205_115601_add_modules_to_courses',
+  },
+  {
+    up: migration_20260205_122212_remove_course_and_order_from_modules.up,
+    down: migration_20260205_122212_remove_course_and_order_from_modules.down,
+    name: '20260205_122212_remove_course_and_order_from_modules',
+  },
+  {
+    up: migration_20260206_072527_add_evaluation_mode.up,
+    down: migration_20260206_072527_add_evaluation_mode.down,
+    name: '20260206_072527_add_evaluation_mode',
+  },
+  {
+    up: migration_20260206_080033_add_completed_lessons_to_enrollments.up,
+    down: migration_20260206_080033_add_completed_lessons_to_enrollments.down,
+    name: '20260206_080033_add_completed_lessons_to_enrollments',
+  },
+  {
+    up: migration_20260206_095021_remove_completed_lessons.up,
+    down: migration_20260206_095021_remove_completed_lessons.down,
+    name: '20260206_095021_remove_completed_lessons',
+  },
+  {
+    up: migration_20260206_101113_add_course_item_progress.up,
+    down: migration_20260206_101113_add_course_item_progress.down,
+    name: '20260206_101113_add_course_item_progress'
   },
 ];

@@ -37,6 +37,7 @@ import { Questions } from './collections/Questions'
 import { Assessments } from './collections/Assessments'
 import { Wishlists } from './collections/Wishlists'
 import { RecentlyViewedCourses } from './collections/RecentlyViewedCourses'
+import { CourseItemProgress } from './collections/CourseItemProgress'
 import { CourseFeedbacks } from './collections/CourseFeedbacks'
 import { NotificationTemplates } from './collections/NotificationTemplates'
 import { Notifications } from './collections/Notifications'
@@ -81,6 +82,7 @@ export default buildConfig({
     CourseFeedbacks,
     Wishlists,
     RecentlyViewedCourses,
+    CourseItemProgress,
     RecentSearches,
     Questions,
     Assessments,

@@ -128,6 +128,15 @@ export interface Course {
   estimatedDurationUnit?: 'minutes' | 'hours' | 'days' | 'weeks' | null;
   updatedAt?: string | null;
   courseMaterials?: CourseMaterialAttachment[] | null;
+  evaluationMode?:
+    | 'lessons'
+    | 'exam'
+    | 'quizzes'
+    | 'lessons_exam'
+    | 'lessons_quizzes'
+    | 'quizzes_exam'
+    | 'lessons_quizzes_exam'
+    | null;
 }
 
 // Extended Course interface with instructor information
@@ -159,6 +168,7 @@ export interface CourseWithInstructor extends Course {
           timeLimitMinutes?: number | null;
           maxAttempts?: number | null;
           isRequired?: boolean;
+          showCorrectAnswer?: boolean;
         } | string; // Could be string ID if depth is shallow
       }>;
       lessons: Array<{
@@ -184,6 +194,7 @@ export interface CourseWithInstructor extends Course {
       timeLimitMinutes?: number | null;
       maxAttempts?: number | null;
       questions?: any[];
+      showCorrectAnswer?: boolean;
     } | null;
   } | null;
 }

@@ -26,7 +26,7 @@ export default function PortalLayout({
   const isCoursePlayer =
     typeof pathname === 'string' &&
     pathname.startsWith('/portal/courses/') &&
-    pathname.endsWith('/player')
+    pathname.includes('/player')
 
   // Hide instant loading screen when portal loads
   useEffect(() => {
@@ -98,9 +98,8 @@ export default function PortalLayout({
 
         {/* Main Content Area - Portal pages content */}
         <main
-          className={`transition-all duration-300 bg-gray-50 ${
-            isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
-          }`}
+          className={`transition-all duration-300 bg-gray-50 ${isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+            }`}
           style={{ backgroundColor: '#f9fafb' }}
         >
           <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
@@ -122,11 +121,10 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
   return (
     <aside
       data-sidebar="portal"
-      className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${
-        isOpen
+      className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${isOpen
           ? 'w-60 translate-x-0'
           : 'w-20 translate-x-0'
-      }`}
+        }`}
       style={{
         height: 'calc(100vh - 4rem)',
         scrollbarWidth: 'thin',
@@ -137,11 +135,10 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
         <nav className="space-y-1">
           {/* Back Navigation */}
           <div className="space-y-1">
-            <button 
+            <button
               onClick={() => window.history.back()}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`}
             >
               <div className="w-5 h-5 flex items-center justify-center">
                 <i className="fa fa-arrow-left text-gray-600"></i>
@@ -154,9 +151,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           <div className="space-y-1">
             {(Link as any)({
               href: "/",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -173,13 +169,12 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           {/* Portal Navigation */}
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Learning</div>}
-            
+
             {/* Portal Dashboard */}
             {(Link as any)({
               href: "/portal/dashboard",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -193,9 +188,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Portal Courses */}
             {(Link as any)({
               href: "/portal/courses",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -209,9 +203,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Portal Instructors */}
             {(Link as any)({
               href: "/portal/instructors",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -228,13 +221,12 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           {/* Activities Navigation */}
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Activities</div>}
-            
+
             {/* Assignments */}
             {(Link as any)({
               href: "/portal/assignments",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -248,9 +240,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Quizzes & Exams */}
             {(Link as any)({
               href: "/portal/quizzes-exams",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -264,9 +255,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Submitted Work */}
             {(Link as any)({
               href: "/portal/submitted-work",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -280,9 +270,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Feedback & Comments */}
             {(Link as any)({
               href: "/portal/feedback-comments",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -297,13 +286,12 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           {/* Interaction Navigation */}
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Interaction</div>}
-            
+
             {/* Discussion Board */}
             {(Link as any)({
               href: "/portal/discussion-board",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -317,9 +305,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Ask Instructor */}
             {(Link as any)({
               href: "/portal/ask-instructor",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -333,9 +320,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Announcements */}
             {(Link as any)({
               href: "/portal/announcements",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -352,13 +338,12 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           {/* General Navigation */}
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">General</div>}
-            
+
             {/* Settings */}
             {(Link as any)({
               href: "/portal/settings",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -372,9 +357,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
             {/* Requirements */}
             {(Link as any)({
               href: "/portal/requirements",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${
-                isOpen ? 'justify-start' : 'justify-center'
-              }`,
+              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
+                }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">

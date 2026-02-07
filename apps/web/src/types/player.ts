@@ -14,5 +14,7 @@ export interface PlayerItem {
     timeLimitMinutes?: number | null;
     maxAttempts?: number | null;
     questionsCount?: number;
+    questions?: any[];
+    showCorrectAnswer?: boolean;
   };
 }

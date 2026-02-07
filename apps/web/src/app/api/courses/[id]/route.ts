@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
-    const courseRes = await fetch(`${apiUrl}/courses/${id}?depth=2`, {
+    const courseRes = await fetch(`${apiUrl}/courses/${id}?depth=3`, {
       headers,
       cache: 'no-store',
     })
@@ -43,44 +43,27 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     let courseMaterials: any[] = []
     let announcements: any[] = []
     let enrollmentStatus: string | null = null
+    let completedLessons: string[] = []
 
     if (courseId) {
-      const paramsModules = new URLSearchParams()
-      paramsModules.set('where[course][equals]', String(courseId))
-      paramsModules.set('sort', 'order')
-      paramsModules.set('limit', '100')
-      paramsModules.set('depth', '2')
+      // Modules are now directly available in the course object and already ordered
+      const modulesRaw = Array.isArray(courseData.modules) ? courseData.modules : []
 
-      const modulesRes = await fetch(`${apiUrl}/course-modules?${paramsModules.toString()}`, {
-        headers,
-        cache: 'no-store',
-      })
-
-      const modulesJson = modulesRes.ok ? await modulesRes.json() : { docs: [] }
-      const modules = Array.isArray(modulesJson?.docs) ? modulesJson.docs : []
-
-      const moduleMap: Record<string, {
-        id: string;
-        title: string;
-        order: number;
-        estimatedDurationMinutes?: number | null;
-        lessons: any[];
-        assessments: any[];
-        items: any[];
-      }> = {}
-
-      for (const m of modules) {
+      const modulesForCurriculum = modulesRaw.map((m: any, index: number) => {
         const idStr = String(m.id)
-        moduleMap[idStr] = {
+        // Synthesize order from array index if missing
+        const order = typeof m.order === 'number' ? m.order : index + 1
+
+        return {
           id: idStr,
           title: String(m.title || ''),
-          order: typeof m.order === 'number' ? m.order : parseInt(String(m.order ?? '0'), 10) || 0,
+          order,
           estimatedDurationMinutes: null,
           lessons: [], // Legacy array, kept empty as we use items
           assessments: [], // Legacy array, kept empty as we use items
           items: Array.isArray(m.items) ? m.items : [],
         }
-      }
+      })
 
       // Fetch Final Exam separately
       let finalExam: any = null
@@ -89,7 +72,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       paramsFinalExam.set('where[course][equals]', String(courseId))
       paramsFinalExam.set('where[assessmentType][equals]', 'final_exam')
       paramsFinalExam.set('limit', '1')
-      paramsFinalExam.set('depth', '0')
+      paramsFinalExam.set('depth', '2')
 
       const finalExamRes = await fetch(`${apiUrl}/assessments?${paramsFinalExam.toString()}`, {
         headers,
@@ -104,16 +87,18 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         finalExam = {
           id: String(a.id),
           title: String(a.title || 'Final Exam'),
-          order: 0, // Field removed from DB
+          order: 0,
           estimatedDurationMinutes:
             typeof a.estimatedDuration === 'number'
               ? a.estimatedDuration
               : null,
           isRequired: typeof a.isRequired === 'boolean' ? a.isRequired : true,
+          passingScore: typeof a.passMark === 'number' ? a.passMark : null,
+          maxAttempts: typeof a.maxAttempts === 'number' ? a.maxAttempts : null,
+          timeLimitMinutes: typeof a.estimatedDuration === 'number' ? a.estimatedDuration : null,
+          questions: Array.isArray(a.items) ? a.items : [],
         }
       }
-
-      const modulesForCurriculum = Object.values(moduleMap).sort((a, b) => a.order - b.order)
 
       curriculum = {
         modules: modulesForCurriculum,
@@ -297,6 +282,12 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
           if (rawStatus) {
             enrollmentStatus = rawStatus
           }
+          // Extract completedLessons
+          if (first && Array.isArray(first.completedLessons)) {
+             completedLessons = first.completedLessons
+          } else {
+             completedLessons = []
+          }
         }
       } catch (enrollmentError) {
         console.error('Error fetching enrollment status for course detail:', enrollmentError)
@@ -309,6 +300,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       courseMaterials,
       announcements,
       enrollmentStatus,
+      completedLessons,
     }
 
     return NextResponse.json(responseBody, {

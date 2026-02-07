@@ -199,8 +199,8 @@ export const lmsAccess = {
   userEnrollment: ({ req: { user } }: AccessArgs) => {
     if (!user) return false
 
-    // Admins and instructors can manage enrollments
-    if (user.role === 'admin' || user.role === 'instructor') {
+    // Admins, instructors, and service accounts can manage enrollments
+    if (user.role === 'admin' || user.role === 'instructor' || user.role === 'service') {
       return true
     }
 

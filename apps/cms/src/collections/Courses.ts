@@ -63,6 +63,15 @@ export const Courses: CollectionConfig = {
       },
     },
     {
+      name: 'modules',
+      type: 'relationship',
+      relationTo: 'course-modules',
+      hasMany: true,
+      admin: {
+        description: 'Manage the order of modules in this course.',
+      },
+    },
+    {
       name: 'descriptionBlocks',
       type: 'json',
       admin: {
@@ -250,6 +259,23 @@ export const Courses: CollectionConfig = {
       defaultValue: 70,
       admin: {
         description: 'Minimum grade required to pass (percentage)',
+      },
+    },
+    {
+      name: 'evaluationMode',
+      type: 'select',
+      options: [
+        { label: 'Evaluate via Lessons (Progress-Based)', value: 'lessons' },
+        { label: 'Evaluate via Final Quiz/Exam (Mastery-Based)', value: 'exam' },
+        { label: 'Evaluate via Passed Quizzes (Continuous Assessment)', value: 'quizzes' },
+        { label: 'Evaluate via Lessons + Final Exam (Prerequisite Model)', value: 'lessons_exam' },
+        { label: 'Evaluate via Lessons + Quizzes (Continuous Progress)', value: 'lessons_quizzes' },
+        { label: 'Evaluate via Quizzes + Final Exam (Performance Only)', value: 'quizzes_exam' },
+        { label: 'Evaluate via Lessons + Quizzes + Final Exam (Strict Academic)', value: 'lessons_quizzes_exam' },
+      ],
+      defaultValue: 'lessons_exam',
+      admin: {
+        description: 'Determines how the student passes the course',
       },
     },
 
