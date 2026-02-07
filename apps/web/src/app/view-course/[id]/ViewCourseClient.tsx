@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AuthorAvatar } from './AuthorAvatar'
@@ -49,13 +50,22 @@ function CourseOverviewCard({
 }) {
   const { wishlistMap, toggleWishlist } = useWishlist()
   const { user, isAuthenticated } = useUser()
+  const [mounted, setMounted] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  const [showModal, setShowModal] = useState(false)
+  const [currentStatus, setCurrentStatus] = useState(() => {
+    return initialEnrollmentStatus ? String(initialEnrollmentStatus).toLowerCase().trim() : initialEnrollmentStatus
+  })
   const [buttonLabel, setButtonLabel] = useState(() => {
     const raw = initialEnrollmentStatus
     if (!raw) {
       return 'Enroll Now'
     }
-    const status = String(raw)
+    const status = String(raw).toLowerCase().trim()
     if (status === 'active') {
       return 'Continue Learning'
     }
@@ -71,15 +81,82 @@ function CourseOverviewCard({
     return 'Enroll Now'
   })
   const [isLoadingEnrollment, setIsLoadingEnrollment] = useState(false)
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false)
+  const [feedbackModal, setFeedbackModal] = useState<{
+    isOpen: boolean
+    type: 'success' | 'error'
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
 
   const showHeart = typeof window !== 'undefined'
   const wishlisted = !!wishlistMap[String(course.id)]
+
+  const handleRequestEnrollment = async () => {
+    if (!user?.id || !course?.id) return
+
+    setIsSubmittingRequest(true)
+    try {
+      const token = localStorage.getItem('grandline_auth_token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (token) {
+        headers.Authorization = `users JWT ${token}`
+      }
+
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
+
+      const res = await fetch(`${apiBase}/lms/enrollment-requests`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: user.id,
+          courseId: course.id,
+        }),
+      })
+
+      if (res.ok) {
+        setShowModal(false)
+        setFeedbackModal({
+          isOpen: true,
+          type: 'success',
+          title: 'Enrollment Request Sent',
+          message: 'We have received your request. Our team will review it and contact you shortly via email.',
+        })
+      } else {
+        setFeedbackModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Request Failed',
+          message: 'We couldn\'t process your request at this time. Please try again later or contact support.',
+        })
+      }
+    } catch (error) {
+      console.error('Error sending enrollment request:', error)
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'An Error Occurred',
+        message: 'Something went wrong. Please check your internet connection and try again.',
+      })
+    } finally {
+      setIsSubmittingRequest(false)
+    }
+  }
 
   const handlePrimaryAction = () => {
     if (buttonLabel === 'Continue Learning') {
       window.location.href = `/portal/courses/${course.id}/player`
       return
     }
+    setShowModal(true)
   }
 
   useEffect(() => {
@@ -119,6 +196,7 @@ function CourseOverviewCard({
           method: 'GET',
           headers,
           credentials: 'include',
+          cache: 'no-store',
         })
 
         if (!res.ok) {
@@ -135,7 +213,8 @@ function CourseOverviewCard({
         let nextLabel = 'Enroll Now'
 
         if (enrollment && typeof (enrollment as any).status === 'string') {
-          const status = String((enrollment as any).status)
+          const status = String((enrollment as any).status).toLowerCase().trim()
+          setCurrentStatus(status)
 
           if (status === 'active') {
             nextLabel = 'Continue Learning'
@@ -173,6 +252,251 @@ function CourseOverviewCard({
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+      {mounted && createPortal(
+        <>
+          {/* Overlay */}
+          <div
+            className={`fixed inset-0 z-[9998] bg-black/50 transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+            onClick={() => setShowModal(false)}
+            aria-hidden="true"
+          />
+
+          {/* Modal Sheet */}
+          <div className={`fixed inset-x-0 bottom-0 z-[9999] bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out flex flex-col h-[90vh] ${showModal ? 'translate-y-0' : 'translate-y-full'
+            }`}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {buttonLabel === 'Enroll Now'
+                  ? (!isAuthenticated ? 'Login Required' : 'Enroll in Course')
+                  : 'Course Info'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5">
+              {buttonLabel === 'Enroll Now' && (
+                !isAuthenticated ? (
+                  <div className="flex flex-col items-center justify-center h-full py-10">
+                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                      <svg className="w-10 h-10 text-[#201a7c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Login to Enroll</h3>
+                    <p className="text-gray-500 text-center max-w-xs mb-8">
+                      You need to be logged in to enroll in this course and track your progress.
+                    </p>
+                    <div className="w-full max-w-sm space-y-3">
+                      <Link
+                        href={`/login?redirect=/view-course/${course.id}` as any}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        href={`/register?redirect=/view-course/${course.id}` as any}
+                        className="block w-full bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <div className="flex gap-4 mb-6">
+                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                        <Image
+                          src={thumbnailImageUrl}
+                          alt={altText}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 mb-1">{course.title}</h3>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold text-[#201a7c]">
+                            {formatPrice(course.discountedPrice)}
+                          </span>
+                          {course.price !== course.discountedPrice && (
+                            <span className="text-sm text-gray-400 line-through">
+                              {formatPrice(course.price)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                      <h4 className="font-semibold text-gray-900">Course Information</h4>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <div>Modules: {totalModules}</div>
+                        <div>Lessons: {totalLessons}</div>
+                        <div>Quizzes: {totalQuizzes}</div>
+                        <div>Language: English</div>
+                        <div>With certificate: Yes</div>
+                        {typeof course.estimatedDuration === 'number' && course.estimatedDuration > 0 && course.estimatedDurationUnit ? (
+                          <div>
+                            Estimated Duration:{' '}
+                            {course.estimatedDuration}{' '}
+                            {course.estimatedDurationUnit === 'minutes' && (course.estimatedDuration === 1 ? 'minute' : 'minutes')}
+                            {course.estimatedDurationUnit === 'hours' && (course.estimatedDuration === 1 ? 'hour' : 'hours')}
+                            {course.estimatedDurationUnit === 'days' && (course.estimatedDuration === 1 ? 'day' : 'days')}
+                            {course.estimatedDurationUnit === 'weeks' && (course.estimatedDuration === 1 ? 'week' : 'weeks')}
+                          </div>
+                        ) : null}
+                        <div>Last Updated: {formatLastUpdated(course.updatedAt)}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto">
+                      <button
+                        className="w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all active:scale-[0.98]"
+                        onClick={handleRequestEnrollment}
+                        disabled={isSubmittingRequest}
+                      >
+                        {isSubmittingRequest ? 'Requesting...' : 'Request Enrollment'}
+                      </button>
+                      <p className="text-center text-xs text-gray-400 mt-3">
+                        By requesting enrollment, you agree to our Terms of Service and Privacy Policy.
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {buttonLabel === 'View Enrollment Status' && (
+                <div className="flex flex-col items-center justify-center h-full py-10">
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${currentStatus === 'completed' ? 'bg-green-100 text-green-600' :
+                    currentStatus === 'pending' ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-red-100 text-red-600'
+                    }`}>
+                    {currentStatus === 'completed' ? (
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : currentStatus === 'pending' ? (
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    )}
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 capitalize">
+                    {currentStatus === 'completed' ? 'Course Completed' :
+                      currentStatus === 'pending' ? 'Enrollment Pending' :
+                        currentStatus === 'suspended' ? 'Enrollment Suspended' :
+                          currentStatus === 'dropped' ? 'Course Dropped' :
+                            currentStatus === 'expired' ? 'Enrollment Expired' :
+                              'Enrollment Status'}
+                  </h3>
+
+                  <p className="text-gray-500 text-center max-w-xs mb-8">
+                    {currentStatus === 'completed'
+                      ? "Congratulations! You have successfully completed this course."
+                      : currentStatus === 'pending'
+                        ? "Your enrollment is currently pending approval. You will be notified once it is active."
+                        : currentStatus === 'suspended'
+                          ? "Your access to this course has been suspended. Please contact support for assistance."
+                          : currentStatus === 'dropped'
+                            ? "You have dropped this course. You can re-enroll if you wish to continue."
+                            : currentStatus === 'expired'
+                              ? "Your enrollment period has expired. You may need to re-enroll to access the content."
+                              : `Your current enrollment status is ${currentStatus}.`}
+                  </p>
+
+                  <div className="w-full max-w-sm space-y-3">
+                    {currentStatus === 'completed' && (
+                      <Link
+                        href={`/portal/courses/${course.id}/player` as any}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        Review Course
+                      </Link>
+                    )}
+                    {(currentStatus === 'dropped' || currentStatus === 'expired') && (
+                      <button
+                        onClick={() => setButtonLabel('Enroll Now')}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        Re-enroll Now
+                      </button>
+                    )}
+                    {(currentStatus === 'suspended' || currentStatus === 'pending') && (
+                      <button
+                        onClick={() => window.location.href = 'mailto:support@grandlinemaritime.com'}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        Contact Support
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="block w-full bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackModal.isOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/60 transition-opacity"
+            onClick={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+          />
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative z-10 transform transition-all scale-100">
+            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${feedbackModal.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+              {feedbackModal.type === 'success' ? (
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+              {feedbackModal.title}
+            </h3>
+            <p className="text-gray-500 text-center mb-8">
+              {feedbackModal.message}
+            </p>
+            <button
+              onClick={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+              className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-[0.98] ${feedbackModal.type === 'success'
+                ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
+                : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                }`}
+            >
+              {feedbackModal.type === 'success' ? 'Great!' : 'Close'}
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* @ts-ignore */}
       <div className="relative">
         <Image
@@ -1108,17 +1432,17 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
               <div id="overview" className="lg:hidden bg-white rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
                 {thumbnailImageUrl && (
                   <div className="lg:hidden">
-                        <CourseOverviewCard
-                          course={course}
-                          thumbnailImageUrl={thumbnailImageUrl}
-                          altText={altText}
-                          totalLessons={totalLessons}
-                          totalModules={totalModules}
-                          totalQuizzes={totalQuizzes}
-                          formatPrice={formatPrice}
-                          formatLastUpdated={formatLastUpdated}
-                          initialEnrollmentStatus={initialEnrollmentStatus}
-                        />
+                    <CourseOverviewCard
+                      course={course}
+                      thumbnailImageUrl={thumbnailImageUrl}
+                      altText={altText}
+                      totalLessons={totalLessons}
+                      totalModules={totalModules}
+                      totalQuizzes={totalQuizzes}
+                      formatPrice={formatPrice}
+                      formatLastUpdated={formatLastUpdated}
+                      initialEnrollmentStatus={initialEnrollmentStatus}
+                    />
                   </div>
                 )}
               </div>

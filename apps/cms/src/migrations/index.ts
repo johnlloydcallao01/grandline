@@ -66,6 +66,7 @@ import * as migration_20260206_072527_add_evaluation_mode from './20260206_07252
 import * as migration_20260206_080033_add_completed_lessons_to_enrollments from './20260206_080033_add_completed_lessons_to_enrollments';
 import * as migration_20260206_095021_remove_completed_lessons from './20260206_095021_remove_completed_lessons';
 import * as migration_20260206_101113_add_course_item_progress from './20260206_101113_add_course_item_progress';
+import * as migration_20260207_121500_remove_company_members from './20260207_121500_remove_company_members';
 
 export const migrations = [
   {
@@ -407,5 +408,10 @@ export const migrations = [
     up: migration_20260206_101113_add_course_item_progress.up,
     down: migration_20260206_101113_add_course_item_progress.down,
     name: '20260206_101113_add_course_item_progress'
+  },
+  {
+    up: migration_20260207_121500_remove_company_members.up,
+    down: migration_20260207_121500_remove_company_members.down,
+    name: '20260207_121500_remove_company_members',
   },
 ];

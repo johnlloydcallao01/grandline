@@ -1,214 +1,172 @@
 'use client';
 
-import { Upload,
-  Search,
-  Grid,
-  List,
-  Filter,
-  Download,
-  Trash2,
-  Edit,
-  Image,
-  Video,
-  FileText,
-  Music,
-  MoreHorizontal,
-  Calendar } from '@/components/ui/IconWrapper';
+import React, { useState } from 'react';
+import {
+  Search, Filter, Plus, MoreHorizontal,
+  Image, Video, Music, FileText, File,
+  Grid, List, Download, Trash2, Edit, Eye
+} from '@/components/ui/IconWrapper';
 
 export default function MediaLibraryPage() {
+  const [activeTab, setActiveTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Mock Data
   const mediaItems = [
-    {
-      id: 1,
-      name: 'hero-banner-marketing.jpg',
-      type: 'image',
-      size: '2.4 MB',
-      dimensions: '1920x1080',
-      uploadedAt: '2024-12-10',
-      url: '/placeholder-image.jpg',
-      alt: 'Marketing hero banner'
-    },
-    {
-      id: 2,
-      name: 'product-demo-video.mp4',
-      type: 'video',
-      size: '45.2 MB',
-      duration: '3:24',
-      uploadedAt: '2024-12-09',
-      url: '/placeholder-video.mp4',
-      alt: 'Product demonstration video'
-    },
-    {
-      id: 3,
-      name: 'company-presentation.pdf',
-      type: 'document',
-      size: '8.7 MB',
-      pages: '24 pages',
-      uploadedAt: '2024-12-08',
-      url: '/placeholder-document.pdf',
-      alt: 'Company presentation slides'
-    },
-    {
-      id: 4,
-      name: 'background-music.mp3',
-      type: 'audio',
-      size: '5.1 MB',
-      duration: '2:45',
-      uploadedAt: '2024-12-07',
-      url: '/placeholder-audio.mp3',
-      alt: 'Background music track'
-    },
-    {
-      id: 5,
-      name: 'team-photo-2024.jpg',
-      type: 'image',
-      size: '3.8 MB',
-      dimensions: '2400x1600',
-      uploadedAt: '2024-12-06',
-      url: '/placeholder-team.jpg',
-      alt: 'Team photo 2024'
-    },
-    {
-      id: 6,
-      name: 'infographic-seo.png',
-      type: 'image',
-      size: '1.2 MB',
-      dimensions: '800x2000',
-      uploadedAt: '2024-12-05',
-      url: '/placeholder-infographic.png',
-      alt: 'SEO infographic'
-    }
+    { id: 1, type: 'image', name: 'Course Thumbnail - React 101.jpg', size: '1.2 MB', date: 'Oct 24, 2024', url: '/placeholder-image.jpg' },
+    { id: 2, type: 'video', name: 'Intro to Hooks.mp4', size: '45.5 MB', date: 'Oct 22, 2024', duration: '12:30' },
+    { id: 3, type: 'pdf', name: 'React Cheatsheet.pdf', size: '2.4 MB', date: 'Oct 20, 2024' },
+    { id: 4, type: 'document', name: 'Course Outline.docx', size: '0.8 MB', date: 'Oct 18, 2024' },
+    { id: 5, type: 'audio', name: 'Podcast - Ep 1.mp3', size: '15.2 MB', date: 'Oct 15, 2024', duration: '34:10' },
+    { id: 6, type: 'image', name: 'Instructor Profile.png', size: '3.1 MB', date: 'Oct 10, 2024' },
+    { id: 7, type: 'video', name: 'Advanced API Integration.mp4', size: '120.5 MB', date: 'Oct 05, 2024', duration: '45:00' },
+    { id: 8, type: 'pdf', name: 'Assignment Guidelines.pdf', size: '1.1 MB', date: 'Oct 01, 2024' },
   ];
 
+  const tabs = [
+    { id: 'all', label: 'All Media' },
+    { id: 'video', label: 'Videos' },
+    { id: 'image', label: 'Images' },
+    { id: 'pdf', label: 'PDFs' },
+    { id: 'document', label: 'Documents' },
+    { id: 'audio', label: 'Audio Files' },
+  ];
 
+  const filteredItems = activeTab === 'all'
+    ? mediaItems
+    : mediaItems.filter(item => item.type === activeTab);
 
-  const getFileIcon = (type: string) => {
+  const getIcon = (type: string) => {
     switch (type) {
-      case 'image': return <Image className="w-8 h-8 text-green-600" aria-label="Image file" />;
-      case 'video': return <Video className="w-8 h-8 text-purple-600" />;
-      case 'document': return <FileText className="w-8 h-8 text-orange-600" />;
-      case 'audio': return <Music className="w-8 h-8 text-blue-600" />;
-      default: return <FileText className="w-8 h-8 text-gray-600" />;
+      case 'video': return <Video className="h-8 w-8 text-blue-500" />;
+      case 'image': return <Image className="h-8 w-8 text-purple-500" />;
+      case 'audio': return <Music className="h-8 w-8 text-pink-500" />;
+      case 'pdf': return <File className="h-8 w-8 text-red-500" />; // simplistic mapping
+      case 'document': return <FileText className="h-8 w-8 text-blue-400" />;
+      default: return <File className="h-8 w-8 text-gray-500" />;
     }
   };
 
-  return (<div className="p-6">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Media Library</h1>
-                <p className="text-gray-600 mt-1">Manage your images, videos, and documents</p>
-              </div>
-              <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Media
-              </button>
-            </div>
-          </div>
-
-
-
-          {/* Controls */}
-          <div className="bg-white rounded-lg shadow mb-6">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex-1 relative">
-                  <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" />
-                  <input
-                    type="text"
-                    placeholder="Search media files..."
-                    className="w-full pl-10 pr-4 py-2 border-2 border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-600"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <select className="px-4 py-2 border-2 border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
-                    <option>All Types</option>
-                    <option>Images</option>
-                    <option>Videos</option>
-                    <option>Documents</option>
-                    <option>Audio</option>
-                  </select>
-                  <button className="flex items-center px-4 py-2 border-2 border-gray-400 rounded-lg hover:bg-gray-100 hover:border-gray-500 transition-colors text-gray-900">
-                    <Filter className="w-4 h-4 mr-2 text-gray-700" />
-                    Filter
-                  </button>
-                  <div className="flex border-2 border-gray-400 rounded-lg">
-                    <button className="px-3 py-2 bg-blue-600 text-white rounded-l-lg hover:bg-blue-700">
-                      <Grid className="w-4 h-4" />
-                    </button>
-                    <button className="px-3 py-2 hover:bg-gray-100 rounded-r-lg text-gray-700 hover:text-gray-900">
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Media Grid */}
-            <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {mediaItems.map((item) => (
-                  <div key={item.id} className="group relative bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                    {/* File Preview */}
-                    <div className="flex justify-center mb-3">
-                      {item.type === 'image' ? (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <Image className="w-8 h-8 text-gray-400" />
-                        </div>
-                      ) : (
-                        <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                          {getFileIcon(item.type)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* File Info */}
-                    <div className="text-center">
-                      <h4 className="text-sm font-medium text-gray-900 truncate" title={item.name}>
-                        {item.name}
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-1">{item.size}</p>
-                      {item.dimensions && (
-                        <p className="text-xs text-gray-400">{item.dimensions}</p>
-                      )}
-                      {item.duration && (
-                        <p className="text-xs text-gray-400">{item.duration}</p>
-                      )}
-                      {item.pages && (
-                        <p className="text-xs text-gray-400">{item.pages}</p>
-                      )}
-                      <div className="flex items-center justify-center text-xs text-gray-400 mt-1">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {item.uploadedAt}
-                      </div>
-                    </div>
-
-                    {/* Actions (shown on hover) */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="flex space-x-1">
-                        <button className="p-1 bg-white rounded shadow-md hover:bg-gray-100 border border-gray-300">
-                          <Download className="w-3 h-3 text-gray-700 hover:text-gray-900" />
-                        </button>
-                        <button className="p-1 bg-white rounded shadow-md hover:bg-gray-100 border border-gray-300">
-                          <Edit className="w-3 h-3 text-blue-600 hover:text-blue-800" />
-                        </button>
-                        <button className="p-1 bg-white rounded shadow-md hover:bg-red-50 border border-gray-300">
-                          <Trash2 className="w-3 h-3 text-red-600 hover:text-red-800" />
-                        </button>
-                        <button className="p-1 bg-white rounded shadow-md hover:bg-gray-100 border border-gray-300">
-                          <MoreHorizontal className="w-3 h-3 text-gray-700 hover:text-gray-900" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-
-            </div>
-          </div>
-
-
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Media Library</h1>
+          <p className="text-gray-600 mt-1">Manage and organize your course assets</p>
         </div>
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Upload New
+        </button>
+      </div>
+
+      {/* Filters & Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50'
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search files..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            >
+              <Grid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredItems.map((item) => (
+            <div key={item.id} className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+              <div className="aspect-video bg-gray-50 flex items-center justify-center relative border-b border-gray-100">
+                {getIcon(item.type)}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="p-1.5 bg-white/90 rounded-md shadow-sm hover:bg-white text-gray-700">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-medium text-gray-900 truncate pr-2" title={item.name}>{item.name}</h3>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>{item.size}</span>
+                  <span>{item.date}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
+                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredItems.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded-lg">
+                        {getIcon(item.type)}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{item.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.size}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }

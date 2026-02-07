@@ -20,6 +20,7 @@ export interface HeaderProps {
 export interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
 }
 
 export interface LayoutProps {
@@ -56,6 +57,20 @@ export type IconName =
   | 'security'
   | 'api'
   | 'integrations'
+  | 'analytics'
+  | 'overview'
+  | 'report'
+  | 'grade'
+  | 'certificate'
+  | 'bank'
+  | 'promotion'
+  | 'invoice'
+  | 'transaction'
+  | 'payout'
+  | 'instructor'
+  | 'trainee'
+  | 'announcement'
+  | 'review'
   | 'notifications'
   | 'help'
   | 'support'

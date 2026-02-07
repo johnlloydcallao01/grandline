@@ -22,7 +22,6 @@ import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { PostCategories } from './collections/PostCategories'
-import { CompanyMembers } from './collections/CompanyMembers'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
 import { CourseEnrollments } from './collections/CourseEnrollments'
@@ -67,7 +66,6 @@ export default buildConfig({
     Media,
     Posts,
     PostCategories,
-    CompanyMembers,
 
     // Learning Management System
     Courses,

@@ -7,6 +7,7 @@ import type { CourseWithInstructor } from '@/types/course';
 import { PlayerItem } from '@/types/player';
 import { buildItemKey, slugify } from '@/utils/course-player';
 import { CourseCurriculumSidebar } from '@/components/course/CourseCurriculumSidebar';
+import { CoursePlayerSkeleton } from '@/components/skeletons';
 import { CoursePlayerProvider } from './CoursePlayerContext';
 
 function formatEnrollmentStatus(status: string | null) {
@@ -40,6 +41,8 @@ export default function CoursePlayerLayout({
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isFinishConfirmationOpen, setIsFinishConfirmationOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -108,7 +111,7 @@ export default function CoursePlayerLayout({
         if (!active) return;
 
         setCourse(data);
-        
+
         // Fetch progress from the new endpoint
         let fetchedProgress = false;
         if (userIdParam) {
@@ -117,7 +120,7 @@ export default function CoursePlayerLayout({
               headers: { 'Content-Type': 'application/json' },
               cache: 'no-store',
             });
-            
+
             if (progressRes.ok) {
               const progressData = await progressRes.json();
               if (Array.isArray(progressData.completedLessonIds)) {
@@ -322,7 +325,7 @@ export default function CoursePlayerLayout({
     if (evaluationMode === 'lessons') {
       const total = flatItems.filter((i) => i.type === 'lesson').length;
       const completed = flatItems.filter((i) => i.type === 'lesson' && completedLessonIds.includes(i.id)).length;
-      
+
       return {
         progressPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
         completedItems: completed,
@@ -334,7 +337,7 @@ export default function CoursePlayerLayout({
     // Default behavior (count everything)
     const total = flatItems.length;
     const completed = currentIndex >= 0 ? currentIndex + 1 : 0;
-    
+
     return {
       progressPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
       completedItems: completed,
@@ -348,7 +351,7 @@ export default function CoursePlayerLayout({
     const newCompleted = isCompleted
       ? completedLessonIds.filter((id) => id !== lessonId)
       : [...completedLessonIds, lessonId];
-    
+
     setCompletedLessonIds(newCompleted);
 
     try {
@@ -381,10 +384,14 @@ export default function CoursePlayerLayout({
       });
 
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.completedLessons)) {
-          setCompletedLessonIds(data.completedLessons.map(String));
-        }
+        // We do not update the state from the server response here to avoid "rubber-banding"
+        // or race conditions when the user clicks multiple lessons quickly.
+        // The optimistic update above is sufficient for the UI.
+        // The server response is only used to confirm the action was successful.
+        // const data = await res.json();
+        // if (Array.isArray(data.completedLessons)) {
+        //   setCompletedLessonIds(data.completedLessons.map(String));
+        // }
       }
     } catch (e) {
       console.error('Failed to save completion', e);
@@ -392,6 +399,66 @@ export default function CoursePlayerLayout({
       setCompletedLessonIds(isCompleted ? [...completedLessonIds] : completedLessonIds.filter(id => id !== lessonId));
     }
   };
+
+  const handleFinishCourse = () => {
+    setIsFinishConfirmationOpen(true);
+  };
+
+  const confirmFinishCourse = async () => {
+    setIsFinishConfirmationOpen(false);
+    setIsSuccessModalOpen(true); // Open success modal immediately
+
+    // Optimistic Update: Immediately show as completed
+    const previousStatus = enrollmentStatus;
+    setEnrollmentStatus('completed');
+
+    // Close mobile menu immediately if open
+    setIsMobileMenuOpen(false);
+
+    try {
+      let userIdParam: string | null = null;
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('grandline_auth_user');
+        if (raw) {
+          const parsed = JSON.parse(raw) as { id?: string | number } | null;
+          userIdParam = parsed?.id ? String(parsed.id) : null;
+        }
+      }
+
+      if (!userIdParam) {
+        setEnrollmentStatus(previousStatus); // Revert on auth error
+        return;
+      }
+
+      const res = await fetch(`/api/courses/${courseId}/finish-course`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userIdParam })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        // Revert on API failure
+        setEnrollmentStatus(previousStatus);
+        console.error(data.error || 'Failed to finish course.');
+        // Optional: show toast/notification for error only
+      }
+    } catch (e) {
+      // Revert on network error
+      setEnrollmentStatus(previousStatus);
+      console.error('Failed to finish course', e);
+    }
+  };
+
+  const showFinishButton = useMemo(() => {
+    if (enrollmentStatus === 'completed') return false; // Hide if already done
+    if (evaluationMode !== 'lessons') return false;
+    if (enrollmentStatus !== 'active') return false;
+
+    // Check if 100% completed
+    return progressPercent === 100;
+  }, [evaluationMode, enrollmentStatus, progressPercent]);
 
   const handleToggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -431,58 +498,45 @@ export default function CoursePlayerLayout({
   }
 
   if (loading) {
+    return <CoursePlayerSkeleton />;
+  }
+
+  // Access Control Check
+  if (!loading && enrollmentStatus !== 'active' && enrollmentStatus !== 'completed') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="bg-white shadow-sm">
-          <div className="h-16 flex items-center justify-between px-[10px]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gray-200" />
-              <div className="space-y-1">
-                <div className="h-3 w-20 bg-gray-200 rounded" />
-                <div className="h-4 w-40 bg-gray-200 rounded" />
-              </div>
-            </div>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="h-4 w-32 bg-gray-200 rounded" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+          <div className="mb-6 flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
+              <i className="fa fa-lock text-4xl text-red-500" />
             </div>
           </div>
-        </header>
 
-        <div className="flex-1 flex min-h-0">
-          <aside className="hidden lg:flex w-96 bg-white shadow-sm max-h-screen">
-            <div className="flex-1 flex flex-col">
-              <div className="px-4 py-3">
-                <div className="h-3 w-24 bg-gray-200 rounded" />
-              </div>
-              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="h-10 bg-gray-100 rounded-lg" />
-                ))}
-              </div>
-            </div>
-          </aside>
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">
+            Access Restricted
+          </h1>
 
-          <main className="flex-1 flex flex-col bg-gray-50">
-            <div className="w-full bg-black flex items-center justify-center">
-              <div className="w-full max-w-5xl aspect-video bg-gray-900" />
-            </div>
-            <div className="flex-1 min-h-0">
-              <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 space-y-4">
-                <div className="h-6 w-40 bg-gray-200 rounded" />
-                <div className="h-4 w-64 bg-gray-200 rounded" />
-                <div className="space-y-3">
-                  <div className="h-24 bg-gray-100 rounded-lg" />
-                  <div className="h-24 bg-gray-100 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          </main>
+          <p className="mb-8 text-gray-600">
+            {enrollmentStatus
+              ? `Your enrollment status is currently "${formatEnrollmentStatus(enrollmentStatus)}".`
+              : "You are not enrolled in this course."
+            }
+            <br />
+            Please enroll to access the course content.
+          </p>
+
+          <button
+            onClick={() => router.push(`/view-course/${courseId}`)}
+            className="w-full rounded-lg bg-[#201a7c] px-6 py-3 font-semibold text-white shadow-md transition-colors hover:bg-[#1a1563] focus:outline-none focus:ring-2 focus:ring-[#201a7c] focus:ring-offset-2"
+          >
+            Go to Course Page
+          </button>
         </div>
       </div>
     );
   }
 
-  if (error || !course) {
+  if (!loading && (error || !course)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -543,7 +597,7 @@ export default function CoursePlayerLayout({
               </button>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-medium text-gray-500">
-                  {course.title}
+                  {course?.title}
                 </span>
                 <span className="text-sm font-semibold text-gray-900 truncate">
                   {currentItem ? currentItem.title : 'Select a learning item'}
@@ -551,6 +605,21 @@ export default function CoursePlayerLayout({
               </div>
             </div>
             <div className="hidden lg:flex items-center gap-6">
+              {enrollmentStatus === 'completed' && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-md border border-green-200">
+                  <i className="fa fa-check-circle text-green-600" />
+                  <span className="text-sm font-semibold">Course Finished</span>
+                </div>
+              )}
+              {showFinishButton && (
+                <button
+                  type="button"
+                  onClick={handleFinishCourse}
+                  className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 animate-pulse"
+                >
+                  Finish this Course
+                </button>
+              )}
               {totalItems > 0 && (
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-xs text-gray-500">
@@ -612,7 +681,7 @@ export default function CoursePlayerLayout({
 
               {/* Mobile Menu Sheet */}
               <div
-                className={`fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out lg:hidden flex flex-col h-[80vh] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
+                className={`fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out lg:hidden flex flex-col h-[90vh] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
                   }`}
               >
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
@@ -634,12 +703,32 @@ export default function CoursePlayerLayout({
                       {progressPercent}%
                     </span>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden mb-4">
                     <div
                       className="h-full rounded-full bg-[#0056d2] transition-all"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
+
+                  {enrollmentStatus === 'completed' && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-md border border-green-200 w-full justify-center">
+                      <i className="fa fa-check-circle text-green-600" />
+                      <span className="text-sm font-semibold">Course Finished</span>
+                    </div>
+                  )}
+
+                  {showFinishButton && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleFinishCourse();
+                      }}
+                      className="w-full inline-flex justify-center items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 animate-pulse"
+                    >
+                      Finish this Course
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto min-h-0">
@@ -657,6 +746,81 @@ export default function CoursePlayerLayout({
                   />
                 </div>
               </div>
+
+              {/* Confirmation Modal */}
+              {isFinishConfirmationOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 bg-black/50 z-[100] transition-opacity duration-300"
+                    onClick={() => setIsFinishConfirmationOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                      <div className="text-center">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                          <i className="fa fa-question text-green-600 text-xl" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          Finish Course?
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                          Are you sure you want to finish this course? This will mark it as completed.
+                        </p>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setIsFinishConfirmationOpen(false)}
+                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={confirmFinishCourse}
+                            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 shadow-sm"
+                          >
+                            Yes, Finish
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Success Modal */}
+              {isSuccessModalOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 bg-black/50 z-[100] transition-opacity duration-300"
+                    onClick={() => setIsSuccessModalOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                      <div className="text-center">
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-bounce">
+                          <i className="fa fa-trophy text-green-600 text-2xl" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          Course Finished!
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                          Congratulations! You have successfully completed this course.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setIsSuccessModalOpen(false)}
+                          className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 shadow-sm"
+                        >
+                          Awesome!
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </>,
             document.body,
           )}

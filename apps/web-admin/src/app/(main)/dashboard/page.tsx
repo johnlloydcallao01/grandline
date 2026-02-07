@@ -1,218 +1,159 @@
 'use client';
 
-
-import { Users,
-  FileText,
-  TrendingUp,
-  BarChart3,
-  Eye,
-  MessageSquare,
-  Heart,
-  Share2 } from '@/components/ui/IconWrapper';
-
+import React from 'react';
+import { Users, TrendingUp, Award, Clock, CheckCircle, AlertCircle, DollarSign } from '@/components/ui/IconWrapper';
 
 export default function DashboardPage() {
   return (
-    <div className="p-6">
-          {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p className="text-gray-600 mt-1">Comprehensive overview of your platform performance</p>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+        <span className="text-sm text-gray-500">Last updated: Just now</span>
+      </div>
 
-
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Active Users */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start space-x-4">
+          <div className="p-3 bg-blue-50 rounded-lg">
+            <Users className="w-6 h-6 text-blue-600" />
           </div>
-
-
-
-
-
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Users className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Users</p>
-                  <p className="text-2xl font-bold text-gray-900">15,420</p>
-                  <p className="text-sm text-green-600">+12% from last month</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Eye className="h-8 w-8 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Page Views</p>
-                  <p className="text-2xl font-bold text-gray-900">89.2K</p>
-                  <p className="text-sm text-green-600">+18% from last month</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <MessageSquare className="h-8 w-8 text-purple-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Engagement</p>
-                  <p className="text-2xl font-bold text-gray-900">4.2K</p>
-                  <p className="text-sm text-green-600">+25% from last month</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <TrendingUp className="h-8 w-8 text-orange-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Conversion Rate</p>
-                  <p className="text-2xl font-bold text-gray-900">3.8%</p>
-                  <p className="text-sm text-green-600">+0.5% from last month</p>
-                </div>
-              </div>
-            </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Active Users</p>
+            <h3 className="text-2xl font-bold text-gray-900 mt-1">2,543</h3>
+            <p className="text-xs text-green-600 flex items-center mt-1">
+              <TrendingUp className="w-3 h-3 mr-1" />
+              +12.5% from last month
+            </p>
           </div>
+        </div>
 
-          {/* Charts and Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Traffic Chart */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Traffic Overview</h3>
-              </div>
-              <div className="p-6">
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Chart visualization would go here</p>
-                    <p className="text-sm text-gray-400">Integration with analytics service needed</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* User Activity */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">User Activity</h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Active Users (24h)</span>
-                    <span className="text-sm font-medium text-gray-900">1,234</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">New Registrations</span>
-                    <span className="text-sm font-medium text-gray-900">45</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Bounce Rate</span>
-                    <span className="text-sm font-medium text-gray-900">32.1%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Avg. Session Duration</span>
-                    <span className="text-sm font-medium text-gray-900">4m 32s</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Course Completions */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start space-x-4">
+          <div className="p-3 bg-green-50 rounded-lg">
+            <Award className="w-6 h-6 text-green-600" />
           </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Course Completions</p>
+            <h3 className="text-2xl font-bold text-gray-900 mt-1">1,205</h3>
+            <p className="text-xs text-green-600 flex items-center mt-1">
+              <TrendingUp className="w-3 h-3 mr-1" />
+              +8.2% from last month
+            </p>
+          </div>
+        </div>
 
-          {/* Recent Content Performance */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Top Performing Content</h3>
-            </div>
-            <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Content
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Views
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Engagement
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-gray-400 mr-3" />
+        {/* Revenue */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start space-x-4">
+          <div className="p-3 bg-purple-50 rounded-lg">
+            <DollarSign className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Total Revenue</p>
+            <h3 className="text-2xl font-bold text-gray-900 mt-1">$45,231</h3>
+            <p className="text-xs text-green-600 flex items-center mt-1">
+              <TrendingUp className="w-3 h-3 mr-1" />
+              +15.3% from last month
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity Feed */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+        </div>
+        <div className="p-6">
+          <div className="flow-root">
+            <ul role="list" className="-mb-8">
+              {[
+                {
+                  id: 1,
+                  content: 'New user registration',
+                  target: 'Sarah Wilson',
+                  date: '10 minutes ago',
+                  icon: Users,
+                  iconBackground: 'bg-blue-100',
+                  iconColor: 'text-blue-600',
+                },
+                {
+                  id: 2,
+                  content: 'Course completed',
+                  target: 'Advanced React Patterns',
+                  date: '2 hours ago',
+                  icon: CheckCircle,
+                  iconBackground: 'bg-green-100',
+                  iconColor: 'text-green-600',
+                },
+                {
+                  id: 3,
+                  content: 'New active subscription',
+                  target: 'Enterprise Plan',
+                  date: '4 hours ago',
+                  icon: DollarSign,
+                  iconBackground: 'bg-purple-100',
+                  iconColor: 'text-purple-600',
+                },
+                {
+                  id: 4,
+                  content: 'System alert',
+                  target: 'High server load detected',
+                  date: '1 day ago',
+                  icon: AlertCircle,
+                  iconBackground: 'bg-yellow-100',
+                  iconColor: 'text-yellow-600',
+                },
+                {
+                  id: 5,
+                  content: 'New review posted',
+                  target: 'UI/UX Design Masterclass',
+                  date: '1 day ago',
+                  icon: Users,
+                  iconBackground: 'bg-gray-100',
+                  iconColor: 'text-gray-600',
+                },
+              ].map((activity, activityIdx) => (
+                <li key={activity.id}>
+                  <div className="relative pb-8">
+                    {activityIdx !== 4 ? (
+                      <span
+                        className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <div className="relative flex space-x-3">
+                      <div>
+                        <span
+                          className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${activity.iconBackground}`}
+                        >
+                          <activity.icon
+                            className={`h-5 w-5 ${activity.iconColor}`}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            Getting Started with E-commerce Marketing
-                          </div>
-                          <div className="text-sm text-gray-500">Blog Post</div>
+                          <p className="text-sm text-gray-500">
+                            {activity.content}{' '}
+                            <span className="font-medium text-gray-900">
+                              {activity.target}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                          <time dateTime={activity.date}>{activity.date}</time>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      12,450
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Heart className="h-4 w-4 text-red-500 mr-1" />
-                        <span className="text-sm text-gray-900">234</span>
-                        <Share2 className="h-4 w-4 text-blue-500 ml-3 mr-1" />
-                        <span className="text-sm text-gray-900">89</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Published
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-gray-400 mr-3" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            Advanced SEO Strategies for 2024
-                          </div>
-                          <div className="text-sm text-gray-500">Blog Post</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      8,920
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Heart className="h-4 w-4 text-red-500 mr-1" />
-                        <span className="text-sm text-gray-900">156</span>
-                        <Share2 className="h-4 w-4 text-blue-500 ml-3 mr-1" />
-                        <span className="text-sm text-gray-900">67</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Published
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
+      </div>
     </div>
   );
 }

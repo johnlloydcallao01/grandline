@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
 
 export const CourseEnrollments: CollectionConfig = {
@@ -229,13 +229,70 @@ export const CourseEnrollments: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data }) => {
-        // Auto-set completion date when status changes to completed
+      async ({ data, req, operation, originalDoc }) => {
+        // 1. Prevent duplicate active enrollments
+        // We must ensure that for a given student and course, there is only ONE active enrollment.
+        // If the status is becoming 'active' (or is remaining 'active'), we check for duplicates.
+        
+        const effectiveStatus = data?.status || (operation === 'create' ? 'active' : originalDoc?.status)
+        
+        if (effectiveStatus === 'active') {
+          const getRelId = (val: any) => (val && typeof val === 'object' && 'id' in val) ? val.id : val
+          const studentId = getRelId(data?.student) || (originalDoc ? getRelId(originalDoc.student) : null)
+          const courseId = getRelId(data?.course) || (originalDoc ? getRelId(originalDoc.course) : null)
+
+          if (studentId && courseId) {
+            const existingEnrollments = await req.payload.find({
+              collection: 'course-enrollments',
+              where: {
+                and: [
+                  {
+                    student: {
+                      equals: studentId,
+                    },
+                  },
+                  {
+                    course: {
+                      equals: courseId,
+                    },
+                  },
+                  {
+                    status: {
+                      equals: 'active',
+                    },
+                  },
+                  ...(operation === 'update' && originalDoc?.id
+                    ? [
+                        {
+                          id: {
+                            not_equals: originalDoc.id,
+                          },
+                        },
+                      ]
+                    : []),
+                ],
+              },
+              limit: 1,
+              depth: 0,
+            })
+
+            if (existingEnrollments.totalDocs > 0) {
+              throw new APIError(
+                'An active enrollment already exists for this student in this course.',
+                400,
+                undefined,
+                true,
+              )
+            }
+          }
+        }
+
+        // 2. Auto-set completion date when status changes to completed
         if (data && data.status === 'completed' && !data.completedAt) {
           data.completedAt = new Date().toISOString()
         }
 
-        // Auto-set progress to 100% when completed
+        // 3. Auto-set progress to 100% when completed
         if (data && data.status === 'completed' && data.progressPercentage !== 100) {
           data.progressPercentage = 100
         }

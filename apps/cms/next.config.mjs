@@ -2,6 +2,8 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable strict mode to avoid dnd-kit hydration mismatches in dev
+  reactStrictMode: false,
   // Redirect root path to admin
   async redirects() {
     return [

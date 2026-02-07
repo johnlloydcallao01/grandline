@@ -23,6 +23,7 @@ function createIconWrapper(IconComponent: React.ComponentType<IconProps>) {
 
 // Export wrapped icons directly
 export const Shield = createIconWrapper(LucideIcons.Shield);
+export const Award = createIconWrapper(LucideIcons.Award);
 export const Eye = createIconWrapper(LucideIcons.Eye);
 export const EyeOff = createIconWrapper(LucideIcons.EyeOff);
 export const AlertCircle = createIconWrapper(LucideIcons.AlertCircle);
@@ -90,6 +91,12 @@ export const ListOrdered = createIconWrapper(LucideIcons.ListOrdered);
 export const DollarSign = createIconWrapper(LucideIcons.DollarSign);
 export const Bell = createIconWrapper(LucideIcons.Bell);
 export const Palette = createIconWrapper(LucideIcons.Palette);
+export const Star = createIconWrapper(LucideIcons.Star);
+export const CreditCard = createIconWrapper(LucideIcons.CreditCard);
+export const Phone = createIconWrapper(LucideIcons.Phone);
+export const XCircle = createIconWrapper(LucideIcons.XCircle);
+export const BookOpen = createIconWrapper(LucideIcons.BookOpen);
+export const RefreshCw = createIconWrapper(LucideIcons.RefreshCw);
 
 // Type for icon components
 export type LucideIcon = React.ComponentType<IconProps>;
