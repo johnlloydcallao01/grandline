@@ -82,6 +82,7 @@ function CourseOverviewCard({
   })
   const [isLoadingEnrollment, setIsLoadingEnrollment] = useState(false)
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false)
+  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false)
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean
     type: 'success' | 'error'
@@ -96,6 +97,66 @@ function CourseOverviewCard({
 
   const showHeart = typeof window !== 'undefined'
   const wishlisted = !!wishlistMap[String(course.id)]
+
+  const handleContactSupport = async () => {
+    if (!user?.id) return
+
+    setIsSubmittingSupport(true)
+
+    const ticketData = currentStatus === 'suspended'
+      ? {
+        subject: 'Suspended Enrollment',
+        message: 'Hello! I’m requesting assistance regarding my account enrollment, which appears to be suspended.'
+      }
+      : {
+        subject: 'Pending Enrollment',
+        message: 'Hello! I’m requesting assistance regarding my account enrollment, which is currently pending. I’d like guidance on the next steps or any information needed to complete the process. Thank you!'
+      }
+
+    try {
+      const res = await fetch('/api/support-tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: ticketData.subject,
+          status: 'open',
+          priority: 'medium',
+          category: 'enrollment',
+          userId: user.id,
+          message: ticketData.message
+        }),
+      })
+
+      if (res.ok) {
+        setShowModal(false)
+        setFeedbackModal({
+          isOpen: true,
+          type: 'success',
+          title: 'Ticket Created',
+          message: `A support ticket has been created regarding your ${currentStatus} enrollment. Our team will assist you shortly.`,
+        })
+      } else {
+        setFeedbackModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Request Failed',
+          message: 'We couldn\'t create a support ticket at this time. Please try again later.',
+        })
+      }
+    } catch (error) {
+      console.error('Error creating support ticket:', error)
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'An Error Occurred',
+        message: 'Something went wrong. Please check your internet connection and try again.',
+      })
+    } finally {
+      setIsSubmittingSupport(false)
+    }
+  }
 
   const handleRequestEnrollment = async () => {
     if (!user?.id || !course?.id) return
@@ -434,12 +495,22 @@ function CourseOverviewCard({
                         Re-enroll Now
                       </button>
                     )}
-                    {(currentStatus === 'suspended' || currentStatus === 'pending') && (
+                    {currentStatus === 'suspended' && (
                       <button
-                        onClick={() => window.location.href = 'mailto:support@grandlinemaritime.com'}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        onClick={handleContactSupport}
+                        disabled={isSubmittingSupport}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
-                        Contact Support
+                        {isSubmittingSupport ? 'Creating Ticket...' : 'Contact Support'}
+                      </button>
+                    )}
+                    {currentStatus === 'pending' && (
+                      <button
+                        onClick={handleContactSupport}
+                        disabled={isSubmittingSupport}
+                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      >
+                        {isSubmittingSupport ? 'Creating Ticket...' : 'Contact Support'}
                       </button>
                     )}
                     <button

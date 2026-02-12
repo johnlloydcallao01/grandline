@@ -62,9 +62,9 @@ This collection stores the granular response to *each question* within a submiss
 | `submission` | Relationship | `assessment-submissions` (Required) | Parent attempt. |
 | `question` | Relationship | `questions` (Required) | The question being answered. |
 | `questionType` | Select | `single_choice`, `multiple_choice`, `true_false` | Snapshot of type for rendering history. |
-| `response` | JSON | | Flexible storage for the answer.<br>`{ value: "option_id" }` or `{ values: ["opt1", "opt2"] }` |
-| `isCorrect` | Checkbox | | Calculated at submission time. |
-| `pointsEarned` | Number | | Points awarded for this specific question. |
+| `response` | JSON | | Flexible storage for the selected option ID(s).<br>`{ optionId: "id" }` for single/true-false.<br>`{ optionIds: ["id1", "id2"] }` for multiple choice. |
+| `isCorrect` | Checkbox | | Calculated at submission time by comparing `optionId` with `isCorrect` in Question's options. |
+| `pointsEarned` | Number | | Points awarded for this specific question (sourced from `Assessments.items[].points`). |
 | `feedback` | Textarea | | (Future) Instructor comments or auto-feedback. |
 
 ### Access Control
@@ -91,14 +91,16 @@ This collection stores the granular response to *each question* within a submiss
 
 ### C. Submitting & Grading
 1.  **API:** `POST /api/assessments/submission/[id]/submit`
-2.  **Payload:** `{ answers: [{ questionId: "...", value: "..." }] }`
+2.  **Payload:** `{ answers: [{ questionId: "...", optionId: "..." } | { questionId: "...", optionIds: ["..."] }] }`
 3.  **Action:**
-    *   **Loop through answers:**
-        *   Fetch original `Question` (to check correct answer).
-        *   Compare User Answer vs. Correct Answer.
-        *   Calculate `isCorrect` and `pointsEarned`.
+    *   **Fetch Assessment & Questions:** Get the assessment definition and all linked questions in one go.
+    *   **Loop through user answers:**
+        *   Find the matching `Question` document and the specific `points` assigned in `Assessment.items`.
+        *   **For single_choice / true_false:** Check if the selected `optionId` has `isCorrect: true` in the question's `options` array.
+        *   **For multiple_choice:** Check if the set of `optionIds` exactly matches the set of options where `isCorrect: true`.
+        *   Calculate `isCorrect` (boolean) and `pointsEarned` (0 or `points`).
         *   **Create/Update** `SubmissionAnswers` rows.
-    *   **Calculate Total:** Sum `pointsEarned`.
+    *   **Calculate Total:** Sum `pointsEarned` and compare against `Assessment.passingScore`.
     *   **Update Submission:** Set `score`, `status: 'graded'`, `completedAt: now`.
     *   **Update Progress:**
         *   Find/Create `CourseItemProgress` for this assessment.

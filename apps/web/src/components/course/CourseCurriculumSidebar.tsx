@@ -11,6 +11,7 @@ interface CourseCurriculumSidebarProps {
   onSelectItem: (item: PlayerItem) => void;
   flatItems: PlayerItem[];
   completedLessonIds?: string[];
+  submissionHistory?: Record<string, any[]>;
 }
 
 export function CourseCurriculumSidebar({
@@ -21,6 +22,7 @@ export function CourseCurriculumSidebar({
   onSelectItem,
   flatItems,
   completedLessonIds = [],
+  submissionHistory = {},
 }: CourseCurriculumSidebarProps) {
   return (
     <div className="flex-1 flex flex-col min-w-0 w-full">
@@ -142,7 +144,10 @@ export function CourseCurriculumSidebar({
                                 const itemKey = buildItemKey('assessment', assessment.id);
                                 const isActive = selectedKey === itemKey;
                                 const isQuiz = assessment.assessmentType === 'quiz';
-                                const isCompleted = completedLessonIds.includes(String(assessment.id));
+                                
+                                // Get the latest attempt result from submissionHistory
+                                const history = submissionHistory[assessment.id] || [];
+                                const latestAttempt = history.length > 0 ? history[history.length - 1] : null;
 
                                 return (
                                   <li key={assessment.id}>
@@ -158,8 +163,12 @@ export function CourseCurriculumSidebar({
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
-                                        {isCompleted ? (
-                                          <i className="fa fa-check-circle text-green-500 text-xs" />
+                                        {latestAttempt ? (
+                                          latestAttempt.score >= (assessment.passingScore || 70) ? (
+                                            <i className="fa fa-check-circle text-[#0056d2] text-xs" />
+                                          ) : (
+                                            <i className="fa fa-times-circle text-red-500 text-xs" />
+                                          )
                                         ) : (
                                           <i
                                             className={`fa ${isQuiz ? 'fa-question-circle' : 'fa-file-alt'} text-[10px] w-3 text-center ${isActive ? 'text-[#201a7c]' : 'text-gray-400'

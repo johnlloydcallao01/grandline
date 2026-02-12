@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
     Search, Filter, Download, Plus, Upload, MoreHorizontal,
-    User, Mail, Phone, Calendar, CheckCircle, XCircle
+    Mail, Phone, Calendar, CheckCircle, XCircle
 } from '@/components/ui/IconWrapper';
 
 export default function TraineeAccountsPage() {
@@ -121,8 +121,8 @@ export default function TraineeAccountsPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${trainee.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                                trainee.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
-                                                    'bg-yellow-100 text-yellow-800'
+                                            trainee.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
+                                                'bg-yellow-100 text-yellow-800'
                                             }`}>
                                             {trainee.status === 'Active' && <CheckCircle className="h-3 w-3 mr-1" />}
                                             {trainee.status === 'Inactive' && <XCircle className="h-3 w-3 mr-1" />}
@@ -136,8 +136,8 @@ export default function TraineeAccountsPage() {
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
                                                 <div className={`h-2 rounded-full ${trainee.progress > 75 ? 'bg-green-500' :
-                                                        trainee.progress > 40 ? 'bg-blue-500' :
-                                                            'bg-yellow-500'
+                                                    trainee.progress > 40 ? 'bg-blue-500' :
+                                                        'bg-yellow-500'
                                                     }`} style={{ width: `${trainee.progress}%` }}></div>
                                             </div>
                                         </div>

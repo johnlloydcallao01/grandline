@@ -131,6 +131,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             collapsed={!isOpen}
                             href="/media"
                         />
+                        <SidebarItem
+                            icon="storage"
+                            label="Storage Settings"
+                            active={pathname?.startsWith('/media/settings')}
+                            collapsed={!isOpen}
+                            href="/media/settings"
+                        />
                     </div>
 
                     {isOpen && <hr className="border-gray-200" />}
@@ -161,10 +168,31 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Certifications</div>}
                         <SidebarItem
                             icon="certificate"
-                            label="Certificates"
-                            active={pathname?.startsWith('/certifications')}
+                            label="Certificate Builder"
+                            active={pathname?.startsWith('/certifications/builder')}
                             collapsed={!isOpen}
-                            href="/certifications"
+                            href="/certifications/builder"
+                        />
+                        <SidebarItem
+                            icon="template"
+                            label="Certificate Templates"
+                            active={pathname?.startsWith('/certifications/templates')}
+                            collapsed={!isOpen}
+                            href="/certifications/templates"
+                        />
+                        <SidebarItem
+                            icon="issuance"
+                            label="Certificate Issuance"
+                            active={pathname?.startsWith('/certifications/issuance')}
+                            collapsed={!isOpen}
+                            href="/certifications/issuance"
+                        />
+                        <SidebarItem
+                            icon="verification"
+                            label="Certificate Verification"
+                            active={pathname?.startsWith('/certifications/verification')}
+                            collapsed={!isOpen}
+                            href="/certifications/verification"
                         />
                     </div>
 
@@ -202,11 +230,18 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                     <div className="space-y-1">
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Accounting</div>}
                         <SidebarItem
-                            icon="transaction"
+                            icon="audit"
                             label="Chart of Accounts"
                             active={pathname?.startsWith('/accounting/chart')}
                             collapsed={!isOpen}
                             href="/accounting/chart"
+                        />
+                        <SidebarItem
+                            icon="transaction"
+                            label="Transactions"
+                            active={pathname?.startsWith('/accounting/transactions')}
+                            collapsed={!isOpen}
+                            href="/accounting/transactions"
                         />
                         <SidebarItem
                             icon="invoice"
@@ -217,10 +252,17 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         />
                         <SidebarItem
                             icon="payments"
-                            label="Payments"
+                            label="Payments & Receipts"
                             active={pathname?.startsWith('/accounting/payments')}
                             collapsed={!isOpen}
                             href="/accounting/payments"
+                        />
+                        <SidebarItem
+                            icon="pricing"
+                            label="Pricing Management"
+                            active={pathname?.startsWith('/accounting/pricing')}
+                            collapsed={!isOpen}
+                            href="/accounting/pricing"
                         />
                         <SidebarItem
                             icon="payout"
@@ -236,6 +278,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             collapsed={!isOpen}
                             href="/accounting/reports"
                         />
+                        <SidebarItem
+                            icon="bank"
+                            label="Banking"
+                            active={pathname?.startsWith('/accounting/banking')}
+                            collapsed={!isOpen}
+                            href="/accounting/banking"
+                        />
                     </div>
 
                     {isOpen && <hr className="border-gray-200" />}
@@ -246,16 +295,16 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         <SidebarItem
                             icon="promotion"
                             label="Promotions"
-                            active={pathname?.startsWith('/marketing')}
+                            active={pathname?.startsWith('/marketing/promotions')}
                             collapsed={!isOpen}
-                            href="/marketing"
+                            href="/marketing/promotions"
                         />
                         <SidebarItem
-                            icon="posts"
-                            label="Blog Posts"
-                            active={pathname?.startsWith('/posts')}
+                            icon="content"
+                            label="Content"
+                            active={pathname?.startsWith('/marketing/content')}
                             collapsed={!isOpen}
-                            href="/posts"
+                            href="/marketing/content"
                         />
                     </div>
 

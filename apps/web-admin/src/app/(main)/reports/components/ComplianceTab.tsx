@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Shield, CheckCircle, AlertTriangle, FileText, Download } from '@/components/ui/IconWrapper';
+import { AlertTriangle, FileText, Download } from '@/components/ui/IconWrapper';
 
 export function ComplianceTab() {
     return (

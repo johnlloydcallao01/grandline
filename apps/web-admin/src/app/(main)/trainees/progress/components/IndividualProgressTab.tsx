@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { User, CheckCircle, Clock, AlertTriangle } from '@/components/ui/IconWrapper';
 
 export function IndividualProgressTab() {
     return (
@@ -48,9 +47,9 @@ export function IndividualProgressTab() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                                item.status === 'Behind' ? 'bg-yellow-100 text-yellow-800' :
-                                                    item.status === 'At Risk' ? 'bg-red-100 text-red-800' :
-                                                        'bg-blue-100 text-blue-800'
+                                            item.status === 'Behind' ? 'bg-yellow-100 text-yellow-800' :
+                                                item.status === 'At Risk' ? 'bg-red-100 text-red-800' :
+                                                    'bg-blue-100 text-blue-800'
                                             }`}>
                                             {item.status}
                                         </span>

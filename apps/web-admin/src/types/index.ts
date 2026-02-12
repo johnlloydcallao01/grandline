@@ -75,4 +75,9 @@ export type IconName =
   | 'help'
   | 'support'
   | 'billing'
-  | 'profile';
+  | 'profile'
+  | 'storage'
+  | 'verification'
+  | 'issuance'
+  | 'template'
+  | 'pricing';

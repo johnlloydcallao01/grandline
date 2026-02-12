@@ -72,9 +72,8 @@ export async function GET(
         const progressParams = new URLSearchParams()
         progressParams.set('where[trainee][equals]', traineeId)
         progressParams.set('where[course][equals]', validCourseId)
-        progressParams.set('limit', '1000') // Fetch all progress items for this course
-        // User requested to simplify and remove depth restrictions to ensure we get the data
-        // Default depth should be sufficient to see the item structure
+        progressParams.set('limit', '1000')
+        progressParams.set('depth', '0') // We only need IDs and status, not full objects
 
         const res = await fetch(
             `${apiUrl}/course-item-progress?${progressParams.toString()}`,
@@ -96,24 +95,25 @@ export async function GET(
 
         const progressMap: Record<string, any> = {}
         const completedLessonIds: string[] = []
+        const attemptCounts: Record<string, number> = {}
 
         if (data.docs && data.docs.length > 0) {
             // DEBUG: Log the first document structure to understand why we might be missing data
-            console.log('[Progress API] Sample doc structure:', JSON.stringify(data.docs[0], null, 2))
+            // console.log('[Progress API] Sample doc structure:', JSON.stringify(data.docs[0], null, 2))
 
             data.docs.forEach((doc: any) => {
-                // Handle polymorphic 'item' field
+                // Handle polymorphic 'item' field (relationTo: ['course-lessons', 'assessments'])
+                // In Payload, when querying with depth=0 or if depth is populated, 
+                // polymorphic fields return as an object { relationTo: string, value: string | object }
                 let itemId: string | undefined
 
-                if (typeof doc.item === 'object' && doc.item !== null) {
-                    // If depth is populated (default), value is an object with id
-                    // If depth=0, value is the ID string
-                    if (doc.item.value && typeof doc.item.value === 'object') {
+                if (doc.item && typeof doc.item === 'object') {
+                    if (typeof doc.item.value === 'object' && doc.item.value !== null) {
                         itemId = doc.item.value.id
                     } else {
                         itemId = doc.item.value
                     }
-                } else {
+                } else if (typeof doc.item === 'string') {
                     itemId = doc.item
                 }
 
@@ -122,7 +122,11 @@ export async function GET(
                         status: doc.status,
                         isCompleted: doc.isCompleted,
                         score: doc.score,
+                        attempts: 0, // Reset attempts here, will be populated by submissions below
                     }
+
+                    // Reset attemptCounts for this item, we will only count actual submissions
+                    attemptCounts[itemId] = 0
 
                     // We include ALL completed items (lessons, assessments, etc.)
                     // Check both boolean flag AND status string for robustness
@@ -135,11 +139,57 @@ export async function GET(
             })
         }
 
-        console.log(`[Progress API] Returning ${completedLessonIds.length} completed items:`, completedLessonIds)
+        // 3. Fetch Assessment Submissions to get accurate attempt counts and history
+        const submissionParams = new URLSearchParams()
+        submissionParams.set('where[trainee][equals]', traineeId)
+        submissionParams.set('where[course][equals]', validCourseId)
+        submissionParams.set('sort', 'attemptNumber') // Sort by attempt number
+        submissionParams.set('limit', '1000')
+
+        const submissionHistory: Record<string, any[]> = {}
+
+        const submissionsRes = await fetch(
+            `${apiUrl}/assessment-submissions?${submissionParams.toString()}`,
+            { headers, cache: 'no-store' }
+        )
+
+        if (submissionsRes.ok) {
+            const submissionsData = await submissionsRes.json()
+            submissionsData.docs?.forEach((sub: any) => {
+                const assessmentId = typeof sub.assessment === 'object' ? sub.assessment.id : sub.assessment
+                if (assessmentId) {
+                    // Count how many submissions exist for this assessment
+                    attemptCounts[assessmentId] = (attemptCounts[assessmentId] || 0) + 1
+                    
+                    // Build history
+                    if (!submissionHistory[assessmentId]) {
+                        submissionHistory[assessmentId] = []
+                    }
+                    submissionHistory[assessmentId].push({
+                        id: sub.id,
+                        attemptNumber: sub.attemptNumber,
+                        score: sub.score,
+                        status: sub.status,
+                        completedAt: sub.completedAt,
+                        pointsTotal: sub.pointsTotal,
+                        pointsPossible: sub.pointsPossible
+                    })
+                    
+                    // Also update the progressMap for consistency
+                    if (progressMap[assessmentId]) {
+                        progressMap[assessmentId].attempts = attemptCounts[assessmentId]
+                    }
+                }
+            })
+        }
+
+        console.log(`[Progress API] Returning ${completedLessonIds.length} completed items, ${Object.keys(attemptCounts).length} attempt counts, and history`)
 
         return NextResponse.json({
             progressMap,
-            completedLessonIds
+            completedLessonIds,
+            attemptCounts,
+            submissionHistory
         })
 
     } catch (error) {

@@ -28,7 +28,12 @@ interface CoursePlayerContextType {
   totalQuizzes: number;
   totalExams: number;
   completedLessonIds: string[];
+  attemptCounts: Record<string, number>;
+  submissionHistory: Record<string, any[]>;
   toggleLessonCompletion: (lessonId: string) => Promise<void>;
+  startAssessment: (assessmentId: string) => Promise<{ submissionId: string; attemptNumber: number; isResumed?: boolean; savedAnswers?: Record<string, any> } | null>;
+  saveAssessmentAnswer: (submissionId: string, questionId: string, response: any, questionType: string) => Promise<void>;
+  submitAssessment: (submissionId: string, answers?: Record<string, any>) => Promise<{ score: number; passed: boolean } | null>;
 }
 
 const CoursePlayerContext = createContext<CoursePlayerContextType | undefined>(undefined);

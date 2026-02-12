@@ -40,6 +40,8 @@ export default function CoursePlayerLayout({
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
+  const [attemptCounts, setAttemptCounts] = useState<Record<string, number>>({});
+  const [submissionHistory, setSubmissionHistory] = useState<Record<string, any[]>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFinishConfirmationOpen, setIsFinishConfirmationOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -125,8 +127,14 @@ export default function CoursePlayerLayout({
               const progressData = await progressRes.json();
               if (Array.isArray(progressData.completedLessonIds)) {
                 setCompletedLessonIds(progressData.completedLessonIds.map(String));
-                fetchedProgress = true;
               }
+              if (progressData.attemptCounts) {
+                setAttemptCounts(progressData.attemptCounts);
+              }
+              if (progressData.submissionHistory) {
+                setSubmissionHistory(progressData.submissionHistory);
+              }
+              fetchedProgress = true;
             }
           } catch (e) {
             console.error('Failed to fetch progress', e);
@@ -400,6 +408,114 @@ export default function CoursePlayerLayout({
     }
   };
 
+  const startAssessment = async (assessmentId: string) => {
+    try {
+      let userIdParam: string | null = null;
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('grandline_auth_user');
+        if (raw) {
+          const parsed = JSON.parse(raw) as { id?: string | number } | null;
+          userIdParam = parsed?.id ? String(parsed.id) : null;
+        }
+      }
+
+      if (!userIdParam) return null;
+
+      const res = await fetch(`/api/assessments/${assessmentId}/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userIdParam, courseId })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('Failed to start assessment:', error);
+        return null;
+      }
+
+      const data = await res.json();
+
+      // If resumed, fetch already saved answers
+      if (data.isResumed) {
+        const answersRes = await fetch(`/api/assessments/submission/${data.submissionId}/answers`, {
+          cache: 'no-store'
+        });
+        if (answersRes.ok) {
+          const answersData = await answersRes.json();
+          data.savedAnswers = answersData.answers;
+        }
+      }
+
+      return data;
+    } catch (e) {
+      console.error('Failed to start assessment', e);
+      return null;
+    }
+  };
+
+  const saveAssessmentAnswer = async (submissionId: string, questionId: string, response: any, questionType: string) => {
+    try {
+      await fetch(`/api/assessments/submission/${submissionId}/save`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, response, questionType })
+      });
+    } catch (e) {
+      console.error('Failed to save assessment answer', e);
+    }
+  };
+
+  const submitAssessment = async (submissionId: string, answers?: Record<string, any>) => {
+    try {
+      const res = await fetch(`/api/assessments/submission/${submissionId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('Failed to submit assessment:', error);
+        return null;
+      }
+
+      const result = await res.json();
+
+      // Refresh progress after submission (regardless of pass/fail to update attempt counts)
+      let userIdParam: string | null = null;
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('grandline_auth_user');
+        if (raw) {
+          const parsed = JSON.parse(raw) as { id?: string | number } | null;
+          userIdParam = parsed?.id ? String(parsed.id) : null;
+        }
+      }
+      if (userIdParam) {
+        const progressRes = await fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+        });
+        if (progressRes.ok) {
+          const progressData = await progressRes.json();
+          if (Array.isArray(progressData.completedLessonIds)) {
+            setCompletedLessonIds(progressData.completedLessonIds.map(String));
+          }
+          if (progressData.attemptCounts) {
+            setAttemptCounts(progressData.attemptCounts);
+          }
+          if (progressData.submissionHistory) {
+            setSubmissionHistory(progressData.submissionHistory);
+          }
+        }
+      }
+
+      return result;
+    } catch (e) {
+      console.error('Failed to submit assessment', e);
+      return null;
+    }
+  };
+
   const handleFinishCourse = () => {
     setIsFinishConfirmationOpen(true);
   };
@@ -580,7 +696,12 @@ export default function CoursePlayerLayout({
         totalQuizzes,
         totalExams,
         completedLessonIds,
+        attemptCounts,
+        submissionHistory,
         toggleLessonCompletion,
+        startAssessment,
+        saveAssessmentAnswer,
+        submitAssessment,
       }}
     >
       <div className="h-screen overflow-hidden bg-[#f5f5f7] flex flex-col">
@@ -743,6 +864,7 @@ export default function CoursePlayerLayout({
                     }}
                     flatItems={flatItems}
                     completedLessonIds={completedLessonIds}
+                    submissionHistory={submissionHistory}
                   />
                 </div>
               </div>
@@ -835,6 +957,7 @@ export default function CoursePlayerLayout({
               onSelectItem={handleSelectItem}
               flatItems={flatItems}
               completedLessonIds={completedLessonIds}
+              submissionHistory={submissionHistory}
             />
           </aside>
 

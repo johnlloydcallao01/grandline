@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { RichTextRenderer } from '@/components/RichTextRenderer';
 import { QuizPlayer } from '@/components/course/QuizPlayer';
 import { useCoursePlayer } from '../CoursePlayerContext';
 
 export default function CoursePlayerPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string[] | undefined;
 
   const {
@@ -19,15 +20,70 @@ export default function CoursePlayerPage() {
     moduleTitleMap,
     setExpandedModules,
     completedLessonIds,
+    attemptCounts,
+    submissionHistory,
     toggleLessonCompletion,
+    startAssessment,
+    saveAssessmentAnswer,
+    submitAssessment,
   } = useCoursePlayer();
 
   const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [initialAnswers, setInitialAnswers] = useState<Record<string, any>>({});
 
   useEffect(() => {
     // Reset quiz state when changing items
     setIsQuizStarted(false);
+    setSubmissionId(null);
+    setIsSubmitting(false);
+    setIsStarting(false);
+    setInitialAnswers({});
   }, [selectedKey]);
+
+  const handleStartQuiz = async () => {
+    if (!currentItem || (currentItem.type !== 'assessment' && currentItem.type !== 'finalExam')) return;
+
+    setIsStarting(true);
+    try {
+      const result = await startAssessment(currentItem.id);
+      if (result) {
+        setSubmissionId(result.submissionId);
+        if (result.savedAnswers) {
+          setInitialAnswers(result.savedAnswers);
+        }
+        setIsQuizStarted(true);
+      }
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const handleCompleteQuiz = async (result: { score: number; passed: boolean; answers: Record<string, string | string[]> }) => {
+    if (!submissionId) return;
+
+    setIsSubmitting(true);
+    try {
+      await submitAssessment(submissionId, result.answers);
+      // The QuizPlayer handles showing results locally, 
+      // but we've now also saved it to the server.
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveAnswer = async (questionId: string, response: any, questionType: string) => {
+    if (!submissionId) return;
+    await saveAssessmentAnswer(submissionId, questionId, response, questionType);
+  };
+
+  const handleRetryQuiz = () => {
+    setIsQuizStarted(false);
+    setSubmissionId(null);
+    // This will trigger the "Start Assessment" screen in QuizPlayer
+  };
 
   const currentItem = useMemo(
     () => (selectedKey ? flatItems.find((item) => item.key === selectedKey) || null : null),
@@ -37,8 +93,34 @@ export default function CoursePlayerPage() {
   // Sync URL slug to selectedKey
   useEffect(() => {
     if (!slug || slug.length === 0) {
-      // Optional: Set to null or first item if needed. 
-      // Current behavior: null (Overview/Welcome)
+      // Auto-redirect to last completed item OR first item if available
+      if (flatItems.length > 0) {
+        let targetItem = flatItems[0];
+
+        // Find the last completed item based on curriculum order
+        // We iterate from the end to find the "furthest" progress
+        // STRICTLY RESTRICT TO LESSONS ONLY per user instruction
+        for (let i = flatItems.length - 1; i >= 0; i--) {
+          const item = flatItems[i];
+          if (item.type === 'lesson' && completedLessonIds.includes(String(item.id))) {
+            targetItem = item;
+            break; // Found the furthest completed LESSON
+          }
+        }
+
+        let url = `/portal/courses/${params.courseId}/player`;
+        const i = targetItem as any;
+
+        if (targetItem.type === 'lesson') {
+          url += `/module/${i.moduleSlug}/lesson/${i.slug}`;
+        } else if (targetItem.type === 'assessment') {
+          url += `/module/${i.moduleSlug}/assessment/${i.slug}`;
+        } else if (targetItem.type === 'finalExam') {
+          url += `/assessment/${i.slug}`;
+        }
+
+        router.replace(url as any);
+      }
       return;
     }
 
@@ -87,7 +169,7 @@ export default function CoursePlayerPage() {
     if (key) {
       setSelectedKey(key);
     }
-  }, [slug, flatItems, setSelectedKey, setExpandedModules]);
+  }, [slug, flatItems, setSelectedKey, setExpandedModules, params.courseId, router, completedLessonIds]);
 
   const currentIndex = currentItem
     ? flatItems.findIndex((item) => item.key === currentItem.key)
@@ -235,95 +317,25 @@ export default function CoursePlayerPage() {
 
             {(currentItem.type === 'assessment' || currentItem.type === 'finalExam') && (
               <>
-                {isQuizStarted && currentItem.assessmentDetails?.questions && currentItem.assessmentDetails.questions.length > 0 ? (
-                  <QuizPlayer
-                    title={currentItem.title}
-                    questions={currentItem.assessmentDetails.questions}
-                    passingScore={currentItem.assessmentDetails.passingScore ?? 70}
-                    timeLimitMinutes={currentItem.assessmentDetails.timeLimitMinutes}
-                    maxAttempts={currentItem.assessmentDetails.maxAttempts}
-                    showCorrectAnswer={currentItem.assessmentDetails.showCorrectAnswer}
-                    onExit={() => {
-                      setIsQuizStarted(false);
-                    }}
-                  />
-                ) : (
-                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    <div className="p-6 md:p-8">
-                      <h2 className="text-xl font-semibold text-gray-900 mb-4 mt-0">
-                        {currentItem.assessmentKind === 'final'
-                          ? 'Final Exam Instructions'
-                          : currentItem.assessmentKind === 'exam'
-                            ? 'Exam Instructions'
-                            : 'Quiz Instructions'}
-                      </h2>
-
-                      {currentItem.content && (
-                        <div className="mb-8 text-gray-600">
-                          <RichTextRenderer content={currentItem.content} />
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 not-prose">
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Time Limit</div>
-                          <div className="font-semibold text-gray-900">
-                            {currentItem.assessmentDetails?.timeLimitMinutes
-                              ? `${currentItem.assessmentDetails.timeLimitMinutes} mins`
-                              : 'None'}
-                          </div>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Passing Score</div>
-                          <div className="font-semibold text-gray-900">
-                            {currentItem.assessmentDetails?.passingScore ?? 70}%
-                          </div>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Attempts</div>
-                          <div className="font-semibold text-gray-900">
-                            {currentItem.assessmentDetails?.maxAttempts ?? 1}
-                          </div>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Questions</div>
-                          <div className="font-semibold text-gray-900">
-                            {currentItem.assessmentDetails?.questionsCount ?? '-'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row gap-4 not-prose">
-                        <button
-                          type="button"
-                          onClick={() => setIsQuizStarted(true)}
-                          disabled={!currentItem.assessmentDetails?.questions || currentItem.assessmentDetails.questions.length === 0}
-                          className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-[#0056d2] hover:bg-[#0041a8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0056d2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          Start {currentItem.assessmentKind === 'final' ? 'Final Exam' : currentItem.assessmentKind === 'exam' ? 'Exam' : 'Quiz'}
-                        </button>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <i className="fa fa-info-circle mr-2" />
-                          {!currentItem.assessmentDetails?.questions || currentItem.assessmentDetails.questions.length === 0
-                            ? 'No questions available.'
-                            : 'Click start when you are ready to begin.'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <QuizPlayer
+                  assessment={currentItem as any}
+                  isStarted={isQuizStarted}
+                  onStart={handleStartQuiz}
+                  onSaveAnswer={handleSaveAnswer}
+                  onComplete={handleCompleteQuiz}
+                  onRetry={handleRetryQuiz}
+                  isSubmitting={isSubmitting}
+                  isStarting={isStarting}
+                  initialAnswers={initialAnswers}
+                  attemptsUsed={currentItem ? attemptCounts[currentItem.id] || 0 : 0}
+                  attemptHistory={currentItem ? submissionHistory[currentItem.id] || [] : []}
+                />
               </>
             )}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
-              <i className="fa fa-book-open text-2xl text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">Select a learning item</h3>
-            <p className="text-gray-500 mt-1 max-w-sm mx-auto">
-              Choose a lesson or assessment from the curriculum sidebar to view its content.
-            </p>
+          <div className="flex h-full items-center justify-center p-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#201a7c] border-t-transparent" />
           </div>
         )}
       </div>

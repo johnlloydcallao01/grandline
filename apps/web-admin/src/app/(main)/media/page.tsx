@@ -1,17 +1,33 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Search, Filter, Plus, MoreHorizontal,
   Image, Video, Music, FileText, File,
-  Grid, List, Download, Trash2, Edit, Eye
+  Grid, List, Download, Trash2, Edit, Eye,
+  Folder, FolderPlus
 } from '@/components/ui/IconWrapper';
 
 export default function MediaLibraryPage() {
-  const [activeTab, setActiveTab] = useState('all');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const activeTab = searchParams.get('tab') || 'all';
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  const handleTabChange = (tabId: string) => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set('tab', tabId);
+    router.push(`/media?${params.toString()}`);
+  };
+
   // Mock Data
+  const folders = [
+    { id: 1, name: 'Project Assets', items: 12 },
+    { id: 2, name: 'Marketing Materials', items: 8 },
+    { id: 3, name: 'Course V1 Backups', items: 5 },
+  ];
+
   const mediaItems = [
     { id: 1, type: 'image', name: 'Course Thumbnail - React 101.jpg', size: '1.2 MB', date: 'Oct 24, 2024', url: '/placeholder-image.jpg' },
     { id: 2, type: 'video', name: 'Intro to Hooks.mp4', size: '45.5 MB', date: 'Oct 22, 2024', duration: '12:30' },
@@ -66,7 +82,7 @@ export default function MediaLibraryPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-50'
@@ -102,6 +118,31 @@ export default function MediaLibraryPage() {
           </div>
         </div>
       </div>
+
+      {/* Folders Section (Only in Grid View & 'All' Tab) */}
+      {activeTab === 'all' && viewMode === 'grid' && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Folders</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Add New Folder Card */}
+            <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group h-40">
+              <FolderPlus className="h-10 w-10 text-gray-400 group-hover:text-blue-500 mb-2" />
+              <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">New Folder</span>
+            </button>
+
+            {folders.map(folder => (
+              <div key={folder.id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md cursor-pointer flex flex-col items-center justify-center text-center h-40 transition-all">
+                <Folder className="h-12 w-12 text-yellow-400 mb-3 fill-current" />
+                <h4 className="font-medium text-gray-900">{folder.name}</h4>
+                <p className="text-xs text-gray-500 mt-1">{folder.items} items</p>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-gray-200 my-6"></div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Recent Files</h3>
+        </div>
+      )}
+
 
       {/* Content Area */}
       {viewMode === 'grid' ? (
