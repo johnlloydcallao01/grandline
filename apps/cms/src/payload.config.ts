@@ -16,7 +16,6 @@ import { Users } from './collections/Users'
 import { Instructors } from './collections/Instructors'
 import { Trainees } from './collections/Trainees'
 import { Admins } from './collections/Admins'
-import { UserCertifications } from './collections/UserCertifications'
 import { UserEvents } from './collections/UserEvents'
 import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
@@ -45,6 +44,7 @@ import { Notifications } from './collections/Notifications'
 import { UserNotifications } from './collections/UserNotifications'
 import { SupportTickets } from './collections/SupportTickets'
 import { SupportTicketMessages } from './collections/SupportTicketMessages'
+import { Certificates } from './collections/Certificates'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -62,7 +62,6 @@ export default buildConfig({
     Instructors,
     Trainees,
     Admins,
-    UserCertifications,
     UserEvents,
     EmergencyContacts,
 
@@ -75,6 +74,7 @@ export default buildConfig({
     Courses,
     CourseCategories,
     CourseEnrollments,
+    Certificates,
     CourseModules,
     CourseLessons,
     Materials,

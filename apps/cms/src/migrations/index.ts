@@ -67,6 +67,11 @@ import * as migration_20260206_080033_add_completed_lessons_to_enrollments from 
 import * as migration_20260206_095021_remove_completed_lessons from './20260206_095021_remove_completed_lessons';
 import * as migration_20260206_101113_add_course_item_progress from './20260206_101113_add_course_item_progress';
 import * as migration_20260207_121500_remove_company_members from './20260207_121500_remove_company_members';
+import * as migration_20260208_120000_add_support_tickets from './20260208_120000_add_support_tickets';
+import * as migration_20260210_000000_add_enrollment_category from './20260210_000000_add_enrollment_category';
+import * as migration_20260212_143056_add_final_evaluation_field from './20260212_143056_add_final_evaluation_field';
+import * as migration_20260213_120933_remove_user_certifications from './20260213_120933_remove_user_certifications';
+import * as migration_20260213_124627_create_certificates_collection from './20260213_124627_create_certificates_collection';
 
 export const migrations = [
   {
@@ -407,11 +412,36 @@ export const migrations = [
   {
     up: migration_20260206_101113_add_course_item_progress.up,
     down: migration_20260206_101113_add_course_item_progress.down,
-    name: '20260206_101113_add_course_item_progress'
+    name: '20260206_101113_add_course_item_progress',
   },
   {
     up: migration_20260207_121500_remove_company_members.up,
     down: migration_20260207_121500_remove_company_members.down,
     name: '20260207_121500_remove_company_members',
+  },
+  {
+    up: migration_20260208_120000_add_support_tickets.up,
+    down: migration_20260208_120000_add_support_tickets.down,
+    name: '20260208_120000_add_support_tickets',
+  },
+  {
+    up: migration_20260210_000000_add_enrollment_category.up,
+    down: migration_20260210_000000_add_enrollment_category.down,
+    name: '20260210_000000_add_enrollment_category',
+  },
+  {
+    up: migration_20260212_143056_add_final_evaluation_field.up,
+    down: migration_20260212_143056_add_final_evaluation_field.down,
+    name: '20260212_143056_add_final_evaluation_field',
+  },
+  {
+    up: migration_20260213_120933_remove_user_certifications.up,
+    down: migration_20260213_120933_remove_user_certifications.down,
+    name: '20260213_120933_remove_user_certifications',
+  },
+  {
+    up: migration_20260213_124627_create_certificates_collection.up,
+    down: migration_20260213_124627_create_certificates_collection.down,
+    name: '20260213_124627_create_certificates_collection'
   },
 ];

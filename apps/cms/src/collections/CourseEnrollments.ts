@@ -169,6 +169,17 @@ export const CourseEnrollments: CollectionConfig = {
       },
     },
     {
+      name: 'finalEvaluation',
+      type: 'select',
+      options: [
+        { label: 'Passed', value: 'passed' },
+        { label: 'Failed', value: 'failed' },
+      ],
+      admin: {
+        description: 'Final evaluation outcome (Passed/Failed)',
+      },
+    },
+    {
       name: 'certificateIssued',
       type: 'checkbox',
       defaultValue: false,
@@ -233,9 +244,9 @@ export const CourseEnrollments: CollectionConfig = {
         // 1. Prevent duplicate active enrollments
         // We must ensure that for a given student and course, there is only ONE active enrollment.
         // If the status is becoming 'active' (or is remaining 'active'), we check for duplicates.
-        
+
         const effectiveStatus = data?.status || (operation === 'create' ? 'active' : originalDoc?.status)
-        
+
         if (effectiveStatus === 'active') {
           const getRelId = (val: any) => (val && typeof val === 'object' && 'id' in val) ? val.id : val
           const studentId = getRelId(data?.student) || (originalDoc ? getRelId(originalDoc.student) : null)
@@ -263,12 +274,12 @@ export const CourseEnrollments: CollectionConfig = {
                   },
                   ...(operation === 'update' && originalDoc?.id
                     ? [
-                        {
-                          id: {
-                            not_equals: originalDoc.id,
-                          },
+                      {
+                        id: {
+                          not_equals: originalDoc.id,
                         },
-                      ]
+                      },
+                    ]
                     : []),
                 ],
               },

@@ -120,13 +120,20 @@ export async function POST(
 
         // 5. Update Enrollment Status
         if (isEligible) {
+            const updateBody: any = {
+                status: 'completed',
+                completionDate: new Date().toISOString()
+            }
+
+            // If in lessons mode, completion implies passing
+            if (evaluationMode === 'lessons') {
+                updateBody.finalEvaluation = 'passed'
+            }
+
             const updateRes = await fetch(`${apiUrl}/course-enrollments/${enrollment.id}`, {
                 method: 'PATCH',
                 headers,
-                body: JSON.stringify({
-                    status: 'completed',
-                    completionDate: new Date().toISOString()
-                })
+                body: JSON.stringify(updateBody)
             })
 
             if (!updateRes.ok) {
