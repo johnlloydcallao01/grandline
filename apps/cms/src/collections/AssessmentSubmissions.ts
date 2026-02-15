@@ -1,7 +1,15 @@
 import type { CollectionConfig } from 'payload'
+import { submitAssessmentHandler } from '../endpoints/submit-assessment'
 
 export const AssessmentSubmissions: CollectionConfig = {
   slug: 'assessment-submissions',
+  endpoints: [
+    {
+      path: '/submit-assessment',
+      method: 'post',
+      handler: submitAssessmentHandler,
+    },
+  ],
   admin: {
     useAsTitle: 'id',
     defaultColumns: ['trainee', 'assessment', 'status', 'score', 'attemptNumber', 'completedAt'],

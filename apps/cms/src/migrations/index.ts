@@ -72,6 +72,7 @@ import * as migration_20260210_000000_add_enrollment_category from './20260210_0
 import * as migration_20260212_143056_add_final_evaluation_field from './20260212_143056_add_final_evaluation_field';
 import * as migration_20260213_120933_remove_user_certifications from './20260213_120933_remove_user_certifications';
 import * as migration_20260213_124627_create_certificates_collection from './20260213_124627_create_certificates_collection';
+import * as migration_20260215_050150_add_default_to_points_earned from './20260215_050150_add_default_to_points_earned';
 
 export const migrations = [
   {
@@ -442,6 +443,11 @@ export const migrations = [
   {
     up: migration_20260213_124627_create_certificates_collection.up,
     down: migration_20260213_124627_create_certificates_collection.down,
-    name: '20260213_124627_create_certificates_collection'
+    name: '20260213_124627_create_certificates_collection',
+  },
+  {
+    up: migration_20260215_050150_add_default_to_points_earned.up,
+    down: migration_20260215_050150_add_default_to_points_earned.down,
+    name: '20260215_050150_add_default_to_points_earned'
   },
 ];

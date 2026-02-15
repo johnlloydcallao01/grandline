@@ -4,6 +4,9 @@ export async function getActiveAssignedCategories(payload: Payload) {
   const coursesResult = await payload.find({
     collection: 'courses',
     limit: 10000,
+    select: {
+      category: true,
+    },
     depth: 0,
   })
 
