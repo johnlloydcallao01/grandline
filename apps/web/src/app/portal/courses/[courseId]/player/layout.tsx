@@ -45,6 +45,7 @@ export default function CoursePlayerLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFinishConfirmationOpen, setIsFinishConfirmationOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -247,7 +248,7 @@ export default function CoursePlayerLayout({
       }
     }
 
-    if (curriculum.finalExam) {
+    if (curriculum.finalExam && course?.evaluationMode !== 'quizzes') {
       const examItems = curriculum.finalExam.questions || [];
       const questions = examItems
         .map((i: any) => i.question)
@@ -275,7 +276,7 @@ export default function CoursePlayerLayout({
     }
 
     return items;
-  }, [curriculum]);
+  }, [curriculum, course?.evaluationMode]);
 
   const { totalModules, totalLessons, totalQuizzes, totalExams } = useMemo(() => {
     if (!curriculum || !Array.isArray(curriculum.modules)) {
@@ -306,7 +307,7 @@ export default function CoursePlayerLayout({
       }
     }
 
-    if (curriculum.finalExam) {
+    if (curriculum.finalExam && course?.evaluationMode !== 'quizzes' && course?.evaluationMode !== 'lessons_quizzes') {
       examsCount += 1;
     }
 
@@ -316,7 +317,7 @@ export default function CoursePlayerLayout({
       totalQuizzes: quizzesCount,
       totalExams: examsCount,
     };
-  }, [curriculum]);
+  }, [curriculum, course?.evaluationMode]);
 
   const currentItem = useMemo(
     () => (selectedKey ? flatItems.find((item) => item.key === selectedKey) || null : null),
@@ -330,15 +331,59 @@ export default function CoursePlayerLayout({
       ? flatItems.findIndex((item) => item.key === currentItem.key)
       : -1;
 
-    if (evaluationMode === 'lessons') {
-      const total = flatItems.filter((i) => i.type === 'lesson').length;
-      const completed = flatItems.filter((i) => i.type === 'lesson' && completedLessonIds.includes(i.id)).length;
+    if (evaluationMode === 'lessons' || evaluationMode === 'lessons_exam') {
+      const lessonItems = flatItems.filter((i) => i.type === 'lesson');
+      const completedLessonCount = lessonItems.filter((i) => completedLessonIds.includes(i.id)).length;
+
+      let total = lessonItems.length;
+      let completed = completedLessonCount;
+
+      if (evaluationMode === 'lessons_exam') {
+        const finalExam = flatItems.find((item) => item.type === 'finalExam');
+        if (finalExam) {
+          total += 1;
+          const submissions = submissionHistory[finalExam.id] || [];
+          if (submissions.length > 0) {
+            completed += 1;
+          }
+        }
+      }
 
       return {
         progressPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
         completedItems: completed,
         totalItems: total,
-        progressLabel: 'lessons'
+        progressLabel: evaluationMode === 'lessons_exam' ? 'lessons & exam' : 'lessons',
+      };
+    }
+
+    if (evaluationMode === 'exam' || evaluationMode === 'quizzes' || evaluationMode === 'lessons_quizzes' || evaluationMode === 'quizzes_exam' || evaluationMode === 'lessons_quizzes_exam') {
+      const total = flatItems.length;
+      let completed = 0;
+
+      for (const item of flatItems) {
+        if (item.type === 'lesson') {
+          if (completedLessonIds.includes(item.id)) {
+            completed++;
+          }
+        } else if (item.type === 'assessment' || item.type === 'finalExam') {
+          // Count as completed if there is at least one submission
+          if (submissionHistory[item.id] && submissionHistory[item.id].length > 0) {
+            completed++;
+          }
+        }
+      }
+
+      let progressLabel = 'items';
+      if (evaluationMode === 'lessons_quizzes') progressLabel = 'lessons & quizzes';
+      else if (evaluationMode === 'quizzes_exam') progressLabel = 'quizzes & exam';
+      else if (evaluationMode === 'lessons_quizzes_exam') progressLabel = 'items';
+
+      return {
+        progressPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
+        completedItems: completed,
+        totalItems: total,
+        progressLabel
       };
     }
 
@@ -569,12 +614,195 @@ export default function CoursePlayerLayout({
 
   const showFinishButton = useMemo(() => {
     if (enrollmentStatus === 'completed') return false; // Hide if already done
-    if (evaluationMode !== 'lessons') return false;
     if (enrollmentStatus !== 'active') return false;
 
-    // Check if 100% completed
-    return progressPercent === 100;
-  }, [evaluationMode, enrollmentStatus, progressPercent]);
+    if (evaluationMode === 'lessons') {
+      // Check if 100% completed
+      return progressPercent === 100;
+    }
+
+    if (evaluationMode === 'exam') {
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      if (!finalExam) return false;
+
+      // Get submission history for the final exam
+      const submissions = submissionHistory[finalExam.id] || [];
+
+      // If no submissions, button should not be shown
+      if (submissions.length === 0) return false;
+
+      // If submitted at least once, allow finish (regardless of pass/fail)
+      return true;
+    }
+
+    if (evaluationMode === 'lessons_exam') {
+      // Must complete ALL lessons AND submit the final exam
+      const lessonItems = flatItems.filter(item => item.type === 'lesson');
+      const allLessonsCompleted = lessonItems.every(item => completedLessonIds.includes(item.id));
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      let examSubmitted = false;
+
+      if (finalExam) {
+        const submissions = submissionHistory[finalExam.id] || [];
+        examSubmitted = submissions.length > 0;
+      }
+
+      // Only show Finish if BOTH conditions met
+      return allLessonsCompleted && examSubmitted;
+    }
+
+    if (evaluationMode === 'quizzes') {
+      // Must submit ALL quizzes and module exams
+      const allQuizzes = flatItems.filter(item => item.type === 'assessment' && (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam'));
+
+      if (allQuizzes.length === 0) return true; // No quizzes/exams to pass?
+
+      const allSubmitted = allQuizzes.every(quiz => {
+        const submissions = submissionHistory[quiz.id] || [];
+        return submissions.length > 0;
+      });
+
+      return allSubmitted;
+    }
+
+    if (evaluationMode === 'lessons_quizzes') {
+      // Must complete ALL lessons AND submit ALL quizzes/exams
+      const lessonItems = flatItems.filter(item => item.type === 'lesson');
+      const allLessonsCompleted = lessonItems.every(item => completedLessonIds.includes(item.id));
+
+      const allAssessments = flatItems.filter(item => item.type === 'assessment' && (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam'));
+      const allAssessmentsSubmitted = allAssessments.every(item => {
+        const submissions = submissionHistory[item.id] || [];
+        return submissions.length > 0;
+      });
+
+      return allLessonsCompleted && allAssessmentsSubmitted;
+    }
+
+    if (evaluationMode === 'quizzes_exam') {
+      // Must submit ALL quizzes/exams AND the final exam
+      const allAssessments = flatItems.filter(item => item.type === 'assessment' && (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam'));
+      const allAssessmentsSubmitted = allAssessments.every(item => {
+        const submissions = submissionHistory[item.id] || [];
+        return submissions.length > 0;
+      });
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      let finalExamSubmitted = false;
+      if (finalExam) {
+        const submissions = submissionHistory[finalExam.id] || [];
+        finalExamSubmitted = submissions.length > 0;
+      }
+
+      return allAssessmentsSubmitted && finalExamSubmitted;
+    }
+
+    if (evaluationMode === 'lessons_quizzes_exam') {
+      // Must complete ALL lessons AND submit ALL quizzes/exams AND submit final exam
+      const lessonItems = flatItems.filter(item => item.type === 'lesson');
+      const allLessonsCompleted = lessonItems.every(item => completedLessonIds.includes(item.id));
+
+      const allAssessments = flatItems.filter(item => item.type === 'assessment' && (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam'));
+      const allAssessmentsSubmitted = allAssessments.every(item => {
+        const submissions = submissionHistory[item.id] || [];
+        return submissions.length > 0;
+      });
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      let finalExamSubmitted = false;
+      if (finalExam) {
+        const submissions = submissionHistory[finalExam.id] || [];
+        finalExamSubmitted = submissions.length > 0;
+      }
+
+      return allLessonsCompleted && allAssessmentsSubmitted && finalExamSubmitted;
+    }
+
+    return false;
+  }, [evaluationMode, enrollmentStatus, progressPercent, flatItems, submissionHistory]);
+
+  const showEvaluationButton = useMemo(() => {
+    if (enrollmentStatus === 'completed' && evaluationMode === 'lessons') return true;
+
+    if (evaluationMode === 'exam') {
+      // Find the final exam
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      if (finalExam && submissionHistory[finalExam.id] && submissionHistory[finalExam.id].length > 0) {
+        return true;
+      }
+    }
+
+    if (evaluationMode === 'quizzes') {
+      // Show if ANY quiz/module exam has been attempted
+      // "Show Evaluation" implies seeing the results. 
+      // It's helpful to see it anytime to track progress of which quizzes are passed/failed.
+      // So let's show it if AT LEAST ONE quiz/exam has been submitted.
+      const anyQuizSubmitted = flatItems.some(item =>
+        item.type === 'assessment' &&
+        (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam') &&
+        submissionHistory[item.id] &&
+        submissionHistory[item.id].length > 0
+      );
+      return anyQuizSubmitted;
+    }
+
+    if (evaluationMode === 'lessons_exam') {
+      // Show if ANY lesson is completed OR exam is submitted
+      const anyLessonCompleted = completedLessonIds.length > 0;
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      const examSubmitted = finalExam && submissionHistory[finalExam.id] && submissionHistory[finalExam.id].length > 0;
+
+      return anyLessonCompleted || examSubmitted;
+    }
+
+    if (evaluationMode === 'lessons_quizzes') {
+      // Show if ANY lesson is completed OR ANY quiz is submitted
+      const anyLessonCompleted = completedLessonIds.length > 0;
+      const anyQuizSubmitted = flatItems.some(item =>
+        item.type === 'assessment' &&
+        (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam') &&
+        submissionHistory[item.id] &&
+        submissionHistory[item.id].length > 0
+      );
+
+      return anyLessonCompleted || anyQuizSubmitted;
+    }
+
+    if (evaluationMode === 'quizzes_exam') {
+      // Show if ANY quiz is submitted OR final exam is submitted
+      const anyQuizSubmitted = flatItems.some(item =>
+        item.type === 'assessment' &&
+        (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam') &&
+        submissionHistory[item.id] &&
+        submissionHistory[item.id].length > 0
+      );
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      const examSubmitted = finalExam && submissionHistory[finalExam.id] && submissionHistory[finalExam.id].length > 0;
+
+      return anyQuizSubmitted || examSubmitted;
+    }
+
+    if (evaluationMode === 'lessons_quizzes_exam') {
+      // Show if ANY lesson completed OR ANY quiz submitted OR final exam submitted
+      const anyLessonCompleted = completedLessonIds.length > 0;
+      const anyQuizSubmitted = flatItems.some(item =>
+        item.type === 'assessment' &&
+        (item.assessmentKind === 'quiz' || item.assessmentKind === 'exam') &&
+        submissionHistory[item.id] &&
+        submissionHistory[item.id].length > 0
+      );
+
+      const finalExam = flatItems.find(item => item.type === 'finalExam');
+      const examSubmitted = finalExam && submissionHistory[finalExam.id] && submissionHistory[finalExam.id].length > 0;
+
+      return anyLessonCompleted || anyQuizSubmitted || examSubmitted;
+    }
+
+    return false;
+  }, [enrollmentStatus, evaluationMode, flatItems, submissionHistory]);
 
   const handleToggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -732,6 +960,16 @@ export default function CoursePlayerLayout({
                   <span className="text-sm font-semibold">Course Finished</span>
                 </div>
               )}
+              {showEvaluationButton && (
+                <button
+                  type="button"
+                  onClick={() => setIsEvaluationModalOpen(true)}
+                  className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  <i className="fa fa-file-text-o mr-2" />
+                  Show Evaluation
+                </button>
+              )}
               {showFinishButton && (
                 <button
                   type="button"
@@ -838,6 +1076,20 @@ export default function CoursePlayerLayout({
                     </div>
                   )}
 
+                  {showEvaluationButton && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsEvaluationModalOpen(true);
+                      }}
+                      className="mt-2 w-full inline-flex justify-center items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    >
+                      <i className="fa fa-file-text-o mr-2" />
+                      Show Evaluation
+                    </button>
+                  )}
+
                   {showFinishButton && (
                     <button
                       type="button"
@@ -865,6 +1117,7 @@ export default function CoursePlayerLayout({
                     flatItems={flatItems}
                     completedLessonIds={completedLessonIds}
                     submissionHistory={submissionHistory}
+                    evaluationMode={course?.evaluationMode}
                   />
                 </div>
               </div>
@@ -909,6 +1162,558 @@ export default function CoursePlayerLayout({
                     </div>
                   </div>
                 </>
+              )}
+
+              {/* Evaluation Modal */}
+              {isEvaluationModalOpen && (
+                (() => {
+                  let status = 'passed';
+                  let message = 'You have successfully completed all required lessons.';
+                  let scoreDisplay: React.ReactNode = null;
+
+                  if (evaluationMode === 'exam') {
+                    const finalExam = flatItems.find(i => i.type === 'finalExam');
+                    const submissions = finalExam ? submissionHistory[finalExam.id] : [];
+                    const latest = submissions && submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                    if (latest) {
+                      // Determine pass/fail
+                      const passingScore = latest.passingScoreSnapshot ?? finalExam?.assessmentDetails?.passingScore ?? 70;
+                      const score = Math.round(latest.score ?? 0);
+                      const passed = score >= passingScore;
+
+                      status = passed ? 'passed' : 'failed';
+                      message = passed
+                        ? 'Congratulations! You have passed the final exam.'
+                        : 'You have not reached the passing score for the final exam.';
+
+                      scoreDisplay = (
+                        <div className="text-center mb-4">
+                          <p className="text-sm text-gray-500">Your Score</p>
+                          <p className={`text-3xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>
+                            {score}% <span className="text-sm text-gray-400 font-normal">/ {passingScore}% required</span>
+                          </p>
+                        </div>
+                      );
+                    }
+                  } else if (evaluationMode === 'lessons_exam') {
+                    // Check Lessons
+                    const lessonItems = flatItems.filter(item => item.type === 'lesson');
+                    const totalLessons = lessonItems.length;
+                    const completedLessons = lessonItems.filter(item => completedLessonIds.includes(item.id)).length;
+                    const lessonsPassed = totalLessons > 0 && completedLessons === totalLessons;
+
+                    // Check Final Exam
+                    const finalExam = flatItems.find(item => item.type === 'finalExam');
+                    let examPassed = false;
+                    let examScore = 0;
+                    let examSubmitted = false;
+                    let examPassingScore = 70;
+
+                    if (finalExam) {
+                      const submissions = submissionHistory[finalExam.id] || [];
+                      if (submissions.length > 0) {
+                        examSubmitted = true;
+                        const latest = submissions[submissions.length - 1];
+                        examPassingScore = latest.passingScoreSnapshot ?? finalExam.assessmentDetails?.passingScore ?? 70;
+                        examScore = Math.round(latest.score ?? 0);
+                        examPassed = examScore >= examPassingScore;
+                      } else {
+                        examPassingScore = finalExam.assessmentDetails?.passingScore ?? 70;
+                      }
+                    }
+
+                    // Status is 'passed' if BOTH are met (lessons done + exam passed)
+                    // But user can finish if BOTH are met (lessons done + exam submitted) regardless of score
+                    // The "Evaluation Result" should probably reflect PASS/FAIL based on score though?
+                    // "If you completed the Lessons but failed the Final Exam, you will fail" -> Yes.
+
+                    status = (lessonsPassed && examPassed) ? 'passed' : 'failed';
+
+                    if (!lessonsPassed) {
+                      message = `You have completed ${completedLessons} of ${totalLessons} lessons. You must complete all lessons before finishing.`;
+                    } else if (!examSubmitted) {
+                      message = 'You have completed all lessons, but you must submit the Final Exam.';
+                    } else if (!examPassed) {
+                      message = `You have completed all lessons and submitted the exam, but you did not achieve the passing score of ${examPassingScore}%.`;
+                    } else {
+                      message = 'Congratulations! You have completed all lessons and passed the Final Exam.';
+                    }
+
+                    scoreDisplay = (
+                      <div className="mb-4 text-left space-y-4 border-t border-b border-gray-100 py-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Lessons Completion</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${lessonsPassed ? 'text-green-600' : 'text-orange-600'}`}>
+                              {Math.round((completedLessons / (totalLessons || 1)) * 100)}%
+                            </span>
+                            <i className={`fa ${lessonsPassed ? 'fa-check text-green-500' : 'fa-clock-o text-orange-500'}`} />
+                          </div>
+                        </div>
+                        {finalExam && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Final Exam</span>
+                            <div className="flex items-center gap-2">
+                              {examSubmitted ? (
+                                <>
+                                  <span className={`font-semibold ${examPassed ? 'text-green-600' : 'text-red-600'}`}>
+                                    {examScore}%
+                                  </span>
+                                  <i className={`fa ${examPassed ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                </>
+                              ) : (
+                                <span className="text-gray-400">Not taken</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+
+                  } else if (evaluationMode === 'quizzes') {
+                    const allAssessments = flatItems.filter(i => i.type === 'assessment' && (i.assessmentKind === 'quiz' || i.assessmentKind === 'exam'));
+                    const results = allAssessments.map(item => {
+                      const submissions = submissionHistory[item.id] || [];
+                      const latest = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                      if (!latest) {
+                        return { title: item.title, status: 'pending', score: 0, passingScore: item.assessmentDetails?.passingScore ?? 70 };
+                      }
+
+                      const passingScore = latest.passingScoreSnapshot ?? item.assessmentDetails?.passingScore ?? 70;
+                      const score = Math.round(latest.score ?? 0);
+                      const passed = score >= passingScore;
+
+                      return {
+                        title: item.title,
+                        status: passed ? 'passed' : 'failed',
+                        score,
+                        passingScore
+                      };
+                    });
+
+                    const allPassed = results.every(r => r.status === 'passed');
+                    status = allPassed ? 'passed' : 'failed';
+                    message = allPassed
+                      ? 'Congratulations! You have passed all required assessments.'
+                      : 'You have completed the assessments, but did not pass all of them.';
+
+                    scoreDisplay = (
+                      <div className="mb-4 max-h-60 overflow-y-auto text-left space-y-2 border-t border-b border-gray-100 py-2">
+                        {results.map((q, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-sm">
+                            <span className="truncate max-w-[180px]" title={q.title}>{q.title}</span>
+                            <div className="flex items-center gap-2">
+                              {q.status === 'pending' ? (
+                                <span className="text-gray-400">Not taken</span>
+                              ) : (
+                                <>
+                                  <span className={`font-semibold ${q.status === 'passed' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {q.score}%
+                                  </span>
+                                  <i className={`fa ${q.status === 'passed' ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } else if (evaluationMode === 'lessons_quizzes') {
+                    // Check Lessons
+                    const lessonItems = flatItems.filter(item => item.type === 'lesson');
+                    const totalLessons = lessonItems.length;
+                    const completedLessons = lessonItems.filter(item => completedLessonIds.includes(item.id)).length;
+                    const lessonsPassed = totalLessons > 0 && completedLessons === totalLessons;
+
+                    // Check Assessments
+                    const allAssessments = flatItems.filter(i => i.type === 'assessment' && (i.assessmentKind === 'quiz' || i.assessmentKind === 'exam'));
+                    const results = allAssessments.map(item => {
+                      const submissions = submissionHistory[item.id] || [];
+                      const latest = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                      if (!latest) {
+                        return { title: item.title, status: 'pending', score: 0, passingScore: item.assessmentDetails?.passingScore ?? 70 };
+                      }
+
+                      const passingScore = latest.passingScoreSnapshot ?? item.assessmentDetails?.passingScore ?? 70;
+                      const score = Math.round(latest.score ?? 0);
+                      const passed = score >= passingScore;
+
+                      return {
+                        title: item.title,
+                        status: passed ? 'passed' : 'failed',
+                        score,
+                        passingScore
+                      };
+                    });
+
+                    const allAssessmentsPassed = results.every(r => r.status === 'passed');
+
+                    status = (lessonsPassed && allAssessmentsPassed) ? 'passed' : 'failed';
+
+                    if (!lessonsPassed) {
+                      message = `You have completed ${completedLessons} of ${totalLessons} lessons. You must complete all lessons.`;
+                    } else if (!allAssessmentsPassed) {
+                      const failedCount = results.filter(r => r.status === 'failed').length;
+                      const pendingCount = results.filter(r => r.status === 'pending').length;
+
+                      if (pendingCount > 0) {
+                        message = 'You have completed all lessons, but you have pending assessments.';
+                      } else {
+                        message = `You have completed all lessons, but failed ${failedCount} assessment${failedCount === 1 ? '' : 's'}.`;
+                      }
+                    } else {
+                      message = 'Congratulations! You have completed all lessons and passed all required assessments.';
+                    }
+
+                    scoreDisplay = (
+                      <div className="mb-4 text-left space-y-4 border-t border-b border-gray-100 py-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Lessons Completion</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${lessonsPassed ? 'text-green-600' : 'text-orange-600'}`}>
+                              {Math.round((completedLessons / (totalLessons || 1)) * 100)}%
+                            </span>
+                            <i className={`fa ${lessonsPassed ? 'fa-check text-green-500' : 'fa-clock-o text-orange-500'}`} />
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-50 pt-2 mt-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Assessments</p>
+                          <div className="max-h-40 overflow-y-auto space-y-2">
+                            {results.map((q, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <span className="truncate max-w-[180px]" title={q.title}>{q.title}</span>
+                                <div className="flex items-center gap-2">
+                                  {q.status === 'pending' ? (
+                                    <span className="text-gray-400">Not taken</span>
+                                  ) : (
+                                    <>
+                                      <span className={`font-semibold ${q.status === 'passed' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {q.score}%
+                                      </span>
+                                      <i className={`fa ${q.status === 'passed' ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {results.length === 0 && (
+                              <p className="text-xs text-gray-400 italic">No assessments required.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else if (evaluationMode === 'quizzes_exam') {
+                    // Check Assessments
+                    const allAssessments = flatItems.filter(i => i.type === 'assessment' && (i.assessmentKind === 'quiz' || i.assessmentKind === 'exam'));
+                    const results = allAssessments.map(item => {
+                      const submissions = submissionHistory[item.id] || [];
+                      const latest = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                      if (!latest) {
+                        return { title: item.title, status: 'pending', score: 0, passingScore: item.assessmentDetails?.passingScore ?? 70 };
+                      }
+
+                      const passingScore = latest.passingScoreSnapshot ?? item.assessmentDetails?.passingScore ?? 70;
+                      const score = Math.round(latest.score ?? 0);
+                      const passed = score >= passingScore;
+
+                      return {
+                        title: item.title,
+                        status: passed ? 'passed' : 'failed',
+                        score,
+                        passingScore
+                      };
+                    });
+
+                    const allAssessmentsPassed = results.every(r => r.status === 'passed');
+
+                    // Check Final Exam
+                    const finalExam = flatItems.find(item => item.type === 'finalExam');
+                    let examPassed = false;
+                    let examScore = 0;
+                    let examSubmitted = false;
+                    let examPassingScore = 70;
+
+                    if (finalExam) {
+                      const submissions = submissionHistory[finalExam.id] || [];
+                      if (submissions.length > 0) {
+                        examSubmitted = true;
+                        const latest = submissions[submissions.length - 1];
+                        examPassingScore = latest.passingScoreSnapshot ?? finalExam.assessmentDetails?.passingScore ?? 70;
+                        examScore = Math.round(latest.score ?? 0);
+                        examPassed = examScore >= examPassingScore;
+                      } else {
+                        examPassingScore = finalExam.assessmentDetails?.passingScore ?? 70;
+                      }
+                    }
+
+                    status = (allAssessmentsPassed && examPassed) ? 'passed' : 'failed';
+
+                    if (!allAssessmentsPassed) {
+                      const failedCount = results.filter(r => r.status === 'failed').length;
+                      const pendingCount = results.filter(r => r.status === 'pending').length;
+
+                      if (pendingCount > 0) {
+                        message = 'You have not completed all required quizzes. You must pass all quizzes and the Final Exam.';
+                      } else {
+                        message = `You have failed ${failedCount} quiz${failedCount === 1 ? '' : 'zes'}. You must pass all quizzes and the Final Exam.`;
+                      }
+                    } else if (!examSubmitted) {
+                      message = 'You have passed all quizzes, but you must pass the Final Exam to complete the course.';
+                    } else if (!examPassed) {
+                      message = `You have passed all quizzes, but you did not achieve the passing score of ${examPassingScore}% on the Final Exam.`;
+                    } else {
+                      message = 'Congratulations! You have passed all quizzes and the Final Exam.';
+                    }
+
+                    scoreDisplay = (
+                      <div className="mb-4 text-left space-y-4 border-t border-b border-gray-100 py-4">
+                        <div className="max-h-40 overflow-y-auto space-y-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Quizzes & Module Exams</p>
+                          {results.map((q, idx) => (
+                            <div key={idx} className="flex items-center justify-between text-sm">
+                              <span className="truncate max-w-[180px]" title={q.title}>{q.title}</span>
+                              <div className="flex items-center gap-2">
+                                {q.status === 'pending' ? (
+                                  <span className="text-gray-400">Not taken</span>
+                                ) : (
+                                  <>
+                                    <span className={`font-semibold ${q.status === 'passed' ? 'text-green-600' : 'text-red-600'}`}>
+                                      {q.score}%
+                                    </span>
+                                    <i className={`fa ${q.status === 'passed' ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {results.length === 0 && (
+                            <p className="text-xs text-gray-400 italic">No quizzes required.</p>
+                          )}
+                        </div>
+
+                        {finalExam && (
+                          <div className="border-t border-gray-50 pt-2 mt-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold">Final Exam</span>
+                              <div className="flex items-center gap-2">
+                                {examSubmitted ? (
+                                  <>
+                                    <span className={`font-semibold ${examPassed ? 'text-green-600' : 'text-red-600'}`}>
+                                      {examScore}%
+                                    </span>
+                                    <i className={`fa ${examPassed ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                  </>
+                                ) : (
+                                  <span className="text-gray-400">Not taken</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else if (evaluationMode === 'lessons_quizzes_exam') {
+                    // Check Lessons
+                    const lessonItems = flatItems.filter(item => item.type === 'lesson');
+                    const totalLessons = lessonItems.length;
+                    const completedLessons = lessonItems.filter(item => completedLessonIds.includes(item.id)).length;
+                    const lessonsPassed = totalLessons > 0 && completedLessons === totalLessons;
+
+                    // Check Assessments
+                    const allAssessments = flatItems.filter(i => i.type === 'assessment' && (i.assessmentKind === 'quiz' || i.assessmentKind === 'exam'));
+                    const results = allAssessments.map(item => {
+                      const submissions = submissionHistory[item.id] || [];
+                      const latest = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                      if (!latest) {
+                        return { title: item.title, status: 'pending', score: 0, passingScore: item.assessmentDetails?.passingScore ?? 70 };
+                      }
+
+                      const passingScore = latest.passingScoreSnapshot ?? item.assessmentDetails?.passingScore ?? 70;
+                      const score = Math.round(latest.score ?? 0);
+                      const passed = score >= passingScore;
+
+                      return {
+                        title: item.title,
+                        status: passed ? 'passed' : 'failed',
+                        score,
+                        passingScore
+                      };
+                    });
+
+                    const allAssessmentsPassed = results.every(r => r.status === 'passed');
+
+                    // Check Final Exam
+                    const finalExam = flatItems.find(item => item.type === 'finalExam');
+                    let examPassed = false;
+                    let examScore = 0;
+                    let examSubmitted = false;
+                    let examPassingScore = 70;
+
+                    if (finalExam) {
+                      const submissions = submissionHistory[finalExam.id] || [];
+                      if (submissions.length > 0) {
+                        examSubmitted = true;
+                        const latest = submissions[submissions.length - 1];
+                        examPassingScore = latest.passingScoreSnapshot ?? finalExam.assessmentDetails?.passingScore ?? 70;
+                        examScore = Math.round(latest.score ?? 0);
+                        examPassed = examScore >= examPassingScore;
+                      } else {
+                        examPassingScore = finalExam.assessmentDetails?.passingScore ?? 70;
+                      }
+                    }
+
+                    status = (lessonsPassed && allAssessmentsPassed && examPassed) ? 'passed' : 'failed';
+
+                    const failures: string[] = [];
+                    if (!lessonsPassed) {
+                      failures.push(`complete all ${totalLessons} lessons (completed: ${completedLessons})`);
+                    }
+                    if (!allAssessmentsPassed) {
+                      const failedCount = results.filter(r => r.status === 'failed').length;
+                      const pendingCount = results.filter(r => r.status === 'pending').length;
+                      if (pendingCount > 0) {
+                        failures.push('pass all quizzes (some are pending)');
+                      } else {
+                        failures.push(`pass all quizzes (${failedCount} failed)`);
+                      }
+                    }
+                    if (!examSubmitted) {
+                      failures.push('submit the Final Exam');
+                    } else if (!examPassed) {
+                      failures.push(`pass the Final Exam (score: ${examScore}%, required: ${examPassingScore}%)`);
+                    }
+
+                    if (status === 'passed') {
+                      message = 'Congratulations! You have completed all lessons, passed all quizzes, and passed the Final Exam.';
+                    } else {
+                      message = 'To complete this course, you must: ' + failures.join(', ');
+                    }
+
+                    scoreDisplay = (
+                      <div className="mb-4 text-left space-y-4 border-t border-b border-gray-100 py-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Lessons Completion</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${lessonsPassed ? 'text-green-600' : 'text-orange-600'}`}>
+                              {Math.round((completedLessons / (totalLessons || 1)) * 100)}%
+                            </span>
+                            <i className={`fa ${lessonsPassed ? 'fa-check text-green-500' : 'fa-clock-o text-orange-500'}`} />
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-50 pt-2 mt-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Quizzes & Module Exams</p>
+                          <div className="max-h-40 overflow-y-auto space-y-2">
+                            {results.map((q, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <span className="truncate max-w-[180px]" title={q.title}>{q.title}</span>
+                                <div className="flex items-center gap-2">
+                                  {q.status === 'pending' ? (
+                                    <span className="text-gray-400">Not taken</span>
+                                  ) : (
+                                    <>
+                                      <span className={`font-semibold ${q.status === 'passed' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {q.score}%
+                                      </span>
+                                      <i className={`fa ${q.status === 'passed' ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {results.length === 0 && (
+                              <p className="text-xs text-gray-400 italic">No quizzes required.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {finalExam && (
+                          <div className="border-t border-gray-50 pt-2 mt-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold">Final Exam</span>
+                              <div className="flex items-center gap-2">
+                                {examSubmitted ? (
+                                  <>
+                                    <span className={`font-semibold ${examPassed ? 'text-green-600' : 'text-red-600'}`}>
+                                      {examScore}%
+                                    </span>
+                                    <i className={`fa ${examPassed ? 'fa-check text-green-500' : 'fa-times text-red-500'}`} />
+                                  </>
+                                ) : (
+                                  <span className="text-gray-400">Not taken</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                      <div
+                        className="fixed inset-0 bg-black/50 z-[100] transition-opacity duration-300"
+                        onClick={() => setIsEvaluationModalOpen(false)}
+                        aria-hidden="true"
+                      />
+                      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                        <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                          <div className="text-center">
+                            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${status === 'passed' ? 'bg-blue-100' : 'bg-red-100'} mb-4`}>
+                              <i className={`fa ${status === 'passed' ? 'fa-file-text-o text-blue-600' : 'fa-times text-red-600'} text-2xl`} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                              Evaluation Result
+                            </h3>
+                            <div className="flex justify-center mb-6">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${status === 'passed' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
+                                {status.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {scoreDisplay}
+
+                            <div className={`my-6 py-4 ${status === 'passed' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'} rounded-lg border`}>
+                              <p className={`text-sm font-medium ${status === 'passed' ? 'text-green-800' : 'text-red-800'}`}>
+                                {message}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              {showFinishButton && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsEvaluationModalOpen(false);
+                                    handleFinishCourse();
+                                  }}
+                                  className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 shadow-sm animate-pulse"
+                                >
+                                  Finish this Course
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setIsEvaluationModalOpen(false)}
+                                className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()
               )}
 
               {/* Success Modal */}
@@ -958,6 +1763,7 @@ export default function CoursePlayerLayout({
               flatItems={flatItems}
               completedLessonIds={completedLessonIds}
               submissionHistory={submissionHistory}
+              evaluationMode={course?.evaluationMode}
             />
           </aside>
 

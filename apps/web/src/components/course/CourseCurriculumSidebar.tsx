@@ -12,6 +12,7 @@ interface CourseCurriculumSidebarProps {
   flatItems: PlayerItem[];
   completedLessonIds?: string[];
   submissionHistory?: Record<string, any[]>;
+  evaluationMode?: string | null;
 }
 
 export function CourseCurriculumSidebar({
@@ -23,6 +24,7 @@ export function CourseCurriculumSidebar({
   flatItems,
   completedLessonIds = [],
   submissionHistory = {},
+  evaluationMode,
 }: CourseCurriculumSidebarProps) {
   return (
     <div className="flex-1 flex flex-col min-w-0 w-full">
@@ -144,7 +146,7 @@ export function CourseCurriculumSidebar({
                                 const itemKey = buildItemKey('assessment', assessment.id);
                                 const isActive = selectedKey === itemKey;
                                 const isQuiz = assessment.assessmentType === 'quiz';
-                                
+
                                 // Get the latest attempt result from submissionHistory
                                 const history = submissionHistory[assessment.id] || [];
                                 const latestAttempt = history.length > 0 ? history[history.length - 1] : null;
@@ -196,7 +198,7 @@ export function CourseCurriculumSidebar({
                 );
               })}
 
-            {curriculum.finalExam && (
+            {curriculum.finalExam && evaluationMode !== 'quizzes' && evaluationMode !== 'lessons_quizzes' && (
               <div className="mt-4 border border-[#0056d2]/30 rounded-lg overflow-hidden bg-white shadow-sm">
                 <button
                   type="button"
