@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import {
-    Shield, Key, RefreshCw, Smartphone,
+    Key, RefreshCw, Smartphone,
     CheckCircle
 } from '@/components/ui/IconWrapper';
 

@@ -7,7 +7,7 @@ import { CoursePerformanceTab } from './components/CoursePerformanceTab';
 import { FinancialTab } from './components/FinancialTab';
 import { ComplianceTab } from './components/ComplianceTab';
 import { CustomReportBuilderTab } from './components/CustomReportBuilderTab';
-import { FileText, TrendingUp, DollarSign, Shield, Users, Plus } from '@/components/ui/IconWrapper';
+import { TrendingUp, DollarSign, Shield, Users, Plus } from '@/components/ui/IconWrapper';
 
 function ReportsContent() {
     const searchParams = useSearchParams();

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Plus, Filter, FileText, Clock, MoreHorizontal } from '@/components/ui/IconWrapper';
+import { Plus, FileText, Clock, MoreHorizontal } from '@/components/ui/IconWrapper';
 
 export default function AssessmentsPage() {
     return (

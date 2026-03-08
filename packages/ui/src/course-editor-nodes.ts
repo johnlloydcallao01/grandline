@@ -43,7 +43,9 @@ export function mapPayloadMediaDocsToSharedMediaItems(docs: unknown): SharedMedi
     .map((d) => ({
       id: String(d.id ?? d._id ?? d.filename ?? Math.random().toString(36)),
       url: String(d.cloudinaryURL ?? d.thumbnailURL ?? d.url ?? ''),
-      alt: typeof d.alt === 'string' ? d.alt : '',
+      alt: (typeof d.alt === 'string' && d.alt) 
+        ? d.alt 
+        : (typeof d.filename === 'string' ? d.filename : ''),
       mimeType: typeof d.mimeType === 'string' ? d.mimeType : '',
     }));
 }

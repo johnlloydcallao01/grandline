@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Plus, Filter, Tag, Flag, MoreHorizontal } from '@/components/ui/IconWrapper';
+import { Search, Plus, Tag, Flag, MoreHorizontal } from '@/components/ui/IconWrapper';
 
 export default function QuestionBankPage() {
     return (

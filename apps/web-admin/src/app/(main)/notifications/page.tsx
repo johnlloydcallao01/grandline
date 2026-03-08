@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
     Bell, Mail, FileText, Plus,
     Search, Filter, MoreHorizontal,
-    CheckCircle, Clock, AlertTriangle,
-    Edit, Trash2, Send, Eye
+    Edit, Trash2
 } from '@/components/ui/IconWrapper';
 
 export default function NotificationsPage() {
@@ -194,7 +193,7 @@ function InAppNotificationsList() {
                             <td className="px-6 py-4">
                                 <div className="flex items-center">
                                     <div className={`h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center mr-4 ${notif.type === 'System' ? 'bg-amber-100 text-amber-600' :
-                                            notif.type === 'Marketing' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
+                                        notif.type === 'Marketing' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
                                         }`}>
                                         <Bell className="h-5 w-5" />
                                     </div>
@@ -209,7 +208,7 @@ function InAppNotificationsList() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${notif.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                        notif.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    notif.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}>
                                     {notif.status}
                                 </span>

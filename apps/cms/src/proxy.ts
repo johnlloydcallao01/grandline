@@ -27,7 +27,7 @@ export function proxy(request: NextRequest) {
         response.headers.set('Access-Control-Allow-Origin', origin)
       }
 
-      response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+      response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
       response.headers.set('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
       response.headers.set('Access-Control-Allow-Credentials', 'true')
       response.headers.set('Access-Control-Max-Age', '86400') // 24 hours

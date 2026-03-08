@@ -3,9 +3,9 @@
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-    Search, Filter, MoreHorizontal,
+    MoreHorizontal,
     BarChart3, Users, BookOpen, Edit,
-    CheckCircle, AlertCircle, ChevronDown, Download
+    ChevronDown, Download
 } from '@/components/ui/IconWrapper';
 
 export default function GradeManagementPage() {

@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-  Search, Filter, Plus, MoreHorizontal,
+  Search, Plus, MoreHorizontal,
   Image, Video, Music, FileText, File,
-  Grid, List, Download, Trash2, Edit, Eye,
+  Grid, List,
   Folder, FolderPlus
 } from '@/components/ui/IconWrapper';
 

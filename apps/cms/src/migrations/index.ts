@@ -73,6 +73,9 @@ import * as migration_20260212_143056_add_final_evaluation_field from './2026021
 import * as migration_20260213_120933_remove_user_certifications from './20260213_120933_remove_user_certifications';
 import * as migration_20260213_124627_create_certificates_collection from './20260213_124627_create_certificates_collection';
 import * as migration_20260215_050150_add_default_to_points_earned from './20260215_050150_add_default_to_points_earned';
+import * as migration_20260223_043556_add_certificate_templates from './20260223_043556_add_certificate_templates';
+import * as migration_20260223_163154_remove_background_image_from_templates from './20260223_163154_remove_background_image_from_templates';
+import * as migration_20260308_125532_add_site_settings_global from './20260308_125532_add_site_settings_global';
 
 export const migrations = [
   {
@@ -448,6 +451,21 @@ export const migrations = [
   {
     up: migration_20260215_050150_add_default_to_points_earned.up,
     down: migration_20260215_050150_add_default_to_points_earned.down,
-    name: '20260215_050150_add_default_to_points_earned'
+    name: '20260215_050150_add_default_to_points_earned',
+  },
+  {
+    up: migration_20260223_043556_add_certificate_templates.up,
+    down: migration_20260223_043556_add_certificate_templates.down,
+    name: '20260223_043556_add_certificate_templates',
+  },
+  {
+    up: migration_20260223_163154_remove_background_image_from_templates.up,
+    down: migration_20260223_163154_remove_background_image_from_templates.down,
+    name: '20260223_163154_remove_background_image_from_templates',
+  },
+  {
+    up: migration_20260308_125532_add_site_settings_global.up,
+    down: migration_20260308_125532_add_site_settings_global.down,
+    name: '20260308_125532_add_site_settings_global',
   },
 ];

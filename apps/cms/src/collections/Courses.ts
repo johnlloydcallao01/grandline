@@ -309,6 +309,19 @@ export const Courses: CollectionConfig = {
       },
     },
 
+    // === CERTIFICATION ===
+    {
+      name: 'certificateTemplate',
+      type: 'relationship',
+      relationTo: 'certificate-templates',
+      hasMany: false,
+      required: false,
+      admin: {
+        description: 'Select the certificate template to be issued upon completion',
+        position: 'sidebar',
+      },
+    },
+
     // === PUBLISHING & STATUS ===
     statusField,
     publishedAtField,

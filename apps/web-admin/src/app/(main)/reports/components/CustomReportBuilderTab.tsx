@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, Download, Calendar, Filter, Plus, Trash2, Check, CheckCircle } from '@/components/ui/IconWrapper';
+import { FileText, Download } from '@/components/ui/IconWrapper';
 
 export function CustomReportBuilderTab() {
     const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['user_name', 'course_completion']);

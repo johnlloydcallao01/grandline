@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BarChart3, TrendingUp, Users, Clock, Star } from '@/components/ui/IconWrapper';
+import { BarChart3, TrendingUp, Users, Star } from '@/components/ui/IconWrapper';
 
 export function CoursePerformanceTab() {
     return (

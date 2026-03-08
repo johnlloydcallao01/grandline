@@ -4,7 +4,7 @@ import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
     BarChart3, Download, FileText,
-    TrendingUp, Users, Calendar, Filter, Search
+    TrendingUp, Users, Calendar, Search
 } from '@/components/ui/IconWrapper';
 
 export default function GradeReportsPage() {

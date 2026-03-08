@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Users, RefreshCw, Plus, Search, Filter, Download } from '@/components/ui/IconWrapper';
+import { User, Users, RefreshCw, Download } from '@/components/ui/IconWrapper';
 
 export default function EnrollmentsPage() {
     const [activeTab, setActiveTab] = useState('manual'); // manual, bulk, auto

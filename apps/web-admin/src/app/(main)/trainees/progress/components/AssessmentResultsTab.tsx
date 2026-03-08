@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Star, FileText } from '@/components/ui/IconWrapper';
+import { FileText } from '@/components/ui/IconWrapper';
 
 export function AssessmentResultsTab() {
     return (

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {
-    CreditCard, Video, Server, Database,
+    CreditCard, Video, Server,
     Plus, Settings
 } from '@/components/ui/IconWrapper';
 

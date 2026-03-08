@@ -167,16 +167,9 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                     <div className="space-y-1">
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Certifications</div>}
                         <SidebarItem
-                            icon="certificate"
-                            label="Certificate Builder"
-                            active={pathname?.startsWith('/certifications/builder')}
-                            collapsed={!isOpen}
-                            href="/certifications/builder"
-                        />
-                        <SidebarItem
                             icon="template"
                             label="Certificate Templates"
-                            active={pathname?.startsWith('/certifications/templates')}
+                            active={pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')}
                             collapsed={!isOpen}
                             href="/certifications/templates"
                         />

@@ -45,6 +45,8 @@ import { UserNotifications } from './collections/UserNotifications'
 import { SupportTickets } from './collections/SupportTickets'
 import { SupportTicketMessages } from './collections/SupportTicketMessages'
 import { Certificates } from './collections/Certificates'
+import { CertificateTemplates } from './collections/CertificateTemplates'
+import { SiteSettings } from './globals/SiteSettings'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -76,6 +78,7 @@ export default buildConfig({
     CourseCategories,
     CourseEnrollments,
     Certificates,
+    CertificateTemplates,
     CourseModules,
     CourseLessons,
     Materials,
@@ -98,6 +101,9 @@ export default buildConfig({
     // Support System
     SupportTickets,
     SupportTicketMessages,
+  ],
+  globals: [
+    SiteSettings,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',

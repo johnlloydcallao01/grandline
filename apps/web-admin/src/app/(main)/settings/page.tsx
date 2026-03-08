@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, Save, Mail, Globe } from '@/components/ui/IconWrapper';
+import { Save, Mail, Globe } from '@/components/ui/IconWrapper';
 
 export default function GeneralSettingsPage() {
   const [activeTab, setActiveTab] = useState('site');

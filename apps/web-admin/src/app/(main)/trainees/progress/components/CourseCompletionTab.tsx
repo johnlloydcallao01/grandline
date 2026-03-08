@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle, Users } from '@/components/ui/IconWrapper';
+import { Users } from '@/components/ui/IconWrapper';
 
 export function CourseCompletionTab() {
     return (

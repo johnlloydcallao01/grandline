@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Filter, Plus, MoreHorizontal, BookOpen, Clock, Users, Star, BarChart3, Edit, Eye, Trash2 } from '@/components/ui/IconWrapper';
+import React from 'react';
+import { Search, Plus, BookOpen, Clock, Users, Star, Edit, Eye } from '@/components/ui/IconWrapper';
 
 export default function CoursesPage() {
     return (

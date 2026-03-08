@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { DollarSign, TrendingUp, Download, CreditCard, Calendar } from '@/components/ui/IconWrapper';
+import { TrendingUp, Download, Calendar } from '@/components/ui/IconWrapper';
 
 export function FinancialTab() {
     return (

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, TrendingUp, Award, Clock, CheckCircle, AlertCircle, DollarSign } from '@/components/ui/IconWrapper';
+import { Users, TrendingUp, Award, CheckCircle, AlertCircle, DollarSign } from '@/components/ui/IconWrapper';
 
 export default function DashboardPage() {
   return (

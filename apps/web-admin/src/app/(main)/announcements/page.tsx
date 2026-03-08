@@ -3,8 +3,8 @@
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-    Bell, Globe, BookOpen, Plus,
-    Search, Filter, Megaphone,
+    Globe, BookOpen, Plus,
+    Search, Filter,
     Calendar, MoreHorizontal, Edit,
     User, Eye
 } from '@/components/ui/IconWrapper';

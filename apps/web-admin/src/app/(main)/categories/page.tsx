@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Plus, Folder, File, ChevronDown, CheckCircle, MoreHorizontal, Edit, Trash2 } from '@/components/ui/IconWrapper';
+import { Plus, Folder, ChevronDown, Edit, Trash2 } from '@/components/ui/IconWrapper';
 
 export default function CourseCategoriesPage() {
-    const [categories, setCategories] = useState([
+    const [categories] = useState([
         {
             id: 1, name: 'Web Development', count: 12, subcategories: [
                 { id: 11, name: 'Frontend', count: 8 },

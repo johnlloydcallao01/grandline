@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {
-    User, Search, Filter, MoreHorizontal,
+    Search, Filter, MoreHorizontal,
     CheckCircle, AlertTriangle,
     FileText, Award
 } from '@/components/ui/IconWrapper';

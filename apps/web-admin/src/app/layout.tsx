@@ -4,6 +4,7 @@ import Image from "next/image";
 import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -106,9 +107,11 @@ export default function RootLayout({ children }: LayoutProps) {
 
         <AuthErrorBoundary>
           <AuthProvider>
-            <LoadingScreenWrapper>
-              {children}
-            </LoadingScreenWrapper>
+            <ToastProvider>
+              <LoadingScreenWrapper>
+                {children}
+              </LoadingScreenWrapper>
+            </ToastProvider>
           </AuthProvider>
         </AuthErrorBoundary>
       </body>
