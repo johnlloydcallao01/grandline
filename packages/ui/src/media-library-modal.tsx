@@ -43,11 +43,11 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    
+
     let active = true;
     setLoading(true);
     setError(null);
-    
+
     (async () => {
       try {
         const media = await loadMedia();
@@ -59,7 +59,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
         if (active) setLoading(false);
       }
     })();
-    
+
     return () => {
       active = false;
     };
@@ -68,13 +68,13 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
   // Handle escape key
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
@@ -139,7 +139,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
         >
           <div
             key="title"
-            style={{ fontSize: 16, fontWeight: 600 }}
+            style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}
           >
             {title}
           </div>
@@ -154,6 +154,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
               background: '#f9fafb',
               cursor: 'pointer',
               fontSize: 13,
+              color: '#374151',
             }}
             onClick={onClose}
           >

@@ -23,6 +23,9 @@ interface CertificateTemplate {
     } | number;
     canvasSchema: {
         elements: any[];
+        width?: number;
+        height?: number;
+        backgroundFit?: 'cover' | 'contain';
     };
     status: 'draft' | 'published' | 'archived';
     updatedAt: string;
@@ -40,11 +43,17 @@ export default function CertificateTemplatesPage() {
         id?: number;
         backgroundImage: string | null;
         elements: any[];
+        width?: number;
+        height?: number;
+        backgroundFit?: 'cover' | 'contain';
     }>({
         isOpen: false,
         id: undefined,
         backgroundImage: null,
-        elements: []
+        elements: [],
+        width: 3508, // Default A4 Landscape @ 300 DPI
+        height: 2480,
+        backgroundFit: 'contain'
     });
 
     const loadTemplates = async () => {
@@ -143,18 +152,18 @@ export default function CertificateTemplatesPage() {
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search templates..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500"
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-600"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex gap-2">
                     <select
-                        className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                        className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -205,7 +214,10 @@ export default function CertificateTemplatesPage() {
                                             isOpen: true,
                                             id: template.id,
                                             backgroundImage: imageUrl,
-                                            elements: elements
+                                            elements: elements,
+                                            width: template.canvasSchema?.width || 3508,
+                                            height: template.canvasSchema?.height || 2480,
+                                            backgroundFit: template.canvasSchema?.backgroundFit || 'contain'
                                         })}
                                         className="p-2 bg-white rounded-full shadow-sm text-gray-700 hover:text-blue-600 hover:scale-105 transition-all"
                                     >
@@ -267,6 +279,9 @@ export default function CertificateTemplatesPage() {
                 onEdit={previewTemplate.id ? () => router.push(`/certifications/builder?id=${previewTemplate.id}`) : undefined}
                 backgroundImage={previewTemplate.backgroundImage}
                 elements={previewTemplate.elements}
+                width={previewTemplate.width}
+                height={previewTemplate.height}
+                backgroundFit={previewTemplate.backgroundFit}
             />
         </div>
     );

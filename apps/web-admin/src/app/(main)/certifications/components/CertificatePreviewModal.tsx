@@ -10,12 +10,15 @@ interface CanvasElement {
     label?: string;
     x: number;
     y: number;
-    width: number;
-    height: number;
+    width: number | 'auto';
+    height: number | 'auto';
     style: {
         fontSize: number;
         fontFamily: string;
         color: string;
+        backgroundColor?: string;
+        padding?: number;
+        borderRadius?: number;
         fontWeight: string;
         textAlign: 'left' | 'center' | 'right';
     };
@@ -27,11 +30,14 @@ interface CertificatePreviewModalProps {
     onClose: () => void;
     onEdit?: () => void;
     backgroundImage: string | null;
+    backgroundFit?: 'cover' | 'contain';
     elements: CanvasElement[];
+    width?: number;
+    height?: number;
 }
 
-const INITIAL_CANVAS_WIDTH = 1123;
-const INITIAL_CANVAS_HEIGHT = 794;
+const DEFAULT_WIDTH = 3508;
+const DEFAULT_HEIGHT = 2480;
 
 const getPreviewContent = (element: CanvasElement) => {
     if (element.type !== 'variable' || !element.field) return element.content;
@@ -52,7 +58,10 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
     onClose,
     onEdit,
     backgroundImage,
-    elements
+    backgroundFit = 'contain',
+    elements,
+    width = DEFAULT_WIDTH,
+    height = DEFAULT_HEIGHT
 }) => {
     const [scale, setScale] = useState(0.5);
 
@@ -65,8 +74,8 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
 
             // Target roughly 80% of screen width and 70% of screen height
             // But ensure we don't scale UP (max 1)
-            const widthRatio = (viewportWidth * 0.8) / INITIAL_CANVAS_WIDTH;
-            const heightRatio = (viewportHeight * 0.7) / INITIAL_CANVAS_HEIGHT;
+            const widthRatio = (viewportWidth * 0.8) / width;
+            const heightRatio = (viewportHeight * 0.7) / height;
 
             // Use the smaller ratio to ensure it fits completely
             setScale(Math.min(widthRatio, heightRatio, 1));
@@ -81,7 +90,7 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
             window.removeEventListener('resize', updateScale);
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen]);
+    }, [isOpen, width, height]);
 
     if (!isOpen) return null;
 
@@ -109,8 +118,8 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                     */}
                     <div
                         style={{
-                            width: INITIAL_CANVAS_WIDTH * scale,
-                            height: INITIAL_CANVAS_HEIGHT * scale,
+                            width: width * scale,
+                            height: height * scale,
                             transition: 'width 0.2s, height 0.2s'
                         }}
                         className="shadow-xl bg-white relative flex-shrink-0"
@@ -122,8 +131,8 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                         <div
                             className="bg-white origin-top-left"
                             style={{
-                                width: INITIAL_CANVAS_WIDTH,
-                                height: INITIAL_CANVAS_HEIGHT,
+                                width: width,
+                                height: height,
                                 transform: `scale(${scale})`,
                                 transition: 'transform 0.2s'
                             }}
@@ -134,7 +143,7 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                                     <img
                                         src={backgroundImage}
                                         alt="Certificate Background"
-                                        className="w-full h-full object-contain"
+                                        className={`w-full h-full object-${backgroundFit}`}
                                     />
                                 </div>
                             ) : (
@@ -151,8 +160,8 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                                     style={{
                                         left: el.x,
                                         top: el.y,
-                                        width: el.width,
-                                        height: el.height,
+                                        width: el.width === 'auto' ? 'auto' : el.width,
+                                        height: el.height === 'auto' ? 'auto' : el.height,
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: el.style.textAlign === 'center' ? 'center' : el.style.textAlign === 'right' ? 'flex-end' : 'flex-start',
@@ -163,12 +172,16 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                                             fontSize: `${el.style.fontSize}px`,
                                             fontFamily: el.style.fontFamily,
                                             color: el.style.color,
+                                            backgroundColor: el.style.backgroundColor || 'transparent',
+                                            padding: `${el.style.padding || 0}px`,
+                                            borderRadius: `${el.style.borderRadius || 0}px`,
                                             fontWeight: el.style.fontWeight,
                                             textAlign: el.style.textAlign,
-                                            width: '100%',
-                                            height: '100%',
+                                            width: el.width === 'auto' ? 'max-content' : '100%',
+                                            height: el.height === 'auto' ? 'auto' : '100%',
                                             whiteSpace: 'pre-wrap',
-                                            overflow: 'hidden'
+                                            overflow: 'hidden',
+                                            boxSizing: 'border-box',
                                         }}
                                     >
                                         {el.type === 'variable' ? (
@@ -176,12 +189,12 @@ export const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = (
                                                 {getPreviewContent(el)}
                                             </span>
                                         ) : el.type === 'image' ? (
-                                        <img
-                                            src={el.content || '/placeholder-image.jpg'}
-                                            alt={el.label || 'Certificate Element'}
-                                            className="w-full h-full object-contain"
-                                        />
-                                    ) : (
+                                            <img
+                                                src={el.content || '/placeholder-image.jpg'}
+                                                alt={el.label || 'Certificate Element'}
+                                                className="w-full h-full object-contain"
+                                            />
+                                        ) : (
                                             <span>{el.content || 'Text'}</span>
                                         )}
                                     </div>

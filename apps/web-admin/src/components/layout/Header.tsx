@@ -5,6 +5,7 @@ import { ChevronDown, User, Settings } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
 import { useAuth, getFullName, getUserInitials } from '@/hooks/useAuth';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { getCMSImageUrl } from '@/lib/cms';
 
 /**
  * Admin Header component with navigation, search, and user controls
@@ -66,6 +67,11 @@ export function Header({
   const userInitials = getUserInitials(user);
   const userEmail = user?.email || 'Loading...';
   const userRole = user?.role || 'Loading...';
+  
+  // Get profile picture URL if available
+  const profilePictureUrl = user?.profilePicture
+    ? (user.profilePicture.cloudinaryURL || getCMSImageUrl(user.profilePicture.url))
+    : null;
 
   return (
     <>
@@ -125,23 +131,6 @@ export function Header({
 
         {/* Right section */}
         <div className="flex items-center space-x-2">
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full text-gray-700"
-            aria-label="Create"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </button>
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full text-gray-700"
-            aria-label="Notifications"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
-            </svg>
-          </button>
-
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -150,8 +139,17 @@ export function Header({
               aria-label="Profile menu"
               aria-expanded={isProfileDropdownOpen}
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {userInitials}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden relative ${profilePictureUrl ? 'bg-transparent' : 'bg-blue-600 text-white font-semibold'}`}>
+                {profilePictureUrl ? (
+                  <Image 
+                    src={profilePictureUrl} 
+                    alt={userDisplayName} 
+                    fill 
+                    className="object-cover"
+                  />
+                ) : (
+                  userInitials
+                )}
               </div>
               <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -181,8 +179,17 @@ export function Header({
                     </div>
                   ) : (
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                        {userInitials}
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden text-lg relative ${profilePictureUrl ? 'bg-transparent' : 'bg-blue-600 text-white font-semibold'}`}>
+                        {profilePictureUrl ? (
+                          <Image 
+                            src={profilePictureUrl} 
+                            alt={userDisplayName} 
+                            fill 
+                            className="object-cover"
+                          />
+                        ) : (
+                          userInitials
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">

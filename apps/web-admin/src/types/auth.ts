@@ -32,7 +32,8 @@ export interface User {
     id: number;
     filename: string;
     url: string;
-    alt?: string;
+    alt?: string | null;
+    cloudinaryURL?: string;
   } | null;
   createdAt: string;
   updatedAt: string;

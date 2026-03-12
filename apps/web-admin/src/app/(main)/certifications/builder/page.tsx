@@ -9,7 +9,8 @@ import {
     Type, Image as ImageIcon,
     Settings, Eye,
     Trash2, AlignLeft, AlignCenter, AlignRight,
-    X, Loader2
+    X, Loader2, ArrowLeft,
+    Copy, Clipboard, CopyPlus
 } from 'lucide-react';
 import { MediaLibraryModal } from '@encreasl/ui/media-library-modal';
 import {
@@ -29,12 +30,15 @@ interface CanvasElement {
     label?: string; // Display label
     x: number;
     y: number;
-    width: number; // Width is now required for resizing
-    height: number; // Height is now required for resizing
+    width: number | 'auto'; // Width is now flexible
+    height: number | 'auto'; // Height is now flexible
     style: {
         fontSize: number;
         fontFamily: string;
         color: string;
+        backgroundColor?: string;
+        padding?: number;
+        borderRadius?: number;
         fontWeight: string;
         textAlign: 'left' | 'center' | 'right';
     };
@@ -51,14 +55,15 @@ interface CertificateTemplateData {
     canvasSchema: {
         width: number;
         height: number;
+        backgroundFit?: 'cover' | 'contain';
         elements: CanvasElement[];
     };
 }
 
 // --- Constants ---
 
-const INITIAL_CANVAS_WIDTH = 1123; // A4 Landscape roughly at 96 DPI (approx)
-const INITIAL_CANVAS_HEIGHT = 794;
+const INITIAL_CANVAS_WIDTH = 3508; // A4 Landscape at 300 DPI
+const INITIAL_CANVAS_HEIGHT = 2480;
 
 const AVAILABLE_VARIABLES = [
     { label: 'Student Name', field: 'student_name' },
@@ -123,6 +128,15 @@ function CertificateBuilderContent() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [canvasScale, setCanvasScale] = useState(1.0); // Zoom level for the editor
 
+    // --- Clipboard & Context Menu State ---
+    const [clipboard, setClipboard] = useState<CanvasElement | null>(null);
+    const [contextMenu, setContextMenu] = useState<{
+        visible: boolean;
+        x: number;
+        y: number;
+        targetId: string | null;
+    }>({ visible: false, x: 0, y: 0, targetId: null });
+
     // Media Library State
     const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
     const [mediaLibraryMode, setMediaLibraryMode] = useState<'element' | 'background'>('element');
@@ -133,6 +147,12 @@ function CertificateBuilderContent() {
     const [templateStatus, setTemplateStatus] = useState<'draft' | 'published' | 'archived'>('draft');
     const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
     const [backgroundMediaId, setBackgroundMediaId] = useState<string | number | null>(null);
+    
+    // Canvas Dimensions
+    const [canvasWidth, setCanvasWidth] = useState(INITIAL_CANVAS_WIDTH);
+    const [canvasHeight, setCanvasHeight] = useState(INITIAL_CANVAS_HEIGHT);
+    const [backgroundFit, setBackgroundFit] = useState<'cover' | 'contain'>('contain');
+    const [dimensionUnit, setDimensionUnit] = useState<'px' | 'in' | 'mm'>('px');
 
     // UI State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -203,13 +223,19 @@ function CertificateBuilderContent() {
                     }
                 }
 
-                if (data.canvasSchema && data.canvasSchema.elements) {
-                    // Restore elements with refs
-                    const restoredElements = data.canvasSchema.elements.map((el: any) => ({
-                        ...el,
-                        nodeRef: React.createRef<HTMLDivElement>()
-                    }));
-                    setElements(restoredElements);
+                if (data.canvasSchema) {
+                    if (data.canvasSchema.width) setCanvasWidth(data.canvasSchema.width);
+                    if (data.canvasSchema.height) setCanvasHeight(data.canvasSchema.height);
+                    if (data.canvasSchema.backgroundFit) setBackgroundFit(data.canvasSchema.backgroundFit);
+
+                    if (data.canvasSchema.elements) {
+                        // Restore elements with refs
+                        const restoredElements = data.canvasSchema.elements.map((el: any) => ({
+                            ...el,
+                            nodeRef: React.createRef<HTMLDivElement>()
+                        }));
+                        setElements(restoredElements);
+                    }
                 }
             } catch (err) {
                 console.error('Error loading template:', err);
@@ -226,6 +252,51 @@ function CertificateBuilderContent() {
         loadTemplate();
     }, [templateId]);
 
+    // --- Keyboard Shortcuts ---
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Check if user is typing in an input or textarea
+            const target = e.target as HTMLElement;
+            const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+            if (isInput) return;
+
+            // Delete key
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (selectedId) {
+                    deleteElement(selectedId);
+                }
+            }
+
+            // Copy (Ctrl+C)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                if (selectedId) {
+                    e.preventDefault();
+                    copyElement(selectedId);
+                }
+            }
+
+            // Paste (Ctrl+V)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                if (clipboard) {
+                    e.preventDefault();
+                    pasteElement();
+                }
+            }
+
+            // Duplicate (Ctrl+D)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                if (selectedId) {
+                    e.preventDefault();
+                    duplicateElement(selectedId);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedId, clipboard]); // Re-bind when dependencies change
+
     // --- Actions ---
 
     const addElement = (type: CanvasElement['type'], field?: string, label?: string) => {
@@ -236,12 +307,15 @@ function CertificateBuilderContent() {
             label: label || 'New Text',
             x: 100, // Default position
             y: 100,
-            width: type === 'image' ? 150 : 300, // Default width
-            height: type === 'image' ? 150 : 50, // Default height
+            width: type === 'image' ? 300 : 'auto', // Default width
+            height: type === 'image' ? 300 : 'auto', // Default height
             style: {
-                fontSize: 24,
+                fontSize: 48, // Start with larger font for 300 DPI
                 fontFamily: 'serif',
                 color: '#000000',
+                backgroundColor: 'transparent',
+                padding: 0,
+                borderRadius: 0,
                 fontWeight: 'normal',
                 textAlign: 'left',
             },
@@ -251,6 +325,7 @@ function CertificateBuilderContent() {
 
         setElements((prev) => [...prev, newElement]);
         setSelectedId(newElement.id);
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
     };
 
     const updateElement = (id: string, updates: Partial<CanvasElement> | Partial<CanvasElement['style']>) => {
@@ -275,6 +350,73 @@ function CertificateBuilderContent() {
         setElements((prev) => prev.filter((el) => el.id !== id));
         if (selectedId === id) setSelectedId(null);
         if (editingId === id) setEditingId(null);
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+    };
+
+    const copyElement = (id: string) => {
+        const el = elements.find(e => e.id === id);
+        if (el) {
+            setClipboard(el);
+            addToast({ title: 'Copied', message: 'Element copied to clipboard', type: 'success' });
+        }
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+    };
+
+    const pasteElement = (position?: { x: number; y: number }) => {
+        if (clipboard) {
+            const newElement: CanvasElement = {
+                ...clipboard,
+                id: `el_${Date.now()}`,
+                x: position ? position.x : clipboard.x + 20,
+                y: position ? position.y : clipboard.y + 20,
+                nodeRef: React.createRef<HTMLDivElement>(),
+            };
+            setElements(prev => [...prev, newElement]);
+            setSelectedId(newElement.id);
+            addToast({ title: 'Pasted', message: 'Element pasted from clipboard', type: 'success' });
+        }
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+    };
+
+    const duplicateElement = (id: string) => {
+        const el = elements.find(e => e.id === id);
+        if (el) {
+            const newElement: CanvasElement = {
+                ...el,
+                id: `el_${Date.now()}`,
+                x: el.x + 20,
+                y: el.y + 20,
+                nodeRef: React.createRef<HTMLDivElement>(),
+            };
+            setElements(prev => [...prev, newElement]);
+            setSelectedId(newElement.id);
+            addToast({ title: 'Duplicated', message: 'Element duplicated', type: 'success' });
+        }
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+    };
+
+    const handleContextMenu = (e: React.MouseEvent, id: string | null) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            targetId: id
+        });
+        
+        if (id) {
+            setSelectedId(id);
+        }
+    };
+
+    const handleDrag = (id: string, e: DraggableEvent, data: DraggableData) => {
+        // Continuous update for smooth controlled dragging
+        setElements((prev) => prev.map((el) => {
+            if (el.id !== id) return el;
+            return { ...el, x: data.x, y: data.y };
+        }));
     };
 
     const handleDragStop = (id: string, e: DraggableEvent, data: DraggableData) => {
@@ -310,8 +452,9 @@ function CertificateBuilderContent() {
 
         try {
             const schema = {
-                width: INITIAL_CANVAS_WIDTH,
-                height: INITIAL_CANVAS_HEIGHT,
+                width: canvasWidth,
+                height: canvasHeight,
+                backgroundFit: backgroundFit,
                 elements: elements.map(({ id, type, field, label, x, y, width, height, style, content }) => ({
                     id, type, field, label, x, y, width, height, style, content
                 }))
@@ -425,8 +568,8 @@ function CertificateBuilderContent() {
                 label: item.alt || 'Image',
                 x: 100,
                 y: 100,
-                width: 200,
-                height: 200,
+                width: 400, // Reasonable default for 300 DPI
+                height: 400,
                 style: {
                     fontSize: 0, // Not used for images
                     fontFamily: 'sans-serif',
@@ -452,6 +595,27 @@ function CertificateBuilderContent() {
     // --- Computed ---
     const selectedElement = elements.find(el => el.id === selectedId);
 
+    // --- Dimension Conversion Helpers ---
+    const toPx = (val: number, unit: 'px' | 'in' | 'mm') => {
+        if (unit === 'px') return val;
+        if (unit === 'in') return Math.round(val * 300);
+        if (unit === 'mm') return Math.round(val * 11.811023622);
+        return val;
+    };
+
+    const fromPx = (px: number, unit: 'px' | 'in' | 'mm') => {
+        if (unit === 'px') return px;
+        if (unit === 'in') return Number((px / 300).toFixed(2));
+        if (unit === 'mm') return Number((px / 11.811023622).toFixed(1));
+        return px;
+    };
+
+    const handleDimensionChange = (val: number, type: 'width' | 'height') => {
+        const pxVal = toPx(val, dimensionUnit);
+        if (type === 'width') setCanvasWidth(pxVal);
+        else setCanvasHeight(pxVal);
+    };
+
     if (isLoading) {
         return (
             <div className="h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50">
@@ -467,10 +631,19 @@ function CertificateBuilderContent() {
         <div className="h-[calc(100vh-4rem)] flex flex-col bg-gray-50">
             {/* Header */}
             <div className="px-6 py-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0 shadow-sm z-10">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900">Certificate Builder</h1>
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                        <span>{templateName}</span>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => router.back()}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
+                        title="Go Back"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">Certificate Builder</h1>
+                        <div className="flex items-center gap-2 text-gray-500 text-sm">
+                            <span>{templateName}</span>
+                        </div>
                     </div>
                 </div>
                 <div className="flex gap-3 items-center">
@@ -622,6 +795,52 @@ function CertificateBuilderContent() {
                                             </div>
                                         </div>
 
+                                        {/* Background Color */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-900 mb-1">Background Color</label>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={selectedElement.style.backgroundColor === 'transparent' ? '#ffffff' : selectedElement.style.backgroundColor}
+                                                    onChange={(e) => updateElement(selectedElement.id, { backgroundColor: e.target.value })}
+                                                    className="h-8 w-8 rounded cursor-pointer border-0 p-0"
+                                                />
+                                                <button
+                                                    onClick={() => updateElement(selectedElement.id, { backgroundColor: 'transparent' })}
+                                                    className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 text-gray-700 font-medium"
+                                                    title="Clear Background"
+                                                >
+                                                    Clear
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Padding */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-900 mb-1">Padding: {selectedElement.style.padding || 0}px</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                value={selectedElement.style.padding || 0}
+                                                onChange={(e) => updateElement(selectedElement.id, { padding: parseInt(e.target.value) })}
+                                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                            />
+                                        </div>
+
+                                        {/* Border Radius */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-900 mb-1">Border Radius: {selectedElement.style.borderRadius || 0}px</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                value={selectedElement.style.borderRadius || 0}
+                                                onChange={(e) => updateElement(selectedElement.id, { borderRadius: parseInt(e.target.value) })}
+                                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                            />
+                                        </div>
+
                                         {/* Alignment */}
                                         <div>
                                             <label className="block text-xs font-bold text-gray-900 mb-1">Alignment</label>
@@ -664,7 +883,13 @@ function CertificateBuilderContent() {
                 </div>
 
                 {/* Center Canvas Area */}
-                <div className="flex-1 bg-gray-200 overflow-auto flex items-center justify-center p-8 relative">
+                <div
+                    className="flex-1 bg-gray-200 overflow-auto flex items-center justify-center p-8 relative"
+                    onClick={() => {
+                        setSelectedId(null);
+                        setEditingId(null);
+                    }}
+                >
 
                     {/* Zoom Controls */}
                     <div className="absolute bottom-8 right-8 bg-white rounded-lg shadow-md flex items-center gap-2 px-3 py-2 z-20 border border-gray-200">
@@ -677,9 +902,17 @@ function CertificateBuilderContent() {
                     <div
                         ref={canvasRef}
                         className="bg-white shadow-2xl relative transition-transform origin-center overflow-hidden"
+                        onClick={(e) => {
+                            // Stop propagation if clicking on canvas background, but still deselect elements
+                            e.stopPropagation();
+                            setSelectedId(null);
+                            setEditingId(null);
+                            setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+                        }}
+                        onContextMenu={(e) => handleContextMenu(e, null)}
                         style={{
-                            width: INITIAL_CANVAS_WIDTH,
-                            height: INITIAL_CANVAS_HEIGHT,
+                            width: canvasWidth,
+                            height: canvasHeight,
                             transform: `scale(${canvasScale})`,
                             // Ensure the canvas takes up space even when scaled down
                             flexShrink: 0
@@ -691,7 +924,7 @@ function CertificateBuilderContent() {
                                 <img
                                     src={backgroundImage}
                                     alt="Certificate Background"
-                                    className="w-full h-full object-contain"
+                                    className={`w-full h-full object-${backgroundFit}`}
                                 />
                             </div>
                         ) : (
@@ -711,9 +944,10 @@ function CertificateBuilderContent() {
 
                         {/* Elements Layer */}
                         {elements.map((el) => (
-                            <div key={`${el.id}-${el.x}-${el.y}`} style={{ display: 'contents' }}>
+                            <div key={el.id} style={{ display: 'contents' }}>
                                 <Draggable
-                                    defaultPosition={{ x: el.x, y: el.y }}
+                                    position={{ x: el.x, y: el.y }}
+                                    onDrag={(e, d) => handleDrag(el.id, e, d)}
                                     onStop={(e, d) => handleDragStop(el.id, e, d)}
                                     scale={canvasScale}
                                     cancel=".nodrag"
@@ -721,29 +955,36 @@ function CertificateBuilderContent() {
                                 >
                                     <div
                                         ref={el.nodeRef as React.RefObject<HTMLDivElement>}
+                                        onContextMenu={(e) => handleContextMenu(e, el.id)}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedId(el.id);
+                                            setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
                                         }}
                                         onDoubleClick={(e) => {
                                             e.stopPropagation();
                                             if (el.type === 'text') {
                                                 setEditingId(el.id);
                                             }
+                                            setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
                                         }}
                                         className={`absolute cursor-move group hover:outline hover:outline-1 hover:outline-blue-400 ${selectedId === el.id ? 'outline outline-2 outline-blue-600 z-50' : 'z-10'
                                             }`}
                                     >
                                         <Resizable
-                                            size={{ width: el.width, height: el.height }}
+                                            size={{
+                                                width: el.width === 'auto' ? 'auto' : el.width,
+                                                height: el.height === 'auto' ? 'auto' : el.height
+                                            }}
                                             onResizeStop={(e, direction, ref, d) => {
-                                                const newWidth = el.width + d.width;
-                                                const newHeight = el.height + d.height;
+                                                const newWidth = (el.width === 'auto' ? ref.offsetWidth : el.width as number) + d.width;
+                                                const newHeight = (el.height === 'auto' ? ref.offsetHeight : el.height as number) + d.height;
 
                                                 // Calculate font size scaling if resizing from corner (bottomRight)
                                                 let newFontSize = el.style.fontSize;
                                                 if (direction === 'bottomRight' || direction === 'topRight' || direction === 'bottomLeft' || direction === 'topLeft') {
-                                                    const ratio = newHeight / el.height;
+                                                    const currentHeight = el.height === 'auto' ? ref.offsetHeight - d.height : el.height as number;
+                                                    const ratio = newHeight / currentHeight;
                                                     newFontSize = Math.round(el.style.fontSize * ratio);
                                                 }
 
@@ -763,8 +1004,14 @@ function CertificateBuilderContent() {
                                             }}
                                             // Only enable bottom/right for simplicity to avoid x/y issues for now
                                             enable={{
-                                                top: false, right: true, bottom: true, left: false,
-                                                topRight: false, bottomRight: true, bottomLeft: false, topLeft: false
+                                                top: false,
+                                                right: el.type === 'image' || selectedId === el.id, // Only resizable if image or selected
+                                                bottom: el.type === 'image' || selectedId === el.id,
+                                                left: false,
+                                                topRight: false,
+                                                bottomRight: el.type === 'image' || selectedId === el.id,
+                                                bottomLeft: false,
+                                                topLeft: false
                                             }}
                                             style={{
                                                 display: 'flex',
@@ -777,18 +1024,23 @@ function CertificateBuilderContent() {
                                                     fontSize: `${el.style.fontSize}px`,
                                                     fontFamily: el.style.fontFamily,
                                                     color: el.style.color,
+                                                    backgroundColor: el.style.backgroundColor || 'transparent',
+                                                    padding: `${el.style.padding || 0}px`,
+                                                    borderRadius: `${el.style.borderRadius || 0}px`,
                                                     fontWeight: el.style.fontWeight,
                                                     textAlign: el.style.textAlign,
-                                                    width: '100%',
-                                                    height: '100%',
+                                                    width: el.width === 'auto' ? 'max-content' : '100%',
+                                                    height: el.height === 'auto' ? 'auto' : '100%',
+                                                    minWidth: '50px',
                                                     whiteSpace: 'pre-wrap', // Allow wrapping
                                                     overflow: 'hidden',
-                                                    userSelect: 'none'
+                                                    userSelect: 'none',
+                                                    boxSizing: 'border-box', // Ensure padding is included in width calculation
                                                 }}
                                             >
                                                 {/* Render Content */}
                                                 {el.type === 'variable' ? (
-                                                    <span className="opacity-80 border border-dashed border-gray-400 px-1 bg-yellow-50/50">
+                                                    <span className="opacity-80 border border-dashed border-gray-400 px-1 bg-yellow-50/50 whitespace-nowrap">
                                                         {`{{ ${el.label} }}`}
                                                     </span>
                                                 ) : el.type === 'image' ? (
@@ -796,25 +1048,35 @@ function CertificateBuilderContent() {
                                                         src={el.content || '/placeholder-image.jpg'}
                                                         alt={el.label || 'Certificate Element'}
                                                         className="w-full h-full object-contain"
+                                                        draggable={false}
+                                                        onDragStart={(e) => e.preventDefault()}
+                                                        style={{ userSelect: 'none' }}
                                                     />
                                                 ) : editingId === el.id ? (
                                                     <textarea
                                                         autoFocus
                                                         value={el.content || ''}
-                                                        onChange={(e) => updateElement(el.id, { content: e.target.value })}
+                                                        onChange={(e) => {
+                                                            updateElement(el.id, { content: e.target.value });
+                                                            // Auto-grow height
+                                                            e.target.style.height = 'auto';
+                                                            e.target.style.height = `${e.target.scrollHeight}px`;
+                                                        }}
                                                         onBlur={() => setEditingId(null)}
                                                         onKeyDown={(e) => {
                                                             e.stopPropagation(); // Prevent triggering other shortcuts
                                                         }}
                                                         onMouseDown={(e) => e.stopPropagation()} // Allow clicking inside textarea without dragging
-                                                        className="w-full h-full bg-transparent outline-none resize-none p-0 m-0 border-none focus:ring-0 nodrag"
+                                                        className="w-full h-full bg-transparent outline-none resize-none p-0 m-0 border-none focus:ring-0 nodrag overflow-hidden"
                                                         style={{
                                                             fontSize: 'inherit',
                                                             fontFamily: 'inherit',
                                                             fontWeight: 'inherit',
                                                             textAlign: 'inherit',
                                                             color: 'inherit',
-                                                            lineHeight: 'inherit'
+                                                            lineHeight: 'inherit',
+                                                            minWidth: '100%',
+                                                            whiteSpace: 'pre-wrap'
                                                         }}
                                                     />
                                                 ) : (
@@ -824,7 +1086,7 @@ function CertificateBuilderContent() {
 
                                             {/* Helper UI when selected */}
                                             {selectedId === el.id && (
-                                                <div className="absolute -top-6 left-0 bg-blue-600 text-white text-[10px] px-1 rounded">
+                                                <div className="absolute -top-6 left-0 bg-blue-600 text-white text-[10px] px-1 rounded whitespace-nowrap">
                                                     {Math.round(el.x)}, {Math.round(el.y)}
                                                 </div>
                                             )}
@@ -837,6 +1099,78 @@ function CertificateBuilderContent() {
                     </div>
                 </div>
             </div>
+
+            {/* Context Menu */}
+            {contextMenu.visible && (
+                <div
+                    className="fixed z-[9999] bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[160px] animate-in fade-in zoom-in-95 duration-100"
+                    style={{
+                        left: Math.min(contextMenu.x, window.innerWidth - 170), // Prevent overflow right
+                        top: Math.min(contextMenu.y, window.innerHeight - 200)  // Prevent overflow bottom
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {contextMenu.targetId ? (
+                        <>
+                            <button
+                                onClick={() => copyElement(contextMenu.targetId!)}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                                <Copy className="h-4 w-4" />
+                                <span>Copy</span>
+                                <span className="ml-auto text-xs text-gray-400">Ctrl+C</span>
+                            </button>
+                            <button
+                                onClick={() => pasteElement()}
+                                disabled={!clipboard}
+                                className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${clipboard ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
+                            >
+                                <Clipboard className="h-4 w-4" />
+                                <span>Paste</span>
+                                <span className="ml-auto text-xs text-gray-400">Ctrl+V</span>
+                            </button>
+                            <button
+                                onClick={() => duplicateElement(contextMenu.targetId!)}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                                <CopyPlus className="h-4 w-4" />
+                                <span>Duplicate</span>
+                                <span className="ml-auto text-xs text-gray-400">Ctrl+D</span>
+                            </button>
+                            <div className="h-px bg-gray-200 my-1" />
+                            <button
+                                onClick={() => deleteElement(contextMenu.targetId!)}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span>Delete</span>
+                                <span className="ml-auto text-xs text-red-300">Del</span>
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                // Calculate position relative to canvas
+                                // We need to convert screen coordinates (contextMenu.x/y) to canvas coordinates
+                                const canvasRect = canvasRef.current?.getBoundingClientRect();
+                                if (canvasRect) {
+                                    const relativeX = (contextMenu.x - canvasRect.left) / canvasScale;
+                                    const relativeY = (contextMenu.y - canvasRect.top) / canvasScale;
+                                    pasteElement({ x: relativeX, y: relativeY });
+                                } else {
+                                    pasteElement();
+                                }
+                            }}
+                            disabled={!clipboard}
+                            className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${clipboard ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
+                        >
+                            <Clipboard className="h-4 w-4" />
+                            <span>Paste Here</span>
+                            <span className="ml-auto text-xs text-gray-400">Ctrl+V</span>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Media Library Modal */}
             <MediaLibraryModal
@@ -853,7 +1187,10 @@ function CertificateBuilderContent() {
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 backgroundImage={backgroundImage}
+                backgroundFit={backgroundFit}
                 elements={elements}
+                width={canvasWidth}
+                height={canvasHeight}
             />
 
             {/* Template Settings Modal */}
@@ -896,6 +1233,63 @@ function CertificateBuilderContent() {
                             </div>
 
                             <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="text-sm font-bold text-gray-900">Canvas Size</label>
+                                    <select
+                                        value={dimensionUnit}
+                                        onChange={(e) => setDimensionUnit(e.target.value as 'px' | 'in' | 'mm')}
+                                        className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 bg-white font-medium"
+                                    >
+                                        <option value="px">Pixels (px)</option>
+                                        <option value="in">Inches (in)</option>
+                                        <option value="mm">Millimeters (mm)</option>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Width ({dimensionUnit})</label>
+                                        <input
+                                            type="number"
+                                            value={fromPx(canvasWidth, dimensionUnit)}
+                                            onChange={(e) => handleDimensionChange(Number(e.target.value), 'width')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
+                                            step={dimensionUnit === 'px' ? 1 : 0.1}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Height ({dimensionUnit})</label>
+                                        <input
+                                            type="number"
+                                            value={fromPx(canvasHeight, dimensionUnit)}
+                                            onChange={(e) => handleDimensionChange(Number(e.target.value), 'height')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
+                                            step={dimensionUnit === 'px' ? 1 : 0.1}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex gap-2 overflow-x-auto pb-2">
+                                    <button
+                                        onClick={() => { setCanvasWidth(3508); setCanvasHeight(2480); }}
+                                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 whitespace-nowrap"
+                                    >
+                                        A4 Landscape
+                                    </button>
+                                    <button
+                                        onClick={() => { setCanvasWidth(2480); setCanvasHeight(3508); }}
+                                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 whitespace-nowrap"
+                                    >
+                                        A4 Portrait
+                                    </button>
+                                    <button
+                                        onClick={() => { setCanvasWidth(3300); setCanvasHeight(2550); }}
+                                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 whitespace-nowrap"
+                                    >
+                                        Letter Landscape
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
                                 <label className="block text-sm font-bold text-gray-900 mb-1">Status</label>
                                 <select
                                     value={templateStatus}
@@ -913,17 +1307,33 @@ function CertificateBuilderContent() {
                                 <div className="flex items-center gap-4">
                                     <div className="h-20 w-32 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center relative">
                                         {backgroundImage ? (
-                                            <img src={backgroundImage} alt="Background" className="h-full w-full object-cover" />
+                                            <img src={backgroundImage} alt="Background" className={`h-full w-full object-${backgroundFit}`} />
                                         ) : (
                                             <ImageIcon className="h-8 w-8 text-gray-400" />
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => openMediaLibrary('background')}
-                                        className="px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-colors"
-                                    >
-                                        Change Image
-                                    </button>
+                                    <div className="flex flex-col gap-2">
+                                        <button
+                                            onClick={() => openMediaLibrary('background')}
+                                            className="px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-colors"
+                                        >
+                                            Change Image
+                                        </button>
+                                        <div className="flex bg-gray-100 rounded-lg p-1">
+                                            <button
+                                                onClick={() => setBackgroundFit('contain')}
+                                                className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${backgroundFit === 'contain' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                            >
+                                                Contain
+                                            </button>
+                                            <button
+                                                onClick={() => setBackgroundFit('cover')}
+                                                className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${backgroundFit === 'cover' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                            >
+                                                Cover
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

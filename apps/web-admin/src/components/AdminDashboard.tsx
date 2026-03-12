@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Header, Sidebar } from "@/components/layout";
 
 interface AdminDashboardProps {
@@ -30,7 +31,18 @@ export function useDashboard() {
  * It maintains layout state and provides a proper SPA experience.
  */
 export function AdminDashboard({ children }: AdminDashboardProps) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Check if we are on the builder page
+  const isBuilderPage = pathname?.startsWith('/certifications/builder');
+
+  // Automatically close sidebar on builder page
+  useEffect(() => {
+    if (isBuilderPage) {
+      setSidebarOpen(false);
+    }
+  }, [isBuilderPage]);
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
@@ -48,17 +60,21 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
   return (
     <DashboardContext.Provider value={dashboardValue}>
       <div className="min-h-screen bg-gray-50">
-        <Header
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          onSearch={handleSearch}
-        />
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
-        <main className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'}`}>
-          <div className="min-h-full px-[10px]">
+        {!isBuilderPage && (
+          <Header
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
+            onSearch={handleSearch}
+          />
+        )}
+        {!isBuilderPage && (
+          <Sidebar
+            isOpen={sidebarOpen}
+            onToggle={toggleSidebar}
+          />
+        )}
+        <main className={`transition-all duration-300 ${!isBuilderPage && sidebarOpen ? 'lg:ml-60' : !isBuilderPage ? 'lg:ml-20' : ''}`}>
+          <div className={`min-h-full ${!isBuilderPage ? 'px-[10px]' : ''}`}>
             {children || <DefaultDashboardContent />}
           </div>
         </main>
