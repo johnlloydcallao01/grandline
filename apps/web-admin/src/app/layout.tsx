@@ -5,6 +5,7 @@ import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loa
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { ToastProvider } from "@/components/ui/Toast";
+import { cmsConfig, getCMSImageUrl } from "@/lib/cms";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,18 +18,53 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Grandline Maritime Admin Dashboard",
-  description: "Admin dashboard for Grandline Maritime Training and Development Center Inc",
-  keywords: "admin dashboard, maritime training, course management, student management",
-  authors: [{ name: "Grandline Maritime Team" }],
-  robots: "noindex, nofollow", // Prevent search engine indexing
-  openGraph: {
-    title: "Grandline Maritime Admin Dashboard",
-    description: "Admin dashboard for maritime training management.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let siteName = "Grandline Maritime Admin Dashboard";
+  let description = "Admin dashboard for Grandline Maritime Training and Development Center Inc";
+  let iconUrl = '/favicon.ico';
+
+  try {
+    const res = await fetch(`${cmsConfig.apiUrl}/globals/site-settings?depth=1`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    
+    if (res.ok) {
+      const settings = await res.json();
+      
+      if (settings.siteName) {
+        siteName = settings.siteName;
+      }
+      
+      if (settings.description) {
+        description = settings.description;
+      }
+      
+      if (settings.favicon && typeof settings.favicon === 'object') {
+        iconUrl = settings.favicon.cloudinaryURL || getCMSImageUrl(settings.favicon.url);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch site settings for metadata:", error);
+  }
+
+  return {
+    title: siteName,
+    description: description,
+    keywords: "admin dashboard, maritime training, course management, student management",
+    authors: [{ name: "Grandline Maritime Team" }],
+    robots: "noindex, nofollow", // Prevent search engine indexing
+    openGraph: {
+      title: siteName,
+      description: description,
+      type: "website",
+    },
+    icons: {
+      icon: iconUrl,
+      shortcut: iconUrl,
+      apple: iconUrl,
+    },
+  };
+}
 
 // Proper React 19 layout props type
 type LayoutProps = {

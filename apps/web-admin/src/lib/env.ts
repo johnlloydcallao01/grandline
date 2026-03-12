@@ -5,7 +5,7 @@
 
 // Simple, direct environment access - no complex validation that breaks
 export const env = {
-  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'Encreasl Admin Dashboard',
+  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'Grandline Dashboard',
   NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
 

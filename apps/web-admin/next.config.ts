@@ -15,6 +15,23 @@ const nextConfig: NextConfig = {
     "payload"
   ],
 
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cms.grandlinemaritime.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+  },
+
   // Next.js automatically exposes NEXT_PUBLIC_ environment variables to the client
   // No need to explicitly define them in the env object
 

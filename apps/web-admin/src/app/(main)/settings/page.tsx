@@ -7,7 +7,7 @@ export default function GeneralSettingsPage() {
   const [activeTab, setActiveTab] = useState('site');
   const [settings, setSettings] = useState({
     site: {
-      name: 'Encreasl Admin',
+      name: 'Grandline',
       description: 'Professional admin dashboard for content management',
       timezone: 'UTC',
       logo: null, // Placeholder for logo upload
@@ -17,7 +17,7 @@ export default function GeneralSettingsPage() {
       smtpPort: '587',
       smtpUser: 'admin@example.com',
       smtpPassword: '••••••••',
-      senderName: 'Encreasl System',
+      senderName: 'Grandline System',
       senderEmail: 'noreply@example.com',
     }
   });
