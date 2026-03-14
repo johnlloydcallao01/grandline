@@ -113,7 +113,7 @@ export function CourseCurriculumSidebar({
                                 const isCompleted = completedLessonIds.includes(String(lesson.id));
 
                                 return (
-                                  <li key={lesson.id}>
+                                  <li key={itemKey}>
                                     <button
                                       type="button"
                                       onClick={() => {

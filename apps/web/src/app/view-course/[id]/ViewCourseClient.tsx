@@ -1638,7 +1638,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                         const lesson = item.value as any
                                         return (
                                           <li
-                                            key={lesson.id}
+                                            key={`lesson-${lesson.id}`}
                                             className="flex items-center justify-between gap-3 text-sm text-gray-700"
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
@@ -1659,7 +1659,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                         const assessment = item.value as any
                                         return (
                                           <li
-                                            key={assessment.id}
+                                            key={`assessment-${assessment.id}`}
                                             className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-sm"
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
