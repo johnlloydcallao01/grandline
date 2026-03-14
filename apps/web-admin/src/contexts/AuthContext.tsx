@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     try {
       let initialUser: User | null = null;
       try {
-        const cached = localStorage.getItem('grandline_auth_user');
+        const cached = localStorage.getItem('grandline_auth_user_admin');
         if (cached) {
           initialUser = JSON.parse(cached);
           dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser } });

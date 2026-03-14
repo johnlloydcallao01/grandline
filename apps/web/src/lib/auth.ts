@@ -24,7 +24,7 @@ const COLLECTION_SLUG = 'users'; // Authentication is on users collection, not t
 
 // Request configuration for cookie-based authentication
 const REQUEST_CONFIG: RequestInit = {
-  credentials: 'include', // Essential for cookie-based auth
+  credentials: 'omit', // Prevent sending conflicting cookies; rely on Authorization header
   headers: {
     'Content-Type': 'application/json',
   },
@@ -130,15 +130,15 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 
     // Store token for persistent authentication (30 days)
     if (response.token) {
-      localStorage.setItem('grandline_auth_token', response.token);
+      localStorage.setItem('grandline_auth_token_trainee', response.token);
 
       // Store expiration time (30 days from now)
       const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
-      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+      localStorage.setItem('grandline_auth_expires_trainee', expirationTime.toString());
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
     } catch { void 0; }
 
     return {
@@ -186,7 +186,7 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     let headers: Record<string, string> | undefined;
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token');
+      const token = localStorage.getItem('grandline_auth_token_trainee');
       if (token) headers = { Authorization: `users JWT ${token}` };
     }
 
@@ -195,7 +195,7 @@ export async function getCurrentUser(): Promise<User | null> {
     if (!response.user) {
       // Fallback to cached user if available to prevent aggressive logout on reload
       try {
-        const cached = localStorage.getItem('grandline_auth_user');
+        const cached = localStorage.getItem('grandline_auth_user_trainee');
         if (cached) {
           return JSON.parse(cached);
         }
@@ -211,7 +211,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
     } catch { void 0; }
 
     return response.user;
@@ -225,7 +225,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     try {
-      const cached = localStorage.getItem('grandline_auth_user');
+      const cached = localStorage.getItem('grandline_auth_user_trainee');
       if (cached) {
         return JSON.parse(cached) as User;
       }
@@ -243,7 +243,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function refreshSession(): Promise<AuthResponse> {
   try {
     // Check if we have a valid token to refresh
-    const currentToken = localStorage.getItem('grandline_auth_token');
+    const currentToken = localStorage.getItem('grandline_auth_token_trainee');
     if (!currentToken) {
       throw new Error('No authentication token available for refresh');
     }
@@ -262,15 +262,15 @@ export async function refreshSession(): Promise<AuthResponse> {
 
     // Update stored token if a new one was provided
     if (response.token) {
-      localStorage.setItem('grandline_auth_token', response.token);
+      localStorage.setItem('grandline_auth_token_trainee', response.token);
 
       // Extend session expiration (30 days)
       const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+      localStorage.setItem('grandline_auth_expires_trainee', expirationTime.toString());
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
     } catch { void 0; }
 
     return {
@@ -310,8 +310,8 @@ export function hasValidStoredToken(): boolean {
     return false;
   }
 
-  const storedToken = localStorage.getItem('grandline_auth_token');
-  const storedExpires = localStorage.getItem('grandline_auth_expires');
+  const storedToken = localStorage.getItem('grandline_auth_token_trainee');
+  const storedExpires = localStorage.getItem('grandline_auth_expires_trainee');
   const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
   if (debug) console.log('🔍 hasValidStoredToken: token exists?', !!storedToken);
   if (debug) console.log('🔍 hasValidStoredToken: expires exists?', !!storedExpires);
@@ -336,7 +336,7 @@ export async function getSessionInfo(): Promise<SessionInfo> {
   try {
     let headers: Record<string, string> | undefined;
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token');
+      const token = localStorage.getItem('grandline_auth_token_trainee');
       if (token) headers = { Authorization: `users JWT ${token}` };
     }
     const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
@@ -365,9 +365,9 @@ export async function getSessionInfo(): Promise<SessionInfo> {
 export function clearAuthState(): void {
   // Clear stored authentication tokens
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('grandline_auth_token');
-    localStorage.removeItem('grandline_auth_expires');
-    localStorage.removeItem('grandline_auth_user');
+    localStorage.removeItem('grandline_auth_token_trainee');
+    localStorage.removeItem('grandline_auth_expires_trainee');
+    localStorage.removeItem('grandline_auth_user_trainee');
     sessionStorage.removeItem('auth:redirectAfterLogin');
     const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
     if (debug) console.log('🧹 CLEARED AUTH STATE');

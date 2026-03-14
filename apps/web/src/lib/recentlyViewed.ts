@@ -6,7 +6,7 @@ function getCachedUserId(): string | number | null {
   }
 
   try {
-    const raw = localStorage.getItem('grandline_auth_user');
+    const raw = localStorage.getItem('grandline_auth_user_trainee');
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { id?: string | number } | null;
     const id = parsed && parsed.id;

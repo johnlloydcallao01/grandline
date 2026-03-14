@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
     try {
       let initialUser: User | null = null;
       try {
-        const cached = localStorage.getItem('grandline_auth_user');
+        const cached = localStorage.getItem('grandline_auth_user_trainee');
         if (cached) {
           initialUser = JSON.parse(cached);
           dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser } });

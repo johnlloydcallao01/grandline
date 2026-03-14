@@ -8,6 +8,7 @@ import {
     Edit, Trash2, Copy, Eye
 } from '@/components/ui/IconWrapper';
 import { cmsConfig, getCMSImageUrl, formatCMSDate } from '@/lib/cms';
+import { getCertificateTemplates } from './actions';
 import { CertificateThumbnail } from '../components/CertificateThumbnail';
 import { CertificatePreviewModal } from '../components/CertificatePreviewModal';
 
@@ -58,17 +59,9 @@ export default function CertificateTemplatesPage() {
 
     const loadTemplates = async () => {
         try {
-            // Fetch with depth=1 to get media details
-            const response = await fetch(`${cmsConfig.apiUrl}/certificate-templates?depth=1&limit=100`, {
-                credentials: 'include',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch templates');
-            }
-
-            const data = await response.json();
-            setTemplates(data.docs || []);
+            setIsLoading(true);
+            const data = await getCertificateTemplates();
+            setTemplates(data || []);
         } catch (err) {
             console.error(err);
             setError('Failed to load templates');

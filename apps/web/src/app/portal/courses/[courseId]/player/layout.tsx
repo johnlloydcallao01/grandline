@@ -69,7 +69,7 @@ export default function CoursePlayerLayout({
         let userIdParam: string | null = null;
         if (typeof window !== 'undefined') {
           try {
-            const raw = localStorage.getItem('grandline_auth_user');
+            const raw = localStorage.getItem('grandline_auth_user_trainee');
             if (raw) {
               const parsed = JSON.parse(raw) as { id?: string | number } | null;
               const value = parsed && parsed.id;
@@ -411,7 +411,7 @@ export default function CoursePlayerLayout({
       let userIdParam: string | null = null;
       if (typeof window !== 'undefined') {
         try {
-          const raw = localStorage.getItem('grandline_auth_user');
+          const raw = localStorage.getItem('grandline_auth_user_trainee');
           if (raw) {
             const parsed = JSON.parse(raw) as { id?: string | number } | null;
             const value = parsed && parsed.id;
@@ -457,7 +457,7 @@ export default function CoursePlayerLayout({
     try {
       let userIdParam: string | null = null;
       if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user');
+        const raw = localStorage.getItem('grandline_auth_user_trainee');
         if (raw) {
           const parsed = JSON.parse(raw) as { id?: string | number } | null;
           userIdParam = parsed?.id ? String(parsed.id) : null;
@@ -529,7 +529,7 @@ export default function CoursePlayerLayout({
       // Refresh progress after submission (regardless of pass/fail to update attempt counts)
       let userIdParam: string | null = null;
       if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user');
+        const raw = localStorage.getItem('grandline_auth_user_trainee');
         if (raw) {
           const parsed = JSON.parse(raw) as { id?: string | number } | null;
           userIdParam = parsed?.id ? String(parsed.id) : null;
@@ -579,7 +579,7 @@ export default function CoursePlayerLayout({
     try {
       let userIdParam: string | null = null;
       if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user');
+        const raw = localStorage.getItem('grandline_auth_user_trainee');
         if (raw) {
           const parsed = JSON.parse(raw) as { id?: string | number } | null;
           userIdParam = parsed?.id ? String(parsed.id) : null;

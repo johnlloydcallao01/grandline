@@ -38,7 +38,7 @@ function normalizeApiBaseUrl(raw?: string): string {
 const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
 const REQUEST_CONFIG: RequestInit = {
-  credentials: 'include',
+  credentials: 'omit', // Prevent sending conflicting cookies; rely on Authorization header
   headers: {
     'Content-Type': 'application/json',
   },
@@ -125,14 +125,14 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
     }
 
     if (response.token) {
-      localStorage.setItem('grandline_auth_token', response.token);
+      localStorage.setItem('grandline_auth_token_admin', response.token);
 
       const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+      localStorage.setItem('grandline_auth_expires_admin', expirationTime.toString());
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
     } catch { void 0; }
 
     return {
@@ -171,7 +171,7 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     let headers: Record<string, string> | undefined;
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token');
+      const token = localStorage.getItem('grandline_auth_token_admin');
       if (token) headers = { Authorization: `users JWT ${token}` };
     }
 
@@ -179,7 +179,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     if (!response.user) {
       try {
-        const cached = localStorage.getItem('grandline_auth_user');
+        const cached = localStorage.getItem('grandline_auth_user_admin');
         if (cached) {
           return JSON.parse(cached);
         }
@@ -195,7 +195,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
     } catch { void 0; }
 
     return response.user;
@@ -209,7 +209,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     try {
-      const cached = localStorage.getItem('grandline_auth_user');
+      const cached = localStorage.getItem('grandline_auth_user_admin');
       if (cached) {
         return JSON.parse(cached) as User;
       }
@@ -221,7 +221,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
 export async function refreshSession(): Promise<AuthResponse> {
   try {
-    const currentToken = localStorage.getItem('grandline_auth_token');
+    const currentToken = localStorage.getItem('grandline_auth_token_admin');
     if (!currentToken) {
       throw new Error('No authentication token available for refresh');
     }
@@ -237,14 +237,14 @@ export async function refreshSession(): Promise<AuthResponse> {
     }
 
     if (response.token) {
-      localStorage.setItem('grandline_auth_token', response.token);
+      localStorage.setItem('grandline_auth_token_admin', response.token);
 
       const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires', expirationTime.toString());
+      localStorage.setItem('grandline_auth_expires_admin', expirationTime.toString());
     }
 
     try {
-      localStorage.setItem('grandline_auth_user', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
     } catch { void 0; }
 
     return {
@@ -273,8 +273,8 @@ export function hasValidStoredToken(): boolean {
     return false;
   }
 
-  const storedToken = localStorage.getItem('grandline_auth_token');
-  const storedExpires = localStorage.getItem('grandline_auth_expires');
+  const storedToken = localStorage.getItem('grandline_auth_token_admin');
+  const storedExpires = localStorage.getItem('grandline_auth_expires_admin');
   const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
   if (debug) console.log('🔍 hasValidStoredToken: token exists?', !!storedToken);
   if (debug) console.log('🔍 hasValidStoredToken: expires exists?', !!storedExpires);
@@ -295,7 +295,7 @@ export async function getSessionInfo(): Promise<SessionInfo> {
   try {
     let headers: Record<string, string> | undefined;
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token');
+      const token = localStorage.getItem('grandline_auth_token_admin');
       if (token) headers = { Authorization: `users JWT ${token}` };
     }
     const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
@@ -319,9 +319,9 @@ export async function getSessionInfo(): Promise<SessionInfo> {
 
 export function clearAuthState(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('grandline_auth_token');
-    localStorage.removeItem('grandline_auth_expires');
-    localStorage.removeItem('grandline_auth_user');
+    localStorage.removeItem('grandline_auth_token_admin');
+    localStorage.removeItem('grandline_auth_expires_admin');
+    localStorage.removeItem('grandline_auth_user_admin');
     sessionStorage.removeItem('auth:redirectAfterLogin');
     const debug = process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true';
     if (debug) console.log('🧹 CLEARED AUTH STATE');

@@ -163,7 +163,7 @@ function CourseOverviewCard({
 
     setIsSubmittingRequest(true)
     try {
-      const token = localStorage.getItem('grandline_auth_token')
+      const token = localStorage.getItem('grandline_auth_token_trainee')
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }
@@ -235,7 +235,7 @@ function CourseOverviewCard({
     const fetchEnrollment = async () => {
       setIsLoadingEnrollment(true)
       try {
-        const token = localStorage.getItem('grandline_auth_token')
+        const token = localStorage.getItem('grandline_auth_token_trainee')
 
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',

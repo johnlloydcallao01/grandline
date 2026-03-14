@@ -31,7 +31,7 @@ export default function ViewCoursePage() {
         let userIdParam: string | null = null;
         if (typeof window !== 'undefined') {
           try {
-            const raw = localStorage.getItem('grandline_auth_user');
+            const raw = localStorage.getItem('grandline_auth_user_trainee');
             if (raw) {
               const parsed = JSON.parse(raw) as { id?: string | number } | null;
               const value = parsed && parsed.id;
