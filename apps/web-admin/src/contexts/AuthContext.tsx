@@ -230,8 +230,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       dispatch({ type: 'REFRESH_SUCCESS', payload: { user: response.user } });
       emitAuthEvent('session_refreshed', { user: response.user });
     } catch (_error) {
-      dispatch({ type: 'SESSION_EXPIRED' });
-      emitAuthEvent('session_expired');
+      // If refresh fails, DO NOT auto-logout. Just log it.
+      // dispatch({ type: 'SESSION_EXPIRED' });
+      // emitAuthEvent('session_expired');
+      console.warn('Session refresh failed, but keeping session active.');
       throw _error;
     }
   }, []);
@@ -262,9 +264,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
     // Listen for custom auth events
     const handleAuthEvent = (e: CustomEvent) => {
-      if (e.type === 'auth:logout' || e.type === 'auth:session_expired') {
+      if (e.type === 'auth:logout') { // Only logout on explicit logout event
         handleSessionExpired();
       }
+      // Ignore auth:session_expired to prevent auto-logout
     };
 
     // Start session monitoring

@@ -263,9 +263,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
 
     // Listen for custom auth events
     const handleAuthEvent = (e: CustomEvent) => {
-      if (e.type === 'auth:logout' || e.type === 'auth:session_expired') {
+      if (e.type === 'auth:logout') { // Only logout on explicit logout event
         handleSessionExpired();
       }
+      // Ignore auth:session_expired to prevent auto-logout
     };
 
     // Start session monitoring

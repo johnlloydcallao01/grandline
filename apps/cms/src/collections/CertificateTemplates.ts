@@ -17,8 +17,20 @@ export const CertificateTemplates: CollectionConfig = {
       }
       return false
     },
-    create: adminOnly,
-    update: adminOnly,
+    create: ({ req: { user } }) => {
+      // Allow admins and service accounts (API key users) to create templates
+      if (user?.role === 'admin' || user?.role === 'service') {
+        return true
+      }
+      return false
+    },
+    update: ({ req: { user } }) => {
+      // Allow admins and service accounts (API key users) to update templates
+      if (user?.role === 'admin' || user?.role === 'service') {
+        return true
+      }
+      return false
+    },
     delete: adminOnly,
   },
   fields: [

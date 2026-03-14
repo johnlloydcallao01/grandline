@@ -10,7 +10,8 @@ import {
     Settings, Eye,
     Trash2, AlignLeft, AlignCenter, AlignRight,
     X, Loader2, ArrowLeft,
-    Copy, Clipboard, CopyPlus
+    Copy, Clipboard, CopyPlus,
+    Layout, ArrowLeftFromLine, ArrowRightFromLine, ArrowUpFromLine, ArrowDownFromLine
 } from 'lucide-react';
 import { MediaLibraryModal } from '@encreasl/ui/media-library-modal';
 import {
@@ -19,6 +20,7 @@ import {
 } from '@encreasl/ui/lexical-course-editor';
 import { env } from '@/lib/env';
 import { useToast } from '@/components/ui/Toast';
+import { getCertificateTemplateById, updateCertificateTemplate } from '../templates/actions';
 import { CertificatePreviewModal } from '../components/CertificatePreviewModal';
 
 // --- Types ---
@@ -46,19 +48,7 @@ interface CanvasElement {
     nodeRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-interface CertificateTemplateData {
-    id: string;
-    name: string;
-    slug: string;
-    status: 'draft' | 'published' | 'archived';
-    backgroundImage: string | number | { id: string | number; url?: string; cloudinaryURL?: string };
-    canvasSchema: {
-        width: number;
-        height: number;
-        backgroundFit?: 'cover' | 'contain';
-        elements: CanvasElement[];
-    };
-}
+// Removed unused interface: CertificateTemplateData
 
 // --- Constants ---
 
@@ -128,6 +118,11 @@ function CertificateBuilderContent() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [canvasScale, setCanvasScale] = useState(1.0); // Zoom level for the editor
 
+    // --- History State (Undo/Redo) ---
+    const [history, setHistory] = useState<CanvasElement[][]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+    // Removed unused ref: isUndoRedoAction
+
     // --- Clipboard & Context Menu State ---
     const [clipboard, setClipboard] = useState<CanvasElement | null>(null);
     const [contextMenu, setContextMenu] = useState<{
@@ -135,7 +130,8 @@ function CertificateBuilderContent() {
         x: number;
         y: number;
         targetId: string | null;
-    }>({ visible: false, x: 0, y: 0, targetId: null });
+        submenu?: 'align' | null;
+    }>({ visible: false, x: 0, y: 0, targetId: null, submenu: null });
 
     // Media Library State
     const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
@@ -169,26 +165,7 @@ function CertificateBuilderContent() {
         const loadTemplate = async () => {
             setIsLoading(true);
             try {
-                const base = (env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-                const url = base ? `${base}/certificate-templates/${templateId}?depth=1` : `/api/certificate-templates/${templateId}?depth=1`;
-
-                const getPayloadToken = () => {
-                    const cookies = typeof document !== 'undefined' ? document.cookie.split(';') : [];
-                    for (const cookie of cookies) {
-                        const [name, value] = cookie.trim().split('=');
-                        if (name === 'payload-token') return value;
-                    }
-                    return null;
-                };
-
-                const headers: Record<string, string> = {};
-                const token = getPayloadToken();
-                if (token) headers.Authorization = `JWT ${token}`;
-
-                const res = await fetch(url, { headers, credentials: 'include' });
-                if (!res.ok) throw new Error('Failed to load template');
-
-                const data: CertificateTemplateData = await res.json();
+                const data = await getCertificateTemplateById(templateId);
 
                 setTemplateName(data.name);
                 setTemplateSlug(data.slug);
@@ -207,7 +184,22 @@ function CertificateBuilderContent() {
                     // If we don't have a URL yet, fetch it using the ID
                     if (!bgUrl && bgId) {
                         try {
+                            const base = (env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
                             const mediaUrl = base ? `${base}/media/${bgId}` : `/api/media/${bgId}`;
+                            
+                            const getPayloadToken = () => {
+                                const cookies = typeof document !== 'undefined' ? document.cookie.split(';') : [];
+                                for (const cookie of cookies) {
+                                    const [name, value] = cookie.trim().split('=');
+                                    if (name === 'payload-token') return value;
+                                }
+                                return null;
+                            };
+
+                            const headers: Record<string, string> = {};
+                            const token = getPayloadToken();
+                            if (token) headers.Authorization = `JWT ${token}`;
+
                             const mediaRes = await fetch(mediaUrl, { headers, credentials: 'include' });
                             if (mediaRes.ok) {
                                 const mediaData = await mediaRes.json();
@@ -252,6 +244,40 @@ function CertificateBuilderContent() {
         loadTemplate();
     }, [templateId]);
 
+    // --- History Management ---
+
+    // Function to manually push state to history (for decisive actions)
+    const pushToHistory = (newElements: CanvasElement[]) => {
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(newElements);
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+    };
+
+    // Initialize history on load
+    useEffect(() => {
+        if (elements.length > 0 && history.length === 0) {
+            setHistory([elements]);
+            setHistoryIndex(0);
+        }
+    }, [elements, history.length]);
+
+    const undo = () => {
+        if (historyIndex > 0) {
+            const prevIndex = historyIndex - 1;
+            setElements(history[prevIndex]);
+            setHistoryIndex(prevIndex);
+        }
+    };
+
+    const redo = () => {
+        if (historyIndex < history.length - 1) {
+            const nextIndex = historyIndex + 1;
+            setElements(history[nextIndex]);
+            setHistoryIndex(nextIndex);
+        }
+    };
+
     // --- Keyboard Shortcuts ---
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -260,6 +286,20 @@ function CertificateBuilderContent() {
             const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
             if (isInput) return;
+
+            // Undo (Ctrl+Z)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+                return;
+            }
+
+            // Redo (Ctrl+Y or Ctrl+Shift+Z)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                e.preventDefault();
+                redo();
+                return;
+            }
 
             // Delete key
             if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -295,7 +335,7 @@ function CertificateBuilderContent() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedId, clipboard]); // Re-bind when dependencies change
+    }, [selectedId, clipboard, historyIndex, history]); // Re-bind when dependencies change
 
     // --- Actions ---
 
@@ -323,31 +363,44 @@ function CertificateBuilderContent() {
             nodeRef: React.createRef<HTMLDivElement>(),
         };
 
-        setElements((prev) => [...prev, newElement]);
+        const newElements = [...elements, newElement];
+        setElements(newElements);
+        pushToHistory(newElements); // Save history
         setSelectedId(newElement.id);
         setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
     };
 
-    const updateElement = (id: string, updates: Partial<CanvasElement> | Partial<CanvasElement['style']>) => {
-        setElements((prev) => prev.map((el) => {
-            if (el.id !== id) return el;
+    const updateElement = (id: string, updates: Partial<CanvasElement> | Partial<CanvasElement['style']>, saveHistory = false) => {
+        let updatedElements: CanvasElement[] = [];
+        setElements((prev) => {
+            updatedElements = prev.map((el) => {
+                if (el.id !== id) return el;
 
-            // Check if updates are for style or top-level properties
-            const isStyleUpdate = Object.keys(updates).some(k => k in el.style);
+                // Check if updates are for style or top-level properties
+                const isStyleUpdate = Object.keys(updates).some(k => k in el.style);
 
-            if (isStyleUpdate) {
-                return {
-                    ...el,
-                    style: { ...el.style, ...updates }
-                };
-            }
+                if (isStyleUpdate) {
+                    return {
+                        ...el,
+                        style: { ...el.style, ...updates }
+                    };
+                }
 
-            return { ...el, ...updates };
-        }));
+                return { ...el, ...updates };
+            });
+            return updatedElements;
+        });
+        
+        // If explicitly requested to save history (e.g. on blur or specific actions)
+        if (saveHistory && updatedElements.length > 0) {
+            pushToHistory(updatedElements);
+        }
     };
 
     const deleteElement = (id: string) => {
-        setElements((prev) => prev.filter((el) => el.id !== id));
+        const newElements = elements.filter((el) => el.id !== id);
+        setElements(newElements);
+        pushToHistory(newElements); // Save history
         if (selectedId === id) setSelectedId(null);
         if (editingId === id) setEditingId(null);
         setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
@@ -421,10 +474,58 @@ function CertificateBuilderContent() {
 
     const handleDragStop = (id: string, e: DraggableEvent, data: DraggableData) => {
         // Final update to ensure sync
-        setElements((prev) => prev.map((el) => {
-            if (el.id !== id) return el;
-            return { ...el, x: data.x, y: data.y };
-        }));
+        let updatedElements: CanvasElement[] = [];
+        setElements((prev) => {
+            updatedElements = prev.map((el) => {
+                if (el.id !== id) return el;
+                return { ...el, x: data.x, y: data.y };
+            });
+            return updatedElements;
+        });
+        pushToHistory(updatedElements); // Save history on drag end
+    };
+
+    const alignElement = (id: string, alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+        let updatedElements: CanvasElement[] = [];
+        setElements((prev) => {
+            updatedElements = prev.map((el) => {
+                if (el.id !== id) return el;
+
+                let newX = el.x;
+                let newY = el.y;
+                const elWidth = typeof el.width === 'number' ? el.width : (el.nodeRef?.current?.offsetWidth || 0);
+                const elHeight = typeof el.height === 'number' ? el.height : (el.nodeRef?.current?.offsetHeight || 0);
+
+                switch (alignment) {
+                    case 'left':
+                        newX = 0;
+                        break;
+                    case 'center':
+                        newX = (canvasWidth - elWidth) / 2;
+                        break;
+                    case 'right':
+                        newX = canvasWidth - elWidth;
+                        break;
+                    case 'top':
+                        newY = 0;
+                        break;
+                    case 'middle':
+                        newY = (canvasHeight - elHeight) / 2;
+                        break;
+                    case 'bottom':
+                        newY = canvasHeight - elHeight;
+                        break;
+                }
+
+                return { ...el, x: newX, y: newY };
+            });
+            return updatedElements;
+        });
+        
+        if (updatedElements.length > 0) {
+            pushToHistory(updatedElements); // Save history on alignment
+        }
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null, submenu: null });
     };
 
     const handleSave = async () => {
@@ -470,66 +571,7 @@ function CertificateBuilderContent() {
                 canvasSchema: schema,
             };
 
-            // Use the API URL directly - do not replace localhost with 127.0.0.1 as it breaks cookie authentication
-            const baseRaw = (env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-            const base = baseRaw;
-
-            const url = templateId
-                ? `${base ? base : '/api'}/certificate-templates/${templateId}`
-                : `${base ? base : '/api'}/certificate-templates`;
-
-            const method = templateId ? 'PATCH' : 'POST';
-
-            // Debug logging
-            console.log('Saving template:', {
-                url,
-                method,
-                templateId,
-                payload
-            });
-
-            const getPayloadToken = () => {
-                const cookies = typeof document !== 'undefined' ? document.cookie.split(';') : [];
-                for (const cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === 'payload-token') return value;
-                }
-                return null;
-            };
-
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            };
-            const token = getPayloadToken();
-            if (token) headers.Authorization = `JWT ${token}`;
-
-            let res;
-            try {
-                // Remove credentials: 'include' if we have a token to avoid CORS strictness
-                // but keep it if we don't have a token (relying on cookies)
-                const fetchOptions: RequestInit = {
-                    method,
-                    headers,
-                    body: JSON.stringify(payload),
-                };
-
-                if (!token) {
-                    fetchOptions.credentials = 'include';
-                }
-
-                res = await fetch(url, fetchOptions);
-            } catch (networkErr: any) {
-                console.error('Network error during save:', networkErr);
-                throw new Error(`Network error: ${networkErr.message || 'Failed to connect to server'}`);
-            }
-
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ errors: [{ message: `HTTP Error ${res.status}` }] }));
-                throw new Error(err.errors?.[0]?.message || `Failed to save: ${res.statusText}`);
-            }
-
-            const data = await res.json();
+            const data = await updateCertificateTemplate(templateId, payload);
 
             addToast({
                 title: 'Success',
@@ -581,7 +623,9 @@ function CertificateBuilderContent() {
                 nodeRef: React.createRef<HTMLDivElement>(),
             };
 
-            setElements((prev) => [...prev, newElement]);
+            const newElements = [...elements, newElement];
+            setElements(newElements);
+            pushToHistory(newElements); // Save history
             setSelectedId(newElement.id);
             setIsMediaLibraryOpen(false);
         }
@@ -763,6 +807,7 @@ function CertificateBuilderContent() {
                                                 type="number"
                                                 value={selectedElement.style.fontSize}
                                                 onChange={(e) => updateElement(selectedElement.id, { fontSize: parseInt(e.target.value) })}
+                                                onBlur={() => updateElement(selectedElement.id, {}, true)} // Save history on blur
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 font-medium focus:ring-blue-500 focus:border-blue-500"
                                             />
                                         </div>
@@ -772,7 +817,7 @@ function CertificateBuilderContent() {
                                             <label className="block text-xs font-bold text-gray-900 mb-1">Font Family</label>
                                             <select
                                                 value={selectedElement.style.fontFamily}
-                                                onChange={(e) => updateElement(selectedElement.id, { fontFamily: e.target.value })}
+                                                onChange={(e) => updateElement(selectedElement.id, { fontFamily: e.target.value }, true)} // Save history on change
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 font-medium focus:ring-blue-500 focus:border-blue-500"
                                             >
                                                 {FONT_FAMILIES.map(f => (
@@ -789,6 +834,7 @@ function CertificateBuilderContent() {
                                                     type="color"
                                                     value={selectedElement.style.color}
                                                     onChange={(e) => updateElement(selectedElement.id, { color: e.target.value })}
+                                                    onBlur={() => updateElement(selectedElement.id, {}, true)} // Save history on blur
                                                     className="h-8 w-8 rounded cursor-pointer border-0 p-0"
                                                 />
                                                 <span className="text-sm font-medium text-black">{selectedElement.style.color}</span>
@@ -803,10 +849,11 @@ function CertificateBuilderContent() {
                                                     type="color"
                                                     value={selectedElement.style.backgroundColor === 'transparent' ? '#ffffff' : selectedElement.style.backgroundColor}
                                                     onChange={(e) => updateElement(selectedElement.id, { backgroundColor: e.target.value })}
+                                                    onBlur={() => updateElement(selectedElement.id, {}, true)} // Save history on blur
                                                     className="h-8 w-8 rounded cursor-pointer border-0 p-0"
                                                 />
                                                 <button
-                                                    onClick={() => updateElement(selectedElement.id, { backgroundColor: 'transparent' })}
+                                                    onClick={() => updateElement(selectedElement.id, { backgroundColor: 'transparent' }, true)} // Save history on clear
                                                     className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 text-gray-700 font-medium"
                                                     title="Clear Background"
                                                 >
@@ -824,6 +871,8 @@ function CertificateBuilderContent() {
                                                 max="100"
                                                 value={selectedElement.style.padding || 0}
                                                 onChange={(e) => updateElement(selectedElement.id, { padding: parseInt(e.target.value) })}
+                                                onMouseUp={() => updateElement(selectedElement.id, {}, true)} // Save history on release
+                                                onTouchEnd={() => updateElement(selectedElement.id, {}, true)} // Save history on release (touch)
                                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                             />
                                         </div>
@@ -837,6 +886,8 @@ function CertificateBuilderContent() {
                                                 max="100"
                                                 value={selectedElement.style.borderRadius || 0}
                                                 onChange={(e) => updateElement(selectedElement.id, { borderRadius: parseInt(e.target.value) })}
+                                                onMouseUp={() => updateElement(selectedElement.id, {}, true)} // Save history on release
+                                                onTouchEnd={() => updateElement(selectedElement.id, {}, true)} // Save history on release (touch)
                                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                             />
                                         </div>
@@ -848,7 +899,7 @@ function CertificateBuilderContent() {
                                                 {(['left', 'center', 'right'] as const).map((align) => (
                                                     <button
                                                         key={align}
-                                                        onClick={() => updateElement(selectedElement.id, { textAlign: align })}
+                                                        onClick={() => updateElement(selectedElement.id, { textAlign: align }, true)} // Save history on click
                                                         className={`flex-1 flex justify-center py-1 rounded ${selectedElement.style.textAlign === align ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                                                     >
                                                         {align === 'left' && <AlignLeft className="h-4 w-4" />}
@@ -868,6 +919,7 @@ function CertificateBuilderContent() {
                                         <textarea
                                             value={selectedElement.content}
                                             onChange={(e) => updateElement(selectedElement.id, { content: e.target.value })}
+                                            onBlur={() => updateElement(selectedElement.id, {}, true)} // Save history on blur
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 font-medium focus:ring-blue-500 focus:border-blue-500"
                                             rows={3}
                                         />
@@ -992,7 +1044,7 @@ function CertificateBuilderContent() {
                                                     width: newWidth,
                                                     height: newHeight,
                                                     style: { ...el.style, fontSize: newFontSize }
-                                                });
+                                                }, true); // Save history on resize stop
                                             }}
                                             handleClasses={{
                                                 bottomRight: 'nodrag',
@@ -1137,6 +1189,96 @@ function CertificateBuilderContent() {
                                 <span>Duplicate</span>
                                 <span className="ml-auto text-xs text-gray-400">Ctrl+D</span>
                             </button>
+                            <div className="relative group/submenu">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setContextMenu(prev => ({ ...prev, submenu: prev.submenu === 'align' ? null : 'align' }));
+                                    }}
+                                    onMouseEnter={() => setContextMenu(prev => ({ ...prev, submenu: 'align' }))}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between group-hover/submenu:bg-gray-100"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Layout className="h-4 w-4" />
+                                        <span>Align to Page</span>
+                                    </div>
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                
+                                {/* Submenu */}
+                                {contextMenu.submenu === 'align' && (
+                                    <div 
+                                        className="absolute left-full top-0 ml-1 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in zoom-in-95 duration-100"
+                                        onMouseEnter={() => setContextMenu(prev => ({ ...prev, submenu: 'align' }))}
+                                    >
+                                        {(() => {
+                                            const el = elements.find(e => e.id === contextMenu.targetId);
+                                            if (!el) return null;
+                                            
+                                            const elWidth = typeof el.width === 'number' ? el.width : (el.nodeRef?.current?.offsetWidth || 0);
+                                            const elHeight = typeof el.height === 'number' ? el.height : (el.nodeRef?.current?.offsetHeight || 0);
+                                            
+                                            // Check alignment with small tolerance (1px)
+                                            const isLeft = Math.abs(el.x) < 1;
+                                            const isCenter = Math.abs(el.x - (canvasWidth - elWidth) / 2) < 1;
+                                            const isRight = Math.abs(el.x - (canvasWidth - elWidth)) < 1;
+                                            const isTop = Math.abs(el.y) < 1;
+                                            const isMiddle = Math.abs(el.y - (canvasHeight - elHeight) / 2) < 1;
+                                            const isBottom = Math.abs(el.y - (canvasHeight - elHeight)) < 1;
+
+                                            return (
+                                                <>
+                                                    <button 
+                                                        onClick={() => !isLeft && alignElement(contextMenu.targetId!, 'left')} 
+                                                        disabled={isLeft}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isLeft ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <ArrowLeftFromLine className="h-3 w-3" /> Left
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => !isCenter && alignElement(contextMenu.targetId!, 'center')} 
+                                                        disabled={isCenter}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isCenter ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <AlignCenter className="h-3 w-3" /> Center
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => !isRight && alignElement(contextMenu.targetId!, 'right')} 
+                                                        disabled={isRight}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isRight ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <ArrowRightFromLine className="h-3 w-3" /> Right
+                                                    </button>
+                                                    <div className="h-px bg-gray-200 my-1" />
+                                                    <button 
+                                                        onClick={() => !isTop && alignElement(contextMenu.targetId!, 'top')} 
+                                                        disabled={isTop}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isTop ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <ArrowUpFromLine className="h-3 w-3" /> Top
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => !isMiddle && alignElement(contextMenu.targetId!, 'middle')} 
+                                                        disabled={isMiddle}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isMiddle ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <Layout className="h-3 w-3 rotate-90" /> Middle
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => !isBottom && alignElement(contextMenu.targetId!, 'bottom')} 
+                                                        disabled={isBottom}
+                                                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isBottom ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                    >
+                                                        <ArrowDownFromLine className="h-3 w-3" /> Bottom
+                                                    </button>
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
+                            </div>
                             <div className="h-px bg-gray-200 my-1" />
                             <button
                                 onClick={() => deleteElement(contextMenu.targetId!)}

@@ -393,8 +393,10 @@ export function monitorSessionExpiration(): () => void {
       const sessionInfo = await getSessionInfo();
 
       if (!sessionInfo.isValid) {
-        emitAuthEvent('session_expired');
-        clearInterval(intervalId);
+        // Disable auto-logout on session check failure to prevent sudden redirects
+        // emitAuthEvent('session_expired');
+        console.warn('Session check failed, but keeping session active to prevent redirect loop.');
+        // clearInterval(intervalId);
       } else if (sessionInfo.expiresAt) {
         const timeUntilExpiry = sessionInfo.expiresAt.getTime() - Date.now();
 

@@ -106,7 +106,7 @@ export default buildConfig({
     SiteSettings,
   ],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET ?? 'local-development-secret-not-for-production',
+  secret: process.env.PAYLOAD_SECRET || 'development-secret-do-not-use-in-production',
   cors: [
     // Production web-admin
     process.env.ADMIN_PROD_URL!,
