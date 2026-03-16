@@ -205,7 +205,7 @@ export default function CoursePlayerLayout({
           if (item.relationTo === 'course-lessons') {
             const lesson = item.value;
             items.push({
-              key: buildItemKey('lesson', lesson.id),
+              key: buildItemKey('lesson', lesson.id, mod.id),
               type: 'lesson',
               id: String(lesson.id),
               moduleId: mod.id,
@@ -224,7 +224,7 @@ export default function CoursePlayerLayout({
             const questionsCount = questions.length > 0 ? questions.length : assessmentItems.length;
 
             items.push({
-              key: buildItemKey('assessment', assessment.id),
+              key: buildItemKey('assessment', assessment.id, mod.id),
               type: 'assessment',
               id: String(assessment.id),
               moduleId: mod.id,

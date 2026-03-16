@@ -1,6 +1,9 @@
 import { PlayerItemType } from '@/types/player';
 
-export function buildItemKey(type: PlayerItemType, id: string) {
+export function buildItemKey(type: PlayerItemType, id: string, moduleId?: string) {
+  if (moduleId && (type === 'lesson' || type === 'assessment')) {
+    return `${moduleId}:${type}:${id}`;
+  }
   return `${type}:${id}`;
 }
 

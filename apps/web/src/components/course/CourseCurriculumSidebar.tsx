@@ -108,7 +108,7 @@ export function CourseCurriculumSidebar({
 
                               if (item.relationTo === 'course-lessons') {
                                 const lesson = item.value;
-                                const itemKey = buildItemKey('lesson', lesson.id);
+                                const itemKey = buildItemKey('lesson', lesson.id, mod.id);
                                 const isActive = selectedKey === itemKey;
                                 const isCompleted = completedLessonIds.includes(String(lesson.id));
 
@@ -143,7 +143,7 @@ export function CourseCurriculumSidebar({
                                 );
                               } else if (item.relationTo === 'assessments') {
                                 const assessment = item.value;
-                                const itemKey = buildItemKey('assessment', assessment.id);
+                                const itemKey = buildItemKey('assessment', assessment.id, mod.id);
                                 const isActive = selectedKey === itemKey;
                                 const isQuiz = assessment.assessmentType === 'quiz';
 
@@ -152,7 +152,7 @@ export function CourseCurriculumSidebar({
                                 const latestAttempt = history.length > 0 ? history[history.length - 1] : null;
 
                                 return (
-                                  <li key={assessment.id}>
+                                  <li key={itemKey}>
                                     <button
                                       type="button"
                                       onClick={() => {
