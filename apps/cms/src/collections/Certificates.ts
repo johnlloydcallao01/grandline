@@ -28,8 +28,12 @@ export const Certificates: CollectionConfig = {
       // Public verification should be handled via a custom endpoint or a server-side client with privileges.
       return false
     },
-    create: adminOnly,
-    update: adminOnly,
+    create: ({ req: { user } }) => {
+      return user?.role === 'admin' || user?.role === 'service';
+    },
+    update: ({ req: { user } }) => {
+      return user?.role === 'admin' || user?.role === 'service';
+    },
     delete: adminOnly,
   },
   fields: [

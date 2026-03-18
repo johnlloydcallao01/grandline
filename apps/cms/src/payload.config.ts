@@ -52,6 +52,8 @@ import { migrations } from './migrations'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+import { generateCertificateEndpoint } from './endpoints/generate-certificate'
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -139,6 +141,11 @@ export default buildConfig({
   // ENTERPRISE-GRADE AUTHENTICATION ENDPOINTS
   // ========================================
   endpoints: [
+    {
+      path: '/generate-certificate',
+      method: 'post',
+      handler: generateCertificateEndpoint as any,
+    },
     {
       path: '/refresh-token',
       method: 'post',

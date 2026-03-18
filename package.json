@@ -34,6 +34,7 @@
   },
   "pnpm": {
     "overrides": {
+      "baseline-browser-mapping": "latest",
       "next": "16.0.7",
       "eslint-config-next": "16.0.7",
       "react": "19.1.0",
@@ -44,7 +45,10 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "baseline-browser-mapping": "patches/baseline-browser-mapping.patch"
+    }
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",

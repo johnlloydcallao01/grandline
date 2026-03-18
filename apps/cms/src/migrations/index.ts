@@ -76,6 +76,7 @@ import * as migration_20260215_050150_add_default_to_points_earned from './20260
 import * as migration_20260223_043556_add_certificate_templates from './20260223_043556_add_certificate_templates';
 import * as migration_20260223_163154_remove_background_image_from_templates from './20260223_163154_remove_background_image_from_templates';
 import * as migration_20260308_125532_add_site_settings_global from './20260308_125532_add_site_settings_global';
+import * as migration_20260314_100000_prevent_accidental_course_deletion from './20260314_100000_prevent_accidental_course_deletion';
 
 export const migrations = [
   {
@@ -467,5 +468,10 @@ export const migrations = [
     up: migration_20260308_125532_add_site_settings_global.up,
     down: migration_20260308_125532_add_site_settings_global.down,
     name: '20260308_125532_add_site_settings_global',
+  },
+  {
+    up: migration_20260314_100000_prevent_accidental_course_deletion.up,
+    down: migration_20260314_100000_prevent_accidental_course_deletion.down,
+    name: '20260314_100000_prevent_accidental_course_deletion',
   },
 ];
