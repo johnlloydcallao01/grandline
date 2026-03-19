@@ -47,7 +47,7 @@
       "unrs-resolver"
     ],
     "patchedDependencies": {
-      "baseline-browser-mapping": "patches/baseline-browser-mapping.patch"
+      "baseline-browser-mapping@2.10.8": "patches/baseline-browser-mapping.patch"
     }
   },
   "engines": {

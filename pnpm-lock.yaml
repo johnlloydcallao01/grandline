@@ -12,7 +12,7 @@ overrides:
   react-dom: 19.1.0
 
 patchedDependencies:
-  baseline-browser-mapping:
+  baseline-browser-mapping@2.10.8:
     hash: apsvsrjxlokleokvupvxej3xcu
     path: patches/baseline-browser-mapping.patch
 
