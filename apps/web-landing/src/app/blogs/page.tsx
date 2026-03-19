@@ -11,9 +11,8 @@ async function fetchActiveAssignedPostCategories(): Promise<BlogCategory[]> {
     if (!apiKey) return [];
 
     const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        process.env.NEXT_PUBLIC_CMS_API_URL ||
-        "https://cms.grandlinemaritime.com/api";
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://cms.grandlinemaritime.com/api";
 
     const res = await fetch(`${apiUrl}/post-categories/active`, {
         headers: {

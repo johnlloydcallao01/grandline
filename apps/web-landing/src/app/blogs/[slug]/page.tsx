@@ -75,7 +75,6 @@ async function fetchPostBySlugOrId(slugOrId: string): Promise<BlogPostDoc | null
 
     const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
-        process.env.NEXT_PUBLIC_CMS_API_URL ||
         "https://cms.grandlinemaritime.com/api";
 
     const headers: Record<string, string> = {

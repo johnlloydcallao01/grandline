@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
 
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL ||
-            process.env.NEXT_PUBLIC_CMS_API_URL ||
             "https://cms.grandlinemaritime.com/api";
 
         const response = await fetch(`${apiUrl}/posts?${params}`, {

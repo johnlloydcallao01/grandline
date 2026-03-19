@@ -31,7 +31,7 @@ export default function ContactPage() {
 
     try {
       // Build API URL
-      const apiBase = process.env.NEXT_PUBLIC_CMS_API_URL || 'https://cms.grandlinemaritime.com/api';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
       const apiUrl = `${apiBase.replace(/\/$/, '')}/contact`;
 
       const response = await fetch(apiUrl, {

@@ -56,7 +56,7 @@ export default function InstructorPage() {
 
     try {
       const apiBase =
-        process.env.NEXT_PUBLIC_CMS_API_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
         "https://cms.grandlinemaritime.com/api";
       const apiUrl = `${apiBase.replace(/\/$/, "")}/instructor-application`;
 
