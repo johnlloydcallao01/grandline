@@ -4,6 +4,8 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   // Disable strict mode to avoid dnd-kit hydration mismatches in dev
   reactStrictMode: false,
+  // Required for Docker/Render deployment (Dockerfile copies .next/standalone)
+  output: 'standalone',
   // Redirect root path to admin
   async redirects() {
     return [

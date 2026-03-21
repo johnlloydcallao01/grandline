@@ -26,7 +26,7 @@ async function fetchWithTimeout(
     url: string,
     init: (RequestInit & { timeoutMs?: number }) | undefined = undefined,
 ) {
-    const { timeoutMs = 10000, ...rest } = init || {};
+    const { timeoutMs = 60000, ...rest } = init || {}; // Increased from 10s to 60s to handle Render cold starts
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {

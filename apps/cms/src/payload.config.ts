@@ -1,6 +1,6 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
+
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import path from 'path'
@@ -55,6 +55,7 @@ const dirname = path.dirname(filename)
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 
 export default buildConfig({
+  serverURL: process.env.CMS_PROD_URL || 'http://localhost:3001',
   admin: {
     user: Users.slug,
     importMap: {
@@ -1048,7 +1049,6 @@ export default buildConfig({
 
   // sharp,
   plugins: [
-    payloadCloudPlugin(),
     cloudStoragePlugin({
       collections: {
         media: {
