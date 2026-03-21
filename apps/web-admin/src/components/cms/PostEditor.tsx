@@ -16,7 +16,8 @@ interface PayloadUser {
   role: string;
 };
 // CMS config available if needed: import { cmsConfig } from '@/lib/cms';
-// Authentication is now handled by middleware
+import { cmsApiFetch } from '@/lib/cms';
+// Authentication is now handled by cmsApiFetch helper (JWT from localStorage)
 import { RichTextEditor } from './RichTextEditor';
 import { MediaUploader } from './MediaUploader';
 import { TagInput } from './TagInput';
@@ -98,9 +99,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`, {
-        credentials: 'include',
-      });
+      const response = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch post');
@@ -161,37 +160,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
       try {
         console.log('🔍 Fetching current user from PayloadCMS...');
 
-        // Get the payload-token cookie value
-        const getPayloadToken = () => {
-          const cookies = document.cookie.split(';');
-          for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'payload-token') {
-              return value;
-            }
-          }
-          return null;
-        };
-
-        const payloadToken = getPayloadToken();
-        console.log('🍪 PayloadCMS token for user fetch:', !!payloadToken);
-
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-
-        // Add Authorization header if we have a token
-        if (payloadToken) {
-          headers['Authorization'] = `JWT ${payloadToken}`;
-          console.log('🔐 Added Authorization header for user fetch');
-        }
-
         // Try the correct PayloadCMS me endpoint
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-          method: 'GET',
-          credentials: 'include',
-          headers,
-        });
+        const response = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`);
 
         console.log('📡 User response status:', response.status);
         console.log('📡 User response headers:', Object.fromEntries(response.headers.entries()));
@@ -310,37 +280,11 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
       console.log('📤 Sending data to PayloadCMS:', payloadData);
 
-      // Get the payload-token cookie value
-      const getPayloadToken = () => {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-          const [name, value] = cookie.trim().split('=');
-          if (name === 'payload-token') {
-            return value;
-          }
-        }
-        return null;
-      };
-
-      const payloadToken = getPayloadToken();
-      console.log('🍪 PayloadCMS token found:', !!payloadToken);
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // Add Authorization header if we have a token
-      if (payloadToken) {
-        headers['Authorization'] = `JWT ${payloadToken}`;
-        console.log('🔐 Added Authorization header with JWT token');
-      }
-
       let response: { id: string; [key: string]: unknown };
       if (postId) {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
+        const res = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
           method: 'PATCH',
-          headers,
-          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payloadData),
         });
         if (!res.ok) {
@@ -350,17 +294,14 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
         }
         response = await res.json();
       } else {
-        console.log('📤 Creating post with headers:', headers);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`, {
+        const res = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`, {
           method: 'POST',
-          headers,
-          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payloadData),
         });
         if (!res.ok) {
           const errorText = await res.text();
           console.error('❌ Create failed:', res.status, errorText);
-          console.error('❌ Response headers:', Object.fromEntries(res.headers.entries()));
           throw new Error(`Failed to create post: ${res.status}`);
         }
         response = await res.json();

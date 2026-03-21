@@ -25,6 +25,37 @@ export const cmsConfig = {
 } as const;
 
 // ========================================
+// AUTHENTICATED FETCH HELPER
+// ========================================
+
+/**
+ * Drop-in replacement for fetch() that automatically attaches the admin JWT
+ * Authorization header from localStorage. Use this for ALL CMS API calls in
+ * web-admin to avoid intermittent 403s caused by missing credentials.
+ *
+ * Example:
+ *   const res = await cmsApiFetch(`${cmsConfig.apiUrl}/certificate-templates?depth=1&limit=100`);
+ */
+export function cmsApiFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(options.headers);
+
+  // Attach JWT from localStorage (admin-specific key)
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('grandline_auth_token_admin');
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', `users JWT ${token}`);
+    }
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    // Do NOT set credentials: 'include' — cookies don't work cross-domain.
+    // The Authorization header is the only reliable auth mechanism here.
+  });
+}
+
+// ========================================
 // UTILITY FUNCTIONS
 // ========================================
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar } from '@/components/ui/IconWrapper';
 import Link from '@/components/ui/LinkWrapper';
-import { formatCMSDateTime } from '@/lib/cms';
+import { formatCMSDateTime, cmsApiFetch } from '@/lib/cms';
 import type { Post } from '@encreasl/cms-types';
 
 function PostsPageContent() {
@@ -37,9 +37,7 @@ function PostsPageContent() {
           params.append('where[title][contains]', filters.search);
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?${params}`, {
-          credentials: 'include',
-        });
+        const response = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
@@ -87,9 +85,8 @@ function PostsPageContent() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
+      const response = await cmsApiFetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
 
       if (!response.ok) {
