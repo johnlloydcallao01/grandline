@@ -5,7 +5,6 @@ import type { Metadata } from 'next'
 import config from '@payload-config'
 import { RootPage, generatePageMetadata } from '@payloadcms/next/views'
 import { importMap } from '../importMap'
-import { NoSSRWrapper } from '../../../../components/NoSSRWrapper'
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic'
@@ -23,9 +22,7 @@ export const generateMetadata = ({ params, searchParams }: Args): Promise<Metada
   generatePageMetadata({ config, params, searchParams })
 
 const Page = async ({ params, searchParams }: Args) => (
-  <NoSSRWrapper>
-    {await RootPage({ config, params, searchParams, importMap })}
-  </NoSSRWrapper>
+  await RootPage({ config, params, searchParams, importMap })
 )
 
 export default Page

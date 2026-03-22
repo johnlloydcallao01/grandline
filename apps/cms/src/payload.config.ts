@@ -55,6 +55,7 @@ const dirname = path.dirname(filename)
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.CMS_PROD_URL || process.env.CMS_LOCAL_URL || 'http://localhost:3000',
   admin: {
     user: Users.slug,
     importMap: {

@@ -2,6 +2,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['@react-pdf/renderer'],
   // Disable strict mode to avoid dnd-kit hydration mismatches in dev
   reactStrictMode: false,
   // Redirect root path to admin
