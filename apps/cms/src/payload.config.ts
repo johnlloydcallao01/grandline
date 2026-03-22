@@ -144,6 +144,7 @@ export default buildConfig({
       maxUses: parseInt(process.env.DATABASE_MAX_USES || '7500'), // Recycle connections after 7500 uses
     },
     prodMigrations: migrations,
+    push: false,
   }),
 
   // ========================================
