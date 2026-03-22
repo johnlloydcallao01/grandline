@@ -17,7 +17,7 @@ export const Users: CollectionConfig = {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
       domain: process.env.NODE_ENV === 'production'
-        ? process.env.COOKIE_DOMAIN
+        ? (process.env.COOKIE_DOMAIN || '.grandlinemaritime.com')
         : undefined,
     },
   },
