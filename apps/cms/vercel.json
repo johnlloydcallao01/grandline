@@ -5,10 +5,10 @@
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "src/app/(payload)/admin/[[...segments]]/page.tsx": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
   "env": {
