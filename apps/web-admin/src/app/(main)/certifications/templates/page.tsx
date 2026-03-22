@@ -7,7 +7,7 @@ import {
     Plus, Search, MoreHorizontal,
     Edit, Trash2, Copy, Eye
 } from '@/components/ui/IconWrapper';
-import { cmsConfig, getCMSImageUrl, formatCMSDate, cmsApiFetch } from '@/lib/cms';
+import { cmsConfig, getCMSImageUrl, formatCMSDate } from '@/lib/cms';
 import { getCertificateTemplates } from './actions';
 import { CertificateThumbnail } from '../components/CertificateThumbnail';
 import { CertificatePreviewModal } from '../components/CertificatePreviewModal';
@@ -60,12 +60,8 @@ export default function CertificateTemplatesPage() {
     const loadTemplates = async () => {
         try {
             setIsLoading(true);
-            const response = await cmsApiFetch(`${cmsConfig.apiUrl}/certificate-templates?depth=1&limit=100`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch templates');
-            }
-            const data = await response.json();
-            setTemplates(data.docs || []);
+            const data = await getCertificateTemplates();
+            setTemplates(data || []);
         } catch (err) {
             console.error(err);
             setError('Failed to load templates');
