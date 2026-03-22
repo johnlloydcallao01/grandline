@@ -10,7 +10,7 @@ import crypto from 'crypto'
 import { cloudinaryAdapter } from './storage/cloudinary-adapter'
 import { authLogger, createAuthLogContext } from './utils/auth-logger'
 import type { PayloadRequest, PayloadHandler } from 'payload'
-// import sharp from 'sharp'
+import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Instructors } from './collections/Instructors'
@@ -55,7 +55,10 @@ const dirname = path.dirname(filename)
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 
 export default buildConfig({
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.CMS_PROD_URL || process.env.CMS_LOCAL_URL || 'http://localhost:3000',
+  sharp,
+  serverURL: process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_SERVER_URL || process.env.CMS_PROD_URL || 'https://cms.grandlinemaritime.com'
+    : process.env.CMS_LOCAL_URL || 'http://localhost:3001',
   admin: {
     user: Users.slug,
     importMap: {
@@ -134,6 +137,14 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
+      // Connection Pool Configuration for High-Performance with generous timeouts
+      max: parseInt(process.env.DATABASE_POOL_MAX || '20'), // Maximum connections
+      min: parseInt(process.env.DATABASE_POOL_MIN || '0'),  // Minimum connections (0 is critical for Vercel serverless)
+      idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '300000'), // 5 minutes
+      connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '60000'), // 60 seconds
+      // Additional pool settings for stability
+      allowExitOnIdle: false,
+      maxUses: parseInt(process.env.DATABASE_MAX_USES || '7500'), // Recycle connections after 7500 uses
     },
     prodMigrations: migrations,
   }),
