@@ -1,26 +1,9 @@
 import { withPayload } from '@payloadcms/next/withPayload'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-// Render automatically sets RENDER=true. CI is set by most CI platforms.
-// On local Windows, we skip standalone to avoid EPERM symlink errors.
-const isRenderOrCI = process.env.RENDER === 'true' || process.env.CI === 'true'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Disable strict mode to avoid dnd-kit hydration mismatches in dev
   reactStrictMode: false,
-  // Only enable standalone on Render/CI (Linux). Local Windows builds fail
-  // with EPERM when Next.js tries to create pnpm symlinks in .next/standalone.
-  ...(isRenderOrCI && {
-    output: 'standalone',
-    experimental: {
-      outputFileTracingRoot: path.join(__dirname, '../../'),
-    },
-  }),
   // Redirect root path to admin
   async redirects() {
     return [
