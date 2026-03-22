@@ -123,13 +123,13 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 
   exportDOM(): DOMExportOutput {
-    const element = this.createDOM({ theme: {} } as any);
+    const element = this.createDOM({ theme: {} } as unknown as EditorConfig);
     return { element };
   }
 
   static importDOM(): DOMConversionMap | null {
     return {
-      img: (node: Node) => ({
+      img: (_node: Node) => ({
         conversion: (domNode: Node) => {
           if (domNode instanceof HTMLImageElement) {
             const { src, alt, width, height } = domNode;
@@ -331,13 +331,13 @@ export class IframeNode extends DecoratorNode<React.ReactNode> {
   }
 
   exportDOM(): DOMExportOutput {
-    const element = this.createDOM({ theme: {} } as any);
+    const element = this.createDOM({ theme: {} } as unknown as EditorConfig);
     return { element };
   }
 
   static importDOM(): DOMConversionMap | null {
     return {
-      iframe: (node: Node) => ({
+      iframe: (_node: Node) => ({
         conversion: (domNode: Node) => {
           if (domNode instanceof HTMLIFrameElement) {
             const { src, width, height } = domNode;
@@ -351,7 +351,7 @@ export class IframeNode extends DecoratorNode<React.ReactNode> {
     };
   }
 
-  createDOM(config: EditorConfig) {
+  createDOM(_config: EditorConfig) {
     const element = document.createElement('iframe');
     element.src = this.__src;
     element.frameBorder = '0';

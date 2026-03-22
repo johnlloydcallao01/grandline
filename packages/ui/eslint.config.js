@@ -20,6 +20,12 @@ module.exports = [
         cancelAnimationFrame: "readonly",
         HTMLElement: "readonly",
         MouseEvent: "readonly",
+        Node: "readonly",
+        KeyboardEvent: "readonly",
+        HTMLImageElement: "readonly",
+        HTMLIFrameElement: "readonly",
+        HTMLDivElement: "readonly",
+        DOMParser: "readonly",
       },
     },
     rules: {

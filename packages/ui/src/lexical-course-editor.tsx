@@ -18,13 +18,7 @@ import {
   FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
   SELECTION_CHANGE_COMMAND,
-  DecoratorNode,
   TextNode,
-  type SerializedLexicalNode,
-  type NodeKey,
-  type EditorConfig,
-  type DOMExportOutput,
-  type DOMConversionMap,
 } from 'lexical';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';

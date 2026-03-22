@@ -136,7 +136,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || '',
       // Connection Pool Configuration for High-Performance with generous timeouts
       max: parseInt(process.env.DATABASE_POOL_MAX || '20'), // Maximum connections
-      min: parseInt(process.env.DATABASE_POOL_MIN || '5'),  // Minimum connections
+      min: Math.max(0, parseInt(process.env.DATABASE_POOL_MIN || '0')),  // Minimum connections (0 for serverless)
       idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '300000'), // 5 minutes
       connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '60000'), // 60 seconds
       // Additional pool settings for stability
