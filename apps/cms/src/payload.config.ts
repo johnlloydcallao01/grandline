@@ -56,9 +56,6 @@ import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 
 export default buildConfig({
   sharp,
-  serverURL: process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_SERVER_URL || process.env.CMS_PROD_URL || 'https://cms.grandlinemaritime.com'
-    : process.env.CMS_LOCAL_URL || 'http://localhost:3001',
   admin: {
     user: Users.slug,
     importMap: {
@@ -139,7 +136,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || '',
       // Connection Pool Configuration for High-Performance with generous timeouts
       max: parseInt(process.env.DATABASE_POOL_MAX || '20'), // Maximum connections
-      min: parseInt(process.env.DATABASE_POOL_MIN || '0'),  // Minimum connections (0 is critical for Vercel serverless)
+      min: parseInt(process.env.DATABASE_POOL_MIN || '5'),  // Minimum connections
       idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '300000'), // 5 minutes
       connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '60000'), // 60 seconds
       // Additional pool settings for stability
