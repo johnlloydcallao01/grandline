@@ -137,23 +137,18 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
               <SidebarItem
                 icon="faqs"
                 label="FAQs"
-                active={pathname === '/faqs'}
+                active={false}
                 collapsed={!isOpen}
-                href="/faqs"
+                href="https://www.grandlinemaritime.com/faqs"
+                target="_blank"
               />
               <SidebarItem
                 icon="contact-us"
                 label="Contact Us"
-                active={pathname === '/contact-us'}
+                active={false}
                 collapsed={!isOpen}
-                href="/contact-us"
-              />
-              <SidebarItem
-                icon="knowledge-base"
-                label="Knowledge Base"
-                active={pathname === '/knowledge-base'}
-                collapsed={!isOpen}
-                href="/knowledge-base"
+                href="https://www.grandlinemaritime.com/contact-us"
+                target="_blank"
               />
             </div>
 

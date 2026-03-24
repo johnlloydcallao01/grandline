@@ -10,8 +10,8 @@ export function Footer() {
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
     { href: "/courses", label: "Courses" },
-    { href: "/contact", label: "Contact" },
-    { href: "/faq", label: "FAQ" }
+    { href: "/contact-us", label: "Contact Us" },
+    { href: "/faqs", label: "FAQS" }
   ];
 
 

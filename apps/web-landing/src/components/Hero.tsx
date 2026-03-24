@@ -35,7 +35,7 @@ export function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link
-                href="/faq"
+                href="/faqs"
                 className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-300 hover:transform hover:scale-105 inline-flex items-center"
               >
                 <i className="fas fa-info-circle mr-2"></i>

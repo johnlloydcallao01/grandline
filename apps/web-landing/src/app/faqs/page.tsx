@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-export default function FAQPage() {
+export default function FAQSPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const faqs = [

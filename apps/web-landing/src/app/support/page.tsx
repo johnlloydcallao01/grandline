@@ -165,10 +165,10 @@ export default function SupportPage() {
 
                     <div className="text-center mt-8">
                         <Link
-                            href="/faq"
+                            href="/faqs"
                             className="text-[#201a7c] hover:text-[#1a1569] font-medium inline-flex items-center gap-2"
                         >
-                            View All FAQs
+                            View All FAQS
                             <i className="fas fa-arrow-right"></i>
                         </Link>
                     </div>

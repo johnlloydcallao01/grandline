@@ -75,7 +75,6 @@ export type IconName =
   | 'support'
   | 'faqs'
   | 'contact-us'
-  | 'knowledge-base'
   | 'about-us'
   | 'blogs'
   | 'terms-conditions'
