@@ -32,6 +32,8 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  serverExternalPackages: ['@react-pdf/renderer'],
+
   // Next.js automatically exposes NEXT_PUBLIC_ environment variables to the client
   // No need to explicitly define them in the env object
 

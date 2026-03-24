@@ -24,10 +24,16 @@ export async function generateMetadata(): Promise<Metadata> {
   let iconUrl = '/favicon.ico';
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout for build
+
     const res = await fetch(`${cmsConfig.apiUrl}/globals/site-settings?depth=1`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      signal: controller.signal
     });
     
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const settings = await res.json();
       
@@ -44,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
       }
     }
   } catch (error) {
-    console.error("Failed to fetch site settings for metadata:", error);
+    console.warn("Failed to fetch site settings for metadata (using defaults):", error instanceof Error ? error.message : "Unknown error");
   }
 
   return {

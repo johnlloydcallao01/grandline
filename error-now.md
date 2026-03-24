@@ -1,91 +1,82 @@
-? It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.
-==> ///////////////////////////////////////////////////////////
-==> 
-==> Available at your primary URL https://cms.grandlinemaritime.com + 1 more domain
-==> 
-==> ///////////////////////////////////////////////////////////
-==> 
-==> Your service is live 🎉
- ✓ Ready in 3.5s
- ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
- ⚠ `experimental.outputFileTracingRoot` has been moved to `outputFileTracingRoot`. Please update your next.config.mjs file accordingly.
- ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
- ⚠     Unrecognized key(s) in object: 'outputFileTracingRoot' at "experimental"
- ⚠ Invalid next.config.mjs options detected: 
- ✓ Starting...
-   - Network:       http://10.20.10.3:10000
-   - Local:         http://localhost:10000
-   ▲ Next.js 16.0.7
-> cross-env NODE_OPTIONS=--no-deprecation next start
-> @encreasl/cms@0.1.0 start /opt/render/project/src/apps/cms
-==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-==> No open ports detected, continuing to scan...
-==> Running 'pnpm run start'
-==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
-==> Deploying...
-==> Build successful 🎉
-==> Uploaded in 10.2s. Compression took 9.6s
-==> Uploading build...
-ƒ  (Dynamic)  server-rendered on demand
-○  (Static)   prerendered as static content
-ƒ Proxy (Middleware)
-└ ƒ /my-route
-├ ƒ /api/trainee-register
-├ ƒ /api/post-categories/active
-├ ƒ /api/lms/enrollments/[id]
-├ ƒ /api/lms/enrollments
-├ ƒ /api/lms/enrollment-requests
-├ ƒ /api/lms/analytics/dashboard
-├ ƒ /api/health
-├ ƒ /api/graphql-playground
-├ ƒ /api/graphql
-├ ƒ /api/course-categories/active
-├ ƒ /api/[...slug]
-├ ƒ /admin/[[...segments]]
-┌ ○ /_not-found
-Route (app)
-   Finalizing page optimization ...
- ✓ Generating static pages using 15 workers (12/12) in 1301.9ms
-   Generating static pages using 15 workers (9/12) 
-   Generating static pages using 15 workers (6/12) 
-   Generating static pages using 15 workers (3/12) 
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   Generating static pages using 15 workers (0/12) ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   Collecting page data using 15 workers ...
-   Running TypeScript ...
- ✓ Compiled successfully in 36.3s
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   Creating an optimized production build ...
-     ? outputFileTracingRoot (invalid experimental key)
-   - Experiments (use with caution):
-   ▲ Next.js 16.0.7 (Turbopack)
- ⚠ `experimental.outputFileTracingRoot` has been moved to `outputFileTracingRoot`. Please update your next.config.mjs file accordingly.
- ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
- ⚠     Unrecognized key(s) in object: 'outputFileTracingRoot' at "experimental"
- ⚠ Invalid next.config.mjs options detected: 
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-> cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=8000" next build
-> @encreasl/cms@0.1.0 build /opt/render/project/src/apps/cms
-==> Running build command 'pnpm install --frozen-lockfile; pnpm run build'...
-==> Docs on specifying a Node.js version: https://render.com/docs/node-version
-==> Using Node.js version 25.8.1 via /opt/render/project/src/apps/cms/package.json
-==> Requesting Node.js version ^18.20.2 || >=20.9.0
-==> Downloaded 350MB in 2s. Extraction took 24s.
-==> Checking out commit b99563db11b31200b75d8fe55409958bbd7f3cc1 in branch main
-==> Cloning from https://github.com/johnlloydcallao01/grandline
-==> It looks like we don't have access to your repo, but we'll try to clone it anyway.
+19:15:10.476 Running build in Washington, D.C., USA (East) – iad1
+19:15:10.476 Build machine configuration: 2 cores, 8 GB
+19:15:10.643 Cloning github.com/johnlloydcallao01/grandline (Branch: main, Commit: 4819ba9)
+19:15:12.658 Cloning completed: 2.015s
+19:15:13.318 Restored build cache from previous deployment (AZPC5uM5NtqQYQ1JdKgaXYVy8t3B)
+19:15:13.692 Running "vercel build"
+19:15:14.299 Vercel CLI 50.35.0
+19:15:14.395 > Detected Turbo. Adjusting default settings...
+19:15:14.630 Detected `pnpm-lock.yaml` version 9 generated by pnpm@10.x with package.json#packageManager pnpm@10.12.1
+19:15:14.635 Running "install" command: `cd ../.. && pnpm install`...
+19:15:16.740 Scope: all 11 workspace projects
+19:15:16.955 Lockfile is up to date, resolution step is skipped
+19:15:17.214 Already up to date
+19:15:18.762 
+19:15:19.080 Done in 2.7s using pnpm v10.12.1
+19:15:19.109 Detected Next.js version: 16.0.7
+19:15:19.109 Running "cd ../.. && pnpm turbo run build --filter=@encreasl/web-admin"
+19:15:19.793 
+19:15:19.793 Attention:
+19:15:19.793 Turborepo now collects completely anonymous telemetry regarding usage.
+19:15:19.793 This information is used to shape the Turborepo roadmap and prioritize features.
+19:15:19.794 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+19:15:19.794 https://turborepo.com/docs/telemetry
+19:15:19.794 
+19:15:19.865 • Packages in scope: @encreasl/web-admin
+19:15:19.866 • Running build in 1 packages
+19:15:19.866 • Remote caching enabled
+19:15:20.071 @encreasl/cms-types:build: cache hit, replaying logs f1959ba47b9f7fe9
+19:15:20.071 @encreasl/cms-types:build: 
+19:15:20.073 @encreasl/cms-types:build: > @encreasl/cms-types@0.1.0 build /vercel/path0/packages/cms-types
+19:15:20.073 @encreasl/cms-types:build: > tsc --noEmit
+19:15:20.073 @encreasl/cms-types:build: 
+19:15:20.076 @encreasl/redux:build: cache hit, replaying logs 22261574948f7a1a
+19:15:20.077 @encreasl/redux:build: 
+19:15:20.077 @encreasl/redux:build: > @encreasl/redux@0.1.0 build /vercel/path0/packages/redux
+19:15:20.077 @encreasl/redux:build: > tsc
+19:15:20.077 @encreasl/redux:build: 
+19:15:20.180 @encreasl/web-admin:build: cache miss, executing b33644fcbeae1861
+19:15:20.496 @encreasl/web-admin:build: 
+19:15:20.496 @encreasl/web-admin:build: > @encreasl/web-admin@0.1.0 build /vercel/path0/apps/web-admin
+19:15:20.496 @encreasl/web-admin:build: > cross-env BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true node ../../node_modules/next/dist/bin/next build
+19:15:20.496 @encreasl/web-admin:build: 
+19:15:20.816 @encreasl/web-admin:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+19:15:21.685 @encreasl/web-admin:build:    ▲ Next.js 16.0.7 (Turbopack)
+19:15:21.687 @encreasl/web-admin:build: 
+19:15:21.725 @encreasl/web-admin:build:    Creating an optimized production build ...
+19:15:21.872 @encreasl/web-admin:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+19:15:37.655 @encreasl/web-admin:build:  ✓ Compiled successfully in 15.3s
+19:15:37.657 @encreasl/web-admin:build:    Skipping validation of types
+19:15:37.794 @encreasl/web-admin:build:    Collecting page data using 1 worker ...
+19:15:38.107 @encreasl/web-admin:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+19:15:38.715 @encreasl/web-admin:build:    Generating static pages using 1 worker (0/47) ...
+19:15:38.876 @encreasl/web-admin:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+19:16:38.985 @encreasl/web-admin:build: Failed to build /_not-found/page: /_not-found (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.986 @encreasl/web-admin:build: Failed to build /(auth)/signin/page: /signin (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.986 @encreasl/web-admin:build: Failed to build /(main)/accounting/banking/page: /accounting/banking (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.987 @encreasl/web-admin:build: Failed to build /(main)/accounting/chart/page: /accounting/chart (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.987 @encreasl/web-admin:build: Failed to build /(main)/accounting/invoices/page: /accounting/invoices (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.987 @encreasl/web-admin:build: Failed to build /(main)/accounting/payments/page: /accounting/payments (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:16:38.987 @encreasl/web-admin:build: Failed to build /(main)/accounting/payouts/page: /accounting/payouts (attempt 1 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.536 @encreasl/web-admin:build: Failed to build /(main)/accounting/invoices/page: /accounting/invoices (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.537 @encreasl/web-admin:build: Failed to build /_not-found/page: /_not-found (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.553 @encreasl/web-admin:build: Failed to build /(main)/accounting/payouts/page: /accounting/payouts (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.568 @encreasl/web-admin:build: Failed to build /(main)/accounting/payments/page: /accounting/payments (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.583 @encreasl/web-admin:build: Failed to build /(main)/accounting/chart/page: /accounting/chart (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.586 @encreasl/web-admin:build: Failed to build /(main)/accounting/banking/page: /accounting/banking (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:17:39.607 @encreasl/web-admin:build: Failed to build /(auth)/signin/page: /signin (attempt 2 of 3) because it took more than 60 seconds. Retrying again shortly.
+19:18:40.623 @encreasl/web-admin:build: Failed to build /(auth)/signin/page: /signin after 3 attempts.
+19:18:40.623 @encreasl/web-admin:build: Export encountered an error on /(auth)/signin/page: /signin, exiting the build.
+19:18:40.638 @encreasl/web-admin:build:  ⨯ Next.js build worker exited with code: 1 and signal: null
+19:18:40.685 @encreasl/web-admin:build:  ELIFECYCLE  Command failed with exit code 1.
+19:18:40.697 @encreasl/web-admin:build: ERROR: command finished with error: command (/vercel/path0/apps/web-admin) /vercel/.local/share/pnpm/.tools/pnpm/10.12.1/bin/pnpm run build exited (1)
+19:18:40.697 @encreasl/web-admin#build: command (/vercel/path0/apps/web-admin) /vercel/.local/share/pnpm/.tools/pnpm/10.12.1/bin/pnpm run build exited (1)
+19:18:40.699 
+19:18:40.699   Tasks:    2 successful, 3 total
+19:18:40.699  Cached:    2 cached, 3 total
+19:18:40.699    Time:    3m20.89s 
+19:18:40.700 Summary:    /vercel/path0/.turbo/runs/3BIZ0NbDIZwAInC0aJSBMEzySt6.json
+19:18:40.700  Failed:    @encreasl/web-admin#build
+19:18:40.700 
+19:18:40.703  ERROR  run failed: command  exited (1)
+19:18:40.727 Error: Command "cd ../.. && pnpm turbo run build --filter=@encreasl/web-admin" exited with 1
