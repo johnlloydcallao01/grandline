@@ -77,6 +77,7 @@ export interface LoginCredentials {
 
 export interface AuthState {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;

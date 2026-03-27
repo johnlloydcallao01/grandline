@@ -4,16 +4,13 @@
  * Enterprise-grade authentication with HTTP-only cookies and 30-day sessions
  */
 
-import type {
-  User,
-  AuthResponse,
-  LoginCredentials,
-  PayloadAuthResponse,
-  PayloadMeResponse,
-  SessionInfo,
-  AuthErrorDetails,
-  AuthErrorType
+import { 
+  AuthResponse, 
+  LoginCredentials, 
+  PayloadMeResponse, 
+  SessionInfo 
 } from '@/types/auth';
+import type { User } from '@/types/auth';
 
 // ========================================
 // CONFIGURATION
@@ -34,46 +31,7 @@ const REQUEST_CONFIG: RequestInit = {
 // ERROR HANDLING UTILITIES
 // ========================================
 
-function createAuthError(type: AuthErrorType, message: string, field?: string): AuthErrorDetails {
-  return {
-    type,
-    message,
-    field,
-    retryable: type === 'NETWORK_ERROR',
-  };
-}
 
-function handleApiError(error: any): AuthErrorDetails {
-  // Network errors
-  if (error instanceof TypeError && error.message.includes('fetch')) {
-    return createAuthError('NETWORK_ERROR', 'Network connection failed. Please check your internet connection.');
-  }
-
-  // PayloadCMS error response
-  if (error.errors && Array.isArray(error.errors)) {
-    const firstError = error.errors[0];
-    if (firstError.message.toLowerCase().includes('invalid login credentials')) {
-      return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
-    }
-    if (firstError.message.toLowerCase().includes('account locked')) {
-      return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
-    }
-    return createAuthError('VALIDATION_ERROR', firstError.message, firstError.field);
-  }
-
-  // HTTP status errors
-  if (error.status === 401) {
-    return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
-  }
-  if (error.status === 423) {
-    return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
-  }
-  if (error.status >= 500) {
-    return createAuthError('NETWORK_ERROR', 'Server error. Please try again later.');
-  }
-
-  return createAuthError('UNKNOWN_ERROR', error.message || 'An unexpected error occurred.');
-}
 
 // ========================================
 // API UTILITIES
@@ -111,67 +69,35 @@ async function makeAuthRequest<T>(endpoint: string, options: RequestInit & { sup
 // CORE AUTHENTICATION FUNCTIONS
 // ========================================
 
+import { serverLogin, serverLogout, getServerUser, serverRefresh } from '@/app/actions/auth';
+
 /**
  * Login user with email and password
- * Uses PayloadCMS cookie strategy for secure session management
- * Only allows users with 'trainee' role to authenticate
+ * Uses Server Actions to set an HTTP-Only cookie securely
  */
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    const response = await makeAuthRequest<PayloadAuthResponse>('/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    const response = await serverLogin(credentials);
 
-    // Check if user has trainee role
-    if (response.user.role !== 'trainee') {
-      throw new Error('Access denied. Only trainees can access this application.');
-    }
-
-    // Store token for persistent authentication (30 days)
-    if (response.token) {
-      localStorage.setItem('grandline_auth_token_trainee', response.token);
-
-      // Store expiration time (30 days from now)
-      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
-      localStorage.setItem('grandline_auth_expires_trainee', expirationTime.toString());
-    }
-
+    // Keep non-sensitive user data in localStorage for quick synchronous access if needed,
+    // but the actual auth token is now safely in an HTTP-Only cookie.
     try {
       localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
     } catch { void 0; }
 
-    return {
-      message: response.message,
-      user: response.user,
-      token: response.token,
-      exp: response.exp,
-    };
-  } catch (error) {
-    const authError = handleApiError(error);
-    throw new Error(authError.message);
+    return response;
+  } catch (error: any) {
+    throw new Error(error.message || 'Login failed');
   }
 }
 
 /**
  * Logout current user
- * Clears stored token and HTTP-only cookies on the server
+ * Clears HTTP-only cookies via Server Action
  */
-export async function logout(): Promise<void> {
+export async function logout(_userType?: 'trainee' | 'instructor'): Promise<void> {
   try {
-    const user = await getCurrentUser();
-    if (user) {
-      try {
-        await makeAuthRequest('/logout', {
-          method: 'POST',
-          suppressErrorLog: true,
-        });
-      } catch (error: any) {
-        if (!(error && typeof error === 'object' && 'status' in error && error.status === 400)) {
-          console.error('Logout error:', error);
-        }
-      }
-    }
+    await serverLogout();
   } finally {
     clearAuthState();
   }
@@ -179,58 +105,24 @@ export async function logout(): Promise<void> {
 
 /**
  * Get current authenticated user
- * Validates session using HTTP-only cookies
- * Only returns user if they have 'trainee' role
+ * Validates session using HTTP-only cookies via Server Action
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    let headers: Record<string, string> | undefined;
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token_trainee');
-      if (token) headers = { Authorization: `users JWT ${token}` };
-    }
-
-    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2', { headers });
-
-    if (!response.user) {
-      // Fallback to cached user if available to prevent aggressive logout on reload
-      try {
-        const cached = localStorage.getItem('grandline_auth_user_trainee');
-        if (cached) {
-          return JSON.parse(cached);
-        }
-      } catch { void 0; }
-
-      clearAuthState();
-      return null;
-    }
-
-    if (response.user.role !== 'trainee') {
+    const user = await getServerUser();
+    
+    if (!user) {
       clearAuthState();
       return null;
     }
 
     try {
-      localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(user));
     } catch { void 0; }
 
-    return response.user;
-  } catch (error: any) {
-    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
-    const status = isAuthStatus ? (error as { status: number }).status : undefined;
-
-    if (status === 401 || status === 403) {
-      clearAuthState();
-      return null;
-    }
-
-    try {
-      const cached = localStorage.getItem('grandline_auth_user_trainee');
-      if (cached) {
-        return JSON.parse(cached) as User;
-      }
-    } catch { void 0; }
-
+    return user;
+  } catch (_error) {
+    clearAuthState();
     return null;
   }
 }
@@ -242,46 +134,16 @@ export async function getCurrentUser(): Promise<User | null> {
  */
 export async function refreshSession(): Promise<AuthResponse> {
   try {
-    // Check if we have a valid token to refresh
-    const currentToken = localStorage.getItem('grandline_auth_token_trainee');
-    if (!currentToken) {
-      throw new Error('No authentication token available for refresh');
-    }
-
-    // Make refresh request to the new enterprise endpoint
-    const response = await makeAuthRequest<PayloadAuthResponse>('/refresh-token', {
-      method: 'POST',
-      headers: { Authorization: `users JWT ${currentToken}` },
-    });
-
-    // Security validation: Check if user has trainee role
-    if (response.user.role !== 'trainee') {
-      clearAuthState(); // Clear invalid session
-      throw new Error('Access denied during refresh');
-    }
-
-    // Update stored token if a new one was provided
-    if (response.token) {
-      localStorage.setItem('grandline_auth_token_trainee', response.token);
-
-      // Extend session expiration (30 days)
-      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires_trainee', expirationTime.toString());
-    }
+    const response = await serverRefresh();
 
     try {
       localStorage.setItem('grandline_auth_user_trainee', JSON.stringify(response.user));
     } catch { void 0; }
 
-    return {
-      message: response.message,
-      user: response.user,
-      token: response.token,
-      exp: response.exp,
-    };
-  } catch (error) {
-    const authError = handleApiError(error);
-    throw new Error(authError.message);
+    return response;
+  } catch (error: any) {
+    clearAuthState();
+    throw new Error(error.message || 'Failed to refresh session');
   }
 }
 

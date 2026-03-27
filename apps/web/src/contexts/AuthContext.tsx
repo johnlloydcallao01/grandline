@@ -24,6 +24,7 @@ import {
   startSessionMonitoring,
   monitorSessionExpiration,
 } from '@/lib/auth';
+import { getServerToken } from '@/app/actions/auth';
 
 // ========================================
 // AUTHENTICATION REDUCER
@@ -31,19 +32,20 @@ import {
 
 type AuthAction =
   | { type: 'AUTH_INIT_START' }
-  | { type: 'AUTH_INIT_SUCCESS'; payload: { user: User | null } }
+  | { type: 'AUTH_INIT_SUCCESS'; payload: { user: User | null; token: string | null } }
   | { type: 'AUTH_INIT_ERROR'; payload: { error: string } }
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User } }
+  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'LOGIN_ERROR'; payload: { error: string } }
   | { type: 'LOGOUT_START' }
   | { type: 'LOGOUT_SUCCESS' }
-  | { type: 'REFRESH_SUCCESS'; payload: { user: User } }
+  | { type: 'REFRESH_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SESSION_EXPIRED' };
 
 const initialState: AuthState = {
   user: null,
+  token: null,
   isAuthenticated: false, // Start as false, will be set during initialization
   isLoading: true, // Start as loading
   isInitialized: false, // Not initialized yet
@@ -63,7 +65,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: action.payload.user,
-        isAuthenticated: action.payload.user !== null,
+        token: action.payload.token,
+        isAuthenticated: action.payload.user !== null && action.payload.token !== null,
         isLoading: false,
         isInitialized: true,
         error: null,
@@ -73,6 +76,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: null,
+        token: null,
         isAuthenticated: false,
         isLoading: false,
         isInitialized: true,
@@ -90,6 +94,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: action.payload.user,
+        token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -99,6 +104,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: null,
+        token: null,
         isAuthenticated: false,
         isLoading: false,
         error: action.payload.error,
@@ -116,6 +122,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: null,
+        token: null,
         isAuthenticated: false,
         isLoading: false,
         error: null,
@@ -125,6 +132,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         user: action.payload.user,
+        token: action.payload.token,
         isAuthenticated: true,
         error: null,
       };
@@ -152,28 +160,55 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: React.ReactNode;
+  initialUser?: User | null;
+  initialToken?: string | null;
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+export const AuthProvider = ({ children, initialUser = null, initialToken = null }: AuthProviderProps): React.ReactNode => {
+  const [state, dispatch] = useReducer(authReducer, {
+    ...initialState,
+    user: initialUser,
+    token: initialToken,
+    isAuthenticated: !!initialUser && !!initialToken,
+    isLoading: !initialUser, // Only load if we didn't get initial user
+    isInitialized: !!initialUser, // If we got it from server, we are initialized
+  });
 
   // ========================================
   // INITIALIZATION
   // ========================================
 
+  const isInitializedRef = React.useRef(false);
+
   const initializeAuth = useCallback(async () => {
+    if (isInitializedRef.current) return;
+    isInitializedRef.current = true;
+
     try {
       let initialUser: User | null = null;
+      let initialToken: string | null = null;
+
       try {
         const cached = localStorage.getItem('grandline_auth_user_trainee');
+        initialToken = localStorage.getItem('grandline_auth_token_trainee');
         if (cached) {
           initialUser = JSON.parse(cached);
-          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser } });
+          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser, token: initialToken } });
         }
       } catch { void 0; }
 
+      // Re-validate session with the server
       const user = await getCurrentUser();
-      dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user } });
+      const token = await getServerToken();
+      
+      // Update local storage token just in case other legacy code needs it
+      if (token) {
+        localStorage.setItem('grandline_auth_token_trainee', token);
+      } else {
+        localStorage.removeItem('grandline_auth_token_trainee');
+      }
+
+      dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user, token } });
 
       if (user) {
         emitAuthEvent('session_restored', { user });
@@ -198,7 +233,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
 
     try {
       const response = await authLogin(credentials);
-      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: response.user } });
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: response.user, token: response.token || '' } });
       emitAuthEvent('login_success', { user: response.user });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
@@ -227,7 +262,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.ReactNode =
   const refreshSession = useCallback(async () => {
     try {
       const response = await authRefreshSession();
-      dispatch({ type: 'REFRESH_SUCCESS', payload: { user: response.user } });
+      dispatch({ type: 'REFRESH_SUCCESS', payload: { user: response.user, token: response.token || '' } });
       emitAuthEvent('session_refreshed', { user: response.user });
     } catch (_error) {
       // If refresh fails, treat as session expired

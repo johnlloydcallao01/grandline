@@ -24,7 +24,18 @@ export function CourseCategoryCarousel({
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Viewport logic for responsive spacing
-  const [viewportWidth, setViewportWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+  // Avoid checking window immediately on render to prevent hydration mismatch
+  const [isClient, setIsClient] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState<number>(1024); // Default desktop width for SSR
+  
+  useEffect(() => {
+    setIsClient(true);
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    handleResize(); // Initial client-side sync
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const isUltraWide = viewportWidth >= 1500;
   const itemWidth = isUltraWide ? 80 : 64;
   const gapWidth = isUltraWide ? 56 : 48;
@@ -153,9 +164,17 @@ export function CourseCategoryCarousel({
         <div
           ref={trackRef}
           className="flex py-2.5 select-none"
-          style={{
+          style={isClient ? {
             transform: `translateX(${translateX}px)`,
             gap: `${gapWidth}px`, // Dynamic gap
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+            transition: 'none',
+            willChange: 'transform',
+            pointerEvents: 'none'
+          } : {
+            transform: 'translateX(0px)',
+            gap: '48px', // Default fallback gap
             WebkitUserSelect: 'none',
             userSelect: 'none',
             transition: 'none',

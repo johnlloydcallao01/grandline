@@ -284,18 +284,30 @@ export default function SupportPage() {
           <div className="space-y-6">
             {/* Quick Stats / Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">My Tickets</h3>
-                <p className="text-3xl font-bold text-blue-600">{tickets.length}</p>
-                <p className="text-sm text-gray-500 mt-1">Total tickets submitted</p>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Open Issues</h3>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">Tickets currently active</p>
-              </div>
+              {loading && tickets.length === 0 ? (
+                Array.from({ length: 2 }).map((_, idx) => (
+                  <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-pulse">
+                    <div className="h-5 bg-gray-200 rounded w-24 mb-3"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mt-1"></div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">My Tickets</h3>
+                    <p className="text-3xl font-bold text-blue-600">{tickets.length}</p>
+                    <p className="text-sm text-gray-500 mt-1">Total tickets submitted</p>
+                  </div>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Open Issues</h3>
+                    <p className="text-3xl font-bold text-yellow-600">
+                      {tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">Tickets currently active</p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Tickets Table */}
@@ -305,7 +317,37 @@ export default function SupportPage() {
               </div>
               
               {loading && tickets.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">Loading tickets...</div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {Array.from({ length: 3 }).map((_, idx) => (
+                        <tr key={idx} className="animate-pulse">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <div className="h-4 bg-gray-200 rounded w-10 ml-auto"></div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : tickets.length === 0 ? (
                 <div className="p-12 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
@@ -486,7 +528,21 @@ export default function SupportPage() {
                 
                 <div className="p-6 space-y-6 max-h-[600px] overflow-y-auto">
                   {loading && messages.length === 0 ? (
-                    <div className="text-center text-gray-500">Loading conversation...</div>
+                    <div className="space-y-6">
+                      {Array.from({ length: 3 }).map((_, idx) => (
+                        <div key={idx} className={`flex flex-col animate-pulse ${idx % 2 === 0 ? 'items-start' : 'items-end'}`}>
+                          <div className={`flex items-center space-x-2 mb-1 ${idx % 2 !== 0 ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                            <div className="h-3 bg-gray-200 rounded w-16"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                          </div>
+                          <div className={`rounded-lg p-4 w-[60%] h-16 ${
+                            idx % 2 !== 0 
+                              ? 'bg-blue-100 rounded-tr-none' 
+                              : 'bg-gray-200 rounded-tl-none'
+                          }`}></div>
+                        </div>
+                      ))}
+                    </div>
                   ) : messages.map((msg) => {
                     const isMe = typeof msg.sender === 'object' ? String(msg.sender.id) === String(user?.id) : String(msg.sender) === String(user?.id);
                     const senderName = typeof msg.sender === 'object' 

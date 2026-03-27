@@ -20,7 +20,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "payload": "3.49.0",
+    "payload": "^3.80.0",
     "zod": "^4.0.10"
   },
   "devDependencies": {

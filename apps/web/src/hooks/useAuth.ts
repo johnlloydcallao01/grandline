@@ -31,13 +31,14 @@ export function useAuth(): UseAuthReturn {
  * Hook for getting current user information
  */
 export function useUser() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
   
   const displayName = user ? getUserDisplayName(user) : '';
   const initials = user ? getInitials(user) : '';
   
   return {
     user,
+    token,
     isAuthenticated,
     isLoading,
     displayName,

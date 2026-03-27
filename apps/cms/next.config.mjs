@@ -35,7 +35,7 @@ const nextConfig = {
     ]
   },
   // Enable Turbopack (Next.js 16 default)
-  turbopack: {},
+  // turbopack: {},
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
