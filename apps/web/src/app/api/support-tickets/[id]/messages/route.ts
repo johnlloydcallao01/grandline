@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     
     // Auth strategy: Prefer user token (cookie), fallback to API Key
     const cookieStore = await cookies();
-    const payloadToken = cookieStore.get('payload-token')?.value;
+    const payloadToken = cookieStore.get('grandline-web-token')?.value;
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     
     // Auth strategy: Prefer user token (cookie), fallback to API Key
     const cookieStore = await cookies();
-    const payloadToken = cookieStore.get('payload-token')?.value;
+    const payloadToken = cookieStore.get('grandline-web-token')?.value;
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

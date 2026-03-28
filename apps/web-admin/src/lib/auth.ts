@@ -8,14 +8,8 @@ import type {
   User,
   AuthResponse,
   LoginCredentials,
-  PayloadAuthResponse,
-  PayloadMeResponse,
-  SessionInfo,
-  AuthErrorDetails,
-  AuthErrorType
+  SessionInfo
 } from '@/types/auth';
-
-const COLLECTION_SLUG = 'users';
 
 function normalizeApiBaseUrl(raw?: string): string {
   const fallback = 'https://cms.grandlinemaritime.com/api';
@@ -35,54 +29,20 @@ function normalizeApiBaseUrl(raw?: string): string {
   return base;
 }
 
-const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+export const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
-const REQUEST_CONFIG: RequestInit = {
+export const COLLECTION_SLUG = 'users';
+
+// Request Config
+export const REQUEST_CONFIG: RequestInit = {
   credentials: 'omit', // Prevent sending conflicting cookies; rely on Authorization header
   headers: {
     'Content-Type': 'application/json',
   },
 };
 
-function createAuthError(type: AuthErrorType, message: string, field?: string): AuthErrorDetails {
-  return {
-    type,
-    message,
-    field,
-    retryable: type === 'NETWORK_ERROR',
-  };
-}
 
-function handleApiError(error: any): AuthErrorDetails {
-  if (error instanceof TypeError && error.message.includes('fetch')) {
-    return createAuthError('NETWORK_ERROR', 'Network connection failed. Please check your internet connection.');
-  }
-
-  if (error.errors && Array.isArray(error.errors)) {
-    const firstError = error.errors[0];
-    if (firstError.message.toLowerCase().includes('invalid login credentials')) {
-      return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
-    }
-    if (firstError.message.toLowerCase().includes('account locked')) {
-      return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
-    }
-    return createAuthError('VALIDATION_ERROR', firstError.message, firstError.field);
-  }
-
-  if (error.status === 401) {
-    return createAuthError('INVALID_CREDENTIALS', 'Invalid email or password.');
-  }
-  if (error.status === 423) {
-    return createAuthError('ACCOUNT_LOCKED', 'Account is temporarily locked. Please try again later.');
-  }
-  if (error.status >= 500) {
-    return createAuthError('NETWORK_ERROR', 'Server error. Please try again later.');
-  }
-
-  return createAuthError('UNKNOWN_ERROR', error.message || 'An unexpected error occurred.');
-}
-
-async function makeAuthRequest<T>(
+export async function makeAuthRequest<T>(
   endpoint: string,
   options: RequestInit & { suppressErrorLog?: boolean } = {}
 ): Promise<T> {
@@ -113,55 +73,25 @@ async function makeAuthRequest<T>(
   }
 }
 
+import { serverLogin, serverLogout, getServerUser, serverRefresh, getServerToken } from '@/app/actions/auth';
+
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    const response = await makeAuthRequest<PayloadAuthResponse>('/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-
-    if (response.user.role !== 'admin') {
-      throw new Error('Access denied. Only administrators can access this application.');
-    }
-
-    if (response.token) {
-      localStorage.setItem('grandline_auth_token_admin', response.token);
-
-      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires_admin', expirationTime.toString());
-    }
+    const response = await serverLogin(credentials);
 
     try {
       localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
     } catch { void 0; }
 
-    return {
-      message: response.message,
-      user: response.user,
-      token: response.token,
-      exp: response.exp,
-    };
-  } catch (error) {
-    const authError = handleApiError(error);
-    throw new Error(authError.message);
+    return response;
+  } catch (error: unknown) {
+    throw new Error(error instanceof Error ? error.message : 'Login failed');
   }
 }
 
 export async function logout(): Promise<void> {
   try {
-    const user = await getCurrentUser();
-    if (user) {
-      try {
-        await makeAuthRequest('/logout', {
-          method: 'POST',
-          suppressErrorLog: true,
-        });
-      } catch (error: any) {
-        if (!(error && typeof error === 'object' && 'status' in error && error.status === 400)) {
-          console.error('Logout error:', error);
-        }
-      }
-    }
+    await serverLogout();
   } finally {
     clearAuthState();
   }
@@ -169,93 +99,36 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    let headers: Record<string, string> | undefined;
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token_admin');
-      if (token) headers = { Authorization: `users JWT ${token}` };
-    }
+    const user = await getServerUser();
 
-    const response = await makeAuthRequest<PayloadMeResponse>('/me?depth=2', { headers });
-
-    if (!response.user) {
-      try {
-        const cached = localStorage.getItem('grandline_auth_user_admin');
-        if (cached) {
-          return JSON.parse(cached);
-        }
-      } catch { void 0; }
-
-      clearAuthState();
-      return null;
-    }
-
-    if (response.user.role !== 'admin') {
+    if (!user) {
       clearAuthState();
       return null;
     }
 
     try {
-      localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
+      localStorage.setItem('grandline_auth_user_admin', JSON.stringify(user));
     } catch { void 0; }
 
-    return response.user;
-  } catch (error: any) {
-    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
-    const status = isAuthStatus ? (error as { status: number }).status : undefined;
-
-    if (status === 401 || status === 403) {
-      clearAuthState();
-      return null;
-    }
-
-    try {
-      const cached = localStorage.getItem('grandline_auth_user_admin');
-      if (cached) {
-        return JSON.parse(cached) as User;
-      }
-    } catch { void 0; }
-
+    return user;
+  } catch (_error) {
+    clearAuthState();
     return null;
   }
 }
 
 export async function refreshSession(): Promise<AuthResponse> {
   try {
-    const currentToken = localStorage.getItem('grandline_auth_token_admin');
-    if (!currentToken) {
-      throw new Error('No authentication token available for refresh');
-    }
-
-    const response = await makeAuthRequest<PayloadAuthResponse>('/refresh-token', {
-      method: 'POST',
-      headers: { Authorization: `users JWT ${currentToken}` },
-    });
-
-    if (response.user.role !== 'admin') {
-      clearAuthState();
-      throw new Error('Access denied during refresh');
-    }
-
-    if (response.token) {
-      localStorage.setItem('grandline_auth_token_admin', response.token);
-
-      const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000);
-      localStorage.setItem('grandline_auth_expires_admin', expirationTime.toString());
-    }
+    const response = await serverRefresh();
 
     try {
       localStorage.setItem('grandline_auth_user_admin', JSON.stringify(response.user));
     } catch { void 0; }
 
-    return {
-      message: response.message,
-      user: response.user,
-      token: response.token,
-      exp: response.exp,
-    };
-  } catch (error) {
-    const authError = handleApiError(error);
-    throw new Error(authError.message);
+    return response;
+  } catch (error: unknown) {
+    clearAuthState();
+    throw new Error(error instanceof Error ? error.message : 'Failed to refresh session');
   }
 }
 
@@ -293,27 +166,22 @@ export function hasValidStoredToken(): boolean {
 
 export async function getSessionInfo(): Promise<SessionInfo> {
   try {
-    let headers: Record<string, string> | undefined;
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('grandline_auth_token_admin');
-      if (token) headers = { Authorization: `users JWT ${token}` };
-    }
-    const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
+    const user = await getServerUser();
+    const token = await getServerToken();
 
-    return {
-      isValid: response.user !== null,
-      user: response.user || undefined,
-      expiresAt: response.exp ? new Date(response.exp * 1000) : undefined,
-    };
-  } catch (error: any) {
-    const isAuthStatus = !!(error && typeof error === 'object' && 'status' in error);
-    const status = isAuthStatus ? (error as { status: number }).status : undefined;
-
-    if (status === 401 || status === 403) {
+    if (!user || !token) {
       return { isValid: false };
     }
 
-    return { isValid: true };
+    return {
+      isValid: true,
+      user,
+      // Since getServerUser doesn't return exp, we can loosely assume it's valid if user is returned.
+      // For precise expiration, we rely on the token itself or let the server reject when expired.
+      expiresAt: undefined,
+    };
+  } catch (_error) {
+    return { isValid: false };
   }
 }
 
@@ -393,10 +261,8 @@ export function monitorSessionExpiration(): () => void {
       const sessionInfo = await getSessionInfo();
 
       if (!sessionInfo.isValid) {
-        // Disable auto-logout on session check failure to prevent sudden redirects
-        // emitAuthEvent('session_expired');
-        console.warn('Session check failed, but keeping session active to prevent redirect loop.');
-        // clearInterval(intervalId);
+        // Do not throw an error or trigger loops.
+        // The middleware handles hard redirects.
       } else if (sessionInfo.expiresAt) {
         const timeUntilExpiry = sessionInfo.expiresAt.getTime() - Date.now();
 

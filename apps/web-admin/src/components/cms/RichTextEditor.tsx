@@ -19,12 +19,8 @@ async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
   const url = base ? `${base}/media?limit=60` : '/api/media?limit=60';
 
   const getPayloadToken = () => {
-    const cookies = typeof document !== 'undefined' ? document.cookie.split(';') : [];
-    for (const cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'payload-token') {
-        return value;
-      }
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem('grandline_auth_token_admin');
     }
     return null;
   };

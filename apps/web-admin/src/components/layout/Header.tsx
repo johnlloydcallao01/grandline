@@ -97,6 +97,7 @@ export function Header({
                 src={logoUrl || "/calsiter-inc-logo.png"}
                 alt={`${siteName} Logo`}
                 fill
+                sizes="(max-width: 768px) 48px, 48px"
                 className="object-contain"
                 priority
               />
@@ -145,6 +146,7 @@ export function Header({
                     src={profilePictureUrl} 
                     alt={userDisplayName} 
                     fill 
+                    sizes="(max-width: 768px) 32px, 32px"
                     className="object-cover"
                   />
                 ) : (
@@ -185,6 +187,7 @@ export function Header({
                             src={profilePictureUrl} 
                             alt={userDisplayName} 
                             fill 
+                            sizes="(max-width: 768px) 48px, 48px"
                             className="object-cover"
                           />
                         ) : (

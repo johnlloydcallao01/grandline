@@ -24,7 +24,7 @@ export async function serverLogin(credentials: LoginCredentials): Promise<AuthRe
 
   if (data.token) {
     const cookieStore = await cookies();
-    cookieStore.set('payload-token', data.token, {
+    cookieStore.set('grandline-web-token', data.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -43,7 +43,7 @@ export async function serverLogin(credentials: LoginCredentials): Promise<AuthRe
 
 export async function serverLogout() {
   const cookieStore = await cookies();
-  cookieStore.delete('payload-token');
+  cookieStore.delete('grandline-web-token');
   
   try {
     await fetch(`${API_BASE_URL}/users/logout`, {
@@ -57,7 +57,7 @@ export async function serverLogout() {
 
 export async function getServerUser(): Promise<User | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('payload-token')?.value;
+  const token = cookieStore.get('grandline-web-token')?.value;
 
   if (!token) return null;
 
@@ -83,12 +83,12 @@ export async function getServerUser(): Promise<User | null> {
 
 export async function getServerToken(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get('payload-token')?.value || null;
+  return cookieStore.get('grandline-web-token')?.value || null;
 }
 
 export async function serverRefresh(): Promise<AuthResponse> {
   const cookieStore = await cookies();
-  const currentToken = cookieStore.get('payload-token')?.value;
+  const currentToken = cookieStore.get('grandline-web-token')?.value;
 
   if (!currentToken) {
     throw new Error('No authentication token available for refresh');
@@ -110,7 +110,7 @@ export async function serverRefresh(): Promise<AuthResponse> {
   }
 
   if (data.token) {
-    cookieStore.set('payload-token', data.token, {
+    cookieStore.set('grandline-web-token', data.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

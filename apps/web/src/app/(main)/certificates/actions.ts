@@ -7,7 +7,7 @@ export async function getMyCertificates(clientToken?: string) {
 
   // Read token from HTTP-Only cookie, fallback to client-provided token
   const cookieStore = await cookies();
-  const token = cookieStore.get('payload-token')?.value || clientToken;
+  const token = cookieStore.get('grandline-web-token')?.value || clientToken;
 
   if (!token) {
     console.error("[ACTION] No token provided to server action.");
@@ -42,9 +42,9 @@ export async function getCertificateById(certificateId: string | number) {
 
   // Extract auth token from cookies (which is how the trainee is logged in)
   // The client side stores the token in localStorage, but since Next.js Server Components
-  // don't have access to localStorage, and the standard Payload login sets a cookie called payload-token
+  // don't have access to localStorage, and the standard Payload login sets a cookie called grandline-web-token
   const cookieStore = await cookies();
-  const token = cookieStore.get('payload-token')?.value;
+  const token = cookieStore.get('grandline-web-token')?.value;
 
   if (!apiKey || !certificateId) {
     console.error("[ACTION] Missing apiKey or certificateId");
