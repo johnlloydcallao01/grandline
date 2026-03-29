@@ -261,8 +261,7 @@ export function monitorSessionExpiration(): () => void {
       const sessionInfo = await getSessionInfo();
 
       if (!sessionInfo.isValid) {
-        // Do not throw an error or trigger loops.
-        // The middleware handles hard redirects.
+        console.warn('Session check failed, but keeping session active to prevent redirect loop.');
       } else if (sessionInfo.expiresAt) {
         const timeUntilExpiry = sessionInfo.expiresAt.getTime() - Date.now();
 

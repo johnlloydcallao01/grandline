@@ -22,6 +22,10 @@ export default function MainLayout({
   const [isDesktop, setIsDesktop] = useState(false)
   const pathname = usePathname()
 
+  // Pages that should hide the sidebar entirely for a full-screen experience
+  const hideSidebarPages = ['/training-materials/'];
+  const shouldHideSidebar = hideSidebarPages.some(page => pathname.startsWith(page)) && pathname !== '/training-materials';
+
   // Hide instant loading screen when main app loads
   useEffect(() => {
     const hideInstantLoadingScreen = () => {
@@ -80,21 +84,25 @@ export default function MainLayout({
         data-fixed-header={pathname === '/results' ? undefined : 'true'}
       >
         {/* Header - Persistent across all pages */}
-        <Header
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          onSearch={handleSearch}
-        />
+        {!shouldHideSidebar && (
+          <Header
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
+            onSearch={handleSearch}
+          />
+        )}
 
         {/* Sidebar - Persistent across all pages */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
+        {!shouldHideSidebar && (
+          <Sidebar
+            isOpen={sidebarOpen}
+            onToggle={toggleSidebar}
+          />
+        )}
 
         {/* Main Content Area - Only this changes during navigation */}
         <main
-          className={`transition-all duration-300 bg-gray-50 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+          className={`transition-all duration-300 bg-gray-50 ${shouldHideSidebar ? 'w-full' : (sidebarOpen ? 'lg:ml-60' : 'lg:ml-20')
             }`}
           style={{ backgroundColor: '#f9fafb' }}
         >
@@ -104,7 +112,7 @@ export default function MainLayout({
         </main>
 
         {/* Mobile Footer - Only for main app pages */}
-        <MobileFooter />
+        {!shouldHideSidebar && <MobileFooter />}
       </div>
     </ProtectedRoute>
   )

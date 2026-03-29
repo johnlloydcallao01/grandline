@@ -199,6 +199,20 @@ export interface CourseWithInstructor extends Course {
   } | null;
 }
 
+export interface Trainee {
+  id: string | number;
+  user: User | string | number;
+  srn: string;
+}
+
+export interface CourseEnrollment {
+  id: string | number;
+  student: Trainee | string | number;
+  course: Course | string | number;
+  status: 'active' | 'completed' | 'dropped' | 'suspended';
+  enrolledAt: string;
+}
+
 // API Response interfaces
 export interface CoursesResponse {
   docs: Course[];
