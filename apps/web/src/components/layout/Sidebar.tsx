@@ -60,35 +60,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
 
             {isOpen && <hr className="my-3 border-gray-200" />}
 
-            {/* Account section */}
-            <div className="space-y-1">
-              {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Account</div>}
-              <SidebarItem
-                icon="profile"
-                label="Profile"
-                active={pathname === '/profile'}
-                collapsed={!isOpen}
-                href="/profile"
-              />
-              <SidebarItem
-                icon="payment-history"
-                label="Payment History"
-                active={pathname === '/payment-history'}
-                collapsed={!isOpen}
-                href="/payment-history"
-              />
-              <SidebarItem
-                icon="settings"
-                label="Settings"
-                active={pathname === '/settings'}
-                collapsed={!isOpen}
-                href="/settings"
-              />
-
-            </div>
-
-            {isOpen && <hr className="my-3 border-gray-200" />}
-
             {/* Resources section */}
             <div className="space-y-1">
               {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Resources</div>}

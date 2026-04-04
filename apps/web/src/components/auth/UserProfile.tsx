@@ -318,10 +318,6 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
                 <i className="fa fa-cog mr-3 text-gray-400"></i>
                 Account Settings
               </button>
-              <button className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
-                <i className="fa fa-bell mr-3 text-gray-400"></i>
-                Notifications
-              </button>
             </div>
 
             <div className="p-2 border-t border-gray-200">

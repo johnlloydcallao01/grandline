@@ -44,6 +44,10 @@ import { Notifications } from './collections/Notifications'
 import { UserNotifications } from './collections/UserNotifications'
 import { SupportTickets } from './collections/SupportTickets'
 import { SupportTicketMessages } from './collections/SupportTicketMessages'
+import { Chats } from './collections/Chats'
+import { ChatMessages } from './collections/ChatMessages'
+import { ChatMessageStatus } from './collections/ChatMessageStatus'
+import { ChatTypingStatus } from './collections/ChatTypingStatus'
 import { Certificates } from './collections/Certificates'
 import { CertificateTemplates } from './collections/CertificateTemplates'
 import { SiteSettings } from './globals/SiteSettings'
@@ -104,6 +108,12 @@ export default buildConfig({
     // Support System
     SupportTickets,
     SupportTicketMessages,
+
+    // Chat System
+    Chats,
+    ChatMessages,
+    ChatMessageStatus,
+    ChatTypingStatus,
   ],
   globals: [
     SiteSettings,

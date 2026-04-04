@@ -40,9 +40,9 @@ export const CourseDescriptionEditor: React.FC<CourseDescriptionEditorProps> = (
 
   const fieldPath = props.path || 'description'
   const fieldLabel =
-    props.label || props.admin?.label || (fieldPath === 'bodyBlocks' ? 'Content' : 'Description')
+    props.label || props.admin?.label || (fieldPath === 'bodyBlocks' ? 'Content' : fieldPath === 'biography' ? 'Biography' : fieldPath === 'certifications' ? 'Certifications' : 'Description')
   const placeholder =
-    (props.admin && props.admin.placeholder) || 'Start writing the course or lesson content'
+    (props.admin && props.admin.placeholder) || (fieldPath === 'biography' ? 'Write a professional biography...' : 'Start writing the course or lesson content')
 
   const { value, setValue } = useField<any>({ path: fieldPath })
 

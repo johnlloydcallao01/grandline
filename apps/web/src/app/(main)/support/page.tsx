@@ -246,7 +246,7 @@ export default function SupportPage() {
     <div className="min-h-screen bg-gray-50/50 pb-12">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-[10px]">
           <div className="py-6 flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Support Center</h1>
@@ -277,7 +277,7 @@ export default function SupportPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-[10px] py-8">
         
         {/* VIEW: Ticket List */}
         {view === 'list' && (

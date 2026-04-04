@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { adminOnly } from '../access'
 
 export const Users: CollectionConfig = {
@@ -132,6 +133,18 @@ export const Users: CollectionConfig = {
       },
     },
 
+    {
+      name: 'biography',
+      label: 'Biography',
+      type: 'richText',
+      editor: lexicalEditor(),
+      admin: {
+        description: 'Public biography or professional background',
+        components: {
+          Field: '/components/fields/CourseDescriptionEditor#CourseDescriptionEditor',
+        },
+      },
+    },
     {
       name: 'role',
       type: 'select',

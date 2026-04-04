@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Instructors: CollectionConfig = {
   slug: 'instructors',
@@ -36,9 +37,14 @@ export const Instructors: CollectionConfig = {
     },
     {
       name: 'certifications',
-      type: 'textarea',
+      label: 'Certifications',
+      type: 'richText',
+      editor: lexicalEditor(),
       admin: {
         description: 'Professional certifications and qualifications',
+        components: {
+          Field: '/components/fields/CourseDescriptionEditor#CourseDescriptionEditor',
+        },
       },
     },
     {

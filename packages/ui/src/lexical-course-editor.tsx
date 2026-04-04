@@ -35,7 +35,21 @@ import { MediaLibraryModal } from './media-library-modal';
 
 export { mapPayloadMediaDocsToSharedMediaItems, type SharedMediaItem };
 
+function useSystemTheme() {
+  const [isDark, setIsDark] = React.useState(false);
+  React.useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDark(media.matches);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listener = (e: any) => setIsDark(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+  return isDark;
+}
+
 const ToolbarButton: React.FC<React.ButtonHTMLAttributes<globalThis.HTMLButtonElement>> = (props) => {
+  const isDark = useSystemTheme();
   return (
     <button
       type="button"
@@ -45,7 +59,8 @@ const ToolbarButton: React.FC<React.ButtonHTMLAttributes<globalThis.HTMLButtonEl
         padding: '0 8px',
         borderRadius: 6,
         border: '1px solid #e5e7eb',
-        background: '#f9fafb',
+        background: isDark ? '#1f2937' : '#f9fafb',
+        color: isDark ? '#f9fafb' : 'inherit',
         cursor: 'pointer',
         fontSize: 13,
       }}
@@ -56,6 +71,7 @@ const ToolbarButton: React.FC<React.ButtonHTMLAttributes<globalThis.HTMLButtonEl
 const TopToolbar: React.FC<{ commitRef: React.MutableRefObject<boolean> }> = ({ commitRef }) => {
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = React.useState(false);
+  const isDark = useSystemTheme();
 
   const updateToolbar = React.useCallback(() => {
     const selection = $getSelection();
@@ -90,7 +106,7 @@ const TopToolbar: React.FC<{ commitRef: React.MutableRefObject<boolean> }> = ({ 
         alignItems: 'center',
         border: '1px solid #e5e7eb',
         borderRadius: 8,
-        background: '#f8fafc',
+        background: isDark ? '#111827' : '#f8fafc',
         padding: 8,
         marginBottom: 8,
       }}
@@ -171,6 +187,7 @@ const SlashPopupPlugin: React.FC<{
   const [open, setOpen] = React.useState(false);
   const [openLibrary, setOpenLibrary] = React.useState(false);
   const menuRef = React.useRef<globalThis.HTMLDivElement | null>(null);
+  const isDark = useSystemTheme();
 
   React.useEffect(() => {
     const unregister = editor.registerCommand(
@@ -240,7 +257,7 @@ const SlashPopupPlugin: React.FC<{
         width: 260,
         border: '1px solid #e5e7eb',
         borderRadius: 8,
-        background: '#ffffff',
+        background: isDark ? '#111827' : '#ffffff',
         boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
         padding: 8,
         zIndex: 9999,
@@ -255,7 +272,8 @@ const SlashPopupPlugin: React.FC<{
           padding: '8px 10px',
           borderRadius: 6,
           border: '1px solid #e5e7eb',
-          background: '#f9fafb',
+          background: isDark ? '#1f2937' : '#f9fafb',
+          color: isDark ? '#f9fafb' : 'inherit',
           cursor: 'pointer',
           fontSize: 13,
         },
@@ -307,6 +325,7 @@ const EditorInner: React.FC<{
   const [editor] = useLexicalComposerContext();
   const [activeTab, setActiveTab] = React.useState<'visual' | 'html'>('visual');
   const [htmlContent, setHtmlContent] = React.useState('');
+  const isDark = useSystemTheme();
 
   const onTabChange = (tab: 'visual' | 'html') => {
     if (tab === activeTab) return;
@@ -339,8 +358,9 @@ const EditorInner: React.FC<{
             onClick={() => onTabChange('visual')}
             style={{
               padding: '6px 12px',
-              background: activeTab === 'visual' ? '#f3f4f6' : '#ffffff',
+              background: activeTab === 'visual' ? (isDark ? '#374151' : '#f3f4f6') : (isDark ? '#111827' : '#ffffff'),
               fontWeight: activeTab === 'visual' ? 600 : 400,
+              color: isDark ? '#f9fafb' : 'inherit',
               cursor: 'pointer',
               border: 'none',
               borderRight: '1px solid #e5e7eb',
@@ -354,8 +374,9 @@ const EditorInner: React.FC<{
             onClick={() => onTabChange('html')}
             style={{
               padding: '6px 12px',
-              background: activeTab === 'html' ? '#f3f4f6' : '#ffffff',
+              background: activeTab === 'html' ? (isDark ? '#374151' : '#f3f4f6') : (isDark ? '#111827' : '#ffffff'),
               fontWeight: activeTab === 'html' ? 600 : 400,
+              color: isDark ? '#f9fafb' : 'inherit',
               cursor: 'pointer',
               border: 'none',
               fontSize: 13,
@@ -413,6 +434,8 @@ const EditorInner: React.FC<{
             border: '1px solid #e5e7eb',
             borderRadius: 6,
             padding: 12,
+            background: isDark ? '#111827' : 'transparent',
+            color: isDark ? '#f9fafb' : 'inherit',
             outline: 'none',
             fontFamily: 'monospace',
             fontSize: 14,
@@ -441,6 +464,7 @@ export function LexicalCourseEditor({
   loadMedia,
 }: LexicalCourseEditorProps) {
   const [isMounted, setIsMounted] = React.useState(false);
+  const isDark = useSystemTheme();
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -485,7 +509,7 @@ export function LexicalCourseEditor({
             border: '1px solid #e5e7eb',
             borderRadius: 8,
             padding: 12,
-            background: '#ffffff',
+            background: isDark ? '#111827' : '#ffffff',
             minHeight: '150px',
           }}
         />
@@ -500,7 +524,7 @@ export function LexicalCourseEditor({
           border: '1px solid #e5e7eb',
           borderRadius: 8,
           padding: 12,
-          background: '#ffffff',
+          background: isDark ? '#111827' : '#ffffff',
         }}
       >
         <LexicalComposer initialConfig={initialConfig}>

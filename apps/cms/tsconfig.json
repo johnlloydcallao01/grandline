@@ -29,6 +29,12 @@
       ],
       "@payload-config": [
         "./src/payload.config.ts"
+      ],
+      "@grandline/chat-engine": [
+        "../../packages/chat-engine/dist/index.js"
+      ],
+      "@grandline/chat-engine/*": [
+        "../../packages/chat-engine/dist/*.js"
       ]
     }
   },

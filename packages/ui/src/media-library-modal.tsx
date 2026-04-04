@@ -1,6 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SharedMediaItem } from './course-editor-nodes';
 
+function useSystemTheme() {
+  const [isDark, setIsDark] = React.useState(false);
+  React.useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDark(media.matches);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listener = (e: any) => setIsDark(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+  return isDark;
+}
+
 export interface MediaLibraryModalProps {
   /**
    * Whether the modal is currently visible
@@ -40,6 +53,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
   const [items, setItems] = useState<SharedMediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isDark = useSystemTheme();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -120,10 +134,11 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
           maxHeight: '80vh',
           border: '1px solid #e5e7eb',
           borderRadius: 10,
-          background: '#ffffff',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+          background: isDark ? '#111827' : '#ffffff',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
         }}
       >
         {/* Header */}
@@ -134,12 +149,13 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 16px',
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
+            background: isDark ? '#1f2937' : '#f9fafb',
           }}
         >
           <div
             key="title"
-            style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}
+            style={{ fontSize: 16, fontWeight: 600, color: isDark ? '#f9fafb' : '#111827' }}
           >
             {title}
           </div>
@@ -147,15 +163,15 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
             key="close"
             type="button"
             style={{
-              height: 28,
-              padding: '0 10px',
-              borderRadius: 6,
-              border: '1px solid #e5e7eb',
-              background: '#f9fafb',
-              cursor: 'pointer',
-              fontSize: 13,
-              color: '#374151',
-            }}
+                height: 28,
+                padding: '0 10px',
+                borderRadius: 6,
+                border: isDark ? '1px solid #4b5563' : '1px solid #e5e7eb',
+                background: isDark ? '#374151' : '#f9fafb',
+                cursor: 'pointer',
+                fontSize: 13,
+                color: isDark ? '#f9fafb' : '#374151',
+              }}
             onClick={onClose}
           >
             Close
@@ -178,7 +194,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#6b7280',
+                color: isDark ? '#d1d5db' : '#6b7280',
               }}
             >
               Loading…
@@ -196,7 +212,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#6b7280',
+                color: isDark ? '#d1d5db' : '#6b7280',
                 fontSize: 13,
               }}
             >
@@ -222,7 +238,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                       width: '100%',
                       borderRadius: 8,
                       border: '1px solid #e5e7eb',
-                      background: '#ffffff',
+                      background: isDark ? '#1f2937' : '#ffffff',
                       padding: 6,
                       cursor: 'pointer',
                       transition: 'transform 0.1s ease, box-shadow 0.1s ease',
@@ -246,20 +262,20 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                           height: 100,
                           objectFit: 'cover',
                           borderRadius: 6,
-                          background: '#f3f4f6',
+                          background: isDark ? '#374151' : '#f3f4f6',
                         }}
                       />
                     ) : (
                       <div
                         style={{
                           width: '100%',
-                          height: 100,
+                          aspectRatio: '1',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: '#f3f4f6',
+                          background: isDark ? '#374151' : '#f3f4f6',
                           borderRadius: 6,
-                          color: '#6b7280',
+                          color: isDark ? '#d1d5db' : '#6b7280',
                           fontSize: 12,
                           textAlign: 'center',
                           padding: 4,
@@ -273,7 +289,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                       style={{
                         marginTop: 6,
                         fontSize: 12,
-                        color: '#374151',
+                        color: isDark ? '#f3f4f6' : '#374151',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',

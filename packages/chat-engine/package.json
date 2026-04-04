@@ -1,0 +1,45 @@
+{
+  "name": "@grandline/chat-engine",
+  "version": "1.0.0",
+  "description": "Shared chat engine for Grandline Maritime - Realtime messaging, typing indicators, and pagination",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.3"
+  },
+  "peerDependencies": {},
+  "keywords": [
+    "chat",
+    "realtime",
+    "supabase",
+    "messaging",
+    "websocket"
+  ],
+  "author": "Grandline Maritime",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnlloydcallao01/grandline.git",
+    "directory": "packages/chat-engine"
+  }
+}
