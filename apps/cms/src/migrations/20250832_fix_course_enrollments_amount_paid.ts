@@ -62,10 +62,10 @@ export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): P
 
       // Create backup table with existing data (SAFETY FIRST)
       console.log('💾 Creating backup of existing course_enrollments data...')
-      await db.execute(sql`
+      await db.execute(sql.raw(`
         CREATE TABLE IF NOT EXISTS course_enrollments_backup_${Date.now().toString()} AS 
         SELECT * FROM course_enrollments;
-      `)
+      `))
 
       // Handle the schema conflict
       if (((amountPaidColumnCheck as unknown) as { rows: ColumnInfo[] }).rows.length === 0 && ((metadataColumnCheck as unknown) as { rows: ColumnInfo[] }).rows.length > 0) {

@@ -131,10 +131,22 @@ export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): P
           `)
         }
 
-        // Ensure it's a primary key
-        await db.execute(sql`
-          ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id);
+        // Ensure it's a primary key - only if it doesn't already have one
+        const pkCheck = await db.execute(sql`
+          SELECT conname 
+          FROM pg_constraint 
+          WHERE conrelid = 'courses'::regclass 
+          AND contype = 'p';
         `)
+        
+        if (((pkCheck as unknown) as { rows: any[] }).rows.length === 0) {
+          console.log('🔧 Adding primary key constraint to courses table...')
+          await db.execute(sql`
+            ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id);
+          `)
+        } else {
+          console.log('✅ courses table already has a primary key constraint')
+        }
       }
 
       await db.execute(sql`
