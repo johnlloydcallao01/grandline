@@ -27,55 +27,31 @@ export const cloudinaryAdapter = ({
       name: 'cloudinary',
       // Handle file upload to Cloudinary
       handleUpload: async ({ file, data }) => {
-        console.log('=== CLOUDINARY UPLOAD START ===')
-        console.log('Environment:', process.env.NODE_ENV)
-        console.log('File info:', {
-          filename: file.filename,
-          size: file.buffer?.length,
-          mimeType: file.mimeType,
-        })
-        console.log('Cloudinary config:', {
-          cloudName: cloudName,
-          apiKeyPresent: !!apiKey,
-          apiSecretPresent: !!apiSecret,
-          folder: folder,
-          prefix: prefix,
-        })
-
         try {
           const uploadOptions = {
             folder: prefix ? `${folder}/${prefix}` : folder,
-            public_id: file.filename, // Keep file extension for proper handling of raw files (like PPTX)
+            public_id: file.filename.replace(/\.[^/.]+$/, ''), // Remove file extension
             use_filename: true,
             unique_filename: false,
             overwrite: false,
             resource_type: 'auto' as const,
           }
 
-          console.log('Upload options:', uploadOptions)
-
           const result: UploadApiResponse = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
               uploadOptions,
               (error, result) => {
                 if (error) {
-                  console.error('Cloudinary stream error:', error)
                   reject(error)
                 } else {
-                  console.log('Cloudinary upload success:', {
-                    public_id: result!.public_id,
-                    secure_url: result!.secure_url,
-                    bytes: result!.bytes,
-                  })
                   resolve(result!)
                 }
               }
             )
-
             uploadStream.end(file.buffer)
           })
 
-          // Update the data object with Cloudinary information
+          // Mutate data directly — this is the proven pattern that works in both dev and production
           data.cloudinaryPublicId = result.public_id
           data.cloudinaryURL = result.secure_url
           data.url = result.secure_url
@@ -83,15 +59,9 @@ export const cloudinaryAdapter = ({
           data.filesize = result.bytes
           data.width = result.width
           data.height = result.height
-
-          console.log('=== CLOUDINARY UPLOAD SUCCESS ===')
+          data.mimeType = `${result.resource_type}/${result.format}`
         } catch (error) {
-          console.error('=== CLOUDINARY UPLOAD ERROR ===')
-          console.error('Error type:', typeof error)
-          console.error('Error message:', error instanceof Error ? error.message : String(error))
-          console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
-          console.error('Full error object:', error)
-          console.error('=== END CLOUDINARY ERROR ===')
+          console.error('Cloudinary upload error:', error)
           throw error
         }
       },
@@ -120,12 +90,13 @@ export const cloudinaryAdapter = ({
       // Handle static file requests (redirect to Cloudinary CDN)
       staticHandler: async (req, { params }) => {
         const { filename } = params
-        const cloudinaryURL = cloudinary.url(filename, {
+        // Decode URL-encoded filename (e.g., main-uploads%2Ffilename -> main-uploads/filename)
+        const decodedFilename = decodeURIComponent(filename)
+        const cloudinaryURL = cloudinary.url(decodedFilename, {
           secure: true,
           fetch_format: 'auto',
           quality: 'auto',
         })
-
         return Response.redirect(cloudinaryURL, 302)
       },
 
@@ -151,3 +122,4 @@ export const cloudinaryAdapter = ({
     return adapter
   }
 }
+

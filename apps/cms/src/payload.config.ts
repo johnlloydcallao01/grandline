@@ -2,12 +2,10 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import crypto from 'crypto'
-import { cloudinaryAdapter } from './storage/cloudinary-adapter'
 import { authLogger, createAuthLogContext } from './utils/auth-logger'
 import type { PayloadRequest, PayloadHandler } from 'payload'
 import sharp from 'sharp'
@@ -1068,18 +1066,7 @@ export default buildConfig({
 
   // sharp,
   plugins: [
-    cloudStoragePlugin({
-      collections: {
-        media: {
-          adapter: cloudinaryAdapter({
-            cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
-            apiKey: process.env.CLOUDINARY_API_KEY!,
-            apiSecret: process.env.CLOUDINARY_API_SECRET!,
-            folder: 'main-uploads',
-          }),
-        },
-      },
-    }),
+    // Cloud storage handled by Media collection beforeChange hook for reliability
     // storage-adapter-placeholder
   ],
 })

@@ -16,9 +16,9 @@ import {
   varchar,
   timestamp,
   serial,
+  jsonb,
   boolean,
   numeric,
-  jsonb,
   type AnyPgColumn,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
@@ -77,12 +77,27 @@ export const enum__posts_v_version_status = pgEnum('enum__posts_v_version_status
   'draft',
   'published',
 ])
+export const enum_courses_estimated_duration_unit = pgEnum('enum_courses_estimated_duration_unit', [
+  'minutes',
+  'hours',
+  'days',
+  'weeks',
+])
 export const enum_courses_difficulty_level = pgEnum('enum_courses_difficulty_level', [
   'beginner',
   'intermediate',
   'advanced',
 ])
 export const enum_courses_language = pgEnum('enum_courses_language', ['en', 'es', 'fr', 'de'])
+export const enum_courses_evaluation_mode = pgEnum('enum_courses_evaluation_mode', [
+  'lessons',
+  'exam',
+  'quizzes',
+  'lessons_exam',
+  'lessons_quizzes',
+  'quizzes_exam',
+  'lessons_quizzes_exam',
+])
 export const enum_courses_status = pgEnum('enum_courses_status', ['draft', 'published'])
 export const enum_course_categories_category_type = pgEnum('enum_course_categories_category_type', [
   'course',
@@ -106,6 +121,151 @@ export const enum_course_enrollments_payment_status = pgEnum(
   'enum_course_enrollments_payment_status',
   ['completed', 'pending', 'failed', 'refunded', 'not_required'],
 )
+export const enum_course_enrollments_final_evaluation = pgEnum(
+  'enum_course_enrollments_final_evaluation',
+  ['passed', 'failed'],
+)
+export const enum_certificates_status = pgEnum('enum_certificates_status', [
+  'active',
+  'revoked',
+  'expired',
+])
+export const enum_certificate_templates_status = pgEnum('enum_certificate_templates_status', [
+  'draft',
+  'published',
+  'archived',
+])
+export const enum_materials_material_source = pgEnum('enum_materials_material_source', [
+  'media',
+  'external',
+])
+export const enum_course_item_progress_status = pgEnum('enum_course_item_progress_status', [
+  'not_started',
+  'in_progress',
+  'completed',
+  'passed',
+  'failed',
+])
+export const enum_questions_type = pgEnum('enum_questions_type', [
+  'single_choice',
+  'multiple_choice',
+  'true_false',
+])
+export const enum_questions_difficulty = pgEnum('enum_questions_difficulty', [
+  'easy',
+  'medium',
+  'hard',
+])
+export const enum_questions_status = pgEnum('enum_questions_status', [
+  'draft',
+  'active',
+  'deprecated',
+])
+export const enum_questions_true_false_correct = pgEnum('enum_questions_true_false_correct', [
+  'true',
+  'false',
+])
+export const enum_assessments_assessment_type = pgEnum('enum_assessments_assessment_type', [
+  'quiz',
+  'exam',
+  'final_exam',
+])
+export const enum_assessment_submissions_status = pgEnum('enum_assessment_submissions_status', [
+  'in_progress',
+  'submitted',
+  'graded',
+])
+export const enum_submission_answers_question_type = pgEnum(
+  'enum_submission_answers_question_type',
+  ['single_choice', 'multiple_choice', 'true_false'],
+)
+export const enum_notification_templates_channels = pgEnum('enum_notification_templates_channels', [
+  'in-app',
+  'email',
+  'push',
+])
+export const enum_notification_templates_category = pgEnum('enum_notification_templates_category', [
+  'learning',
+  'account',
+  'system-update',
+  'other',
+])
+export const enum_notifications_category = pgEnum('enum_notifications_category', [
+  'learning',
+  'account',
+  'system-update',
+  'other',
+])
+export const enum_notifications_origin = pgEnum('enum_notifications_origin', [
+  'manual',
+  'automatic',
+])
+export const enum_notifications_audience_type = pgEnum('enum_notifications_audience_type', [
+  'all-users',
+  'role',
+  'segment',
+  'specific-users',
+])
+export const enum_notifications_audience_role = pgEnum('enum_notifications_audience_role', [
+  'trainee',
+  'instructor',
+  'admin',
+  'service',
+])
+export const enum_notifications_status = pgEnum('enum_notifications_status', [
+  'draft',
+  'scheduled',
+  'sent',
+  'cancelled',
+])
+export const enum_user_notifications_category = pgEnum('enum_user_notifications_category', [
+  'learning',
+  'account',
+  'system-update',
+  'other',
+])
+export const enum_user_notifications_channel = pgEnum('enum_user_notifications_channel', [
+  'in-app',
+  'email',
+  'push',
+])
+export const enum_support_tickets_status = pgEnum('enum_support_tickets_status', [
+  'open',
+  'in_progress',
+  'waiting_for_user',
+  'resolved',
+  'closed',
+])
+export const enum_support_tickets_priority = pgEnum('enum_support_tickets_priority', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+])
+export const enum_support_tickets_category = pgEnum('enum_support_tickets_category', [
+  'technical',
+  'billing',
+  'course_content',
+  'account',
+  'general',
+  'enrollment',
+])
+export const enum_chats_type = pgEnum('enum_chats_type', ['direct', 'group'])
+export const enum_chats_status = pgEnum('enum_chats_status', ['active', 'archived', 'deleted'])
+export const enum_chat_messages_content_type = pgEnum('enum_chat_messages_content_type', [
+  'text',
+  'image',
+  'file',
+  'system',
+])
+export const enum_chat_message_status_status = pgEnum('enum_chat_message_status_status', [
+  'delivered',
+  'read',
+])
+export const enum_site_settings_social_links_platform = pgEnum(
+  'enum_site_settings_social_links_platform',
+  ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok'],
+)
 
 export const users_reset_password_tokens = pgTable(
   'users_reset_password_tokens',
@@ -120,15 +280,15 @@ export const users_reset_password_tokens = pgTable(
       precision: 3,
     }).notNull(),
   },
-  (columns) => ({
-    _orderIdx: index('users_reset_password_tokens_order_idx').on(columns._order),
-    _parentIDIdx: index('users_reset_password_tokens_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('users_reset_password_tokens_order_idx').on(columns._order),
+    index('users_reset_password_tokens_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [users.id],
       name: 'users_reset_password_tokens_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const users_sessions = pgTable(
@@ -144,15 +304,15 @@ export const users_sessions = pgTable(
       precision: 3,
     }).notNull(),
   },
-  (columns) => ({
-    _orderIdx: index('users_sessions_order_idx').on(columns._order),
-    _parentIDIdx: index('users_sessions_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('users_sessions_order_idx').on(columns._order),
+    index('users_sessions_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [users.id],
       name: 'users_sessions_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const users = pgTable(
@@ -170,6 +330,7 @@ export const users = pgTable(
     birthDate: timestamp('birth_date', { mode: 'string', withTimezone: true, precision: 3 }),
     placeOfBirth: varchar('place_of_birth'),
     completeAddress: varchar('complete_address'),
+    biography: jsonb('biography'),
     role: enum_users_role('role').notNull().default('trainee'),
     isActive: boolean('is_active').default(true),
     lastLogin: timestamp('last_login', { mode: 'string', withTimezone: true, precision: 3 }),
@@ -194,16 +355,16 @@ export const users = pgTable(
     }),
     salt: varchar('salt'),
     hash: varchar('hash'),
-    loginAttempts: numeric('login_attempts').default('0'),
+    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
     lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
   },
-  (columns) => ({
-    users_username_idx: uniqueIndex('users_username_idx').on(columns.username),
-    users_profile_picture_idx: index('users_profile_picture_idx').on(columns.profilePicture),
-    users_updated_at_idx: index('users_updated_at_idx').on(columns.updatedAt),
-    users_created_at_idx: index('users_created_at_idx').on(columns.createdAt),
-    users_email_idx: uniqueIndex('users_email_idx').on(columns.email),
-  }),
+  (columns) => [
+    uniqueIndex('users_username_idx').on(columns.username),
+    index('users_profile_picture_idx').on(columns.profilePicture),
+    index('users_updated_at_idx').on(columns.updatedAt),
+    index('users_created_at_idx').on(columns.createdAt),
+    uniqueIndex('users_email_idx').on(columns.email),
+  ],
 )
 
 export const instructors = pgTable(
@@ -216,8 +377,8 @@ export const instructors = pgTable(
         onDelete: 'set null',
       }),
     specialization: varchar('specialization').notNull(),
-    yearsExperience: numeric('years_experience'),
-    certifications: varchar('certifications'),
+    yearsExperience: numeric('years_experience', { mode: 'number' }),
+    certifications: jsonb('certifications'),
     officeHours: varchar('office_hours'),
     contactEmail: varchar('contact_email'),
     teachingPermissions: jsonb('teaching_permissions'),
@@ -228,11 +389,11 @@ export const instructors = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    instructors_user_idx: uniqueIndex('instructors_user_idx').on(columns.user),
-    instructors_updated_at_idx: index('instructors_updated_at_idx').on(columns.updatedAt),
-    instructors_created_at_idx: index('instructors_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    uniqueIndex('instructors_user_idx').on(columns.user),
+    index('instructors_updated_at_idx').on(columns.updatedAt),
+    index('instructors_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const trainees = pgTable(
@@ -259,12 +420,12 @@ export const trainees = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    trainees_user_idx: uniqueIndex('trainees_user_idx').on(columns.user),
-    trainees_srn_idx: uniqueIndex('trainees_srn_idx').on(columns.srn),
-    trainees_updated_at_idx: index('trainees_updated_at_idx').on(columns.updatedAt),
-    trainees_created_at_idx: index('trainees_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    uniqueIndex('trainees_user_idx').on(columns.user),
+    uniqueIndex('trainees_srn_idx').on(columns.srn),
+    index('trainees_updated_at_idx').on(columns.updatedAt),
+    index('trainees_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const admins = pgTable(
@@ -285,44 +446,11 @@ export const admins = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    admins_user_idx: uniqueIndex('admins_user_idx').on(columns.user),
-    admins_updated_at_idx: index('admins_updated_at_idx').on(columns.updatedAt),
-    admins_created_at_idx: index('admins_created_at_idx').on(columns.createdAt),
-  }),
-)
-
-export const user_certifications = pgTable(
-  'user_certifications',
-  {
-    id: serial('id').primaryKey(),
-    user: integer('user_id')
-      .notNull()
-      .references(() => users.id, {
-        onDelete: 'set null',
-      }),
-    certificationName: varchar('certification_name').notNull(),
-    issuingAuthority: varchar('issuing_authority'),
-    issueDate: timestamp('issue_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    expiryDate: timestamp('expiry_date', { mode: 'string', withTimezone: true, precision: 3 }),
-    verificationUrl: varchar('verification_url'),
-    isActive: boolean('is_active').default(true),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => ({
-    user_certifications_user_idx: index('user_certifications_user_idx').on(columns.user),
-    user_certifications_updated_at_idx: index('user_certifications_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    user_certifications_created_at_idx: index('user_certifications_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    uniqueIndex('admins_user_idx').on(columns.user),
+    index('admins_updated_at_idx').on(columns.updatedAt),
+    index('admins_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const user_events = pgTable(
@@ -349,12 +477,12 @@ export const user_events = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    user_events_user_idx: index('user_events_user_idx').on(columns.user),
-    user_events_triggered_by_idx: index('user_events_triggered_by_idx').on(columns.triggeredBy),
-    user_events_updated_at_idx: index('user_events_updated_at_idx').on(columns.updatedAt),
-    user_events_created_at_idx: index('user_events_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('user_events_user_idx').on(columns.user),
+    index('user_events_triggered_by_idx').on(columns.triggeredBy),
+    index('user_events_updated_at_idx').on(columns.updatedAt),
+    index('user_events_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const emergency_contacts = pgTable(
@@ -380,15 +508,11 @@ export const emergency_contacts = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    emergency_contacts_user_idx: index('emergency_contacts_user_idx').on(columns.user),
-    emergency_contacts_updated_at_idx: index('emergency_contacts_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    emergency_contacts_created_at_idx: index('emergency_contacts_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('emergency_contacts_user_idx').on(columns.user),
+    index('emergency_contacts_updated_at_idx').on(columns.updatedAt),
+    index('emergency_contacts_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const media = pgTable(
@@ -408,17 +532,17 @@ export const media = pgTable(
     thumbnailURL: varchar('thumbnail_u_r_l'),
     filename: varchar('filename'),
     mimeType: varchar('mime_type'),
-    filesize: numeric('filesize'),
-    width: numeric('width'),
-    height: numeric('height'),
-    focalX: numeric('focal_x'),
-    focalY: numeric('focal_y'),
+    filesize: numeric('filesize', { mode: 'number' }),
+    width: numeric('width', { mode: 'number' }),
+    height: numeric('height', { mode: 'number' }),
+    focalX: numeric('focal_x', { mode: 'number' }),
+    focalY: numeric('focal_y', { mode: 'number' }),
   },
-  (columns) => ({
-    media_updated_at_idx: index('media_updated_at_idx').on(columns.updatedAt),
-    media_created_at_idx: index('media_created_at_idx').on(columns.createdAt),
-    media_filename_idx: uniqueIndex('media_filename_idx').on(columns.filename),
-  }),
+  (columns) => [
+    index('media_updated_at_idx').on(columns.updatedAt),
+    index('media_created_at_idx').on(columns.createdAt),
+    uniqueIndex('media_filename_idx').on(columns.filename),
+  ],
 )
 
 export const posts_tags = pgTable(
@@ -429,15 +553,15 @@ export const posts_tags = pgTable(
     id: varchar('id').primaryKey(),
     tag: varchar('tag'),
   },
-  (columns) => ({
-    _orderIdx: index('posts_tags_order_idx').on(columns._order),
-    _parentIDIdx: index('posts_tags_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('posts_tags_order_idx').on(columns._order),
+    index('posts_tags_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [posts.id],
       name: 'posts_tags_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const posts = pgTable(
@@ -459,6 +583,7 @@ export const posts = pgTable(
     seo_title: varchar('seo_title'),
     seo_description: varchar('seo_description'),
     seo_focusKeyword: varchar('seo_focus_keyword'),
+    isFeatured: boolean('is_featured').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -467,14 +592,14 @@ export const posts = pgTable(
       .notNull(),
     _status: enum_posts_status('_status').default('draft'),
   },
-  (columns) => ({
-    posts_slug_idx: uniqueIndex('posts_slug_idx').on(columns.slug),
-    posts_featured_image_idx: index('posts_featured_image_idx').on(columns.featuredImage),
-    posts_author_idx: index('posts_author_idx').on(columns.author),
-    posts_updated_at_idx: index('posts_updated_at_idx').on(columns.updatedAt),
-    posts_created_at_idx: index('posts_created_at_idx').on(columns.createdAt),
-    posts__status_idx: index('posts__status_idx').on(columns._status),
-  }),
+  (columns) => [
+    uniqueIndex('posts_slug_idx').on(columns.slug),
+    index('posts_featured_image_idx').on(columns.featuredImage),
+    index('posts_author_idx').on(columns.author),
+    index('posts_updated_at_idx').on(columns.updatedAt),
+    index('posts_created_at_idx').on(columns.createdAt),
+    index('posts__status_idx').on(columns._status),
+  ],
 )
 
 export const posts_rels = pgTable(
@@ -486,24 +611,22 @@ export const posts_rels = pgTable(
     path: varchar('path').notNull(),
     'post-categoriesID': integer('post_categories_id'),
   },
-  (columns) => ({
-    order: index('posts_rels_order_idx').on(columns.order),
-    parentIdx: index('posts_rels_parent_idx').on(columns.parent),
-    pathIdx: index('posts_rels_path_idx').on(columns.path),
-    posts_rels_post_categories_id_idx: index('posts_rels_post_categories_id_idx').on(
-      columns['post-categoriesID'],
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('posts_rels_order_idx').on(columns.order),
+    index('posts_rels_parent_idx').on(columns.parent),
+    index('posts_rels_path_idx').on(columns.path),
+    index('posts_rels_post_categories_id_idx').on(columns['post-categoriesID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [posts.id],
       name: 'posts_rels_parent_fk',
     }).onDelete('cascade'),
-    'post-categoriesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['post-categoriesID']],
       foreignColumns: [post_categories.id],
       name: 'posts_rels_post_categories_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _posts_v_version_tags = pgTable(
@@ -515,15 +638,15 @@ export const _posts_v_version_tags = pgTable(
     tag: varchar('tag'),
     _uuid: varchar('_uuid'),
   },
-  (columns) => ({
-    _orderIdx: index('_posts_v_version_tags_order_idx').on(columns._order),
-    _parentIDIdx: index('_posts_v_version_tags_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('_posts_v_version_tags_order_idx').on(columns._order),
+    index('_posts_v_version_tags_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_posts_v.id],
       name: '_posts_v_version_tags_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const _posts_v = pgTable(
@@ -552,6 +675,7 @@ export const _posts_v = pgTable(
     version_seo_title: varchar('version_seo_title'),
     version_seo_description: varchar('version_seo_description'),
     version_seo_focusKeyword: varchar('version_seo_focus_keyword'),
+    version_isFeatured: boolean('version_is_featured').default(false),
     version_updatedAt: timestamp('version_updated_at', {
       mode: 'string',
       withTimezone: true,
@@ -571,30 +695,18 @@ export const _posts_v = pgTable(
       .notNull(),
     latest: boolean('latest'),
   },
-  (columns) => ({
-    _posts_v_parent_idx: index('_posts_v_parent_idx').on(columns.parent),
-    _posts_v_version_version_slug_idx: index('_posts_v_version_version_slug_idx').on(
-      columns.version_slug,
-    ),
-    _posts_v_version_version_featured_image_idx: index(
-      '_posts_v_version_version_featured_image_idx',
-    ).on(columns.version_featuredImage),
-    _posts_v_version_version_author_idx: index('_posts_v_version_version_author_idx').on(
-      columns.version_author,
-    ),
-    _posts_v_version_version_updated_at_idx: index('_posts_v_version_version_updated_at_idx').on(
-      columns.version_updatedAt,
-    ),
-    _posts_v_version_version_created_at_idx: index('_posts_v_version_version_created_at_idx').on(
-      columns.version_createdAt,
-    ),
-    _posts_v_version_version__status_idx: index('_posts_v_version_version__status_idx').on(
-      columns.version__status,
-    ),
-    _posts_v_created_at_idx: index('_posts_v_created_at_idx').on(columns.createdAt),
-    _posts_v_updated_at_idx: index('_posts_v_updated_at_idx').on(columns.updatedAt),
-    _posts_v_latest_idx: index('_posts_v_latest_idx').on(columns.latest),
-  }),
+  (columns) => [
+    index('_posts_v_parent_idx').on(columns.parent),
+    index('_posts_v_version_version_slug_idx').on(columns.version_slug),
+    index('_posts_v_version_version_featured_image_idx').on(columns.version_featuredImage),
+    index('_posts_v_version_version_author_idx').on(columns.version_author),
+    index('_posts_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_posts_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_posts_v_version_version__status_idx').on(columns.version__status),
+    index('_posts_v_created_at_idx').on(columns.createdAt),
+    index('_posts_v_updated_at_idx').on(columns.updatedAt),
+    index('_posts_v_latest_idx').on(columns.latest),
+  ],
 )
 
 export const _posts_v_rels = pgTable(
@@ -606,24 +718,22 @@ export const _posts_v_rels = pgTable(
     path: varchar('path').notNull(),
     'post-categoriesID': integer('post_categories_id'),
   },
-  (columns) => ({
-    order: index('_posts_v_rels_order_idx').on(columns.order),
-    parentIdx: index('_posts_v_rels_parent_idx').on(columns.parent),
-    pathIdx: index('_posts_v_rels_path_idx').on(columns.path),
-    _posts_v_rels_post_categories_id_idx: index('_posts_v_rels_post_categories_id_idx').on(
-      columns['post-categoriesID'],
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('_posts_v_rels_order_idx').on(columns.order),
+    index('_posts_v_rels_parent_idx').on(columns.parent),
+    index('_posts_v_rels_path_idx').on(columns.path),
+    index('_posts_v_rels_post_categories_id_idx').on(columns['post-categoriesID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [_posts_v.id],
       name: '_posts_v_rels_parent_fk',
     }).onDelete('cascade'),
-    'post-categoriesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['post-categoriesID']],
       foreignColumns: [post_categories.id],
       name: '_posts_v_rels_post_categories_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const post_categories = pgTable(
@@ -637,7 +747,7 @@ export const post_categories = pgTable(
       onDelete: 'set null',
     }),
     colorCode: varchar('color_code'),
-    displayOrder: numeric('display_order').default('0'),
+    displayOrder: numeric('display_order', { mode: 'number' }).default(0),
     isActive: boolean('is_active').default(true),
     metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -647,45 +757,12 @@ export const post_categories = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    post_categories_slug_idx: uniqueIndex('post_categories_slug_idx').on(columns.slug),
-    post_categories_icon_idx: index('post_categories_icon_idx').on(columns.icon),
-    post_categories_updated_at_idx: index('post_categories_updated_at_idx').on(columns.updatedAt),
-    post_categories_created_at_idx: index('post_categories_created_at_idx').on(columns.createdAt),
-  }),
-)
-
-export const company_members = pgTable(
-  'company_members',
-  {
-    id: serial('id').primaryKey(),
-    firstName: varchar('first_name').notNull(),
-    lastName: varchar('last_name').notNull(),
-    middleName: varchar('middle_name'),
-    position: varchar('position').notNull(),
-    bio: varchar('bio'),
-    profilePicture: integer('profile_picture_id').references(() => media.id, {
-      onDelete: 'set null',
-    }),
-    order: numeric('order').default('0'),
-    isActive: boolean('is_active').default(true),
-    email: varchar('email'),
-    linkedinUrl: varchar('linkedin_url'),
-    twitterUrl: varchar('twitter_url'),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => ({
-    company_members_profile_picture_idx: index('company_members_profile_picture_idx').on(
-      columns.profilePicture,
-    ),
-    company_members_updated_at_idx: index('company_members_updated_at_idx').on(columns.updatedAt),
-    company_members_created_at_idx: index('company_members_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    uniqueIndex('post_categories_slug_idx').on(columns.slug),
+    index('post_categories_icon_idx').on(columns.icon),
+    index('post_categories_updated_at_idx').on(columns.updatedAt),
+    index('post_categories_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const courses_learning_objectives = pgTable(
@@ -696,15 +773,15 @@ export const courses_learning_objectives = pgTable(
     id: varchar('id').primaryKey(),
     objective: varchar('objective').notNull(),
   },
-  (columns) => ({
-    _orderIdx: index('courses_learning_objectives_order_idx').on(columns._order),
-    _parentIDIdx: index('courses_learning_objectives_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('courses_learning_objectives_order_idx').on(columns._order),
+    index('courses_learning_objectives_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [courses.id],
       name: 'courses_learning_objectives_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const courses_prerequisites = pgTable(
@@ -715,15 +792,15 @@ export const courses_prerequisites = pgTable(
     id: varchar('id').primaryKey(),
     prerequisite: varchar('prerequisite').notNull(),
   },
-  (columns) => ({
-    _orderIdx: index('courses_prerequisites_order_idx').on(columns._order),
-    _parentIDIdx: index('courses_prerequisites_parent_id_idx').on(columns._parentID),
-    _parentIDFk: foreignKey({
+  (columns) => [
+    index('courses_prerequisites_order_idx').on(columns._order),
+    index('courses_prerequisites_parent_id_idx').on(columns._parentID),
+    foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [courses.id],
       name: 'courses_prerequisites_parent_id_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const courses = pgTable(
@@ -734,6 +811,7 @@ export const courses = pgTable(
     courseCode: varchar('course_code').notNull(),
     excerpt: varchar('excerpt'),
     description: jsonb('description'),
+    descriptionBlocks: jsonb('description_blocks'),
     instructor: integer('instructor_id')
       .notNull()
       .references(() => instructors.id, {
@@ -745,9 +823,9 @@ export const courses = pgTable(
     bannerImage: integer('banner_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
-    price: numeric('price').default('0'),
-    discountedPrice: numeric('discounted_price'),
-    maxStudents: numeric('max_students'),
+    price: numeric('price', { mode: 'number' }).default(0),
+    discountedPrice: numeric('discounted_price', { mode: 'number' }),
+    maxStudents: numeric('max_students', { mode: 'number' }),
     enrollmentStartDate: timestamp('enrollment_start_date', {
       mode: 'string',
       withTimezone: true,
@@ -768,11 +846,20 @@ export const courses = pgTable(
       withTimezone: true,
       precision: 3,
     }),
-    estimatedDuration: numeric('estimated_duration'),
+    estimatedDuration: numeric('estimated_duration', { mode: 'number' }),
+    estimatedDurationUnit:
+      enum_courses_estimated_duration_unit('estimated_duration_unit').default('hours'),
     difficultyLevel: enum_courses_difficulty_level('difficulty_level').default('beginner'),
     isFeatured: boolean('is_featured').default(false),
     language: enum_courses_language('language').default('en'),
-    passingGrade: numeric('passing_grade').default('70'),
+    passingGrade: numeric('passing_grade', { mode: 'number' }).default(70),
+    evaluationMode: enum_courses_evaluation_mode('evaluation_mode').default('lessons_exam'),
+    certificateTemplate: integer('certificate_template_id').references(
+      () => certificate_templates.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     status: enum_courses_status('status').notNull().default('draft'),
     publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
     settings: jsonb('settings'),
@@ -783,14 +870,15 @@ export const courses = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    courses_course_code_idx: uniqueIndex('courses_course_code_idx').on(columns.courseCode),
-    courses_instructor_idx: index('courses_instructor_idx').on(columns.instructor),
-    courses_thumbnail_idx: index('courses_thumbnail_idx').on(columns.thumbnail),
-    courses_banner_image_idx: index('courses_banner_image_idx').on(columns.bannerImage),
-    courses_updated_at_idx: index('courses_updated_at_idx').on(columns.updatedAt),
-    courses_created_at_idx: index('courses_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    uniqueIndex('courses_course_code_idx').on(columns.courseCode),
+    index('courses_instructor_idx').on(columns.instructor),
+    index('courses_thumbnail_idx').on(columns.thumbnail),
+    index('courses_banner_image_idx').on(columns.bannerImage),
+    index('courses_certificate_template_idx').on(columns.certificateTemplate),
+    index('courses_updated_at_idx').on(columns.updatedAt),
+    index('courses_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const courses_rels = pgTable(
@@ -800,35 +888,38 @@ export const courses_rels = pgTable(
     order: integer('order'),
     parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
+    'course-modulesID': integer('course_modules_id'),
     instructorsID: integer('instructors_id'),
     'course-categoriesID': integer('course_categories_id'),
   },
-  (columns) => ({
-    order: index('courses_rels_order_idx').on(columns.order),
-    parentIdx: index('courses_rels_parent_idx').on(columns.parent),
-    pathIdx: index('courses_rels_path_idx').on(columns.path),
-    courses_rels_instructors_id_idx: index('courses_rels_instructors_id_idx').on(
-      columns.instructorsID,
-    ),
-    courses_rels_course_categories_id_idx: index('courses_rels_course_categories_id_idx').on(
-      columns['course-categoriesID'],
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('courses_rels_order_idx').on(columns.order),
+    index('courses_rels_parent_idx').on(columns.parent),
+    index('courses_rels_path_idx').on(columns.path),
+    index('courses_rels_course_modules_id_idx').on(columns['course-modulesID']),
+    index('courses_rels_instructors_id_idx').on(columns.instructorsID),
+    index('courses_rels_course_categories_id_idx').on(columns['course-categoriesID']),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [courses.id],
       name: 'courses_rels_parent_fk',
     }).onDelete('cascade'),
-    instructorsIdFk: foreignKey({
+    foreignKey({
+      columns: [columns['course-modulesID']],
+      foreignColumns: [course_modules.id],
+      name: 'courses_rels_course_modules_fk',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [columns['instructorsID']],
       foreignColumns: [instructors.id],
       name: 'courses_rels_instructors_fk',
     }).onDelete('cascade'),
-    'course-categoriesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['course-categoriesID']],
       foreignColumns: [course_categories.id],
       name: 'courses_rels_course_categories_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const course_categories = pgTable(
@@ -846,7 +937,7 @@ export const course_categories = pgTable(
       onDelete: 'set null',
     }),
     colorCode: varchar('color_code'),
-    displayOrder: numeric('display_order').default('0'),
+    displayOrder: numeric('display_order', { mode: 'number' }).default(0),
     isActive: boolean('is_active').default(true),
     metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -856,17 +947,13 @@ export const course_categories = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    course_categories_slug_idx: uniqueIndex('course_categories_slug_idx').on(columns.slug),
-    course_categories_parent_idx: index('course_categories_parent_idx').on(columns.parent),
-    course_categories_icon_idx: index('course_categories_icon_idx').on(columns.icon),
-    course_categories_updated_at_idx: index('course_categories_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    course_categories_created_at_idx: index('course_categories_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    uniqueIndex('course_categories_slug_idx').on(columns.slug),
+    index('course_categories_parent_idx').on(columns.parent),
+    index('course_categories_icon_idx').on(columns.icon),
+    index('course_categories_updated_at_idx').on(columns.updatedAt),
+    index('course_categories_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const course_enrollments = pgTable(
@@ -894,16 +981,17 @@ export const course_enrollments = pgTable(
       withTimezone: true,
       precision: 3,
     }),
-    amountPaid: numeric('amount_paid'),
-    progressPercentage: numeric('progress_percentage').default('0'),
+    amountPaid: numeric('amount_paid', { mode: 'number' }),
+    progressPercentage: numeric('progress_percentage', { mode: 'number' }).default(0),
     lastAccessedAt: timestamp('last_accessed_at', {
       mode: 'string',
       withTimezone: true,
       precision: 3,
     }),
     completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
-    currentGrade: numeric('current_grade'),
-    finalGrade: numeric('final_grade'),
+    currentGrade: numeric('current_grade', { mode: 'number' }),
+    finalGrade: numeric('final_grade', { mode: 'number' }),
+    finalEvaluation: enum_course_enrollments_final_evaluation('final_evaluation'),
     certificateIssued: boolean('certificate_issued').default(false),
     enrolledBy: integer('enrolled_by_id').references(() => users.id, {
       onDelete: 'set null',
@@ -918,19 +1006,498 @@ export const course_enrollments = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    course_enrollments_student_idx: index('course_enrollments_student_idx').on(columns.student),
-    course_enrollments_course_idx: index('course_enrollments_course_idx').on(columns.course),
-    course_enrollments_enrolled_by_idx: index('course_enrollments_enrolled_by_idx').on(
-      columns.enrolledBy,
-    ),
-    course_enrollments_updated_at_idx: index('course_enrollments_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    course_enrollments_created_at_idx: index('course_enrollments_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('course_enrollments_student_idx').on(columns.student),
+    index('course_enrollments_course_idx').on(columns.course),
+    index('course_enrollments_enrolled_by_idx').on(columns.enrolledBy),
+    index('course_enrollments_updated_at_idx').on(columns.updatedAt),
+    index('course_enrollments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const certificates = pgTable(
+  'certificates',
+  {
+    id: serial('id').primaryKey(),
+    certificateCode: varchar('certificate_code').notNull(),
+    verificationUrl: varchar('verification_url'),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    enrollment: integer('enrollment_id')
+      .notNull()
+      .references(() => course_enrollments.id, {
+        onDelete: 'set null',
+      }),
+    issueDate: timestamp('issue_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    expiryDate: timestamp('expiry_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    file: integer('file_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    metadata: jsonb('metadata'),
+    status: enum_certificates_status('status').notNull().default('active'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('certificates_certificate_code_idx').on(columns.certificateCode),
+    index('certificates_trainee_idx').on(columns.trainee),
+    index('certificates_course_idx').on(columns.course),
+    index('certificates_enrollment_idx').on(columns.enrollment),
+    index('certificates_file_idx').on(columns.file),
+    index('certificates_updated_at_idx').on(columns.updatedAt),
+    index('certificates_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const certificate_templates = pgTable(
+  'certificate_templates',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    slug: varchar('slug').notNull(),
+    backgroundImage: integer('background_image_id')
+      .notNull()
+      .references(() => media.id, {
+        onDelete: 'set null',
+      }),
+    canvasSchema: jsonb('canvas_schema').notNull(),
+    status: enum_certificate_templates_status('status').notNull().default('draft'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('certificate_templates_slug_idx').on(columns.slug),
+    index('certificate_templates_background_image_idx').on(columns.backgroundImage),
+    index('certificate_templates_updated_at_idx').on(columns.updatedAt),
+    index('certificate_templates_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const course_modules = pgTable(
+  'course_modules',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    description: jsonb('description'),
+    releaseAt: timestamp('release_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('course_modules_updated_at_idx').on(columns.updatedAt),
+    index('course_modules_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const course_modules_rels = pgTable(
+  'course_modules_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    'course-lessonsID': integer('course_lessons_id'),
+    assessmentsID: integer('assessments_id'),
+  },
+  (columns) => [
+    index('course_modules_rels_order_idx').on(columns.order),
+    index('course_modules_rels_parent_idx').on(columns.parent),
+    index('course_modules_rels_path_idx').on(columns.path),
+    index('course_modules_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
+    index('course_modules_rels_assessments_id_idx').on(columns.assessmentsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [course_modules.id],
+      name: 'course_modules_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-lessonsID']],
+      foreignColumns: [course_lessons.id],
+      name: 'course_modules_rels_course_lessons_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assessmentsID']],
+      foreignColumns: [assessments.id],
+      name: 'course_modules_rels_assessments_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const course_lessons = pgTable(
+  'course_lessons',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    module: integer('module_id')
+      .notNull()
+      .references(() => course_modules.id, {
+        onDelete: 'set null',
+      }),
+    description: jsonb('description'),
+    estimatedDuration: numeric('estimated_duration', { mode: 'number' }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('course_lessons_module_idx').on(columns.module),
+    index('course_lessons_updated_at_idx').on(columns.updatedAt),
+    index('course_lessons_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const materials = pgTable(
+  'materials',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    description: varchar('description'),
+    materialSource: enum_materials_material_source('material_source').notNull().default('media'),
+    externalUrl: varchar('external_url'),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('materials_updated_at_idx').on(columns.updatedAt),
+    index('materials_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const materials_rels = pgTable(
+  'materials_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('materials_rels_order_idx').on(columns.order),
+    index('materials_rels_parent_idx').on(columns.parent),
+    index('materials_rels_path_idx').on(columns.path),
+    index('materials_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [materials.id],
+      name: 'materials_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'materials_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const course_materials = pgTable(
+  'course_materials',
+  {
+    id: serial('id').primaryKey(),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    material: integer('material_id')
+      .notNull()
+      .references(() => materials.id, {
+        onDelete: 'set null',
+      }),
+    order: numeric('order', { mode: 'number' }).default(1),
+    isRequired: boolean('is_required').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('course_materials_course_idx').on(columns.course),
+    index('course_materials_material_idx').on(columns.material),
+    index('course_materials_updated_at_idx').on(columns.updatedAt),
+    index('course_materials_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const lesson_materials = pgTable(
+  'lesson_materials',
+  {
+    id: serial('id').primaryKey(),
+    lesson: integer('lesson_id')
+      .notNull()
+      .references(() => course_lessons.id, {
+        onDelete: 'set null',
+      }),
+    material: integer('material_id')
+      .notNull()
+      .references(() => materials.id, {
+        onDelete: 'set null',
+      }),
+    order: numeric('order', { mode: 'number' }).default(1),
+    isRequired: boolean('is_required').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('lesson_materials_lesson_idx').on(columns.lesson),
+    index('lesson_materials_material_idx').on(columns.material),
+    index('lesson_materials_updated_at_idx').on(columns.updatedAt),
+    index('lesson_materials_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const announcements = pgTable(
+  'announcements',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    bodyBlocks: jsonb('body_blocks'),
+    pinned: boolean('pinned').default(false),
+    visibleFrom: timestamp('visible_from', { mode: 'string', withTimezone: true, precision: 3 }),
+    visibleUntil: timestamp('visible_until', { mode: 'string', withTimezone: true, precision: 3 }),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('announcements_course_idx').on(columns.course),
+    index('announcements_created_by_idx').on(columns.createdBy),
+    index('announcements_updated_at_idx').on(columns.updatedAt),
+    index('announcements_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const course_feedbacks = pgTable(
+  'course_feedbacks',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    rating: numeric('rating', { mode: 'number' }),
+    comment: varchar('comment').notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('course_feedbacks_user_idx').on(columns.user),
+    index('course_feedbacks_course_idx').on(columns.course),
+    index('course_feedbacks_updated_at_idx').on(columns.updatedAt),
+    index('course_feedbacks_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const wishlists = pgTable(
+  'wishlists',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    compositeKey: varchar('composite_key'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('wishlists_user_idx').on(columns.user),
+    index('wishlists_course_idx').on(columns.course),
+    uniqueIndex('wishlists_composite_key_idx').on(columns.compositeKey),
+    index('wishlists_updated_at_idx').on(columns.updatedAt),
+    index('wishlists_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const recently_viewed_courses = pgTable(
+  'recently_viewed_courses',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    viewedAt: timestamp('viewed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    viewCount: numeric('view_count', { mode: 'number' }).default(1),
+    compositeKey: varchar('composite_key'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('recently_viewed_courses_user_idx').on(columns.user),
+    index('recently_viewed_courses_course_idx').on(columns.course),
+    uniqueIndex('recently_viewed_courses_composite_key_idx').on(columns.compositeKey),
+    index('recently_viewed_courses_updated_at_idx').on(columns.updatedAt),
+    index('recently_viewed_courses_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const course_item_progress = pgTable(
+  'course_item_progress',
+  {
+    id: serial('id').primaryKey(),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    enrollment: integer('enrollment_id')
+      .notNull()
+      .references(() => course_enrollments.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_course_item_progress_status('status').notNull().default('not_started'),
+    isCompleted: boolean('is_completed').default(false),
+    progressPercentage: numeric('progress_percentage', { mode: 'number' }).default(0),
+    startedAt: timestamp('started_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    lastAccessedAt: timestamp('last_accessed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    durationSeconds: numeric('duration_seconds', { mode: 'number' }).default(0),
+    score: numeric('score', { mode: 'number' }),
+    grade: numeric('grade', { mode: 'number' }),
+    attempts: numeric('attempts', { mode: 'number' }).default(0),
+    quizData: jsonb('quiz_data'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('course_item_progress_trainee_idx').on(columns.trainee),
+    index('course_item_progress_course_idx').on(columns.course),
+    index('course_item_progress_enrollment_idx').on(columns.enrollment),
+    index('course_item_progress_status_idx').on(columns.status),
+    index('course_item_progress_is_completed_idx').on(columns.isCompleted),
+    index('course_item_progress_last_accessed_at_idx').on(columns.lastAccessedAt),
+    index('course_item_progress_updated_at_idx').on(columns.updatedAt),
+    index('course_item_progress_created_at_idx').on(columns.createdAt),
+    index('trainee_course_idx').on(columns.trainee, columns.course),
+    index('enrollment_isCompleted_idx').on(columns.enrollment, columns.isCompleted),
+  ],
+)
+
+export const course_item_progress_rels = pgTable(
+  'course_item_progress_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    'course-lessonsID': integer('course_lessons_id'),
+    assessmentsID: integer('assessments_id'),
+  },
+  (columns) => [
+    index('course_item_progress_rels_order_idx').on(columns.order),
+    index('course_item_progress_rels_parent_idx').on(columns.parent),
+    index('course_item_progress_rels_path_idx').on(columns.path),
+    index('course_item_progress_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
+    index('course_item_progress_rels_assessments_id_idx').on(columns.assessmentsID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [course_item_progress.id],
+      name: 'course_item_progress_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-lessonsID']],
+      foreignColumns: [course_lessons.id],
+      name: 'course_item_progress_rels_course_lessons_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assessmentsID']],
+      foreignColumns: [assessments.id],
+      name: 'course_item_progress_rels_assessments_fk',
+    }).onDelete('cascade'),
+  ],
 )
 
 export const recent_searches = pgTable(
@@ -946,7 +1513,7 @@ export const recent_searches = pgTable(
     normalizedQuery: varchar('normalized_query').notNull(),
     scope: varchar('scope').notNull().default('courses'),
     compositeKey: varchar('composite_key'),
-    frequency: numeric('frequency').notNull().default('1'),
+    frequency: numeric('frequency', { mode: 'number' }).notNull().default(1),
     source: varchar('source').default('unknown'),
     deviceId: varchar('device_id'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -956,14 +1523,711 @@ export const recent_searches = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    recent_searches_user_idx: index('recent_searches_user_idx').on(columns.user),
-    recent_searches_composite_key_idx: uniqueIndex('recent_searches_composite_key_idx').on(
-      columns.compositeKey,
-    ),
-    recent_searches_updated_at_idx: index('recent_searches_updated_at_idx').on(columns.updatedAt),
-    recent_searches_created_at_idx: index('recent_searches_created_at_idx').on(columns.createdAt),
-  }),
+  (columns) => [
+    index('recent_searches_user_idx').on(columns.user),
+    uniqueIndex('recent_searches_composite_key_idx').on(columns.compositeKey),
+    index('recent_searches_updated_at_idx').on(columns.updatedAt),
+    index('recent_searches_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const questions_options = pgTable(
+  'questions_options',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    label: varchar('label'),
+    isCorrect: boolean('is_correct').default(false),
+  },
+  (columns) => [
+    index('questions_options_order_idx').on(columns._order),
+    index('questions_options_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [questions.id],
+      name: 'questions_options_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const questions = pgTable(
+  'questions',
+  {
+    id: serial('id').primaryKey(),
+    prompt: varchar('prompt').notNull(),
+    type: enum_questions_type('type').notNull().default('single_choice'),
+    explanation: varchar('explanation'),
+    difficulty: enum_questions_difficulty('difficulty').notNull().default('medium'),
+    status: enum_questions_status('status').notNull().default('active'),
+    trueFalseCorrect: enum_questions_true_false_correct('true_false_correct'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('questions_updated_at_idx').on(columns.updatedAt),
+    index('questions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const questions_texts = pgTable(
+  'questions_texts',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    text: varchar('text'),
+  },
+  (columns) => [
+    index('questions_texts_order_parent').on(columns.order, columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [questions.id],
+      name: 'questions_texts_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const assessments_items = pgTable(
+  'assessments_items',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    question: integer('question_id')
+      .notNull()
+      .references(() => questions.id, {
+        onDelete: 'set null',
+      }),
+    order: numeric('order', { mode: 'number' }),
+    points: numeric('points', { mode: 'number' }).default(1),
+  },
+  (columns) => [
+    index('assessments_items_order_idx').on(columns._order),
+    index('assessments_items_parent_id_idx').on(columns._parentID),
+    index('assessments_items_question_idx').on(columns.question),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [assessments.id],
+      name: 'assessments_items_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const assessments = pgTable(
+  'assessments',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    description: jsonb('description'),
+    assessmentType: enum_assessments_assessment_type('assessment_type').notNull().default('quiz'),
+    module: integer('module_id').references(() => course_modules.id, {
+      onDelete: 'set null',
+    }),
+    course: integer('course_id').references(() => courses.id, {
+      onDelete: 'set null',
+    }),
+    passingScore: numeric('passing_score', { mode: 'number' }).default(70),
+    maxAttempts: numeric('max_attempts', { mode: 'number' }).default(1),
+    timeLimitMinutes: numeric('time_limit_minutes', { mode: 'number' }),
+    showCorrectAnswer: boolean('show_correct_answer').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('assessments_module_idx').on(columns.module),
+    index('assessments_course_idx').on(columns.course),
+    index('assessments_updated_at_idx').on(columns.updatedAt),
+    index('assessments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const assessment_submissions = pgTable(
+  'assessment_submissions',
+  {
+    id: serial('id').primaryKey(),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    enrollment: integer('enrollment_id')
+      .notNull()
+      .references(() => course_enrollments.id, {
+        onDelete: 'set null',
+      }),
+    assessment: integer('assessment_id')
+      .notNull()
+      .references(() => assessments.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_assessment_submissions_status('status').notNull().default('in_progress'),
+    attemptNumber: numeric('attempt_number', { mode: 'number' }).notNull(),
+    score: numeric('score', { mode: 'number' }),
+    pointsTotal: numeric('points_total', { mode: 'number' }),
+    pointsPossible: numeric('points_possible', { mode: 'number' }),
+    passingScoreSnapshot: numeric('passing_score_snapshot', { mode: 'number' }),
+    startedAt: timestamp('started_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    isLatest: boolean('is_latest').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('assessment_submissions_trainee_idx').on(columns.trainee),
+    index('assessment_submissions_enrollment_idx').on(columns.enrollment),
+    index('assessment_submissions_assessment_idx').on(columns.assessment),
+    index('assessment_submissions_course_idx').on(columns.course),
+    index('assessment_submissions_updated_at_idx').on(columns.updatedAt),
+    index('assessment_submissions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const submission_answers = pgTable(
+  'submission_answers',
+  {
+    id: serial('id').primaryKey(),
+    submission: integer('submission_id')
+      .notNull()
+      .references(() => assessment_submissions.id, {
+        onDelete: 'set null',
+      }),
+    question: integer('question_id')
+      .notNull()
+      .references(() => questions.id, {
+        onDelete: 'set null',
+      }),
+    questionType: enum_submission_answers_question_type('question_type').notNull(),
+    response: jsonb('response').notNull(),
+    isCorrect: boolean('is_correct').default(false),
+    pointsEarned: numeric('points_earned', { mode: 'number' }).default(0),
+    feedback: varchar('feedback'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('submission_answers_submission_idx').on(columns.submission),
+    index('submission_answers_question_idx').on(columns.question),
+    index('submission_answers_updated_at_idx').on(columns.updatedAt),
+    index('submission_answers_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const notification_templates_channels = pgTable(
+  'notification_templates_channels',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum_notification_templates_channels('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('notification_templates_channels_order_idx').on(columns.order),
+    index('notification_templates_channels_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [notification_templates.id],
+      name: 'notification_templates_channels_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const notification_templates = pgTable(
+  'notification_templates',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    code: varchar('code').notNull(),
+    category: enum_notification_templates_category('category').notNull().default('learning'),
+    titleTemplate: varchar('title_template').notNull(),
+    bodyTemplate: varchar('body_template'),
+    defaultLink: varchar('default_link'),
+    automatic: boolean('automatic').default(false),
+    manual: boolean('manual').default(true),
+    metadataSchema: jsonb('metadata_schema'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('notification_templates_code_idx').on(columns.code),
+    index('notification_templates_updated_at_idx').on(columns.updatedAt),
+    index('notification_templates_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: serial('id').primaryKey(),
+    template: integer('template_id').references(() => notification_templates.id, {
+      onDelete: 'set null',
+    }),
+    category: enum_notifications_category('category').notNull(),
+    title: varchar('title').notNull(),
+    body: varchar('body'),
+    metadata: jsonb('metadata'),
+    sourceType: varchar('source_type'),
+    sourceId: varchar('source_id'),
+    actor: integer('actor_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    origin: enum_notifications_origin('origin').notNull().default('automatic'),
+    audienceType: enum_notifications_audience_type('audience_type').notNull(),
+    audienceRole: enum_notifications_audience_role('audience_role'),
+    segmentDefinition: jsonb('segment_definition'),
+    scheduledAt: timestamp('scheduled_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    expiresAt: timestamp('expires_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    status: enum_notifications_status('status').notNull().default('draft'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('notifications_template_idx').on(columns.template),
+    index('notifications_actor_idx').on(columns.actor),
+    index('notifications_updated_at_idx').on(columns.updatedAt),
+    index('notifications_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const notifications_rels = pgTable(
+  'notifications_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('notifications_rels_order_idx').on(columns.order),
+    index('notifications_rels_parent_idx').on(columns.parent),
+    index('notifications_rels_path_idx').on(columns.path),
+    index('notifications_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [notifications.id],
+      name: 'notifications_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'notifications_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const user_notifications = pgTable(
+  'user_notifications',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    notification: integer('notification_id')
+      .notNull()
+      .references(() => notifications.id, {
+        onDelete: 'set null',
+      }),
+    category: enum_user_notifications_category('category').notNull(),
+    title: varchar('title').notNull(),
+    body: varchar('body'),
+    link: varchar('link'),
+    metadata: jsonb('metadata'),
+    readAt: timestamp('read_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    seenAt: timestamp('seen_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    deliveredAt: timestamp('delivered_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    channel: enum_user_notifications_channel('channel').notNull().default('in-app'),
+    archived: boolean('archived').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('user_notifications_user_idx').on(columns.user),
+    index('user_notifications_notification_idx').on(columns.notification),
+    index('user_notifications_updated_at_idx').on(columns.updatedAt),
+    index('user_notifications_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const support_tickets = pgTable(
+  'support_tickets',
+  {
+    id: serial('id').primaryKey(),
+    subject: varchar('subject').notNull(),
+    status: enum_support_tickets_status('status').notNull().default('open'),
+    priority: enum_support_tickets_priority('priority').notNull().default('medium'),
+    category: enum_support_tickets_category('category').notNull(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    assignedTo: integer('assigned_to_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    lastMessageAt: timestamp('last_message_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('support_tickets_user_idx').on(columns.user),
+    index('support_tickets_assigned_to_idx').on(columns.assignedTo),
+    index('support_tickets_updated_at_idx').on(columns.updatedAt),
+    index('support_tickets_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const support_tickets_rels = pgTable(
+  'support_tickets_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('support_tickets_rels_order_idx').on(columns.order),
+    index('support_tickets_rels_parent_idx').on(columns.parent),
+    index('support_tickets_rels_path_idx').on(columns.path),
+    index('support_tickets_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [support_tickets.id],
+      name: 'support_tickets_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'support_tickets_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const support_ticket_messages = pgTable(
+  'support_ticket_messages',
+  {
+    id: serial('id').primaryKey(),
+    ticket: integer('ticket_id')
+      .notNull()
+      .references(() => support_tickets.id, {
+        onDelete: 'set null',
+      }),
+    sender: integer('sender_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    message: jsonb('message').notNull(),
+    isInternal: boolean('is_internal').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('support_ticket_messages_ticket_idx').on(columns.ticket),
+    index('support_ticket_messages_sender_idx').on(columns.sender),
+    index('support_ticket_messages_updated_at_idx').on(columns.updatedAt),
+    index('support_ticket_messages_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const support_ticket_messages_rels = pgTable(
+  'support_ticket_messages_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('support_ticket_messages_rels_order_idx').on(columns.order),
+    index('support_ticket_messages_rels_parent_idx').on(columns.parent),
+    index('support_ticket_messages_rels_path_idx').on(columns.path),
+    index('support_ticket_messages_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [support_ticket_messages.id],
+      name: 'support_ticket_messages_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'support_ticket_messages_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const chats = pgTable(
+  'chats',
+  {
+    id: serial('id').primaryKey(),
+    type: enum_chats_type('type').notNull().default('direct'),
+    title: varchar('title'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_chats_status('status').default('active'),
+    lastMessageAt: timestamp('last_message_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastMessagePreview: varchar('last_message_preview'),
+    isArchived: boolean('is_archived').default(false),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('chats_created_by_idx').on(columns.createdBy),
+    index('chats_updated_at_idx').on(columns.updatedAt),
+    index('chats_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const chats_rels = pgTable(
+  'chats_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('chats_rels_order_idx').on(columns.order),
+    index('chats_rels_parent_idx').on(columns.parent),
+    index('chats_rels_path_idx').on(columns.path),
+    index('chats_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [chats.id],
+      name: 'chats_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'chats_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const chat_messages_reactions = pgTable(
+  'chat_messages_reactions',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    emoji: varchar('emoji').notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('chat_messages_reactions_order_idx').on(columns._order),
+    index('chat_messages_reactions_parent_id_idx').on(columns._parentID),
+    index('chat_messages_reactions_user_idx').on(columns.user),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [chat_messages.id],
+      name: 'chat_messages_reactions_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const chat_messages = pgTable(
+  'chat_messages',
+  {
+    id: serial('id').primaryKey(),
+    chat: integer('chat_id')
+      .notNull()
+      .references(() => chats.id, {
+        onDelete: 'set null',
+      }),
+    sender: integer('sender_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    content: jsonb('content').notNull(),
+    contentType: enum_chat_messages_content_type('content_type').default('text'),
+    replyTo: integer('reply_to_id').references((): AnyPgColumn => chat_messages.id, {
+      onDelete: 'set null',
+    }),
+    editedAt: timestamp('edited_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    isDeleted: boolean('is_deleted').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('chat_messages_chat_idx').on(columns.chat),
+    index('chat_messages_sender_idx').on(columns.sender),
+    index('chat_messages_reply_to_idx').on(columns.replyTo),
+    index('chat_messages_updated_at_idx').on(columns.updatedAt),
+    index('chat_messages_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const chat_messages_rels = pgTable(
+  'chat_messages_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('chat_messages_rels_order_idx').on(columns.order),
+    index('chat_messages_rels_parent_idx').on(columns.parent),
+    index('chat_messages_rels_path_idx').on(columns.path),
+    index('chat_messages_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [chat_messages.id],
+      name: 'chat_messages_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'chat_messages_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const chat_message_status = pgTable(
+  'chat_message_status',
+  {
+    id: serial('id').primaryKey(),
+    message: integer('message_id')
+      .notNull()
+      .references(() => chat_messages.id, {
+        onDelete: 'set null',
+      }),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_chat_message_status_status('status').notNull().default('delivered'),
+    deliveredAt: timestamp('delivered_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    readAt: timestamp('read_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('chat_message_status_message_idx').on(columns.message),
+    index('chat_message_status_user_idx').on(columns.user),
+    index('chat_message_status_updated_at_idx').on(columns.updatedAt),
+    index('chat_message_status_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const chat_typing_status = pgTable(
+  'chat_typing_status',
+  {
+    id: serial('id').primaryKey(),
+    chat: integer('chat_id')
+      .notNull()
+      .references(() => chats.id, {
+        onDelete: 'set null',
+      }),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    isTyping: boolean('is_typing').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('chat_typing_status_chat_idx').on(columns.chat),
+    index('chat_typing_status_user_idx').on(columns.user),
+    index('chat_typing_status_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const payload_kv = pgTable(
+  'payload_kv',
+  {
+    id: serial('id').primaryKey(),
+    key: varchar('key').notNull(),
+    data: jsonb('data').notNull(),
+  },
+  (columns) => [uniqueIndex('payload_kv_key_idx').on(columns.key)],
 )
 
 export const payload_locked_documents = pgTable(
@@ -978,17 +2242,11 @@ export const payload_locked_documents = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    payload_locked_documents_global_slug_idx: index('payload_locked_documents_global_slug_idx').on(
-      columns.globalSlug,
-    ),
-    payload_locked_documents_updated_at_idx: index('payload_locked_documents_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_locked_documents_created_at_idx: index('payload_locked_documents_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_locked_documents_global_slug_idx').on(columns.globalSlug),
+    index('payload_locked_documents_updated_at_idx').on(columns.updatedAt),
+    index('payload_locked_documents_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const payload_locked_documents_rels = pgTable(
@@ -1002,148 +2260,304 @@ export const payload_locked_documents_rels = pgTable(
     instructorsID: integer('instructors_id'),
     traineesID: integer('trainees_id'),
     adminsID: integer('admins_id'),
-    'user-certificationsID': integer('user_certifications_id'),
     'user-eventsID': integer('user_events_id'),
     'emergency-contactsID': integer('emergency_contacts_id'),
     mediaID: integer('media_id'),
     postsID: integer('posts_id'),
     'post-categoriesID': integer('post_categories_id'),
-    'company-membersID': integer('company_members_id'),
     coursesID: integer('courses_id'),
     'course-categoriesID': integer('course_categories_id'),
     'course-enrollmentsID': integer('course_enrollments_id'),
-    'recent-searchesID': integer('recent_searches_id'),
+    certificatesID: integer('certificates_id'),
+    'certificate-templatesID': integer('certificate_templates_id'),
+    'course-modulesID': integer('course_modules_id'),
+    'course-lessonsID': integer('course_lessons_id'),
+    materialsID: integer('materials_id'),
+    'course-materialsID': integer('course_materials_id'),
+    'lesson-materialsID': integer('lesson_materials_id'),
+    announcementsID: integer('announcements_id'),
+    'course-feedbacksID': integer('course_feedbacks_id'),
+    wishlistsID: integer('wishlists_id'),
+    'recently-viewed-coursesID': integer('recently_viewed_courses_id'),
+    'course-item-progressID': integer('course_item_progress_id'),
+    questionsID: integer('questions_id'),
+    assessmentsID: integer('assessments_id'),
+    'assessment-submissionsID': integer('assessment_submissions_id'),
+    'submission-answersID': integer('submission_answers_id'),
+    'notification-templatesID': integer('notification_templates_id'),
+    notificationsID: integer('notifications_id'),
+    'user-notificationsID': integer('user_notifications_id'),
+    'support-ticketsID': integer('support_tickets_id'),
+    'support-ticket-messagesID': integer('support_ticket_messages_id'),
+    chatsID: integer('chats_id'),
+    'chat-messagesID': integer('chat_messages_id'),
+    'chat-message-statusID': integer('chat_message_status_id'),
+    'chat-typing-statusID': integer('chat_typing_status_id'),
   },
-  (columns) => ({
-    order: index('payload_locked_documents_rels_order_idx').on(columns.order),
-    parentIdx: index('payload_locked_documents_rels_parent_idx').on(columns.parent),
-    pathIdx: index('payload_locked_documents_rels_path_idx').on(columns.path),
-    payload_locked_documents_rels_users_id_idx: index(
-      'payload_locked_documents_rels_users_id_idx',
-    ).on(columns.usersID),
-    payload_locked_documents_rels_instructors_id_idx: index(
-      'payload_locked_documents_rels_instructors_id_idx',
-    ).on(columns.instructorsID),
-    payload_locked_documents_rels_trainees_id_idx: index(
-      'payload_locked_documents_rels_trainees_id_idx',
-    ).on(columns.traineesID),
-    payload_locked_documents_rels_admins_id_idx: index(
-      'payload_locked_documents_rels_admins_id_idx',
-    ).on(columns.adminsID),
-    payload_locked_documents_rels_user_certifications_id_idx: index(
-      'payload_locked_documents_rels_user_certifications_id_idx',
-    ).on(columns['user-certificationsID']),
-    payload_locked_documents_rels_user_events_id_idx: index(
-      'payload_locked_documents_rels_user_events_id_idx',
-    ).on(columns['user-eventsID']),
-    payload_locked_documents_rels_emergency_contacts_id_idx: index(
-      'payload_locked_documents_rels_emergency_contacts_id_idx',
-    ).on(columns['emergency-contactsID']),
-    payload_locked_documents_rels_media_id_idx: index(
-      'payload_locked_documents_rels_media_id_idx',
-    ).on(columns.mediaID),
-    payload_locked_documents_rels_posts_id_idx: index(
-      'payload_locked_documents_rels_posts_id_idx',
-    ).on(columns.postsID),
-    payload_locked_documents_rels_post_categories_id_idx: index(
-      'payload_locked_documents_rels_post_categories_id_idx',
-    ).on(columns['post-categoriesID']),
-    payload_locked_documents_rels_company_members_id_idx: index(
-      'payload_locked_documents_rels_company_members_id_idx',
-    ).on(columns['company-membersID']),
-    payload_locked_documents_rels_courses_id_idx: index(
-      'payload_locked_documents_rels_courses_id_idx',
-    ).on(columns.coursesID),
-    payload_locked_documents_rels_course_categories_id_idx: index(
-      'payload_locked_documents_rels_course_categories_id_idx',
-    ).on(columns['course-categoriesID']),
-    payload_locked_documents_rels_course_enrollments_id_idx: index(
-      'payload_locked_documents_rels_course_enrollments_id_idx',
-    ).on(columns['course-enrollmentsID']),
-    payload_locked_documents_rels_recent_searches_id_idx: index(
-      'payload_locked_documents_rels_recent_searches_id_idx',
-    ).on(columns['recent-searchesID']),
-    parentFk: foreignKey({
+  (columns) => [
+    index('payload_locked_documents_rels_order_idx').on(columns.order),
+    index('payload_locked_documents_rels_parent_idx').on(columns.parent),
+    index('payload_locked_documents_rels_path_idx').on(columns.path),
+    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
+    index('payload_locked_documents_rels_instructors_id_idx').on(columns.instructorsID),
+    index('payload_locked_documents_rels_trainees_id_idx').on(columns.traineesID),
+    index('payload_locked_documents_rels_admins_id_idx').on(columns.adminsID),
+    index('payload_locked_documents_rels_user_events_id_idx').on(columns['user-eventsID']),
+    index('payload_locked_documents_rels_emergency_contacts_id_idx').on(
+      columns['emergency-contactsID'],
+    ),
+    index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
+    index('payload_locked_documents_rels_posts_id_idx').on(columns.postsID),
+    index('payload_locked_documents_rels_post_categories_id_idx').on(columns['post-categoriesID']),
+    index('payload_locked_documents_rels_courses_id_idx').on(columns.coursesID),
+    index('payload_locked_documents_rels_course_categories_id_idx').on(
+      columns['course-categoriesID'],
+    ),
+    index('payload_locked_documents_rels_course_enrollments_id_idx').on(
+      columns['course-enrollmentsID'],
+    ),
+    index('payload_locked_documents_rels_certificates_id_idx').on(columns.certificatesID),
+    index('payload_locked_documents_rels_certificate_templates_id_idx').on(
+      columns['certificate-templatesID'],
+    ),
+    index('payload_locked_documents_rels_course_modules_id_idx').on(columns['course-modulesID']),
+    index('payload_locked_documents_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
+    index('payload_locked_documents_rels_materials_id_idx').on(columns.materialsID),
+    index('payload_locked_documents_rels_course_materials_id_idx').on(
+      columns['course-materialsID'],
+    ),
+    index('payload_locked_documents_rels_lesson_materials_id_idx').on(
+      columns['lesson-materialsID'],
+    ),
+    index('payload_locked_documents_rels_announcements_id_idx').on(columns.announcementsID),
+    index('payload_locked_documents_rels_course_feedbacks_id_idx').on(
+      columns['course-feedbacksID'],
+    ),
+    index('payload_locked_documents_rels_wishlists_id_idx').on(columns.wishlistsID),
+    index('payload_locked_documents_rels_recently_viewed_courses_id_idx').on(
+      columns['recently-viewed-coursesID'],
+    ),
+    index('payload_locked_documents_rels_course_item_progress_id_idx').on(
+      columns['course-item-progressID'],
+    ),
+    index('payload_locked_documents_rels_questions_id_idx').on(columns.questionsID),
+    index('payload_locked_documents_rels_assessments_id_idx').on(columns.assessmentsID),
+    index('payload_locked_documents_rels_assessment_submissions_id_idx').on(
+      columns['assessment-submissionsID'],
+    ),
+    index('payload_locked_documents_rels_submission_answers_id_idx').on(
+      columns['submission-answersID'],
+    ),
+    index('payload_locked_documents_rels_notification_templates_id_idx').on(
+      columns['notification-templatesID'],
+    ),
+    index('payload_locked_documents_rels_notifications_id_idx').on(columns.notificationsID),
+    index('payload_locked_documents_rels_user_notifications_id_idx').on(
+      columns['user-notificationsID'],
+    ),
+    index('payload_locked_documents_rels_support_tickets_id_idx').on(columns['support-ticketsID']),
+    index('payload_locked_documents_rels_support_ticket_messages_id_idx').on(
+      columns['support-ticket-messagesID'],
+    ),
+    index('payload_locked_documents_rels_chats_id_idx').on(columns.chatsID),
+    index('payload_locked_documents_rels_chat_messages_id_idx').on(columns['chat-messagesID']),
+    index('payload_locked_documents_rels_chat_message_status_id_idx').on(
+      columns['chat-message-statusID'],
+    ),
+    index('payload_locked_documents_rels_chat_typing_status_id_idx').on(
+      columns['chat-typing-statusID'],
+    ),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
       name: 'payload_locked_documents_rels_parent_fk',
     }).onDelete('cascade'),
-    usersIdFk: foreignKey({
+    foreignKey({
       columns: [columns['usersID']],
       foreignColumns: [users.id],
       name: 'payload_locked_documents_rels_users_fk',
     }).onDelete('cascade'),
-    instructorsIdFk: foreignKey({
+    foreignKey({
       columns: [columns['instructorsID']],
       foreignColumns: [instructors.id],
       name: 'payload_locked_documents_rels_instructors_fk',
     }).onDelete('cascade'),
-    traineesIdFk: foreignKey({
+    foreignKey({
       columns: [columns['traineesID']],
       foreignColumns: [trainees.id],
       name: 'payload_locked_documents_rels_trainees_fk',
     }).onDelete('cascade'),
-    adminsIdFk: foreignKey({
+    foreignKey({
       columns: [columns['adminsID']],
       foreignColumns: [admins.id],
       name: 'payload_locked_documents_rels_admins_fk',
     }).onDelete('cascade'),
-    'user-certificationsIdFk': foreignKey({
-      columns: [columns['user-certificationsID']],
-      foreignColumns: [user_certifications.id],
-      name: 'payload_locked_documents_rels_user_certifications_fk',
-    }).onDelete('cascade'),
-    'user-eventsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['user-eventsID']],
       foreignColumns: [user_events.id],
       name: 'payload_locked_documents_rels_user_events_fk',
     }).onDelete('cascade'),
-    'emergency-contactsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['emergency-contactsID']],
       foreignColumns: [emergency_contacts.id],
       name: 'payload_locked_documents_rels_emergency_contacts_fk',
     }).onDelete('cascade'),
-    mediaIdFk: foreignKey({
+    foreignKey({
       columns: [columns['mediaID']],
       foreignColumns: [media.id],
       name: 'payload_locked_documents_rels_media_fk',
     }).onDelete('cascade'),
-    postsIdFk: foreignKey({
+    foreignKey({
       columns: [columns['postsID']],
       foreignColumns: [posts.id],
       name: 'payload_locked_documents_rels_posts_fk',
     }).onDelete('cascade'),
-    'post-categoriesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['post-categoriesID']],
       foreignColumns: [post_categories.id],
       name: 'payload_locked_documents_rels_post_categories_fk',
     }).onDelete('cascade'),
-    'company-membersIdFk': foreignKey({
-      columns: [columns['company-membersID']],
-      foreignColumns: [company_members.id],
-      name: 'payload_locked_documents_rels_company_members_fk',
-    }).onDelete('cascade'),
-    coursesIdFk: foreignKey({
+    foreignKey({
       columns: [columns['coursesID']],
       foreignColumns: [courses.id],
       name: 'payload_locked_documents_rels_courses_fk',
     }).onDelete('cascade'),
-    'course-categoriesIdFk': foreignKey({
+    foreignKey({
       columns: [columns['course-categoriesID']],
       foreignColumns: [course_categories.id],
       name: 'payload_locked_documents_rels_course_categories_fk',
     }).onDelete('cascade'),
-    'course-enrollmentsIdFk': foreignKey({
+    foreignKey({
       columns: [columns['course-enrollmentsID']],
       foreignColumns: [course_enrollments.id],
       name: 'payload_locked_documents_rels_course_enrollments_fk',
     }).onDelete('cascade'),
-    'recent-searchesIdFk': foreignKey({
-      columns: [columns['recent-searchesID']],
-      foreignColumns: [recent_searches.id],
-      name: 'payload_locked_documents_rels_recent_searches_fk',
+    foreignKey({
+      columns: [columns['certificatesID']],
+      foreignColumns: [certificates.id],
+      name: 'payload_locked_documents_rels_certificates_fk',
     }).onDelete('cascade'),
-  }),
+    foreignKey({
+      columns: [columns['certificate-templatesID']],
+      foreignColumns: [certificate_templates.id],
+      name: 'payload_locked_documents_rels_certificate_templates_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-modulesID']],
+      foreignColumns: [course_modules.id],
+      name: 'payload_locked_documents_rels_course_modules_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-lessonsID']],
+      foreignColumns: [course_lessons.id],
+      name: 'payload_locked_documents_rels_course_lessons_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['materialsID']],
+      foreignColumns: [materials.id],
+      name: 'payload_locked_documents_rels_materials_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-materialsID']],
+      foreignColumns: [course_materials.id],
+      name: 'payload_locked_documents_rels_course_materials_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['lesson-materialsID']],
+      foreignColumns: [lesson_materials.id],
+      name: 'payload_locked_documents_rels_lesson_materials_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['announcementsID']],
+      foreignColumns: [announcements.id],
+      name: 'payload_locked_documents_rels_announcements_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-feedbacksID']],
+      foreignColumns: [course_feedbacks.id],
+      name: 'payload_locked_documents_rels_course_feedbacks_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['wishlistsID']],
+      foreignColumns: [wishlists.id],
+      name: 'payload_locked_documents_rels_wishlists_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['recently-viewed-coursesID']],
+      foreignColumns: [recently_viewed_courses.id],
+      name: 'payload_locked_documents_rels_recently_viewed_courses_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-item-progressID']],
+      foreignColumns: [course_item_progress.id],
+      name: 'payload_locked_documents_rels_course_item_progress_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['questionsID']],
+      foreignColumns: [questions.id],
+      name: 'payload_locked_documents_rels_questions_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assessmentsID']],
+      foreignColumns: [assessments.id],
+      name: 'payload_locked_documents_rels_assessments_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assessment-submissionsID']],
+      foreignColumns: [assessment_submissions.id],
+      name: 'payload_locked_documents_rels_assessment_submissions_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['submission-answersID']],
+      foreignColumns: [submission_answers.id],
+      name: 'payload_locked_documents_rels_submission_answers_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['notification-templatesID']],
+      foreignColumns: [notification_templates.id],
+      name: 'payload_locked_documents_rels_notification_templates_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['notificationsID']],
+      foreignColumns: [notifications.id],
+      name: 'payload_locked_documents_rels_notifications_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['user-notificationsID']],
+      foreignColumns: [user_notifications.id],
+      name: 'payload_locked_documents_rels_user_notifications_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['support-ticketsID']],
+      foreignColumns: [support_tickets.id],
+      name: 'payload_locked_documents_rels_support_tickets_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['support-ticket-messagesID']],
+      foreignColumns: [support_ticket_messages.id],
+      name: 'payload_locked_documents_rels_support_ticket_messages_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['chatsID']],
+      foreignColumns: [chats.id],
+      name: 'payload_locked_documents_rels_chats_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['chat-messagesID']],
+      foreignColumns: [chat_messages.id],
+      name: 'payload_locked_documents_rels_chat_messages_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['chat-message-statusID']],
+      foreignColumns: [chat_message_status.id],
+      name: 'payload_locked_documents_rels_chat_message_status_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['chat-typing-statusID']],
+      foreignColumns: [chat_typing_status.id],
+      name: 'payload_locked_documents_rels_chat_typing_status_fk',
+    }).onDelete('cascade'),
+  ],
 )
 
 export const payload_preferences = pgTable(
@@ -1159,15 +2573,11 @@ export const payload_preferences = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    payload_preferences_key_idx: index('payload_preferences_key_idx').on(columns.key),
-    payload_preferences_updated_at_idx: index('payload_preferences_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_preferences_created_at_idx: index('payload_preferences_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_preferences_key_idx').on(columns.key),
+    index('payload_preferences_updated_at_idx').on(columns.updatedAt),
+    index('payload_preferences_created_at_idx').on(columns.createdAt),
+  ],
 )
 
 export const payload_preferences_rels = pgTable(
@@ -1179,24 +2589,22 @@ export const payload_preferences_rels = pgTable(
     path: varchar('path').notNull(),
     usersID: integer('users_id'),
   },
-  (columns) => ({
-    order: index('payload_preferences_rels_order_idx').on(columns.order),
-    parentIdx: index('payload_preferences_rels_parent_idx').on(columns.parent),
-    pathIdx: index('payload_preferences_rels_path_idx').on(columns.path),
-    payload_preferences_rels_users_id_idx: index('payload_preferences_rels_users_id_idx').on(
-      columns.usersID,
-    ),
-    parentFk: foreignKey({
+  (columns) => [
+    index('payload_preferences_rels_order_idx').on(columns.order),
+    index('payload_preferences_rels_parent_idx').on(columns.parent),
+    index('payload_preferences_rels_path_idx').on(columns.path),
+    index('payload_preferences_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_preferences.id],
       name: 'payload_preferences_rels_parent_fk',
     }).onDelete('cascade'),
-    usersIdFk: foreignKey({
+    foreignKey({
       columns: [columns['usersID']],
       foreignColumns: [users.id],
       name: 'payload_preferences_rels_users_fk',
     }).onDelete('cascade'),
-  }),
+  ],
 )
 
 export const payload_migrations = pgTable(
@@ -1204,7 +2612,7 @@ export const payload_migrations = pgTable(
   {
     id: serial('id').primaryKey(),
     name: varchar('name'),
-    batch: numeric('batch'),
+    batch: numeric('batch', { mode: 'number' }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -1212,14 +2620,54 @@ export const payload_migrations = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (columns) => ({
-    payload_migrations_updated_at_idx: index('payload_migrations_updated_at_idx').on(
-      columns.updatedAt,
-    ),
-    payload_migrations_created_at_idx: index('payload_migrations_created_at_idx').on(
-      columns.createdAt,
-    ),
-  }),
+  (columns) => [
+    index('payload_migrations_updated_at_idx').on(columns.updatedAt),
+    index('payload_migrations_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const site_settings_social_links = pgTable(
+  'site_settings_social_links',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    platform: enum_site_settings_social_links_platform('platform').notNull(),
+    url: varchar('url').notNull(),
+  },
+  (columns) => [
+    index('site_settings_social_links_order_idx').on(columns._order),
+    index('site_settings_social_links_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [site_settings.id],
+      name: 'site_settings_social_links_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const site_settings = pgTable(
+  'site_settings',
+  {
+    id: serial('id').primaryKey(),
+    siteName: varchar('site_name').notNull().default('Grandline Maritime'),
+    description: varchar('description'),
+    logo: integer('logo_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    favicon: integer('favicon_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    address: varchar('address'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('site_settings_logo_idx').on(columns.logo),
+    index('site_settings_favicon_idx').on(columns.favicon),
+  ],
 )
 
 export const relations_users_reset_password_tokens = relations(
@@ -1269,13 +2717,6 @@ export const relations_trainees = relations(trainees, ({ one }) => ({
 export const relations_admins = relations(admins, ({ one }) => ({
   user: one(users, {
     fields: [admins.user],
-    references: [users.id],
-    relationName: 'user',
-  }),
-}))
-export const relations_user_certifications = relations(user_certifications, ({ one }) => ({
-  user: one(users, {
-    fields: [user_certifications.user],
     references: [users.id],
     relationName: 'user',
   }),
@@ -1386,13 +2827,6 @@ export const relations_post_categories = relations(post_categories, ({ one }) =>
     relationName: 'icon',
   }),
 }))
-export const relations_company_members = relations(company_members, ({ one }) => ({
-  profilePicture: one(media, {
-    fields: [company_members.profilePicture],
-    references: [media.id],
-    relationName: 'profilePicture',
-  }),
-}))
 export const relations_courses_learning_objectives = relations(
   courses_learning_objectives,
   ({ one }) => ({
@@ -1415,6 +2849,11 @@ export const relations_courses_rels = relations(courses_rels, ({ one }) => ({
     fields: [courses_rels.parent],
     references: [courses.id],
     relationName: '_rels',
+  }),
+  'course-modulesID': one(course_modules, {
+    fields: [courses_rels['course-modulesID']],
+    references: [course_modules.id],
+    relationName: 'course-modules',
   }),
   instructorsID: one(instructors, {
     fields: [courses_rels.instructorsID],
@@ -1449,6 +2888,11 @@ export const relations_courses = relations(courses, ({ one, many }) => ({
   prerequisites: many(courses_prerequisites, {
     relationName: 'prerequisites',
   }),
+  certificateTemplate: one(certificate_templates, {
+    fields: [courses.certificateTemplate],
+    references: [certificate_templates.id],
+    relationName: 'certificateTemplate',
+  }),
   _rels: many(courses_rels, {
     relationName: '_rels',
   }),
@@ -1482,6 +2926,193 @@ export const relations_course_enrollments = relations(course_enrollments, ({ one
     relationName: 'enrolledBy',
   }),
 }))
+export const relations_certificates = relations(certificates, ({ one }) => ({
+  trainee: one(trainees, {
+    fields: [certificates.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
+  }),
+  course: one(courses, {
+    fields: [certificates.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  enrollment: one(course_enrollments, {
+    fields: [certificates.enrollment],
+    references: [course_enrollments.id],
+    relationName: 'enrollment',
+  }),
+  file: one(media, {
+    fields: [certificates.file],
+    references: [media.id],
+    relationName: 'file',
+  }),
+}))
+export const relations_certificate_templates = relations(certificate_templates, ({ one }) => ({
+  backgroundImage: one(media, {
+    fields: [certificate_templates.backgroundImage],
+    references: [media.id],
+    relationName: 'backgroundImage',
+  }),
+}))
+export const relations_course_modules_rels = relations(course_modules_rels, ({ one }) => ({
+  parent: one(course_modules, {
+    fields: [course_modules_rels.parent],
+    references: [course_modules.id],
+    relationName: '_rels',
+  }),
+  'course-lessonsID': one(course_lessons, {
+    fields: [course_modules_rels['course-lessonsID']],
+    references: [course_lessons.id],
+    relationName: 'course-lessons',
+  }),
+  assessmentsID: one(assessments, {
+    fields: [course_modules_rels.assessmentsID],
+    references: [assessments.id],
+    relationName: 'assessments',
+  }),
+}))
+export const relations_course_modules = relations(course_modules, ({ many }) => ({
+  _rels: many(course_modules_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_course_lessons = relations(course_lessons, ({ one }) => ({
+  module: one(course_modules, {
+    fields: [course_lessons.module],
+    references: [course_modules.id],
+    relationName: 'module',
+  }),
+}))
+export const relations_materials_rels = relations(materials_rels, ({ one }) => ({
+  parent: one(materials, {
+    fields: [materials_rels.parent],
+    references: [materials.id],
+    relationName: '_rels',
+  }),
+  mediaID: one(media, {
+    fields: [materials_rels.mediaID],
+    references: [media.id],
+    relationName: 'media',
+  }),
+}))
+export const relations_materials = relations(materials, ({ many }) => ({
+  _rels: many(materials_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_course_materials = relations(course_materials, ({ one }) => ({
+  course: one(courses, {
+    fields: [course_materials.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  material: one(materials, {
+    fields: [course_materials.material],
+    references: [materials.id],
+    relationName: 'material',
+  }),
+}))
+export const relations_lesson_materials = relations(lesson_materials, ({ one }) => ({
+  lesson: one(course_lessons, {
+    fields: [lesson_materials.lesson],
+    references: [course_lessons.id],
+    relationName: 'lesson',
+  }),
+  material: one(materials, {
+    fields: [lesson_materials.material],
+    references: [materials.id],
+    relationName: 'material',
+  }),
+}))
+export const relations_announcements = relations(announcements, ({ one }) => ({
+  course: one(courses, {
+    fields: [announcements.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  createdBy: one(users, {
+    fields: [announcements.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+}))
+export const relations_course_feedbacks = relations(course_feedbacks, ({ one }) => ({
+  user: one(users, {
+    fields: [course_feedbacks.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  course: one(courses, {
+    fields: [course_feedbacks.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+}))
+export const relations_wishlists = relations(wishlists, ({ one }) => ({
+  user: one(users, {
+    fields: [wishlists.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  course: one(courses, {
+    fields: [wishlists.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+}))
+export const relations_recently_viewed_courses = relations(recently_viewed_courses, ({ one }) => ({
+  user: one(users, {
+    fields: [recently_viewed_courses.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  course: one(courses, {
+    fields: [recently_viewed_courses.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+}))
+export const relations_course_item_progress_rels = relations(
+  course_item_progress_rels,
+  ({ one }) => ({
+    parent: one(course_item_progress, {
+      fields: [course_item_progress_rels.parent],
+      references: [course_item_progress.id],
+      relationName: '_rels',
+    }),
+    'course-lessonsID': one(course_lessons, {
+      fields: [course_item_progress_rels['course-lessonsID']],
+      references: [course_lessons.id],
+      relationName: 'course-lessons',
+    }),
+    assessmentsID: one(assessments, {
+      fields: [course_item_progress_rels.assessmentsID],
+      references: [assessments.id],
+      relationName: 'assessments',
+    }),
+  }),
+)
+export const relations_course_item_progress = relations(course_item_progress, ({ one, many }) => ({
+  trainee: one(trainees, {
+    fields: [course_item_progress.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
+  }),
+  course: one(courses, {
+    fields: [course_item_progress.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  enrollment: one(course_enrollments, {
+    fields: [course_item_progress.enrollment],
+    references: [course_enrollments.id],
+    relationName: 'enrollment',
+  }),
+  _rels: many(course_item_progress_rels, {
+    relationName: '_rels',
+  }),
+}))
 export const relations_recent_searches = relations(recent_searches, ({ one }) => ({
   user: one(users, {
     fields: [recent_searches.user],
@@ -1489,6 +3120,297 @@ export const relations_recent_searches = relations(recent_searches, ({ one }) =>
     relationName: 'user',
   }),
 }))
+export const relations_questions_options = relations(questions_options, ({ one }) => ({
+  _parentID: one(questions, {
+    fields: [questions_options._parentID],
+    references: [questions.id],
+    relationName: 'options',
+  }),
+}))
+export const relations_questions_texts = relations(questions_texts, ({ one }) => ({
+  parent: one(questions, {
+    fields: [questions_texts.parent],
+    references: [questions.id],
+    relationName: '_texts',
+  }),
+}))
+export const relations_questions = relations(questions, ({ many }) => ({
+  options: many(questions_options, {
+    relationName: 'options',
+  }),
+  _texts: many(questions_texts, {
+    relationName: '_texts',
+  }),
+}))
+export const relations_assessments_items = relations(assessments_items, ({ one }) => ({
+  _parentID: one(assessments, {
+    fields: [assessments_items._parentID],
+    references: [assessments.id],
+    relationName: 'items',
+  }),
+  question: one(questions, {
+    fields: [assessments_items.question],
+    references: [questions.id],
+    relationName: 'question',
+  }),
+}))
+export const relations_assessments = relations(assessments, ({ one, many }) => ({
+  module: one(course_modules, {
+    fields: [assessments.module],
+    references: [course_modules.id],
+    relationName: 'module',
+  }),
+  course: one(courses, {
+    fields: [assessments.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  items: many(assessments_items, {
+    relationName: 'items',
+  }),
+}))
+export const relations_assessment_submissions = relations(assessment_submissions, ({ one }) => ({
+  trainee: one(trainees, {
+    fields: [assessment_submissions.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
+  }),
+  enrollment: one(course_enrollments, {
+    fields: [assessment_submissions.enrollment],
+    references: [course_enrollments.id],
+    relationName: 'enrollment',
+  }),
+  assessment: one(assessments, {
+    fields: [assessment_submissions.assessment],
+    references: [assessments.id],
+    relationName: 'assessment',
+  }),
+  course: one(courses, {
+    fields: [assessment_submissions.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+}))
+export const relations_submission_answers = relations(submission_answers, ({ one }) => ({
+  submission: one(assessment_submissions, {
+    fields: [submission_answers.submission],
+    references: [assessment_submissions.id],
+    relationName: 'submission',
+  }),
+  question: one(questions, {
+    fields: [submission_answers.question],
+    references: [questions.id],
+    relationName: 'question',
+  }),
+}))
+export const relations_notification_templates_channels = relations(
+  notification_templates_channels,
+  ({ one }) => ({
+    parent: one(notification_templates, {
+      fields: [notification_templates_channels.parent],
+      references: [notification_templates.id],
+      relationName: 'channels',
+    }),
+  }),
+)
+export const relations_notification_templates = relations(notification_templates, ({ many }) => ({
+  channels: many(notification_templates_channels, {
+    relationName: 'channels',
+  }),
+}))
+export const relations_notifications_rels = relations(notifications_rels, ({ one }) => ({
+  parent: one(notifications, {
+    fields: [notifications_rels.parent],
+    references: [notifications.id],
+    relationName: '_rels',
+  }),
+  usersID: one(users, {
+    fields: [notifications_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_notifications = relations(notifications, ({ one, many }) => ({
+  template: one(notification_templates, {
+    fields: [notifications.template],
+    references: [notification_templates.id],
+    relationName: 'template',
+  }),
+  actor: one(users, {
+    fields: [notifications.actor],
+    references: [users.id],
+    relationName: 'actor',
+  }),
+  _rels: many(notifications_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_user_notifications = relations(user_notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [user_notifications.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  notification: one(notifications, {
+    fields: [user_notifications.notification],
+    references: [notifications.id],
+    relationName: 'notification',
+  }),
+}))
+export const relations_support_tickets_rels = relations(support_tickets_rels, ({ one }) => ({
+  parent: one(support_tickets, {
+    fields: [support_tickets_rels.parent],
+    references: [support_tickets.id],
+    relationName: '_rels',
+  }),
+  mediaID: one(media, {
+    fields: [support_tickets_rels.mediaID],
+    references: [media.id],
+    relationName: 'media',
+  }),
+}))
+export const relations_support_tickets = relations(support_tickets, ({ one, many }) => ({
+  user: one(users, {
+    fields: [support_tickets.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  assignedTo: one(users, {
+    fields: [support_tickets.assignedTo],
+    references: [users.id],
+    relationName: 'assignedTo',
+  }),
+  _rels: many(support_tickets_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_support_ticket_messages_rels = relations(
+  support_ticket_messages_rels,
+  ({ one }) => ({
+    parent: one(support_ticket_messages, {
+      fields: [support_ticket_messages_rels.parent],
+      references: [support_ticket_messages.id],
+      relationName: '_rels',
+    }),
+    mediaID: one(media, {
+      fields: [support_ticket_messages_rels.mediaID],
+      references: [media.id],
+      relationName: 'media',
+    }),
+  }),
+)
+export const relations_support_ticket_messages = relations(
+  support_ticket_messages,
+  ({ one, many }) => ({
+    ticket: one(support_tickets, {
+      fields: [support_ticket_messages.ticket],
+      references: [support_tickets.id],
+      relationName: 'ticket',
+    }),
+    sender: one(users, {
+      fields: [support_ticket_messages.sender],
+      references: [users.id],
+      relationName: 'sender',
+    }),
+    _rels: many(support_ticket_messages_rels, {
+      relationName: '_rels',
+    }),
+  }),
+)
+export const relations_chats_rels = relations(chats_rels, ({ one }) => ({
+  parent: one(chats, {
+    fields: [chats_rels.parent],
+    references: [chats.id],
+    relationName: '_rels',
+  }),
+  usersID: one(users, {
+    fields: [chats_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_chats = relations(chats, ({ one, many }) => ({
+  createdBy: one(users, {
+    fields: [chats.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  _rels: many(chats_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_chat_messages_reactions = relations(chat_messages_reactions, ({ one }) => ({
+  _parentID: one(chat_messages, {
+    fields: [chat_messages_reactions._parentID],
+    references: [chat_messages.id],
+    relationName: 'reactions',
+  }),
+  user: one(users, {
+    fields: [chat_messages_reactions.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_chat_messages_rels = relations(chat_messages_rels, ({ one }) => ({
+  parent: one(chat_messages, {
+    fields: [chat_messages_rels.parent],
+    references: [chat_messages.id],
+    relationName: '_rels',
+  }),
+  mediaID: one(media, {
+    fields: [chat_messages_rels.mediaID],
+    references: [media.id],
+    relationName: 'media',
+  }),
+}))
+export const relations_chat_messages = relations(chat_messages, ({ one, many }) => ({
+  chat: one(chats, {
+    fields: [chat_messages.chat],
+    references: [chats.id],
+    relationName: 'chat',
+  }),
+  sender: one(users, {
+    fields: [chat_messages.sender],
+    references: [users.id],
+    relationName: 'sender',
+  }),
+  replyTo: one(chat_messages, {
+    fields: [chat_messages.replyTo],
+    references: [chat_messages.id],
+    relationName: 'replyTo',
+  }),
+  reactions: many(chat_messages_reactions, {
+    relationName: 'reactions',
+  }),
+  _rels: many(chat_messages_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_chat_message_status = relations(chat_message_status, ({ one }) => ({
+  message: one(chat_messages, {
+    fields: [chat_message_status.message],
+    references: [chat_messages.id],
+    relationName: 'message',
+  }),
+  user: one(users, {
+    fields: [chat_message_status.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_chat_typing_status = relations(chat_typing_status, ({ one }) => ({
+  chat: one(chats, {
+    fields: [chat_typing_status.chat],
+    references: [chats.id],
+    relationName: 'chat',
+  }),
+  user: one(users, {
+    fields: [chat_typing_status.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+}))
+export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
   ({ one }) => ({
@@ -1517,11 +3439,6 @@ export const relations_payload_locked_documents_rels = relations(
       references: [admins.id],
       relationName: 'admins',
     }),
-    'user-certificationsID': one(user_certifications, {
-      fields: [payload_locked_documents_rels['user-certificationsID']],
-      references: [user_certifications.id],
-      relationName: 'user-certifications',
-    }),
     'user-eventsID': one(user_events, {
       fields: [payload_locked_documents_rels['user-eventsID']],
       references: [user_events.id],
@@ -1547,11 +3464,6 @@ export const relations_payload_locked_documents_rels = relations(
       references: [post_categories.id],
       relationName: 'post-categories',
     }),
-    'company-membersID': one(company_members, {
-      fields: [payload_locked_documents_rels['company-membersID']],
-      references: [company_members.id],
-      relationName: 'company-members',
-    }),
     coursesID: one(courses, {
       fields: [payload_locked_documents_rels.coursesID],
       references: [courses.id],
@@ -1567,10 +3479,130 @@ export const relations_payload_locked_documents_rels = relations(
       references: [course_enrollments.id],
       relationName: 'course-enrollments',
     }),
-    'recent-searchesID': one(recent_searches, {
-      fields: [payload_locked_documents_rels['recent-searchesID']],
-      references: [recent_searches.id],
-      relationName: 'recent-searches',
+    certificatesID: one(certificates, {
+      fields: [payload_locked_documents_rels.certificatesID],
+      references: [certificates.id],
+      relationName: 'certificates',
+    }),
+    'certificate-templatesID': one(certificate_templates, {
+      fields: [payload_locked_documents_rels['certificate-templatesID']],
+      references: [certificate_templates.id],
+      relationName: 'certificate-templates',
+    }),
+    'course-modulesID': one(course_modules, {
+      fields: [payload_locked_documents_rels['course-modulesID']],
+      references: [course_modules.id],
+      relationName: 'course-modules',
+    }),
+    'course-lessonsID': one(course_lessons, {
+      fields: [payload_locked_documents_rels['course-lessonsID']],
+      references: [course_lessons.id],
+      relationName: 'course-lessons',
+    }),
+    materialsID: one(materials, {
+      fields: [payload_locked_documents_rels.materialsID],
+      references: [materials.id],
+      relationName: 'materials',
+    }),
+    'course-materialsID': one(course_materials, {
+      fields: [payload_locked_documents_rels['course-materialsID']],
+      references: [course_materials.id],
+      relationName: 'course-materials',
+    }),
+    'lesson-materialsID': one(lesson_materials, {
+      fields: [payload_locked_documents_rels['lesson-materialsID']],
+      references: [lesson_materials.id],
+      relationName: 'lesson-materials',
+    }),
+    announcementsID: one(announcements, {
+      fields: [payload_locked_documents_rels.announcementsID],
+      references: [announcements.id],
+      relationName: 'announcements',
+    }),
+    'course-feedbacksID': one(course_feedbacks, {
+      fields: [payload_locked_documents_rels['course-feedbacksID']],
+      references: [course_feedbacks.id],
+      relationName: 'course-feedbacks',
+    }),
+    wishlistsID: one(wishlists, {
+      fields: [payload_locked_documents_rels.wishlistsID],
+      references: [wishlists.id],
+      relationName: 'wishlists',
+    }),
+    'recently-viewed-coursesID': one(recently_viewed_courses, {
+      fields: [payload_locked_documents_rels['recently-viewed-coursesID']],
+      references: [recently_viewed_courses.id],
+      relationName: 'recently-viewed-courses',
+    }),
+    'course-item-progressID': one(course_item_progress, {
+      fields: [payload_locked_documents_rels['course-item-progressID']],
+      references: [course_item_progress.id],
+      relationName: 'course-item-progress',
+    }),
+    questionsID: one(questions, {
+      fields: [payload_locked_documents_rels.questionsID],
+      references: [questions.id],
+      relationName: 'questions',
+    }),
+    assessmentsID: one(assessments, {
+      fields: [payload_locked_documents_rels.assessmentsID],
+      references: [assessments.id],
+      relationName: 'assessments',
+    }),
+    'assessment-submissionsID': one(assessment_submissions, {
+      fields: [payload_locked_documents_rels['assessment-submissionsID']],
+      references: [assessment_submissions.id],
+      relationName: 'assessment-submissions',
+    }),
+    'submission-answersID': one(submission_answers, {
+      fields: [payload_locked_documents_rels['submission-answersID']],
+      references: [submission_answers.id],
+      relationName: 'submission-answers',
+    }),
+    'notification-templatesID': one(notification_templates, {
+      fields: [payload_locked_documents_rels['notification-templatesID']],
+      references: [notification_templates.id],
+      relationName: 'notification-templates',
+    }),
+    notificationsID: one(notifications, {
+      fields: [payload_locked_documents_rels.notificationsID],
+      references: [notifications.id],
+      relationName: 'notifications',
+    }),
+    'user-notificationsID': one(user_notifications, {
+      fields: [payload_locked_documents_rels['user-notificationsID']],
+      references: [user_notifications.id],
+      relationName: 'user-notifications',
+    }),
+    'support-ticketsID': one(support_tickets, {
+      fields: [payload_locked_documents_rels['support-ticketsID']],
+      references: [support_tickets.id],
+      relationName: 'support-tickets',
+    }),
+    'support-ticket-messagesID': one(support_ticket_messages, {
+      fields: [payload_locked_documents_rels['support-ticket-messagesID']],
+      references: [support_ticket_messages.id],
+      relationName: 'support-ticket-messages',
+    }),
+    chatsID: one(chats, {
+      fields: [payload_locked_documents_rels.chatsID],
+      references: [chats.id],
+      relationName: 'chats',
+    }),
+    'chat-messagesID': one(chat_messages, {
+      fields: [payload_locked_documents_rels['chat-messagesID']],
+      references: [chat_messages.id],
+      relationName: 'chat-messages',
+    }),
+    'chat-message-statusID': one(chat_message_status, {
+      fields: [payload_locked_documents_rels['chat-message-statusID']],
+      references: [chat_message_status.id],
+      relationName: 'chat-message-status',
+    }),
+    'chat-typing-statusID': one(chat_typing_status, {
+      fields: [payload_locked_documents_rels['chat-typing-statusID']],
+      references: [chat_typing_status.id],
+      relationName: 'chat-typing-status',
     }),
   }),
 )
@@ -1603,6 +3635,31 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
   }),
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
+export const relations_site_settings_social_links = relations(
+  site_settings_social_links,
+  ({ one }) => ({
+    _parentID: one(site_settings, {
+      fields: [site_settings_social_links._parentID],
+      references: [site_settings.id],
+      relationName: 'socialLinks',
+    }),
+  }),
+)
+export const relations_site_settings = relations(site_settings, ({ one, many }) => ({
+  logo: one(media, {
+    fields: [site_settings.logo],
+    references: [media.id],
+    relationName: 'logo',
+  }),
+  favicon: one(media, {
+    fields: [site_settings.favicon],
+    references: [media.id],
+    relationName: 'favicon',
+  }),
+  socialLinks: many(site_settings_social_links, {
+    relationName: 'socialLinks',
+  }),
+}))
 
 type DatabaseSchema = {
   enum_users_gender: typeof enum_users_gender
@@ -1614,20 +3671,50 @@ type DatabaseSchema = {
   enum_emergency_contacts_relationship: typeof enum_emergency_contacts_relationship
   enum_posts_status: typeof enum_posts_status
   enum__posts_v_version_status: typeof enum__posts_v_version_status
+  enum_courses_estimated_duration_unit: typeof enum_courses_estimated_duration_unit
   enum_courses_difficulty_level: typeof enum_courses_difficulty_level
   enum_courses_language: typeof enum_courses_language
+  enum_courses_evaluation_mode: typeof enum_courses_evaluation_mode
   enum_courses_status: typeof enum_courses_status
   enum_course_categories_category_type: typeof enum_course_categories_category_type
   enum_course_enrollments_enrollment_type: typeof enum_course_enrollments_enrollment_type
   enum_course_enrollments_status: typeof enum_course_enrollments_status
   enum_course_enrollments_payment_status: typeof enum_course_enrollments_payment_status
+  enum_course_enrollments_final_evaluation: typeof enum_course_enrollments_final_evaluation
+  enum_certificates_status: typeof enum_certificates_status
+  enum_certificate_templates_status: typeof enum_certificate_templates_status
+  enum_materials_material_source: typeof enum_materials_material_source
+  enum_course_item_progress_status: typeof enum_course_item_progress_status
+  enum_questions_type: typeof enum_questions_type
+  enum_questions_difficulty: typeof enum_questions_difficulty
+  enum_questions_status: typeof enum_questions_status
+  enum_questions_true_false_correct: typeof enum_questions_true_false_correct
+  enum_assessments_assessment_type: typeof enum_assessments_assessment_type
+  enum_assessment_submissions_status: typeof enum_assessment_submissions_status
+  enum_submission_answers_question_type: typeof enum_submission_answers_question_type
+  enum_notification_templates_channels: typeof enum_notification_templates_channels
+  enum_notification_templates_category: typeof enum_notification_templates_category
+  enum_notifications_category: typeof enum_notifications_category
+  enum_notifications_origin: typeof enum_notifications_origin
+  enum_notifications_audience_type: typeof enum_notifications_audience_type
+  enum_notifications_audience_role: typeof enum_notifications_audience_role
+  enum_notifications_status: typeof enum_notifications_status
+  enum_user_notifications_category: typeof enum_user_notifications_category
+  enum_user_notifications_channel: typeof enum_user_notifications_channel
+  enum_support_tickets_status: typeof enum_support_tickets_status
+  enum_support_tickets_priority: typeof enum_support_tickets_priority
+  enum_support_tickets_category: typeof enum_support_tickets_category
+  enum_chats_type: typeof enum_chats_type
+  enum_chats_status: typeof enum_chats_status
+  enum_chat_messages_content_type: typeof enum_chat_messages_content_type
+  enum_chat_message_status_status: typeof enum_chat_message_status_status
+  enum_site_settings_social_links_platform: typeof enum_site_settings_social_links_platform
   users_reset_password_tokens: typeof users_reset_password_tokens
   users_sessions: typeof users_sessions
   users: typeof users
   instructors: typeof instructors
   trainees: typeof trainees
   admins: typeof admins
-  user_certifications: typeof user_certifications
   user_events: typeof user_events
   emergency_contacts: typeof emergency_contacts
   media: typeof media
@@ -1638,26 +3725,65 @@ type DatabaseSchema = {
   _posts_v: typeof _posts_v
   _posts_v_rels: typeof _posts_v_rels
   post_categories: typeof post_categories
-  company_members: typeof company_members
   courses_learning_objectives: typeof courses_learning_objectives
   courses_prerequisites: typeof courses_prerequisites
   courses: typeof courses
   courses_rels: typeof courses_rels
   course_categories: typeof course_categories
   course_enrollments: typeof course_enrollments
+  certificates: typeof certificates
+  certificate_templates: typeof certificate_templates
+  course_modules: typeof course_modules
+  course_modules_rels: typeof course_modules_rels
+  course_lessons: typeof course_lessons
+  materials: typeof materials
+  materials_rels: typeof materials_rels
+  course_materials: typeof course_materials
+  lesson_materials: typeof lesson_materials
+  announcements: typeof announcements
+  course_feedbacks: typeof course_feedbacks
+  wishlists: typeof wishlists
+  recently_viewed_courses: typeof recently_viewed_courses
+  course_item_progress: typeof course_item_progress
+  course_item_progress_rels: typeof course_item_progress_rels
   recent_searches: typeof recent_searches
+  questions_options: typeof questions_options
+  questions: typeof questions
+  questions_texts: typeof questions_texts
+  assessments_items: typeof assessments_items
+  assessments: typeof assessments
+  assessment_submissions: typeof assessment_submissions
+  submission_answers: typeof submission_answers
+  notification_templates_channels: typeof notification_templates_channels
+  notification_templates: typeof notification_templates
+  notifications: typeof notifications
+  notifications_rels: typeof notifications_rels
+  user_notifications: typeof user_notifications
+  support_tickets: typeof support_tickets
+  support_tickets_rels: typeof support_tickets_rels
+  support_ticket_messages: typeof support_ticket_messages
+  support_ticket_messages_rels: typeof support_ticket_messages_rels
+  chats: typeof chats
+  chats_rels: typeof chats_rels
+  chat_messages_reactions: typeof chat_messages_reactions
+  chat_messages: typeof chat_messages
+  chat_messages_rels: typeof chat_messages_rels
+  chat_message_status: typeof chat_message_status
+  chat_typing_status: typeof chat_typing_status
+  payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
+  site_settings_social_links: typeof site_settings_social_links
+  site_settings: typeof site_settings
   relations_users_reset_password_tokens: typeof relations_users_reset_password_tokens
   relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
   relations_instructors: typeof relations_instructors
   relations_trainees: typeof relations_trainees
   relations_admins: typeof relations_admins
-  relations_user_certifications: typeof relations_user_certifications
   relations_user_events: typeof relations_user_events
   relations_emergency_contacts: typeof relations_emergency_contacts
   relations_media: typeof relations_media
@@ -1668,19 +3794,59 @@ type DatabaseSchema = {
   relations__posts_v_rels: typeof relations__posts_v_rels
   relations__posts_v: typeof relations__posts_v
   relations_post_categories: typeof relations_post_categories
-  relations_company_members: typeof relations_company_members
   relations_courses_learning_objectives: typeof relations_courses_learning_objectives
   relations_courses_prerequisites: typeof relations_courses_prerequisites
   relations_courses_rels: typeof relations_courses_rels
   relations_courses: typeof relations_courses
   relations_course_categories: typeof relations_course_categories
   relations_course_enrollments: typeof relations_course_enrollments
+  relations_certificates: typeof relations_certificates
+  relations_certificate_templates: typeof relations_certificate_templates
+  relations_course_modules_rels: typeof relations_course_modules_rels
+  relations_course_modules: typeof relations_course_modules
+  relations_course_lessons: typeof relations_course_lessons
+  relations_materials_rels: typeof relations_materials_rels
+  relations_materials: typeof relations_materials
+  relations_course_materials: typeof relations_course_materials
+  relations_lesson_materials: typeof relations_lesson_materials
+  relations_announcements: typeof relations_announcements
+  relations_course_feedbacks: typeof relations_course_feedbacks
+  relations_wishlists: typeof relations_wishlists
+  relations_recently_viewed_courses: typeof relations_recently_viewed_courses
+  relations_course_item_progress_rels: typeof relations_course_item_progress_rels
+  relations_course_item_progress: typeof relations_course_item_progress
   relations_recent_searches: typeof relations_recent_searches
+  relations_questions_options: typeof relations_questions_options
+  relations_questions_texts: typeof relations_questions_texts
+  relations_questions: typeof relations_questions
+  relations_assessments_items: typeof relations_assessments_items
+  relations_assessments: typeof relations_assessments
+  relations_assessment_submissions: typeof relations_assessment_submissions
+  relations_submission_answers: typeof relations_submission_answers
+  relations_notification_templates_channels: typeof relations_notification_templates_channels
+  relations_notification_templates: typeof relations_notification_templates
+  relations_notifications_rels: typeof relations_notifications_rels
+  relations_notifications: typeof relations_notifications
+  relations_user_notifications: typeof relations_user_notifications
+  relations_support_tickets_rels: typeof relations_support_tickets_rels
+  relations_support_tickets: typeof relations_support_tickets
+  relations_support_ticket_messages_rels: typeof relations_support_ticket_messages_rels
+  relations_support_ticket_messages: typeof relations_support_ticket_messages
+  relations_chats_rels: typeof relations_chats_rels
+  relations_chats: typeof relations_chats
+  relations_chat_messages_reactions: typeof relations_chat_messages_reactions
+  relations_chat_messages_rels: typeof relations_chat_messages_rels
+  relations_chat_messages: typeof relations_chat_messages
+  relations_chat_message_status: typeof relations_chat_message_status
+  relations_chat_typing_status: typeof relations_chat_typing_status
+  relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels
   relations_payload_preferences: typeof relations_payload_preferences
   relations_payload_migrations: typeof relations_payload_migrations
+  relations_site_settings_social_links: typeof relations_site_settings_social_links
+  relations_site_settings: typeof relations_site_settings
 }
 
 declare module '@payloadcms/db-postgres' {
