@@ -17,49 +17,7 @@ interface Ticket {
   lastMessageAt?: string;
 }
 
-interface Message {
-  id: string;
-  message: any; // Lexical JSON
-  sender: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    role?: string;
-  } | string;
-  createdAt: string;
-  isInternal?: boolean;
-}
-
 // --- Helpers ---
-
-function extractTextFromLexical(node: any): string {
-  if (!node) return '';
-  if (typeof node === 'string') return node;
-  
-  let text = '';
-  
-  // Handle root/children traversal
-  if (node.root) {
-    return extractTextFromLexical(node.root);
-  }
-  
-  if (node.text) {
-    text += node.text;
-  }
-  
-  if (node.children && Array.isArray(node.children)) {
-    node.children.forEach((child: any) => {
-      text += extractTextFromLexical(child);
-      // Add newline for block elements
-      if (child.type === 'paragraph' || child.type === 'heading' || child.type === 'list-item') {
-         text += '\n';
-      }
-    });
-  }
-  
-  return text.trim();
-}
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -96,10 +54,8 @@ function getPriorityColor(priority: string) {
 
 export default function SupportPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useUser();
-  const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
+  const [view, setView] = useState<'list' | 'create'>('list');
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   
   // Create Ticket Form State
@@ -109,9 +65,6 @@ export default function SupportPage() {
     priority: 'medium',
     message: '',
   });
-
-  // Reply Form State
-  const [replyMessage, setReplyMessage] = useState('');
 
   // Fetch Tickets
   const fetchTickets = useCallback(async () => {
@@ -130,35 +83,12 @@ export default function SupportPage() {
     }
   }, [user]);
 
-  // Fetch Messages for a Ticket
-  const fetchMessages = useCallback(async (ticketId: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/support-tickets/${ticketId}/messages`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.docs || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch messages', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   // Initial Fetch
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchTickets();
     }
   }, [isAuthenticated, user, fetchTickets]);
-
-  // Handle Ticket Selection
-  const handleTicketClick = async (ticket: Ticket) => {
-    setSelectedTicket(ticket);
-    setView('detail');
-    await fetchMessages(ticket.id);
-  };
 
   // Handle Create Ticket
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -186,37 +116,6 @@ export default function SupportPage() {
     } catch (error) {
       console.error('Error creating ticket', error);
       alert('An error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle Send Reply
-  const handleSendReply = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !selectedTicket || !replyMessage.trim()) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/support-tickets/${selectedTicket.id}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: replyMessage,
-          userId: user.id,
-        }),
-      });
-
-      if (res.ok) {
-        setReplyMessage('');
-        await fetchMessages(selectedTicket.id);
-        // Refresh ticket list to update lastMessageAt
-        fetchTickets(); 
-      } else {
-        alert('Failed to send message.');
-      }
-    } catch (error) {
-      console.error('Error sending message', error);
     } finally {
       setLoading(false);
     }
@@ -397,12 +296,12 @@ export default function SupportPage() {
                             {ticket.lastMessageAt ? formatDate(ticket.lastMessageAt) : formatDate(ticket.createdAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={() => handleTicketClick(ticket)}
+                            <Link
+                              href={`/support/${ticket.id}` as any}
                               className="text-blue-600 hover:text-blue-900"
                             >
                               View
-                            </button>
+                            </Link>
                           </td>
                         </tr>
                       ))}
@@ -509,139 +408,6 @@ export default function SupportPage() {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
-
-        {/* VIEW: Ticket Detail */}
-        {view === 'detail' && selectedTicket && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Message Thread */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-gray-900">Conversation</h2>
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedTicket.status)}`}>
-                    {selectedTicket.status.replace(/_/g, ' ').toUpperCase()}
-                  </span>
-                </div>
-                
-                <div className="p-6 space-y-6 max-h-[600px] overflow-y-auto">
-                  {loading && messages.length === 0 ? (
-                    <div className="space-y-6">
-                      {Array.from({ length: 3 }).map((_, idx) => (
-                        <div key={idx} className={`flex flex-col animate-pulse ${idx % 2 === 0 ? 'items-start' : 'items-end'}`}>
-                          <div className={`flex items-center space-x-2 mb-1 ${idx % 2 !== 0 ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                            <div className="h-3 bg-gray-200 rounded w-16"></div>
-                            <div className="h-3 bg-gray-200 rounded w-24"></div>
-                          </div>
-                          <div className={`rounded-lg p-4 w-[60%] h-16 ${
-                            idx % 2 !== 0 
-                              ? 'bg-blue-100 rounded-tr-none' 
-                              : 'bg-gray-200 rounded-tl-none'
-                          }`}></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : messages.map((msg) => {
-                    const isMe = typeof msg.sender === 'object' ? String(msg.sender.id) === String(user?.id) : String(msg.sender) === String(user?.id);
-                    const senderName = typeof msg.sender === 'object' 
-                      ? (msg.sender.firstName ? `${msg.sender.firstName} ${msg.sender.lastName}` : 'Support Agent')
-                      : 'Unknown';
-                    
-                    return (
-                      <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                        <div className={`flex items-center space-x-2 mb-1 ${isMe ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                          <span className="text-sm font-medium text-gray-900">{isMe ? 'You' : senderName}</span>
-                          <span className="text-xs text-gray-500">{formatDate(msg.createdAt)}</span>
-                        </div>
-                        <div className={`rounded-lg p-4 max-w-[85%] ${
-                          isMe 
-                            ? 'bg-blue-600 text-white rounded-tr-none' 
-                            : 'bg-gray-100 text-gray-800 rounded-tl-none'
-                        }`}>
-                          <div className="whitespace-pre-wrap text-sm">
-                            {extractTextFromLexical(msg.message)}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Reply Box */}
-                {selectedTicket.status !== 'closed' && (
-                  <div className="p-4 bg-gray-50 border-t border-gray-200">
-                    <form onSubmit={handleSendReply}>
-                      <div className="flex gap-4">
-                        <textarea
-                          required
-                          rows={2}
-                          className="flex-1 rounded-lg border-gray-300 border p-3 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                          placeholder="Type your reply here..."
-                          value={replyMessage}
-                          onChange={(e) => setReplyMessage(e.target.value)}
-                        />
-                        <button
-                          type="submit"
-                          disabled={loading || !replyMessage.trim()}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 self-end h-full"
-                        >
-                          Send
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-                {selectedTicket.status === 'closed' && (
-                  <div className="p-4 bg-gray-50 border-t border-gray-200 text-center text-gray-500">
-                    This ticket is closed. Please create a new ticket if you need further assistance.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Ticket Info */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Ticket Details</h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Subject</label>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedTicket.subject}</p>
-                  </div>
-                  
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Ticket ID</label>
-                    <p className="text-sm font-mono text-gray-600 mt-1">#{String(selectedTicket.id).slice(0, 8)}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Category</label>
-                    <p className="text-sm text-gray-900 mt-1 capitalize">{selectedTicket.category.replace(/_/g, ' ')}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Priority</label>
-                    <p className={`text-sm font-medium mt-1 ${getPriorityColor(selectedTicket.priority)} capitalize`}>
-                      {selectedTicket.priority}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Created</label>
-                    <p className="text-sm text-gray-900 mt-1">{formatDate(selectedTicket.createdAt)}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase">Last Activity</label>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {selectedTicket.lastMessageAt ? formatDate(selectedTicket.lastMessageAt) : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
