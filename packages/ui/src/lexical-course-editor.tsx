@@ -14,10 +14,16 @@ import {
   $getSelection,
   $isRangeSelection,
   $getRoot,
+  $isElementNode,
+  $isDecoratorNode,
+  $createParagraphNode,
   COMMAND_PRIORITY_EDITOR,
   FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  PASTE_COMMAND,
+  DROP_COMMAND,
+  CUT_COMMAND,
   TextNode,
 } from 'lexical';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
@@ -144,8 +150,39 @@ const TypingCommitPlugin: React.FC<{ commitRef: React.MutableRefObject<boolean> 
       },
       COMMAND_PRIORITY_EDITOR,
     );
+
+    const unregisterPaste = editor.registerCommand(
+      PASTE_COMMAND,
+      () => {
+        commitRef.current = true;
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR,
+    );
+
+    const unregisterDrop = editor.registerCommand(
+      DROP_COMMAND,
+      () => {
+        commitRef.current = true;
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR,
+    );
+
+    const unregisterCut = editor.registerCommand(
+      CUT_COMMAND,
+      () => {
+        commitRef.current = true;
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR,
+    );
+
     return () => {
       unregisterKey();
+      unregisterPaste();
+      unregisterDrop();
+      unregisterCut();
     };
   }, [editor, commitRef]);
   return null;
@@ -181,8 +218,9 @@ const CommitOnContentChangePlugin: React.FC<{
 
 const SlashPopupPlugin: React.FC<{
   loadMedia: () => Promise<SharedMediaItem[]>;
+  uploadMedia?: (file: File) => Promise<SharedMediaItem>;
   commitRef?: React.MutableRefObject<boolean>;
-}> = ({ loadMedia, commitRef }) => {
+}> = ({ loadMedia, uploadMedia, commitRef }) => {
   const [editor] = useLexicalComposerContext();
   const [open, setOpen] = React.useState(false);
   const [openLibrary, setOpenLibrary] = React.useState(false);
@@ -310,6 +348,7 @@ const SlashPopupPlugin: React.FC<{
         onClose={() => setOpenLibrary(false)}
         onSelect={onSelectMedia}
         loadMedia={loadMedia}
+        uploadMedia={uploadMedia}
       />
     </>
   );
@@ -317,11 +356,12 @@ const SlashPopupPlugin: React.FC<{
 
 const EditorInner: React.FC<{
   loadMedia: () => Promise<SharedMediaItem[]>;
+  uploadMedia?: (file: File) => Promise<SharedMediaItem>;
   commitRef: React.MutableRefObject<boolean>;
   suppressRef: React.MutableRefObject<boolean>;
   onCommit: (json: unknown) => void;
   placeholder: string;
-}> = ({ loadMedia, commitRef, suppressRef, onCommit, placeholder }) => {
+}> = ({ loadMedia, uploadMedia, commitRef, suppressRef, onCommit, placeholder }) => {
   const [editor] = useLexicalComposerContext();
   const [activeTab, setActiveTab] = React.useState<'visual' | 'html'>('visual');
   const [htmlContent, setHtmlContent] = React.useState('');
@@ -337,13 +377,27 @@ const EditorInner: React.FC<{
       });
       setActiveTab('html');
     } else {
+      commitRef.current = true;
       editor.update(() => {
         const parser = new DOMParser();
         const dom = parser.parseFromString(htmlContent, 'text/html');
         const nodes = $generateNodesFromDOM(editor, dom);
         const root = $getRoot();
         root.clear();
-        root.append(...nodes);
+        
+        let currentParagraph: any = null;
+        for (const node of nodes) {
+          if (($isElementNode(node) && !node.isInline()) || ($isDecoratorNode(node) && !(node as any).isInline())) {
+            root.append(node);
+            currentParagraph = null;
+          } else {
+            if (!currentParagraph) {
+              currentParagraph = $createParagraphNode();
+              root.append(currentParagraph);
+            }
+            currentParagraph.append(node);
+          }
+        }
       });
       setActiveTab('visual');
     }
@@ -422,7 +476,7 @@ const EditorInner: React.FC<{
             commitRef={commitRef}
             onCommit={onCommit}
           />
-          <SlashPopupPlugin loadMedia={loadMedia} commitRef={commitRef} />
+          <SlashPopupPlugin loadMedia={loadMedia} uploadMedia={uploadMedia} commitRef={commitRef} />
         </>
       ) : (
         <textarea
@@ -454,6 +508,7 @@ export type LexicalCourseEditorProps = {
   placeholder?: string;
   className?: string;
   loadMedia: () => Promise<SharedMediaItem[]>;
+  uploadMedia?: (file: File) => Promise<SharedMediaItem>;
 };
 
 export function LexicalCourseEditor({
@@ -462,6 +517,7 @@ export function LexicalCourseEditor({
   placeholder = 'Type /image to insert an image',
   className = '',
   loadMedia,
+  uploadMedia,
 }: LexicalCourseEditorProps) {
   const [isMounted, setIsMounted] = React.useState(false);
   const isDark = useSystemTheme();
@@ -530,6 +586,7 @@ export function LexicalCourseEditor({
         <LexicalComposer initialConfig={initialConfig}>
           <EditorInner
             loadMedia={loadMedia}
+            uploadMedia={uploadMedia}
             commitRef={commitGateRef}
             suppressRef={suppressCommitRef}
             onCommit={(json) => {

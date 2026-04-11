@@ -37,7 +37,11 @@ export const Media: CollectionConfig = {
         try {
           const timestamp = Date.now()
           const baseName = file.name.replace(/\.[^/.]+$/, '') // Remove file extension
-          const uniquePublicId = `${baseName}_${timestamp}`
+          const extension = file.name.includes('.') ? file.name.split('.').pop() : ''
+          
+          // For raw files (like PPT/DOC/PDF), Cloudinary requires the extension in the public_id 
+          // to serve it with the correct extension in the URL. We'll append it for all to be safe.
+          const uniquePublicId = extension ? `${baseName}_${timestamp}.${extension}` : `${baseName}_${timestamp}`
 
           req.payload.logger.info(`[Media beforeChange] Uploading file: ${file.name} as ${uniquePublicId}`)
 
@@ -73,7 +77,14 @@ export const Media: CollectionConfig = {
           data.filesize = result.bytes
           data.width = result.width
           data.height = result.height
-          data.mimeType = `${result.resource_type}/${result.format}`
+          
+          if (result.resource_type !== 'raw') {
+            if (result.format === 'pdf') {
+              data.mimeType = 'application/pdf'
+            } else {
+              data.mimeType = `${result.resource_type}/${result.format}`
+            }
+          }
 
           req.payload.logger.info(`[Media beforeChange] SUCCESS: Uploaded to Cloudinary, public_id=${result.public_id}`)
         } catch (error) {

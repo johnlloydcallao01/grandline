@@ -88,24 +88,23 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
         );
       }
 
-      // Render PowerPoint files securely via Google Docs Viewer
-      // Note: Google Viewer requires the URL to be publicly accessible.
-      // Cloudinary URLs are public by default.
-      if (isPowerPoint(mime)) {
-        const encodedUrl = encodeURIComponent(url);
-        const googleViewerUrl = `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`;
-        return (
-          <div className="w-full h-full bg-gray-100 flex flex-col">
-            <iframe src={googleViewerUrl} className="w-full flex-1" title={material.title} frameBorder="0" />
-          </div>
-        );
-      }
-
-      if (isOfficeDoc(mime)) {
+      // Render PowerPoint files securely via Microsoft Office Viewer for slideshow behavior
+      if (isPowerPoint(mime) || isOfficeDoc(mime)) {
         const encodedUrl = encodeURIComponent(url);
         const officeViewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodedUrl}`;
+        const hasExtension = url.split('/').pop()?.includes('.');
         return (
           <div className="w-full h-full bg-gray-100 flex flex-col">
+            {url.includes('raw') && !hasExtension && (
+               <div className="bg-yellow-50 p-4 border-b border-yellow-200 flex flex-col items-center justify-center text-center">
+                 <p className="text-sm text-yellow-800 mb-2">
+                   <strong>Warning:</strong> This file is missing its original extension (e.g., .pptx) and cannot be previewed online.
+                 </p>
+                 <a href={getDownloadUrl(url)} download className="text-sm text-blue-600 hover:underline font-medium">
+                   Download file directly instead
+                 </a>
+               </div>
+            )}
             <iframe src={officeViewerUrl} className="w-full flex-1" title={material.title} frameBorder="0" />
           </div>
         );

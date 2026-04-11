@@ -260,7 +260,7 @@ export default function DownloadsPage() {
             </div>
             <ul className="divide-y divide-gray-200">
               {materials.map((item) => (
-                <li key={`mat-${item.id}`} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150 flex items-center justify-between">
+                <li key={`mat-${item.isLessonMaterial ? 'lesson' : 'course'}-${item.id}`} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150 flex items-center justify-between">
                   <div className="flex items-center min-w-0 gap-x-4">
                     <div className={`flex-shrink-0 h-12 w-12 rounded-lg flex items-center justify-center ${item.type === 'PDF' ? 'bg-red-100 text-red-600' :
                       item.type === 'Video' ? 'bg-blue-100 text-blue-600' :

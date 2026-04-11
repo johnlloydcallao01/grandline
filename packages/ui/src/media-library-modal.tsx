@@ -32,6 +32,10 @@ export interface MediaLibraryModalProps {
    */
   loadMedia: () => Promise<SharedMediaItem[]>;
   /**
+   * Optional async function to upload a new media item
+   */
+  uploadMedia?: (file: File) => Promise<SharedMediaItem>;
+  /**
    * Optional custom title for the modal
    */
   title?: string;
@@ -46,13 +50,17 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
   onClose,
   onSelect,
   loadMedia,
+  uploadMedia,
   title = 'Media Library',
   zIndex = 9998,
 }) => {
   const libraryRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<SharedMediaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const isDark = useSystemTheme();
 
   useEffect(() => {
@@ -61,6 +69,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
     let active = true;
     setLoading(true);
     setError(null);
+    setSearchQuery(''); // Reset search on open
 
     (async () => {
       try {
@@ -111,7 +120,38 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
     };
   }, [isOpen, onClose]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!uploadMedia) return;
+    
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+    try {
+      const newItem = await uploadMedia(file);
+      setItems((prev) => [newItem, ...prev]);
+    } catch (err) {
+      setError('Failed to upload media');
+      console.error('Error uploading media:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   if (!isOpen) return null;
+
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const altMatch = item.alt?.toLowerCase().includes(query);
+    const urlMatch = item.url?.toLowerCase().includes(query);
+    const fileMatch = item.filename?.toLowerCase().includes(query);
+    return altMatch || urlMatch || fileMatch;
+  });
 
   return (
     <div
@@ -159,23 +199,79 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
           >
             {title}
           </div>
-          <button
-            key="close"
-            type="button"
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {uploadMedia && (
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+                <button
+                  type="button"
+                  disabled={uploading}
+                  style={{
+                    height: 28,
+                    padding: '0 12px',
+                    borderRadius: 6,
+                    border: '1px solid transparent',
+                    background: uploading ? (isDark ? '#4b5563' : '#d1d5db') : '#3b82f6',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: '#ffffff',
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {uploading ? 'Uploading...' : 'Upload File'}
+                </button>
+              </>
+            )}
+            <button
+              key="close"
+              type="button"
+              style={{
+                  height: 28,
+                  padding: '0 10px',
+                  borderRadius: 6,
+                  border: isDark ? '1px solid #4b5563' : '1px solid #e5e7eb',
+                  background: isDark ? '#374151' : '#f9fafb',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  color: isDark ? '#f9fafb' : '#374151',
+                }}
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div
+          style={{
+            padding: '12px 16px',
+            borderBottom: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
+            background: isDark ? '#111827' : '#ffffff',
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Search media..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-                height: 28,
-                padding: '0 10px',
-                borderRadius: 6,
-                border: isDark ? '1px solid #4b5563' : '1px solid #e5e7eb',
-                background: isDark ? '#374151' : '#f9fafb',
-                cursor: 'pointer',
-                fontSize: 13,
-                color: isDark ? '#f9fafb' : '#374151',
-              }}
-            onClick={onClose}
-          >
-            Close
-          </button>
+              width: '100%',
+              padding: '8px 12px',
+              borderRadius: 6,
+              border: isDark ? '1px solid #4b5563' : '1px solid #e5e7eb',
+              background: isDark ? '#1f2937' : '#f9fafb',
+              color: isDark ? '#f9fafb' : '#111827',
+              fontSize: 14,
+              outline: 'none',
+            }}
+          />
         </div>
 
         {/* Body */}
@@ -218,6 +314,19 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
             >
               No media items found.
             </div>
+          ) : filteredItems.length === 0 ? (
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: isDark ? '#d1d5db' : '#6b7280',
+                fontSize: 13,
+              }}
+            >
+              No results match your search.
+            </div>
           ) : (
             <div
               style={{
@@ -226,7 +335,7 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
                 gap: 12,
               }}
             >
-              {items.map((item) => {
+              {filteredItems.map((item) => {
                 const isImage = !item.mimeType || item.mimeType.startsWith('image/');
 
                 return (

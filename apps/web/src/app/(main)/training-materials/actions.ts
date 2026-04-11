@@ -329,10 +329,7 @@ export async function getEnrolledMaterials(clientToken?: string): Promise<Fronte
 
     const allMaterials = [...mappedCourseMaterials, ...mappedLessonMaterials];
 
-    // Remove duplicates based on material ID if attached to multiple courses
-    const uniqueMaterials = Array.from(new Map(allMaterials.map(m => [m.id, m])).values());
-
-    return uniqueMaterials;
+    return allMaterials;
 
   } catch (error) {
     console.error('Error fetching training materials:', error);

@@ -2,6 +2,7 @@
 import React from 'react';
 import {
   DecoratorNode,
+  $createParagraphNode,
   type SerializedLexicalNode,
   type NodeKey,
   type EditorConfig,
@@ -14,6 +15,7 @@ export type SharedMediaItem = {
   url: string;
   alt?: string;
   mimeType?: string;
+  filename?: string;
 };
 
 type PayloadMediaDoc = {
@@ -34,9 +36,16 @@ export function mapPayloadMediaDocsToSharedMediaItems(docs: unknown): SharedMedi
       if (typeof d?.mimeType !== 'string') return true;
       return (
         d.mimeType.startsWith('image/') ||
+        d.mimeType.startsWith('video/') ||
+        d.mimeType.startsWith('audio/') ||
+        d.mimeType === 'application/pdf' ||
         d.mimeType === 'application/vnd.ms-powerpoint' ||
-        d.mimeType ===
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        d.mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        d.mimeType === 'application/msword' ||
+        d.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        d.mimeType === 'application/vnd.ms-excel' ||
+        d.mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        d.mimeType === 'application/zip' ||
         d.mimeType === 'application/x-cfb'
       );
     })
@@ -47,6 +56,7 @@ export function mapPayloadMediaDocsToSharedMediaItems(docs: unknown): SharedMedi
         ? d.alt 
         : (typeof d.filename === 'string' ? d.filename : ''),
       mimeType: typeof d.mimeType === 'string' ? d.mimeType : '',
+      filename: typeof d.filename === 'string' ? d.filename : '',
     }));
 }
 
@@ -83,6 +93,10 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
       node.__mimeType,
       node.__key,
     );
+  }
+
+  isInline(): boolean {
+    return false;
   }
 
   constructor(
@@ -159,6 +173,10 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
       this.__mimeType.startsWith('image/') ||
       this.__url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i);
 
+    const isVideo =
+      this.__mimeType.startsWith('video/') ||
+      this.__url.match(/\.(mp4|webm|ogg|mov)$/i);
+
     if (isImage) {
       const img = document.createElement('img');
       img.src = this.__url;
@@ -173,6 +191,20 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
         img.style.height = this.__height;
       }
       figure.appendChild(img);
+    } else if (isVideo) {
+      const video = document.createElement('video');
+      video.src = this.__url;
+      video.controls = true;
+      video.style.maxWidth = '100%';
+      video.style.borderRadius = '4px';
+      video.style.border = '1px solid #e5e7eb';
+      if (this.__width) {
+        video.style.width = this.__width;
+      }
+      if (this.__height) {
+        video.style.height = this.__height;
+      }
+      figure.appendChild(video);
     } else {
       // Render file card for PPT/Docs
       const card = document.createElement('a');
@@ -191,22 +223,51 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
       card.style.width = '100%';
       card.style.maxWidth = '400px';
 
+      let typeName = 'File Document';
+      let iconColor = '#6b7280'; // Gray
+      let svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
+
+      if (this.__mimeType.includes('presentation') || this.__mimeType.includes('powerpoint') || this.__mimeType === 'application/x-cfb') {
+        typeName = 'PowerPoint Presentation';
+        iconColor = '#e11d48'; // Rose
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-presentation"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M2 15h10"/><path d="m2 15 2 6"/><path d="m12 15-2 6"/></svg>';
+      } else if (this.__mimeType.includes('pdf')) {
+        typeName = 'PDF Document';
+        iconColor = '#dc2626'; // Red
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>';
+      } else if (this.__mimeType.includes('word') || this.__mimeType.includes('document')) {
+        typeName = 'Word Document';
+        iconColor = '#2563eb'; // Blue
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>';
+      } else if (this.__mimeType.includes('excel') || this.__mimeType.includes('spreadsheet')) {
+        typeName = 'Excel Spreadsheet';
+        iconColor = '#16a34a'; // Green
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sheet"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v4"/></svg>';
+      } else if (this.__mimeType.startsWith('video/')) {
+        typeName = 'Video File';
+        iconColor = '#8b5cf6'; // Purple
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-video"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 11 5 3-5 3v-6Z"/></svg>';
+      } else if (this.__mimeType.startsWith('audio/')) {
+        typeName = 'Audio File';
+        iconColor = '#f59e0b'; // Amber
+        svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-audio"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M8 18v-2"/><path d="M16 18v-2"/></svg>';
+      }
+
       const icon = document.createElement('div');
-      icon.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-presentation"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><path d="M2 15h10"/><path d="m2 15 2 6"/><path d="m12 15-2 6"/></svg>';
-      icon.style.color = '#e11d48'; // Rose color for PPT
+      icon.innerHTML = svgIcon;
+      icon.style.color = iconColor;
 
       const info = document.createElement('div');
       info.style.display = 'flex';
       info.style.flexDirection = 'column';
 
       const title = document.createElement('span');
-      title.textContent = this.__alt || 'Presentation File';
+      title.textContent = this.__alt || 'Document File';
       title.style.fontWeight = '500';
       title.style.fontSize = '14px';
 
       const type = document.createElement('span');
-      type.textContent = 'PowerPoint Presentation';
+      type.textContent = typeName;
       type.style.fontSize = '12px';
       type.style.color = '#6b7280';
 
@@ -245,6 +306,10 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
       this.__mimeType.startsWith('image/') ||
       this.__url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i);
 
+    const isVideo =
+      this.__mimeType.startsWith('video/') ||
+      this.__url.match(/\.(mp4|webm|ogg|mov)$/i);
+
     if (isImage) {
       const img = dom.querySelector('img') as globalThis.HTMLImageElement | null;
       if (img) {
@@ -259,6 +324,23 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
           img.style.removeProperty('height');
         }
         if (img.src !== this.__url) img.src = this.__url;
+      } else {
+        return true; // Structure changed
+      }
+    } else if (isVideo) {
+      const video = dom.querySelector('video') as globalThis.HTMLVideoElement | null;
+      if (video) {
+        if (this.__width) {
+          video.style.width = this.__width;
+        } else {
+          video.style.removeProperty('width');
+        }
+        if (this.__height) {
+          video.style.height = this.__height;
+        } else {
+          video.style.removeProperty('height');
+        }
+        if (video.src !== this.__url) video.src = this.__url;
       } else {
         return true; // Structure changed
       }
@@ -302,6 +384,10 @@ export class IframeNode extends DecoratorNode<React.ReactNode> {
     );
   }
 
+  isInline(): boolean {
+    return false; // Force block level to prevent root splice issues
+  }
+
   constructor(
     src: string,
     width = '100%',
@@ -342,6 +428,7 @@ export class IframeNode extends DecoratorNode<React.ReactNode> {
           if (domNode instanceof HTMLIFrameElement) {
             const { src, width, height } = domNode;
             const node = new IframeNode(src, width, height);
+            
             return { node };
           }
           return null;

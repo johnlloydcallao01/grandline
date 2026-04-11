@@ -356,6 +356,36 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
       /\.(ppt|pptx)$/i.test(src)
 
+    const isPDF =
+      mimeType === 'application/pdf' ||
+      /\.(pdf)$/i.test(src)
+
+    const isVideo =
+      mimeType.startsWith('video/') ||
+      /\.(mp4|webm|ogg|mov)$/i.test(src)
+
+    if (isVideo) {
+      return (
+        <figure key={key} className="w-full mb-6">
+          <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-black relative flex justify-center">
+            <video
+              src={src}
+              controls
+              className="max-w-full max-h-[600px] object-contain"
+              preload="metadata"
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          {caption && (
+            <figcaption className="mt-2 text-sm text-gray-500">
+              {caption}
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
+
     if (isPPT) {
       return (
         <figure key={key} className="w-full mb-6">
@@ -397,6 +427,53 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
                 <line x1="12" x2="12" y1="15" y2="3" />
               </svg>
               Download Presentation
+            </a>
+          </div>
+        </figure>
+      )
+    }
+
+    if (isPDF) {
+      return (
+        <figure key={key} className="w-full mb-6">
+          <div className="w-full h-[600px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+            <iframe
+              src={`${src}#view=FitH`}
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              title={alt || 'PDF Document'}
+            >
+              This browser does not support PDFs. Please download the file to view it:
+              <a href={src}>Download PDF</a>
+            </iframe>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            {caption && (
+              <figcaption className="text-sm text-gray-500">{caption}</figcaption>
+            )}
+            <a
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" />
+              </svg>
+              Download PDF
             </a>
           </div>
         </figure>

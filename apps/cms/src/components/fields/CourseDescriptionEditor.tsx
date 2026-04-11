@@ -31,6 +31,32 @@ async function loadCmsMedia(): Promise<SharedMediaItem[]> {
   return mapPayloadMediaDocsToSharedMediaItems(json?.docs)
 }
 
+async function uploadCmsMedia(file: File): Promise<SharedMediaItem> {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('alt', file.name)
+
+  const res = await fetch('/api/media', {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to upload media: ${res.status}`)
+  }
+
+  const json = await res.json()
+  const doc = json.doc || json
+  return {
+    id: doc.id,
+    url: doc.cloudinaryURL || doc.url,
+    alt: doc.alt || doc.filename,
+    mimeType: doc.mimeType,
+    filename: doc.filename,
+  }
+}
+
 export const CourseDescriptionEditor: React.FC<CourseDescriptionEditorProps> = (props) => {
   const [mounted, setMounted] = useState(false)
 
@@ -65,6 +91,7 @@ export const CourseDescriptionEditor: React.FC<CourseDescriptionEditorProps> = (
         }}
         placeholder={placeholder}
         loadMedia={loadCmsMedia}
+        uploadMedia={uploadCmsMedia}
       />
     </div>
   )

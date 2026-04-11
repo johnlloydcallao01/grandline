@@ -41,7 +41,7 @@ export default function TrainingMaterialsClient({ initialMaterials }: TrainingMa
   const renderMaterialCard = (item: FrontendMaterial) => (
     <Link 
       href={`/training-materials/${item.id}?type=${item.isLessonMaterial ? 'lesson' : 'course'}` as any}
-      key={item.id} 
+      key={`${item.isLessonMaterial ? 'lesson' : 'course'}-${item.id}`} 
       className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col group cursor-pointer"
     >
       <div className={`h-32 ${item.image} rounded-t-xl flex items-center justify-center relative group-hover:opacity-90 transition-opacity`}>
