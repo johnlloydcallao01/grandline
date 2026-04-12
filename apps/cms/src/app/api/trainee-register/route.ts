@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
           srn: body.srn,
           couponCode: body.couponCode || '',
           enrollmentDate: new Date().toISOString(),
-          currentLevel: 'beginner' as const
+          currentLevel: 'standard' as const
         }
 
         console.log('📋 Trainee data to create:', traineeData)

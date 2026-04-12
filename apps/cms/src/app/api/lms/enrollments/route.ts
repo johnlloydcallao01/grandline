@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       where,
       page,
       limit,
-      depth: 2,
+      depth: 4, // Depth 1: Course, Depth 2: Instructor, Depth 3: User, Depth 4: Profile Picture (Media)
       sort: '-enrolledAt',
     })
 

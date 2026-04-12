@@ -54,8 +54,8 @@ export const Trainees: CollectionConfig = {
       type: 'select',
       options: [
         {
-          label: 'Beginner',
-          value: 'beginner',
+          label: 'Standard',
+          value: 'standard',
         },
         {
           label: 'Intermediate',
@@ -66,7 +66,7 @@ export const Trainees: CollectionConfig = {
           value: 'advanced',
         },
       ],
-      defaultValue: 'beginner',
+      defaultValue: 'standard',
       admin: {
         description: 'Current learning level',
       },

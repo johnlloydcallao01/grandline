@@ -399,6 +399,50 @@ export default function CoursePlayerLayout({
     };
   }, [flatItems, currentItem, evaluationMode, completedLessonIds]);
 
+  useEffect(() => {
+    if (!courseId || progressPercent === undefined || !mounted) return;
+
+    let active = true;
+    const syncProgress = async () => {
+      try {
+        let userIdParam: string | null = null;
+        if (typeof window !== 'undefined') {
+          const raw = localStorage.getItem('grandline_auth_user_trainee');
+          if (raw) {
+            const parsed = JSON.parse(raw) as { id?: string | number } | null;
+            userIdParam = parsed?.id ? String(parsed.id) : null;
+          }
+        }
+
+        if (!userIdParam) return;
+
+        const res = await fetch(`/api/courses/${courseId}/sync-progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: userIdParam, progressPercentage: progressPercent })
+        });
+
+        if (!active) return;
+
+        if (!res.ok) {
+          console.error('Failed to sync progress to database');
+        }
+      } catch (err) {
+        console.error('Network error syncing progress', err);
+      }
+    };
+
+    // Debounce the sync slightly to prevent spamming the API on rapid clicks
+    const timeoutId = setTimeout(() => {
+      syncProgress();
+    }, 1000);
+
+    return () => {
+      active = false;
+      clearTimeout(timeoutId);
+    };
+  }, [progressPercent, courseId, mounted]);
+
   const toggleLessonCompletion = async (lessonId: string) => {
     const isCompleted = completedLessonIds.includes(lessonId);
     const newCompleted = isCompleted

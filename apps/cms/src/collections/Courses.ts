@@ -220,11 +220,11 @@ export const Courses: CollectionConfig = {
       name: 'difficultyLevel',
       type: 'select',
       options: [
-        { label: 'Beginner', value: 'beginner' },
+        { label: 'Standard', value: 'standard' },
         { label: 'Intermediate', value: 'intermediate' },
         { label: 'Advanced', value: 'advanced' },
       ],
-      defaultValue: 'beginner',
+      defaultValue: 'standard',
       admin: {
         description: 'Course difficulty level',
       },

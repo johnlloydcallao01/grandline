@@ -83,6 +83,10 @@ import * as migration_20260322_141612 from './20260322_141612';
 import * as migration_20260402_031257 from './20260402_031257';
 import * as migration_20260402_133641 from './20260402_133641';
 import * as migration_20260405_053352_add_user_biography from './20260405_053352_add_user_biography';
+import * as migration_20260405_134000_restore_missing_api_key_columns from './20260405_134000_restore_missing_api_key_columns';
+import * as migration_20260405_135000_restore_locked_documents_rels from './20260405_135000_restore_locked_documents_rels';
+import * as migration_20260405_162000_restore_wishlists from './20260405_162000_restore_wishlists';
+import * as migration_20260412_030444_rename_beginner_to_standard from './20260412_030444_rename_beginner_to_standard';
 
 export const migrations = [
   {
@@ -508,6 +512,26 @@ export const migrations = [
   {
     up: migration_20260405_053352_add_user_biography.up,
     down: migration_20260405_053352_add_user_biography.down,
-    name: '20260405_053352_add_user_biography'
+    name: '20260405_053352_add_user_biography',
+  },
+  {
+    up: migration_20260405_134000_restore_missing_api_key_columns.up,
+    down: migration_20260405_134000_restore_missing_api_key_columns.down,
+    name: '20260405_134000_restore_missing_api_key_columns',
+  },
+  {
+    up: migration_20260405_135000_restore_locked_documents_rels.up,
+    down: migration_20260405_135000_restore_locked_documents_rels.down,
+    name: '20260405_135000_restore_locked_documents_rels',
+  },
+  {
+    up: migration_20260405_162000_restore_wishlists.up,
+    down: migration_20260405_162000_restore_wishlists.down,
+    name: '20260405_162000_restore_wishlists',
+  },
+  {
+    up: migration_20260412_030444_rename_beginner_to_standard.up,
+    down: migration_20260412_030444_rename_beginner_to_standard.down,
+    name: '20260412_030444_rename_beginner_to_standard'
   },
 ];
