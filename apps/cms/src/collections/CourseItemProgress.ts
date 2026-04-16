@@ -56,7 +56,7 @@ export const CourseItemProgress: CollectionConfig = {
     {
       name: 'item',
       type: 'relationship',
-      relationTo: ['course-lessons', 'assessments'],
+      relationTo: ['course-lessons', 'assessments', 'assignments'],
       required: true,
       index: true,
       hasMany: false,

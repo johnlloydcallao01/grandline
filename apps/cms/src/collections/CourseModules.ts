@@ -50,10 +50,10 @@ export const CourseModules: CollectionConfig = {
     {
       name: 'items',
       type: 'relationship',
-      relationTo: ['course-lessons', 'assessments'],
+      relationTo: ['course-lessons', 'assessments', 'assignments'],
       hasMany: true,
       admin: {
-        description: 'Manage the order of lessons and assessments in this module.',
+        description: 'Manage the order of lessons, assessments, and assignments in this module.',
       },
     },
     {

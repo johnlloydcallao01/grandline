@@ -154,7 +154,7 @@ export interface CourseWithInstructor extends Course {
       title: string;
       estimatedDurationMinutes?: number | null;
       items: Array<{
-        relationTo: 'course-lessons' | 'assessments';
+        relationTo: 'course-lessons' | 'assessments' | 'assignments';
         value: {
           id: string;
           title: string;
@@ -169,6 +169,12 @@ export interface CourseWithInstructor extends Course {
           maxAttempts?: number | null;
           isRequired?: boolean;
           showCorrectAnswer?: boolean;
+          // For assignments
+          maxScore?: number | null;
+          submissionType?: 'file_upload' | 'text_entry' | 'both';
+          allowedFileTypes?: string[] | null;
+          dueDate?: string | null;
+          attachments?: any[] | null;
         } | string; // Could be string ID if depth is shallow
       }>;
       lessons: Array<{

@@ -243,6 +243,26 @@ export default function CoursePlayerLayout({
                 showCorrectAnswer: assessment.showCorrectAnswer,
               }
             } as any);
+          } else if (item.relationTo === 'assignments') {
+            const assignment = item.value;
+            items.push({
+              key: buildItemKey('assignment', assignment.id, mod.id),
+              type: 'assignment',
+              id: String(assignment.id),
+              moduleId: mod.id,
+              title: assignment.title,
+              content: assignment.description,
+              slug: slugify(assignment.title),
+              moduleSlug: modSlug,
+              assignmentDetails: {
+                maxScore: assignment.maxScore,
+                passingScore: assignment.passingScore,
+                submissionType: assignment.submissionType,
+                allowedFileTypes: assignment.allowedFileTypes,
+                dueDate: assignment.dueDate,
+                attachments: assignment.attachments,
+              }
+            } as any);
           }
         }
       }
@@ -285,12 +305,14 @@ export default function CoursePlayerLayout({
         totalLessons: 0,
         totalQuizzes: 0,
         totalExams: 0,
+        totalAssignments: 0,
       };
     }
 
     let lessonsCount = 0;
     let quizzesCount = 0;
     let examsCount = 0;
+    let assignmentsCount = 0;
 
     for (const mod of curriculum.modules) {
       if (Array.isArray(mod.items)) {
@@ -302,6 +324,8 @@ export default function CoursePlayerLayout({
             const a = item.value;
             if (a.assessmentType === 'exam') examsCount += 1;
             else quizzesCount += 1;
+          } else if (item.relationTo === 'assignments') {
+            assignmentsCount += 1;
           }
         }
       }
@@ -316,6 +340,7 @@ export default function CoursePlayerLayout({
       totalLessons: lessonsCount,
       totalQuizzes: quizzesCount,
       totalExams: examsCount,
+      totalAssignments: assignmentsCount,
     };
   }, [curriculum, course?.evaluationMode]);
 

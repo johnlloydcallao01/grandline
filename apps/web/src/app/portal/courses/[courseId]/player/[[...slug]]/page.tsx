@@ -130,6 +130,7 @@ export default function CoursePlayerPage() {
     // URL patterns:
     // /module/:moduleSlug/lesson/:lessonSlug -> ['module', modSlug, 'lesson', lessonSlug]
     // /module/:moduleSlug/assessment/:assessmentSlug -> ['module', modSlug, 'assessment', assessmentSlug]
+    // /module/:moduleSlug/assignment/:assignmentSlug -> ['module', modSlug, 'assignment', assignmentSlug]
     // /assessment/:assessmentSlug -> ['assessment', assessmentSlug] (Final Exam)
 
     if (slug[0] === 'module' && slug[2] === 'lesson' && slug[3]) {
@@ -149,6 +150,17 @@ export default function CoursePlayerPage() {
       const assessmentSlug = slug[3];
       foundItem = flatItems.find((i: any) =>
         i.type === 'assessment' && i.slug === assessmentSlug && i.moduleSlug === moduleSlug
+      );
+
+      if (foundItem) {
+        key = foundItem.key;
+        setExpandedModules(prev => prev.includes(foundItem.moduleId) ? prev : [...prev, foundItem.moduleId]);
+      }
+    } else if (slug[0] === 'module' && slug[2] === 'assignment' && slug[3]) {
+      const moduleSlug = slug[1];
+      const assignmentSlug = slug[3];
+      foundItem = flatItems.find((i: any) =>
+        i.type === 'assignment' && i.slug === assignmentSlug && i.moduleSlug === moduleSlug
       );
 
       if (foundItem) {
@@ -187,7 +199,9 @@ export default function CoursePlayerPage() {
           : 'Quiz'
         : currentItem?.type === 'finalExam'
           ? 'Final Exam'
-          : null;
+          : currentItem?.type === 'assignment'
+            ? 'Assignment'
+            : null;
 
   const currentModuleTitle =
     currentItem && currentItem.moduleId ? moduleTitleMap[currentItem.moduleId] || null : null;
@@ -331,6 +345,54 @@ export default function CoursePlayerPage() {
                   attemptHistory={currentItem ? submissionHistory[currentItem.id] || [] : []}
                 />
               </>
+            )}
+
+            {currentItem.type === 'assignment' && (
+              <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+                <div className="flex flex-col md:flex-row justify-between gap-6 mb-8 pb-6 border-b border-gray-100">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Assignment Details</h2>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <i className="fa fa-star text-amber-500"></i> Max Score: {currentItem.assignmentDetails?.maxScore}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <i className="fa fa-check-circle text-green-500"></i> Passing Score: {currentItem.assignmentDetails?.passingScore}
+                      </span>
+                      {currentItem.assignmentDetails?.dueDate && (
+                        <span className="flex items-center gap-1">
+                          <i className="fa fa-calendar-alt text-blue-500"></i> Due: {new Date(currentItem.assignmentDetails.dueDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold capitalize">
+                      {currentItem.assignmentDetails?.submissionType?.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Instructions</h3>
+                  {currentItem.content ? (
+                    <RichTextRenderer content={currentItem.content} />
+                  ) : (
+                    <p className="text-gray-500">No instructions provided.</p>
+                  )}
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border border-dashed border-gray-300">
+                    <i className="fa fa-upload text-3xl text-gray-400 mb-3"></i>
+                    <h3 className="text-gray-900 font-medium mb-1">Submit your work</h3>
+                    <p className="text-gray-500 text-sm mb-4">Assignment submissions are coming soon!</p>
+                    <button disabled className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium opacity-50 cursor-not-allowed">
+                      Submit Assignment
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ) : (

@@ -45,6 +45,7 @@ export function CourseCurriculumSidebar({
                 let lessonCount = 0;
                 let quizCount = 0;
                 let examCount = 0;
+                let assignmentCount = 0;
 
                 if (Array.isArray(mod.items)) {
                   for (const item of mod.items) {
@@ -55,6 +56,8 @@ export function CourseCurriculumSidebar({
                       const a = item.value;
                       if (a.assessmentType === 'exam') examCount++;
                       else quizCount++;
+                    } else if (item.relationTo === 'assignments') {
+                      assignmentCount++;
                     }
                   }
                 }
@@ -84,6 +87,13 @@ export function CourseCurriculumSidebar({
                                 {' • '}
                                 {quizCount + examCount} assessment
                                 {quizCount + examCount === 1 ? '' : 's'}
+                              </>
+                            ) : null}
+                            {assignmentCount > 0 ? (
+                              <>
+                                {' • '}
+                                {assignmentCount} assignment
+                                {assignmentCount === 1 ? '' : 's'}
                               </>
                             ) : null}
                           </span>
@@ -184,6 +194,33 @@ export function CourseCurriculumSidebar({
                                           {assessment.estimatedDurationMinutes} min
                                         </span>
                                       ) : null}
+                                    </button>
+                                  </li>
+                                );
+                              } else if (item.relationTo === 'assignments') {
+                                const assignment = item.value;
+                                const itemKey = buildItemKey('assignment', assignment.id, mod.id);
+                                const isActive = selectedKey === itemKey;
+                                // Get the latest submission state (we don't have it yet, so let's just mark it as not completed for now)
+                                const isCompleted = false;
+
+                                return (
+                                  <li key={itemKey}>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const found = flatItems.find((i) => i.key === itemKey);
+                                        if (found) onSelectItem(found);
+                                      }}
+                                      className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-xs ${isActive
+                                        ? 'bg-white text-teal-700 font-semibold shadow-sm'
+                                        : 'text-gray-700 hover:bg-white'
+                                        }`}
+                                    >
+                                      <span className="flex items-center gap-2 min-w-0">
+                                        <i className={`fa fa-file-alt ${isCompleted ? 'text-green-500' : 'text-teal-500'} text-xs`} />
+                                        <span className="truncate">{assignment.title}</span>
+                                      </span>
                                     </button>
                                   </li>
                                 );

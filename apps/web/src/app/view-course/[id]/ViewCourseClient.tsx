@@ -34,6 +34,7 @@ function CourseOverviewCard({
   totalLessons,
   totalModules,
   totalQuizzes,
+  totalAssignments,
   formatPrice,
   formatLastUpdated,
   initialEnrollmentStatus,
@@ -44,6 +45,7 @@ function CourseOverviewCard({
   totalLessons: number;
   totalModules: number;
   totalQuizzes: number;
+  totalAssignments: number;
   formatPrice: (price: number | null | undefined) => string;
   formatLastUpdated: (updatedAt: string | null | undefined) => string;
   initialEnrollmentStatus?: string | null;
@@ -402,6 +404,7 @@ function CourseOverviewCard({
                         <div>Modules: {totalModules}</div>
                         <div>Lessons: {totalLessons}</div>
                         <div>Quizzes: {totalQuizzes}</div>
+                        {totalAssignments > 0 && <div>Assignments: {totalAssignments}</div>}
                         <div>Language: English</div>
                         <div>With certificate: Yes</div>
                         {typeof course.estimatedDuration === 'number' && course.estimatedDuration > 0 && course.estimatedDurationUnit ? (
@@ -633,6 +636,7 @@ function CourseOverviewCard({
           <div>Modules: {totalModules}</div>
           <div>Lessons: {totalLessons}</div>
           <div>Quizzes: {totalQuizzes}</div>
+          {totalAssignments > 0 && <div>Assignments: {totalAssignments}</div>}
           <div>Language: English</div>
           <div>With certificate: Yes</div>
           {typeof course.estimatedDuration === 'number' && course.estimatedDuration > 0 && course.estimatedDurationUnit ? (
@@ -1351,6 +1355,17 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
       )
     }, 0) || 0) + (curriculum?.finalExam ? 1 : 0)
 
+  const totalAssignments =
+    curriculum?.modules?.reduce((sum, m) => {
+      if (!Array.isArray(m.items)) return sum
+      return (
+        sum +
+        m.items.filter(
+          (item) => item.relationTo === 'assignments' && typeof item.value !== 'string',
+        ).length
+      )
+    }, 0) || 0
+
   const courseMaterials = Array.isArray(course.courseMaterials)
     ? course.courseMaterials
     : []
@@ -1612,6 +1627,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                       totalLessons={totalLessons}
                       totalModules={totalModules}
                       totalQuizzes={totalQuizzes}
+                      totalAssignments={totalAssignments}
                       formatPrice={formatPrice}
                       formatLastUpdated={formatLastUpdated}
                       initialEnrollmentStatus={initialEnrollmentStatus}
@@ -1649,6 +1665,12 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                         <span className="w-2 h-2 rounded-full bg-rose-500" />
                         {totalExams} exam{totalExams === 1 ? '' : 's'}
                       </span>
+                      {totalAssignments > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-1 text-teal-700">
+                          <span className="w-2 h-2 rounded-full bg-teal-500" />
+                          {totalAssignments} assignment{totalAssignments === 1 ? '' : 's'}
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-3">
@@ -1656,6 +1678,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                         let lessonCount = 0
                         let quizCount = 0
                         let examCount = 0
+                        let assignmentCount = 0
                         if (Array.isArray(module.items)) {
                           for (const item of module.items) {
                             if (typeof item.value === 'string') continue
@@ -1665,6 +1688,8 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                               const a = item.value as any
                               if (a.assessmentType === 'exam') examCount++
                               else quizCount++
+                            } else if (item.relationTo === 'assignments') {
+                              assignmentCount++
                             }
                           }
                         }
@@ -1703,6 +1728,11 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                   {examCount > 0 && (
                                     <span>
                                       {examCount} exam{examCount === 1 ? '' : 's'}
+                                    </span>
+                                  )}
+                                  {assignmentCount > 0 && (
+                                    <span>
+                                      {assignmentCount} assignment{assignmentCount === 1 ? '' : 's'}
                                     </span>
                                   )}
                                 </div>
@@ -1796,6 +1826,36 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                               {assessment.estimatedDurationMinutes ? (
                                                 <span>
                                                   {assessment.estimatedDurationMinutes} min
+                                                </span>
+                                              ) : null}
+                                            </div>
+                                          </li>
+                                        )
+                                      } else if (item.relationTo === 'assignments') {
+                                        const assignment = item.value as any
+                                        return (
+                                          <li
+                                            key={`assignment-${assignment.id}`}
+                                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-sm"
+                                          >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                              <span className="text-xs text-gray-400 w-6">
+                                                {itemIndex + 1}.
+                                              </span>
+                                              <span className="inline-flex items-center rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
+                                                Assignment
+                                              </span>
+                                              <span className="truncate text-gray-800">
+                                                {assignment.title}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                                Required
+                                              </span>
+                                              {assignment.dueDate ? (
+                                                <span>
+                                                  Due: {new Date(assignment.dueDate).toLocaleDateString()}
                                                 </span>
                                               ) : null}
                                             </div>
@@ -2280,6 +2340,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                       totalLessons={totalLessons}
                       totalModules={totalModules}
                       totalQuizzes={totalQuizzes}
+                      totalAssignments={totalAssignments}
                       formatPrice={formatPrice}
                       formatLastUpdated={formatLastUpdated}
                       initialEnrollmentStatus={initialEnrollmentStatus}

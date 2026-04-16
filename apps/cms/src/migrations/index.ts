@@ -87,6 +87,7 @@ import * as migration_20260405_134000_restore_missing_api_key_columns from './20
 import * as migration_20260405_135000_restore_locked_documents_rels from './20260405_135000_restore_locked_documents_rels';
 import * as migration_20260405_162000_restore_wishlists from './20260405_162000_restore_wishlists';
 import * as migration_20260412_030444_rename_beginner_to_standard from './20260412_030444_rename_beginner_to_standard';
+import * as migration_20260416_131422 from './20260416_131422';
 
 export const migrations = [
   {
@@ -532,6 +533,11 @@ export const migrations = [
   {
     up: migration_20260412_030444_rename_beginner_to_standard.up,
     down: migration_20260412_030444_rename_beginner_to_standard.down,
-    name: '20260412_030444_rename_beginner_to_standard'
+    name: '20260412_030444_rename_beginner_to_standard',
+  },
+  {
+    up: migration_20260416_131422.up,
+    down: migration_20260416_131422.down,
+    name: '20260416_131422'
   },
 ];

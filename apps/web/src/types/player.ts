@@ -1,4 +1,4 @@
-export type PlayerItemType = 'lesson' | 'assessment' | 'finalExam';
+export type PlayerItemType = 'lesson' | 'assessment' | 'finalExam' | 'assignment';
 
 export interface PlayerItem {
   key: string;
@@ -16,5 +16,13 @@ export interface PlayerItem {
     questionsCount?: number;
     questions?: any[];
     showCorrectAnswer?: boolean;
+  };
+  assignmentDetails?: {
+    maxScore?: number | null;
+    passingScore?: number | null;
+    submissionType?: 'file_upload' | 'text_entry' | 'both';
+    allowedFileTypes?: string[] | null;
+    dueDate?: string | null;
+    attachments?: any[] | null;
   };
 }

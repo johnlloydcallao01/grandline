@@ -32,6 +32,8 @@ import { RecentSearches } from './collections/RecentSearches'
 import { Questions } from './collections/Questions'
 import { Assessments } from './collections/Assessments'
 import { AssessmentSubmissions } from './collections/AssessmentSubmissions'
+import { Assignments } from './collections/Assignments'
+import { AssignmentSubmissions } from './collections/AssignmentSubmissions'
 import { SubmissionAnswers } from './collections/SubmissionAnswers'
 import { Wishlists } from './collections/Wishlists'
 import { RecentlyViewedCourses } from './collections/RecentlyViewedCourses'
@@ -98,6 +100,8 @@ export default buildConfig({
     Questions,
     Assessments,
     AssessmentSubmissions,
+    Assignments,
+    AssignmentSubmissions,
     SubmissionAnswers,
     NotificationTemplates,
     Notifications,
