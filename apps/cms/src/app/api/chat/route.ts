@@ -11,12 +11,21 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Ch
 
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') || 'active'
+    const type = searchParams.get('type')
     const cursor = searchParams.get('cursor')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
 
     // Build query
-    const query: any = {
-      'participants.value': { equals: user.id }
+    const query: any = {}
+
+    // For direct chats, must be a participant. For group/discussion boards, make them public to all users.
+    if (type === 'group') {
+      query.type = { equals: 'group' }
+    } else {
+      query['participants'] = { equals: user.id }
+      if (type) {
+        query.type = { equals: type }
+      }
     }
 
     if (status !== 'all') {
@@ -56,6 +65,8 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Ch
         lastMessageAt: chat.lastMessageAt || undefined,
         unreadCount,
         participants,
+        metadata: chat.metadata,
+        createdBy: chat.createdBy && typeof chat.createdBy === 'object' ? chat.createdBy : undefined,
         isActive: (chat as any).status === 'active'
       }
     })

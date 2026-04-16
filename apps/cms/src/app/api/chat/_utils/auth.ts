@@ -10,13 +10,13 @@ export async function getPayloadInstance(): Promise<Payload> {
 
 export async function requireAuth(req: NextRequest): Promise<User> {
   const payload = await getPayloadInstance()
-  const user = await payload.auth({ headers: req.headers })
+  const authResult = await payload.auth({ headers: req.headers })
 
-  if (!user) {
+  if (!authResult || !authResult.user) {
     throw new ApiError('Unauthorized', 401)
   }
 
-  return user as unknown as User
+  return authResult.user as unknown as User
 }
 
 export function requireRole(user: User, allowedRoles: string[]): void {

@@ -156,7 +156,7 @@ export function canSendToChat(userId: number, chat: Chat): ValidationResult {
     }
   }
 
-  if (!isParticipant(userId, chat)) {
+  if (chat.type !== 'group' && !isParticipant(userId, chat)) {
     return {
       valid: false,
       error: 'You are not a participant in this chat',

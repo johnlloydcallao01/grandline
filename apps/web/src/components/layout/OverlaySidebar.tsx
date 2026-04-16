@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
-import { SidebarItem } from '@/components/ui';
+import { SidebarMenuItems } from './SidebarMenuItems';
 
 interface OverlaySidebarProps {
   isOpen: boolean;
@@ -14,8 +13,6 @@ interface OverlaySidebarProps {
  * Contains the same navigation items as the main sidebar
  */
 export function OverlaySidebar({ isOpen, onClose }: OverlaySidebarProps) {
-  const pathname = usePathname();
-
   // Close overlay when pressing Escape
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -68,65 +65,9 @@ export function OverlaySidebar({ isOpen, onClose }: OverlaySidebarProps) {
           scrollbarColor: '#cbd5e1 transparent'
         }}
       >
-
-
         <div className="p-3">
           <nav className="space-y-1">
-            {/* Main Navigation */}
-            <div className="space-y-1">
-              <SidebarItem
-                icon="home"
-                label="Home"
-                active={pathname === '/'}
-                collapsed={false}
-                href="/"
-                onClick={onClose}
-              />
-            </div>
-
-
-
-            <hr className="my-3 border-gray-200" />
-
-            {/* Explore section */}
-            <div className="space-y-1">
-              <div className="px-3 py-2 text-sm font-medium text-gray-900">Explore</div>
-              <SidebarItem 
-                icon="trending" 
-                label="Trending" 
-                collapsed={false} 
-                href="/trending" 
-                onClick={onClose}
-              />
-              <SidebarItem 
-                icon="music" 
-                label="Music" 
-                collapsed={false} 
-                href="/music" 
-                onClick={onClose}
-              />
-              <SidebarItem 
-                icon="gaming" 
-                label="Gaming" 
-                collapsed={false} 
-                href="/gaming" 
-                onClick={onClose}
-              />
-              <SidebarItem 
-                icon="news" 
-                label="News" 
-                collapsed={false} 
-                href="/news" 
-                onClick={onClose}
-              />
-              <SidebarItem 
-                icon="sports" 
-                label="Sports" 
-                collapsed={false} 
-                href="/sports" 
-                onClick={onClose}
-              />
-            </div>
+            <SidebarMenuItems isOpen={true} onItemClick={onClose} />
           </nav>
         </div>
       </aside>

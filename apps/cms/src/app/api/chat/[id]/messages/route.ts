@@ -7,12 +7,13 @@ import { canSendToChat, validateNewMessage } from '@grandline/chat-engine'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<Record<string, string>> }
+  props: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse<ApiResponse<MessageListResponse>>> {
   try {
+    const params = await props.params
     const user = await requireAuth(req)
     const payload = await getPayload({ config: (await import('@/payload.config')) as any })
-    const chatId = parseInt((await params).id)
+    const chatId = parseInt(params.id)
 
     if (isNaN(chatId)) {
       throw new ApiError('Invalid chat ID', 400)
@@ -30,10 +31,13 @@ export async function GET(
     }
 
     const isParticipant = chat.participants?.some(
-      (p: any) => p.value && p.value.id === user.id
+      (p: any) => {
+        const pId = typeof p === 'object' ? (p.id || p.value?.id || p.value) : p;
+        return pId === user.id;
+      }
     )
 
-    if (!isParticipant) {
+    if (chat.type !== 'group' && !isParticipant) {
       throw new ApiError('You are not a participant in this chat', 403)
     }
 
@@ -99,12 +103,13 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<Record<string, string>> }
+  props: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse<ApiResponse<MessageResponse>>> {
   try {
+    const params = await props.params
     const user = await requireAuth(req)
     const payload = await getPayload({ config: (await import('@/payload.config')) as any })
-    const chatId = parseInt((await params).id)
+    const chatId = parseInt(params.id)
 
     if (isNaN(chatId)) {
       throw new ApiError('Invalid chat ID', 400)
@@ -127,8 +132,8 @@ export async function POST(
       type: (chat as any).type,
       status: (chat as any).status,
       participants: (chat.participants || []).map((p: any) => ({
-        userId: p.value?.id || p.value,
-        role: p.value?.role || 'trainee',
+        userId: typeof p === 'object' ? (p.id || p.value?.id || p.value) : p,
+        role: typeof p === 'object' ? (p.role || p.value?.role || 'trainee') : 'trainee',
         joinedAt: p.createdAt || new Date().toISOString()
       })),
       createdAt: chat.createdAt,
@@ -142,9 +147,24 @@ export async function POST(
 
     const body: SendMessageRequest = await req.json()
 
+    // Extract text for validation if content is a Lexical object
+    let textContent = body.content as any
+    if (typeof textContent === 'object' && textContent !== null) {
+      try {
+        // Very basic extraction of text from Lexical root for length validation
+        textContent = textContent.root?.children?.map((c: any) =>
+          c.children?.map((child: any) => child.text || '').join('')
+        ).join('\n') || ''
+      } catch (_e) {
+        textContent = JSON.stringify(textContent)
+      }
+    } else {
+      textContent = String(textContent || '')
+    }
+
     // Validate message
     const validation = validateNewMessage({
-      content: body.content,
+      content: textContent,
       type: body.type || 'text',
       replyToMessageId: body.replyToMessageId,
       attachments: body.attachments
@@ -155,22 +175,26 @@ export async function POST(
     }
 
     // Create message
+    console.log('Creating message:', { chatId, senderId: user.id, contentType: body.type });
+    ; (req as any).user = user;
     const message = await payload.create({
       collection: 'chat-messages',
+      req,
+      user, // Pass user directly as well, which Payload 3 respects
+      overrideAccess: true, // Bypass strict collection access rules
       data: {
         chat: chatId,
         sender: user.id,
         content: body.content as any,
         contentType: body.type || 'text',
-        replyTo: body.replyToMessageId || null,
-        attachments: body.attachments as any || [],
-        reactions: []
+        replyTo: body.replyToMessageId ? body.replyToMessageId : null,
       }
     })
 
     // Create read status for sender (mark as read)
     await payload.create({
       collection: 'chat-message-status',
+      overrideAccess: true,
       data: {
         message: message.id,
         user: user.id,
@@ -180,11 +204,16 @@ export async function POST(
     })
 
     // Update chat last message
+    const previewText = typeof body.content === 'string'
+      ? body.content.substring(0, 100)
+      : '[Message]';
+
     await payload.update({
       collection: 'chats',
       id: chatId,
+      overrideAccess: true,
       data: {
-        lastMessagePreview: body.content.substring(0, 100),
+        lastMessagePreview: previewText,
         lastMessageAt: new Date().toISOString()
       }
     })

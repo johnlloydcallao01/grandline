@@ -33,7 +33,7 @@ export async function GET(
       (p: any) => p.value && p.value.id === user.id
     )
 
-    if (!isParticipant) {
+    if (chat.type !== 'group' && !isParticipant) {
       throw new ApiError('You are not a participant in this chat', 403)
     }
 

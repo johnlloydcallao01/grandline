@@ -78,7 +78,11 @@ export default function PortalLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+      <div 
+        className="min-h-screen bg-gray-50" 
+        style={{ backgroundColor: '#f9fafb' }}
+        data-fixed-header={!isCoursePlayer ? 'true' : undefined}
+      >
         {/* Header - Same as main app for consistency */}
         {!isCoursePlayer && (
           <Header

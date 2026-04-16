@@ -44,7 +44,7 @@ export const ChatMessages: CollectionConfig = {
       validate: (async (value, { req }) => {
         if (!value) return 'Chat is required'
         try {
-          const chatId = typeof value === 'object' ? value.id : value
+          const chatId = typeof value === 'object' ? value.id || value.value : value
           const chat = await req.payload.findByID({
             collection: 'chats',
             id: chatId,
@@ -56,12 +56,12 @@ export const ChatMessages: CollectionConfig = {
           // Check if user is a participant
           const user = req.user
           if (!user) return 'You must be logged in'
-          if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor') {
+          if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor' || chat.type === 'group') {
             return true
           }
           const participants = Array.isArray(chat.participants) ? chat.participants : []
           const isParticipant = participants.some((p: any) => {
-            const pid = typeof p === 'object' ? p.id : p
+            const pid = typeof p === 'object' ? (p.value?.id || p.value || p.id) : p
             return String(pid) === String(user.id)
           })
           if (!isParticipant) {

@@ -68,6 +68,8 @@ export class ChatChannelManager {
   }
 
   private createChatChannel(chatId: number, channelName: string): void {
+    console.log(`[ChatEngine] Creating Supabase channel: ${channelName} for chat ID ${chatId}`);
+    
     const channel = this.supabase
       .channel(channelName, {
         config: {
@@ -82,9 +84,10 @@ export class ChatChannelManager {
           event: 'INSERT',
           schema: 'public',
           table: 'chat_messages',
-          filter: `chat_id=eq.${chatId}`,
+          filter: `chat=eq.${chatId}`,
         },
         (payload: { new: Record<string, unknown>; old?: Record<string, unknown>; eventType?: string }) => {
+          console.log(`[ChatEngine] 🟢 INSERT received on chat_messages:`, payload);
           this.emitEvent(channelName, {
             type: 'message_insert',
             payload: payload.new as any,
@@ -101,9 +104,10 @@ export class ChatChannelManager {
           event: 'UPDATE',
           schema: 'public',
           table: 'chat_messages',
-          filter: `chat_id=eq.${chatId}`,
+          filter: `chat=eq.${chatId}`,
         },
         (payload: { new: Record<string, unknown>; old?: Record<string, unknown>; eventType?: string }) => {
+          console.log(`[ChatEngine] 🟡 UPDATE received on chat_messages:`, payload);
           this.emitEvent(channelName, {
             type: 'message_update',
             payload: payload.new as any,
@@ -121,9 +125,10 @@ export class ChatChannelManager {
           event: 'DELETE',
           schema: 'public',
           table: 'chat_messages',
-          filter: `chat_id=eq.${chatId}`,
+          filter: `chat=eq.${chatId}`,
         },
         (payload: { new: Record<string, unknown>; old?: Record<string, unknown>; eventType?: string }) => {
+          console.log(`[ChatEngine] 🔴 DELETE received on chat_messages:`, payload);
           this.emitEvent(channelName, {
             type: 'message_delete',
             payload: payload.old as any,
@@ -177,7 +182,7 @@ export class ChatChannelManager {
           event: '*',
           schema: 'public',
           table: 'chat_typing_status',
-          filter: `chat_id=eq.${chatId}`,
+          filter: `chat=eq.${chatId}`,
         },
         (payload: { new: Record<string, unknown>; old?: Record<string, unknown>; eventType?: string }) => {
           this.emitEvent(channelName, {
@@ -191,7 +196,8 @@ export class ChatChannelManager {
           })
         }
       )
-      .subscribe((status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
+      .subscribe((status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT', err?: Error) => {
+        console.log(`[ChatEngine] Channel ${channelName} status changed to: ${status}`, err ? `Error: ${err.message}` : '');
         const state = this.channelStates.get(channelName)
         if (state) {
           state.status = status === 'SUBSCRIBED' ? 'connected' : status === 'CLOSED' ? 'disconnected' : 'error'

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@encreasl/ui"],
+  transpilePackages: ["@encreasl/ui", "@grandline/chat-engine"],
 
   // Image configuration for external domains
   images: {
