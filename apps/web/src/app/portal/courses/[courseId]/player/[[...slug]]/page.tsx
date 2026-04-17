@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { RichTextRenderer } from '@/components/RichTextRenderer';
 import { QuizPlayer } from '@/components/course/QuizPlayer';
+import { AssignmentPlayer } from '../AssignmentPlayer';
 import { useCoursePlayer } from '../CoursePlayerContext';
 
 export default function CoursePlayerPage() {
@@ -22,10 +23,12 @@ export default function CoursePlayerPage() {
     completedLessonIds,
     attemptCounts,
     submissionHistory,
+    assignmentSubmissions,
     toggleLessonCompletion,
     startAssessment,
     saveAssessmentAnswer,
     submitAssessment,
+    submitAssignment,
   } = useCoursePlayer();
 
   const [isQuizStarted, setIsQuizStarted] = useState(false);
@@ -348,51 +351,11 @@ export default function CoursePlayerPage() {
             )}
 
             {currentItem.type === 'assignment' && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                <div className="flex flex-col md:flex-row justify-between gap-6 mb-8 pb-6 border-b border-gray-100">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Assignment Details</h2>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <i className="fa fa-star text-amber-500"></i> Max Score: {currentItem.assignmentDetails?.maxScore}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <i className="fa fa-check-circle text-green-500"></i> Passing Score: {currentItem.assignmentDetails?.passingScore}
-                      </span>
-                      {currentItem.assignmentDetails?.dueDate && (
-                        <span className="flex items-center gap-1">
-                          <i className="fa fa-calendar-alt text-blue-500"></i> Due: {new Date(currentItem.assignmentDetails.dueDate).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold capitalize">
-                      {currentItem.assignmentDetails?.submissionType?.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Instructions</h3>
-                  {currentItem.content ? (
-                    <RichTextRenderer content={currentItem.content} />
-                  ) : (
-                    <p className="text-gray-500">No instructions provided.</p>
-                  )}
-                </div>
-
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <div className="bg-gray-50 rounded-xl p-6 text-center border border-dashed border-gray-300">
-                    <i className="fa fa-upload text-3xl text-gray-400 mb-3"></i>
-                    <h3 className="text-gray-900 font-medium mb-1">Submit your work</h3>
-                    <p className="text-gray-500 text-sm mb-4">Assignment submissions are coming soon!</p>
-                    <button disabled className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium opacity-50 cursor-not-allowed">
-                      Submit Assignment
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <AssignmentPlayer
+                assignment={currentItem as any}
+                submissions={assignmentSubmissions[currentItem.id] || []}
+                onSubmit={submitAssignment}
+              />
             )}
           </div>
         ) : (

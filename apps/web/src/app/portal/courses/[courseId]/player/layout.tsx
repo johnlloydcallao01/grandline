@@ -9,6 +9,7 @@ import { buildItemKey, slugify } from '@/utils/course-player';
 import { CourseCurriculumSidebar } from '@/components/course/CourseCurriculumSidebar';
 import { CoursePlayerSkeleton } from '@/components/skeletons';
 import { CoursePlayerProvider } from './CoursePlayerContext';
+import { fetchAssignmentSubmissions, submitAssignment as serverSubmitAssignment } from './actions';
 
 function formatEnrollmentStatus(status: string | null) {
   if (!status) return 'Not enrolled';
@@ -42,6 +43,7 @@ export default function CoursePlayerLayout({
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [attemptCounts, setAttemptCounts] = useState<Record<string, number>>({});
   const [submissionHistory, setSubmissionHistory] = useState<Record<string, any[]>>({});
+  const [assignmentSubmissions, setAssignmentSubmissions] = useState<Record<string, any[]>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFinishConfirmationOpen, setIsFinishConfirmationOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -119,10 +121,18 @@ export default function CoursePlayerLayout({
         let fetchedProgress = false;
         if (userIdParam) {
           try {
-            const progressRes = await fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
-              headers: { 'Content-Type': 'application/json' },
-              cache: 'no-store',
-            });
+            const [progressRes, assignmentsRes] = await Promise.all([
+              fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
+                headers: { 'Content-Type': 'application/json' },
+                cache: 'no-store',
+              }),
+              fetchAssignmentSubmissions(courseId).catch(err => {
+                console.error('Failed to fetch assignments', err);
+                return {};
+              })
+            ]);
+
+            setAssignmentSubmissions(assignmentsRes || {});
 
             if (progressRes.ok) {
               const progressData = await progressRes.json();
@@ -396,6 +406,10 @@ export default function CoursePlayerLayout({
           if (submissionHistory[item.id] && submissionHistory[item.id].length > 0) {
             completed++;
           }
+        } else if (item.type === 'assignment') {
+          if (assignmentSubmissions[item.id] && assignmentSubmissions[item.id].some(s => s.status !== 'draft')) {
+            completed++;
+          }
         }
       }
 
@@ -627,6 +641,25 @@ export default function CoursePlayerLayout({
     } catch (e) {
       console.error('Failed to submit assessment', e);
       return null;
+    }
+  };
+
+  const submitAssignment = async (assignmentId: string, content: string, fileIds: string[]) => {
+    try {
+      const result = await serverSubmitAssignment(courseId as string, assignmentId, content, fileIds);
+      
+      // Refresh assignment submissions after submitting
+      try {
+        const assignmentsRes = await fetchAssignmentSubmissions(courseId as string);
+        setAssignmentSubmissions(assignmentsRes || {});
+      } catch (err) {
+        console.error('Failed to refresh assignment submissions', err);
+      }
+      
+      return result;
+    } catch (e) {
+      console.error('Failed to submit assignment', e);
+      throw e;
     }
   };
 
@@ -888,6 +921,8 @@ export default function CoursePlayerLayout({
       url += `/module/${i.moduleSlug}/lesson/${i.slug}`;
     } else if (item.type === 'assessment') {
       url += `/module/${i.moduleSlug}/assessment/${i.slug}`;
+    } else if (item.type === 'assignment') {
+      url += `/module/${i.moduleSlug}/assignment/${i.slug}`;
     } else if (item.type === 'finalExam') {
       url += `/assessment/${i.slug}`;
     }
@@ -995,10 +1030,12 @@ export default function CoursePlayerLayout({
         completedLessonIds,
         attemptCounts,
         submissionHistory,
+        assignmentSubmissions,
         toggleLessonCompletion,
         startAssessment,
         saveAssessmentAnswer,
         submitAssessment,
+        submitAssignment,
       }}
     >
       <div className="h-screen overflow-hidden bg-[#f5f5f7] flex flex-col">

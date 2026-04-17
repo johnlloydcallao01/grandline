@@ -78,8 +78,8 @@ export default function PortalLayout({
 
   return (
     <ProtectedRoute>
-      <div 
-        className="min-h-screen bg-gray-50" 
+      <div
+        className="min-h-screen bg-gray-50"
         style={{ backgroundColor: '#f9fafb' }}
         data-fixed-header={!isCoursePlayer ? 'true' : undefined}
       >
@@ -126,8 +126,8 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
     <aside
       data-sidebar="portal"
       className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${isOpen
-          ? 'w-60 translate-x-0'
-          : 'w-20 translate-x-0'
+        ? 'w-60 translate-x-0'
+        : 'w-20 translate-x-0'
         }`}
       style={{
         height: 'calc(100vh - 4rem)',
@@ -252,21 +252,6 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
                     <i className="fa fa-graduation-cap text-gray-600"></i>
                   </div>
                   {isOpen && <span className="ml-3 text-gray-700">Quizzes & Exams</span>}
-                </>
-              )
-            })}
-
-            {/* Submitted Work */}
-            {(Link as any)({
-              href: "/portal/submitted-work",
-              className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
-                }`,
-              children: (
-                <>
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-clipboard-check text-gray-600"></i>
-                  </div>
-                  {isOpen && <span className="ml-3 text-gray-700">Submitted Work</span>}
                 </>
               )
             })}
