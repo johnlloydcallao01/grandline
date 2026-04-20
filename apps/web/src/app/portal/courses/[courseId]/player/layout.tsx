@@ -44,6 +44,7 @@ export default function CoursePlayerLayout({
   const [attemptCounts, setAttemptCounts] = useState<Record<string, number>>({});
   const [submissionHistory, setSubmissionHistory] = useState<Record<string, any[]>>({});
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<Record<string, any[]>>({});
+  const [hasSubmittedFeedback, setHasSubmittedFeedback] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFinishConfirmationOpen, setIsFinishConfirmationOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -121,7 +122,7 @@ export default function CoursePlayerLayout({
         let fetchedProgress = false;
         if (userIdParam) {
           try {
-            const [progressRes, assignmentsRes] = await Promise.all([
+            const [progressRes, assignmentsRes, feedbackRes] = await Promise.all([
               fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
@@ -129,10 +130,22 @@ export default function CoursePlayerLayout({
               fetchAssignmentSubmissions(courseId).catch(err => {
                 console.error('Failed to fetch assignments', err);
                 return {};
+              }),
+              fetch(`/api/courses/${courseId}/feedback-status?userId=${userIdParam}`, {
+                headers: { 'Content-Type': 'application/json' },
+                cache: 'no-store',
+              }).catch(err => {
+                console.error('Failed to fetch feedback status', err);
+                return null;
               })
             ]);
 
             setAssignmentSubmissions(assignmentsRes || {});
+
+            if (feedbackRes && feedbackRes.ok) {
+              const feedbackData = await feedbackRes.json();
+              setHasSubmittedFeedback(feedbackData.hasSubmitted === true);
+            }
 
             if (progressRes.ok) {
               const progressData = await progressRes.json();
@@ -647,7 +660,7 @@ export default function CoursePlayerLayout({
   const submitAssignment = async (assignmentId: string, content: string, fileIds: string[]) => {
     try {
       const result = await serverSubmitAssignment(courseId as string, assignmentId, content, fileIds);
-      
+
       // Refresh assignment submissions after submitting
       try {
         const assignmentsRes = await fetchAssignmentSubmissions(courseId as string);
@@ -655,7 +668,7 @@ export default function CoursePlayerLayout({
       } catch (err) {
         console.error('Failed to refresh assignment submissions', err);
       }
-      
+
       return result;
     } catch (e) {
       console.error('Failed to submit assignment', e);
@@ -669,6 +682,16 @@ export default function CoursePlayerLayout({
 
   const confirmFinishCourse = async () => {
     setIsFinishConfirmationOpen(false);
+
+    if (course?.feedbackForm && typeof course.feedbackForm === 'object' && course.isFeedbackRequired) {
+      router.push(`/portal/courses/${courseId}/player/feedback`);
+      return;
+    }
+
+    await finalizeCourseCompletion();
+  };
+
+  const finalizeCourseCompletion = async () => {
     setIsSuccessModalOpen(true); // Open success modal immediately
 
     // Optimistic Update: Immediately show as completed
@@ -717,6 +740,11 @@ export default function CoursePlayerLayout({
   const showFinishButton = useMemo(() => {
     if (enrollmentStatus === 'completed') return false; // Hide if already done
     if (enrollmentStatus !== 'active') return false;
+
+    // Check feedback requirement first - if required but not submitted, completely block Finish Button
+    if (course?.isFeedbackRequired && !hasSubmittedFeedback) {
+      return false;
+    }
 
     if (evaluationMode === 'lessons') {
       // Check if 100% completed
@@ -822,7 +850,7 @@ export default function CoursePlayerLayout({
     }
 
     return false;
-  }, [evaluationMode, enrollmentStatus, progressPercent, flatItems, submissionHistory]);
+  }, [evaluationMode, enrollmentStatus, progressPercent, flatItems, submissionHistory, course?.isFeedbackRequired, hasSubmittedFeedback]);
 
   const showEvaluationButton = useMemo(() => {
     if (enrollmentStatus === 'completed' && evaluationMode === 'lessons') return true;
@@ -1031,6 +1059,8 @@ export default function CoursePlayerLayout({
         attemptCounts,
         submissionHistory,
         assignmentSubmissions,
+        hasSubmittedFeedback,
+        setHasSubmittedFeedback,
         toggleLessonCompletion,
         startAssessment,
         saveAssessmentAnswer,
@@ -1212,6 +1242,7 @@ export default function CoursePlayerLayout({
 
                 <div className="flex-1 overflow-y-auto min-h-0">
                   <CourseCurriculumSidebar
+                    course={course}
                     curriculum={curriculum}
                     expandedModules={expandedModules}
                     onToggleModule={handleToggleModule}
@@ -1224,6 +1255,9 @@ export default function CoursePlayerLayout({
                     completedLessonIds={completedLessonIds}
                     submissionHistory={submissionHistory}
                     evaluationMode={course?.evaluationMode}
+                    onFeedbackClick={() => {
+                      setIsMobileMenuOpen(false);
+                    }}
                   />
                 </div>
               </div>
@@ -1861,6 +1895,7 @@ export default function CoursePlayerLayout({
         <div className="flex-1 flex min-h-0">
           <aside className="hidden lg:flex w-96 shrink-0 bg-white shadow-sm h-full overflow-hidden">
             <CourseCurriculumSidebar
+              course={course}
               curriculum={curriculum}
               expandedModules={expandedModules}
               onToggleModule={handleToggleModule}

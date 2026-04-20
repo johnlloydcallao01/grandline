@@ -1,9 +1,12 @@
 import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { CourseWithInstructor } from '@/types/course';
 import { PlayerItem } from '@/types/player';
 import { buildItemKey } from '@/utils/course-player';
 
 interface CourseCurriculumSidebarProps {
+  course?: CourseWithInstructor | null;
   curriculum: CourseWithInstructor['curriculum'];
   expandedModules: string[];
   onToggleModule: (moduleId: string) => void;
@@ -13,9 +16,11 @@ interface CourseCurriculumSidebarProps {
   completedLessonIds?: string[];
   submissionHistory?: Record<string, any[]>;
   evaluationMode?: string | null;
+  onFeedbackClick?: () => void;
 }
 
 export function CourseCurriculumSidebar({
+  course,
   curriculum,
   expandedModules,
   onToggleModule,
@@ -25,7 +30,10 @@ export function CourseCurriculumSidebar({
   completedLessonIds = [],
   submissionHistory = {},
   evaluationMode,
+  onFeedbackClick,
 }: CourseCurriculumSidebarProps) {
+  const pathname = usePathname();
+  const isFeedbackPage = pathname?.endsWith('/feedback');
   return (
     <div className="flex-1 flex flex-col min-w-0 w-full">
       <div className="px-5 py-3 border-b border-gray-100">
@@ -268,6 +276,36 @@ export function CourseCurriculumSidebar({
                     <span>Attempts: Unlimited</span>
                   </div>
                 </button>
+              </div>
+            )}
+
+            {course?.feedbackForm && typeof course.feedbackForm === 'object' && (
+              <div className={`mt-4 border rounded-lg overflow-hidden shadow-sm transition-colors ${isFeedbackPage ? 'bg-purple-50/80 border-purple-400' : 'bg-white border-purple-500/30 hover:border-purple-400'}`}>
+                <Link
+                  href={`/portal/courses/${course.id}/player/feedback`}
+                  onClick={onFeedbackClick}
+                  className={`w-full flex flex-col gap-2 px-3 py-3 transition-colors ${isFeedbackPage ? '' : 'hover:bg-purple-50/40'}`}
+                >
+                  <div className="w-full flex items-center gap-3 min-w-0">
+                    <span className={`shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${isFeedbackPage ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}`}>
+                      <i className="fa fa-comment-dots"></i>
+                    </span>
+                    <div className="flex flex-col min-w-0 text-left">
+                      <span className={`text-[10px] font-bold tracking-wider uppercase ${isFeedbackPage ? 'text-purple-700' : 'text-purple-600'}`}>
+                        Course Feedback
+                      </span>
+                      <span className={`text-sm font-semibold truncate ${isFeedbackPage ? 'text-purple-900' : 'text-gray-900'}`}>
+                        {course.feedbackForm.title || 'Course Feedback'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full flex items-center justify-between pl-11 text-[11px] text-gray-500 font-medium">
+                    <span>Survey</span>
+                    {course.isFeedbackRequired && (
+                      <span className={isFeedbackPage ? 'text-purple-600 font-bold' : ''}>Required</span>
+                    )}
+                  </div>
+                </Link>
               </div>
             )}
           </>

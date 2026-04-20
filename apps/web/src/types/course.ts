@@ -128,6 +128,8 @@ export interface Course {
   estimatedDurationUnit?: 'minutes' | 'hours' | 'days' | 'weeks' | null;
   updatedAt?: string | null;
   courseMaterials?: CourseMaterialAttachment[] | null;
+  feedbackForm?: any | null; // The associated Feedback Form (Survey)
+  isFeedbackRequired?: boolean | null; // Whether the feedback form is mandatory
   evaluationMode?:
     | 'lessons'
     | 'exam'

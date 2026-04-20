@@ -38,7 +38,8 @@ import { SubmissionAnswers } from './collections/SubmissionAnswers'
 import { Wishlists } from './collections/Wishlists'
 import { RecentlyViewedCourses } from './collections/RecentlyViewedCourses'
 import { CourseItemProgress } from './collections/CourseItemProgress'
-import { CourseFeedbacks } from './collections/CourseFeedbacks'
+import { FeedbackForms } from './collections/FeedbackForms'
+import { FeedbackSubmissions } from './collections/FeedbackSubmissions'
 import { NotificationTemplates } from './collections/NotificationTemplates'
 import { Notifications } from './collections/Notifications'
 import { UserNotifications } from './collections/UserNotifications'
@@ -92,7 +93,8 @@ export default buildConfig({
     CourseMaterials,
     LessonMaterials,
     Announcements,
-    CourseFeedbacks,
+    FeedbackForms,
+    FeedbackSubmissions,
     Wishlists,
     RecentlyViewedCourses,
     CourseItemProgress,

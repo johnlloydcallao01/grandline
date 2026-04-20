@@ -30,6 +30,63 @@ export async function uploadMedia(formData: FormData) {
 }
 
 /**
+ * Submits feedback form
+ */
+export async function submitFeedbackForm(data: {
+  courseId: string;
+  formId: string;
+  responses: Record<string, any>;
+}) {
+  const token = await getServerToken();
+  const user = await getServerUser();
+
+  if (!token || !user) throw new Error('Unauthorized');
+  
+  if (user.role !== 'trainee') {
+    throw new Error('Only trainees can submit course feedback');
+  }
+
+  const apiKey = process.env.PAYLOAD_API_KEY;
+  if (!apiKey) throw new Error('API key not configured');
+
+  const headersWithKey = {
+    'Content-Type': 'application/json',
+    'Authorization': `users API-Key ${apiKey}`,
+  };
+
+  // 1. Fetch Trainee Profile
+  const traineeRes = await fetch(`${API_BASE_URL}/trainees?where[user][equals]=${user.id}`, {
+    headers: headersWithKey,
+    cache: 'no-store',
+  });
+
+  if (!traineeRes.ok) throw new Error('Failed to fetch trainee profile');
+  const traineeData = await traineeRes.json();
+  const trainee = traineeData.docs?.[0];
+  if (!trainee) throw new Error('Trainee profile not found');
+  const traineeId = trainee.id;
+
+  // 2. Submit Feedback
+  const submitRes = await fetch(`${API_BASE_URL}/feedback-submissions`, {
+    method: 'POST',
+    headers: headersWithKey,
+    body: JSON.stringify({
+      course: Number(data.courseId),
+      form: Number(data.formId),
+      trainee: Number(traineeId),
+      responses: data.responses,
+    }),
+  });
+
+  if (!submitRes.ok) {
+    const err = await submitRes.json();
+    return { success: false, error: err.error || err.errors?.[0]?.message || 'Failed to submit feedback' };
+  }
+
+  return { success: true };
+}
+
+/**
  * Fetches all assignment submissions for a specific course for the current trainee.
  */
 export async function fetchAssignmentSubmissions(courseId: string) {

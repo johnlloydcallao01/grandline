@@ -31,6 +31,8 @@ interface CoursePlayerContextType {
   attemptCounts: Record<string, number>;
   submissionHistory: Record<string, any[]>;
   assignmentSubmissions: Record<string, any[]>;
+  hasSubmittedFeedback: boolean;
+  setHasSubmittedFeedback: React.Dispatch<React.SetStateAction<boolean>>;
   toggleLessonCompletion: (lessonId: string) => Promise<void>;
   startAssessment: (assessmentId: string) => Promise<{ submissionId: string; attemptNumber: number; isResumed?: boolean; savedAnswers?: Record<string, any> } | null>;
   saveAssessmentAnswer: (submissionId: string, questionId: string, response: any, questionType: string) => Promise<void>;

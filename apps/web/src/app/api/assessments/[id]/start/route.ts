@@ -70,6 +70,7 @@ export async function POST(
 
     const submissionParams = new URLSearchParams()
     submissionParams.set('where[trainee][equals]', traineeId)
+    submissionParams.set('where[course][equals]', String(courseId))
     submissionParams.set('where[assessment][equals]', String(assessmentId))
     submissionParams.set('sort', '-attemptNumber')
 

@@ -334,6 +334,25 @@ export const Courses: CollectionConfig = {
         description: 'Additional course settings and configurations',
       },
     },
+    {
+      name: 'feedbackForm',
+      type: 'relationship',
+      relationTo: 'feedback-forms',
+      admin: {
+        position: 'sidebar',
+        description: 'Advanced feedback survey to render at the end of the course',
+      },
+    },
+    {
+      name: 'isFeedbackRequired',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Require trainees to submit this feedback form to complete the course',
+        condition: (data) => Boolean(data?.feedbackForm),
+      },
+    },
   ],
   hooks: {
     beforeChange: [
