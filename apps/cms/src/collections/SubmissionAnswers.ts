@@ -88,5 +88,14 @@ export const SubmissionAnswers: CollectionConfig = {
         description: 'Optional instructor feedback for this specific answer',
       },
     },
+    {
+      name: 'isFeedbackRead',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        description: 'Internal flag tracking if the trainee has seen the instructor feedback for this question',
+      },
+    },
   ],
 }

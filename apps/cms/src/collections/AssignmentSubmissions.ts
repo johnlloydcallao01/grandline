@@ -137,5 +137,14 @@ export const AssignmentSubmissions: CollectionConfig = {
         description: 'The instructor who graded this submission',
       },
     },
+    {
+      name: 'isFeedbackRead',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        description: 'Internal flag tracking if the trainee has seen the instructor feedback',
+      },
+    },
   ],
 }

@@ -296,6 +296,43 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                   </tbody>
                 </table>
               </div>
+
+              {/* Instructor Feedback Section */}
+              {attemptHistory.some(h => h.feedbacks && h.feedbacks.length > 0) && (
+                <div className="mt-8">
+                  <h4 className="text-md font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                    <i className="fa fa-comment-dots text-blue-600"></i>
+                    Instructor Feedback
+                  </h4>
+                  <div className="space-y-4">
+                    {attemptHistory.map(h => {
+                      if (!h.feedbacks || h.feedbacks.length === 0) return null;
+                      return (
+                        <div key={`feedback-${h.id}`} className="bg-blue-50/30 rounded-xl border border-blue-100 p-5">
+                          <div className="font-semibold text-sm text-blue-800 mb-4 flex items-center justify-between">
+                            <span>Feedback for {h.attemptNumber === 1 ? 'First Take' : h.attemptNumber === 2 ? 'Second Take' : h.attemptNumber === 3 ? 'Third Take' : `Attempt ${h.attemptNumber}`}</span>
+                            <span className="text-xs font-normal text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">{h.feedbacks.length} Comment{h.feedbacks.length > 1 ? 's' : ''}</span>
+                          </div>
+                          <div className="space-y-3">
+                            {h.feedbacks.map((f: any) => (
+                              <div key={f.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                                <p className="text-xs font-medium text-gray-500 mb-2 pb-2 border-b border-gray-100 line-clamp-2">
+                                  <span className="font-bold text-gray-700 mr-1">Q:</span>
+                                  {f.questionPrompt}
+                                </p>
+                                <div className="text-sm text-gray-800 whitespace-pre-wrap flex items-start gap-3 mt-2">
+                                  <i className="fa fa-quote-left text-gray-300 mt-1 text-xs"></i>
+                                  <p>{f.feedback}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

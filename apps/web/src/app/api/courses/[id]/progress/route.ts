@@ -172,7 +172,8 @@ export async function GET(
                         status: sub.status,
                         completedAt: sub.completedAt,
                         pointsTotal: sub.pointsTotal,
-                        pointsPossible: sub.pointsPossible
+                        pointsPossible: sub.pointsPossible,
+                        feedbacks: [] // Will populate this below
                     })
                     
                     // Also update the progressMap for consistency
@@ -181,6 +182,54 @@ export async function GET(
                     }
                 }
             })
+        }
+
+        // 4. Fetch SubmissionAnswers with feedback for this trainee in this course
+        // Collect all submission IDs first
+        const allSubmissionIds: string[] = []
+        for (const assessmentId in submissionHistory) {
+            submissionHistory[assessmentId].forEach(sub => {
+                allSubmissionIds.push(sub.id)
+            })
+        }
+
+        if (allSubmissionIds.length > 0) {
+            const answersParams = new URLSearchParams()
+            answersParams.set('where[submission][in]', allSubmissionIds.join(','))
+            answersParams.set('limit', '1000')
+            answersParams.set('depth', '2') // To get question details
+
+            const answersRes = await fetch(
+                `${apiUrl}/submission-answers?${answersParams.toString()}`,
+                { headers, cache: 'no-store' }
+            )
+
+            if (answersRes.ok) {
+                const answersData = await answersRes.json()
+                answersData.docs?.forEach((ans: any) => {
+                    if (ans.feedback && ans.feedback.trim() !== '') {
+                        const submissionId = typeof ans.submission === 'object' ? ans.submission.id : ans.submission
+                        const questionPrompt = typeof ans.question === 'object' ? ans.question.prompt : 'Question'
+                        
+                        // Find the submission in our history and attach the feedback
+                        for (const assessmentId in submissionHistory) {
+                            const historyArray = submissionHistory[assessmentId]
+                            const targetSub = historyArray.find(h => String(h.id) === String(submissionId))
+                            if (targetSub) {
+                                targetSub.feedbacks.push({
+                                    id: ans.id,
+                                    questionPrompt: questionPrompt,
+                                    feedback: ans.feedback,
+                                    isCorrect: ans.isCorrect,
+                                    pointsEarned: ans.pointsEarned,
+                                    updatedAt: ans.updatedAt
+                                })
+                                break;
+                            }
+                        }
+                    }
+                })
+            }
         }
 
         console.log(`[Progress API] Returning ${completedLessonIds.length} completed items, ${Object.keys(attemptCounts).length} attempt counts, and history`)

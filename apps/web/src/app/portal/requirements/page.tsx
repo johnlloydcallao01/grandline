@@ -3,28 +3,28 @@
 export default function RequirementsPage() {
   const systemChecks = [
     { id: 1, name: 'Browser Compatibility', status: 'pass', details: 'Chrome 120.0 detected' },
-    { id: 2, name: 'Internet Speed', status: 'pass', details: '25 Mbps (Recommended: 5 Mbps)' },
-    { id: 3, name: 'Screen Resolution', status: 'pass', details: '1920x1080 detected' },
-    { id: 4, name: 'Microphone Access', status: 'warn', details: 'Permission not granted' },
-    { id: 5, name: 'Webcam Access', status: 'fail', details: 'Device not found' }
+    { id: 2, name: 'Internet Speed', status: 'pass', details: '25 Mbps (Minimum for Video: 2 Mbps)' },
+    { id: 3, name: 'Screen Resolution', status: 'pass', details: '1920x1080 (Minimum: 1024x768)' },
+    { id: 4, name: 'Microphone Access', status: 'warn', details: 'Required for live sessions' },
+    { id: 5, name: 'Webcam Access', status: 'warn', details: 'Required for proctored exams' }
   ];
 
   const softwareReqs = [
     {
       category: 'Operating System',
-      min: 'Windows 10 / macOS 10.15',
-      rec: 'Windows 11 / macOS 12+',
+      min: 'Windows 10 / macOS 10.15 / Android 10+',
+      rec: 'Windows 11 / macOS 12+ / iOS 15+',
       icon: 'fa-desktop'
     },
     {
       category: 'Web Browser',
       min: 'Chrome 90+, Firefox 88+, Edge 90+',
-      rec: 'Latest stable version',
+      rec: 'Latest stable version (Secure Browser)',
       icon: 'fa-chrome'
     },
     {
       category: 'Hardware',
-      min: '4GB RAM, 2GHz Processor',
+      min: '2GB RAM, Dual-Core 1.9GHz Processor',
       rec: '8GB RAM, i5/M1 Processor or better',
       icon: 'fa-microchip'
     }
@@ -43,10 +43,6 @@ export default function RequirementsPage() {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900">Current System Status</h2>
-              <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center gap-2">
-                <i className="fa fa-refresh"></i>
-                Re-check
-              </button>
             </div>
             <div className="divide-y divide-gray-100">
               {systemChecks.map((check) => (
@@ -118,9 +114,14 @@ export default function RequirementsPage() {
             <p className="text-blue-100 text-sm mb-6">
               If you're experiencing technical difficulties with the portal, our IT support team is available 24/7.
             </p>
-            <button className="w-full bg-white text-blue-600 py-2 rounded-lg font-bold hover:bg-blue-50 transition-colors shadow-sm">
+            <a 
+              href="https://app.grandlinemaritime.com/support"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-white text-blue-600 py-2 rounded-lg font-bold hover:bg-blue-50 transition-colors shadow-sm text-center"
+            >
               Contact Support
-            </button>
+            </a>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -129,28 +130,10 @@ export default function RequirementsPage() {
               <li>
                 <a href="#" className="flex items-center justify-between group">
                   <div className="flex items-center gap-3">
-                    <i className="fa fa-file-pdf-o text-red-500"></i>
-                    <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">User Manual v2.4</span>
-                  </div>
-                  <i className="fa fa-download text-gray-400"></i>
-                </a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
                     <i className="fa fa-chrome text-blue-500"></i>
                     <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">Chrome Installer</span>
                   </div>
                   <i className="fa fa-external-link text-gray-400"></i>
-                </a>
-              </li>
-              <li>
-                <a href="#" className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                    <i className="fa fa-mobile text-gray-800"></i>
-                    <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">Mobile App (iOS/Android)</span>
-                  </div>
-                  <i className="fa fa-qrcode text-gray-400"></i>
                 </a>
               </li>
             </ul>

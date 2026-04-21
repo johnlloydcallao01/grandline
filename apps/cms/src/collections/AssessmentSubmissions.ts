@@ -135,5 +135,14 @@ export const AssessmentSubmissions: CollectionConfig = {
         description: 'Indicates if this is the most recent attempt for this assessment',
       },
     },
+    {
+      name: 'isFeedbackRead',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        description: 'Internal flag tracking if the trainee has seen the automated score feedback',
+      },
+    },
   ],
 }
