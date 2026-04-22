@@ -24,6 +24,9 @@ export interface ChatListItem {
     role: string
   }[]
   isActive: boolean
+  isArchived: boolean
+  lastMessageSenderId?: number
+  createdBy?: number
 }
 
 export interface ChatDetailResponse {

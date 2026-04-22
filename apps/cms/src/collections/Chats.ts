@@ -46,6 +46,7 @@ export const Chats: CollectionConfig = {
       options: [
         { label: 'Direct (1:1)', value: 'direct' },
         { label: 'Group', value: 'group' },
+        { label: 'Instructor & Trainee', value: 'instructor_trainee' },
       ],
       defaultValue: 'direct',
       required: true,

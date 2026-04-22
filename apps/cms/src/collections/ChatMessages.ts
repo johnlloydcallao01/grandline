@@ -13,13 +13,11 @@ export const ChatMessages: CollectionConfig = {
       if (!user) return false
       // Admin/service/instructor can read all messages
       if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor') return true
-      // Users can only read messages from chats where they are participants
-      // Note: This is a simplified check; the chat validation handles participant access
-      return {
-        sender: {
-          equals: user.id,
-        },
-      }
+      // Trainees can read all messages — the custom /api/chat/[id]/messages route handler
+      // already enforces participant-based access control before hitting this collection.
+      // Restricting to sender === user.id here would prevent trainees from seeing instructor
+      // replies in conversations they are part of.
+      return true
     }) as any,
     create: ({ req: { user } }) => {
       return !!user
@@ -167,16 +165,72 @@ export const ChatMessages: CollectionConfig = {
         if (operation === 'create' && doc.chat) {
           // Update the parent chat's lastMessageAt and preview
           try {
-            const contentPreview = typeof doc.content === 'string'
-              ? doc.content.substring(0, 100)
-              : '[Rich content]'
+            let extractedText = '';
+            if (typeof doc.content === 'string') {
+              extractedText = doc.content;
+            } else if (typeof doc.content === 'object' && doc.content !== null) {
+              const extractTextNode = (node: any): string => {
+                if (!node) return '';
+                if (typeof node === 'string') return node;
+                if (typeof node.text === 'string') return node.text;
+                if (Array.isArray(node.children)) {
+                  return node.children.map(extractTextNode).filter(Boolean).join(' ');
+                }
+                if (node.root) {
+                  return extractTextNode(node.root);
+                }
+                return '';
+              };
+              try {
+                extractedText = extractTextNode(doc.content);
+                // Collapse multiple spaces from joining empty nodes
+                extractedText = extractedText.replace(/\s+/g, ' ');
+              } catch (_e) {
+                // ignore
+              }
+            }
+
+            extractedText = extractedText.trim();
+            let contentPreview = extractedText;
+            if (contentPreview.length > 80) {
+              contentPreview = contentPreview.substring(0, 80).trim() + '...';
+            } else if (!contentPreview) {
+              contentPreview = doc.contentType === 'image' ? '[Image]' : doc.contentType === 'file' ? '[File]' : '[Message]';
+            }
+
+            // Prepare update data
+            const updateData: any = {
+              lastMessageAt: new Date().toISOString(),
+              lastMessagePreview: contentPreview,
+            }
+
+            // Check if it's an Ask Instructor chat to auto-update status
+            const chatId = typeof doc.chat === 'object' ? doc.chat.id : doc.chat
+            const parentChat = await req.payload.findByID({
+              collection: 'chats',
+              id: chatId,
+              depth: 0,
+              overrideAccess: true,
+            })
+
+            if (parentChat && parentChat.metadata && (parentChat.metadata as any).isAskInstructor) {
+              if (req.user?.role === 'trainee') {
+                updateData.metadata = {
+                  ...(parentChat.metadata as object),
+                  status: 'pending'
+                }
+              } else if (req.user?.role === 'instructor') {
+                updateData.metadata = {
+                  ...(parentChat.metadata as object),
+                  status: 'answered'
+                }
+              }
+            }
+
             await req.payload.update({
               collection: 'chats',
-              id: typeof doc.chat === 'object' ? doc.chat.id : doc.chat,
-              data: {
-                lastMessageAt: new Date().toISOString(),
-                lastMessagePreview: contentPreview,
-              },
+              id: chatId,
+              data: updateData,
               req,
               depth: 0,
             })

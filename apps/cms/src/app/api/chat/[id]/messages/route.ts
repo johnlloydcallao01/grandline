@@ -33,7 +33,7 @@ export async function GET(
     const isParticipant = chat.participants?.some(
       (p: any) => {
         const pId = typeof p === 'object' ? (p.id || p.value?.id || p.value) : p;
-        return pId === user.id;
+        return String(pId) === String(user.id);
       }
     )
 
@@ -203,20 +203,41 @@ export async function POST(
       }
     })
 
-    // Update chat last message
-    const previewText = typeof body.content === 'string'
-      ? body.content.substring(0, 100)
-      : '[Message]';
-
-    await payload.update({
+    // Update parent chat metadata status and last message preview
+    // Get parent chat to find creator
+    const parentChat = await payload.findByID({
       collection: 'chats',
       id: chatId,
-      overrideAccess: true,
-      data: {
-        lastMessagePreview: previewText,
-        lastMessageAt: new Date().toISOString()
-      }
+      depth: 0,
+      overrideAccess: true
     })
+
+    if (parentChat) {
+      const creatorId = typeof parentChat.createdBy === 'object' ? (parentChat.createdBy as any).id : parentChat.createdBy;
+      const isCreator = String(user.id) === String(creatorId);
+      
+      let previewText = textContent.trim();
+      if (previewText.length > 80) {
+        previewText = previewText.substring(0, 80).trim() + '...';
+      } else if (!previewText) {
+        previewText = body.type === 'image' ? '[Image]' : body.type === 'file' ? '[File]' : '[Message]';
+      }
+
+      await payload.update({
+        collection: 'chats',
+        id: chatId,
+        overrideAccess: true,
+        data: {
+          lastMessageAt: new Date().toISOString(),
+          lastMessagePreview: previewText,
+          metadata: {
+            ...(parentChat.metadata as any || {}),
+            status: isCreator ? 'pending' : 'answered'
+          }
+        }
+      })
+    }
+
 
     const response: MessageResponse = {
       id: message.id,

@@ -42,15 +42,37 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Ch
       sort: '-updatedAt'
     })
 
-    // Format response
-    const formattedChats: ChatListItem[] = chatsResult.docs.map((chat: Chat) => {
+    // Fetch last messages for each chat to determine status
+    const formattedChats = await Promise.all(chatsResult.docs.map(async (chat: Chat) => {
+      // Get the last message to find the sender
+      const lastMessages = await payload.find({
+        collection: 'chat-messages',
+        where: {
+          chat: { equals: chat.id }
+        },
+        limit: 1,
+        sort: '-createdAt',
+        depth: 0,
+        overrideAccess: true
+      })
+      
+      const lastMessageSenderId = lastMessages.docs[0]?.sender 
+        ? (typeof lastMessages.docs[0].sender === 'object' ? (lastMessages.docs[0].sender as any).id : lastMessages.docs[0].sender)
+        : undefined;
+
+      // Participants in a simple hasMany relationship are plain user objects when depth >= 1
+      // Handle both plain objects (simple hasMany) and polymorphic {value} objects
       const participants = (chat.participants || [])
-        .filter((p: any) => p.value && p.value.id !== user.id)
-        .map((p: any) => ({
-          id: p.value.id,
-          name: `${p.value.firstName || ''} ${p.value.lastName || ''}`.trim() || p.value.email,
-          avatar: p.value.profilePicture,
-          role: p.value.role
+        .map((p: any) => {
+          const userObj = p && typeof p === 'object' && p.value ? p.value : p;
+          return userObj && typeof userObj === 'object' ? userObj : null;
+        })
+        .filter((userObj: any) => userObj && userObj.id && userObj.id !== user.id)
+        .map((userObj: any) => ({
+          id: userObj.id,
+          name: `${userObj.firstName || ''} ${userObj.lastName || ''}`.trim() || userObj.email,
+          avatar: userObj.profilePicture,
+          role: userObj.role
         }))
 
       // Calculate unread count (simplified - would need actual implementation)
@@ -63,13 +85,15 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Ch
         status: (chat as any).status,
         lastMessagePreview: chat.lastMessagePreview || undefined,
         lastMessageAt: chat.lastMessageAt || undefined,
+        lastMessageSenderId,
         unreadCount,
         participants,
         metadata: chat.metadata,
-        createdBy: chat.createdBy && typeof chat.createdBy === 'object' ? chat.createdBy : undefined,
-        isActive: (chat as any).status === 'active'
+        createdBy: chat.createdBy ? (typeof chat.createdBy === 'object' ? (chat.createdBy as any).id : chat.createdBy) : undefined,
+        isActive: (chat as any).status === 'active',
+        isArchived: (chat as any).isArchived || false
       }
-    })
+    }))
 
     return NextResponse.json({
       data: formattedChats,
@@ -143,8 +167,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<a
 
 function generateChatTitle(chat: Chat, currentUser: User): string {
   const otherParticipants = (chat.participants || [])
-    .filter((p: any) => p.value && p.value.id !== currentUser.id)
-    .map((p: any) => `${p.value.firstName || ''} ${p.value.lastName || ''}`.trim() || p.value.email)
+    .map((p: any) => {
+      const userObj = p && typeof p === 'object' && p.value ? p.value : p;
+      return userObj && typeof userObj === 'object' ? userObj : null;
+    })
+    .filter((userObj: any) => userObj && userObj.id && userObj.id !== currentUser.id)
+    .map((userObj: any) => `${userObj.firstName || ''} ${userObj.lastName || ''}`.trim() || userObj.email)
 
   if (otherParticipants.length === 1) {
     return otherParticipants[0]
