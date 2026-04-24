@@ -35,6 +35,17 @@ export default function AskInstructorPage() {
     setMounted(true);
     let active = true;
 
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const preselectedInstructorId = searchParams.get('instructorId');
+      if (preselectedInstructorId) {
+        setSelectedInstructor(preselectedInstructorId);
+        setShowAskModal(true);
+        // Clean up the URL
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
+
     const loadData = async () => {
       setLoading(true);
 

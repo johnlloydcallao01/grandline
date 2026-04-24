@@ -58,6 +58,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
+import { getTraineeDashboardSummary } from './endpoints/getTraineeDashboardSummary'
 
 export default buildConfig({
   sharp,
@@ -165,6 +166,11 @@ export default buildConfig({
   // ENTERPRISE-GRADE AUTHENTICATION ENDPOINTS
   // ========================================
   endpoints: [
+    {
+      path: '/dashboard/trainee-summary',
+      method: 'get',
+      handler: getTraineeDashboardSummary as any,
+    },
     {
       path: '/generate-certificate',
       method: 'post',

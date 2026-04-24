@@ -203,7 +203,14 @@ export default function InstructorProfilePage() {
               </div>
             </div>
 
-            <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+            <button 
+              onClick={() => {
+                const uId = String(user.id || user);
+                const fallbackId = uId !== '[object Object]' ? uId : String(instructor.id);
+                router.push(`/portal/ask-instructor?instructorId=${fallbackId}`);
+              }}
+              className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+            >
               Talk with Me
             </button>
           </div>

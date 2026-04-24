@@ -85,7 +85,7 @@ export default function CertificatesPage() {
         <div className="w-full px-[10px]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Certificates & Documents</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Certificates</h1>
               <p className="mt-1 text-sm text-gray-500">
                 Manage and track your completed course certificates.
               </p>
