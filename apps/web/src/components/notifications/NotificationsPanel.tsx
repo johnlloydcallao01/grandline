@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 type NotificationTypeId =
   | 'all'
   | 'unread'
-  | 'learning'
-  | 'account'
-  | 'system_update'
+  | 'enrollments'
   | string;
 
 export type NotificationItem = {
@@ -33,36 +31,37 @@ export type NotificationFilter = {
 interface NotificationsPanelProps {
   items: NotificationItem[];
   filters: NotificationFilter[];
+  onMarkAsRead?: (id: number | string) => Promise<void> | void;
+  onMarkAllAsRead?: () => Promise<void> | void;
+  onDelete?: (id: number | string) => Promise<void> | void;
 }
 
-export function NotificationsPanel({ items, filters }: NotificationsPanelProps) {
+export function NotificationsPanel({ items, filters, onMarkAsRead, onMarkAllAsRead, onDelete }: NotificationsPanelProps) {
   const [selectedFilter, setSelectedFilter] = useState<NotificationTypeId>('all');
   const [notifications, setNotifications] = useState<NotificationItem[]>(items);
+
+  // Sync with parent items when they change (e.g., after fetch)
+  useEffect(() => {
+    setNotifications(items);
+  }, [items]);
 
   const filteredNotifications = notifications.filter((notification) => {
     if (selectedFilter === 'all') return true;
     if (selectedFilter === 'unread') return !notification.read;
-    if (selectedFilter === 'learning') {
-      return [
-        'course_completion',
-        'assignment_due',
-        'new_course',
-        'reminder',
-        'achievement',
-      ].includes(notification.type);
-    }
-    if (selectedFilter === 'account') {
-      return ['payment', 'certificate_issued'].includes(notification.type);
-    }
-    if (selectedFilter === 'system_update') {
-      return notification.type === 'system_update';
+    if (selectedFilter === 'enrollments') {
+      return ['course_enrolled', 'enrollment'].includes(notification.type);
     }
     return notification.type === selectedFilter;
   });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id: number | string) => {
+  const markAsRead = async (id: number | string) => {
+    // Call external handler if provided
+    if (onMarkAsRead) {
+      await onMarkAsRead(id);
+    }
+    // Update local state
     setNotifications((prev) =>
       prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification,
@@ -70,11 +69,21 @@ export function NotificationsPanel({ items, filters }: NotificationsPanelProps) 
     );
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    // Call external handler if provided
+    if (onMarkAllAsRead) {
+      await onMarkAllAsRead();
+    }
+    // Update local state
     setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
   };
 
-  const deleteNotification = (id: number | string) => {
+  const deleteNotification = async (id: number | string) => {
+    // Call external handler if provided
+    if (onDelete) {
+      await onDelete(id);
+    }
+    // Update local state
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   };
 
@@ -114,20 +123,18 @@ export function NotificationsPanel({ items, filters }: NotificationsPanelProps) 
               <button
                 key={type.id}
                 onClick={() => setSelectedFilter(type.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex items-center space-x-2 ${
-                  selectedFilter === type.id
-                    ? 'bg-[#201a7c] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex items-center space-x-2 ${selectedFilter === type.id
+                  ? 'bg-[#201a7c] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 <span>{type.label}</span>
                 {type.count > 0 && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${
-                      selectedFilter === type.id
-                        ? 'bg-white/20 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
+                    className={`px-2 py-0.5 rounded-full text-xs ${selectedFilter === type.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-gray-200 text-gray-600'
+                      }`}
                   >
                     {type.count}
                   </span>
@@ -156,9 +163,8 @@ export function NotificationsPanel({ items, filters }: NotificationsPanelProps) 
             {filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-200 ${
-                  !notification.read ? 'border-l-4 border-l-[#201a7c] shadow-sm' : 'hover:shadow-sm'
-                }`}
+                className={`bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-200 ${!notification.read ? 'border-l-4 border-l-[#201a7c] shadow-sm' : 'hover:shadow-sm'
+                  }`}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
@@ -172,16 +178,14 @@ export function NotificationsPanel({ items, filters }: NotificationsPanelProps) 
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3
-                            className={`text-sm font-semibold ${
-                              !notification.read ? 'text-gray-900' : 'text-gray-700'
-                            }`}
+                            className={`text-sm font-semibold ${!notification.read ? 'text-gray-900' : 'text-gray-700'
+                              }`}
                           >
                             {notification.title}
                           </h3>
                           <p
-                            className={`text-sm mt-1 ${
-                              !notification.read ? 'text-gray-700' : 'text-gray-600'
-                            }`}
+                            className={`text-sm mt-1 ${!notification.read ? 'text-gray-700' : 'text-gray-600'
+                              }`}
                           >
                             {notification.message}
                           </p>

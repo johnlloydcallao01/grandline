@@ -311,5 +311,90 @@ export const CourseEnrollments: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        // Only create notification on CREATE operation for active enrollments
+        if (operation !== 'create' || doc.status !== 'active') return
+
+        try {
+          const payload = req.payload
+
+          // 1. Get trainee's user ID
+          const studentId = typeof doc.student === 'object' ? doc.student.id : doc.student
+          const trainee = await payload.findByID({
+            collection: 'trainees',
+            id: studentId,
+            depth: 0,
+          })
+
+          const userId = typeof trainee.user === 'object' ? trainee.user.id : trainee.user
+
+          // 2. Get course details
+          const courseId = typeof doc.course === 'object' ? doc.course.id : doc.course
+          const course = await payload.findByID({
+            collection: 'courses',
+            id: courseId,
+            depth: 0,
+          })
+
+          // 3. Find COURSE_ENROLLED template
+          const templateRes = await payload.find({
+            collection: 'notification-templates',
+            where: {
+              code: { equals: 'COURSE_ENROLLED' }
+            },
+            limit: 1,
+          })
+          const template = templateRes.docs[0]
+
+          // 4. Create broadcast notification
+          const notification = await payload.create({
+            collection: 'notifications',
+            data: {
+              ...(template && { template: template.id }),
+              category: 'learning',
+              title: `🎓 Welcome to ${course.title}!`,
+              body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
+              metadata: {
+                enrollmentId: doc.id,
+                courseId: course.id,
+                courseName: course.title,
+                enrollmentType: doc.enrollmentType,
+              },
+              sourceType: 'enrollment',
+              sourceId: String(doc.id),
+              origin: 'automatic',
+              audienceType: 'specific-users',
+              status: 'sent',
+            },
+          })
+
+          // 5. Create per-user notification (for bell icon)
+          await payload.create({
+            collection: 'user-notifications',
+            data: {
+              user: userId,
+              notification: notification.id,
+              category: 'learning',
+              title: `🎓 Welcome to ${course.title}!`,
+              body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
+              link: `/portal/courses/${course.id}`,
+              metadata: {
+                enrollmentId: doc.id,
+                courseId: course.id,
+                courseName: course.title,
+              },
+              channel: 'in-app',
+              deliveredAt: new Date().toISOString(),
+            },
+          })
+
+          console.log(`[CourseEnrollments Hook] Notification created for user ${userId}, course ${course.title}`)
+        } catch (notifyError) {
+          // Log error but don't fail the enrollment
+          console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)
+        }
+      },
+    ],
   },
 }
