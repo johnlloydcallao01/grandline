@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Header, Sidebar, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
+import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import { useUser } from '@/hooks/useAuth'
 
 /**
  * Main App Layout - Persistent layout for all main app pages
@@ -21,6 +23,7 @@ export default function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
 
   // Pages that should hide the sidebar entirely for a full-screen experience
   const hideSidebarPages = ['/training-materials/'];
@@ -78,42 +81,44 @@ export default function MainLayout({
 
   return (
     <ProtectedRoute>
-      <div
-        className="min-h-screen bg-gray-50"
-        style={{ backgroundColor: '#f9fafb' }}
-        data-fixed-header={pathname === '/results' ? undefined : 'true'}
-      >
-        {/* Header - Persistent across all pages */}
-        {!shouldHideSidebar && (
-          <Header
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={toggleSidebar}
-            onSearch={handleSearch}
-          />
-        )}
-
-        {/* Sidebar - Persistent across all pages */}
-        {!shouldHideSidebar && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onToggle={toggleSidebar}
-          />
-        )}
-
-        {/* Main Content Area - Only this changes during navigation */}
-        <main
-          className={`transition-all duration-300 bg-gray-50 ${shouldHideSidebar ? 'w-full' : (sidebarOpen ? 'lg:ml-60' : 'lg:ml-20')
-            }`}
+      <NotificationsProvider userId={user?.id}>
+        <div
+          className="min-h-screen bg-gray-50"
           style={{ backgroundColor: '#f9fafb' }}
+          data-fixed-header={pathname === '/results' ? undefined : 'true'}
         >
-          <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
-            {children}
-          </div>
-        </main>
+          {/* Header - Persistent across all pages */}
+          {!shouldHideSidebar && (
+            <Header
+              sidebarOpen={sidebarOpen}
+              onToggleSidebar={toggleSidebar}
+              onSearch={handleSearch}
+            />
+          )}
 
-        {/* Mobile Footer - Only for main app pages */}
-        {!shouldHideSidebar && <MobileFooter />}
-      </div>
+          {/* Sidebar - Persistent across all pages */}
+          {!shouldHideSidebar && (
+            <Sidebar
+              isOpen={sidebarOpen}
+              onToggle={toggleSidebar}
+            />
+          )}
+
+          {/* Main Content Area - Only this changes during navigation */}
+          <main
+            className={`transition-all duration-300 bg-gray-50 ${shouldHideSidebar ? 'w-full' : (sidebarOpen ? 'lg:ml-60' : 'lg:ml-20')
+              }`}
+            style={{ backgroundColor: '#f9fafb' }}
+          >
+            <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+              {children}
+            </div>
+          </main>
+
+          {/* Mobile Footer - Only for main app pages */}
+          {!shouldHideSidebar && <MobileFooter />}
+        </div>
+      </NotificationsProvider>
     </ProtectedRoute>
   )
 }
