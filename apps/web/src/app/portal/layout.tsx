@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Header, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
+import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import { useUser } from '@/hooks/useAuth'
 
 /**
  * Portal Layout - Custom layout for portal pages
@@ -22,6 +24,7 @@ export default function PortalLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
 
   const isCoursePlayer =
     typeof pathname === 'string' &&
@@ -78,42 +81,44 @@ export default function PortalLayout({
 
   return (
     <ProtectedRoute>
-      <div
-        className="min-h-screen bg-gray-50"
-        style={{ backgroundColor: '#f9fafb' }}
-        data-fixed-header={!isCoursePlayer ? 'true' : undefined}
-      >
-        {/* Header - Same as main app for consistency */}
-        {!isCoursePlayer && (
-          <Header
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={toggleSidebar}
-            onSearch={handleSearch}
-          />
-        )}
-
-        {/* Portal Sidebar - Custom sidebar for portal pages */}
-        {!isCoursePlayer && (
-          <PortalSidebar
-            isOpen={sidebarOpen}
-            onToggle={toggleSidebar}
-          />
-        )}
-
-        {/* Main Content Area - Portal pages content */}
-        <main
-          className={`transition-all duration-300 bg-gray-50 ${isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
-            }`}
+      <NotificationsProvider userId={user?.id}>
+        <div
+          className="min-h-screen bg-gray-50"
           style={{ backgroundColor: '#f9fafb' }}
+          data-fixed-header={!isCoursePlayer ? 'true' : undefined}
         >
-          <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
-            {children}
-          </div>
-        </main>
+          {/* Header - Same as main app for consistency */}
+          {!isCoursePlayer && (
+            <Header
+              sidebarOpen={sidebarOpen}
+              onToggleSidebar={toggleSidebar}
+              onSearch={handleSearch}
+            />
+          )}
 
-        {/* Mobile Footer - Same as main app */}
-        {!isCoursePlayer && <MobileFooter />}
-      </div>
+          {/* Portal Sidebar - Custom sidebar for portal pages */}
+          {!isCoursePlayer && (
+            <PortalSidebar
+              isOpen={sidebarOpen}
+              onToggle={toggleSidebar}
+            />
+          )}
+
+          {/* Main Content Area - Portal pages content */}
+          <main
+            className={`transition-all duration-300 bg-gray-50 ${isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+              }`}
+            style={{ backgroundColor: '#f9fafb' }}
+          >
+            <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+              {children}
+            </div>
+          </main>
+
+          {/* Mobile Footer - Same as main app */}
+          {!isCoursePlayer && <MobileFooter />}
+        </div>
+      </NotificationsProvider>
     </ProtectedRoute>
   )
 }

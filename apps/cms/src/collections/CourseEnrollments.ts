@@ -1,5 +1,6 @@
 import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
+import { broadcastNotification } from '../utils/supabaseNotifications'
 
 export const CourseEnrollments: CollectionConfig = {
   slug: 'course-enrollments',
@@ -370,7 +371,7 @@ export const CourseEnrollments: CollectionConfig = {
           })
 
           // 5. Create per-user notification (for bell icon)
-          await payload.create({
+          const userNotification = await payload.create({
             collection: 'user-notifications',
             data: {
               user: userId,
@@ -389,7 +390,22 @@ export const CourseEnrollments: CollectionConfig = {
             },
           })
 
-          console.log(`[CourseEnrollments Hook] Notification created for user ${userId}, course ${course.title}`)
+          // 6. Broadcast via Supabase Realtime for instant delivery
+          await broadcastNotification(userId, {
+            id: userNotification.id,
+            title: `🎓 Welcome to ${course.title}!`,
+            body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
+            category: 'learning',
+            link: `/portal/courses/${course.id}`,
+            metadata: {
+              enrollmentId: doc.id,
+              courseId: course.id,
+              courseName: course.title,
+            },
+            deliveredAt: new Date().toISOString(),
+          })
+
+          console.log(`[CourseEnrollments Hook] Notification created & broadcast for user ${userId}, course ${course.title}`)
         } catch (notifyError) {
           // Log error but don't fail the enrollment
           console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)

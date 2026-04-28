@@ -11,6 +11,24 @@ export default function NotificationsPage() {
   const router = useRouter();
 
   // Use shared context for real-time sync
+  const context = useNotifications();
+
+  // Redirect if not logged in or no context (shouldn't happen in (main) layout)
+  useEffect(() => {
+    if (!user && !context?.isLoading) {
+      router.push('/signin');
+    }
+  }, [user, context, router]);
+
+  // Show loading if context not available yet
+  if (!context) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ab3b43]" />
+      </div>
+    );
+  }
+
   const {
     notifications,
     unreadCount,
@@ -19,14 +37,7 @@ export default function NotificationsPage() {
     markAsUnread,
     markAllAsRead,
     deleteNotification
-  } = useNotifications();
-
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!user && !isLoading) {
-      router.push('/signin');
-    }
-  }, [user, isLoading, router]);
+  } = context;
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -45,6 +45,7 @@ export class ChatChannelManager {
         return () => this.unsubscribeFromChat(chatId, handler);
     }
     createChatChannel(chatId, channelName) {
+        console.log(`[ChatEngine] Creating Supabase channel: ${channelName} for chat ID ${chatId}`);
         const channel = this.supabase
             .channel(channelName, {
             config: {
@@ -57,8 +58,9 @@ export class ChatChannelManager {
             event: 'INSERT',
             schema: 'public',
             table: 'chat_messages',
-            filter: `chat_id=eq.${chatId}`,
+            filter: `chat=eq.${chatId}`,
         }, (payload) => {
+            console.log(`[ChatEngine] 🟢 INSERT received on chat_messages:`, payload);
             this.emitEvent(channelName, {
                 type: 'message_insert',
                 payload: payload.new,
@@ -72,8 +74,9 @@ export class ChatChannelManager {
             event: 'UPDATE',
             schema: 'public',
             table: 'chat_messages',
-            filter: `chat_id=eq.${chatId}`,
+            filter: `chat=eq.${chatId}`,
         }, (payload) => {
+            console.log(`[ChatEngine] 🟡 UPDATE received on chat_messages:`, payload);
             this.emitEvent(channelName, {
                 type: 'message_update',
                 payload: payload.new,
@@ -88,8 +91,9 @@ export class ChatChannelManager {
             event: 'DELETE',
             schema: 'public',
             table: 'chat_messages',
-            filter: `chat_id=eq.${chatId}`,
+            filter: `chat=eq.${chatId}`,
         }, (payload) => {
+            console.log(`[ChatEngine] 🔴 DELETE received on chat_messages:`, payload);
             this.emitEvent(channelName, {
                 type: 'message_delete',
                 payload: payload.old,
@@ -132,7 +136,7 @@ export class ChatChannelManager {
             event: '*',
             schema: 'public',
             table: 'chat_typing_status',
-            filter: `chat_id=eq.${chatId}`,
+            filter: `chat=eq.${chatId}`,
         }, (payload) => {
             this.emitEvent(channelName, {
                 type: 'typing_update',
@@ -144,7 +148,8 @@ export class ChatChannelManager {
                 new: payload.new,
             });
         })
-            .subscribe((status) => {
+            .subscribe((status, err) => {
+            console.log(`[ChatEngine] Channel ${channelName} status changed to: ${status}`, err ? `Error: ${err.message}` : '');
             const state = this.channelStates.get(channelName);
             if (state) {
                 state.status = status === 'SUBSCRIBED' ? 'connected' : status === 'CLOSED' ? 'disconnected' : 'error';

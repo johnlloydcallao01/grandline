@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ export default function DiscussionThreadPage() {
   const [activeTopic, setActiveTopic] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
-  
+
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean, type: 'success' | 'error', title: string, message: string }>({ isOpen: false, type: 'success', title: '', message: '' });
@@ -33,16 +33,16 @@ export default function DiscussionThreadPage() {
     }
 
     setMounted(true);
-    
+
     // Initialize ChatChannelManager when component mounts on client
     try {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
+
       if (!url || !key) {
         throw new Error('Supabase URL or Key is missing from environment variables');
       }
-      
+
       console.log('[DiscussionBoard] Initializing Supabase client...', url);
       const supabaseClient = createSupabaseClient({
         supabaseUrl: url,
@@ -54,7 +54,7 @@ export default function DiscussionThreadPage() {
     } catch (e) {
       console.error('Failed to initialize Supabase client for real-time chat', e);
     }
-    
+
     // Cleanup on unmount to prevent memory leaks during hot reload
     return () => {
       // Note: we don't unsubscribe here because we want to keep the connection
@@ -69,7 +69,7 @@ export default function DiscussionThreadPage() {
       // In a real app, you'd have a specific endpoint `getDiscussionTopic(id)`
       const topics = await getDiscussionTopics();
       const topic = topics.find((t: any) => t.id === topicId);
-      
+
       if (topic) {
         setActiveTopic(topic);
         await fetchTopicMessages(topicId);
@@ -83,14 +83,14 @@ export default function DiscussionThreadPage() {
     }
   };
 
-  const fetchTopicMessages = async (id: number) => {
+  const fetchTopicMessages = useCallback(async (id: number) => {
     try {
       const data = await getTopicMessages(id);
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (topicId) {
@@ -103,29 +103,50 @@ export default function DiscussionThreadPage() {
 
     if (activeTopic && channelManagerRef.current && channelManagerReady) {
       console.log(`[DiscussionBoard] Subscribing to chat ID: ${activeTopic.id}`);
+      console.log(`[DiscussionBoard] ChannelManager ready:`, channelManagerReady);
+      console.log(`[DiscussionBoard] ChannelManager instance:`, channelManagerRef.current ? 'exists' : 'null');
+
       // Subscribe to real-time events for the active topic
       unsubscribe = channelManagerRef.current.subscribeToChat(activeTopic.id, (event) => {
-        console.log(`[DiscussionBoard] Realtime Event Received:`, event.type);
+        console.log(`[DiscussionBoard] 🔔 Realtime Event Received:`, event.type, event);
         if (event.type === 'message_insert') {
+          console.log(`[DiscussionBoard] Message insert payload:`, event.payload);
           setMessages((prevMessages) => {
             // Check if we already have this message (e.g. from optimistic update)
             if (prevMessages.some((msg) => msg.id === (event.payload as any).id)) {
               console.log(`[DiscussionBoard] Message ${(event.payload as any).id} already exists, skipping`);
               return prevMessages;
             }
-            
+
             console.log(`[DiscussionBoard] New message detected, refetching topic messages...`);
             // Refetch to get populated relationships (user details)
             setTimeout(() => {
               fetchTopicMessages(activeTopic.id);
             }, 100);
-            
+
             return prevMessages;
           });
         } else if (event.type === 'message_delete') {
           setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== (event.payload as any).id));
         }
       });
+
+      // Also listen for broadcast events (more reliable for cross-tab communication)
+      const channel = (channelManagerRef.current as any).channels?.get(`chat:${activeTopic.id}`);
+      if (channel) {
+        console.log(`[DiscussionBoard] Setting up broadcast listener for new_message`);
+        channel.on('broadcast', { event: 'new_message' }, (payload: any) => {
+          console.log(`[DiscussionBoard] 📡 Broadcast received:`, payload);
+          // Refetch messages when broadcast received
+          setTimeout(() => {
+            fetchTopicMessages(activeTopic.id);
+          }, 100);
+        });
+      }
+
+      console.log(`[DiscussionBoard] Subscription function returned, unsubscribe defined:`, !!unsubscribe);
+    } else {
+      console.log(`[DiscussionBoard] Not subscribing - activeTopic:`, !!activeTopic, 'channelManagerReady:', channelManagerReady);
     }
 
     return () => {
@@ -134,17 +155,17 @@ export default function DiscussionThreadPage() {
         unsubscribe();
       }
     };
-  }, [activeTopic]);
+  }, [activeTopic, channelManagerReady, fetchTopicMessages]);
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyContent || !activeTopic) return;
-    
+
     try {
       setIsSubmitting(true);
       const newMessage = await replyToTopic(activeTopic.id, replyContent);
       setReplyContent('');
-      
+
       // Optimistically append our own message
       setMessages((prevMessages) => {
         if (prevMessages.some((msg) => msg.id === newMessage.id)) {
@@ -152,7 +173,31 @@ export default function DiscussionThreadPage() {
         }
         return [...prevMessages, newMessage];
       });
-      
+
+      // Broadcast to other clients via Supabase broadcast (more reliable than postgres_changes)
+      if (channelManagerRef.current) {
+        console.log(`[DiscussionBoard] Broadcasting new message to chat:${activeTopic.id}`);
+        try {
+          const channel = (channelManagerRef.current as any).channels?.get(`chat:${activeTopic.id}`);
+          if (channel) {
+            await channel.send({
+              type: 'broadcast',
+              event: 'new_message',
+              payload: {
+                messageId: newMessage.id,
+                chatId: activeTopic.id,
+                sender: newMessage.sender,
+                content: newMessage.content,
+                createdAt: newMessage.createdAt,
+              },
+            });
+            console.log(`[DiscussionBoard] Broadcast sent successfully`);
+          }
+        } catch (broadcastError) {
+          console.error(`[DiscussionBoard] Broadcast failed:`, broadcastError);
+        }
+      }
+
     } catch (error: any) {
       console.error('Error posting reply:', error);
       setFeedbackModal({ isOpen: true, type: 'error', title: 'Failed to Post Reply', message: error.message || 'An unexpected error occurred. Please try again.' });
@@ -178,7 +223,7 @@ export default function DiscussionThreadPage() {
     return (
       <div className="w-full px-[10px] py-6 animate-pulse">
         <div className="w-32 h-6 bg-gray-200 rounded mb-4" />
-        
+
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
           <div className="h-8 bg-gray-200 rounded w-1/2 mb-4" />
           <div className="h-4 bg-gray-200 rounded w-1/4" />
@@ -212,7 +257,7 @@ export default function DiscussionThreadPage() {
 
   return (
     <div className="w-full px-[10px] py-6">
-      <Link 
+      <Link
         href="/portal/discussion-board"
         className="mb-4 inline-flex items-center gap-2 text-gray-500 hover:text-gray-900"
       >
@@ -267,7 +312,7 @@ export default function DiscussionThreadPage() {
             onChange={(e) => setReplyContent(e.target.value)}
           />
           <div className="flex justify-end">
-            <button 
+            <button
               type="submit"
               disabled={!replyContent.trim() || isSubmitting}
               className="bg-[#201a7c] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] transition-colors disabled:opacity-50 flex items-center gap-2"

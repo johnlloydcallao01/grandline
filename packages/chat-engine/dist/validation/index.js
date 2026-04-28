@@ -125,7 +125,7 @@ export function canSendToChat(userId, chat) {
             code: 'CHAT_CLOSED'
         };
     }
-    if (!isParticipant(userId, chat)) {
+    if (chat.type !== 'group' && !isParticipant(userId, chat)) {
         return {
             valid: false,
             error: 'You are not a participant in this chat',

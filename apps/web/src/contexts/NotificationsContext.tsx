@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { NotificationItem } from '@/components/notifications/NotificationsPanel';
+import { createClientFromEnv, type SupabaseClient, type RealtimeChannel } from '@grandline/chat-engine';
 
 interface NotificationsContextType {
   notifications: NotificationItem[];
@@ -22,6 +23,10 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Supabase realtime
+  const supabaseRef = useRef<SupabaseClient | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     if (!userId) return;
@@ -66,6 +71,107 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
     if (userId) {
       fetchNotifications();
     }
+  }, [userId, fetchNotifications]);
+
+  // ============================================================================
+  // Supabase Realtime Subscription for Instant Notifications
+  // ============================================================================
+  useEffect(() => {
+    if (!userId) return;
+
+    // Initialize Supabase client
+    try {
+      supabaseRef.current = createClientFromEnv();
+    } catch (error) {
+      console.error('[NotificationsContext] Failed to create Supabase client:', error);
+      return;
+    }
+
+    const supabase = supabaseRef.current;
+    const channelName = `notifications:user:${userId}`;
+
+    console.log(`[NotificationsContext] Subscribing to realtime channel: ${channelName}`);
+
+    // Create and subscribe to the channel
+    const channel = supabase
+      .channel(channelName, {
+        config: {
+          broadcast: {
+            self: true,
+          },
+        },
+      })
+      .on(
+        'broadcast',
+        { event: 'new_notification' },
+        (payload: { payload: { notification: any } }) => {
+          console.log('[NotificationsContext] 🔔 Realtime notification received:', payload);
+
+          // Play notification sound (optional)
+          try {
+            const audio = new Audio('/sounds/notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {
+              // Audio play failed (user interaction required), ignore
+            });
+          } catch {
+            // Audio not supported, ignore
+          }
+
+          // Add new notification to state immediately
+          const newNotification = payload.payload?.notification;
+          if (newNotification) {
+            const transformed: NotificationItem = {
+              id: newNotification.id,
+              type: newNotification.category || 'other',
+              title: newNotification.title,
+              message: newNotification.body,
+              timestamp: getTimeAgo(newNotification.deliveredAt),
+              read: false,
+              icon: getNotificationIcon(newNotification.category),
+              iconColor: getIconColor(newNotification.category),
+              iconBg: getIconBg(newNotification.category),
+              actionText: newNotification.link ? 'View Details' : undefined,
+              actionPath: newNotification.link || undefined,
+            };
+
+            setNotifications((prev) => [transformed, ...prev]);
+            setUnreadCount((prev) => prev + 1);
+          }
+
+          // Also refetch to ensure consistency with server
+          fetchNotifications();
+        }
+      )
+      .on(
+        'broadcast',
+        { event: 'notification_read' },
+        (payload: { payload: { notificationId: string } }) => {
+          console.log('[NotificationsContext] 📖 Notification marked as read:', payload);
+
+          const notificationId = payload.payload?.notificationId;
+          if (notificationId) {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+            );
+            setUnreadCount((prev) => Math.max(0, prev - 1));
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log(`[NotificationsContext] Channel ${channelName} status: ${status}`);
+      });
+
+    channelRef.current = channel;
+
+    // Cleanup on unmount or userId change
+    return () => {
+      console.log(`[NotificationsContext] Unsubscribing from channel: ${channelName}`);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
   }, [userId, fetchNotifications]);
 
   const markAsRead = useCallback(async (id: number | string) => {
@@ -261,10 +367,8 @@ export function getTimeAgo(timestamp: string): string {
   return date.toLocaleDateString();
 }
 
-export function useNotifications() {
+export function useNotifications(): NotificationsContextType | null {
   const context = useContext(NotificationsContext);
-  if (context === undefined) {
-    throw new Error('useNotifications must be used within a NotificationsProvider');
-  }
-  return context;
+  // Return null instead of throwing to allow usage outside provider (e.g., auth pages)
+  return context || null;
 }

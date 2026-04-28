@@ -17,7 +17,22 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   const pathname = usePathname();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  // Use shared context for real-time sync
+  // Use shared context for real-time sync (null if outside provider, e.g., auth pages)
+  const context = useNotifications();
+
+  // If no context (outside NotificationsProvider), render disabled bell
+  if (!context) {
+    return (
+      <button
+        className="relative p-2 text-gray-400 cursor-default"
+        aria-label="Notifications"
+        disabled
+      >
+        <i className="fas fa-bell text-xl" />
+      </button>
+    );
+  }
+
   const {
     notifications,
     unreadCount,
@@ -27,7 +42,7 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
     markAsUnread,
     markAllAsRead,
     deleteNotification
-  } = useNotifications();
+  } = context;
 
   const [isOpen, setIsOpen] = useState(false);
   const isNotificationsPage = pathname === '/notifications';
