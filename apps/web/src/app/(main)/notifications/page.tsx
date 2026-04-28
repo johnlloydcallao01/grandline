@@ -5,7 +5,6 @@ import { NotificationsPanel, type NotificationItem } from '@/components/notifica
 import { useUser } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
 
 // Helper: Map notification category/type to icon styles
 const getNotificationIcon = (category: string, _type?: string) => {
@@ -47,16 +46,15 @@ export default function NotificationsPage() {
     }
   }, [user, isLoading, router]);
 
-  // Fetch notifications
+  // Fetch notifications via local API
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
 
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/user-notifications?where[user][equals]=${user.id}&sort=-deliveredAt&limit=50`,
-        { credentials: 'include' }
-      );
+      const res = await fetch(`/api/notifications?userId=${user.id}`, {
+        credentials: 'same-origin',
+      });
 
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
 
@@ -99,10 +97,10 @@ export default function NotificationsPage() {
   // Mark single as read
   const handleMarkAsRead = async (id: number | string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/user-notifications/${id}`, {
+      const res = await fetch(`/api/notifications/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'same-origin',
         body: JSON.stringify({ readAt: new Date().toISOString() }),
       });
 
@@ -122,10 +120,10 @@ export default function NotificationsPage() {
     try {
       await Promise.all(
         unread.map((n) =>
-          fetch(`${API_BASE_URL}/api/user-notifications/${n.id}`, {
+          fetch(`/api/notifications/${n.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            credentials: 'same-origin',
             body: JSON.stringify({ readAt: new Date().toISOString() }),
           })
         )
@@ -140,9 +138,9 @@ export default function NotificationsPage() {
   // Delete notification
   const handleDelete = async (id: number | string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/user-notifications/${id}`, {
+      const res = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        credentials: 'same-origin',
       });
 
       if (res.ok) {

@@ -12,8 +12,6 @@ interface NotificationBellProps {
   isMobile?: boolean;
 }
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
-
 // Helper: Map notification category/type to icon styles
 const getNotificationIcon = (category: string, _sourceType?: string) => {
   const iconMap: Record<string, { icon: string; iconColor: string; iconBg: string; type: string }> = {
@@ -54,16 +52,15 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
 
   const isNotificationsPage = pathname === '/notifications';
 
-  // Fetch notifications from CMS
+  // Fetch notifications via local API proxy
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
 
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/user-notifications?where[user][equals]=${user.id}&sort=-deliveredAt&limit=50`,
-        { credentials: 'include' }
-      );
+      const res = await fetch(`/api/notifications?userId=${user.id}`, {
+        credentials: 'same-origin',
+      });
 
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
 
@@ -129,10 +126,10 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   // Mark single as read
   const handleMarkAsRead = async (id: number | string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/user-notifications/${id}`, {
+      const res = await fetch(`/api/notifications/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'same-origin',
         body: JSON.stringify({ readAt: new Date().toISOString() }),
       });
 
@@ -153,10 +150,10 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
     try {
       await Promise.all(
         unread.map((n) =>
-          fetch(`${API_BASE_URL}/api/user-notifications/${n.id}`, {
+          fetch(`/api/notifications/${n.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            credentials: 'same-origin',
             body: JSON.stringify({ readAt: new Date().toISOString() }),
           })
         )
@@ -172,9 +169,9 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   // Delete notification
   const handleDelete = async (id: number | string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/user-notifications/${id}`, {
+      const res = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        credentials: 'same-origin',
       });
 
       if (res.ok) {
@@ -227,8 +224,8 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
         {unreadCount > 0 && (
           <span
             className={`absolute text-white text-xs font-bold rounded-full flex items-center justify-center ${isMobile
-                ? 'top-0.5 right-2 w-4 h-4 text-[10px]' // Mobile: closer to centered icon
-                : '-top-1 -right-1 w-5 h-5' // Desktop: at edge of fixed-size button
+              ? 'top-0.5 right-2 w-4 h-4 text-[10px]' // Mobile: closer to centered icon
+              : '-top-1 -right-1 w-5 h-5' // Desktop: at edge of fixed-size button
               }`}
             style={{ backgroundColor: '#ab3b43' }}
           >
