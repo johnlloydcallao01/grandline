@@ -17,6 +17,10 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   const pathname = usePathname();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
+  // Track if user has seen the notification indicator (bubble cleared on click)
+  const [bubbleCleared, setBubbleCleared] = useState(false);
+  const lastUnreadCountRef = useRef(0);
+
   // Use shared context for real-time sync (null if outside provider, e.g., auth pages)
   const context = useNotifications();
 
@@ -47,6 +51,18 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   const [isOpen, setIsOpen] = useState(false);
   const isNotificationsPage = pathname === '/notifications';
 
+  // Reset bubble cleared state when new notifications arrive (unreadCount increases)
+  useEffect(() => {
+    if (unreadCount > lastUnreadCountRef.current) {
+      // New notifications arrived, show bubble again
+      setBubbleCleared(false);
+    }
+    lastUnreadCountRef.current = unreadCount;
+  }, [unreadCount]);
+
+  // Show bubble if there are unread notifications AND user hasn't cleared it by clicking
+  const showBubble = unreadCount > 0 && !bubbleCleared;
+
   // Refresh when panel opens (desktop modal only)
   useEffect(() => {
     if (isOpen && !navigateToPage) {
@@ -69,8 +85,11 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
     };
   }, [isOpen]);
 
-  // Handle bell click
+  // Handle bell click - clear bubble indicator (but don't mark as read)
   const handleBellClick = () => {
+    // Clear the bubble indicator immediately on click (Facebook-like behavior)
+    setBubbleCleared(true);
+
     if (navigateToPage) {
       // Mobile: navigate to full page
       router.push('/notifications');
@@ -83,7 +102,7 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
 
   // Bell button classes
   const bellClasses = isMobile
-    ? 'w-full h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors'
+    ? 'relative w-full h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors'
     : `relative w-10 h-10 rounded-md flex items-center justify-center transition-colors ${isNotificationsPage ? 'bg-[#e6e5f7]' : 'bg-white hover:bg-gray-50'
     }`;
 
@@ -104,12 +123,12 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
         <i className={iconClasses}></i>
 
         {/* Unread Badge - Using same red as wishlist heart (#ab3b43) */}
-        {/* unreadCount comes from context - updates in real-time */}
-        {unreadCount > 0 && (
+        {/* Cleared when clicking bell, but notifications remain unread until manually marked */}
+        {showBubble && (
           <span
-            className={`absolute text-white text-xs font-bold rounded-full flex items-center justify-center ${isMobile
-              ? '-top-1 right-1 w-4 h-4 text-[10px]' // Mobile: slight offset from bell
-              : '-top-1 -right-1 w-5 h-5' // Desktop: slight offset from bell
+            className={`absolute text-white font-bold rounded-full flex items-center justify-center leading-none ${isMobile
+              ? '-top-1 -right-2 w-3.5 h-3.5 text-[9px]' // Mobile: moved down 2px
+              : 'top-0 -right-1 w-4 h-4 text-[10px]' // Desktop: moved down 2px
               }`}
             style={{ backgroundColor: '#ab3b43' }}
           >

@@ -177,14 +177,14 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
     <header className={`lg:sticky lg:top-0 fixed top-0 left-0 right-0 bg-white z-50 lg:transition-none transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : 'lg:translate-y-0 -translate-y-full'
       }`}>
       {pathname !== '/results' && (
-        <div className="lg:hidden flex items-center px-3 py-1.5 space-x-1 sm:space-x-2 h-14">
-          <div className="w-[80%] flex items-center justify-start">
+        <div className="lg:hidden flex items-center px-3 py-1.5 space-x-3 h-14">
+          <div className="flex-1 flex items-center justify-start">
             {React.createElement(Image, { src: '/calsiter-inc-logo.png', alt: 'Calsiter Inc Logo', width: 210, height: 56, className: 'h-14 w-auto', priority: true })}
           </div>
-          <div className="w-[10%]">
+          <div className="flex-none">
             <NotificationBell navigateToPage isMobile />
           </div>
-          <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-[10%] h-10 bg-white rounded-md flex items-center justify-center">
+          <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-10 h-10 bg-white rounded-md flex items-center justify-center flex-none">
             <i className="fa fa-search text-gray-600 text-lg"></i>
           </button>
         </div>
