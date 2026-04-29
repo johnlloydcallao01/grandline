@@ -333,17 +333,17 @@ function PortalSidebar({ isOpen, onToggle: _onToggle }: { isOpen: boolean; onTog
           <div className="space-y-1">
             {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">General</div>}
 
-            {/* Settings */}
+            {/* Account */}
             {(Link as any)({
-              href: "/portal/settings",
+              href: "/portal/account",
               className: `flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors ${isOpen ? 'justify-start' : 'justify-center'
                 }`,
               children: (
                 <>
                   <div className="w-5 h-5 flex items-center justify-center">
-                    <i className="fa fa-cog text-gray-600"></i>
+                    <i className="fa fa-user text-gray-600"></i>
                   </div>
-                  {isOpen && <span className="ml-3 text-gray-700">Settings</span>}
+                  {isOpen && <span className="ml-3 text-gray-700">Account</span>}
                 </>
               )
             })}

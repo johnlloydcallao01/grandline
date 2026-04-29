@@ -17,10 +17,6 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   const pathname = usePathname();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  // Track if user has seen the notification indicator (bubble cleared on click)
-  const [bubbleCleared, setBubbleCleared] = useState(false);
-  const lastUnreadCountRef = useRef(0);
-
   // Use shared context for real-time sync (null if outside provider, e.g., auth pages)
   const context = useNotifications();
 
@@ -40,28 +36,18 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
   const {
     notifications,
     unreadCount,
+    unseenCount, // For bell bubble - based on seenAt, not readAt
     isLoading,
     fetchNotifications,
     markAsRead,
     markAsUnread,
     markAllAsRead,
+    markAllAsSeen, // Clears bubble by setting seenAt
     deleteNotification
   } = context;
 
   const [isOpen, setIsOpen] = useState(false);
   const isNotificationsPage = pathname === '/notifications';
-
-  // Reset bubble cleared state when new notifications arrive (unreadCount increases)
-  useEffect(() => {
-    if (unreadCount > lastUnreadCountRef.current) {
-      // New notifications arrived, show bubble again
-      setBubbleCleared(false);
-    }
-    lastUnreadCountRef.current = unreadCount;
-  }, [unreadCount]);
-
-  // Show bubble if there are unread notifications AND user hasn't cleared it by clicking
-  const showBubble = unreadCount > 0 && !bubbleCleared;
 
   // Refresh when panel opens (desktop modal only)
   useEffect(() => {
@@ -85,10 +71,13 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
     };
   }, [isOpen]);
 
-  // Handle bell click - clear bubble indicator (but don't mark as read)
+  // Handle bell click - mark all as SEEN (clears bubble) but NOT as READ
   const handleBellClick = () => {
-    // Clear the bubble indicator immediately on click (Facebook-like behavior)
-    setBubbleCleared(true);
+    // Mark all as SEEN when clicking bell - this clears the bubble
+    // Notifications stay UNREAD until user manually marks them
+    if (unseenCount > 0) {
+      markAllAsSeen();
+    }
 
     if (navigateToPage) {
       // Mobile: navigate to full page
@@ -122,9 +111,9 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
       >
         <i className={iconClasses}></i>
 
-        {/* Unread Badge - Using same red as wishlist heart (#ab3b43) */}
-        {/* Cleared when clicking bell, but notifications remain unread until manually marked */}
-        {showBubble && (
+        {/* Unseen Badge - Shows based on seenAt, not readAt (Facebook-like) */}
+        {/* Clears when clicking bell by calling markAllAsSeen, but notifications stay unread */}
+        {unseenCount > 0 && (
           <span
             className={`absolute text-white font-bold rounded-full flex items-center justify-center leading-none ${isMobile
               ? '-top-1 -right-2 w-3.5 h-3.5 text-[9px]' // Mobile: moved down 2px
@@ -132,7 +121,7 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
               }`}
             style={{ backgroundColor: '#ab3b43' }}
           >
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unseenCount > 9 ? '9+' : unseenCount}
           </span>
         )}
       </button>

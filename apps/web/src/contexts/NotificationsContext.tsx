@@ -7,11 +7,13 @@ import { createClientFromEnv, type SupabaseClient, type RealtimeChannel } from '
 interface NotificationsContextType {
   notifications: NotificationItem[];
   unreadCount: number;
+  unseenCount: number; // For bell bubble - clears when clicking bell
   isLoading: boolean;
   fetchNotifications: () => Promise<void>;
   markAsRead: (id: number | string) => Promise<void>;
   markAsUnread: (id: number | string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  markAllAsSeen: () => Promise<void>; // Clicking bell - clears bubble only
   markSelectedAsRead: (ids: (number | string)[]) => Promise<void>;
   markSelectedAsUnread: (ids: (number | string)[]) => Promise<void>;
   deleteNotification: (id: number | string) => Promise<void>;
@@ -22,6 +24,7 @@ const NotificationsContext = createContext<NotificationsContextType | undefined>
 export function NotificationsProvider({ children, userId }: { children: React.ReactNode; userId?: string | number }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unseenCount, setUnseenCount] = useState(0); // For bell bubble indicator
   const [isLoading, setIsLoading] = useState(false);
 
   // Supabase realtime
@@ -50,6 +53,7 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
         message: n.body,
         timestamp: n.deliveredAt,
         read: !!n.readAt,
+        seen: !!n.seenAt, // Track seen status separately
         icon: getNotificationIcon(n.category),
         iconColor: getIconColor(n.category),
         iconBg: getIconBg(n.category),
@@ -59,6 +63,7 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
 
       setNotifications(transformed);
       setUnreadCount(transformed.filter((n) => !n.read).length);
+      setUnseenCount(transformed.filter((n) => !n.seen).length); // Bubble count
     } catch (error) {
       console.error('[NotificationsContext] Error fetching:', error);
     } finally {
@@ -237,6 +242,29 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
     }
   }, [notifications]);
 
+  // Mark all as SEEN (clicking bell) - clears bubble but keeps notifications unread
+  const markAllAsSeen = useCallback(async () => {
+    if (unseenCount === 0) return;
+
+    try {
+      // Call API to mark all unseen notifications as seen
+      const res = await fetch('/api/notifications/mark-seen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ userId }),
+      });
+
+      if (res.ok) {
+        // Update local state - mark all as seen but keep read status
+        setNotifications((prev) => prev.map((n) => ({ ...n, seen: true })));
+        setUnseenCount(0);
+      }
+    } catch (error) {
+      console.error('[NotificationsContext] Error marking all seen:', error);
+    }
+  }, [unseenCount, userId]);
+
   const markSelectedAsRead = useCallback(async (ids: (number | string)[]) => {
     try {
       await Promise.all(
@@ -305,11 +333,13 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
       value={{
         notifications,
         unreadCount,
+        unseenCount,
         isLoading,
         fetchNotifications,
         markAsRead,
         markAsUnread,
         markAllAsRead,
+        markAllAsSeen,
         markSelectedAsRead,
         markSelectedAsUnread,
         deleteNotification,

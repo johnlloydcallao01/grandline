@@ -15,6 +15,7 @@ export type NotificationItem = {
   message: string;
   timestamp: string;
   read: boolean;
+  seen?: boolean; // For bell bubble indicator - separate from read status
   icon: string;
   iconColor: string;
   iconBg: string;
