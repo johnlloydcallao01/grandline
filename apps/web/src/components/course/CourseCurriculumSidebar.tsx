@@ -36,11 +36,11 @@ export function CourseCurriculumSidebar({
   const isFeedbackPage = pathname?.endsWith('/feedback');
   return (
     <div className="flex-1 flex flex-col min-w-0 w-full">
-      <div className="px-5 py-3 border-b border-gray-100">
-        <p className="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+      <div className="px-5 py-3 border-b border-[var(--card-border)]">
+        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
           Course Curriculum
         </p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Browse modules, lessons, and assessments.
         </p>
       </div>
@@ -73,22 +73,22 @@ export function CourseCurriculumSidebar({
                 return (
                   <div
                     key={mod.id}
-                    className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+                    className="border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--card-background)]"
                   >
                     <button
                       type="button"
                       onClick={() => onToggleModule(mod.id)}
-                      className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50"
+                      className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-700">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300">
                           {String(index + 1).padStart(2, '0')}
                         </span>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-medium text-gray-900 truncate">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate text-left">
                             {mod.title}
                           </span>
-                          <span className="text-[11px] text-gray-500">
+                          <span className="text-[11px] text-gray-500 dark:text-gray-400 text-left">
                             {lessonCount} lesson{lessonCount === 1 ? '' : 's'}
                             {quizCount + examCount > 0 ? (
                               <>
@@ -118,7 +118,7 @@ export function CourseCurriculumSidebar({
                       </span>
                     </button>
                     {isExpanded && (
-                      <div className="border-t border-gray-100 bg-gray-50 px-3 py-2 space-y-2">
+                      <div className="border-t border-[var(--card-border)] bg-gray-50 dark:bg-[var(--background)] px-3 py-2 space-y-2">
                         {Array.isArray(mod.items) && mod.items.length > 0 ? (
                           <ul className="space-y-1">
                             {mod.items.map((item) => {
@@ -139,15 +139,15 @@ export function CourseCurriculumSidebar({
                                         if (found) onSelectItem(found);
                                       }}
                                       className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-xs ${isActive
-                                        ? 'bg-white text-[#201a7c] font-semibold shadow-sm'
-                                        : 'text-gray-700 hover:bg-white'
+                                        ? 'bg-[var(--card-background)] text-[#201a7c] dark:text-[#564df5] font-semibold shadow-sm'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-[var(--card-background)]'
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
                                         {isCompleted ? (
                                           <i className="fa fa-check-circle text-green-500 text-xs" />
                                         ) : (
-                                          <span className="w-1.5 h-1.5 rounded-full bg-[#201a7c]" />
+                                          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#201a7c] dark:bg-[#564df5]' : 'bg-gray-400'}`} />
                                         )}
                                         <span className="truncate">{lesson.title}</span>
                                       </span>
@@ -178,20 +178,20 @@ export function CourseCurriculumSidebar({
                                         if (found) onSelectItem(found);
                                       }}
                                       className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-xs ${isActive
-                                        ? 'bg-white text-[#201a7c] font-semibold shadow-sm'
-                                        : 'text-gray-700 hover:bg-white'
+                                        ? 'bg-[var(--card-background)] text-[#201a7c] dark:text-[#564df5] font-semibold shadow-sm'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-[var(--card-background)]'
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
                                         {latestAttempt ? (
                                           latestAttempt.score >= (assessment.passingScore || 70) ? (
-                                            <i className="fa fa-check-circle text-[#0056d2] text-xs" />
+                                            <i className="fa fa-check-circle text-[#0056d2] dark:text-[#3b82f6] text-xs" />
                                           ) : (
                                             <i className="fa fa-times-circle text-red-500 text-xs" />
                                           )
                                         ) : (
                                           <i
-                                            className={`fa ${isQuiz ? 'fa-question-circle' : 'fa-file-alt'} text-[10px] w-3 text-center ${isActive ? 'text-[#201a7c]' : 'text-gray-400'
+                                            className={`fa ${isQuiz ? 'fa-question-circle' : 'fa-file-alt'} text-[10px] w-3 text-center ${isActive ? 'text-[#201a7c] dark:text-[#564df5]' : 'text-gray-400'
                                               }`}
                                           />
                                         )}
@@ -221,8 +221,8 @@ export function CourseCurriculumSidebar({
                                         if (found) onSelectItem(found);
                                       }}
                                       className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-xs ${isActive
-                                        ? 'bg-white text-teal-700 font-semibold shadow-sm'
-                                        : 'text-gray-700 hover:bg-white'
+                                        ? 'bg-[var(--card-background)] text-teal-700 dark:text-teal-400 font-semibold shadow-sm'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-[var(--card-background)]'
                                         }`}
                                     >
                                       <span className="flex items-center gap-2 min-w-0">
@@ -244,7 +244,7 @@ export function CourseCurriculumSidebar({
               })}
 
             {curriculum.finalExam && evaluationMode !== 'quizzes' && evaluationMode !== 'lessons_quizzes' && (
-              <div className="mt-4 border border-[#0056d2]/30 rounded-lg overflow-hidden bg-white shadow-sm">
+              <div className="mt-4 border border-[#0056d2]/30 dark:border-blue-500/30 rounded-lg overflow-hidden bg-[var(--card-background)] shadow-sm">
                 <button
                   type="button"
                   onClick={() => {
@@ -252,22 +252,22 @@ export function CourseCurriculumSidebar({
                     const found = flatItems.find((i) => i.key === itemKey);
                     if (found) onSelectItem(found);
                   }}
-                  className="w-full flex flex-col gap-2 px-3 py-3 hover:bg-indigo-50/40 transition-colors"
+                  className="w-full flex flex-col gap-2 px-3 py-3 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 transition-colors"
                 >
                   <div className="w-full flex items-center gap-3 min-w-0">
-                    <span className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#0056d2]/10 text-xs font-bold text-[#0056d2]">
+                    <span className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#0056d2]/10 dark:bg-blue-900/30 text-xs font-bold text-[#0056d2] dark:text-blue-400">
                       FE
                     </span>
                     <div className="flex flex-col min-w-0 text-left">
-                      <span className="text-[10px] font-bold tracking-wider uppercase text-[#0056d2]">
+                      <span className="text-[10px] font-bold tracking-wider uppercase text-[#0056d2] dark:text-blue-400">
                         Final Assessment
                       </span>
-                      <span className="text-sm font-semibold text-gray-900 truncate">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {curriculum.finalExam.title}
                       </span>
                     </div>
                   </div>
-                  <div className="w-full flex items-center justify-between pl-11 text-[11px] text-gray-500 font-medium">
+                  <div className="w-full flex items-center justify-between pl-11 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                     <span>
                       {curriculum.finalExam.estimatedDurationMinutes
                         ? `${curriculum.finalExam.estimatedDurationMinutes} min`
@@ -280,29 +280,29 @@ export function CourseCurriculumSidebar({
             )}
 
             {course?.feedbackForm && typeof course.feedbackForm === 'object' && (
-              <div className={`mt-4 border rounded-lg overflow-hidden shadow-sm transition-colors ${isFeedbackPage ? 'bg-purple-50/80 border-purple-400' : 'bg-white border-purple-500/30 hover:border-purple-400'}`}>
+              <div className={`mt-4 border rounded-lg overflow-hidden shadow-sm transition-colors ${isFeedbackPage ? 'bg-purple-50/80 dark:bg-purple-900/20 border-purple-400' : 'bg-[var(--card-background)] border-purple-500/30 hover:border-purple-400'}`}>
                 <Link
                   href={`/portal/courses/${course.id}/player/feedback`}
                   onClick={onFeedbackClick}
-                  className={`w-full flex flex-col gap-2 px-3 py-3 transition-colors ${isFeedbackPage ? '' : 'hover:bg-purple-50/40'}`}
+                  className={`w-full flex flex-col gap-2 px-3 py-3 transition-colors ${isFeedbackPage ? '' : 'hover:bg-purple-50/40 dark:hover:bg-purple-900/10'}`}
                 >
                   <div className="w-full flex items-center gap-3 min-w-0">
-                    <span className={`shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${isFeedbackPage ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}`}>
+                    <span className={`shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${isFeedbackPage ? 'bg-purple-600 text-white' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'}`}>
                       <i className="fa fa-comment-dots"></i>
                     </span>
                     <div className="flex flex-col min-w-0 text-left">
-                      <span className={`text-[10px] font-bold tracking-wider uppercase ${isFeedbackPage ? 'text-purple-700' : 'text-purple-600'}`}>
+                      <span className={`text-[10px] font-bold tracking-wider uppercase ${isFeedbackPage ? 'text-purple-700 dark:text-purple-300' : 'text-purple-600 dark:text-purple-400'}`}>
                         Course Feedback
                       </span>
-                      <span className={`text-sm font-semibold truncate ${isFeedbackPage ? 'text-purple-900' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-semibold truncate ${isFeedbackPage ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
                         {course.feedbackForm.title || 'Course Feedback'}
                       </span>
                     </div>
                   </div>
-                  <div className="w-full flex items-center justify-between pl-11 text-[11px] text-gray-500 font-medium">
+                  <div className="w-full flex items-center justify-between pl-11 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                     <span>Survey</span>
                     {course.isFeedbackRequired && (
-                      <span className={isFeedbackPage ? 'text-purple-600 font-bold' : ''}>Required</span>
+                      <span className={isFeedbackPage ? 'text-purple-600 dark:text-purple-400 font-bold' : ''}>Required</span>
                     )}
                   </div>
                 </Link>
@@ -310,7 +310,7 @@ export function CourseCurriculumSidebar({
             )}
           </>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Curriculum will be displayed here once modules and lessons are added for this course.
           </p>
         )}

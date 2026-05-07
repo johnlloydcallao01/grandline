@@ -32,19 +32,19 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
   const renderViewer = () => {
     if (material.materialSource === 'external' && material.externalUrl) {
       return (
-        <div className="flex flex-col items-center justify-center p-12 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
-          <svg className="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
+          <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900">External Resource</h3>
-          <p className="mt-1 text-sm text-gray-500 max-w-md text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">External Resource</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md text-center">
             This material is hosted on an external website. Click the button below to open it in a new tab.
           </p>
           <a 
             href={material.externalUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500"
           >
             Open External Link
           </a>
@@ -63,7 +63,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
 
       if (isPdf(mime)) {
         return (
-          <div className="w-full h-full bg-gray-100 flex flex-col">
+          <div className="w-full h-full bg-gray-100 dark:bg-gray-900 flex flex-col">
             <iframe src={`${url}#view=FitH`} className="w-full flex-1" title={material.title} />
           </div>
         );
@@ -82,7 +82,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
 
       if (isImage(mime)) {
         return (
-          <div className="w-full h-full flex justify-center items-center p-8 bg-gray-50 overflow-auto">
+          <div className="w-full h-full flex justify-center items-center p-8 bg-gray-50 dark:bg-gray-900 overflow-auto">
             <img src={url} alt={material.title} className="max-w-full max-h-full object-contain shadow-sm" />
           </div>
         );
@@ -94,13 +94,13 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
         const officeViewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodedUrl}`;
         const hasExtension = url.split('/').pop()?.includes('.');
         return (
-          <div className="w-full h-full bg-gray-100 flex flex-col">
+          <div className="w-full h-full bg-gray-100 dark:bg-gray-900 flex flex-col">
             {url.includes('raw') && !hasExtension && (
-               <div className="bg-yellow-50 p-4 border-b border-yellow-200 flex flex-col items-center justify-center text-center">
-                 <p className="text-sm text-yellow-800 mb-2">
+               <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 border-b border-yellow-200 dark:border-yellow-800/50 flex flex-col items-center justify-center text-center">
+                 <p className="text-sm text-yellow-800 dark:text-yellow-400 mb-2">
                    <strong>Warning:</strong> This file is missing its original extension (e.g., .pptx) and cannot be previewed online.
                  </p>
-                 <a href={getDownloadUrl(url)} download className="text-sm text-blue-600 hover:underline font-medium">
+                 <a href={getDownloadUrl(url)} download className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
                    Download file directly instead
                  </a>
                </div>
@@ -112,12 +112,12 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
 
       // Fallback for unsupported file types
       return (
-        <div className="flex flex-col items-center justify-center p-12 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl m-8">
-          <svg className="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl m-8">
+          <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900">File Preview Not Available</h3>
-          <p className="mt-1 text-sm text-gray-500 max-w-md text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">File Preview Not Available</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md text-center">
             This file format cannot be previewed directly in the browser. Please download it to view.
           </p>
           <a 
@@ -125,7 +125,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
             download={activeMedia.filename || material.title}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500"
           >
             Download File
           </a>
@@ -134,7 +134,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
     }
 
     return (
-      <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
+      <div className="p-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
         No content available for this material.
       </div>
     );
@@ -164,13 +164,13 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
   const downloadUrl = activeMediaUrl ? getDownloadUrl(activeMediaUrl) : '#';
 
   return (
-    <div className="h-screen w-full flex flex-col bg-white overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-[var(--background)] overflow-hidden">
       {/* Top Navigation Bar */}
-      <div className="flex-none h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-40">
+      <div className="flex-none h-14 bg-[var(--card-background)] border-b border-[var(--card-border)] flex items-center justify-between px-4 z-40">
         <div className="flex items-center space-x-4 flex-1 min-w-0">
           <Link 
             href="/training-materials" 
-            className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+            className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors"
             title="Back to Materials"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,11 +179,11 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
           </Link>
           
           <div className="flex flex-col min-w-0">
-            <h1 className="text-sm font-semibold text-gray-900 truncate">
+            <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
               {material.title}
             </h1>
-            <div className="flex items-center space-x-2 text-xs text-gray-500 truncate">
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${isLessonMaterial ? 'bg-indigo-100 text-indigo-800' : 'bg-blue-100 text-blue-800'}`}>
+            <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 truncate">
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${isLessonMaterial ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'}`}>
                 {isLessonMaterial ? 'Lesson Material' : 'Course Material'}
               </span>
               <span className="truncate">{courseContext}</span>
@@ -198,7 +198,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
               download={activeMediaName}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
+              className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 dark:hover:bg-blue-500"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -213,14 +213,14 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
       <div className="flex-1 flex overflow-hidden relative">
         {/* Left: Details Sidebar */}
         <div 
-          className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
+          className={`h-full bg-[var(--card-background)] border-r border-[var(--card-border)] flex flex-col transition-all duration-300 ease-in-out ${
             sidebarOpen ? 'w-80 md:w-96 translate-x-0' : 'w-0 -translate-x-full border-none'
           }`}
         >
           <div className="flex-1 overflow-y-auto p-6 w-80 md:w-96">
-            <h2 className="text-lg font-bold text-gray-900 mb-1">Material Details</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Material Details</h2>
             {data.isRequired && (
-              <span className="inline-block bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded border border-red-200 mb-4">
+              <span className="inline-block bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 text-xs font-medium px-2 py-0.5 rounded border border-red-200 dark:border-red-800/50 mb-4">
                 Required Reading
               </span>
             )}
@@ -228,8 +228,8 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
             {/* Description */}
             {material.description && (
               <div className="mt-4 mb-8">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Description</h3>
-                <div className="prose prose-sm text-gray-600">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Description</h3>
+                <div className="prose prose-sm text-gray-600 dark:text-gray-400">
                   {material.description}
                 </div>
               </div>
@@ -238,7 +238,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
             {/* Multiple Files Selection */}
             {hasMultipleFiles && (
               <div className="mb-8">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
                   Files Included ({material.media.length})
                 </h3>
                 <div className="flex flex-col gap-2">
@@ -248,8 +248,8 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
                       onClick={() => setActiveMediaIndex(idx)}
                       className={`text-left px-3 py-3 rounded-lg text-sm transition-colors border flex items-start gap-3 ${
                         activeMediaIndex === idx 
-                          ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400' 
+                          : 'bg-[var(--card-background)] border-[var(--card-border)] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                       }`}
                     >
                       <div className="mt-0.5 opacity-70">
@@ -262,7 +262,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`truncate font-medium ${activeMediaIndex === idx ? 'text-blue-900' : 'text-gray-900'}`} title={file.filename}>
+                        <div className={`truncate font-medium ${activeMediaIndex === idx ? 'text-blue-900 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'}`} title={file.filename}>
                           {file.filename}
                         </div>
                         <div className="text-xs opacity-70 mt-0.5">
@@ -278,7 +278,7 @@ export default function MaterialViewerClient({ data, isLessonMaterial }: { data:
         </div>
 
         {/* Right: Viewer */}
-        <div className="flex-1 h-full bg-gray-100 relative">
+        <div className="flex-1 h-full bg-gray-100 dark:bg-gray-900 relative">
           {renderViewer()}
         </div>
       </div>

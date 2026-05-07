@@ -965,8 +965,8 @@ export default function CoursePlayerLayout({
 
   if (!courseId) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-600 text-sm">
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center text-gray-600 dark:text-gray-400 text-sm">
           Course not found.
         </div>
       </div>
@@ -980,19 +980,19 @@ export default function CoursePlayerLayout({
   // Access Control Check
   if (!loading && enrollmentStatus !== 'active' && enrollmentStatus !== 'completed') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--background)] px-4 text-center">
+        <div className="w-full max-w-md rounded-2xl bg-[var(--card-background)] border border-[var(--card-border)] p-8 shadow-xl">
           <div className="mb-6 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-              <i className="fa fa-lock text-4xl text-red-500" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <i className="fa fa-lock text-4xl text-red-500 dark:text-red-400" />
             </div>
           </div>
 
-          <h1 className="mb-2 text-2xl font-bold text-gray-900">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
             Access Restricted
           </h1>
 
-          <p className="mb-8 text-gray-600">
+          <p className="mb-8 text-gray-600 dark:text-gray-400">
             {enrollmentStatus
               ? `Your enrollment status is currently "${formatEnrollmentStatus(enrollmentStatus)}".`
               : "You are not enrolled in this course."
@@ -1014,13 +1014,13 @@ export default function CoursePlayerLayout({
 
   if (!loading && (error || !course)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-3">Course not available</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Course not available</p>
           <button
             type="button"
             onClick={handlePrevious}
-            className="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <i className="fa fa-arrow-left mr-2" />
             Go back
@@ -1068,23 +1068,23 @@ export default function CoursePlayerLayout({
         submitAssignment,
       }}
     >
-      <div className="h-screen overflow-hidden bg-[#f5f5f7] flex flex-col">
-        <header className="bg-white border-b border-gray-200 shrink-0">
+      <div className="h-screen overflow-hidden bg-[var(--background)] flex flex-col">
+        <header className="bg-[var(--card-background)] border-b border-[var(--card-border)] shrink-0">
           <div className="h-14 flex items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={handlePrevious}
                 aria-label="Go back"
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-[var(--card-border)] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 <i className="fa fa-arrow-left" />
               </button>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-medium text-gray-500">
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   {course?.title}
                 </span>
-                <span className="text-sm font-semibold text-gray-900 truncate">
+                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                   {currentItem ? currentItem.title : 'Select a learning item'}
                 </span>
               </div>
@@ -1117,22 +1117,22 @@ export default function CoursePlayerLayout({
               )}
               {totalItems > 0 && (
                 <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {progressPercent}% Progress
                   </span>
-                  <div className="w-40 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="w-40 h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-[#0056d2] transition-all"
+                      className="h-full rounded-full bg-[#0056d2] dark:bg-blue-500 transition-all"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
                 </div>
               )}
               <div className="flex flex-col items-end">
-                <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
+                <span className="inline-flex items-center rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   {formatEnrollmentStatus(enrollmentStatus)}
                 </span>
-                <div className="mt-1 flex flex-wrap justify-end gap-2 text-[11px] text-gray-500">
+                <div className="mt-1 flex flex-wrap justify-end gap-2 text-[11px] text-gray-500 dark:text-gray-400">
                   <span>
                     {totalModules} module{totalModules === 1 ? '' : 's'}
                   </span>
@@ -1176,31 +1176,31 @@ export default function CoursePlayerLayout({
 
               {/* Mobile Menu Sheet */}
               <div
-                className={`fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out lg:hidden flex flex-col h-[90vh] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
+                className={`fixed inset-x-0 bottom-0 z-50 bg-[var(--card-background)] rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out lg:hidden flex flex-col h-[90vh] border-t border-[var(--card-border)] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
                   }`}
               >
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-                  <h2 className="text-lg font-semibold text-gray-900">Course Content</h2>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--card-border)] shrink-0">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Course Content</h2>
                   <button
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 -mr-2 text-gray-400 hover:text-gray-600"
+                    className="p-2 -mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     aria-label="Close menu"
                   >
                     <i className="fa fa-times text-lg" />
                   </button>
                 </div>
 
-                <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 shrink-0">
+                <div className="px-5 py-4 border-b border-[var(--card-border)] bg-gray-50 dark:bg-gray-900 shrink-0">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Progress</span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {progressPercent}%
                     </span>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden mb-4">
+                  <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden mb-4">
                     <div
-                      className="h-full rounded-full bg-[#0056d2] transition-all"
+                      className="h-full rounded-full bg-[#0056d2] dark:bg-blue-500 transition-all"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -1271,22 +1271,22 @@ export default function CoursePlayerLayout({
                     aria-hidden="true"
                   />
                   <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                    <div className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
                       <div className="text-center">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                          <i className="fa fa-question text-green-600 text-xl" />
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+                          <i className="fa fa-question text-green-600 dark:text-green-400 text-xl" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                           Finish Course?
                         </h3>
-                        <p className="text-sm text-gray-500 mb-6">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                           Are you sure you want to finish this course? This will mark it as completed.
                         </p>
                         <div className="flex gap-3">
                           <button
                             type="button"
                             onClick={() => setIsFinishConfirmationOpen(false)}
-                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                           >
                             Cancel
                           </button>
@@ -1805,12 +1805,12 @@ export default function CoursePlayerLayout({
                         aria-hidden="true"
                       />
                       <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-                        <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                        <div className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
                           <div className="text-center">
-                            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${status === 'passed' ? 'bg-blue-100' : 'bg-red-100'} mb-4`}>
-                              <i className={`fa ${status === 'passed' ? 'fa-file-text-o text-blue-600' : 'fa-times text-red-600'} text-2xl`} />
+                            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${status === 'passed' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-red-100 dark:bg-red-900/30'} mb-4`}>
+                              <i className={`fa ${status === 'passed' ? 'fa-file-text-o text-blue-600 dark:text-blue-400' : 'fa-times text-red-600 dark:text-red-400'} text-2xl`} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                               Evaluation Result
                             </h3>
                             <div className="flex justify-center mb-6">
@@ -1821,8 +1821,8 @@ export default function CoursePlayerLayout({
 
                             {scoreDisplay}
 
-                            <div className={`my-6 py-4 ${status === 'passed' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'} rounded-lg border`}>
-                              <p className={`text-sm font-medium ${status === 'passed' ? 'text-green-800' : 'text-red-800'}`}>
+                            <div className={`my-6 py-4 ${status === 'passed' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800'} rounded-lg border`}>
+                              <p className={`text-sm font-medium ${status === 'passed' ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}`}>
                                 {message}
                               </p>
                             </div>
@@ -1843,7 +1843,7 @@ export default function CoursePlayerLayout({
                               <button
                                 type="button"
                                 onClick={() => setIsEvaluationModalOpen(false)}
-                                className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                               >
                                 Close
                               </button>
@@ -1865,15 +1865,15 @@ export default function CoursePlayerLayout({
                     aria-hidden="true"
                   />
                   <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
+                    <div className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-xl shadow-xl max-w-sm w-full p-6 pointer-events-auto transform transition-all scale-100 opacity-100">
                       <div className="text-center">
-                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-bounce">
-                          <i className="fa fa-trophy text-green-600 text-2xl" />
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4 animate-bounce">
+                          <i className="fa fa-trophy text-green-600 dark:text-green-400 text-2xl" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                           Course Finished!
                         </h3>
-                        <p className="text-sm text-gray-500 mb-6">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                           Congratulations! You have successfully completed this course.
                         </p>
                         <button
@@ -1893,7 +1893,7 @@ export default function CoursePlayerLayout({
           )}
 
         <div className="flex-1 flex min-h-0">
-          <aside className="hidden lg:flex w-96 shrink-0 bg-white shadow-sm h-full overflow-hidden">
+          <aside className="hidden lg:flex w-96 shrink-0 bg-[var(--card-background)] border-r border-[var(--card-border)] shadow-sm h-full overflow-hidden">
             <CourseCurriculumSidebar
               course={course}
               curriculum={curriculum}
@@ -1908,7 +1908,7 @@ export default function CoursePlayerLayout({
             />
           </aside>
 
-          <main className="flex-1 flex flex-col bg-[#f5f5f7] min-w-0 overflow-hidden">
+          <main className="flex-1 flex flex-col bg-[var(--background)] min-w-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               {children}
             </div>

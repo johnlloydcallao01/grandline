@@ -93,15 +93,15 @@ export default function ViewCoursePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[var(--background)]">
         <div className="w-full px-[10px] md:px-[15px] pt-4 pb-4">
-          <div className="h-6 w-1/3 bg-gray-200 rounded animate-pulse mb-2"></div>
-          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         </div>
-        <div className="w-full bg-gray-50">
+        <div className="w-full bg-[var(--card-background)] border-y border-[var(--card-border)]">
           <div className="max-w-7xl px-2.5 md:px-4 py-6">
-            <div className="h-6 bg-gray-200 rounded w-2/3 animate-pulse mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse mb-4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -110,8 +110,8 @@ export default function ViewCoursePage() {
 
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="w-full px-[10px] py-10 text-center text-gray-600">Course not available</div>
+      <div className="min-h-screen bg-[var(--background)]">
+        <div className="w-full px-[10px] py-10 text-center text-gray-600 dark:text-gray-400">Course not available</div>
       </div>
     );
   }

@@ -33,8 +33,8 @@ export function FacebookLoadingScreen({ isVisible, progress = 0 }: FacebookLoadi
             <div className="facebook-logo">
               {/* @ts-ignore -- Next.js Image component type issue with React 19 */}
               <Image
-                src="/calsiter-inc-logo.png"
-                alt="Calsiter Inc Logo"
+                src="/grandline-logo.png"
+                alt="Grandline Logo"
                 width={48}
                 height={48}
                 className="facebook-logo-image"
@@ -57,7 +57,7 @@ export function FacebookLoadingScreen({ isVisible, progress = 0 }: FacebookLoadi
           {/* Progress Bar */}
           <div className="facebook-progress-container">
             <div className="facebook-progress-bar">
-              <div 
+              <div
                 className="facebook-progress-fill"
                 style={{ width: `${Math.min(progress, 100)}%` }}
               ></div>

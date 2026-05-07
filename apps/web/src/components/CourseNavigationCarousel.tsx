@@ -107,10 +107,10 @@ export function CourseNavigationCarousel({
       {translateX < 0 && (
         <button
           onClick={scrollLeft}
-          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-[var(--card-background)] border border-[var(--card-border)] shadow-lg rounded-full items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           aria-label="Scroll left"
         >
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -120,10 +120,10 @@ export function CourseNavigationCarousel({
       {translateX > -maxTranslate && (
         <button
           onClick={scrollRight}
-          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-[var(--card-background)] border border-[var(--card-border)] shadow-lg rounded-full items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           aria-label="Scroll right"
         >
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -131,7 +131,7 @@ export function CourseNavigationCarousel({
 
       {/* Carousel Container */}
       <div
-        className="overflow-hidden px-[10px] bg-white rounded-lg shadow-sm"
+        className="overflow-hidden px-[10px] bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm"
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
@@ -167,8 +167,8 @@ export function CourseNavigationCarousel({
                 onClick={() => handleSectionClick(section)}
                 className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                   activeSection === section
-                    ? 'bg-gray-200 text-gray-700 shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-200 dark:bg-[#3028a3] text-gray-700 dark:text-gray-100 shadow-md'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {section}

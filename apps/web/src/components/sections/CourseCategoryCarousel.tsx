@@ -27,7 +27,7 @@ export function CourseCategoryCarousel({
   // Avoid checking window immediately on render to prevent hydration mismatch
   const [isClient, setIsClient] = useState(false);
   const [viewportWidth, setViewportWidth] = useState<number>(1024); // Default desktop width for SSR
-  
+
   useEffect(() => {
     setIsClient(true);
     const handleResize = () => setViewportWidth(window.innerWidth);
@@ -124,10 +124,10 @@ export function CourseCategoryCarousel({
       {translateX < 0 && (
         <button
           onClick={scrollLeft}
-          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--card-background)] shadow-lg rounded-full items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           aria-label="Scroll left"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -137,10 +137,10 @@ export function CourseCategoryCarousel({
       {translateX > -maxTranslate && (
         <button
           onClick={scrollRight}
-          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors"
+          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--card-background)] shadow-lg rounded-full items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           aria-label="Scroll right"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>

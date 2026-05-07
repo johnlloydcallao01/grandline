@@ -70,14 +70,14 @@ export function CourseCard({
 
     const titleClassName =
         variant === "grid"
-            ? "font-medium text-gray-900 group-hover:text-blue-600 transition-colors overflow-hidden"
-            : "font-medium text-gray-900 overflow-hidden";
+            ? "font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors overflow-hidden"
+            : "font-medium text-gray-900 dark:text-gray-100 overflow-hidden";
 
     const resolvedHref = href || `/view-course/${course.id}`;
 
     const content = (
         <>
-            <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
+            <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-3">
                 {imageUrl ? (
                     <img
                         src={imageUrl}
@@ -92,10 +92,10 @@ export function CourseCard({
                     />
                 ) : null}
                 <div
-                    className={`w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center ${imageUrl ? "hidden" : ""
+                    className={`w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center ${imageUrl ? "hidden" : ""
                         }`}
                 >
-                    <div className="text-gray-400 text-center">
+                    <div className="text-gray-400 dark:text-gray-500 text-center">
                         <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
                             <path
                                 fillRule="evenodd"
@@ -126,7 +126,7 @@ export function CourseCard({
                             }
                         }
                     }}
-                    className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"
+                    className="absolute top-3 right-3 w-8 h-8 bg-[var(--card-background)] dark:bg-gray-800 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                     aria-label="Toggle wishlist"
                     type="button"
                 >
@@ -142,7 +142,7 @@ export function CourseCard({
                 </h3>
                 {course.excerpt ? (
                     <p
-                        className="text-sm text-gray-600 overflow-hidden"
+                        className="text-sm text-gray-600 dark:text-gray-400 overflow-hidden"
                         style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
                     >
                         {course.excerpt}

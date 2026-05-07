@@ -11,7 +11,7 @@ import type {
 } from '@/types/course'
 
 function renderHeadingBlock(block: HeadingBlock, index: number) {
-  const baseClass = 'font-semibold text-gray-900'
+  const baseClass = 'font-semibold text-gray-900 dark:text-gray-100'
   const spacingClass = index === 0 ? 'mt-0 mb-3' : 'mt-6 mb-3'
 
   if (block.level === 1) {
@@ -39,7 +39,7 @@ function renderHeadingBlock(block: HeadingBlock, index: number) {
 
 function renderParagraphBlock(block: ParagraphBlock, index: number) {
   return (
-    <p key={index} className="text-gray-700 leading-relaxed mb-4">
+    <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
       {block.text}
     </p>
   )
@@ -50,7 +50,7 @@ function renderListBlock(block: ListBlock, index: number) {
   return (
     <ListTag
       key={index}
-      className={`pl-5 space-y-1 text-gray-700 leading-relaxed mb-4 ${block.style === 'ordered' ? 'list-decimal' : 'list-disc'}`}
+      className={`pl-5 space-y-1 text-gray-700 dark:text-gray-300 leading-relaxed mb-4 ${block.style === 'ordered' ? 'list-decimal' : 'list-disc'}`}
     >
       {block.items.map((item, i) => (
         <li key={i}>{item}</li>
@@ -77,10 +77,10 @@ function renderImageBlock(block: ImageBlock, index: number) {
         width={800}
         height={450}
         style={style}
-        className="rounded-lg border border-gray-200 object-cover"
+        className="rounded-lg border border-gray-200 dark:border-gray-700 object-cover"
       />
       {block.caption && (
-        <figcaption className="mt-2 text-sm text-gray-500">
+        <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           {block.caption}
         </figcaption>
       )}
@@ -92,11 +92,11 @@ function renderQuoteBlock(block: QuoteBlock, index: number) {
   return (
     <blockquote
       key={index}
-      className="border-l-4 border-gray-300 pl-4 italic text-gray-700 mb-6"
+      className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-700 dark:text-gray-300 mb-6"
     >
       <p>{block.text}</p>
       {block.attribution && (
-        <footer className="mt-1 text-sm text-gray-500">
+        <footer className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           — {block.attribution}
         </footer>
       )}
@@ -126,10 +126,10 @@ function renderLexicalTextNode(node: any, key: string): React.ReactNode {
   }
 
   if (format & 16) {
-    content = <code key={`${key}-code`} className="bg-gray-100 px-1 rounded text-sm font-mono text-pink-600">{content}</code>
+    content = <code key={`${key}-code`} className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-sm font-mono text-pink-600 dark:text-pink-400">{content}</code>
   }
   if (format & 1) {
-    content = <strong key={`${key}-bold`}>{content}</strong>
+    content = <strong key={`${key}-bold`} className="text-gray-900 dark:text-gray-100">{content}</strong>
   }
   if (format & 2) {
     content = <em key={`${key}-italic`}>{content}</em>
@@ -184,7 +184,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
     if (!hasBlockChild) {
       return (
-        <p key={key} className="text-gray-700 leading-relaxed mb-4">
+        <p key={key} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
           {renderLexicalChildren(node, key)}
         </p>
       )
@@ -199,7 +199,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
             return (
               <p
                 key={`${key}-p-${index}`}
-                className="text-gray-700 leading-relaxed"
+                className="text-gray-700 dark:text-gray-300 leading-relaxed"
               >
                 {renderLexicalTextNode(child, `${key}-text-${index}`)}
               </p>
@@ -214,7 +214,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
   if (type === 'heading') {
     const tag = node.tag
-    const baseClass = 'font-semibold text-gray-900'
+    const baseClass = 'font-semibold text-gray-900 dark:text-gray-100'
     const spacingClass = 'mt-8 mb-4'
 
     if (tag === 'h1') {
@@ -244,7 +244,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     return (
       <blockquote
         key={key}
-        className="border-l-4 border-gray-300 pl-4 italic text-gray-700 mb-6"
+        className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-700 dark:text-gray-300 mb-6"
       >
         {renderLexicalChildren(node, key)}
       </blockquote>
@@ -257,7 +257,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     return (
       <ListTag
         key={key}
-        className={`pl-5 space-y-2 text-gray-700 leading-relaxed mb-4 ${listType === 'ol' ? 'list-decimal' : 'list-disc'}`}
+        className={`pl-5 space-y-2 text-gray-700 dark:text-gray-300 leading-relaxed mb-4 ${listType === 'ol' ? 'list-decimal' : 'list-disc'}`}
       >
         {renderLexicalChildren(node, key)}
       </ListTag>
@@ -306,7 +306,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 dark:border-gray-700 object-cover"
         />
       </figure>
     )
@@ -329,10 +329,10 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 dark:border-gray-700 object-cover"
         />
         {caption && (
-          <figcaption className="mt-2 text-sm text-gray-500">
+          <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {caption}
           </figcaption>
         )}
@@ -389,7 +389,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     if (isPPT) {
       return (
         <figure key={key} className="w-full mb-6">
-          <div className="w-full h-[500px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+          <div className="w-full h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 relative">
             <iframe
               src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(src)}`}
               width="100%"
@@ -403,13 +403,13 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           </div>
           <div className="mt-2 flex items-center justify-between">
             {caption && (
-              <figcaption className="text-sm text-gray-500">{caption}</figcaption>
+              <figcaption className="text-sm text-gray-500 dark:text-gray-400">{caption}</figcaption>
             )}
             <a
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -436,7 +436,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     if (isPDF) {
       return (
         <figure key={key} className="w-full mb-6">
-          <div className="w-full h-[600px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+          <div className="w-full h-[600px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 relative">
             <iframe
               src={`${src}#view=FitH`}
               width="100%"
@@ -450,13 +450,13 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           </div>
           <div className="mt-2 flex items-center justify-between">
             {caption && (
-              <figcaption className="text-sm text-gray-500">{caption}</figcaption>
+              <figcaption className="text-sm text-gray-500 dark:text-gray-400">{caption}</figcaption>
             )}
             <a
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -488,10 +488,10 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-3/4 h-auto rounded-lg border border-gray-200 dark:border-gray-700 object-cover"
         />
         {caption && (
-          <figcaption className="mt-2 text-sm text-gray-500">
+          <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {caption}
           </figcaption>
         )}
@@ -519,7 +519,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     return (
       <figure key={key} className="w-full mb-6">
         <div
-          className="w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+          className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
           style={
             isPixel
               ? {
@@ -551,7 +551,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
   }
 
   return (
-    <span key={key}>
+    <span key={key} className="text-gray-900 dark:text-gray-100">
       {renderLexicalChildren(node, key)}
     </span>
   )
@@ -576,7 +576,7 @@ function renderRichDescription(description: any): React.ReactNode {
   }
 
   return (
-    <div className="space-y-1 text-gray-700 leading-relaxed">
+    <div className="space-y-1 text-gray-700 dark:text-gray-300 leading-relaxed">
       {rendered}
     </div>
   )
@@ -591,7 +591,7 @@ export function RichTextRenderer({
 }) {
   if (blocks && blocks.length > 0) {
     return (
-      <div className="space-y-4 text-gray-700 leading-relaxed">
+      <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
         {blocks.map((block, index) => {
           if (block.type === 'heading') return renderHeadingBlock(block, index)
           if (block.type === 'paragraph') return renderParagraphBlock(block, index)
@@ -610,5 +610,5 @@ export function RichTextRenderer({
     return rich
   }
 
-  return <p className="text-gray-500 italic">No content available.</p>
+  return <p className="text-gray-500 dark:text-gray-400 italic">No content available.</p>
 }

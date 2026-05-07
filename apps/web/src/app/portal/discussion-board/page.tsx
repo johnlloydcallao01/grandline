@@ -123,15 +123,15 @@ export default function DiscussionBoardPage() {
   });
 
   return (
-    <div className="w-full px-[10px] py-6">
+    <div className="w-full px-[10px] py-6 bg-[var(--background)] min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Discussion Board</h1>
-          <p className="text-gray-500 mt-1">Engage with peers and instructors on maritime topics</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Discussion Board</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Engage with peers and instructors on maritime topics</p>
         </div>
         <button
           onClick={() => setShowNewTopicModal(true)}
-          className="bg-[#201a7c] text-white px-4 py-2 rounded-lg hover:bg-[#1a1563] transition-colors flex items-center gap-2 shadow-sm"
+          className="bg-[#201a7c] dark:bg-[#3028a3] text-white px-4 py-2 rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] transition-colors flex items-center gap-2 shadow-sm"
         >
           <i className="fa fa-plus"></i>
           <span>New Topic</span>
@@ -139,18 +139,18 @@ export default function DiscussionBoardPage() {
       </div>
 
       {mounted && showNewTopicModal && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-white md:bg-black/50 flex flex-col md:items-start md:justify-center md:p-6 md:pt-12 overflow-hidden" style={{ margin: 0 }}>
-          <div className="bg-white w-full h-full flex flex-col md:h-auto md:max-h-[85vh] md:rounded-xl md:max-w-4xl md:shadow-2xl overflow-hidden md:mx-auto">
-            <div className="p-3 md:px-6 md:py-4 flex items-center justify-between border-b border-gray-200 shrink-0">
+        <div className="fixed inset-0 z-[99999] bg-[var(--background)] md:bg-black/50 flex flex-col md:items-start md:justify-center md:p-6 md:pt-12 overflow-hidden" style={{ margin: 0 }}>
+          <div className="bg-[var(--card-background)] w-full h-full flex flex-col md:h-auto md:max-h-[85vh] md:rounded-xl md:max-w-4xl md:shadow-2xl overflow-hidden md:mx-auto">
+            <div className="p-3 md:px-6 md:py-4 flex items-center justify-between border-b border-[var(--card-border)] shrink-0">
               <div className="flex items-center gap-2">
                 {/* Mobile Back Button */}
-                <button onClick={() => setShowNewTopicModal(false)} className="md:hidden w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center shrink-0">
-                  <i className="fa fa-arrow-left"></i>
+                <button onClick={() => setShowNewTopicModal(false)} className="md:hidden w-8 h-8 rounded-full bg-[var(--card-background)] border border-[var(--card-border)] shadow-md flex items-center justify-center shrink-0">
+                  <i className="fa fa-arrow-left text-gray-600 dark:text-gray-300"></i>
                 </button>
-                <h2 className="text-xl font-bold text-gray-900">Create New Topic</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Create New Topic</h2>
               </div>
               {/* Desktop Close Button */}
-              <button onClick={() => setShowNewTopicModal(false)} className="hidden md:block text-gray-400 hover:text-gray-600 transition-colors p-1 shrink-0 ml-2">
+              <button onClick={() => setShowNewTopicModal(false)} className="hidden md:block text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 shrink-0 ml-2">
                 <i className="fa fa-times text-xl"></i>
               </button>
             </div>
@@ -158,10 +158,10 @@ export default function DiscussionBoardPage() {
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <form onSubmit={handleCreateTopic} className="h-full flex flex-col">
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-[var(--card-border)] bg-[var(--background)] text-gray-900 dark:text-gray-100 rounded-lg p-2 focus:ring-2 focus:ring-[#201a7c] focus:outline-none"
                     value={newTopicTitle}
                     onChange={(e) => setNewTopicTitle(e.target.value)}
                     placeholder="Enter a descriptive title..."
@@ -169,9 +169,9 @@ export default function DiscussionBoardPage() {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
                   <select
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full border border-[var(--card-border)] bg-[var(--background)] text-gray-900 dark:text-gray-100 rounded-lg p-2 focus:ring-2 focus:ring-[#201a7c] focus:outline-none"
                     value={newTopicCategory}
                     onChange={(e) => setNewTopicCategory(e.target.value)}
                   >
@@ -181,27 +181,27 @@ export default function DiscussionBoardPage() {
                   </select>
                 </div>
                 <div className="mb-6 flex-1 flex flex-col">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Initial Message</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Initial Message</label>
                   <textarea
-                    className="w-full border border-gray-300 rounded-lg p-2 min-h-[150px] flex-1 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    className="w-full border border-[var(--card-border)] bg-[var(--background)] text-gray-900 dark:text-gray-100 rounded-lg p-2 min-h-[150px] flex-1 focus:ring-2 focus:ring-[#201a7c] focus:outline-none resize-none"
                     value={newTopicContent}
                     onChange={(e) => setNewTopicContent(e.target.value)}
                     placeholder="What would you like to discuss?"
                     required
                   />
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 shrink-0 mt-auto">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--card-border)] shrink-0 mt-auto">
                   <button
                     type="button"
                     onClick={() => setShowNewTopicModal(false)}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-[#201a7c] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+                    className="bg-[#201a7c] dark:bg-[#3028a3] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -221,14 +221,14 @@ export default function DiscussionBoardPage() {
       )}
 
       {/* Search and Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+      <div className="bg-[var(--card-background)] p-4 rounded-xl border border-[var(--card-border)] shadow-sm mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="w-full md:w-72 lg:w-80 relative flex-shrink-0">
-            <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
             <input
               type="text"
               placeholder="Search topics..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#201a7c]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -265,8 +265,8 @@ export default function DiscussionBoardPage() {
                     setSelectedCategory(category.id);
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === category.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    ? 'bg-[#201a7c]/10 dark:bg-[#3028a3]/30 text-[#201a7c] dark:text-[#5c54e0]'
+                    : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                 >
                   {category.name}
@@ -282,23 +282,23 @@ export default function DiscussionBoardPage() {
         {loading ? (
           <>
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm animate-pulse block">
+              <div key={i} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm animate-pulse block">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-gray-200"></div>
+                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800"></div>
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-3 mt-1">
-                    <div className="h-4 bg-gray-200 rounded-full w-24"></div>
-                    <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-full w-24"></div>
+                    <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
                   </div>
                 </div>
               </div>
             ))}
           </>
         ) : filteredTopics.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-[var(--card-background)] rounded-xl border border-[var(--card-border)]">
             <p>No discussion topics found. Be the first to start one!</p>
           </div>
         ) : (
@@ -308,33 +308,33 @@ export default function DiscussionBoardPage() {
               <Link
                 href={`/portal/discussion-board/${topic.id}`}
                 key={topic.id}
-                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer group block"
+                className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 hover:shadow-md transition-shadow cursor-pointer group block"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
-                      <i className="fa fa-comments text-blue-500 text-xl"></i>
+                    <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center border border-blue-100 dark:border-blue-800">
+                      <i className="fa fa-comments text-[#201a7c] dark:text-[#5c54e0] text-xl"></i>
                     </div>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide">
+                      <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide">
                         {categoryObj?.name || 'General'}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate pr-4">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#201a7c] dark:group-hover:text-[#5c54e0] transition-colors truncate pr-4">
                       {topic.title}
                     </h3>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-500">
+                    <div className="mt-2 flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
-                        <span className="font-medium text-gray-700">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
                           {topic.createdBy?.firstName} {topic.createdBy?.lastName}
                         </span>
                       </span>
-                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                      <span className="w-1 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></span>
                       <span>Last active: {topic.lastMessageAt ? new Date(topic.lastMessageAt).toLocaleDateString() : 'Just now'}</span>
                     </div>
                   </div>
@@ -348,19 +348,19 @@ export default function DiscussionBoardPage() {
       {/* Feedback Modal */}
       {mounted && feedbackModal.isOpen && createPortal(
         <div className="fixed inset-0 z-[99999] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <div className="bg-[var(--card-background)] rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
               {feedbackModal.type === 'success' ? (
                 <i className="fa fa-check text-2xl"></i>
               ) : (
                 <i className="fa fa-times text-2xl"></i>
               )}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{feedbackModal.title}</h3>
-            <p className="text-sm text-gray-500 mb-6">{feedbackModal.message}</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{feedbackModal.title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{feedbackModal.message}</p>
             <button
               onClick={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
-              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
+              className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors"
             >
               Close
             </button>

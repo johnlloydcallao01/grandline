@@ -83,8 +83,7 @@ export default function MainLayout({
     <ProtectedRoute>
       <NotificationsProvider userId={user?.id}>
         <div
-          className="min-h-screen bg-gray-50"
-          style={{ backgroundColor: '#f9fafb' }}
+          className="min-h-screen bg-[var(--background)]"
           data-fixed-header={pathname === '/results' ? undefined : 'true'}
         >
           {/* Header - Persistent across all pages */}
@@ -106,11 +105,10 @@ export default function MainLayout({
 
           {/* Main Content Area - Only this changes during navigation */}
           <main
-            className={`transition-all duration-300 bg-gray-50 ${shouldHideSidebar ? 'w-full' : (sidebarOpen ? 'lg:ml-60' : 'lg:ml-20')
+            className={`transition-all duration-300 bg-[var(--background)] ${shouldHideSidebar ? 'w-full' : (sidebarOpen ? 'lg:ml-60' : 'lg:ml-20')
               }`}
-            style={{ backgroundColor: '#f9fafb' }}
           >
-            <div className="min-h-full bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
+            <div className="min-h-full bg-[var(--background)]">
               {children}
             </div>
           </main>

@@ -208,18 +208,18 @@ export default function AskInstructorPage() {
   );
 
   return (
-    <div className="w-full px-[10px] py-6">
+    <div className="w-full px-[10px] py-6 bg-[var(--background)] min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ask Instructor</h1>
-          <p className="text-gray-500 mt-1">Get direct support and guidance from maritime experts</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ask Instructor</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Get direct support and guidance from maritime experts</p>
         </div>
         <button
           onClick={() => {
             setSelectedInstructor('');
             setShowAskModal(true);
           }}
-          className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm font-medium"
+          className="bg-[#201a7c] dark:bg-[#3028a3] text-white px-6 py-2.5 rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] transition-colors flex items-center gap-2 shadow-sm font-medium"
         >
           <i className="fa fa-paper-plane"></i>
           <span>Ask a Question</span>
@@ -229,34 +229,34 @@ export default function AskInstructorPage() {
       {/* Available Instructors */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900">Your Instructors</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Instructors</h2>
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse flex flex-col h-[180px]">
+              <div key={i} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-5 animate-pulse flex flex-col h-[180px]">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 shrink-0"></div>
+                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 shrink-0"></div>
                   <div className="flex-1 space-y-2 pt-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                   </div>
                 </div>
                 <div className="mt-5 space-y-2">
                   <div className="flex items-center gap-2">
-                     <div className="w-4 h-4 bg-gray-200 rounded-full"></div>
-                     <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                     <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
+                     <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-2/3"></div>
                   </div>
                 </div>
-                <div className="mt-auto pt-4 border-t border-gray-50 flex justify-end">
-                   <div className="h-4 bg-gray-200 rounded w-16"></div>
+                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+                   <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-16"></div>
                 </div>
               </div>
             ))}
           </div>
         ) : instructors.length === 0 ? (
-          <div className="text-sm text-gray-500 bg-white p-4 rounded-xl border border-gray-200">
+          <div className="text-sm text-gray-500 dark:text-gray-400 bg-[var(--card-background)] p-4 rounded-xl border border-[var(--card-border)]">
             You are not enrolled in any courses with assigned instructors.
           </div>
         ) : (
@@ -278,29 +278,29 @@ export default function AskInstructorPage() {
               const role = instructor.specialization || 'Instructor';
 
               return (
-                <div key={instructor.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col">
+                <div key={instructor.id} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-5 hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col">
                   <div className="absolute top-0 right-0 w-16 h-16 -mr-8 -mt-8 rounded-full opacity-20 bg-green-500"></div>
 
                   <div className="flex items-start gap-4">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 overflow-hidden">
+                      <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 overflow-hidden">
                         <img src={image} alt={name} className="w-full h-full object-cover" />
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{name}</h3>
-                      <p className="text-xs font-medium text-blue-600 line-clamp-1">{role}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#201a7c] dark:group-hover:text-[#5c54e0] transition-colors line-clamp-1">{name}</h3>
+                      <p className="text-xs font-medium text-[#201a7c] dark:text-[#5c54e0] line-clamp-1">{role}</p>
                     </div>
                   </div>
 
                   <div className="mt-4 space-y-2 flex-1">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <i className="fa fa-envelope w-5 text-center mr-2 text-gray-400"></i>
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                      <i className="fa fa-envelope w-5 text-center mr-2 text-gray-400 dark:text-gray-500"></i>
                       <span className="truncate">{instructor.contactEmail || user.email || 'N/A'}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-50 flex justify-end">
+                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
                     <button
                       onClick={() => {
                         const user = instructor.user || {};
@@ -308,7 +308,7 @@ export default function AskInstructorPage() {
                         const fallbackId = uId !== '[object Object]' ? uId : String(instructor.id);
                         openModalForInstructor(fallbackId);
                       }}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer z-10"
+                      className="text-xs font-medium text-[#201a7c] dark:text-[#5c54e0] hover:text-[#1a1563] dark:hover:text-[#6a62f5] transition-colors flex items-center gap-1 cursor-pointer z-10"
                     >
                       Message <i className="fa fa-arrow-right"></i>
                     </button>
@@ -321,14 +321,14 @@ export default function AskInstructorPage() {
       </div>
 
       {/* Q&A Section */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm overflow-hidden">
+        <div className="border-b border-[var(--card-border)]">
           <nav className="flex -mb-px">
             <button
               onClick={() => setActiveTab('my-questions')}
               className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'my-questions'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-[#201a7c] text-[#201a7c] dark:border-[#5c54e0] dark:text-[#5c54e0]'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
             >
               Active Questions
@@ -336,8 +336,8 @@ export default function AskInstructorPage() {
             <button
               onClick={() => setActiveTab('archived')}
               className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'archived'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-[#201a7c] text-[#201a7c] dark:border-[#5c54e0] dark:text-[#5c54e0]'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
             >
               Archived
@@ -345,7 +345,7 @@ export default function AskInstructorPage() {
           </nav>
         </div>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-[var(--card-border)]">
           {loading ? (
             <div className="w-full">
               {[1, 2, 3].map(i => (
@@ -353,44 +353,44 @@ export default function AskInstructorPage() {
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="h-5 bg-gray-200 rounded-full w-20" />
-                        <div className="h-3 bg-gray-200 rounded w-16" />
+                        <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded-full w-20" />
+                        <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-16" />
                       </div>
-                      <div className="h-5 bg-gray-200 rounded w-3/4 mb-3" />
-                      <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                      <div className="h-4 bg-gray-200 rounded w-2/3 mb-4" />
-                      <div className="h-8 bg-gray-100 rounded-lg w-48" />
+                      <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-3" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full mb-2" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-2/3 mb-4" />
+                      <div className="h-8 bg-gray-100 dark:bg-gray-800/50 rounded-lg w-48" />
                     </div>
                     <div className="flex-shrink-0 flex md:flex-col items-center gap-2">
-                       <div className="h-6 w-6 bg-gray-200 rounded-full" />
+                       <div className="h-6 w-6 bg-gray-200 dark:bg-gray-800 rounded-full" />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredQuestions.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               No questions found in this category.
             </div>
           ) : (
             filteredQuestions.map((q) => (
-              <Link href={`/portal/ask-instructor/${q.id}` as any} key={q.id} className="block p-6 hover:bg-gray-50 transition-colors group cursor-pointer">
+              <Link href={`/portal/ask-instructor/${q.id}` as any} key={q.id} className="block p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group cursor-pointer">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${q.status === 'answered' ? 'bg-green-100 text-green-700' :
-                        q.status === 'archived' ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-700'
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${q.status === 'answered' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                        q.status === 'archived' ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                         }`}>
                         {q.status}
                       </span>
-                      <span className="text-xs text-gray-500">{q.date}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{q.date}</span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{q.subject}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{q.preview}</p>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-[#201a7c] dark:group-hover:text-[#5c54e0] transition-colors">{q.subject}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{q.preview}</p>
 
                     {q.status === 'answered' && (
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 inline-block">
-                        <div className="flex items-center gap-2 text-xs font-medium text-blue-800">
+                      <div className="bg-[#201a7c]/5 dark:bg-[#3028a3]/20 rounded-lg p-3 border border-[#201a7c]/10 dark:border-[#3028a3]/30 inline-block">
+                        <div className="flex items-center gap-2 text-xs font-medium text-[#201a7c] dark:text-[#5c54e0]">
                           <i className="fa fa-reply"></i>
                           New Reply from {q.instructor}
                         </div>
@@ -398,7 +398,7 @@ export default function AskInstructorPage() {
                     )}
 
                     {q.status === 'pending' && (
-                      <div className="flex items-center gap-2 text-xs text-gray-500 italic">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 italic">
                         <i className="fa fa-spinner fa-spin"></i>
                         Awaiting response from {q.instructor}
                       </div>
@@ -406,7 +406,7 @@ export default function AskInstructorPage() {
                   </div>
 
                   <div className="flex-shrink-0 flex md:flex-col items-center gap-2">
-                    <div className="p-2 text-gray-400 group-hover:text-blue-600 transition-colors">
+                    <div className="p-2 text-gray-400 group-hover:text-[#201a7c] dark:group-hover:text-[#5c54e0] transition-colors">
                       <i className="fa fa-chevron-right"></i>
                     </div>
                   </div>
@@ -419,16 +419,16 @@ export default function AskInstructorPage() {
 
       {/* Ask Modal */}
       {mounted && showAskModal && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-white md:bg-black/50 flex flex-col md:items-start md:justify-center md:p-6 md:pt-12 overflow-hidden" style={{ margin: 0 }}>
-          <div className="bg-white w-full h-full flex flex-col md:h-auto md:max-h-[85vh] md:rounded-xl md:max-w-2xl md:shadow-2xl overflow-hidden md:mx-auto">
-            <div className="p-3 md:px-6 md:py-4 flex items-center justify-between border-b border-gray-200 shrink-0">
+        <div className="fixed inset-0 z-[99999] bg-[var(--background)] md:bg-black/50 flex flex-col md:items-start md:justify-center md:p-6 md:pt-12 overflow-hidden" style={{ margin: 0 }}>
+          <div className="bg-[var(--card-background)] w-full h-full flex flex-col md:h-auto md:max-h-[85vh] md:rounded-xl md:max-w-2xl md:shadow-2xl overflow-hidden md:mx-auto">
+            <div className="p-3 md:px-6 md:py-4 flex items-center justify-between border-b border-[var(--card-border)] shrink-0">
               <div className="flex items-center gap-2">
-                <button onClick={() => setShowAskModal(false)} className="md:hidden w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center shrink-0">
-                  <i className="fa fa-arrow-left"></i>
+                <button onClick={() => setShowAskModal(false)} className="md:hidden w-8 h-8 rounded-full bg-[var(--card-background)] border border-[var(--card-border)] shadow-md flex items-center justify-center shrink-0">
+                  <i className="fa fa-arrow-left text-gray-600 dark:text-gray-300"></i>
                 </button>
-                <h2 className="text-xl font-bold text-gray-900">Ask Instructor</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Ask Instructor</h2>
               </div>
-              <button onClick={() => setShowAskModal(false)} className="hidden md:block text-gray-400 hover:text-gray-600 transition-colors p-1 shrink-0 ml-2">
+              <button onClick={() => setShowAskModal(false)} className="hidden md:block text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 shrink-0 ml-2">
                 <i className="fa fa-times text-xl"></i>
               </button>
             </div>
@@ -436,9 +436,9 @@ export default function AskInstructorPage() {
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <form onSubmit={handleAskQuestion} className="h-full flex flex-col">
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Instructor</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Instructor</label>
                   <select
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full border border-[var(--card-border)] rounded-lg p-2 focus:ring-2 focus:ring-[#201a7c] focus:outline-none bg-[var(--background)] text-gray-900 dark:text-gray-100"
                     value={selectedInstructor}
                     onChange={(e) => setSelectedInstructor(e.target.value)}
                     required
@@ -455,10 +455,10 @@ export default function AskInstructorPage() {
                   </select>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-[var(--card-border)] bg-[var(--background)] text-gray-900 dark:text-gray-100 rounded-lg p-2 focus:ring-2 focus:ring-[#201a7c] focus:outline-none"
                     value={questionSubject}
                     onChange={(e) => setQuestionSubject(e.target.value)}
                     placeholder="Briefly summarize your question..."
@@ -466,27 +466,27 @@ export default function AskInstructorPage() {
                   />
                 </div>
                 <div className="mb-6 flex-1 flex flex-col">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
                   <textarea
-                    className="w-full border border-gray-300 rounded-lg p-2 min-h-[150px] flex-1 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    className="w-full border border-[var(--card-border)] bg-[var(--background)] text-gray-900 dark:text-gray-100 rounded-lg p-2 min-h-[150px] flex-1 focus:ring-2 focus:ring-[#201a7c] focus:outline-none resize-none"
                     value={questionMessage}
                     onChange={(e) => setQuestionMessage(e.target.value)}
                     placeholder="Provide details about your question..."
                     required
                   />
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 shrink-0 mt-auto">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--card-border)] shrink-0 mt-auto">
                   <button
                     type="button"
                     onClick={() => setShowAskModal(false)}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || !selectedInstructor || !questionSubject || !questionMessage}
-                    className="bg-[#201a7c] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+                    className="bg-[#201a7c] dark:bg-[#3028a3] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -508,19 +508,19 @@ export default function AskInstructorPage() {
       {/* Feedback Modal */}
       {mounted && feedbackModal.isOpen && createPortal(
         <div className="fixed inset-0 z-[99999] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <div className="bg-[var(--card-background)] rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
               {feedbackModal.type === 'success' ? (
                 <i className="fa fa-check text-2xl"></i>
               ) : (
                 <i className="fa fa-times text-2xl"></i>
               )}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{feedbackModal.title}</h3>
-            <p className="text-sm text-gray-500 mb-6">{feedbackModal.message}</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{feedbackModal.title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{feedbackModal.message}</p>
             <button
               onClick={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
-              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
+              className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors"
             >
               Close
             </button>

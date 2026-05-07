@@ -23,7 +23,7 @@ export default function NotificationsPage() {
   // Show loading if context not available yet
   if (!context) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ab3b43]" />
       </div>
     );
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
   } = context;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--background)]">
       <NotificationsPanel
         items={notifications}
         filters={[

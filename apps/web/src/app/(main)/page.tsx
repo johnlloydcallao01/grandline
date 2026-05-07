@@ -13,7 +13,7 @@ import { getCourseCategories } from "@/server";
 export default async function Home() {
   const categories = await getCourseCategories(50);
   return (
-    <div className="bg-gray-50 lg:min-h-screen home-no-min" style={{ backgroundColor: '#f9fafb' }}>
+    <div className="bg-[var(--background)] lg:min-h-screen home-no-min">
       {/* Hero Section */}
       <HeroSection />
 

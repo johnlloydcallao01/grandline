@@ -98,8 +98,8 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
 
 
   return (
-    <div className="bg-gray-50" style={{ backgroundColor: '#f9fafb' }}>
-      <div className="bg-white border-b border-gray-200">
+    <div className="bg-[var(--background)]">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
         <CourseCategoryCarousel
           categories={categoriesState as CourseCategory[]}
           onCategoryChange={(id) => {
@@ -137,13 +137,15 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
           />
         </div>
       ) : (
-        <CoursesCarousel
-          courses={displayCourses.slice(0, 8)}
-          isLoading={isLoading}
-          skeletonCount={8}
-          title="Available Courses"
-          viewAllLink={availableCoursesLink}
-        />
+        <div className="lg:hidden">
+          <CoursesCarousel
+            courses={displayCourses.slice(0, 8)}
+            isLoading={isLoading}
+            skeletonCount={8}
+            title="Available Courses"
+            viewAllLink={availableCoursesLink}
+          />
+        </div>
       )}
       <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
         {(displayCourses.length > visibleCount || hasMore) && (
@@ -157,7 +159,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
                 }
               }}
               disabled={isLoadingMore}
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-md border border-[var(--card-border)] bg-[var(--card-background)] p-[10px] text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoadingMore ? 'Loading...' : 'Load More'}
             </button>
@@ -176,13 +178,15 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
               viewAllLink={featuredCoursesLink}
             />
           </div>
-          <CoursesCarousel
-            courses={featuredDisplay.slice(0, 8)}
-            isLoading={isLoadingFeatured}
-            skeletonCount={8}
-            title="Featured Courses"
-            viewAllLink={featuredCoursesLink}
-          />
+          <div className="lg:hidden">
+            <CoursesCarousel
+              courses={featuredDisplay.slice(0, 8)}
+              isLoading={isLoadingFeatured}
+              skeletonCount={8}
+              title="Featured Courses"
+              viewAllLink={featuredCoursesLink}
+            />
+          </div>
           <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
             {(featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
               <div className="flex justify-center">
@@ -195,7 +199,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
                     }
                   }}
                   disabled={isLoadingMoreFeatured}
-                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-[10px] text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center rounded-md border border-[var(--card-border)] bg-[var(--card-background)] p-[10px] text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isLoadingMoreFeatured ? 'Loading...' : 'Load More'}
                 </button>

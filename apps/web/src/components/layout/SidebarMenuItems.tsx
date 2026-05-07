@@ -42,11 +42,11 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="my-3 border-[var(--card-border)]" />}
 
       {/* Resources section */}
       <div className="space-y-1">
-        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Resources</div>}
+        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">Resources</div>}
         <SidebarItem
           icon="certificate"
           label="Certificates"
@@ -81,11 +81,11 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="my-3 border-[var(--card-border)]" />}
 
       {/* Support section */}
       <div className="space-y-1">
-        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">Support</div>}
+        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">Support</div>}
         <SidebarItem
           icon="support"
           label="Support"
@@ -114,11 +114,11 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="my-3 border-[var(--card-border)]" />}
 
       {/* General section */}
       <div className="space-y-1">
-        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900">General</div>}
+        {isOpen && <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">General</div>}
         <SidebarItem
           icon="about-us"
           label="About Us"

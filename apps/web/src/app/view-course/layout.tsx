@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Header, OverlaySidebar } from '@/components/layout';
+import { NotificationsProvider } from '@/contexts/NotificationsContext';
+import { useUser } from '@/hooks/useAuth';
 
 interface ViewCourseLayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,7 @@ interface ViewCourseLayoutProps {
 export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
   const [isOverlaySidebarOpen, setIsOverlaySidebarOpen] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const { user } = useUser();
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       if (typeof history !== 'undefined' && (history as any).scrollRestoration !== undefined) {
@@ -66,9 +69,10 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Shared Header - only visible on desktop */}
-      <div className="hidden lg:block lg:sticky lg:top-0 lg:z-50">
+    <NotificationsProvider userId={user?.id}>
+      <div className="min-h-screen bg-[var(--background)]">
+        {/* Shared Header - only visible on desktop */}
+        <div className="hidden lg:block lg:sticky lg:top-0 lg:z-50">
         <Header
           sidebarOpen={isOverlaySidebarOpen}
           onToggleSidebar={handleToggleOverlaySidebar}
@@ -85,25 +89,26 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
       </div>
 
       {/* Mobile/Tablet Sticky Header */}
-      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200 py-[3px]">
-        <div className="flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-50 bg-[var(--card-background)] border-b border-[var(--card-border)] py-[3px]">
+        <div className="flex items-center justify-between px-2">
           {/* Back Arrow */}
           <button
             onClick={() => window.history.back()}
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors
-"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="Go back"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
           {/* Ellipsis Menu */}
           <button
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={() => setIsActionsOpen(true)}
+            aria-label="More options"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
           </button>
@@ -111,7 +116,7 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="bg-white">
+      <div className="bg-[var(--background)]">
         {children}
       </div>
 
@@ -122,29 +127,30 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
             aria-label="Close share options"
             onClick={() => setIsActionsOpen(false)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-t-2xl p-4 shadow-lg">
+          <div className="relative w-full max-w-md bg-[var(--card-background)] rounded-t-2xl p-4 shadow-lg border-t border-[var(--card-border)]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-900">Options</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Options</span>
               <button
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Close"
                 onClick={() => setIsActionsOpen(false)}
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             <button
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-sm font-medium text-gray-900"
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-900 dark:text-gray-100"
               onClick={handleShare}
             >
-              <i className="fa fa-share-alt text-gray-600" />
+              <i className="fa fa-share-alt text-gray-600 dark:text-gray-400" />
               <span>Share</span>
             </button>
           </div>
         </div>
       )}
     </div>
+    </NotificationsProvider>
   );
 }

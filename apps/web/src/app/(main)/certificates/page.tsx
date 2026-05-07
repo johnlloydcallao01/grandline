@@ -79,14 +79,14 @@ export default function CertificatesPage() {
   const revokedCount = certificates.filter(c => c.status === 'revoked').length;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
+    <div className="min-h-screen bg-[var(--background)] pb-12">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)] sticky top-0 z-30">
         <div className="w-full px-[10px]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Certificates</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Certificates</h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Manage and track your completed course certificates.
               </p>
             </div>
@@ -100,54 +100,54 @@ export default function CertificatesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 animate-pulse">
+              <div key={idx} className="bg-[var(--card-background)] p-6 rounded-xl shadow-sm border border-[var(--card-border)] animate-pulse">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-gray-200 h-12 w-12"></div>
+                  <div className="p-3 rounded-lg bg-gray-200 dark:bg-gray-800 h-12 w-12"></div>
                   <div className="ml-4">
-                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                    <div className="h-8 bg-gray-200 rounded w-12"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-12"></div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
             <>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="bg-[var(--card-background)] p-6 rounded-xl shadow-sm border border-[var(--card-border)]">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-green-50 border border-green-100">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
+                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Active Certificates</p>
-                    <p className="text-2xl font-bold text-gray-900">{activeCount}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Certificates</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{activeCount}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="bg-[var(--card-background)] p-6 rounded-xl shadow-sm border border-[var(--card-border)]">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <svg className="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Revoked</p>
-                    <p className="text-2xl font-bold text-gray-900">{revokedCount}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Revoked</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{revokedCount}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="bg-[var(--card-background)] p-6 rounded-xl shadow-sm border border-[var(--card-border)]">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-100">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800">
+                    <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Expired</p>
-                    <p className="text-2xl font-bold text-gray-900">{expiredCount}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Expired</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{expiredCount}</p>
                   </div>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function CertificatesPage() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-t-xl border border-gray-200 border-b-0 p-4">
+        <div className="bg-[var(--card-background)] rounded-t-xl border border-[var(--card-border)] border-b-0 p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
             <div className="relative max-w-xs w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -168,7 +168,7 @@ export default function CertificatesPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg leading-5 bg-[var(--background)] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Search certificates..."
               />
             </div>
@@ -176,18 +176,18 @@ export default function CertificatesPage() {
         </div>
 
         {/* Certificates Table */}
-        <div className="bg-white shadow-sm rounded-b-xl border border-gray-200 overflow-hidden">
+        <div className="bg-[var(--card-background)] shadow-sm rounded-b-xl border border-[var(--card-border)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Course Name & ID
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Issue Date
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
                   <th scope="col" className="relative px-6 py-3">
@@ -195,55 +195,55 @@ export default function CertificatesPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-[var(--card-background)] divide-y divide-gray-200 dark:divide-gray-700">
                 {isLoading ? (
                   // Skeleton Loading State
                   Array.from({ length: 3 }).map((_, idx) => (
                     <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-lg"></div>
+                          <div className="flex-shrink-0 h-10 w-10 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
                           <div className="ml-4">
-                            <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-48 mb-2"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-24"></div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-32"></div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                        <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded-full w-16"></div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="h-8 bg-gray-200 rounded-lg w-28 inline-block"></div>
+                        <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded-lg w-28 inline-block"></div>
                       </td>
                     </tr>
                   ))
                 ) : filteredCertificates.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       No certificates found.
                     </td>
                   </tr>
                 ) : (
                   filteredCertificates.map((cert) => (
-                    <tr key={cert.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <tr key={cert.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                          <div className="flex-shrink-0 h-10 w-10 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{cert.course?.title || cert.metadata?.courseTitle || 'Unknown Course'}</div>
-                            <div className="text-xs text-gray-500 font-mono">{cert.certificateCode}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{cert.course?.title || cert.metadata?.courseTitle || 'Unknown Course'}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{cert.certificateCode}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-gray-900 dark:text-gray-300">
                           {new Date(cert.issueDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                         </div>
                       </td>
@@ -256,7 +256,7 @@ export default function CertificatesPage() {
                         {cert.file?.url ? (
                           <Link
                             href={`/certificates/${cert.id}`}
-                            className="text-blue-600 hover:text-blue-900 inline-flex items-center bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 inline-flex items-center bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg transition-colors"
                           >
                             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -265,7 +265,7 @@ export default function CertificatesPage() {
                             View Details
                           </Link>
                         ) : (
-                          <span className="text-gray-400">Unavailable</span>
+                          <span className="text-gray-400 dark:text-gray-500">Unavailable</span>
                         )}
                       </td>
                     </tr>

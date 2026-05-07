@@ -5,6 +5,7 @@ import { LoadingScreenWrapper, InstantLoadingController, LoadingProvider } from 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getServerUser, getServerToken } from "@/app/actions/auth";
 import "./globals.css";
 
@@ -39,7 +40,7 @@ export default async function RootLayout({
   const initialToken = await getServerToken();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -47,6 +48,20 @@ export default async function RootLayout({
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const theme = localStorage.getItem('grandline-theme-preference') || 'system';
+                const resolved = theme === 'system' 
+                  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                  : theme;
+                document.documentElement.classList.add(resolved);
+                document.documentElement.setAttribute('data-theme', resolved);
+              })();
+            `,
+          }}
         />
       </head>
       <body
@@ -62,8 +77,8 @@ export default async function RootLayout({
                   <div className="facebook-logo">
                     {/* @ts-ignore -- Next.js Image component type issue with React 19 */}
                     <Image
-                      src="/calsiter-inc-logo.png"
-                      alt="Calsiter Inc Logo"
+                      src="/grandline-logo.png"
+                      alt="Grandline Logo"
                       width={48}
                       height={48}
                       className="facebook-logo-image"
@@ -111,9 +126,11 @@ export default async function RootLayout({
           <AuthErrorBoundary>
             <AuthProvider initialUser={initialUser} initialToken={initialToken}>
               <WishlistProvider>
-                <LoadingScreenWrapper>
-                  {children}
-                </LoadingScreenWrapper>
+                <ThemeProvider>
+                  <LoadingScreenWrapper>
+                    {children}
+                  </LoadingScreenWrapper>
+                </ThemeProvider>
               </WishlistProvider>
             </AuthProvider>
           </AuthErrorBoundary>

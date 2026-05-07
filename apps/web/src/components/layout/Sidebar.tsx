@@ -16,14 +16,14 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
     <>
       <aside
         data-sidebar="main"
-        className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${isOpen
-            ? 'w-60 translate-x-0'
-            : 'w-20 translate-x-0'
+        className={`fixed left-0 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${isOpen
+          ? 'w-60 translate-x-0'
+          : 'w-20 translate-x-0'
           }`}
         style={{
           height: 'calc(100vh - 4rem)',
           scrollbarWidth: 'thin',
-          scrollbarColor: '#cbd5e1 transparent'
+          scrollbarColor: 'var(--card-border) transparent'
         }}
         onScroll={onScroll}
       >

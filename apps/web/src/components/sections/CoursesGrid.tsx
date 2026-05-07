@@ -17,13 +17,13 @@ interface CoursesGridProps {
 function CourseCardSkeleton() {
   return (
     <div className="group cursor-pointer animate-pulse">
-      <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-3">
-        <div className="w-full h-full bg-gray-300"></div>
+      <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-3">
+        <div className="w-full h-full bg-gray-300 dark:bg-gray-600"></div>
       </div>
       <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-3 bg-gray-200 rounded w-full"></div>
-        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
       </div>
     </div>
   );
@@ -36,9 +36,9 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
     return (
       <div className={paddingClass}>
         <div className="mb-[10px] flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           {viewAllLink && (
-            <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <Link href={viewAllLink as any} className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
               <i className="fa fa-chevron-right"></i>
             </Link>
           )}
@@ -57,16 +57,16 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
     return (
       <div className={paddingClass}>
         <div className="mb-[10px] flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
         </div>
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses available</h3>
-          <p className="text-gray-600">Check back later for new courses.</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No courses available</h3>
+          <p className="text-gray-600 dark:text-gray-400">Check back later for new courses.</p>
         </div>
       </div>
     );
@@ -75,9 +75,9 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
   return (
     <div className={paddingClass}>
       <div className="mb-[10px] flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
         {viewAllLink && (
-          <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+          <Link href={viewAllLink as any} className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <i className="fa fa-chevron-right"></i>
           </Link>
         )}

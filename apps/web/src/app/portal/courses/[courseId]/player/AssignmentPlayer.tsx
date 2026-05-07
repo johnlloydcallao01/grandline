@@ -154,11 +154,11 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-      <div className="flex flex-col md:flex-row justify-between gap-6 mb-8 pb-6 border-b border-gray-100">
+    <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 md:p-8">
+      <div className="flex flex-col md:flex-row justify-between gap-6 mb-8 pb-6 border-b border-[var(--card-border)]">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Assignment Details</h2>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Assignment Details</h2>
+          <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
             <span className="flex items-center gap-1">
               <i className="fa fa-star text-amber-500"></i> Max Score: {maxScore}
             </span>
@@ -174,31 +174,31 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
         </div>
         <div className="flex items-center">
           <div className="relative group flex items-center">
-            <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold capitalize flex items-center cursor-help">
+            <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg text-sm font-semibold capitalize flex items-center cursor-help">
               {submissionType.replace('_', ' ')}
               <i className="fa fa-info-circle ml-1.5 opacity-60 text-xs"></i>
             </span>
             {/* Tooltip Popup */}
-            <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs bg-gray-900 text-white text-xs rounded py-1.5 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg text-center font-normal">
+            <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs bg-gray-900 dark:bg-gray-800 text-white text-xs rounded py-1.5 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg text-center font-normal border border-gray-700">
               {getSubmissionTypeTooltip(submissionType)}
               {/* Little triangle arrow pointing down */}
-              <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900"></div>
+              <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Instructions</h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Instructions</h3>
         {assignment.content ? (
           <RichTextRenderer content={assignment.content} />
         ) : (
-          <p className="text-gray-500">No instructions provided.</p>
+          <p className="text-gray-500 dark:text-gray-400">No instructions provided.</p>
         )}
         
         {attachments && attachments.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <h4 className="font-semibold text-gray-700 mb-2 text-sm">Attachments:</h4>
+          <div className="mt-4 pt-4 border-t border-[var(--card-border)]">
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-sm">Attachments:</h4>
             <div className="flex flex-wrap gap-2">
               {attachments.map((att: any) => (
                 <a 
@@ -206,7 +206,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
                   href={getMediaUrl(att)} 
                   target="_blank" 
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-[var(--card-border)] rounded-lg text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                 >
                   <i className="fa fa-download"></i>
                   {att.filename || 'Download File'}
@@ -218,25 +218,25 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
       </div>
 
       {latestSubmission ? (
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Your Submission</h3>
+        <div className="mt-8 pt-8 border-t border-[var(--card-border)]">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Your Submission</h3>
           
           <div className={`p-4 rounded-xl border mb-6 ${
             latestSubmission.status === 'graded' 
-              ? (latestSubmission.score >= passingScore ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200')
+              ? (latestSubmission.score >= passingScore ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800')
               : latestSubmission.status === 'returned_for_revision'
-                ? 'bg-amber-50 border-amber-200'
-                : 'bg-blue-50 border-blue-200'
+                ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
+                : 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
           }`}>
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="font-semibold text-gray-900 capitalize">Status: {latestSubmission.status.replace(/_/g, ' ')}</p>
-                <p className="text-sm text-gray-500">Submitted on {new Date(latestSubmission.submittedAt).toLocaleString()}</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100 capitalize">Status: {latestSubmission.status.replace(/_/g, ' ')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Submitted on {new Date(latestSubmission.submittedAt).toLocaleString()}</p>
               </div>
               {latestSubmission.status === 'graded' && (
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Score</p>
-                  <p className={`text-2xl font-bold ${latestSubmission.score >= passingScore ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Score</p>
+                  <p className={`text-2xl font-bold ${latestSubmission.score >= passingScore ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {latestSubmission.score} / {maxScore}
                   </p>
                 </div>
@@ -244,26 +244,26 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
             </div>
 
             {latestSubmission.feedback && (
-              <div className="mt-4 pt-4 border-t border-gray-200/60">
-                <p className="text-sm font-semibold text-gray-700 mb-1">Instructor Feedback:</p>
-                <div className="text-sm text-gray-800 bg-white/60 p-3 rounded-lg">
+              <div className="mt-4 pt-4 border-t border-gray-200/60 dark:border-gray-700/60">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Instructor Feedback:</p>
+                <div className="text-sm text-gray-800 dark:text-gray-200 bg-[var(--card-background)] p-3 rounded-lg border border-[var(--card-border)]">
                   <RichTextRenderer content={latestSubmission.feedback} />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-            <h4 className="font-semibold text-gray-700 mb-2 text-sm">Submitted Content:</h4>
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-[var(--card-border)]">
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-sm">Submitted Content:</h4>
             {latestSubmission.submittedText && (
-              <div className="text-sm text-gray-800 whitespace-pre-wrap bg-white p-3 rounded border border-gray-200 mb-3">
+              <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap bg-[var(--card-background)] p-3 rounded border border-[var(--card-border)] mb-3">
                 {extractText(latestSubmission.submittedText)}
               </div>
             )}
             
             {latestSubmission.uploadedFiles && latestSubmission.uploadedFiles.length > 0 && (
               <div>
-                <p className="text-xs text-gray-500 mb-1">Files:</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Files:</p>
                 <div className="flex flex-wrap gap-2">
                   {latestSubmission.uploadedFiles.map((file: any) => (
                     <a 
@@ -271,7 +271,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
                       href={getMediaUrl(file)} 
                       target="_blank" 
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded text-sm text-blue-600 hover:bg-gray-50 transition-colors"
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--card-background)] border border-[var(--card-border)] rounded text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
                       <i className="fa fa-file"></i>
                       {file.filename || 'View File'}
@@ -284,27 +284,27 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
           
           {(latestSubmission.status === 'returned_for_revision' || latestSubmission.status === 'draft') && (
             <div className="mt-6">
-              <p className="text-sm text-gray-600 mb-4">You can submit a new revision below.</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You can submit a new revision below.</p>
             </div>
           )}
         </div>
       ) : null}
 
       {(!latestSubmission || latestSubmission.status === 'returned_for_revision') && (
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="mt-8 pt-8 border-t border-[var(--card-border)]">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
             {latestSubmission ? 'Submit Revision' : 'Submit your work'}
           </h3>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg text-sm">
               <i className="fa fa-exclamation-circle mr-2"></i>
               {error}
             </div>
           )}
           
           {success && (
-            <div className="mb-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-lg text-sm">
               <i className="fa fa-check-circle mr-2"></i>
               Assignment submitted successfully!
             </div>
@@ -313,11 +313,11 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
           <div className="space-y-4">
             {canEnterText && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Text Submission</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Text Submission</label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[150px]"
+                  className="w-full border border-gray-300 dark:border-gray-600 bg-[var(--card-background)] text-gray-900 dark:text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[150px]"
                   placeholder="Type your answer here..."
                   disabled={isSubmitting}
                 />
@@ -326,7 +326,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
 
             {canUploadFile && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">File Upload</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File Upload</label>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -334,14 +334,15 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
                   multiple
                   disabled={isSubmitting}
                   accept={getAcceptString()}
-                  className="block w-full text-sm text-gray-500
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-full file:border-0
                     file:text-sm file:font-semibold
                     file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
+                    dark:file:bg-blue-900/30 dark:file:text-blue-400
+                    hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Allowed types: {allowedFileTypes?.join(', ') || 'Any'}
                 </p>
               </div>

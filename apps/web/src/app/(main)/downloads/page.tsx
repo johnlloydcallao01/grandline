@@ -107,65 +107,65 @@ export default function DownloadsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50/50 pb-12">
+      <div className="min-h-screen bg-[var(--background)] pb-12">
         {/* Header Skeleton */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="bg-[var(--card-background)] border-b border-[var(--card-border)] sticky top-0 z-30">
           <div className="w-full px-[10px]">
             <div className="py-6">
-              <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-64 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-96 animate-pulse"></div>
             </div>
           </div>
         </div>
 
         <div className="w-full px-[10px] py-8 space-y-8">
           {/* Section 1 Skeleton */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <div className="h-6 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-72 animate-pulse"></div>
+          <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50">
+              <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-48 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-72 animate-pulse"></div>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-[var(--card-border)]">
               {[1, 2, 3].map((i) => (
                 <li key={i} className="px-6 py-5 flex items-center justify-between">
                   <div className="flex items-center min-w-0 gap-x-4 flex-1">
-                    <div className="flex-shrink-0 h-12 w-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="flex-shrink-0 h-12 w-12 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
                     <div className="min-w-0 flex-1">
-                      <div className="h-5 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-64 mb-2 animate-pulse"></div>
                       <div className="flex items-center space-x-2">
-                        <div className="h-4 bg-gray-200 rounded-full w-16 animate-pulse"></div>
-                        <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-                        <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-full w-16 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-32 animate-pulse"></div>
                       </div>
                     </div>
                   </div>
-                  <div className="h-9 bg-gray-200 rounded w-28 animate-pulse ml-4"></div>
+                  <div className="h-9 bg-gray-200 dark:bg-gray-800 rounded w-28 animate-pulse ml-4"></div>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Section 2 Skeleton */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <div className="h-6 bg-gray-200 rounded w-56 mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-80 animate-pulse"></div>
+          <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50">
+              <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-56 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-80 animate-pulse"></div>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-[var(--card-border)]">
               {[1, 2].map((i) => (
                 <li key={i} className="px-6 py-5 flex items-center justify-between">
                   <div className="flex items-center min-w-0 gap-x-4 flex-1">
-                    <div className="flex-shrink-0 h-12 w-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="flex-shrink-0 h-12 w-12 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
                     <div className="min-w-0 flex-1">
-                      <div className="h-5 bg-gray-200 rounded w-72 mb-2 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-72 mb-2 animate-pulse"></div>
                       <div className="flex items-center space-x-2">
-                        <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                        <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
-                        <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-16 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-48 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20 animate-pulse"></div>
                       </div>
                     </div>
                   </div>
-                  <div className="h-9 bg-gray-200 rounded w-32 animate-pulse ml-4"></div>
+                  <div className="h-9 bg-gray-200 dark:bg-gray-800 rounded w-32 animate-pulse ml-4"></div>
                 </li>
               ))}
             </ul>
@@ -176,13 +176,13 @@ export default function DownloadsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
+    <div className="min-h-screen bg-[var(--background)] pb-12">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)] sticky top-0 z-30">
         <div className="w-full px-[10px]">
           <div className="py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Downloads Center</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Downloads Center</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Download your certificates and training materials for offline use.
             </p>
           </div>
@@ -193,30 +193,30 @@ export default function DownloadsPage() {
 
         {/* Certificates Section */}
         {certificates.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+          <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium leading-6 text-gray-900">My Certificates</h3>
-                <p className="mt-1 text-sm text-gray-500">Official course completion certificates and documents.</p>
+                <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">My Certificates</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Official course completion certificates and documents.</p>
               </div>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-[var(--card-border)]">
               {certificates.map((cert) => (
-                <li key={`cert-${cert.id}`} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150 flex items-center justify-between">
+                <li key={`cert-${cert.id}`} className="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150 flex items-center justify-between group">
                   <div className="flex items-center min-w-0 gap-x-4">
-                    <div className="flex-shrink-0 h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                    <div className="flex-shrink-0 h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {cert.course?.title || 'Certificate'} - {cert.certificateCode}
                       </p>
-                      <div className="flex items-center mt-1 text-xs text-gray-500 space-x-2">
-                        <span className={`px-2 py-0.5 rounded-full border font-medium ${cert.status === 'active' ? 'bg-green-50 text-green-700 border-green-200' :
-                          cert.status === 'expired' ? 'bg-red-50 text-red-700 border-red-200' :
-                            'bg-gray-50 text-gray-700 border-gray-200'
+                      <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-2">
+                        <span className={`px-2 py-0.5 rounded-full border font-medium ${cert.status === 'active' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/50' :
+                          cert.status === 'expired' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50' :
+                            'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
                           }`}>
                           {cert.status.charAt(0).toUpperCase() + cert.status.slice(1)}
                         </span>
@@ -234,15 +234,15 @@ export default function DownloadsPage() {
                         download={cert.file.filename || `Certificate-${cert.certificateCode}.pdf`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm"
+                        className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[var(--card-background)] text-gray-700 dark:text-gray-200 border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
                       >
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         <span className="hidden sm:inline">Download</span>
                       </a>
                     ) : (
-                      <span className="text-sm text-gray-500 italic">Not available</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 italic">Not available</span>
                     )}
                   </div>
                 </li>
@@ -253,19 +253,19 @@ export default function DownloadsPage() {
 
         {/* Training Materials Section */}
         {materials.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Training Materials</h3>
-              <p className="mt-1 text-sm text-gray-500">Course and lesson materials available for your enrolled programs.</p>
+          <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Training Materials</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Course and lesson materials available for your enrolled programs.</p>
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-[var(--card-border)]">
               {materials.map((item) => (
-                <li key={`mat-${item.isLessonMaterial ? 'lesson' : 'course'}-${item.id}`} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150 flex items-center justify-between">
+                <li key={`mat-${item.isLessonMaterial ? 'lesson' : 'course'}-${item.id}`} className="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150 flex items-center justify-between group">
                   <div className="flex items-center min-w-0 gap-x-4">
-                    <div className={`flex-shrink-0 h-12 w-12 rounded-lg flex items-center justify-center ${item.type === 'PDF' ? 'bg-red-100 text-red-600' :
-                      item.type === 'Video' ? 'bg-blue-100 text-blue-600' :
-                        item.type === 'Presentation' ? 'bg-orange-100 text-orange-600' :
-                          'bg-indigo-100 text-indigo-600'
+                    <div className={`flex-shrink-0 h-12 w-12 rounded-lg flex items-center justify-center ${item.type === 'PDF' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
+                      item.type === 'Video' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
+                        item.type === 'Presentation' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+                          'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
                       }`}>
                       {item.type === 'PDF' && (
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
@@ -278,9 +278,9 @@ export default function DownloadsPage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
-                      <div className="flex items-center mt-1 text-xs text-gray-500 space-x-2">
-                        <span className="bg-gray-100 px-2 py-0.5 rounded border border-gray-200 text-gray-600 font-medium">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{item.title}</p>
+                      <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-2">
+                        <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium">
                           {item.isLessonMaterial ? 'Lesson' : 'Course'}
                         </span>
                         <span>•</span>
@@ -306,9 +306,9 @@ export default function DownloadsPage() {
                     {item.hasMultipleFiles && item.allFiles && item.allFiles.length > 0 ? (
                       <button
                         onClick={() => handleBulkDownload(item.allFiles!)}
-                        className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm"
+                        className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[var(--card-background)] text-gray-700 dark:text-gray-200 border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
                       >
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         <span className="hidden sm:inline">Download All ({item.allFiles.length})</span>
@@ -319,9 +319,9 @@ export default function DownloadsPage() {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm"
+                          className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[var(--card-background)] text-gray-700 dark:text-gray-200 border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
                         >
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                           <span className="hidden sm:inline">Open Link</span>
@@ -332,16 +332,16 @@ export default function DownloadsPage() {
                           download={item.title}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm"
+                          className="flex items-center space-x-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[var(--card-background)] text-gray-700 dark:text-gray-200 border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
                         >
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
                           <span className="hidden sm:inline">Download</span>
                         </a>
                       )
                     ) : (
-                      <span className="text-sm text-gray-500 italic">Not available</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 italic">Not available</span>
                     )}
                   </div>
                 </li>
@@ -351,12 +351,12 @@ export default function DownloadsPage() {
         )}
 
         {certificates.length === 0 && materials.length === 0 && !isLoading && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] p-12 text-center">
+            <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No downloads available</h3>
-            <p className="mt-1 text-sm text-gray-500">You don't have any certificates or training materials to download yet.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No downloads available</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">You don't have any certificates or training materials to download yet.</p>
           </div>
         )}
 

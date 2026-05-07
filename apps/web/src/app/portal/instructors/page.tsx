@@ -79,14 +79,14 @@ export default function InstructorsPage() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-[var(--background)]">
       {/* Header Section */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
         <div className="w-full px-[10px] py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Instructors</h1>
-              <p className="mt-1 text-sm text-gray-500">Connect with industry experts and mentors</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Instructors</h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Connect with industry experts and mentors</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -95,9 +95,9 @@ export default function InstructorsPage() {
                   placeholder="Find instructors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-[var(--background)] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-[#201a7c] outline-none transition-colors"
                 />
-                <i className="fa fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                <i className="fa fa-search absolute left-3 top-3 text-gray-400 dark:text-gray-500 text-sm"></i>
               </div>
             </div>
           </div>
@@ -109,29 +109,29 @@ export default function InstructorsPage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+              <div key={i} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 animate-pulse">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-4 w-full">
-                    <div className="w-16 h-16 rounded-full bg-gray-200 shrink-0"></div>
+                    <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 shrink-0"></div>
                     <div className="flex-1">
-                      <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                      <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-5/6"></div>
                     </div>
                   </div>
                 </div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2 mt-6"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3 mb-6"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full mb-2 mt-6"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-2/3 mb-6"></div>
                 <div className="grid grid-cols-2 gap-2 mb-6">
-                  <div className="p-2 bg-gray-100 rounded-lg h-16"></div>
-                  <div className="p-2 bg-gray-100 rounded-lg h-16"></div>
+                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg h-16"></div>
+                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg h-16"></div>
                 </div>
-                <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-lg w-full"></div>
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="flex justify-center py-12 text-red-500">
+          <div className="flex justify-center py-12 text-red-500 dark:text-red-400">
             {error}
           </div>
         ) : (
@@ -156,48 +156,48 @@ export default function InstructorsPage() {
                 const status = 'Available';
 
                 return (
-                  <div key={instructor.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div key={instructor.id} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
                         <img
                           src={image}
                           alt={name}
-                          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-gray-800 shadow-sm"
                         />
                         <div>
-                          <h3 className="font-bold text-gray-900">{name}</h3>
-                          <p className="text-sm text-blue-600 font-medium">{title}</p>
-                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                          <h3 className="font-bold text-gray-900 dark:text-gray-100">{name}</h3>
+                          <p className="text-sm text-[#201a7c] dark:text-[#5c54e0] font-medium">{title}</p>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
                             <i className="fa fa-envelope"></i>
                             <span>{instructor.contactEmail || user.email || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${status === 'Available' ? 'bg-green-50 text-green-700' :
-                        status === 'In Class' ? 'bg-amber-50 text-amber-700' :
-                          'bg-gray-100 text-gray-600'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${status === 'Available' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                        status === 'In Class' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                          'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                         }`}>
                         {status}
                       </span>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-6 line-clamp-2 min-h-[40px]">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 line-clamp-2 min-h-[40px]">
                       {instructor.specialization || 'No specialization specified.'}
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 mb-6">
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="text-sm font-bold text-gray-900">{instructor.yearsExperience || 0}</div>
-                        <div className="text-xs text-gray-500">Years Exp</div>
+                      <div className="text-center p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-transparent dark:border-[var(--card-border)]">
+                        <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{instructor.yearsExperience || 0}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Years Exp</div>
                       </div>
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <div className="text-sm font-bold text-gray-900 line-clamp-1">{instructor.officeHours || 'Flexible'}</div>
-                        <div className="text-xs text-gray-500">Office Hours</div>
+                      <div className="text-center p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-transparent dark:border-[var(--card-border)]">
+                        <div className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{instructor.officeHours || 'Flexible'}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Office Hours</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Link href={`/portal/instructors/${instructor.id}` as any} className="flex-1 text-center px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm block">
+                      <Link href={`/portal/instructors/${instructor.id}` as any} className="flex-1 text-center px-4 py-2 bg-[var(--background)] border border-[var(--card-border)] text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm block">
                         View Profile
                       </Link>
                     </div>
@@ -208,18 +208,18 @@ export default function InstructorsPage() {
 
             {filteredInstructors.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <i className="fa fa-user-slash text-gray-400 text-xl"></i>
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 border border-[var(--card-border)]">
+                  <i className="fa fa-user-slash text-gray-400 dark:text-gray-500 text-xl"></i>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">No instructors found</h3>
-                <p className="text-gray-500 max-w-sm mt-1">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No instructors found</h3>
+                <p className="text-gray-500 dark:text-gray-400 max-w-sm mt-1">
                   {instructors.length === 0
                     ? "You are not enrolled in any courses with assigned instructors yet."
                     : "Try adjusting your search or filters to find what you're looking for."}
                 </p>
                 <button
                   onClick={() => { setSearchQuery(''); }}
-                  className="mt-4 text-blue-600 font-medium hover:underline"
+                  className="mt-4 text-[#201a7c] dark:text-[#5c54e0] font-medium hover:underline"
                 >
                   Reset filters
                 </button>

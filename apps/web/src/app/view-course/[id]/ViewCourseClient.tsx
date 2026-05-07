@@ -314,29 +314,29 @@ function CourseOverviewCard({
   }, [isAuthenticated, user?.id, course.id])
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="bg-[var(--card-background)] rounded-lg overflow-hidden shadow-lg border border-[var(--card-border)]">
       {mounted && createPortal(
         <>
           {/* Overlay */}
           <div
-            className={`fixed inset-0 z-[9998] bg-black/50 transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[9998] bg-[var(--background)]/80 md:bg-black/50 transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
             onClick={() => setShowModal(false)}
             aria-hidden="true"
           />
 
           {/* Modal Sheet */}
-          <div className={`fixed inset-x-0 bottom-0 z-[9999] bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out flex flex-col h-[90vh] ${showModal ? 'translate-y-0' : 'translate-y-full'
+          <div className={`fixed inset-x-0 bottom-0 z-[9999] bg-[var(--card-background)] rounded-t-2xl shadow-xl border-t border-[var(--card-border)] transform transition-transform duration-300 ease-out flex flex-col h-[90vh] ${showModal ? 'translate-y-0' : 'translate-y-full'
             }`}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <h2 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--card-border)] shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {buttonLabel === 'Enroll Now'
                   ? (!isAuthenticated ? 'Login Required' : 'Enroll in Course')
                   : 'Course Info'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 -mr-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -348,25 +348,25 @@ function CourseOverviewCard({
               {buttonLabel === 'Enroll Now' && (
                 !isAuthenticated ? (
                   <div className="flex flex-col items-center justify-center h-full py-10">
-                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-                      <svg className="w-10 h-10 text-[#201a7c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-20 h-20 bg-blue-50 dark:bg-[#3028a3]/20 rounded-full flex items-center justify-center mb-6">
+                      <svg className="w-10 h-10 text-[#201a7c] dark:text-[#5c54e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Login to Enroll</h3>
-                    <p className="text-gray-500 text-center max-w-xs mb-8">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Login to Enroll</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs mb-8">
                       You need to be logged in to enroll in this course and track your progress.
                     </p>
                     <div className="w-full max-w-sm space-y-3">
                       <Link
                         href={`/login?redirect=/view-course/${course.id}` as any}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         Log In
                       </Link>
                       <Link
                         href={`/register?redirect=/view-course/${course.id}` as any}
-                        className="block w-full bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[var(--card-background)] border-2 border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         Create Account
                       </Link>
@@ -375,7 +375,7 @@ function CourseOverviewCard({
                 ) : (
                   <div className="flex flex-col h-full">
                     <div className="flex gap-4 mb-6">
-                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 border border-[var(--card-border)]">
                         <Image
                           src={thumbnailImageUrl}
                           alt={altText}
@@ -384,13 +384,13 @@ function CourseOverviewCard({
                         />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-gray-900 line-clamp-2 mb-1">{course.title}</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1">{course.title}</h3>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-bold text-[#201a7c]">
+                          <span className="text-xl font-bold text-[#201a7c] dark:text-[#5c54e0]">
                             {formatPrice(course.discountedPrice)}
                           </span>
                           {course.price !== course.discountedPrice && (
-                            <span className="text-sm text-gray-400 line-through">
+                            <span className="text-sm text-gray-400 dark:text-gray-500 line-through">
                               {formatPrice(course.price)}
                             </span>
                           )}
@@ -399,8 +399,8 @@ function CourseOverviewCard({
                     </div>
 
                     <div className="space-y-4 mb-8">
-                      <h4 className="font-semibold text-gray-900">Course Information</h4>
-                      <div className="text-sm text-gray-600 space-y-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Course Information</h4>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                         <div>Modules: {totalModules}</div>
                         <div>Lessons: {totalLessons}</div>
                         <div>Quizzes: {totalQuizzes}</div>
@@ -423,13 +423,13 @@ function CourseOverviewCard({
 
                     <div className="mt-auto">
                       <button
-                        className="w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all active:scale-[0.98]"
+                        className="w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all active:scale-[0.98]"
                         onClick={handleRequestEnrollment}
                         disabled={isSubmittingRequest}
                       >
                         {isSubmittingRequest ? 'Requesting...' : 'Request Enrollment'}
                       </button>
-                      <p className="text-center text-xs text-gray-400 mt-3">
+                      <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
                         By requesting enrollment, you agree to our Terms of Service and Privacy Policy.
                       </p>
                     </div>
@@ -439,9 +439,9 @@ function CourseOverviewCard({
 
               {buttonLabel === 'View Enrollment Status' && (
                 <div className="flex flex-col items-center justify-center h-full py-10">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${currentStatus === 'completed' ? 'bg-green-100 text-green-600' :
-                    currentStatus === 'pending' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-red-100 text-red-600'
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${currentStatus === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                    currentStatus === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
+                      'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     }`}>
                     {currentStatus === 'completed' ? (
                       <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,7 +458,7 @@ function CourseOverviewCard({
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 capitalize">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 capitalize">
                     {currentStatus === 'completed' ? 'Course Completed' :
                       currentStatus === 'pending' ? 'Enrollment Pending' :
                         currentStatus === 'suspended' ? 'Enrollment Suspended' :
@@ -467,7 +467,7 @@ function CourseOverviewCard({
                               'Enrollment Status'}
                   </h3>
 
-                  <p className="text-gray-500 text-center max-w-xs mb-8">
+                  <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs mb-8">
                     {currentStatus === 'completed'
                       ? "Congratulations! You have successfully completed this course."
                       : currentStatus === 'pending'
@@ -485,7 +485,7 @@ function CourseOverviewCard({
                     {currentStatus === 'completed' && (
                       <Link
                         href={`/portal/courses/${course.id}/player` as any}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         Review Course
                       </Link>
@@ -493,7 +493,7 @@ function CourseOverviewCard({
                     {(currentStatus === 'dropped' || currentStatus === 'expired') && (
                       <button
                         onClick={() => setButtonLabel('Enroll Now')}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         Re-enroll Now
                       </button>
@@ -502,7 +502,7 @@ function CourseOverviewCard({
                       <button
                         onClick={handleContactSupport}
                         disabled={isSubmittingSupport}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         {isSubmittingSupport ? 'Creating Ticket...' : 'Contact Support'}
                       </button>
@@ -511,14 +511,14 @@ function CourseOverviewCard({
                       <button
                         onClick={handleContactSupport}
                         disabled={isSubmittingSupport}
-                        className="block w-full bg-[#201a7c] hover:bg-[#1a1563] disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                        className="block w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                       >
                         {isSubmittingSupport ? 'Creating Ticket...' : 'Contact Support'}
                       </button>
                     )}
                     <button
                       onClick={() => setShowModal(false)}
-                      className="block w-full bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
+                      className="block w-full bg-[var(--card-background)] border-2 border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold py-3 px-4 rounded-xl text-center transition-colors"
                     >
                       Close
                     </button>
@@ -538,30 +538,30 @@ function CourseOverviewCard({
             className="fixed inset-0 bg-black/60 transition-opacity"
             onClick={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
           />
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative z-10 transform transition-all scale-100">
-            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${feedbackModal.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+          <div className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-2xl shadow-2xl w-full max-w-md p-6 relative z-10 transform transition-all scale-100">
+            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${feedbackModal.type === 'success' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'
               }`}>
               {feedbackModal.type === 'success' ? (
-                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               )}
             </div>
-            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-gray-100 mb-2">
               {feedbackModal.title}
             </h3>
-            <p className="text-gray-500 text-center mb-8">
+            <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
               {feedbackModal.message}
             </p>
             <button
               onClick={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
               className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-[0.98] ${feedbackModal.type === 'success'
-                ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
-                : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                ? 'bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 shadow-green-200 dark:shadow-none'
+                : 'bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 shadow-red-200 dark:shadow-none'
                 }`}
             >
               {feedbackModal.type === 'success' ? 'Great!' : 'Close'}
@@ -583,7 +583,7 @@ function CourseOverviewCard({
         {showHeart && (
           <button
             type="button"
-            className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors"
+            className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-transparent dark:border-gray-700"
             aria-label="Toggle wishlist"
             onClick={async (e) => {
               e.preventDefault();
@@ -600,7 +600,7 @@ function CourseOverviewCard({
             }}
           >
             <i
-              className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300'}`}
+              className={`fa fa-heart ${wishlisted ? 'text-[#ab3b43]' : 'text-gray-300 dark:text-gray-500'}`}
             ></i>
           </button>
         )}
@@ -609,30 +609,29 @@ function CourseOverviewCard({
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="text-red-500 text-sm line-through">
+            <span className="text-red-500 dark:text-red-400 text-sm line-through">
               {formatPrice(course.price)}
             </span>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {formatPrice(course.discountedPrice)}
             </div>
           </div>
           <span
-            className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded"
-            style={{ backgroundColor: '#f5f5f5', color: '#333' }}
+            className="bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-300 text-xs px-2 py-1 rounded"
           >
             {course.category?.map((c) => c.name).join(', ') || 'General'}
           </span>
         </div>
 
         <button
-          className="w-full bg-white hover:bg-[#201a7c] text-[#201a7c] hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c]"
+          className="w-full bg-[var(--card-background)] hover:bg-[#201a7c] dark:hover:bg-[#3028a3] text-[#201a7c] dark:text-[#5c54e0] hover:text-white dark:hover:text-white font-medium py-3 px-4 rounded-lg mb-3 transition-colors border border-[#201a7c] dark:border-[#5c54e0]"
           disabled={isLoadingEnrollment}
           onClick={handlePrimaryAction}
         >
           ▶ {buttonLabel}
         </button>
 
-        <div className="text-sm text-gray-600 space-y-1">
+        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <div>Modules: {totalModules}</div>
           <div>Lessons: {totalLessons}</div>
           <div>Quizzes: {totalQuizzes}</div>
@@ -664,7 +663,7 @@ function getImageUrl(media: Media | null | undefined): string | null {
 }
 
 function renderHeadingBlock(block: HeadingBlock, index: number) {
-  const baseClass = 'font-semibold text-gray-900'
+  const baseClass = 'font-semibold text-gray-900 dark:text-gray-100'
   const spacingClass = index === 0 ? 'mt-0 mb-3' : 'mt-6 mb-3'
 
   if (block.level === 1) {
@@ -692,7 +691,7 @@ function renderHeadingBlock(block: HeadingBlock, index: number) {
 
 function renderParagraphBlock(block: ParagraphBlock, index: number) {
   return (
-    <p key={index} className="text-gray-700 leading-relaxed">
+    <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed">
       {block.text}
     </p>
   )
@@ -703,7 +702,7 @@ function renderListBlock(block: ListBlock, index: number) {
   return (
     <ListTag
       key={index}
-      className="pl-5 space-y-1 text-gray-700 leading-relaxed"
+      className="pl-5 space-y-1 text-gray-700 dark:text-gray-300 leading-relaxed"
     >
       {block.items.map((item, i) => (
         <li key={i}>{item}</li>
@@ -729,10 +728,10 @@ function renderImageBlock(block: ImageBlock, index: number) {
         width={800}
         height={450}
         style={style}
-        className="rounded-lg border border-gray-200 object-cover"
+        className="rounded-lg border border-gray-200 dark:border-gray-700 object-cover"
       />
       {block.caption && (
-        <figcaption className="mt-2 text-sm text-gray-500">
+        <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           {block.caption}
         </figcaption>
       )}
@@ -744,11 +743,11 @@ function renderQuoteBlock(block: QuoteBlock, index: number) {
   return (
     <blockquote
       key={index}
-      className="border-l-4 border-gray-300 pl-4 italic text-gray-700"
+      className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-700 dark:text-gray-300"
     >
       <p>{block.text}</p>
       {block.attribution && (
-        <footer className="mt-1 text-sm text-gray-500">
+        <footer className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           — {block.attribution}
         </footer>
       )}
@@ -836,14 +835,14 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
     if (!hasBlockChild) {
       return (
-        <p key={key} className="text-gray-700 leading-relaxed">
+        <p key={key} className="text-gray-700 dark:text-gray-300 leading-relaxed">
           {renderLexicalChildren(node, key)}
         </p>
       )
     }
 
     return (
-      <div key={key} className="space-y-4">
+      <div key={key} className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
         {children.map((child: any, index: number) => {
           if (!child || typeof child !== 'object') return null
 
@@ -851,7 +850,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
             return (
               <p
                 key={`${key}-p-${index}`}
-                className="text-gray-700 leading-relaxed"
+                className="text-gray-700 dark:text-gray-300 leading-relaxed"
               >
                 {renderLexicalTextNode(child, `${key}-text-${index}`)}
               </p>
@@ -866,7 +865,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
   if (type === 'heading') {
     const tag = node.tag
-    const baseClass = 'font-semibold text-gray-900'
+    const baseClass = 'font-semibold text-gray-900 dark:text-gray-100'
     const spacingClass = 'mt-6 mb-3'
 
     if (tag === 'h1') {
@@ -896,7 +895,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     return (
       <blockquote
         key={key}
-        className="border-l-4 border-gray-300 pl-4 italic text-gray-700"
+        className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-700 dark:text-gray-300"
       >
         {renderLexicalChildren(node, key)}
       </blockquote>
@@ -909,7 +908,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     return (
       <ListTag
         key={key}
-        className="pl-5 space-y-1 text-gray-700 leading-relaxed"
+        className="pl-5 space-y-1 text-gray-700 dark:text-gray-300 leading-relaxed"
       >
         {renderLexicalChildren(node, key)}
       </ListTag>
@@ -958,7 +957,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-1/2 h-auto rounded-lg border border-[var(--card-border)] object-cover"
         />
       </figure>
     )
@@ -981,10 +980,10 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full lg:w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-1/2 h-auto rounded-lg border border-[var(--card-border)] object-cover"
         />
         {caption && (
-          <figcaption className="mt-2 text-sm text-gray-500">
+          <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {caption}
           </figcaption>
         )}
@@ -1018,7 +1017,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     if (isVideo) {
       return (
         <figure key={key} className="w-full mb-6">
-          <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-black relative flex justify-center">
+          <div className="w-full border border-[var(--card-border)] rounded-lg overflow-hidden bg-black relative flex justify-center">
             <video
               src={src}
               controls
@@ -1029,7 +1028,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
             </video>
           </div>
           {caption && (
-            <figcaption className="mt-2 text-sm text-gray-500">
+            <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               {caption}
             </figcaption>
           )}
@@ -1040,7 +1039,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     if (isPPT) {
       return (
         <figure key={key} className="w-full mb-6">
-          <div className="w-full h-[500px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+          <div className="w-full h-[500px] border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--background)] relative">
             <iframe
               src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(src)}`}
               width="100%"
@@ -1054,13 +1053,13 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           </div>
           <div className="mt-2 flex items-center justify-between">
             {caption && (
-              <figcaption className="text-sm text-gray-500">{caption}</figcaption>
+              <figcaption className="text-sm text-gray-500 dark:text-gray-400">{caption}</figcaption>
             )}
             <a
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-[#201a7c] dark:text-[#5c54e0] hover:text-[#1a1563] dark:hover:text-[#6a62f5] font-medium"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
               Download Presentation
@@ -1073,7 +1072,7 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
     if (isPDF) {
       return (
         <figure key={key} className="w-full mb-6">
-          <div className="w-full h-[600px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative">
+          <div className="w-full h-[600px] border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--background)] relative">
             <iframe
               src={`${src}#view=FitH`}
               width="100%"
@@ -1087,13 +1086,13 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           </div>
           <div className="mt-2 flex items-center justify-between">
             {caption && (
-              <figcaption className="text-sm text-gray-500">{caption}</figcaption>
+              <figcaption className="text-sm text-gray-500 dark:text-gray-400">{caption}</figcaption>
             )}
             <a
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-[#201a7c] dark:text-[#5c54e0] hover:text-[#1a1563] dark:hover:text-[#6a62f5] font-medium"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
               Download PDF
@@ -1111,10 +1110,10 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
           alt={alt}
           width={800}
           height={450}
-          className="w-full lg:w-1/2 h-auto rounded-lg border border-gray-200 object-cover"
+          className="w-full lg:w-1/2 h-auto rounded-lg border border-[var(--card-border)] object-cover"
         />
         {caption && (
-          <figcaption className="mt-2 text-sm text-gray-500">
+          <figcaption className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {caption}
           </figcaption>
         )}
@@ -1148,7 +1147,7 @@ function renderRichDescription(description: any): React.ReactNode {
   }
 
   return (
-    <div className="space-y-4 text-gray-700 leading-relaxed">
+    <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
       {rendered}
     </div>
   )
@@ -1163,7 +1162,7 @@ function CourseDescriptionBlocks({
 }) {
   if (blocks && blocks.length > 0) {
     return (
-      <div className="space-y-4 text-gray-700 leading-relaxed">
+      <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
         {blocks.map((block, index) => {
           if (block.type === 'heading') return renderHeadingBlock(block, index)
           if (block.type === 'paragraph') return renderParagraphBlock(block, index)
@@ -1526,7 +1525,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
   }, [curriculum])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[var(--background)]">
 
 
       {/* Breadcrumb Navigation */}
@@ -1535,13 +1534,13 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
           {(Link as any)({
             href: '/',
             className:
-              'text-gray-600 hover:text-[#201a7c] transition-all duration-200 font-medium',
+              'text-gray-600 dark:text-gray-400 hover:text-[#201a7c] dark:hover:text-[#5c54e0] transition-all duration-200 font-medium',
             children: 'Home',
           })}
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-[#201a7c] font-semibold truncate max-w-xs">
+          <span className="text-[#201a7c] dark:text-[#5c54e0] font-semibold truncate max-w-xs">
             {course.title}
           </span>
         </nav>
@@ -1604,7 +1603,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
 
 
       {/* Course Content Sections - Two Column Layout */}
-      <div className="w-full bg-gray-50 min-h-screen">
+      <div className="w-full bg-[var(--background)] min-h-screen">
         <div className="w-full lg:pr-5">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Main Content - Left Column */}
@@ -1617,7 +1616,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                 />
               </div>
 
-              <div id="overview" className="lg:hidden bg-white rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
+              <div id="overview" className="lg:hidden bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-2.5 pt-2.5 pb-8 mb-8">
                 {thumbnailImageUrl && (
                   <div className="lg:hidden">
                     <CourseOverviewCard
@@ -1637,8 +1636,8 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
               </div>
 
               {/* Description Section */}
-              <div id="description" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">
+              <div id="description" className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
                   Course Description
                 </h2>
                 <CourseDescriptionBlocks
@@ -1648,25 +1647,25 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
               </div>
 
               {/* Additional content sections can be added here */}
-              <div id="curriculum" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
-                <h2 className="text-xl font-semibold mb-2">Curriculum</h2>
+              <div id="curriculum" className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Curriculum</h2>
                 {curriculum && curriculum.modules && curriculum.modules.length > 0 ? (
                   <>
-                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600 mb-6">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1">
-                        <span className="w-2 h-2 rounded-full bg-[#201a7c]" />
+                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-6">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#201a7c]/10 dark:bg-[#3028a3]/30 px-2 py-1 text-[#201a7c] dark:text-[#5c54e0]">
+                        <span className="w-2 h-2 rounded-full bg-[#201a7c] dark:bg-[#5c54e0]" />
                         {totalLessons} lesson{totalLessons === 1 ? '' : 's'}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-1 text-amber-700 dark:text-amber-400">
                         <span className="w-2 h-2 rounded-full bg-amber-500" />
                         {totalQuizzes} quiz{totalQuizzes === 1 ? '' : 'zes'}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-900/30 px-2 py-1 text-rose-700 dark:text-rose-400">
                         <span className="w-2 h-2 rounded-full bg-rose-500" />
                         {totalExams} exam{totalExams === 1 ? '' : 's'}
                       </span>
                       {totalAssignments > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-1 text-teal-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 dark:bg-teal-900/30 px-2 py-1 text-teal-700 dark:text-teal-400">
                           <span className="w-2 h-2 rounded-full bg-teal-500" />
                           {totalAssignments} assignment{totalAssignments === 1 ? '' : 's'}
                         </span>
@@ -1698,26 +1697,26 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                         return (
                           <div
                             key={module.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+                            className="border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--card-background)]"
                           >
                             <button
                               type="button"
-                              className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3"
+                              className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                               onClick={() =>
                                 setExpandedItem(isExpanded ? null : module.id)
                               }
                             >
                               <div className="flex flex-col items-start gap-1 min-w-0">
-                                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-2.5 py-1">
-                                  <span className="text-[11px] font-semibold text-[#201a7c] tracking-wide uppercase">
+                                <span className="inline-flex items-center gap-2 rounded-full bg-[#201a7c]/10 dark:bg-[#3028a3]/30 px-2.5 py-1">
+                                  <span className="text-[11px] font-semibold text-[#201a7c] dark:text-[#5c54e0] tracking-wide uppercase">
                                     Module {moduleIndex + 1}
                                   </span>
                                 </span>
-                                <span className="font-medium text-sm md:text-base text-gray-900 truncate">
+                                <span className="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100 truncate">
                                   {module.title}
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 w-full sm:w-auto">
+                              <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 dark:text-gray-400 w-full sm:w-auto">
                                 <div className="flex items-center gap-3">
                                   <span>
                                     {lessonCount} lesson{lessonCount === 1 ? '' : 's'}
@@ -1760,7 +1759,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                               </div>
                             </button>
                             {isExpanded && (
-                              <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 py-3">
+                              <div className="border-t border-[var(--card-border)] bg-[var(--background)] px-3 sm:px-4 py-3">
                                 <ul className="space-y-2">
                                   {Array.isArray(module.items) && module.items.length > 0 ? (
                                     module.items.map((item, itemIndex) => {
@@ -1771,13 +1770,13 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                         return (
                                           <li
                                             key={`lesson-${lesson.id}`}
-                                            className="flex items-center justify-between gap-3 text-sm text-gray-700"
+                                            className="flex items-center justify-between gap-3 text-sm text-gray-700 dark:text-gray-300"
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
                                               <span className="text-xs text-gray-400 w-6">
                                                 {itemIndex + 1}.
                                               </span>
-                                              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
                                               <span className="truncate">{lesson.title}</span>
                                             </div>
                                             {lesson.estimatedDurationMinutes ? (
@@ -1801,25 +1800,25 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                               <span
                                                 className={
                                                   assessment.assessmentType === 'exam'
-                                                    ? 'inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-600'
-                                                    : 'inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700'
+                                                    ? 'inline-flex items-center rounded-full bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 text-[11px] font-medium text-rose-600 dark:text-rose-400'
+                                                    : 'inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-400'
                                                 }
                                               >
                                                 {assessment.assessmentType === 'exam'
                                                   ? 'Exam'
                                                   : 'Quiz'}
                                               </span>
-                                              <span className="truncate text-gray-800">
+                                              <span className="truncate text-gray-800 dark:text-gray-200">
                                                 {assessment.title}
                                               </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-xs text-gray-400">
                                               {assessment.isRequired === false ? (
-                                                <span className="rounded-full border border-gray-200 px-2 py-0.5">
+                                                <span className="rounded-full border border-[var(--card-border)] px-2 py-0.5">
                                                   Optional
                                                 </span>
                                               ) : (
-                                                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                                <span className="rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-emerald-700 dark:text-emerald-400">
                                                   Required
                                                 </span>
                                               )}
@@ -1842,15 +1841,15 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                               <span className="text-xs text-gray-400 w-6">
                                                 {itemIndex + 1}.
                                               </span>
-                                              <span className="inline-flex items-center rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
+                                              <span className="inline-flex items-center rounded-full bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 text-[11px] font-medium text-teal-700 dark:text-teal-400">
                                                 Assignment
                                               </span>
-                                              <span className="truncate text-gray-800">
+                                              <span className="truncate text-gray-800 dark:text-gray-200">
                                                 {assignment.title}
                                               </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-xs text-gray-400">
-                                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                              <span className="rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-emerald-700 dark:text-emerald-400">
                                                 Required
                                               </span>
                                               {assignment.dueDate ? (
@@ -1877,27 +1876,27 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                       })}
 
                       {curriculum.finalExam && (
-                        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                        <div className="border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--card-background)]">
                           <button
                             type="button"
-                            className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3"
+                            className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                             onClick={() =>
                               setExpandedItem(expandedItem === 'finalExam' ? null : 'finalExam')
                             }
                           >
                             <div className="flex flex-col items-start gap-1 min-w-0">
-                              <span className="inline-flex items-center gap-2 rounded-full bg-[#201a7c] px-3 py-1">
+                              <span className="inline-flex items-center gap-2 rounded-full bg-[#201a7c] dark:bg-[#3028a3] px-3 py-1">
                                 <span className="text-[11px] font-semibold text-white tracking-wide uppercase">
                                   Final Exam
                                 </span>
                               </span>
-                              <span className="font-medium text-sm md:text-base text-gray-900 truncate">
+                              <span className="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100 truncate">
                                 {curriculum.finalExam.title}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 w-full sm:w-auto">
+                            <div className="flex items-center justify-between sm:justify-end gap-3 text-[11px] md:text-xs text-gray-500 dark:text-gray-400 w-full sm:w-auto">
                               <div className="flex items-center gap-3">
-                                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                                <span className="rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-emerald-700 dark:text-emerald-400">
                                   {curriculum.finalExam.isRequired === false ? 'Optional' : 'Required'}
                                 </span>
                                 {curriculum.finalExam.estimatedDurationMinutes ? (
@@ -1928,7 +1927,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                             </div>
                           </button>
                           {expandedItem === 'finalExam' && (
-                            <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700">
+                            <div className="border-t border-[var(--card-border)] bg-[var(--background)] px-3 sm:px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                               <p>
                                 This final exam evaluates your mastery of the overall course outcomes.
                               </p>
@@ -1939,7 +1938,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                     </div>
                   </>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400">
                     Curriculum will be displayed here once modules and lessons are added for this
                     course.
                   </p>
@@ -1947,16 +1946,16 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
               </div>
 
 
-              <div id="materials" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
-                <h2 className="text-xl font-semibold mb-2">Materials</h2>
+              <div id="materials" className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Materials</h2>
                 {courseMaterials.length === 0 ? (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400">
                     Course materials and resources will be displayed here once they are attached
                     to this course.
                   </p>
                 ) : (
                   <>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       All official materials attached to this course are listed below.
                     </p>
                     <div className="space-y-3">
@@ -1988,11 +1987,11 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                         return (
                           <div
                             key={item.id}
-                            className="flex flex-col gap-2 border border-gray-200 rounded-lg px-4 py-3 hover:border-[#201a7c] hover:bg-indigo-50/40 transition-colors"
+                            className="flex flex-col gap-2 border border-[var(--card-border)] rounded-lg px-4 py-3 hover:border-[#201a7c] dark:hover:border-[#5c54e0] hover:bg-[#201a7c]/5 dark:hover:bg-[#3028a3]/20 transition-colors"
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-start gap-3 min-w-0">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 flex-shrink-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#201a7c]/10 dark:bg-[#3028a3]/30 text-[#201a7c] dark:text-[#5c54e0] flex-shrink-0">
                                   <svg
                                     className="w-5 h-5"
                                     fill="none"
@@ -2225,38 +2224,38 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                   </>
                 )}
               </div>
-              <div id="instructors" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Instructors</h2>
+              <div id="instructors" className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Instructors</h2>
                 {course.instructor && course.instructor.user ? (
                   <div className="flex items-start gap-4">
                     <AuthorAvatar user={course.instructor.user} />
                     <div>
-                      <p className="text-gray-900 font-semibold">
+                      <p className="text-gray-900 dark:text-gray-100 font-semibold">
                         {course.instructor.user.firstName} {course.instructor.user.lastName}
                       </p>
                       {course.instructor.specialization && (
-                        <p className="text-sm text-[#201a7c] font-medium">
+                        <p className="text-sm text-[#201a7c] dark:text-[#5c54e0] font-medium">
                           {course.instructor.specialization}
                         </p>
                       )}
                       {course.instructor.user.email && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           {course.instructor.user.email}
                         </p>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400">
                     Instructor information will be displayed here once available.
                   </p>
                 )}
               </div>
 
-              <div id="announcements" className="bg-white rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Announcements</h2>
+              <div id="announcements" className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-sm px-[10px] lg:px-8 py-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Announcements</h2>
                 {announcements.length === 0 ? (
-                  <p className="text-gray-600">No announcements have been posted for this course yet.</p>
+                  <p className="text-gray-600 dark:text-gray-400">No announcements have been posted for this course yet.</p>
                 ) : (
                   <div className="space-y-6">
                     {announcements.map((announcement) => {
@@ -2272,21 +2271,21 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                               isExpanded ? null : announcement.id,
                             )
                           }
-                          className="w-full text-left border border-gray-200 rounded-lg px-4 py-3 hover:border-[#201a7c] hover:bg-gray-50 transition-colors"
+                          className="w-full text-left border border-[var(--card-border)] rounded-lg px-4 py-3 hover:border-[#201a7c] dark:hover:border-[#5c54e0] hover:bg-[#201a7c]/5 dark:hover:bg-[#3028a3]/20 transition-colors"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 flex flex-col gap-1">
                               <div className="flex items-center gap-2">
                                 {announcement.pinned && (
-                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-yellow-800">
+                                  <span className="inline-flex items-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-yellow-800 dark:text-yellow-400">
                                     Pinned
                                   </span>
                                 )}
-                                <span className="text-sm font-semibold text-gray-900">
+                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                   {announcement.title}
                                 </span>
                               </div>
-                              <div className="text-[11px] text-gray-500">
+                              <div className="text-[11px] text-gray-500 dark:text-gray-400">
                                 {announcement.authorName && (
                                   <span className="mr-2">
                                     Posted by {announcement.authorName}
@@ -2299,7 +2298,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                                 )}
                               </div>
                             </div>
-                            <span className="ml-3 flex-shrink-0 text-gray-400">
+                            <span className="ml-3 flex-shrink-0 text-gray-400 dark:text-gray-500">
                               <svg
                                 className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'
                                   }`}
@@ -2317,7 +2316,7 @@ export default function ViewCourseClient({ course, initialEnrollmentStatus }: Vi
                             </span>
                           </div>
                           {isExpanded && announcement.body && (
-                            <div className="mt-3 text-sm text-gray-700">
+                            <div className="mt-3 text-sm text-gray-700 dark:text-gray-300">
                               {renderRichDescription(announcement.body)}
                             </div>
                           )}

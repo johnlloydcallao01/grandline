@@ -9,11 +9,11 @@ import { useWishlist } from "@/contexts/WishlistContext"
 function CourseCardSkeleton() {
   return (
     <div className="w-64 flex-shrink-0">
-      <div className="aspect-video bg-gray-200 rounded-lg animate-pulse mb-3" />
+      <div className="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mb-3" />
       <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
-        <div className="h-3 bg-gray-200 rounded w-full animate-pulse" />
-        <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse" />
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
       </div>
     </div>
   )
@@ -56,11 +56,11 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
 
   if (isLoading && (!courses || courses.length === 0)) {
     return (
-      <div className="lg:hidden p-[10px]">
+      <div className="p-[10px]">
         <div className="mb-[10px] flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           {viewAllLink && (
-            <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <Link href={viewAllLink as any} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
               <i className="fa fa-chevron-right"></i>
             </Link>
           )}
@@ -93,11 +93,11 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
   }
 
   return (
-    <div className="lg:hidden p-[10px]">
+    <div className="p-[10px]">
       <div className="mb-[10px] flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
         {viewAllLink && (
-          <Link href={viewAllLink as any} className="lg:hidden text-gray-500 hover:text-gray-700">
+          <Link href={viewAllLink as any} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <i className="fa fa-chevron-right"></i>
           </Link>
         )}

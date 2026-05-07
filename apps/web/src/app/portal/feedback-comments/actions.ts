@@ -16,8 +16,11 @@ export interface FeedbackItem {
     itemType: string;
     course: string;
     read: boolean;
-    sourceType: 'assignment-submissions' | 'assessment-submissions' | 'submission-answers';
+    sourceType: 'assignment-submissions' | 'assessment-submissions' | 'submission-answers' | 'feedback-submissions';
     linkUrl: string;
+    // Additional fields for feedback submissions
+    responses?: Record<string, any>;
+    formTitle?: string;
 }
 
 function extractTextFromLexical(node: any): string {
@@ -35,9 +38,9 @@ function extractTextFromLexical(node: any): string {
 
 function getDeepLinkUrl(course: any, itemType: 'assignment' | 'assessment', itemId: string, itemTitle: string): string {
     if (!course || !course.id) return '#';
-    
+
     const itemSlug = slugify(itemTitle);
-    
+
     // Check if it's the final exam
     if (itemType === 'assessment' && course.curriculum?.finalExam) {
         const finalExamId = typeof course.curriculum.finalExam === 'object' ? course.curriculum.finalExam.id : course.curriculum.finalExam;
@@ -267,6 +270,45 @@ export async function getFeedbackComments(): Promise<FeedbackItem[]> {
         }
     }
 
+    // Query 4: FeedbackSubmissions
+    // Trainee's submitted feedback forms for courses
+    const feedbackSubmissionsRes = await fetch(
+        `${API_BASE_URL}/feedback-submissions?where[trainee][equals]=${traineeId}&limit=100&depth=2`,
+        { headers: headersWithKey, cache: 'no-store' }
+    );
+
+    if (feedbackSubmissionsRes.ok) {
+        const data = await feedbackSubmissionsRes.json();
+        for (const doc of data.docs || []) {
+            const course = doc.course || {};
+            const form = doc.form || {};
+            const responses = doc.responses || {};
+
+            // Build a summary of the responses
+            const responseCount = Object.keys(responses).length;
+            const summaryText = responseCount > 0
+                ? `You submitted ${responseCount} response${responseCount > 1 ? 's' : ''} to the course feedback form.`
+                : 'You submitted feedback for this course.';
+
+            items.push({
+                id: String(doc.id),
+                instructor: 'You',
+                instructorRole: 'Submitted Feedback',
+                avatar: `https://ui-avatars.com/api/?name=You&background=10b981&color=fff`,
+                date: doc.createdAt || doc.updatedAt,
+                content: summaryText,
+                relatedItem: form.title || 'Course Feedback',
+                itemType: 'Feedback Form',
+                course: course.title || 'Course',
+                read: true, // User's own submissions are always "read"
+                sourceType: 'feedback-submissions',
+                linkUrl: course.id ? `/portal/courses/${course.id}/player/feedback` : '#',
+                responses: responses,
+                formTitle: form.title || 'Course Feedback',
+            });
+        }
+    }
+
     // Sort all items by date descending
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
@@ -276,6 +318,9 @@ export async function markAsRead(id: string, sourceType: string, isRead: boolean
     const user = await getServerUser();
 
     if (!token || !user || user.role !== 'trainee') return false;
+
+    // Skip feedback-submissions as they don't have isFeedbackRead field (always considered "read")
+    if (sourceType === 'feedback-submissions') return true;
 
     const apiKey = process.env.PAYLOAD_API_KEY;
     if (!apiKey) return false;
@@ -300,7 +345,8 @@ export async function markAsRead(id: string, sourceType: string, isRead: boolean
 }
 
 export async function markAllAsRead(items: FeedbackItem[]): Promise<boolean> {
-    const unreadItems = items.filter(i => !i.read);
+    // Exclude feedback-submissions as they don't have isFeedbackRead field
+    const unreadItems = items.filter(i => !i.read && i.sourceType !== 'feedback-submissions');
     if (unreadItems.length === 0) return true;
 
     const results = await Promise.all(
@@ -311,7 +357,8 @@ export async function markAllAsRead(items: FeedbackItem[]): Promise<boolean> {
 }
 
 export async function markAllAsUnread(items: FeedbackItem[]): Promise<boolean> {
-    const readItems = items.filter(i => i.read);
+    // Exclude feedback-submissions as they don't have isFeedbackRead field
+    const readItems = items.filter(i => i.read && i.sourceType !== 'feedback-submissions');
     if (readItems.length === 0) return true;
 
     const results = await Promise.all(

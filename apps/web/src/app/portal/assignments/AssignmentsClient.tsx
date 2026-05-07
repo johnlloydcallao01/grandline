@@ -89,7 +89,7 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
   const getStatusBadge = (assignment: MergedAssignment) => {
     const isLate = isAssignmentLate(assignment);
     const lateBadge = isLate ? (
-      <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-50 text-red-700 border-red-200 ml-2">
+      <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 ml-2">
         Late
       </span>
     ) : null;
@@ -99,16 +99,16 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
     if (assignment.status === 'graded') {
       const passed = (assignment.score ?? 0) >= assignment.passingScore;
       if (passed) {
-        primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-green-50 text-green-700 border-green-200">Passed</span>;
+        primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">Passed</span>;
       } else {
-        primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-50 text-red-700 border-red-200">Failed</span>;
+        primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800">Failed</span>;
       }
     } else if (assignment.status === 'returned_for_revision') {
-      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-50 text-amber-700 border-amber-200">Returned for Revision</span>;
+      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800">Returned for Revision</span>;
     } else if (assignment.status === 'submitted') {
-      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200">In Review</span>;
+      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">In Review</span>;
     } else {
-      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-yellow-50 text-yellow-700 border-yellow-200">Pending</span>;
+      primaryBadge = <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">Pending</span>;
     }
 
     return (
@@ -129,57 +129,57 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-[var(--background)]">
       {/* Header Section */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
         <div className="w-full px-[10px] py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Assignments</h1>
-              <p className="mt-1 text-sm text-gray-500">Track and manage your course tasks and projects</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Assignments</h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Track and manage your course tasks and projects</p>
               
               <div className="flex flex-wrap items-center gap-4 mt-4">
                 <button 
                   onClick={() => handleFilterChange('All')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'All' ? 'font-bold' : ''}`}
                 >
-                  <span className="w-3 h-3 rounded-full bg-gray-400"></span>
-                  <span className="text-gray-700">{initialAssignments.length} All</span>
+                  <span className="w-3 h-3 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                  <span className="text-gray-700 dark:text-gray-300">{initialAssignments.length} All</span>
                 </button>
                 <button 
                   onClick={() => handleFilterChange('Pending')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'Pending' ? 'font-bold' : ''}`}
                 >
-                  <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
-                  <span className="text-gray-700">{summary.pending} Pending</span>
+                  <span className="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500"></span>
+                  <span className="text-gray-700 dark:text-gray-300">{summary.pending} Pending</span>
                 </button>
                 <button 
                   onClick={() => handleFilterChange('Submitted')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'Submitted' ? 'font-bold' : ''}`}
                 >
                   <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                  <span className="text-gray-700">{summary.submitted} In Review</span>
+                  <span className="text-gray-700 dark:text-gray-300">{summary.submitted} In Review</span>
                 </button>
                 <button 
                   onClick={() => handleFilterChange('Returned')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'Returned' ? 'font-bold' : ''}`}
                 >
                   <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                  <span className="text-gray-700">{summary.returned} Returned</span>
+                  <span className="text-gray-700 dark:text-gray-300">{summary.returned} Returned</span>
                 </button>
                 <button 
                   onClick={() => handleFilterChange('Graded')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'Graded' ? 'font-bold' : ''}`}
                 >
                   <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                  <span className="text-gray-700">{summary.graded} Graded</span>
+                  <span className="text-gray-700 dark:text-gray-300">{summary.graded} Graded</span>
                 </button>
                 <button 
                   onClick={() => handleFilterChange('Late')}
                   className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${filterStatus === 'Late' ? 'font-bold' : ''}`}
                 >
                   <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                  <span className="text-gray-700">{summary.late} Late</span>
+                  <span className="text-gray-700 dark:text-gray-300">{summary.late} Late</span>
                 </button>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
               <select
                 value={filterStatus}
                 onChange={(e) => handleFilterChange(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-gray-700 cursor-pointer"
+                className="px-4 py-2 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-[#201a7c] outline-none bg-[var(--card-background)] text-gray-700 dark:text-gray-200 cursor-pointer"
               >
                 <option value="All">All Status</option>
                 <option value="Pending">Pending</option>
@@ -205,16 +205,16 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
       <div className="w-full px-[10px] py-8">
         <div className="space-y-4">
           {filteredAssignments.map((assignment) => (
-            <div key={`${assignment.courseId}-${assignment.id}`} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={`${assignment.courseId}-${assignment.id}`} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     {getStatusBadge(assignment)}
                     <div className="relative group flex items-center">
-                      <span className="text-xs font-medium text-gray-500 flex items-center gap-1 uppercase tracking-wide cursor-help">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1 uppercase tracking-wide cursor-help">
                         <i className="fa fa-tag"></i>
                         {assignment.submissionType.replace('_', ' ')}
-                        <i className="fa fa-info-circle ml-1 text-gray-400"></i>
+                        <i className="fa fa-info-circle ml-1 text-gray-400 dark:text-gray-500"></i>
                       </span>
                       {/* Tooltip Popup */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs bg-gray-900 text-white text-xs rounded py-1.5 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg text-center">
@@ -224,25 +224,25 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">{assignment.title}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{assignment.title}</h3>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 border border-gray-200">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
                       Course
                     </span>
-                    <p className="text-sm text-blue-600 font-medium truncate max-w-sm md:max-w-md lg:max-w-lg">{assignment.courseTitle}</p>
+                    <p className="text-sm text-[#201a7c] dark:text-[#5c54e0] font-medium truncate max-w-sm md:max-w-md lg:max-w-lg">{assignment.courseTitle}</p>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 mt-4">
+                  <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mt-4">
                     <div className="flex items-center gap-2">
-                      <i className="fa fa-calendar-alt text-gray-400"></i>
+                      <i className="fa fa-calendar-alt text-gray-400 dark:text-gray-500"></i>
                       <span>Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'No deadline'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <i className="fa fa-star text-gray-400"></i>
+                      <i className="fa fa-star text-gray-400 dark:text-gray-500"></i>
                       <span>Max Score: {assignment.maxScore}</span>
                     </div>
                     {assignment.status === 'graded' && assignment.score !== null && (
-                      <div className={`flex items-center gap-2 font-medium ${assignment.score >= assignment.passingScore ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`flex items-center gap-2 font-medium ${assignment.score >= assignment.passingScore ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         <i className={`fa ${assignment.score >= assignment.passingScore ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
                         <span>Score: {assignment.score} / {assignment.maxScore}</span>
                       </div>
@@ -255,8 +255,8 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
                     href={`/portal/courses/${assignment.courseId}/player/module/${assignment.moduleSlug}/assignment/${assignment.assignmentSlug}`}
                     className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm flex items-center gap-2 ${
                       assignment.status === 'pending' || assignment.status === 'returned_for_revision'
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-[#201a7c] dark:bg-[#3028a3] text-white hover:bg-[#1a1569] dark:hover:bg-[#3b32c4]'
+                        : 'bg-[var(--card-background)] border border-[var(--card-border)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                   >
                     {assignment.status === 'pending' || assignment.status === 'returned_for_revision' ? (
@@ -281,16 +281,16 @@ export default function AssignmentsClient({ initialAssignments }: AssignmentsCli
 
         {filteredAssignments.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <i className="fa fa-clipboard-check text-gray-400 text-xl"></i>
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+              <i className="fa fa-clipboard-check text-gray-400 dark:text-gray-500 text-xl"></i>
             </div>
-            <h3 className="text-lg font-medium text-gray-900">No assignments found</h3>
-            <p className="text-gray-500 max-w-sm mt-1">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No assignments found</h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-sm mt-1">
               You don't have any assignments matching the selected filter.
             </p>
             <button 
               onClick={() => setFilterStatus('All')}
-              className="mt-4 text-blue-600 font-medium hover:underline"
+              className="mt-4 text-[#201a7c] dark:text-[#5c54e0] font-medium hover:underline"
             >
               Clear filter
             </button>

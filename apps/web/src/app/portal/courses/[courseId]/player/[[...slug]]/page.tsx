@@ -219,13 +219,13 @@ export default function CoursePlayerPage() {
     <div className="px-[10px] py-8">
       <div className="flex items-start justify-between gap-6">
         <div className="min-w-0 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             {currentTypeLabel ?? 'Learning activity'}
           </p>
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 leading-snug">
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-snug">
             {currentItem ? currentItem.title : course.title}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {currentItem ? (
               <>
                 {currentModuleTitle && (
@@ -250,8 +250,8 @@ export default function CoursePlayerPage() {
               onClick={() => currentItem && toggleLessonCompletion(currentItem.id)}
               className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border transition-colors
                 ${isCompleted
-                  ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50'
+                  : 'bg-[var(--card-background)] border-[var(--card-border)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
             >
               <i className={`fa ${isCompleted ? 'fa-check-circle' : 'fa-circle-o'} mr-2`} />
@@ -262,7 +262,7 @@ export default function CoursePlayerPage() {
             type="button"
             disabled={!previousItem}
             onClick={() => previousItem && handleSelectItem(previousItem)}
-            className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <i className="fa fa-chevron-left mr-2" />
             Previous item
@@ -287,8 +287,8 @@ export default function CoursePlayerPage() {
             onClick={() => currentItem && toggleLessonCompletion(currentItem.id)}
             className={`w-full inline-flex items-center justify-center px-4 py-3 rounded-lg text-sm font-medium border transition-colors
               ${isCompleted
-                ? 'bg-green-50 border-green-200 text-green-700'
-                : 'bg-white border-gray-300 text-gray-700'
+                ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'
+                : 'bg-[var(--card-background)] border-[var(--card-border)] text-gray-700 dark:text-gray-300'
               }`}
           >
             <i className={`fa ${isCompleted ? 'fa-check-circle' : 'fa-circle-o'} mr-2`} />
@@ -300,7 +300,7 @@ export default function CoursePlayerPage() {
             type="button"
             disabled={!previousItem}
             onClick={() => previousItem && handleSelectItem(previousItem)}
-            className="inline-flex items-center justify-center px-4 py-3 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 disabled:opacity-50"
+            className="inline-flex items-center justify-center px-4 py-3 rounded-lg border border-[var(--card-border)] bg-[var(--card-background)] text-sm font-medium text-gray-700 dark:text-gray-300 disabled:opacity-50"
           >
             <i className="fa fa-chevron-left mr-2" />
             Previous
@@ -319,15 +319,15 @@ export default function CoursePlayerPage() {
 
       <div className="mt-8 space-y-8">
         {currentItem ? (
-          <div className="prose prose-slate max-w-none">
+          <div className="prose prose-slate dark:prose-invert max-w-none">
             {currentItem.type === 'lesson' && (
               currentItem.content ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 md:p-8">
                   <RichTextRenderer content={currentItem.content} />
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-                  <p className="text-gray-500">No content available for this lesson.</p>
+                <div className="text-center py-12 bg-[var(--card-background)] rounded-xl border border-dashed border-[var(--card-border)]">
+                  <p className="text-gray-500 dark:text-gray-400">No content available for this lesson.</p>
                 </div>
               )
             )}

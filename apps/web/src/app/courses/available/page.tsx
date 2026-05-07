@@ -17,7 +17,7 @@ export default function AvailableCoursesPage() {
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-8">
+    <div className="bg-[var(--background)] min-h-screen pb-8">
       <div className="max-w-7xl mx-auto">
         <CoursesGrid
           courses={courses}
@@ -35,7 +35,7 @@ export default function AvailableCoursesPage() {
             ) : (
               <button
                 onClick={loadMore}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-700 bg-[var(--card-background)] px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600"
               >
                 Load More
               </button>

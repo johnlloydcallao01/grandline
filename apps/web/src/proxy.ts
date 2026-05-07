@@ -9,7 +9,7 @@ const PUBLIC_ROUTES = [
   '/api',
   '/_next',
   '/favicon.ico',
-  '/calsiter-inc-logo.png',
+  '/grandline-logo.png',
   '/file.svg',
   '/globe.svg',
   '/next.svg',

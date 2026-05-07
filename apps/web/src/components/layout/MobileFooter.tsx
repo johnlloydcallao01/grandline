@@ -61,8 +61,8 @@ export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
   };
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 h-[55px] ${hideAt === 'lg' ? 'lg:hidden' : 'md:hidden'}`}>
-      <div className="flex items-center justify-around h-full px-1">
+    <div className={`fixed bottom-0 left-0 right-0 bg-[var(--card-background)] border-t border-[var(--card-border)] z-50 h-[55px] ${hideAt === 'lg' ? 'lg:hidden' : 'md:hidden'}`}>
+      <div className="flex items-center justify-around h-full px-1 pb-safe">
         {navigationItems.map((item) => (
           <button
             key={item.id}
@@ -77,23 +77,23 @@ export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
             {item.isHelp ? (
               // Brand color circle for help icon with Portal text
               <div className="flex flex-col items-center justify-center -mt-2">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: '#201a7c' }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-[#201a7c] dark:bg-[#3028a3]">
                   {item.icon}
                 </div>
-                <span className="text-xs font-medium leading-none text-gray-600 mt-1">
+                <span className="text-xs font-medium leading-none text-gray-600 dark:text-gray-400 mt-1">
                   {item.label}
                 </span>
               </div>
             ) : (
               <>
                 <div className={`mb-1 ${
-                  isActive(item.path) ? 'text-black' : 'text-gray-600'
+                  isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
                 }`}>
                   {item.icon}
                 </div>
                 {item.label && (
                   <span className={`text-xs font-medium leading-none ${
-                    isActive(item.path) ? 'text-black' : 'text-gray-600'
+                    isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
                   }`}>
                     {item.label}
                   </span>

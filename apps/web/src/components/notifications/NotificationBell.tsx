@@ -91,13 +91,13 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
 
   // Bell button classes
   const bellClasses = isMobile
-    ? 'relative w-full h-10 bg-white rounded-md flex items-center justify-center hover:bg-gray-50 transition-colors'
-    : `relative w-10 h-10 rounded-md flex items-center justify-center transition-colors ${isNotificationsPage ? 'bg-[#e6e5f7]' : 'bg-white hover:bg-gray-50'
-    }`;
+      ? 'relative w-10 h-10 bg-[var(--card-background)] border border-[var(--card-border)] rounded-md flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+      : `relative w-10 h-10 rounded-md flex items-center justify-center transition-colors ${isNotificationsPage ? 'bg-[#e6e5f7] dark:bg-blue-900/30' : 'bg-[var(--card-background)] border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800'
+      }`;
 
   const iconClasses = isMobile
-    ? 'fas fa-bell text-gray-600 text-lg'
-    : `fas fa-bell text-lg ${isNotificationsPage ? 'text-[#201a7c]' : 'text-gray-600'}`;
+    ? 'fas fa-bell text-[var(--muted)] text-lg'
+    : `fas fa-bell text-lg ${isNotificationsPage ? 'text-[#201a7c] dark:text-blue-400' : 'text-[var(--muted)]'}`;
 
   return (
     <div className="relative" ref={notificationsRef}>
@@ -128,7 +128,7 @@ export function NotificationBell({ navigateToPage = false, isMobile = false }: N
 
       {/* Desktop Modal Dropdown */}
       {!navigateToPage && !isNotificationsPage && isOpen && (
-        <div className="absolute right-0 mt-3 w-[420px] max-w-[95vw] max-h-[80vh] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+        <div className="absolute right-0 mt-3 w-[420px] max-w-[95vw] max-h-[80vh] bg-[var(--card-background)] rounded-xl shadow-2xl border border-[var(--card-border)] overflow-hidden z-50">
           <div className="max-h-[80vh] overflow-y-auto">
             <NotificationsPanel
               items={notifications}

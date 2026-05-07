@@ -60,9 +60,9 @@ export function MobileSearchOverlay(): React.ReactNode {
   if (!isOverlayOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-white flex flex-col overflow-hidden">
-      <div className="p-3 flex items-center gap-2 border-b border-gray-200">
-        <button onClick={() => { setTyping(false); setOverlayOpen(false) }} className="w-8 h-8 rounded-full bg-white border shadow-md flex items-center justify-center">
+    <div className="fixed inset-0 z-[1000] bg-[var(--background)] flex flex-col overflow-hidden">
+      <div className="p-3 flex items-center gap-2 border-b border-[var(--card-border)]">
+        <button onClick={() => { setTyping(false); setOverlayOpen(false) }} className="w-8 h-8 rounded-full bg-[var(--card-background)] border border-[var(--card-border)] shadow-md flex items-center justify-center text-[var(--foreground)]">
           <i className="fa fa-arrow-left"></i>
         </button>
         <div className="relative flex-1">
@@ -76,7 +76,7 @@ export function MobileSearchOverlay(): React.ReactNode {
               setOverlayOpen(false)
               router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
             }}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-gray-600 dark:hover:text-gray-300 z-10"
             aria-label="Search"
           >
             <i className="fa fa-search"></i>
@@ -100,14 +100,14 @@ export function MobileSearchOverlay(): React.ReactNode {
                 router.push(`/results?search_query=${encodeURIComponent(v)}` as any)
               }
             }}
-            className="w-full h-10 border border-gray-300 rounded-md pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c]"
+            className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] bg-[var(--card-background)] text-[var(--foreground)] placeholder-[var(--muted)]"
             placeholder="Search courses"
           />
           {query.trim().length > 0 && (
             <button
               type="button"
               onClick={() => { setQuery(''); setMode('suggestions'); loadRecentKeywords(); setTyping(false) }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center"
               aria-label="Clear"
             >
               <i className="fa fa-times"></i>

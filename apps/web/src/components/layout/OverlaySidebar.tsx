@@ -35,9 +35,9 @@ export function OverlaySidebar({ isOpen, onClose }: OverlaySidebarProps) {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.querySelector('[data-overlay-sidebar]');
       const toggleButton = document.querySelector('[aria-label*="sidebar"]'); // Find the toggle button
-      
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node) && 
-          toggleButton && !toggleButton.contains(e.target as Node)) {
+
+      if (isOpen && sidebar && !sidebar.contains(e.target as Node) &&
+        toggleButton && !toggleButton.contains(e.target as Node)) {
         onClose();
       }
     };
@@ -56,13 +56,12 @@ export function OverlaySidebar({ isOpen, onClose }: OverlaySidebarProps) {
       {/* Sidebar */}
       <aside
         data-overlay-sidebar
-        className={`fixed left-0 top-16 bg-white border-r border-gray-200 transition-transform duration-300 overflow-y-auto z-50 w-60 shadow-xl ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed left-0 top-16 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-transform duration-300 overflow-y-auto z-50 w-60 shadow-xl ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         style={{
           height: 'calc(100vh - 4rem)',
           scrollbarWidth: 'thin',
-          scrollbarColor: '#cbd5e1 transparent'
+          scrollbarColor: 'var(--card-border) transparent'
         }}
       >
         <div className="p-3">

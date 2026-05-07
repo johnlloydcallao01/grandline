@@ -203,32 +203,32 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
 
   if (!isStarted) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden p-8 md:p-12 text-center">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] overflow-hidden p-8 md:p-12 text-center">
         <div className="max-w-2xl mx-auto">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-600 mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6">
             <i className="fa fa-file-text-o text-2xl" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{title}</h2>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-xs text-gray-500 uppercase font-bold mb-1">Questions</div>
-              <div className="text-lg font-semibold text-gray-900">{questions.length}</div>
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+              <div className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Questions</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{questions.length}</div>
             </div>
-            <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-xs text-gray-500 uppercase font-bold mb-1">Passing Score</div>
-              <div className="text-lg font-semibold text-gray-900">{passingScore}%</div>
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+              <div className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Passing Score</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{passingScore}%</div>
             </div>
             {timeLimitMinutes && (
-              <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-                <div className="text-xs text-gray-500 uppercase font-bold mb-1">Time Limit</div>
-                <div className="text-lg font-semibold text-gray-900">{timeLimitMinutes} min</div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Time Limit</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{timeLimitMinutes} min</div>
               </div>
             )}
             {maxAttempts && (
-              <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-                <div className="text-xs text-gray-500 uppercase font-bold mb-1">Remaining Attempts</div>
-                <div className="text-lg font-semibold text-gray-900">{remainingAttempts}</div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Remaining Attempts</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{remainingAttempts}</div>
               </div>
             )}
           </div>
@@ -252,10 +252,10 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
 
           {attemptHistory && attemptHistory.length > 0 && (
             <div className="mt-12 text-left">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Attempt History</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 border-b border-[var(--card-border)] pb-2">Attempt History</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                  <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800">
                     <tr>
                       <th scope="col" className="px-4 py-3">Attempt</th>
                       <th scope="col" className="px-4 py-3">Date</th>
@@ -263,12 +263,12 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                       <th scope="col" className="px-4 py-3 text-right">Result</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {attemptHistory.map((history) => {
                       const historyPassed = (history.score || 0) >= passingScore;
                       return (
-                        <tr key={history.id} className="bg-white hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">
+                        <tr key={history.id} className="bg-[var(--card-background)] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                             {history.attemptNumber === 1 ? 'First Take' :
                               history.attemptNumber === 2 ? 'Second Take' :
                                 history.attemptNumber === 3 ? 'Third Take' :
@@ -285,7 +285,7 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                             {Math.round(history.score || 0)}%
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${historyPassed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${historyPassed ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                               }`}>
                               {historyPassed ? 'PASSED' : 'FAILED'}
                             </span>
@@ -300,28 +300,28 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
               {/* Instructor Feedback Section */}
               {attemptHistory.some(h => h.feedbacks && h.feedbacks.length > 0) && (
                 <div className="mt-8">
-                  <h4 className="text-md font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                    <i className="fa fa-comment-dots text-blue-600"></i>
+                  <h4 className="text-md font-bold text-gray-900 dark:text-gray-100 mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                    <i className="fa fa-comment-dots text-blue-600 dark:text-blue-400"></i>
                     Instructor Feedback
                   </h4>
                   <div className="space-y-4">
                     {attemptHistory.map(h => {
                       if (!h.feedbacks || h.feedbacks.length === 0) return null;
                       return (
-                        <div key={`feedback-${h.id}`} className="bg-blue-50/30 rounded-xl border border-blue-100 p-5">
-                          <div className="font-semibold text-sm text-blue-800 mb-4 flex items-center justify-between">
+                        <div key={`feedback-${h.id}`} className="bg-blue-50/30 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900 p-5">
+                          <div className="font-semibold text-sm text-blue-800 dark:text-blue-300 mb-4 flex items-center justify-between">
                             <span>Feedback for {h.attemptNumber === 1 ? 'First Take' : h.attemptNumber === 2 ? 'Second Take' : h.attemptNumber === 3 ? 'Third Take' : `Attempt ${h.attemptNumber}`}</span>
-                            <span className="text-xs font-normal text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">{h.feedbacks.length} Comment{h.feedbacks.length > 1 ? 's' : ''}</span>
+                            <span className="text-xs font-normal text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">{h.feedbacks.length} Comment{h.feedbacks.length > 1 ? 's' : ''}</span>
                           </div>
                           <div className="space-y-3">
                             {h.feedbacks.map((f: any) => (
-                              <div key={f.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                                <p className="text-xs font-medium text-gray-500 mb-2 pb-2 border-b border-gray-100 line-clamp-2">
-                                  <span className="font-bold text-gray-700 mr-1">Q:</span>
+                              <div key={f.id} className="bg-[var(--card-background)] rounded-lg border border-[var(--card-border)] p-4 shadow-sm">
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 pb-2 border-b border-[var(--card-border)] line-clamp-2">
+                                  <span className="font-bold text-gray-700 dark:text-gray-300 mr-1">Q:</span>
                                   {f.questionPrompt}
                                 </p>
-                                <div className="text-sm text-gray-800 whitespace-pre-wrap flex items-start gap-3 mt-2">
-                                  <i className="fa fa-quote-left text-gray-300 mt-1 text-xs"></i>
+                                <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap flex items-start gap-3 mt-2">
+                                  <i className="fa fa-quote-left text-gray-300 dark:text-gray-600 mt-1 text-xs"></i>
                                   <p>{f.feedback}</p>
                                 </div>
                               </div>
@@ -342,10 +342,10 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
 
   if (isSubmitting) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] overflow-hidden p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#0056d2] border-t-transparent mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900">Submitting your answers...</h3>
-        <p className="text-gray-500 mt-2">Please wait while we process your results.</p>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Submitting your answers...</h3>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">Please wait while we process your results.</p>
       </div>
     );
   }
@@ -358,10 +358,10 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
 
     if (showReview) {
       return (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[400px]">
-          <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-900">Quiz Review</h2>
-            <div className="text-sm font-medium text-gray-900">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] overflow-hidden flex flex-col min-h-[400px]">
+          <div className="border-b border-[var(--card-border)] px-6 py-4 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Quiz Review</h2>
+            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Score: {score}% ({correctCount}/{questions.length})
             </div>
           </div>
@@ -385,14 +385,14 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                 }
 
                 return (
-                  <div key={q.id} className="border-b border-gray-100 pb-8 last:border-0 last:pb-0">
+                  <div key={q.id} className="border-b border-[var(--card-border)] pb-8 last:border-0 last:pb-0">
                     <div className="flex gap-4 mb-4">
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isCorrect ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                         }`}>
                         {idx + 1}
                       </span>
                       <div className="flex-1">
-                        <div className="text-lg font-medium text-gray-900 mb-4">{q.prompt}</div>
+                        <div className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{q.prompt}</div>
 
                         <div className="space-y-3">
                           {q.options.map((option) => {
@@ -401,18 +401,18 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                               : userAnswer === option.id;
                             const isOptionCorrect = option.isCorrect;
 
-                            let borderClass = 'border-gray-200';
-                            let bgClass = 'bg-white';
+                            let borderClass = 'border-[var(--card-border)]';
+                            let bgClass = 'bg-[var(--card-background)]';
                             let icon: React.ReactNode = null;
 
                             if (isOptionCorrect) {
                               borderClass = 'border-green-500';
-                              bgClass = 'bg-green-50';
-                              icon = <i className="fa fa-check text-green-600 ml-auto" />;
+                              bgClass = 'bg-green-50 dark:bg-green-900/10';
+                              icon = <i className="fa fa-check text-green-600 dark:text-green-400 ml-auto" />;
                             } else if (isSelected && !isOptionCorrect) {
                               borderClass = 'border-red-500';
-                              bgClass = 'bg-red-50';
-                              icon = <i className="fa fa-times text-red-600 ml-auto" />;
+                              bgClass = 'bg-red-50 dark:bg-red-900/10';
+                              icon = <i className="fa fa-times text-red-600 dark:text-red-400 ml-auto" />;
                             }
 
                             return (
@@ -420,11 +420,11 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                                 key={option.id}
                                 className={`flex items-center p-4 rounded-lg border ${borderClass} ${bgClass}`}
                               >
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${isSelected ? (isOptionCorrect ? 'border-green-600 bg-green-600' : 'border-red-600 bg-red-600') : 'border-gray-300'
+                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${isSelected ? (isOptionCorrect ? 'border-green-600 bg-green-600' : 'border-red-600 bg-red-600') : 'border-gray-300 dark:border-gray-600'
                                   }`}>
                                   {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                                 </div>
-                                <span className={`text-gray-700 ${isOptionCorrect ? 'font-medium text-green-900' : ''}`}>
+                                <span className={`text-gray-700 dark:text-gray-300 ${isOptionCorrect ? 'font-medium text-green-900 dark:text-green-400' : ''}`}>
                                   {option.label}
                                 </span>
                                 {icon}
@@ -434,7 +434,7 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                         </div>
 
                         {q.explanation && (
-                          <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm">
+                          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-lg text-sm">
                             <span className="font-bold block mb-1">Explanation:</span>
                             {q.explanation}
                           </div>
@@ -447,7 +447,7 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-center">
+          <div className="border-t border-[var(--card-border)] px-6 py-4 bg-gray-50 dark:bg-gray-800 flex justify-center">
             <button
               onClick={() => setShowReview(false)}
               className="px-6 py-2 bg-[#0056d2] text-white rounded-lg hover:bg-[#0041a8] font-medium"
@@ -460,20 +460,20 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
     }
 
     return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden p-6 md:p-8">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] overflow-hidden p-6 md:p-8">
         <div className="text-center mb-8">
-          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${passed ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
             <i className={`fa ${passed ? 'fa-check' : 'fa-times'} text-3xl`} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {passed ? 'Assessment Passed!' : 'Assessment Failed'}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             You scored <span className="font-semibold">{score}%</span> ({correctCount}/{questions.length}). The passing score is {passingScore}%.
           </p>
           {finalRemainingAttempts !== null && (
-            <p className="text-gray-600 mb-6">
-              Remaining Attempts: <span className="font-bold text-[#201a7c]">{finalRemainingAttempts}</span>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Remaining Attempts: <span className="font-bold text-[#201a7c] dark:text-blue-400">{finalRemainingAttempts}</span>
             </p>
           )}
         </div>
@@ -511,18 +511,18 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[400px]">
+    <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] overflow-hidden flex flex-col min-h-[400px]">
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50">
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+      <div className="border-b border-[var(--card-border)] px-6 py-4 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
         <div className="flex items-center gap-4 text-sm">
           {timeLeft !== null && (
-            <div className={`font-mono font-medium ${timeLeft < 60 ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`font-mono font-medium ${timeLeft < 60 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
               <i className="fa fa-clock-o mr-2" />
               {formatTime(timeLeft)}
             </div>
           )}
-          <div className="text-gray-500">
+          <div className="text-gray-500 dark:text-gray-400">
             Question {currentIndex + 1} of {questions.length}
           </div>
         </div>
@@ -531,7 +531,7 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
       {/* Question Content */}
       <div className="flex-1 p-6 md:p-8">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-6 text-lg font-medium text-gray-900">
+          <div className="mb-6 text-lg font-medium text-gray-900 dark:text-gray-100">
             {currentQuestion.prompt}
           </div>
 
@@ -545,8 +545,8 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                 <label
                   key={option.id}
                   className={`flex items-center p-4 rounded-lg border cursor-pointer transition-colors ${isSelected
-                    ? 'border-[#0056d2] bg-[#f0f7ff] ring-1 ring-[#0056d2]'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-[#0056d2] bg-[#f0f7ff] dark:bg-[#0056d2]/10 ring-1 ring-[#0056d2]'
+                    : 'border-[var(--card-border)] hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                 >
                   <input
@@ -557,7 +557,7 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
                     onChange={() => handleOptionSelect(option.id)}
                     className="h-4 w-4 text-[#0056d2] border-gray-300 focus:ring-[#0056d2]"
                   />
-                  <span className="ml-3 text-gray-700">{option.label}</span>
+                  <span className="ml-3 text-gray-700 dark:text-gray-300">{option.label}</span>
                 </label>
               );
             })}
@@ -566,11 +566,11 @@ export const QuizPlayer: React.FC<QuizPlayerProps> = ({
       </div>
 
       {/* Footer Navigation */}
-      <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between">
+      <div className="border-t border-[var(--card-border)] px-6 py-4 bg-gray-50 dark:bg-gray-800 flex justify-between">
         <button
           onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
           disabled={currentIndex === 0}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>

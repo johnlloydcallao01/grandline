@@ -221,28 +221,28 @@ export default function DiscussionThreadPage() {
 
   if (loadingMessages) {
     return (
-      <div className="w-full px-[10px] py-6 animate-pulse">
-        <div className="w-32 h-6 bg-gray-200 rounded mb-4" />
+      <div className="w-full px-[10px] py-6 bg-[var(--background)] min-h-screen animate-pulse">
+        <div className="w-32 h-6 bg-gray-200 dark:bg-gray-800 rounded mb-4" />
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4" />
-          <div className="h-4 bg-gray-200 rounded w-1/4" />
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm mb-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mb-4" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4" />
         </div>
 
         <div className="space-y-4 mb-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div key={i} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gray-200" />
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800" />
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-32" />
-                  <div className="h-3 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-32" />
+                  <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-24" />
                 </div>
               </div>
               <div className="space-y-2 mt-4">
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-5/6" />
-                <div className="h-4 bg-gray-200 rounded w-4/6" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-5/6" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-4/6" />
               </div>
             </div>
           ))}
@@ -256,17 +256,17 @@ export default function DiscussionThreadPage() {
   }
 
   return (
-    <div className="w-full px-[10px] py-6">
+    <div className="w-full px-[10px] py-6 bg-[var(--background)] min-h-screen">
       <Link
         href="/portal/discussion-board"
-        className="mb-4 inline-flex items-center gap-2 text-gray-500 hover:text-gray-900"
+        className="mb-4 inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
       >
         <i className="fa fa-arrow-left"></i> Back to Discussions
       </Link>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">{activeTopic.title}</h1>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{activeTopic.title}</h1>
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span>Posted by {activeTopic.createdBy?.firstName} {activeTopic.createdBy?.lastName}</span>
           <span>•</span>
           <span>{new Date(activeTopic.createdAt || Date.now()).toLocaleDateString()}</span>
@@ -275,26 +275,26 @@ export default function DiscussionThreadPage() {
 
       <div className="space-y-4 mb-6">
         {messages.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-[var(--card-background)] rounded-xl border border-[var(--card-border)]">
             No messages yet. Be the first to reply!
           </div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div key={msg.id} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                <div className="w-10 h-10 rounded-full bg-[#201a7c]/10 dark:bg-[#3028a3]/30 flex items-center justify-center text-[#201a7c] dark:text-[#5c54e0] font-bold">
                   {msg.sender?.firstName?.[0]}{msg.sender?.lastName?.[0]}
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">
+                  <div className="font-bold text-gray-900 dark:text-gray-100">
                     {msg.sender?.firstName} {msg.sender?.lastName}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(msg.createdAt).toLocaleString()}
                   </div>
                 </div>
               </div>
-              <div className="text-gray-800 whitespace-pre-wrap">
+              <div className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
                 {extractText(msg.content)}
               </div>
             </div>
@@ -302,11 +302,11 @@ export default function DiscussionThreadPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-        <h3 className="font-bold text-gray-900 mb-4">Post a Reply</h3>
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] p-6 shadow-sm">
+        <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Post a Reply</h3>
         <form onSubmit={handleReply}>
           <textarea
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] mb-4"
+            className="w-full bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#201a7c] min-h-[100px] mb-4"
             placeholder="Write your reply here..."
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
@@ -315,7 +315,7 @@ export default function DiscussionThreadPage() {
             <button
               type="submit"
               disabled={!replyContent.trim() || isSubmitting}
-              className="bg-[#201a7c] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="bg-[#201a7c] dark:bg-[#3028a3] text-white px-6 py-2 rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -333,19 +333,19 @@ export default function DiscussionThreadPage() {
       {/* Feedback Modal */}
       {mounted && feedbackModal.isOpen && createPortal(
         <div className="fixed inset-0 z-[99999] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <div className="bg-[var(--card-background)] rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
               {feedbackModal.type === 'success' ? (
                 <i className="fa fa-check text-2xl"></i>
               ) : (
                 <i className="fa fa-times text-2xl"></i>
               )}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{feedbackModal.title}</h3>
-            <p className="text-sm text-gray-500 mb-6">{feedbackModal.message}</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{feedbackModal.title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{feedbackModal.message}</p>
             <button
               onClick={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
-              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
+              className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors"
             >
               Close
             </button>

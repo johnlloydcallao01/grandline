@@ -1,31 +1,41 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-background: #ffffff;
+  --card-border: #e5e7eb;
+  --muted-text: #6b7280;
+  --accent: #201a7c;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #171717;
+  --card-border: #262626;
+  --muted-text: #a1a1aa;
+  --accent: #6366f1;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card-background);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted-text);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* DISABLED DARK MODE - Always use light theme for professional maritime app */
-/*
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-*/
-
 body {
-  background: #ffffff !important; /* Force white background */
-  color: #171717 !important; /* Force dark text */
+  background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Line clamp utility */
@@ -46,17 +56,17 @@ body {
   body {
     padding-bottom: 0;
     padding-top: 0;
-    background-color: #ffffff;
+    background-color: var(--background);
   }
 
   [data-fixed-header="true"] main {
     min-height: calc(100vh - 56px);
     margin-top: 56px;
-    background-color: #ffffff;
+    background-color: var(--background);
     box-sizing: border-box;
   }
 
-  [data-fixed-header="true"] main > div > *:first-child {
+  [data-fixed-header="true"] main>div>*:first-child {
     margin-top: 0 !important;
   }
 }
@@ -69,26 +79,31 @@ body {
 
   .min-h-screen {
     min-height: 100vh;
-    background-color: #ffffff;
+    background-color: var(--background);
   }
 
-  [data-fixed-header="true"] main > div {
+  [data-fixed-header="true"] main>div {
     min-height: calc(100vh - 56px - 55px - env(safe-area-inset-bottom, 0px));
-    background-color: #ffffff;
+    background-color: var(--background);
+  }
+
+  /* Target the bottom padding for the safe area below the mobile footer */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
 /* Tablet-only page content adjustments */
 @media (min-width: 768px) and (max-width: 1023px) {
-  [data-fixed-header="true"] main > div {
+  [data-fixed-header="true"] main>div {
     min-height: calc(100vh - 56px);
-    background-color: #ffffff;
+    background-color: var(--background);
   }
 }
 
-  main * {
-    box-sizing: border-box;
-  }
+main * {
+  box-sizing: border-box;
+}
 
 /* Ensure sidebar is completely hidden on mobile and tablet */
 @media (max-width: 1023px) {
@@ -107,6 +122,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -144,9 +160,12 @@ aside[data-sidebar="main"]::-webkit-scrollbar-thumb:hover {
 
 /* Skeleton loading animation */
 @keyframes skeleton-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -165,6 +184,7 @@ main {
 
 /* Accessibility - Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
+
   .content-transition,
   .content-wrapper,
   aside[data-sidebar="main"] {
@@ -186,7 +206,8 @@ main {
   bottom: 0;
   z-index: 9999;
   pointer-events: none;
-  display: block; /* Ensure consistent initial state */
+  display: block;
+  /* Ensure consistent initial state */
 }
 
 /* Full Screen Overlay */
@@ -395,6 +416,7 @@ main {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -402,9 +424,12 @@ main {
 
 /* Logo Float Animation */
 @keyframes logoFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -416,6 +441,7 @@ main {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(2);
     opacity: 0;
@@ -427,6 +453,7 @@ main {
   0% {
     opacity: 0.6;
   }
+
   100% {
     opacity: 1;
   }
@@ -437,6 +464,7 @@ main {
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: 200px 0;
   }
@@ -444,10 +472,14 @@ main {
 
 /* Dot Bounce Animation */
 @keyframes dotBounce {
-  0%, 80%, 100% {
+
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
+
   40% {
     transform: scale(1.2);
     opacity: 1;
@@ -460,9 +492,11 @@ main {
     transform: translateY(0px) rotate(0deg);
     opacity: 0.05;
   }
+
   50% {
     opacity: 0.1;
   }
+
   100% {
     transform: translateY(-20px) rotate(360deg);
     opacity: 0.05;
@@ -512,6 +546,7 @@ main {
 
 /* Accessibility - Respect reduced motion preferences for loading screen */
 @media (prefers-reduced-motion: reduce) {
+
   .facebook-loading-overlay,
   .facebook-logo,
   .facebook-pulse-ring,
@@ -527,9 +562,15 @@ main {
     display: none;
   }
 }
+
 /* Home page: remove any enforced min-height on tablet and below */
 @media (max-width: 1023px) {
-  main > div.home-no-min {
+  main>div.home-no-min {
     min-height: auto !important;
   }
+}
+
+/* Ensure padding matches mobile UI */
+.home-no-min {
+  padding-bottom: 2rem;
 }

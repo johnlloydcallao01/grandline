@@ -35,58 +35,58 @@ const AnimatedNumber: React.FC<{ value: number; suffix?: string }> = ({ value, s
 export const StatStrip: React.FC<StatStripProps> = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+      <div className="bg-[var(--card-background)] rounded-lg p-6 shadow-sm border border-[var(--card-border)]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Active Courses</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Courses</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               <AnimatedNumber value={stats?.activeCoursesCount || 0} />
             </p>
           </div>
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <i className="fa fa-book text-blue-600 text-xl"></i>
+          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <i className="fa fa-book text-blue-600 dark:text-blue-400 text-xl"></i>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+      <div className="bg-[var(--card-background)] rounded-lg p-6 shadow-sm border border-[var(--card-border)]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Completed</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               <AnimatedNumber value={stats?.completedCoursesCount || 0} />
             </p>
           </div>
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <i className="fa fa-check-circle text-green-600 text-xl"></i>
+          <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+            <i className="fa fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+      <div className="bg-[var(--card-background)] rounded-lg p-6 shadow-sm border border-[var(--card-border)]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Average Grade</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Grade</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               <AnimatedNumber value={stats?.activeAvgGrade || 0} suffix="%" />
             </p>
           </div>
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <i className="fa fa-star text-yellow-600 text-xl"></i>
+          <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+            <i className="fa fa-star text-yellow-600 dark:text-yellow-400 text-xl"></i>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+      <div className="bg-[var(--card-background)] rounded-lg p-6 shadow-sm border border-[var(--card-border)]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Certificates</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Certificates</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               <AnimatedNumber value={stats?.certificatesCount || 0} />
             </p>
           </div>
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <i className="fa fa-certificate text-purple-600 text-xl"></i>
+          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+            <i className="fa fa-certificate text-purple-600 dark:text-purple-400 text-xl"></i>
           </div>
         </div>
       </div>
