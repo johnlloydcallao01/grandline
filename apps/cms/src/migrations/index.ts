@@ -94,6 +94,8 @@ import * as migration_20260420_121801 from './20260420_121801';
 import * as migration_20260421_080510 from './20260421_080510';
 import * as migration_20260421_121749 from './20260421_121749';
 import * as migration_20260422_120454 from './20260422_120454';
+import * as migration_20260508_063949_add_phone_to_users from './20260508_063949_add_phone_to_users';
+import * as migration_20260508_151000_fix_trigger_beginner_to_standard from './20260508_151000_fix_trigger_beginner_to_standard';
 
 export const migrations = [
   {
@@ -574,6 +576,16 @@ export const migrations = [
   {
     up: migration_20260422_120454.up,
     down: migration_20260422_120454.down,
-    name: '20260422_120454'
+    name: '20260422_120454',
+  },
+  {
+    up: migration_20260508_063949_add_phone_to_users.up,
+    down: migration_20260508_063949_add_phone_to_users.down,
+    name: '20260508_063949_add_phone_to_users'
+  },
+  {
+    up: migration_20260508_151000_fix_trigger_beginner_to_standard.up,
+    down: migration_20260508_151000_fix_trigger_beginner_to_standard.down,
+    name: '20260508_151000_fix_trigger_beginner_to_standard'
   },
 ];

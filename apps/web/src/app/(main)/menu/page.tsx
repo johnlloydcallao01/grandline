@@ -73,17 +73,17 @@ export default function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--background)]">
       {/* User Profile Section */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
         <div className="px-4 pt-8 pb-6">
           {/* Page Title */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Menu</h1>
-            <p className="text-gray-600 text-sm mt-1">Account and app settings</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Menu</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Account and app settings</p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200">
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--card-border)]">
               <Image
                 src={mockUser.avatar}
                 alt={mockUser.name}
@@ -93,31 +93,31 @@ export default function MenuPage() {
               />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900">{mockUser.name}</h2>
-              <p className="text-sm text-gray-600">{mockUser.rank}</p>
-              <p className="text-sm text-gray-500">{mockUser.company}</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{mockUser.name}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{mockUser.rank}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{mockUser.company}</p>
             </div>
             <button 
               onClick={() => handleMenuItemClick('/profile')}
-              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <i className="fa fa-chevron-right text-gray-600 text-sm"></i>
+              <i className="fa fa-chevron-right text-gray-600 dark:text-gray-400 text-sm"></i>
             </button>
           </div>
           
           {/* Quick Stats */}
           <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-bold text-[#201a7c]">{mockUser.coursesCompleted}</div>
-              <div className="text-xs text-gray-600">Courses</div>
+            <div className="text-center p-3 bg-blue-50 dark:bg-[#3028a3]/20 rounded-lg">
+              <div className="text-lg font-bold text-[#201a7c] dark:text-[#5c54e0]">{mockUser.coursesCompleted}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Courses</div>
             </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-bold text-green-600">{mockUser.certificatesEarned}</div>
-              <div className="text-xs text-gray-600">Certificates</div>
+            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">{mockUser.certificatesEarned}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Certificates</div>
             </div>
-            <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <div className="text-lg font-bold text-purple-600">{mockUser.memberSince}</div>
-              <div className="text-xs text-gray-600">Member Since</div>
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{mockUser.memberSince}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Member Since</div>
             </div>
           </div>
         </div>
@@ -127,19 +127,19 @@ export default function MenuPage() {
       <div className="px-4 py-6">
         {menuSections.map((section, sectionIndex) => (
           <div key={sectionIndex} className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 px-2">{section.title}</h3>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 px-2">{section.title}</h3>
+            <div className="bg-[var(--card-background)] rounded-lg shadow-sm border border-[var(--card-border)] overflow-hidden">
               {section.items.map((item, itemIndex) => (
                 <button
                   key={itemIndex}
                   onClick={() => handleMenuItemClick(item.path)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-[var(--card-border)] last:border-b-0"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                      <i className={`fa ${item.icon} text-gray-600`}></i>
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                      <i className={`fa ${item.icon} text-gray-600 dark:text-gray-400`}></i>
                     </div>
-                    <span className="font-medium text-gray-900">{item.label}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     {item.badge && (
@@ -147,7 +147,7 @@ export default function MenuPage() {
                         {item.badge}
                       </span>
                     )}
-                    <i className="fa fa-chevron-right text-gray-400 text-sm"></i>
+                    <i className="fa fa-chevron-right text-gray-400 dark:text-gray-500 text-sm"></i>
                   </div>
                 </button>
               ))}
@@ -160,8 +160,8 @@ export default function MenuPage() {
 
       {/* Sign Out Section */}
       <div className="px-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-t border-gray-100 py-1">
+        <div className="bg-[var(--card-background)] rounded-lg shadow-sm border border-[var(--card-border)] overflow-hidden">
+          <div className="border-t border-[var(--card-border)] py-1">
             <button
               onClick={async () => {
                 try {
@@ -172,7 +172,7 @@ export default function MenuPage() {
                 }
               }}
               disabled={isLoggingOut}
-              className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
             >
               {isLoggingOut ? (
                 <svg className="w-4 h-4 mr-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +191,7 @@ export default function MenuPage() {
 
       {/* App Info */}
       <div className="px-4 pb-20">
-        <div className="text-center text-gray-500 text-sm">
+        <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
           <p>Grandline Maritime Training</p>
           <p>Version 1.0.0</p>
           <p className="mt-2">© 2024 Grandline Maritime Training Center</p>

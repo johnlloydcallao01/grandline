@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
         password: '[HIDDEN]'
       })
 
-      // Re-throw with more context
-      throw new Error(`User creation failed: ${userCreationError instanceof Error ? userCreationError.message : String(userCreationError)}`)
+      // Re-throw original error to preserve error properties like 'code' for duplicate key detection
+      throw userCreationError;
     }
 
     // Step 2: Check if trainee record was created by trigger, if not create manually
@@ -217,7 +217,8 @@ export async function POST(request: NextRequest) {
       }
     } catch (traineeError) {
       console.error('💥 TRAINEE HANDLING FAILED:', traineeError)
-      throw new Error(`Trainee handling failed: ${traineeError instanceof Error ? traineeError.message : String(traineeError)}`)
+      // Re-throw original error to preserve error properties
+      throw traineeError;
     }
 
     // Step 3: Create emergency contact
@@ -275,8 +276,8 @@ export async function POST(request: NextRequest) {
       console.error('💥 EMERGENCY CONTACT CREATION FAILED:', emergencyCreationError)
       console.error('📋 Data that failed:', emergencyData)
 
-      // Re-throw with more context
-      throw new Error(`Emergency contact creation failed: ${emergencyCreationError instanceof Error ? emergencyCreationError.message : String(emergencyCreationError)}`)
+      // Re-throw original error to preserve error properties
+      throw emergencyCreationError;
     }
 
     console.log('🎉 === TRAINEE REGISTRATION COMPLETED SUCCESSFULLY ===')
@@ -410,13 +411,29 @@ export async function POST(request: NextRequest) {
     const isDevelopment = process.env.NODE_ENV === 'development'
     console.error('🔍 HANDLING GENERIC ERROR - Development mode:', isDevelopment)
 
+    // Extract the actual error message to avoid generic responses
+    const actualErrorMessage = error instanceof Error ? error.message : String(error);
+    
+    // Check if the generic error is actually a duplicate key that slipped through
+    if (actualErrorMessage.includes('duplicate key') || actualErrorMessage.includes('unique constraint')) {
+      return NextResponse.json(
+        {
+          error: 'Duplicate information detected',
+          message: 'Some of the information you provided (like Email, Username, or SRN) is already registered. Please check and try again.',
+          type: 'duplicate',
+          details: actualErrorMessage
+        },
+        { status: 409, headers: corsHeaders }
+      )
+    }
+
     return NextResponse.json(
       {
-        error: 'Registration failed due to an unexpected error',
-        message: 'We encountered an unexpected error while processing your registration. Please try again in a few moments.',
+        error: 'Registration failed',
+        message: actualErrorMessage || 'We encountered an unexpected error while processing your registration. Please try again in a few moments.',
         type: 'server_error',
+        details: actualErrorMessage,
         ...(isDevelopment && {
-          details: error instanceof Error ? error.message : String(error),
           errorType: error instanceof Error ? error.name : typeof error,
           stack: error instanceof Error ? error.stack : undefined
         })

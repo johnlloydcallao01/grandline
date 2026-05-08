@@ -192,6 +192,10 @@ export default function RegisterPage() {
           const fieldName = error.path.join('.');
           newErrors[fieldName] = error.message;
         });
+        
+        // Add a general error message to alert the user
+        newErrors.general = 'Please check the form for errors and try again.';
+        
         setErrors(newErrors);
         return;
       }
@@ -231,17 +235,33 @@ export default function RegisterPage() {
 
         if (error?.type === 'duplicate') {
           errorMessage = error.message || `This ${error.field || 'information'} is already registered. Please use different information.`;
+          
+          // Highlight specific field if provided by backend
+          if (error?.field && error.field !== 'field') {
+            setErrors({ [error.field]: errorMessage, general: 'Please fix the highlighted errors below.' });
+            return;
+          }
         } else if (error?.type === 'validation') {
           errorMessage = error.message || 'Please check your form data and try again.';
 
-          // If there are specific field errors, show them
-          if (error?.details && typeof error.details === 'object') {
-            // You could set specific field errors here if needed
+          // If there are specific field errors from PayloadCMS, show them directly on the fields
+          if (Array.isArray(error?.details)) {
+            const backendErrors: Record<string, string> = {};
+            error.details.forEach((err: any) => {
+              if (err.field && err.message) {
+                backendErrors[err.field] = err.message;
+              }
+            });
+            if (Object.keys(backendErrors).length > 0) {
+              setErrors({ ...backendErrors, general: 'Please fix the highlighted errors below.' });
+              return;
+            }
           }
         } else if (error?.type === 'server_error') {
-          errorMessage = error.message || 'We encountered a server error. Please try again in a few moments.';
+          // Use the EXACT error message from the backend instead of generic text
+          errorMessage = error.details || error.message || 'We encountered a server error. Please try again in a few moments.';
         } else {
-          errorMessage = error?.error || error?.message || 'Registration failed. Please try again.';
+          errorMessage = error?.details || error?.error || error?.message || 'Registration failed. Please try again.';
         }
 
         showError(errorMessage);
@@ -464,9 +484,14 @@ export default function RegisterPage() {
                           name="middleName"
                           value={formData.middleName}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('middleName')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Carlos"
                         />
+                        {renderFieldError('middleName')}
                       </div>
                     </div>
 
@@ -481,9 +506,14 @@ export default function RegisterPage() {
                           value={formData.lastName}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('lastName')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Dela Cruz"
                         />
+                        {renderFieldError('lastName')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -494,9 +524,14 @@ export default function RegisterPage() {
                           name="nameExtension"
                           value={formData.nameExtension}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('nameExtension')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Jr."
                         />
+                        {renderFieldError('nameExtension')}
                       </div>
                     </div>
 
@@ -511,13 +546,18 @@ export default function RegisterPage() {
                           value={formData.gender}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('gender')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                         >
                           <option value="">Select gender</option>
                           {genderOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                           ))}
                         </select>
+                        {renderFieldError('gender')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -528,13 +568,18 @@ export default function RegisterPage() {
                           value={formData.civilStatus}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('civilStatus')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                         >
                           <option value="">Select civil status</option>
                           {civilStatusOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                           ))}
                         </select>
+                        {renderFieldError('civilStatus')}
                       </div>
                     </div>
 
@@ -550,9 +595,14 @@ export default function RegisterPage() {
                           value={formData.srn}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('srn')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="SRN-123456"
                         />
+                        {renderFieldError('srn')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -564,9 +614,14 @@ export default function RegisterPage() {
                           value={formData.nationality}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('nationality')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Filipino"
                         />
+                        {renderFieldError('nationality')}
                       </div>
                     </div>
 
@@ -582,8 +637,13 @@ export default function RegisterPage() {
                           value={formData.birthDate}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('birthDate')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                         />
+                        {renderFieldError('birthDate')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -595,9 +655,14 @@ export default function RegisterPage() {
                           value={formData.placeOfBirth}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('placeOfBirth')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Manila, Philippines"
                         />
+                        {renderFieldError('placeOfBirth')}
                       </div>
                     </div>
 
@@ -612,9 +677,14 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none ${
+                          getFieldError('completeAddress')
+                            ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                            : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                        }`}
                         placeholder="123 Main Street, Barangay Sample, City, Province, ZIP Code"
                       />
+                      {renderFieldError('completeAddress')}
                     </div>
                   </div>
 
@@ -635,9 +705,14 @@ export default function RegisterPage() {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('email')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="juan.delacruz@example.com"
                         />
+                        {renderFieldError('email')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -649,9 +724,14 @@ export default function RegisterPage() {
                           value={formData.phoneNumber}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('phoneNumber')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="+63 912 345 6789"
                         />
+                        {renderFieldError('phoneNumber')}
                       </div>
                     </div>
                   </div>
@@ -675,9 +755,14 @@ export default function RegisterPage() {
                             value={formData.username}
                             onChange={handleInputChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                              getFieldError('username')
+                                ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                                : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                            }`}
                             placeholder="juan_delacruz"
                           />
+                          {renderFieldError('username')}
                         </div>
                         <div>
                           <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -690,7 +775,11 @@ export default function RegisterPage() {
                               value={formData.password}
                               onChange={handleInputChange}
                               required
-                              className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                              className={`w-full px-4 py-3 pr-12 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                                getFieldError('password')
+                                  ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                                  : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                              }`}
                               placeholder="Enter your password"
                             />
                             <button
@@ -701,6 +790,7 @@ export default function RegisterPage() {
                               <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                             </button>
                           </div>
+                          {renderFieldError('password')}
                         </div>
                       </div>
 
@@ -716,7 +806,11 @@ export default function RegisterPage() {
                             value={formData.confirmPassword}
                             onChange={handleInputChange}
                             required
-                            className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                            className={`w-full px-4 py-3 pr-12 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                              getFieldError('confirmPassword')
+                                ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                                : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                            }`}
                             placeholder="Confirm your password"
                           />
                           <button
@@ -727,6 +821,7 @@ export default function RegisterPage() {
                             <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                           </button>
                         </div>
+                        {renderFieldError('confirmPassword')}
                       </div>
                     </div>
                   </div>
@@ -746,9 +841,14 @@ export default function RegisterPage() {
                         name="couponCode"
                         value={formData.couponCode}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                          getFieldError('couponCode')
+                            ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                            : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                        }`}
                         placeholder="Enter coupon code (optional)"
                       />
+                      {renderFieldError('couponCode')}
                     </div>
                   </div>
 
@@ -770,23 +870,32 @@ export default function RegisterPage() {
                           value={formData.emergencyFirstName}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('emergencyFirstName')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Maria"
                         />
+                        {renderFieldError('emergencyFirstName')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
-                          Middle Name *
+                          Middle Name
                         </label>
                         <input
                           type="text"
                           name="emergencyMiddleName"
                           value={formData.emergencyMiddleName}
                           onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('emergencyMiddleName')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Santos"
                         />
+                        {renderFieldError('emergencyMiddleName')}
                       </div>
                     </div>
 
@@ -801,9 +910,14 @@ export default function RegisterPage() {
                           value={formData.emergencyLastName}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('emergencyLastName')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="Dela Cruz"
                         />
+                        {renderFieldError('emergencyLastName')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -815,9 +929,14 @@ export default function RegisterPage() {
                           value={formData.emergencyContactNumber}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('emergencyContactNumber')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="+63 912 345 6789"
                         />
+                        {renderFieldError('emergencyContactNumber')}
                       </div>
                     </div>
 
@@ -831,13 +950,18 @@ export default function RegisterPage() {
                           value={formData.emergencyRelationship}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white ${
+                            getFieldError('emergencyRelationship')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                         >
                           <option value="">Select relationship</option>
                           {relationshipOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                           ))}
                         </select>
+                        {renderFieldError('emergencyRelationship')}
                       </div>
                       <div>
                         <label className="block text-sm font-normal mb-2" style={{ color: '#555' }}>
@@ -849,29 +973,37 @@ export default function RegisterPage() {
                           onChange={handleInputChange}
                           required
                           rows={3}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#201a7c]/20 focus:border-[#201a7c] transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all duration-200 text-gray-900 bg-gray-50 focus:bg-white resize-none ${
+                            getFieldError('emergencyCompleteAddress')
+                              ? 'border-red-300 focus:ring-red-200 focus:border-red-500'
+                              : 'border-gray-200 focus:ring-[#201a7c]/20 focus:border-[#201a7c]'
+                          }`}
                           placeholder="456 Emergency Street, Barangay Sample, City, Province, ZIP Code"
                         />
+                        {renderFieldError('emergencyCompleteAddress')}
                       </div>
                     </div>
                   </div>
 
                   {/* Terms Agreement */}
-                  <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="checkbox"
-                      name="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-4 h-4 text-[#201a7c] border-gray-300 rounded focus:ring-[#201a7c]"
-                    />
-                    <label className="text-sm text-gray-600">
-                      I agree to the{' '}
-                      <a href="#" className="text-[#201a7c] hover:underline font-medium">Terms of Service</a>
-                      {' '}and{' '}
-                      <a href="#" className="text-[#201a7c] hover:underline font-medium">Privacy Policy</a>
-                    </label>
+                  <div className="flex flex-col p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        name="agreeToTerms"
+                        checked={formData.agreeToTerms}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1 w-4 h-4 text-[#201a7c] border-gray-300 rounded focus:ring-[#201a7c]"
+                      />
+                      <label className="text-sm text-gray-600">
+                        I agree to the{' '}
+                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Terms of Service</a>
+                        {' '}and{' '}
+                        <a href="#" className="text-[#201a7c] hover:underline font-medium">Privacy Policy</a>
+                      </label>
+                    </div>
+                    {renderFieldError('agreeToTerms')}
                   </div>
                 </div>
 
