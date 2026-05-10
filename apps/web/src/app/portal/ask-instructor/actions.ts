@@ -14,7 +14,7 @@ export async function fetchMyQuestions() {
     };
 
     if (token) {
-        headers['Authorization'] = `JWT ${token}`;
+        headers['Authorization'] = `users JWT ${token}`;
     } else if (process.env.PAYLOAD_API_KEY) {
         headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     }
@@ -66,7 +66,7 @@ export async function askNewQuestion(instructorUserId: number, subject: string, 
     };
 
     if (token) {
-        headers['Authorization'] = `JWT ${token}`;
+        headers['Authorization'] = `users JWT ${token}`;
     } else if (process.env.PAYLOAD_API_KEY) {
         headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     }
@@ -156,7 +156,7 @@ export async function getQuestionMessages(chatId: number) {
     };
 
     if (token) {
-        headers['Authorization'] = `JWT ${token}`;
+        headers['Authorization'] = `users JWT ${token}`;
     } else if (process.env.PAYLOAD_API_KEY) {
         headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     }
@@ -185,7 +185,7 @@ export async function replyToQuestion(chatId: number, content: string) {
     };
 
     if (token) {
-        headers['Authorization'] = `JWT ${token}`;
+        headers['Authorization'] = `users JWT ${token}`;
     } else if (process.env.PAYLOAD_API_KEY) {
         headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     }

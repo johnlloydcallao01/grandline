@@ -14,7 +14,7 @@ export async function uploadMedia(formData: FormData) {
   const res = await fetch(`${API_BASE_URL}/media`, {
     method: 'POST',
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       // Do not set Content-Type for FormData, the browser sets it with the boundary
     },
     body: formData,

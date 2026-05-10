@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     };
 
     if (payloadToken) {
-      headers['Authorization'] = `JWT ${payloadToken}`;
+      headers['Authorization'] = `users JWT ${payloadToken}`;
     } else if (process.env.PAYLOAD_API_KEY) {
       headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     } else {
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     };
 
     if (payloadToken) {
-      headers['Authorization'] = `JWT ${payloadToken}`;
+      headers['Authorization'] = `users JWT ${payloadToken}`;
     } else if (process.env.PAYLOAD_API_KEY) {
       headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
     } else {

@@ -1,4 +1,5 @@
 import type { PayloadHandler } from 'payload'
+import type { Assessment, Question, SubmissionAnswer } from '../payload-types'
 
 export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Response> => {
   const { payload, user } = req
@@ -9,7 +10,7 @@ export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Resp
 
   try {
     const body = await (req.json ? req.json() : req.body)
-    const { submissionId, answers } = body as { submissionId: number | string, answers: Record<string, any> }
+    const { submissionId, answers } = body as { submissionId: number | string, answers: Record<string, unknown> }
 
     if (!submissionId) {
       return Response.json({ error: 'Missing submissionId' }, { status: 400 })
@@ -76,36 +77,30 @@ export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Resp
     const userAnswers = answers || {}
 
     // Iterate over assessment items (questions)
-    // @ts-ignore
-    for (const item of assessment.items || []) {
-      const question = item.question
-      // @ts-ignore
+    const typedAssessment = assessment as unknown as Assessment
+
+    for (const item of typedAssessment.items || []) {
+      const question = item.question as Question
       const possiblePoints = item.points || 1
       totalPointsPossible += possiblePoints
 
-      // @ts-ignore
       const userResponse = userAnswers[question.id]
       let isCorrect = false
       let pointsEarned = 0
 
       if (userResponse !== undefined) {
-        // @ts-ignore
         if (question.type === 'single_choice' || question.type === 'true_false') {
-          // @ts-ignore
-          const correctOption = question.options?.find((opt: any) => opt.isCorrect)
-          // @ts-ignore
+          const correctOption = question.options?.find((opt) => opt.isCorrect)
           if (correctOption && correctOption.id === userResponse) {
             isCorrect = true
             pointsEarned = possiblePoints
           }
-        // @ts-ignore
         } else if (question.type === 'multiple_choice') {
-          // @ts-ignore
-          const correctOptionIds = question.options?.filter((opt: any) => opt.isCorrect).map((opt: any) => opt.id) || []
+          const correctOptionIds = question.options?.filter((opt) => opt.isCorrect).map((opt) => opt.id) || []
           const userResponseIds = Array.isArray(userResponse) ? userResponse : [userResponse]
           
           const isMatch = correctOptionIds.length === userResponseIds.length && 
-                          correctOptionIds.every((id: string) => userResponseIds.includes(id))
+                          correctOptionIds.every((id: string | null | undefined) => id && userResponseIds.includes(id))
           
           if (isMatch) {
             isCorrect = true
@@ -117,18 +112,15 @@ export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Resp
       totalPointsEarned += pointsEarned
 
       // Prepare upsert operation
-      // @ts-ignore
       const existingId = existingAnswersMap.get(question.id)
-      const data = {
-        submission: submissionIdVal,
-        // @ts-ignore
+      const data: Omit<SubmissionAnswer, 'id' | 'createdAt' | 'updatedAt'> = {
+        submission: submissionIdVal as number,
         question: question.id,
-        // @ts-ignore
         questionType: question.type,
         response: { value: userResponse ?? null },
         isCorrect,
         pointsEarned,
-      } as any
+      }
 
       if (existingId) {
         operations.push(
@@ -223,8 +215,8 @@ export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Resp
       pointsPossible: totalPointsPossible
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Submit Assessment Endpoint Error:', error)
-    return Response.json({ error: 'Internal Server Error', details: error.message }, { status: 500 })
+    return Response.json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }

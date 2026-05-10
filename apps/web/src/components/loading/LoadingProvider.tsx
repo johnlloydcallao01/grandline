@@ -110,7 +110,6 @@ export function LoadingProvider({ children }: LoadingProviderProps): React.React
   };
 
   return (
-    /* @ts-ignore -- React 19 Context Provider type issue */
     <LoadingContext.Provider value={contextValue}>
       {children}
     </LoadingContext.Provider>

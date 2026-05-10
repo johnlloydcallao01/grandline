@@ -17,7 +17,7 @@ export async function getAnnouncements() {
   try {
     // 1. Fetch user to get their trainee ID
     const userRes = await fetch(`${apiUrl}/users/me`, {
-      headers: token ? { Authorization: `JWT ${token}` } : { Authorization: `users API-Key ${apiKey}` },
+      headers: token ? { Authorization: `users JWT ${token}` } : { Authorization: `users API-Key ${apiKey}` },
       cache: 'no-store',
     });
     

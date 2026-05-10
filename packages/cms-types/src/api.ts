@@ -16,7 +16,7 @@ export class CMSApiClient {
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.headers = {
       'Content-Type': 'application/json',
-      ...(authToken && { Authorization: `JWT ${authToken}` }),
+      ...(authToken && { Authorization: `users JWT ${authToken}` }),
     };
   }
 

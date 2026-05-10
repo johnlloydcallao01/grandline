@@ -10,7 +10,7 @@ export async function getDiscussionTopics() {
 
   const res = await fetch(`${API_BASE_URL}/chat?type=group&limit=50`, {
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       'Content-Type': 'application/json',
     },
     cache: 'no-store',
@@ -30,7 +30,7 @@ export async function getTopicMessages(topicId: number) {
 
   const res = await fetch(`${API_BASE_URL}/chat/${topicId}/messages?direction=forward&limit=100`, {
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       'Content-Type': 'application/json',
     },
     cache: 'no-store',
@@ -53,7 +53,7 @@ export async function createDiscussionTopic(title: string, content: string, cate
   const chatRes = await fetch(`${API_BASE_URL}/chats`, {
     method: 'POST',
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -109,7 +109,7 @@ export async function createDiscussionTopic(title: string, content: string, cate
   const msgRes = await fetch(`${API_BASE_URL}/chat/${chatId}/messages`, {
     method: 'POST',
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -162,7 +162,7 @@ export async function replyToTopic(topicId: number, content: string) {
   const res = await fetch(`${API_BASE_URL}/chat/${topicId}/messages`, {
     method: 'POST',
     headers: {
-      Authorization: `JWT ${token}`,
+      Authorization: `users JWT ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

@@ -75,7 +75,6 @@ export default async function RootLayout({
                 {/* Company Logo Animation */}
                 <div className="facebook-logo-container">
                   <div className="facebook-logo">
-                    {/* @ts-ignore -- Next.js Image component type issue with React 19 */}
                     <Image
                       src="/grandline-logo.png"
                       alt="Grandline Logo"

@@ -79,7 +79,7 @@ export default function AskInstructorThreadPage() {
             const qRes = await fetch(`${CMS_URL}/api/chat?type=instructor_trainee&limit=50&_t=${Date.now()}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `JWT ${userToken}`
+                    'Authorization': `users JWT ${userToken}`
                 },
                 cache: 'no-store'
             });

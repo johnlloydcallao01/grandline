@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { adminOnly, serviceOrAbove } from '../access'
+import { adminOnly } from '../access'
 
 export const Trainees: CollectionConfig = {
   slug: 'trainees',
@@ -8,10 +8,18 @@ export const Trainees: CollectionConfig = {
     defaultColumns: ['user', 'srn', 'enrollmentDate', 'currentLevel'],
   },
   access: {
-    read: serviceOrAbove, // Service, Instructors and admins can read trainee data
-    create: adminOnly, // Only admins can create trainee records
-    update: adminOnly, // Only admins can update trainee records
-    delete: adminOnly, // Only admins can delete trainee records
+    read: ({ req: { user } }) => {
+      if (!user) return false;
+      if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor') return true;
+      return { user: { equals: user.id } };
+    },
+    create: adminOnly,
+    update: ({ req: { user } }) => {
+      if (!user) return false;
+      if (user.role === 'admin') return true;
+      return { user: { equals: user.id } };
+    },
+    delete: adminOnly,
   },
   fields: [
     {

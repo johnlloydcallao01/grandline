@@ -23,7 +23,7 @@ export async function isCourseWishlisted(courseId: string | number): Promise<boo
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `JWT ${token}`,
+    Authorization: `users JWT ${token}`,
   };
 
   const params = new URLSearchParams();
@@ -55,7 +55,7 @@ export async function toggleWishlist(courseId: string | number): Promise<boolean
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `JWT ${token}`,
+    Authorization: `users JWT ${token}`,
   };
 
   // First get the user to know their ID

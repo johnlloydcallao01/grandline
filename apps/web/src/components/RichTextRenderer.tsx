@@ -70,7 +70,6 @@ function renderImageBlock(block: ImageBlock, index: number) {
 
   return (
     <figure key={index} className="w-full mb-6">
-      {/* @ts-ignore */}
       <Image
         src={block.url}
         alt={block.alt || ''}
@@ -300,7 +299,6 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
     return (
       <figure key={key} className="w-full mb-6">
-        {/* @ts-ignore */}
         <Image
           src={src}
           alt={alt}
@@ -323,7 +321,6 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
     return (
       <figure key={key} className="w-full mb-6">
-        {/* @ts-ignore */}
         <Image
           src={src}
           alt={alt}
@@ -482,7 +479,6 @@ function renderLexicalNode(node: any, key: string): React.ReactNode {
 
     return (
       <figure key={key} className="w-full mb-6">
-        {/* @ts-ignore */}
         <Image
           src={src}
           alt={alt}

@@ -17,7 +17,7 @@ export async function getMyCertificates(clientToken?: string) {
   try {
     const certsRes = await fetch(`${apiUrl}/certificates?depth=2`, {
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `users JWT ${token}`,
       },
       cache: 'no-store' // Force no-cache to be absolutely certain
     });
@@ -57,7 +57,7 @@ export async function getCertificateById(certificateId: string | number) {
     // 1. Authenticate the user securely on the server
     if (token) {
       const meRes = await fetch(`${apiUrl}/users/me`, {
-        headers: { Authorization: `JWT ${token}` }
+        headers: { Authorization: `users JWT ${token}` }
       });
       if (meRes.ok) {
         const meData = await meRes.json();

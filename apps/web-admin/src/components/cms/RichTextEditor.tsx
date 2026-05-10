@@ -29,7 +29,7 @@ async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
 
   const headers: Record<string, string> = {};
   if (payloadToken) {
-    headers.Authorization = `JWT ${payloadToken}`;
+    headers.Authorization = `users JWT ${payloadToken}`;
   }
 
   const res = await fetch(url, {

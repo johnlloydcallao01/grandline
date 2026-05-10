@@ -75,7 +75,7 @@ export default function AskInstructorPage() {
           const qRes = await fetch(`${CMS_URL}/api/chat?type=instructor_trainee&status=all&limit=50&_t=${Date.now()}`, {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `JWT ${userToken}`
+              'Authorization': `users JWT ${userToken}`
             },
             cache: 'no-store'
           });
