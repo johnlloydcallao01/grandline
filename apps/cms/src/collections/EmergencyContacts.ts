@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { adminOnly, instructorOrAbove } from '../access'
+import { adminOnly } from '../access'
 
 export const EmergencyContacts: CollectionConfig = {
   slug: 'emergency-contacts',
@@ -8,9 +8,20 @@ export const EmergencyContacts: CollectionConfig = {
     defaultColumns: ['user', 'firstName', 'lastName', 'contactNumber', 'relationship'],
   },
   access: {
-    read: instructorOrAbove, // Instructors and admins can read emergency contacts
-    create: adminOnly, // Only admins can create emergency contacts
-    update: adminOnly, // Only admins can update emergency contacts
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor') return true
+      return { user: { equals: user.id } }
+    },
+    create: ({ req: { user } }) => {
+      if (!user) return false
+      return user.role === 'admin' || user.role === 'service' || user.role === 'instructor'
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin' || user.role === 'service' || user.role === 'instructor') return true
+      return { user: { equals: user.id } }
+    },
     delete: adminOnly, // Only admins can delete emergency contacts
   },
   fields: [
@@ -19,6 +30,7 @@ export const EmergencyContacts: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
+      unique: true,
       admin: {
         description: 'User this emergency contact belongs to',
       },

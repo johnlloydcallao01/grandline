@@ -27,6 +27,7 @@ export interface User {
   birthDate?: string | null;
   placeOfBirth?: string | null;
   completeAddress?: string | null;
+  phone?: string | null;
   gender?: ('male' | 'female' | 'other' | 'prefer_not_to_say') | null;
   civilStatus?: ('single' | 'married' | 'divorced' | 'widowed' | 'separated') | null;
   biography?: any;

@@ -84,3 +84,85 @@ export async function updateTraineeRecord(traineeId: number, data: any): Promise
     return { success: false, error: error.message };
   }
 }
+
+export async function getEmergencyContactRecord(
+  userId: number
+): Promise<{ success: boolean; emergencyContact?: any; error?: string; notFound?: boolean }> {
+  try {
+    const apiKey = process.env.PAYLOAD_API_KEY;
+    if (!apiKey) return { success: false, error: 'Server configuration error: Missing API Key' };
+
+    const response = await fetch(`${API_BASE_URL}/emergency-contacts?where[user][equals]=${userId}&limit=1&sort=-updatedAt`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `users API-Key ${apiKey}`
+      },
+      cache: 'no-store'
+    });
+
+    const result = await response.json();
+    if (!response.ok) return { success: false, error: 'Failed to fetch emergency contact record' };
+
+    if (result.docs && result.docs.length > 0) {
+      return { success: true, emergencyContact: result.docs[0] };
+    }
+
+    return { success: false, error: 'Emergency contact record not found', notFound: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function upsertEmergencyContactRecord(
+  userId: number,
+  data: any
+): Promise<{ success: boolean; emergencyContact?: any; error?: string }> {
+  try {
+    const apiKey = process.env.PAYLOAD_API_KEY;
+    if (!apiKey) return { success: false, error: 'Server configuration error: Missing API Key' };
+
+    const existingRecord = await getEmergencyContactRecord(userId);
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `users API-Key ${apiKey}`
+    };
+
+    if (existingRecord.success && existingRecord.emergencyContact?.id) {
+      const response = await fetch(`${API_BASE_URL}/emergency-contacts/${existingRecord.emergencyContact.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        return { success: false, error: result.errors?.[0]?.message || result.message || 'Failed to update emergency contact record' };
+      }
+
+      return { success: true, emergencyContact: result.doc };
+    }
+
+    if (!existingRecord.notFound) {
+      return { success: false, error: existingRecord.error || 'Failed to verify existing emergency contact record' };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/emergency-contacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        user: userId,
+        ...data,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.errors?.[0]?.message || result.message || 'Failed to create emergency contact record' };
+    }
+
+    return { success: true, emergencyContact: result.doc };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

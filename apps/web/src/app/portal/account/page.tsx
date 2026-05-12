@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getCurrentUser } from '@/lib/auth';
-import { updateUserProfile, getTraineeRecord, updateTraineeRecord } from '@/app/actions/user';
+import {
+  updateUserProfile,
+  getTraineeRecord,
+  updateTraineeRecord,
+  getEmergencyContactRecord,
+  upsertEmergencyContactRecord,
+} from '@/app/actions/user';
 import type { User } from '@/types/auth';
 
 const TABS = ['Profile', 'PII', 'Account', 'Preferences'];
@@ -77,6 +83,8 @@ export default function AccountPage() {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -92,7 +100,17 @@ export default function AccountPage() {
     srn: '',
     birthDate: '',
     placeOfBirth: '',
-    completeAddress: ''
+    completeAddress: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    couponCode: '',
+    emergencyFirstName: '',
+    emergencyMiddleName: '',
+    emergencyLastName: '',
+    emergencyContactNumber: '',
+    emergencyRelationship: '',
+    emergencyCompleteAddress: ''
   });
 
   const [notifications, setNotifications] = useState({
@@ -121,10 +139,28 @@ export default function AccountPage() {
           setUser(currentUser);
 
           let fetchedSrn = '';
+          let fetchedCouponCode = '';
+          let fetchedEmergencyFirstName = '';
+          let fetchedEmergencyMiddleName = '';
+          let fetchedEmergencyLastName = '';
+          let fetchedEmergencyContactNumber = '';
+          let fetchedEmergencyRelationship = '';
+          let fetchedEmergencyCompleteAddress = '';
           const traineeRes = await getTraineeRecord(currentUser.id);
           if (traineeRes.success && traineeRes.trainee) {
             setTraineeId(traineeRes.trainee.id);
             fetchedSrn = traineeRes.trainee.srn || '';
+            fetchedCouponCode = traineeRes.trainee.couponCode || '';
+          }
+
+          const emergencyRes = await getEmergencyContactRecord(currentUser.id);
+          if (emergencyRes.success && emergencyRes.emergencyContact) {
+            fetchedEmergencyFirstName = emergencyRes.emergencyContact.firstName || '';
+            fetchedEmergencyMiddleName = emergencyRes.emergencyContact.middleName || '';
+            fetchedEmergencyLastName = emergencyRes.emergencyContact.lastName || '';
+            fetchedEmergencyContactNumber = emergencyRes.emergencyContact.contactNumber || '';
+            fetchedEmergencyRelationship = emergencyRes.emergencyContact.relationship || '';
+            fetchedEmergencyCompleteAddress = emergencyRes.emergencyContact.completeAddress || '';
           }
 
           setProfileData({
@@ -141,7 +177,17 @@ export default function AccountPage() {
             srn: fetchedSrn,
             birthDate: currentUser.birthDate ? new Date(currentUser.birthDate).toISOString().split('T')[0] : '',
             placeOfBirth: currentUser.placeOfBirth || '',
-            completeAddress: currentUser.completeAddress || ''
+            completeAddress: currentUser.completeAddress || '',
+            phone: currentUser.phone || '',
+            password: '',
+            confirmPassword: '',
+            couponCode: fetchedCouponCode,
+            emergencyFirstName: fetchedEmergencyFirstName,
+            emergencyMiddleName: fetchedEmergencyMiddleName,
+            emergencyLastName: fetchedEmergencyLastName,
+            emergencyContactNumber: fetchedEmergencyContactNumber,
+            emergencyRelationship: fetchedEmergencyRelationship,
+            emergencyCompleteAddress: fetchedEmergencyCompleteAddress
           });
         }
       } catch (error) {
@@ -164,7 +210,15 @@ export default function AccountPage() {
     setSaveMessage(null);
 
     try {
-      const updateData = {
+      if (profileData.password || profileData.confirmPassword) {
+        if (profileData.password !== profileData.confirmPassword) {
+          setSaveMessage({ type: 'error', text: 'Passwords do not match' });
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      const updateData: any = {
         firstName: profileData.firstName,
         middleName: profileData.middleName,
         lastName: profileData.lastName,
@@ -177,23 +231,47 @@ export default function AccountPage() {
         birthDate: profileData.birthDate ? new Date(profileData.birthDate).toISOString() : null,
         placeOfBirth: profileData.placeOfBirth || null,
         completeAddress: profileData.completeAddress || null,
+        phone: profileData.phone || null,
         biography: profileData.bio ? plainTextToLexical(profileData.bio) : null
       };
+
+      if (profileData.password) {
+        updateData.password = profileData.password;
+      }
 
       const result = await updateUserProfile(user.id, updateData);
 
       if (result.success && result.user) {
         setUser(result.user);
 
-        if (traineeId && profileData.srn) {
-          const traineeRes = await updateTraineeRecord(traineeId, { srn: profileData.srn });
+        if (traineeId && (profileData.srn !== undefined || profileData.couponCode !== undefined)) {
+          const traineeRes = await updateTraineeRecord(traineeId, {
+            srn: profileData.srn,
+            couponCode: profileData.couponCode
+          });
           if (!traineeRes.success) {
-            setSaveMessage({ type: 'error', text: traineeRes.error || 'Profile updated, but failed to update SRN' });
+            setSaveMessage({ type: 'error', text: traineeRes.error || 'Profile updated, but failed to update trainee records' });
             return;
           }
         }
 
+        const emergencyRes = await upsertEmergencyContactRecord(user.id, {
+          firstName: profileData.emergencyFirstName,
+          middleName: profileData.emergencyMiddleName || null,
+          lastName: profileData.emergencyLastName,
+          contactNumber: profileData.emergencyContactNumber,
+          relationship: profileData.emergencyRelationship,
+          completeAddress: profileData.emergencyCompleteAddress,
+        });
+        if (!emergencyRes.success) {
+          setSaveMessage({ type: 'error', text: emergencyRes.error || 'Profile updated, but failed to update emergency contact' });
+          return;
+        }
+
         setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
+
+        // Clear passwords from state after successful save
+        setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       } else {
         setSaveMessage({ type: 'error', text: result.error || 'Failed to update profile' });
       }
@@ -417,6 +495,8 @@ export default function AccountPage() {
               </div>
             )}
 
+            <h3 className="text-md font-bold text-gray-900 dark:text-gray-100 mb-4">Personal Information</h3>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name *</label>
@@ -545,12 +625,212 @@ export default function AccountPage() {
               </div>
             </div>
 
+            <h3 className="text-md font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4">Contact Information</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number *</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-md font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4">Username & Password</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username *</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={profileData.username}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={profileData.password}
+                    onChange={handleProfileChange}
+                    autoComplete="new-password"
+                    placeholder="Leave blank to keep current password"
+                    className="w-full px-4 py-2 pr-10 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm Password *</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={profileData.confirmPassword}
+                    onChange={handleProfileChange}
+                    autoComplete="new-password"
+                    placeholder="Confirm new password"
+                    className="w-full px-4 py-2 pr-10 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-md font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4">Marketing</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Coupon Code</label>
+                <input
+                  type="text"
+                  name="couponCode"
+                  value={profileData.couponCode}
+                  onChange={(e) => {
+                    setProfileData(prev => ({ ...prev, couponCode: e.target.value.toUpperCase() }));
+                    setSaveMessage(null);
+                  }}
+                  placeholder="Enter a valid coupon code"
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent uppercase"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-md font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4">In Case of Emergency</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name *</label>
+                <input
+                  type="text"
+                  name="emergencyFirstName"
+                  value={profileData.emergencyFirstName}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Middle Name</label>
+                <input
+                  type="text"
+                  name="emergencyMiddleName"
+                  value={profileData.emergencyMiddleName}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name *</label>
+                <input
+                  type="text"
+                  name="emergencyLastName"
+                  value={profileData.emergencyLastName}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact Number *</label>
+                <input
+                  type="text"
+                  name="emergencyContactNumber"
+                  value={profileData.emergencyContactNumber}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Relationship *</label>
+                <select
+                  name="emergencyRelationship"
+                  value={profileData.emergencyRelationship}
+                  onChange={handleProfileChange}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent"
+                >
+                  <option value="">Select relationship</option>
+                  <option value="parent">Parent</option>
+                  <option value="spouse">Spouse</option>
+                  <option value="sibling">Sibling</option>
+                  <option value="child">Child</option>
+                  <option value="guardian">Guardian</option>
+                  <option value="friend">Friend</option>
+                  <option value="relative">Relative</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Complete Address *</label>
+                <textarea
+                  name="emergencyCompleteAddress"
+                  value={profileData.emergencyCompleteAddress}
+                  onChange={handleProfileChange}
+                  rows={3}
+                  className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent resize-none"
+                />
+              </div>
+            </div>
+
             <div className="flex justify-end gap-3 pt-6 border-t border-[var(--card-border)] mt-6">
               <button
                 type="button"
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-colors"
-                onClick={() => {
+                onClick={async () => {
                   if (user) {
+                    let fetchedCouponCode = '';
+                    let fetchedSrn = '';
+                    let fetchedEmergencyFirstName = '';
+                    let fetchedEmergencyMiddleName = '';
+                    let fetchedEmergencyLastName = '';
+                    let fetchedEmergencyContactNumber = '';
+                    let fetchedEmergencyRelationship = '';
+                    let fetchedEmergencyCompleteAddress = '';
+
+                    const traineeRes = await getTraineeRecord(user.id);
+                    if (traineeRes.success && traineeRes.trainee) {
+                      fetchedSrn = traineeRes.trainee.srn || '';
+                      fetchedCouponCode = traineeRes.trainee.couponCode || '';
+                    }
+
+                    const emergencyRes = await getEmergencyContactRecord(user.id);
+                    if (emergencyRes.success && emergencyRes.emergencyContact) {
+                      fetchedEmergencyFirstName = emergencyRes.emergencyContact.firstName || '';
+                      fetchedEmergencyMiddleName = emergencyRes.emergencyContact.middleName || '';
+                      fetchedEmergencyLastName = emergencyRes.emergencyContact.lastName || '';
+                      fetchedEmergencyContactNumber = emergencyRes.emergencyContact.contactNumber || '';
+                      fetchedEmergencyRelationship = emergencyRes.emergencyContact.relationship || '';
+                      fetchedEmergencyCompleteAddress = emergencyRes.emergencyContact.completeAddress || '';
+                    }
+
                     setProfileData({
                       ...profileData,
                       firstName: user.firstName || '',
@@ -560,10 +840,24 @@ export default function AccountPage() {
                       gender: user.gender || '',
                       civilStatus: user.civilStatus || '',
                       nationality: user.nationality || '',
+                      srn: fetchedSrn,
+                      username: user.username || '',
+                      email: user.email || '',
                       birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '',
                       placeOfBirth: user.placeOfBirth || '',
-                      completeAddress: user.completeAddress || ''
+                      completeAddress: user.completeAddress || '',
+                      phone: user.phone || '',
+                      password: '',
+                      confirmPassword: '',
+                      couponCode: fetchedCouponCode,
+                      emergencyFirstName: fetchedEmergencyFirstName,
+                      emergencyMiddleName: fetchedEmergencyMiddleName,
+                      emergencyLastName: fetchedEmergencyLastName,
+                      emergencyContactNumber: fetchedEmergencyContactNumber,
+                      emergencyRelationship: fetchedEmergencyRelationship,
+                      emergencyCompleteAddress: fetchedEmergencyCompleteAddress
                     });
+
                     setSaveMessage(null);
                   }
                 }}
