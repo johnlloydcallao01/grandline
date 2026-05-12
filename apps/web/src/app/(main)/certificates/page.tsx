@@ -24,24 +24,23 @@ interface Certificate {
 }
 
 export default function CertificatesPage() {
-  const { user, token } = useUser(); // Using the proven useUser hook from Header
+  const { user, isLoading: isAuthLoading } = useUser();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchCertificates() {
-      // Wait for the user hook to initialize
-      if (user === undefined) return;
+      if (isAuthLoading) return;
 
       try {
-        if (!user || !user.id || !token) {
+        if (!user || !user.id) {
           setIsLoading(false);
           return;
         }
 
-        // Pass the explicit token instead of relying on plain userId
-        const fetchedCerts = await getMyCertificates(token);
+        setIsLoading(true);
+        const fetchedCerts = await getMyCertificates(user.id);
 
         setCertificates(fetchedCerts || []);
       } catch (error: any) {
@@ -52,7 +51,7 @@ export default function CertificatesPage() {
     }
 
     fetchCertificates();
-  }, [user, token]);
+  }, [user, isAuthLoading]);
 
 
   const getStatusColor = (status: string) => {

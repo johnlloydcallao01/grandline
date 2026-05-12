@@ -40,7 +40,7 @@ export default function DownloadsPage() {
 
       try {
         const [certs, mats] = await Promise.all([
-          getMyCertificates(token),
+          getMyCertificates(user.id),
           getEnrolledMaterials(token)
         ]);
 

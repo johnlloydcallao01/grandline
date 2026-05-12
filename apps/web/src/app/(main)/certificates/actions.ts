@@ -2,24 +2,41 @@
 
 import { cookies } from 'next/headers';
 
-export async function getMyCertificates(clientToken?: string) {
+export async function getMyCertificates(userId: number) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiKey = process.env.PAYLOAD_API_KEY || '';
 
-  // Read token from HTTP-Only cookie, fallback to client-provided token
-  const cookieStore = await cookies();
-  const token = cookieStore.get('grandline-web-token')?.value || clientToken;
-
-  if (!token) {
-    console.error("[ACTION] No token provided to server action.");
+  if (!userId || !apiKey) {
+    console.error('[ACTION] Missing userId or PAYLOAD_API_KEY for certificate lookup.');
     return [];
   }
 
   try {
-    const certsRes = await fetch(`${apiUrl}/certificates?depth=2`, {
+    const traineeRes = await fetch(`${apiUrl}/trainees?where[user][equals]=${userId}&limit=1`, {
       headers: {
-        Authorization: `users JWT ${token}`,
+        Authorization: `users API-Key ${apiKey}`,
       },
-      cache: 'no-store' // Force no-cache to be absolutely certain
+      cache: 'no-store'
+    });
+
+    if (!traineeRes.ok) {
+      console.error(`[ACTION] Failed to fetch trainee for certificates: ${traineeRes.statusText}`);
+      return [];
+    }
+
+    const traineeData = await traineeRes.json();
+    const trainee = traineeData.docs?.[0];
+
+    if (!trainee?.id) {
+      console.error('[ACTION] No trainee record found for certificate lookup.');
+      return [];
+    }
+
+    const certsRes = await fetch(`${apiUrl}/certificates?where[trainee][equals]=${trainee.id}&depth=2&limit=100&sort=-issueDate`, {
+      headers: {
+        Authorization: `users API-Key ${apiKey}`,
+      },
+      cache: 'no-store'
     });
 
     if (!certsRes.ok) {
@@ -111,7 +128,6 @@ export async function getCertificateById(certificateId: string | number) {
     return null;
   }
 }
-
 
 
 
