@@ -4,20 +4,33 @@ import { getServerToken, getServerUser } from '@/app/actions/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 
+function getChatAuthHeaders(token: string): HeadersInit {
+  return {
+    Authorization: `JWT ${token}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+async function getErrorMessage(res: Response, fallbackMessage: string): Promise<string> {
+  try {
+    const data = await res.json();
+    return data?.error || data?.message || data?.errors?.[0]?.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+}
+
 export async function getDiscussionTopics() {
   const token = await getServerToken();
   if (!token) throw new Error('Unauthorized');
 
   const res = await fetch(`${API_BASE_URL}/chat?type=group&limit=50`, {
-    headers: {
-      Authorization: `users JWT ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: getChatAuthHeaders(token),
     cache: 'no-store',
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch discussion topics');
+    throw new Error(await getErrorMessage(res, 'Failed to fetch discussion topics'));
   }
 
   const data = await res.json();
@@ -29,15 +42,12 @@ export async function getTopicMessages(topicId: number) {
   if (!token) throw new Error('Unauthorized');
 
   const res = await fetch(`${API_BASE_URL}/chat/${topicId}/messages?direction=forward&limit=100`, {
-    headers: {
-      Authorization: `users JWT ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: getChatAuthHeaders(token),
     cache: 'no-store',
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch messages');
+    throw new Error(await getErrorMessage(res, 'Failed to fetch messages'));
   }
 
   const data = await res.json();
@@ -108,10 +118,7 @@ export async function createDiscussionTopic(title: string, content: string, cate
   // 2. Post the initial message
   const msgRes = await fetch(`${API_BASE_URL}/chat/${chatId}/messages`, {
     method: 'POST',
-    headers: {
-      Authorization: `users JWT ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: getChatAuthHeaders(token),
     body: JSON.stringify({
       content: lexicalContent,
       type: 'text',
@@ -161,10 +168,7 @@ export async function replyToTopic(topicId: number, content: string) {
 
   const res = await fetch(`${API_BASE_URL}/chat/${topicId}/messages`, {
     method: 'POST',
-    headers: {
-      Authorization: `users JWT ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: getChatAuthHeaders(token),
     body: JSON.stringify({
       content: lexicalContent,
       type: 'text',

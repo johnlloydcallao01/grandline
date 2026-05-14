@@ -15,34 +15,21 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
-    
-    // Auth strategy: Prefer user token (cookie), fallback to API Key
     const cookieStore = await cookies();
     const payloadToken = cookieStore.get('grandline-web-token')?.value;
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
 
-    if (payloadToken) {
-      headers['Authorization'] = `users JWT ${payloadToken}`;
-    } else if (process.env.PAYLOAD_API_KEY) {
-      headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
-    } else {
-       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    if (!payloadToken) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
-
-    const queryParams = new URLSearchParams();
-    queryParams.set('where[ticket][equals]', ticketId);
-    queryParams.set('sort', 'createdAt'); // Oldest first for chat-like view
-    queryParams.set('limit', '100'); // Fetch reasonable amount
-    queryParams.set('depth', '1'); // Expand sender to get name/avatar
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(`${apiUrl}/support-ticket-messages?${queryParams.toString()}`, {
-      headers,
+    const res = await fetch(`${apiUrl}/lms/support-tickets/${ticketId}/messages`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${payloadToken}`,
+      },
       cache: 'no-store',
       signal: controller.signal,
     });
@@ -66,72 +53,30 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id: ticketId } = await context.params;
     const body = await request.json();
-    const { message, userId } = body;
+    const { message } = body;
 
-    if (!ticketId || !message || !userId) {
+    if (!ticketId || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
-    
-    // Auth strategy: Prefer user token (cookie), fallback to API Key
     const cookieStore = await cookies();
     const payloadToken = cookieStore.get('grandline-web-token')?.value;
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
 
-    if (payloadToken) {
-      headers['Authorization'] = `users JWT ${payloadToken}`;
-    } else if (process.env.PAYLOAD_API_KEY) {
-      headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
-    } else {
-       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    if (!payloadToken) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
-
-    // Convert plain text to Lexical JSON structure
-    const lexicalMessage = {
-      root: {
-        children: [
-          {
-            children: [
-              {
-                detail: 0,
-                format: 0,
-                mode: "normal",
-                style: "",
-                text: message,
-                type: "text",
-                version: 1
-              }
-            ],
-            direction: "ltr",
-            format: "",
-            indent: 0,
-            type: "paragraph",
-            version: 1
-          }
-        ],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "root",
-        version: 1
-      }
-    };
-
-    console.log(`Sending message to ticket ${ticketId}...`);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(`${apiUrl}/support-ticket-messages`, {
+    const res = await fetch(`${apiUrl}/lms/support-tickets/${ticketId}/messages`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${payloadToken}`,
+      },
       body: JSON.stringify({
-        ticket: ticketId,
-        sender: userId,
-        message: lexicalMessage,
+        message,
       }),
       signal: controller.signal,
     });

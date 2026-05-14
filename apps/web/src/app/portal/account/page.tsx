@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLogout } from '@/hooks/useAuth';
 import { getCurrentUser } from '@/lib/auth';
 import {
   updateUserProfile,
@@ -14,6 +16,258 @@ import {
 import type { User } from '@/types/auth';
 
 const TABS = ['Profile', 'PII', 'Account', 'Preferences'];
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
+const COURSE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535466657820-08e46762b06f?auto=format&fit=crop&q=80&w=600';
+
+type EnrollmentMedia = {
+  cloudinaryURL?: string | null;
+  url?: string | null;
+};
+
+type AccountEnrollment = {
+  id: string | number;
+  enrollmentType?: string | null;
+  status: string;
+  finalEvaluation?: 'passed' | 'failed' | null;
+  progressPercentage?: number | null;
+  amountPaid?: number | null;
+  enrolledAt?: string | null;
+  course?: {
+    id: string | number;
+    title?: string | null;
+    price?: number | null;
+    difficultyLevel?: string | null;
+    estimatedDuration?: number | null;
+    estimatedDurationUnit?: string | null;
+    thumbnail?: EnrollmentMedia | null;
+    instructor?: {
+      user?: {
+        firstName?: string | null;
+        lastName?: string | null;
+        profilePicture?: EnrollmentMedia | null;
+      } | null;
+    } | null;
+  } | null;
+};
+
+function getMediaUrl(media?: EnrollmentMedia | null): string {
+  if (!media) return COURSE_FALLBACK_IMAGE;
+  if (media.cloudinaryURL) return media.cloudinaryURL;
+  if (media.url) {
+    if (media.url.startsWith('http')) return media.url;
+    return `${API_BASE_URL}${media.url}`;
+  }
+  return COURSE_FALLBACK_IMAGE;
+}
+
+function formatStatusLabel(status?: string | null): string {
+  if (!status) return 'Unknown';
+  return status
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function getEnrollmentDisplayStatus(enrollment: AccountEnrollment): string {
+  if (enrollment.status === 'completed' && enrollment.finalEvaluation === 'passed') {
+    return 'Passed';
+  }
+
+  if (enrollment.status === 'completed' && enrollment.finalEvaluation === 'failed') {
+    return 'Failed';
+  }
+
+  if (enrollment.status === 'completed') {
+    return 'Completed';
+  }
+
+  return formatStatusLabel(enrollment.status);
+}
+
+function getEnrollmentBadgeClasses(enrollment: AccountEnrollment): string {
+  const displayStatus = getEnrollmentDisplayStatus(enrollment);
+
+  switch (displayStatus) {
+    case 'Active':
+      return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
+    case 'Passed':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800';
+    case 'Failed':
+      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+    case 'Suspended':
+      return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800';
+    case 'Pending':
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'Dropped':
+      return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800';
+    case 'Expired':
+      return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/80 dark:text-slate-300 dark:border-slate-700';
+    default:
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
+  }
+}
+
+function getEnrollmentActionLabel(status?: string | null): string {
+  void status;
+  return 'View Details';
+}
+
+function getEnrollmentTimestamp(enrollment: AccountEnrollment): number {
+  if (!enrollment.enrolledAt) return 0;
+  const timestamp = new Date(enrollment.enrolledAt).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function formatEnrollmentHistoryGroup(enrolledAt?: string | null): string {
+  if (!enrolledAt) return 'Undated';
+
+  const date = new Date(enrolledAt);
+  if (Number.isNaN(date.getTime())) return 'Undated';
+
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+  });
+}
+
+function formatEnrollmentHistoryDate(enrolledAt?: string | null): string {
+  if (!enrolledAt) return 'No date';
+
+  const date = new Date(enrolledAt);
+  if (Number.isNaN(date.getTime())) return 'No date';
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function formatCurrency(value?: number | null): string {
+  if (value === null || value === undefined) return 'PHP 0.00';
+
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(value);
+}
+
+function AccountFormSkeleton({ dense = false }: { dense?: boolean }) {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="border-b border-[var(--card-border)] pb-4">
+        <div className="h-6 w-44 rounded bg-gray-200 dark:bg-gray-800"></div>
+      </div>
+
+      <div className="flex flex-col gap-8 md:flex-row">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-32 w-32 rounded-full bg-gray-200 dark:bg-gray-800"></div>
+          <div className="h-4 w-24 rounded bg-gray-200 dark:bg-gray-800"></div>
+        </div>
+
+        <div className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-2">
+          {Array.from({ length: dense ? 10 : 6 }).map((_, index) => (
+            <div key={index} className={dense && index >= 8 ? 'md:col-span-2' : ''}>
+              <div className="mb-2 h-4 w-28 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-10 w-full rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+            </div>
+          ))}
+          <div className="md:col-span-2">
+            <div className="mb-2 h-4 w-32 rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className={`w-full rounded-lg bg-gray-200 dark:bg-gray-800 ${dense ? 'h-24' : 'h-20'}`}></div>
+          </div>
+        </div>
+      </div>
+
+      {dense ? (
+        <div className="space-y-6">
+          {Array.from({ length: 3 }).map((_, sectionIndex) => (
+            <div key={sectionIndex}>
+              <div className="mb-4 h-5 w-40 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {Array.from({ length: sectionIndex === 2 ? 6 : 4 }).map((_, fieldIndex) => (
+                  <div key={fieldIndex} className={fieldIndex === 4 || fieldIndex === 5 ? 'md:col-span-2' : ''}>
+                    <div className="mb-2 h-4 w-28 rounded bg-gray-200 dark:bg-gray-800"></div>
+                    <div className={`w-full rounded-lg bg-gray-200 dark:bg-gray-800 ${fieldIndex >= 4 ? 'h-20' : 'h-10'}`}></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex justify-end gap-3 border-t border-[var(--card-border)] pt-6">
+        <div className="h-10 w-24 rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+        <div className="h-10 w-32 rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+      </div>
+    </div>
+  );
+}
+
+function AccountTabOverviewSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <div className="h-6 w-44 rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className="h-4 w-80 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className="h-3 w-28 rounded bg-gray-200 dark:bg-gray-800"></div>
+          </div>
+          <div className="h-10 w-full rounded-lg bg-gray-200 dark:bg-gray-800 lg:w-80"></div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div key={index} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+            <div className="space-y-4">
+              <div className="h-3 w-32 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-8 w-40 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-800"></div>
+                <div className="h-10 w-28 rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 border-b border-[var(--card-border)] px-5 py-4 last:border-b-0"
+          >
+            <div className="hidden min-w-[92px] space-y-2 md:block">
+              <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-3 w-12 rounded bg-gray-200 dark:bg-gray-800"></div>
+            </div>
+            <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-gray-200 dark:bg-gray-800"></div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                <div className="h-4 w-48 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+                <div className="h-6 w-24 rounded-full bg-gray-200 dark:bg-gray-800"></div>
+              </div>
+              <div className="h-3 w-64 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-800"></div>
+                  <div className="h-3 w-10 rounded bg-gray-200 dark:bg-gray-800"></div>
+                </div>
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800"></div>
+              </div>
+            </div>
+            <div className="hidden h-4 w-24 rounded bg-gray-200 dark:bg-gray-800 md:block"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // Helper to convert Payload's Lexical JSON to plain text for the textarea
 function lexicalToPlainText(lexicalData: any): string {
@@ -71,6 +325,7 @@ export default function AccountPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get('tab');
+  const { logout, isLoggingOut } = useLogout();
 
   // Default to the tab in URL if valid, otherwise 'Profile'
   const initialTab = TABS.includes(tabFromUrl || '') ? tabFromUrl! : 'Profile';
@@ -114,11 +369,13 @@ export default function AccountPage() {
   });
 
   const [notifications, setNotifications] = useState({
-    email: true,
     push: true,
     marketing: false,
     security: true
   });
+  const [accountSearchQuery, setAccountSearchQuery] = useState('');
+  const [accountEnrollments, setAccountEnrollments] = useState<AccountEnrollment[]>([]);
+  const [isLoadingAccountEnrollments, setIsLoadingAccountEnrollments] = useState(true);
 
   // Sync state when URL changes (e.g. user hits back button)
   useEffect(() => {
@@ -198,6 +455,55 @@ export default function AccountPage() {
     }
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (isLoadingUser) {
+      return;
+    }
+
+    if (!user?.id) {
+      setAccountEnrollments([]);
+      setIsLoadingAccountEnrollments(false);
+      return;
+    }
+
+    const userId = user.id;
+    let isCancelled = false;
+
+    async function loadAccountEnrollments() {
+      setIsLoadingAccountEnrollments(true);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/lms/enrollments?userId=${userId}&limit=100`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch enrollments: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!isCancelled) {
+          setAccountEnrollments(Array.isArray(data.docs) ? data.docs : []);
+        }
+      } catch (error) {
+        console.error('Failed to load account enrollments', error);
+        if (!isCancelled) {
+          setAccountEnrollments([]);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingAccountEnrollments(false);
+        }
+      }
+    }
+
+    loadAccountEnrollments();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.id, isLoadingUser]);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setProfileData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -292,6 +598,61 @@ export default function AccountPage() {
     }
   };
 
+  const filteredAccountEnrollments = useMemo(() => {
+    return [...accountEnrollments]
+      .filter((enrollment) => {
+        const courseTitle = enrollment.course?.title || '';
+        return courseTitle.toLowerCase().includes(accountSearchQuery.toLowerCase());
+      })
+      .sort((a, b) => getEnrollmentTimestamp(b) - getEnrollmentTimestamp(a));
+  }, [accountEnrollments, accountSearchQuery]);
+
+  const groupedAccountEnrollments = useMemo(() => {
+    return filteredAccountEnrollments.reduce<Array<{ label: string; items: AccountEnrollment[] }>>((groups, enrollment) => {
+      const label = formatEnrollmentHistoryGroup(enrollment.enrolledAt);
+      const existingGroup = groups[groups.length - 1];
+
+      if (existingGroup && existingGroup.label === label) {
+        existingGroup.items.push(enrollment);
+      } else {
+        groups.push({ label, items: [enrollment] });
+      }
+
+      return groups;
+    }, []);
+  }, [filteredAccountEnrollments]);
+
+  const totalAmountPaid = useMemo(() => {
+    return accountEnrollments.reduce((total, enrollment) => {
+      return total + (typeof enrollment.amountPaid === 'number' ? enrollment.amountPaid : 0);
+    }, 0);
+  }, [accountEnrollments]);
+
+  const totalPayableAmount = useMemo(() => {
+    return accountEnrollments.reduce((total, enrollment) => {
+      if (enrollment.enrollmentType !== 'paid') {
+        return total;
+      }
+
+      const coursePrice = typeof enrollment.course?.price === 'number' ? enrollment.course.price : 0;
+      const amountPaid = typeof enrollment.amountPaid === 'number' ? enrollment.amountPaid : 0;
+      const remainingBalance = Math.max(coursePrice - amountPaid, 0);
+
+      return total + remainingBalance;
+    }, 0);
+  }, [accountEnrollments]);
+
+  const isAccountOverviewReady = !isLoadingUser && !isLoadingAccountEnrollments;
+
+  const handleAccountLogout = async () => {
+    try {
+      await logout();
+      window.location.href = 'https://grandlinemaritime.com';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-[var(--background)]">
       {/* Header Section */}
@@ -325,8 +686,8 @@ export default function AccountPage() {
         {activeTab === 'Profile' && (
           <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6 relative">
             {isLoadingUser && (
-              <div className="absolute inset-0 bg-[var(--card-background)]/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
-                <i className="fa fa-spinner fa-spin text-[#201a7c] dark:text-[#5c54e0] text-3xl"></i>
+              <div className="absolute inset-0 bg-[var(--card-background)] z-10 rounded-xl p-6">
+                <AccountFormSkeleton />
               </div>
             )}
 
@@ -478,8 +839,8 @@ export default function AccountPage() {
         {activeTab === 'PII' && (
           <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6 relative">
             {isLoadingUser && (
-              <div className="absolute inset-0 bg-[var(--card-background)]/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
-                <i className="fa fa-spinner fa-spin text-[#201a7c] dark:text-[#5c54e0] text-3xl"></i>
+              <div className="absolute inset-0 bg-[var(--card-background)] z-10 rounded-xl p-6">
+                <AccountFormSkeleton dense />
               </div>
             )}
 
@@ -956,17 +1317,6 @@ export default function AccountPage() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Receive daily summaries and course updates</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={notifications.email} onChange={() => setNotifications({ ...notifications, email: !notifications.email })} />
-                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
                     <h3 className="font-medium text-gray-900 dark:text-gray-100">Push Notifications</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Real-time alerts for assignments and messages</p>
                   </div>
@@ -992,12 +1342,241 @@ export default function AccountPage() {
         )}
 
         {activeTab === 'Account' && (
-          <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="fa fa-tools text-gray-400 dark:text-gray-500 text-2xl"></i>
+          <div className="space-y-6">
+            {!isAccountOverviewReady ? (
+              <AccountTabOverviewSkeleton />
+            ) : (
+              <>
+                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Enrolled Courses</h2>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        All of your enrolled courses are shown here in one list, regardless of status.
+                      </p>
+                      <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                        {accountEnrollments.length} total enrollments
+                      </p>
+                    </div>
+
+                    <div className="relative w-full lg:w-80">
+                      <input
+                        type="text"
+                        placeholder="Search enrolled courses..."
+                        value={accountSearchQuery}
+                        onChange={(e) => setAccountSearchQuery(e.target.value)}
+                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] py-2 pl-10 pr-4 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:ring-2 focus:ring-[#201a7c] dark:text-gray-100 dark:placeholder:text-gray-400"
+                      />
+                      <i className="fa fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Total Amount Paid
+                    </p>
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {formatCurrency(totalAmountPaid)}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Combined `Amount Paid` across all enrolled courses in your account.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          Based on {accountEnrollments.length} enrollment{accountEnrollments.length === 1 ? '' : 's'}
+                        </div>
+                        <Link
+                          href={{ pathname: '/portal/account/payments' }}
+                          className="inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm font-medium text-[#201a7c] transition-colors hover:bg-gray-50 dark:text-[#7b75ef] dark:hover:bg-gray-800"
+                        >
+                          Breakdown
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Payable Amount
+                    </p>
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {formatCurrency(totalPayableAmount)}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Remaining balance for paid enrollments, calculated from `Course Price` minus `Amount Paid`.
+                        </p>
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Only includes enrollments with `Enrollment Type` set to `paid`
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {filteredAccountEnrollments.length > 0 ? (
+                  <div className="space-y-6">
+                    {groupedAccountEnrollments.map((group) => (
+                      <div key={group.label} className="overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+                        <div className="border-b border-[var(--card-border)] bg-gray-50 px-5 py-3 dark:bg-gray-800/40">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                              {group.label}
+                            </h3>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {group.items.length} {group.items.length === 1 ? 'enrollment' : 'enrollments'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {group.items.map((enrollment) => {
+                          const course = enrollment.course;
+                          if (!course) return null;
+
+                          const instructorName = course.instructor?.user?.firstName
+                            ? `${course.instructor.user.firstName} ${course.instructor.user.lastName || ''}`.trim()
+                            : 'Instructor';
+                          const progress = enrollment.progressPercentage || 0;
+                          const displayStatus = getEnrollmentDisplayStatus(enrollment);
+                          const enrolledDate = formatEnrollmentHistoryDate(enrollment.enrolledAt);
+
+                          return (
+                            <div
+                              key={enrollment.id}
+                              className="group flex flex-col gap-4 border-b border-[var(--card-border)] px-5 py-4 transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/30 last:border-b-0 md:flex-row md:items-start"
+                            >
+                              <div className="min-w-[92px] flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="font-semibold text-gray-700 dark:text-gray-200">{enrolledDate}</div>
+                                <div className="mt-1">Enrolled</div>
+                              </div>
+
+                              <div className="flex min-w-0 items-start gap-4 flex-1">
+                                <img
+                                  src={getMediaUrl(course.thumbnail)}
+                                  alt={course.title || 'Course'}
+                                  className="h-12 w-12 flex-shrink-0 rounded-lg border border-gray-200 object-cover dark:border-gray-700"
+                                />
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-[#201a7c] dark:text-gray-100 dark:group-hover:text-[#7b75ef]">
+                                      {course.title}
+                                    </h3>
+                                    <span className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-xs font-semibold ${getEnrollmentBadgeClasses(enrollment)}`}>
+                                      {displayStatus}
+                                    </span>
+                                  </div>
+
+                                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <span>{instructorName}</span>
+                                    <span className="hidden sm:inline text-gray-300 dark:text-gray-600">•</span>
+                                    <span>{course.difficultyLevel || 'Standard'}</span>
+                                    <span className="hidden sm:inline text-gray-300 dark:text-gray-600">•</span>
+                                    <span>
+                                      {course.estimatedDuration
+                                        ? `${course.estimatedDuration} ${course.estimatedDurationUnit || 'Hours'}`
+                                        : 'Self-paced'}
+                                    </span>
+                                  </div>
+
+                                  <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
+                                    <div className="min-w-[140px]">
+                                      <div className="mb-1 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                        <span>Progress</span>
+                                        <span className="font-medium">{progress}%</span>
+                                      </div>
+                                      <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                                        <div
+                                          className="h-2 rounded-full bg-[#201a7c] dark:bg-[#5c54e0]"
+                                          style={{ width: `${progress}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                      Enrollment status: {formatStatusLabel(enrollment.status)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex-shrink-0 md:pl-4">
+                                <Link
+                                  href={{
+                                    pathname: '/portal/account/enrollments/[enrollmentId]',
+                                    query: { enrollmentId: String(enrollment.id) },
+                                  }}
+                                  className="whitespace-nowrap text-sm font-medium text-[#201a7c] transition-colors hover:text-[#1a1563] dark:text-[#7b75ef] dark:hover:text-[#968fff]"
+                                >
+                                  {getEnrollmentActionLabel(enrollment.status)} →
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-12 text-center shadow-sm">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                      <i className="fa fa-book-open text-2xl text-gray-400 dark:text-gray-500"></i>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      {accountEnrollments.length === 0 ? 'No enrolled courses yet' : 'No matching courses found'}
+                    </h3>
+                    <p className="mt-2 text-gray-500 dark:text-gray-400">
+                      {accountEnrollments.length === 0
+                        ? 'Your enrollments will appear here as soon as they are added to your account.'
+                        : 'Try a different search term to find one of your enrolled courses.'}
+                    </p>
+                    {accountEnrollments.length === 0 ? (
+                      <Link
+                        href="/portal/courses"
+                        className="mt-6 inline-flex items-center justify-center rounded-lg bg-[#201a7c] px-5 py-2.5 font-medium text-white transition-colors hover:bg-[#1a1563] dark:bg-[#3028a3] dark:hover:bg-[#3b32c4]"
+                      >
+                        View Courses
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setAccountSearchQuery('')}
+                        className="mt-6 inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                      >
+                        Clear Search
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-6 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Sign out</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    End your current session on this device.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAccountLogout}
+                  disabled={isLoggingOut}
+                  className="inline-flex items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                </button>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Under Construction</h3>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">This section is currently being updated with new features.</p>
           </div>
         )}
       </div>

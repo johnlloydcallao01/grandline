@@ -150,7 +150,6 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: replyMessage,
-                    userId: user.id,
                 }),
             });
 

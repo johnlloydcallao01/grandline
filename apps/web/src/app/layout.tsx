@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
+import Script from "next/script";
 import { LoadingScreenWrapper, InstantLoadingController, LoadingProvider } from "@/components/loading";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
@@ -49,20 +50,18 @@ export default async function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const theme = localStorage.getItem('grandline-theme-preference') || 'system';
-                const resolved = theme === 'system' 
-                  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-                  : theme;
-                document.documentElement.classList.add(resolved);
-                document.documentElement.setAttribute('data-theme', resolved);
-              })();
-            `,
-          }}
-        />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            (function() {
+              const theme = localStorage.getItem('grandline-theme-preference') || 'system';
+              const resolved = theme === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : theme;
+              document.documentElement.classList.add(resolved);
+              document.documentElement.setAttribute('data-theme', resolved);
+            })();
+          `}
+        </Script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { getAnnouncements } from '../../(main)/announcements/actions';
 import AnnouncementsClient from '../../(main)/announcements/AnnouncementsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Portal Announcements | Grandline',
   description: 'Important updates and news from your enrolled courses.',

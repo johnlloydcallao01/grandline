@@ -1,76 +1,136 @@
 'use client';
 
-import React from 'react';
-import Image from "@/components/ui/ImageWrapper";
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLogout } from '@/hooks/useAuth';
+import { UserAvatar } from '@/components/auth';
+import { useLogout, useUser } from '@/hooks/useAuth';
 
 /**
  * Professional Menu Page - Facebook-style user menu
  * Mobile-optimized with comprehensive app navigation and user options
  */
 
-// Mock user data
-const mockUser = {
-  name: 'Alex Maritime',
-  email: 'alex.maritime@example.com',
-  rank: 'Third Officer',
-  company: 'Global Shipping Ltd.',
-  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-  memberSince: '2023',
-  coursesCompleted: 8,
-  certificatesEarned: 6
-};
-
 // Menu sections data
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
+
 const menuSections = [
   {
-    title: 'Learning',
+    title: 'Quick Nav',
     items: [
-      { icon: 'fa-graduation-cap', label: 'My Courses', path: '/portal', badge: '3' },
-      { icon: 'fa-certificate', label: 'Certificates', path: '/certificates', badge: null },
-      { icon: 'fa-chart-line', label: 'Progress', path: '/progress', badge: null },
-      { icon: 'fa-bookmark', label: 'Saved Courses', path: '/saved', badge: '12' },
-      { icon: 'fa-history', label: 'Learning History', path: '/history', badge: null }
+      { icon: 'fa-home', label: 'Home', path: '/', badge: null },
+      { icon: 'fa-bookmark', label: 'Wishlists', path: '/wishlists', badge: null },
+      { icon: 'fa-history', label: 'Recently Viewed', path: '/history', badge: null }
     ]
   },
   {
-    title: 'Account',
+    title: 'Resources',
     items: [
-      { icon: 'fa-user-edit', label: 'Edit Profile', path: '/profile', badge: null },
-      { icon: 'fa-cog', label: 'Settings', path: '/settings', badge: null },
-      { icon: 'fa-bell', label: 'Notifications', path: '/notifications', badge: '5' },
-      { icon: 'fa-credit-card', label: 'Billing & Payments', path: '/billing', badge: null },
-      { icon: 'fa-shield-alt', label: 'Privacy & Security', path: '/privacy', badge: null }
+      { icon: 'fa-certificate', label: 'Certificates', path: '/certificates', badge: null },
+      { icon: 'fa-book-open', label: 'Training Materials', path: '/training-materials', badge: null },
+      { icon: 'fa-download', label: 'Downloads', path: '/downloads', badge: null },
+      { icon: 'fa-bullhorn', label: 'Announcements', path: '/announcements', badge: null }
     ]
   },
   {
     title: 'Support',
     items: [
-      { icon: 'fa-question-circle', label: 'Help Center', path: '/help', badge: null },
-      { icon: 'fa-comments', label: 'Contact Support', path: '/support', badge: null },
-      { icon: 'fa-bug', label: 'Report Issue', path: '/report', badge: null },
-      { icon: 'fa-star', label: 'Rate App', path: '/rate', badge: null }
+      { icon: 'fa-life-ring', label: 'Support', path: '/support', badge: null },
+      { icon: 'fa-question-circle', label: 'FAQs', path: '/faqs', badge: null },
+      { icon: 'fa-envelope', label: 'Contact Us', path: '/contact-us', badge: null }
     ]
   },
   {
-    title: 'More',
+    title: 'General',
     items: [
-      { icon: 'fa-users', label: 'Invite Friends', path: '/invite', badge: null },
-      { icon: 'fa-share-alt', label: 'Share App', path: '/share', badge: null },
-      { icon: 'fa-info-circle', label: 'About', path: '/about', badge: null },
-      { icon: 'fa-file-alt', label: 'Terms & Privacy', path: '/terms', badge: null }
+      { icon: 'fa-info-circle', label: 'About Us', path: '/about', badge: null },
+      { icon: 'fa-newspaper', label: 'Blogs', path: '/blogs', badge: null },
+      { icon: 'fa-file-contract', label: 'Terms & Conditions', path: '/terms-and-conditions', badge: null },
+      { icon: 'fa-user-shield', label: 'Privacy Policy', path: '/privacy-policy', badge: null }
     ]
   }
 ];
 
+type MenuStats = {
+  activeCoursesCount: number;
+  certificatesCount: number;
+};
+
 export default function MenuPage() {
   const router = useRouter();
   const { logout, isLoggingOut } = useLogout();
+  const { user, displayName, isLoading } = useUser();
+  const [menuStats, setMenuStats] = useState<MenuStats | null>(null);
+  const [isLoadingMenuStats, setIsLoadingMenuStats] = useState(true);
 
   const handleMenuItemClick = (path: string) => {
     router.push(path as any);
   };
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!user?.id) {
+      setMenuStats(null);
+      setIsLoadingMenuStats(false);
+      return;
+    }
+
+    const userId = user.id;
+    let isCancelled = false;
+
+    async function loadMenuStats() {
+      setIsLoadingMenuStats(true);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/dashboard/trainee-summary?userId=${userId}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch menu stats: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!isCancelled) {
+          setMenuStats(data?.success ? data.data?.stats ?? null : null);
+        }
+      } catch (error) {
+        console.error('Failed to load menu stats', error);
+        if (!isCancelled) {
+          setMenuStats(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingMenuStats(false);
+        }
+      }
+    }
+
+    loadMenuStats();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.id, isLoading]);
+
+  const memberSince = useMemo(() => {
+    if (!user?.createdAt) {
+      return null;
+    }
+
+    const createdAt = new Date(user.createdAt);
+    if (Number.isNaN(createdAt.getTime())) {
+      return null;
+    }
+
+    return createdAt.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }, [user?.createdAt]);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -80,45 +140,64 @@ export default function MenuPage() {
           {/* Page Title */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Menu</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Account and app settings</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Navigate menus and support</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--card-border)]">
-              <Image
-                src={mockUser.avatar}
-                alt={mockUser.name}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{mockUser.name}</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{mockUser.rank}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{mockUser.company}</p>
-            </div>
-            <button 
-              onClick={() => handleMenuItemClick('/profile')}
-              className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
+          <button
+            onClick={() => handleMenuItemClick('/portal/account')}
+            className="w-full flex items-center space-x-4 rounded-xl bg-[var(--background)] p-4 text-left border border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse flex-shrink-0"></div>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-5 w-40 rounded bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+                  <div className="h-4 w-52 max-w-full rounded bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+                  <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+                </div>
+              </>
+            ) : (
+              <>
+                <UserAvatar size="xl" />
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
+                  {user?.role && (
+                    <div className="flex items-center mt-1">
+                      <span className="text-xs text-blue-600 dark:text-blue-400 font-medium capitalize">{user.role}</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
               <i className="fa fa-chevron-right text-gray-600 dark:text-gray-400 text-sm"></i>
-            </button>
-          </div>
-          
-          {/* Quick Stats */}
+            </div>
+          </button>
+
           <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-blue-50 dark:bg-[#3028a3]/20 rounded-lg">
-              <div className="text-lg font-bold text-[#201a7c] dark:text-[#5c54e0]">{mockUser.coursesCompleted}</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Courses</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400">{mockUser.certificatesEarned}</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Certificates</div>
-            </div>
-            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{mockUser.memberSince}</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Member Since</div>
-            </div>
+            {isLoading || isLoadingMenuStats ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="p-3 rounded-lg border border-[var(--card-border)] bg-[var(--background)] animate-pulse">
+                  <div className="h-7 w-14 mx-auto rounded bg-gray-200 dark:bg-gray-800"></div>
+                  <div className="h-3 w-16 mx-auto mt-2 rounded bg-gray-200 dark:bg-gray-800"></div>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="text-center p-3 bg-blue-50 dark:bg-[#3028a3]/20 rounded-lg border border-blue-100 dark:border-[#3028a3]/30">
+                  <div className="text-lg font-bold text-[#201a7c] dark:text-[#5c54e0]">{menuStats?.activeCoursesCount ?? 0}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Courses</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                  <div className="text-lg font-bold text-green-600 dark:text-green-400">{menuStats?.certificatesCount ?? 0}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Certificates</div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                  <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{memberSince ?? '--'}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Member Since</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

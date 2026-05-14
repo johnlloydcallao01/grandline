@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { createSupabaseClient, ChatChannelManager } from '@grandline/chat-engine';
-import { getQuestionMessages, replyToQuestion } from '../actions';
+import { fetchQuestionTopic, getQuestionMessages, replyToQuestion } from '../actions';
 
 export default function AskInstructorThreadPage() {
     const params = useParams();
@@ -57,52 +57,7 @@ export default function AskInstructorThreadPage() {
 
     const fetchTopicData = async () => {
         try {
-            let userToken: string | null = null;
-            let userIdParam: string | null = null;
-            if (typeof window !== 'undefined') {
-                userToken = localStorage.getItem('grandline_auth_token_trainee');
-                const raw = localStorage.getItem('grandline_auth_user_trainee');
-                if (raw) {
-                    const parsed = JSON.parse(raw) as { id?: string | number } | null;
-                    if (parsed && parsed.id) userIdParam = String(parsed.id);
-                }
-            }
-
-            if (!userToken || !userIdParam) {
-                router.push('/portal/ask-instructor');
-                return;
-            }
-
-            const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
-            const CMS_URL = API_BASE_URL.replace('/api', '');
-            // Use the custom /api/chat endpoint which returns { data: [...], meta: {...} }
-            const qRes = await fetch(`${CMS_URL}/api/chat?type=instructor_trainee&limit=50&_t=${Date.now()}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `users JWT ${userToken}`
-                },
-                cache: 'no-store'
-            });
-
-            if (!qRes.ok) throw new Error('Failed to fetch topics');
-            
-            const data = await qRes.json();
-            // data.data is the chats array from the custom endpoint
-            const filtered = (data.data || []).filter((chat: any) => chat.metadata?.isAskInstructor);
-            const mapped = filtered.map((chat: any) => {
-                const otherParticipant = chat.participants?.find((p: any) => String(p.id) !== String(userIdParam));
-                return {
-                    id: chat.id,
-                    subject: chat.metadata?.subject || chat.title || 'Question',
-                    preview: chat.lastMessagePreview || 'No messages yet...',
-                    instructor: otherParticipant?.name || 'Instructor',
-                    status: chat.metadata?.status || 'pending',
-                    date: new Date(chat.lastMessageAt || chat.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                    answerPreview: null
-                };
-            });
-
-            const topic = mapped.find((t: any) => t.id === topicId);
+            const topic = await fetchQuestionTopic(topicId);
 
             if (topic) {
                 setActiveTopic(topic);

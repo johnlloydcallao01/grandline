@@ -14,28 +14,21 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
-    
-    // Auth strategy: Prefer user token (cookie), fallback to API Key
     const cookieStore = await cookies();
     const payloadToken = cookieStore.get('grandline-web-token')?.value;
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
 
-    if (payloadToken) {
-      headers['Authorization'] = `users JWT ${payloadToken}`;
-    } else if (process.env.PAYLOAD_API_KEY) {
-      headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
-    } else {
-       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    if (!payloadToken) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(`${apiUrl}/support-tickets/${ticketId}`, {
-      headers,
+    const res = await fetch(`${apiUrl}/lms/support-tickets/${ticketId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${payloadToken}`,
+      },
       cache: 'no-store',
       signal: controller.signal,
     });

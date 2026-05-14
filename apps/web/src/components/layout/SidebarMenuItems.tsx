@@ -97,19 +97,17 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
         <SidebarItem
           icon="faqs"
           label="FAQs"
-          active={false}
+          active={pathname === '/faqs'}
           collapsed={!isOpen}
-          href="https://www.grandlinemaritime.com/faqs"
-          target="_blank"
+          href="/faqs"
           onClick={onItemClick}
         />
         <SidebarItem
           icon="contact-us"
           label="Contact Us"
-          active={false}
+          active={pathname === '/contact-us'}
           collapsed={!isOpen}
-          href="https://www.grandlinemaritime.com/contact-us"
-          target="_blank"
+          href="/contact-us"
           onClick={onItemClick}
         />
       </div>
@@ -122,37 +120,33 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
         <SidebarItem
           icon="about-us"
           label="About Us"
-          active={false}
+          active={pathname === '/about'}
           collapsed={!isOpen}
-          href="https://grandlinemaritime.com/about"
-          target="_blank"
+          href="/about"
           onClick={onItemClick}
         />
         <SidebarItem
           icon="blogs"
           label="Blogs"
-          active={false}
+          active={pathname === '/blogs' || pathname.startsWith('/blogs/')}
           collapsed={!isOpen}
-          href="https://grandlinemaritime.com/blogs"
-          target="_blank"
+          href="/blogs"
           onClick={onItemClick}
         />
         <SidebarItem
           icon="terms-conditions"
           label="Terms & Conditions"
-          active={false}
+          active={pathname === '/terms-and-conditions'}
           collapsed={!isOpen}
-          href="https://grandlinemaritime.com/terms-and-conditions"
-          target="_blank"
+          href="/terms-and-conditions"
           onClick={onItemClick}
         />
         <SidebarItem
           icon="privacy-policy"
           label="Privacy Policy"
-          active={false}
+          active={pathname === '/privacy-policy'}
           collapsed={!isOpen}
-          href="https://grandlinemaritime.com/privacy-policy"
-          target="_blank"
+          href="/privacy-policy"
           onClick={onItemClick}
         />
       </div>

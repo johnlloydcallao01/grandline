@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { askNewQuestion } from './actions';
+import { askNewQuestion, fetchAskInstructorPageData } from './actions';
 
 export default function AskInstructorPage() {
   const router = useRouter();
@@ -48,105 +48,14 @@ export default function AskInstructorPage() {
 
     const loadData = async () => {
       setLoading(true);
-
-      // 1. Fetch questions using pure CSR
       try {
-        let userToken: string | null = null;
-        let userIdParam: string | null = null;
-        if (typeof window !== 'undefined') {
-          try {
-            userToken = localStorage.getItem('grandline_auth_token_trainee');
-            const raw = localStorage.getItem('grandline_auth_user_trainee');
-            if (raw) {
-              const parsed = JSON.parse(raw) as { id?: string | number } | null;
-              const value = parsed && parsed.id;
-              if (value !== undefined && value !== null) {
-                userIdParam = String(value);
-              }
-            }
-          } catch {
-            // ignore
-          }
-        }
-
-        if (userToken && userIdParam) {
-          const CMS_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace('/api', '');
-          // Use the custom /api/chat endpoint which returns { data: [...], meta: {...} }
-          const qRes = await fetch(`${CMS_URL}/api/chat?type=instructor_trainee&status=all&limit=50&_t=${Date.now()}`, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `users JWT ${userToken}`
-            },
-            cache: 'no-store'
-          });
-
-          if (qRes.ok) {
-            const data = await qRes.json();
-            // data.data is the chats array from the custom endpoint
-            const filtered = (data.data || []).filter((chat: any) => chat.metadata?.isAskInstructor);
-            const mapped = filtered.map((chat: any) => {
-              const otherParticipant = chat.participants?.find((p: any) => String(p.id) !== String(userIdParam));
-              return {
-                id: chat.id,
-                subject: chat.metadata?.subject || chat.title || 'Question',
-                preview: chat.lastMessagePreview || 'No messages yet...',
-                instructor: otherParticipant?.name || 'Instructor',
-                status: chat.isArchived || chat.status === 'archived' ? 'archived' : 
-                  (chat.lastMessageSenderId && String(chat.lastMessageSenderId) !== String(userIdParam) ? 'answered' : (chat.metadata?.status || 'pending')),
-                date: new Date(chat.lastMessageAt || chat.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                answerPreview: null
-              };
-            });
-            if (active) setQuestions(mapped);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch questions:', err);
-      }
-
-      // 2. Fetch instructors using proven client logic EXACTLY as /portal/instructors
-      try {
-        let userIdParam: string | null = null;
-        if (typeof window !== 'undefined') {
-          try {
-            const raw = localStorage.getItem('grandline_auth_user_trainee');
-            if (raw) {
-              const parsed = JSON.parse(raw) as { id?: string | number } | null;
-              const value = parsed && parsed.id;
-              if (value !== undefined && value !== null) {
-                userIdParam = String(value);
-              }
-            }
-          } catch {
-            // ignore
-          }
-        }
-
-        if (!userIdParam) {
-          console.warn('No userIdParam found in localStorage');
-          if (active) setLoading(false);
-          return;
-        }
-
-        console.log('userIdParam extracted:', userIdParam);
-
-        const res = await fetch(`/api/instructors/enrolled?userId=${userIdParam}`, {
-          cache: 'no-store',
-        });
-
-        console.log('API Response status:', res.status);
-
-        if (res.ok) {
-          const data = await res.json();
-          console.log('API Returned data:', data);
-          if (active) {
-            setInstructors(data.instructors || []);
-          }
-        } else {
-          console.error('Failed to fetch instructors from API:', await res.text());
+        const data = await fetchAskInstructorPageData();
+        if (active) {
+          setQuestions(data.questions || []);
+          setInstructors(data.instructors || []);
         }
       } catch (error) {
-        console.error('Error fetching instructors:', error);
+        console.error('Error fetching ask instructor data:', error);
       } finally {
         if (active) setLoading(false);
       }

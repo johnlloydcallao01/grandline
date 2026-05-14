@@ -71,7 +71,7 @@ export default function SupportPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/support-tickets?userId=${user.id}`);
+      const res = await fetch('/api/support-tickets');
       if (res.ok) {
         const data = await res.json();
         setTickets(data.docs || []);
@@ -102,7 +102,6 @@ export default function SupportPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...createForm,
-          userId: user.id,
         }),
       });
 
