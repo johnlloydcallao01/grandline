@@ -8,6 +8,7 @@ import { AuthErrorBoundary } from "@/components/auth";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getServerUser, getServerToken } from "@/app/actions/auth";
+import { getSiteSettingsFavicon } from "@/server/siteSettings";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,17 +21,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Grandline Maritime Training and Development Center Inc",
-  description: "Transform your ecommerce business with data-driven marketing strategies. We help online stores increase sales, optimize conversions, and scale profitably.",
+  description: "Professional maritime training programs designed by industry experts.",
   keywords: "ecommerce marketing, digital marketing agency, online store marketing, conversion optimization, ecommerce growth",
   authors: [{ name: "Calsiter Team" }],
   openGraph: {
     title: "Grandline Maritime Training and Development Center Inc",
-    description: "Transform your ecommerce business with data-driven marketing strategies.",
+    description: "Professional maritime training programs designed by industry experts.",
     type: "website",
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteSettings, faviconUrl } = await getSiteSettingsFavicon();
+  const version = encodeURIComponent(siteSettings?.updatedAt || faviconUrl || "fallback");
+  const iconUrl = `/favicon.ico?v=${version}`;
+
+  return {
+    ...defaultMetadata,
+    icons: {
+      icon: iconUrl,
+      shortcut: iconUrl,
+      apple: iconUrl,
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
