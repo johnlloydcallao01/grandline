@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { UserAvatar } from '@/components/auth';
 
 /**
  * Mobile app-like sticky footer navigation
@@ -31,7 +32,6 @@ export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
     {
       id: 'portal',
       label: 'Portal', // Portal label for LMS
-      icon: <i className="fa fa-book text-lg text-white"></i>,
       path: '/portal',
       isHelp: true,
     },
@@ -67,18 +67,17 @@ export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
           <button
             key={item.id}
             onClick={() => handleNavigation(item.path)}
-            className={`flex flex-col items-center justify-center transition-all duration-200 ${
-              item.isHelp
-                ? 'relative'
-                : 'p-1'
-            }`}
+            className={`flex flex-col items-center justify-center transition-all duration-200 ${item.isHelp
+              ? 'relative'
+              : 'p-1'
+              }`}
             aria-label={item.label || 'Help'}
           >
             {item.isHelp ? (
-              // Brand color circle for help icon with Portal text
+              // Reuse the header avatar so the mobile Portal entry matches desktop profile UI.
               <div className="flex flex-col items-center justify-center -mt-2">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-[#201a7c] dark:bg-[#3028a3]">
-                  {item.icon}
+                <div className="rounded-full shadow-lg ring-2 ring-[var(--card-background)]">
+                  <UserAvatar size="md" showOnlineStatus />
                 </div>
                 <span className="text-xs font-medium leading-none text-gray-600 dark:text-gray-400 mt-1">
                   {item.label}
@@ -86,15 +85,13 @@ export function MobileFooter({ hideAt = 'md' }: MobileFooterProps) {
               </div>
             ) : (
               <>
-                <div className={`mb-1 ${
-                  isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
-                }`}>
+                <div className={`mb-1 ${isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
+                  }`}>
                   {item.icon}
                 </div>
                 {item.label && (
-                  <span className={`text-xs font-medium leading-none ${
-                    isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <span className={`text-xs font-medium leading-none ${isActive(item.path) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
+                    }`}>
                     {item.label}
                   </span>
                 )}

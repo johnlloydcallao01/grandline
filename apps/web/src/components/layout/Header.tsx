@@ -20,15 +20,204 @@ import { NotificationBell } from '@/components/notifications/NotificationBell';
  * @param onSearch - Optional search handler function
  */
 export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
+  const [isMobilePortalMenuOpen, setIsMobilePortalMenuOpen] = useState(false)
+
   return (
     <SearchProvider>
-      <HeaderInner sidebarOpen={sidebarOpen} onToggleSidebar={onToggleSidebar} onSearch={onSearch} />
+      <HeaderInner
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={onToggleSidebar}
+        onSearch={onSearch}
+        isMobilePortalMenuOpen={isMobilePortalMenuOpen}
+        onOpenMobilePortalMenu={() => setIsMobilePortalMenuOpen(true)}
+      />
+      <MobilePortalMenuOverlay
+        isOpen={isMobilePortalMenuOpen}
+        onClose={() => setIsMobilePortalMenuOpen(false)}
+      />
       <MobileSearchOverlay />
     </SearchProvider>
   )
 }
 
-function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
+type PortalMobileMenuItem = {
+  label: string
+  href: string
+  icon: string
+}
+
+type PortalMobileMenuSection = {
+  title: string
+  items: PortalMobileMenuItem[]
+}
+
+const portalMobileMenuSections: PortalMobileMenuSection[] = [
+  {
+    title: 'Learning',
+    items: [
+      { label: 'Dashboard', href: '/portal/dashboard', icon: 'fa-tachometer-alt' },
+      { label: 'Courses', href: '/portal/courses', icon: 'fa-book' },
+      { label: 'Instructors', href: '/portal/instructors', icon: 'fa-chalkboard-teacher' },
+    ],
+  },
+  {
+    title: 'Activities',
+    items: [
+      { label: 'Assignments', href: '/portal/assignments', icon: 'fa-tasks' },
+      { label: 'Quizzes & Exams', href: '/portal/quizzes-exams', icon: 'fa-graduation-cap' },
+      { label: 'Feedback & Comments', href: '/portal/feedback-comments', icon: 'fa-comment-dots' },
+    ],
+  },
+  {
+    title: 'Interaction',
+    items: [
+      { label: 'Discussion Board', href: '/portal/discussion-board', icon: 'fa-comments' },
+      { label: 'Ask Instructor', href: '/portal/ask-instructor', icon: 'fa-question-circle' },
+      { label: 'Announcements', href: '/portal/announcements', icon: 'fa-bullhorn' },
+    ],
+  },
+  {
+    title: 'General',
+    items: [
+      { label: 'Account', href: '/portal/account', icon: 'fa-user' },
+      { label: 'Requirements', href: '/portal/requirements', icon: 'fa-list-check' },
+    ],
+  },
+]
+
+type HeaderInnerProps = HeaderProps & {
+  isMobilePortalMenuOpen: boolean
+  onOpenMobilePortalMenu: () => void
+}
+
+function MobilePortalMenuOverlay({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    onClose()
+  }, [pathname])
+
+  const handleNavigation = (href: string) => {
+    onClose()
+    router.push(href as any)
+  }
+
+  const handleBack = () => {
+    onClose()
+    window.history.back()
+  }
+
+  const isPortalMenuItemActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  if (!pathname.startsWith('/portal')) return null
+
+  return (
+    <div
+      className={`fixed inset-0 z-[1000] lg:hidden ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      aria-hidden={!isOpen}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+        aria-label="Close portal menu"
+      />
+      <div className={`relative w-full h-full bg-[var(--background)] flex flex-col overflow-hidden transition-transform duration-300 ease-out will-change-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="h-14 px-4 flex items-center justify-between border-b border-[var(--card-border)]">
+          <div className="text-base font-semibold text-gray-900 dark:text-gray-100">Portal Menu</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-10 h-10 rounded-md flex items-center justify-center text-gray-800 dark:text-gray-200"
+            aria-label="Close portal menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <i className="fa fa-arrow-left text-gray-600 dark:text-gray-400"></i>
+              </div>
+              <span>Back</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNavigation('/')}
+              className={`flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-medium transition-colors ${isPortalMenuItemActive('/') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <i className="fa fa-home text-gray-600 dark:text-gray-400"></i>
+              </div>
+              <span>Home</span>
+            </button>
+          </div>
+
+          {portalMobileMenuSections.map(section => (
+            <div key={section.title} className="space-y-1">
+              <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                {section.title}
+              </div>
+              {section.items.map(item => (
+                <button
+                  key={item.href}
+                  type="button"
+                  onClick={() => handleNavigation(item.href)}
+                  className={`flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-medium transition-colors ${isPortalMenuItemActive(item.href) ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                >
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className={`fa ${item.icon} text-gray-600 dark:text-gray-400`}></i>
+                  </div>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch, isMobilePortalMenuOpen, onOpenMobilePortalMenu }: HeaderInnerProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -41,6 +230,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const searchRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { query, setQuery, setOverlayOpen, setDropdownOpen, getSuggestions, setMode, saveRecentKeyword, loadRecentKeywords, persistRecentKeyword, setTyping } = useSearch()
+  const isPortalPage = pathname.startsWith('/portal')
 
 
   const handleMyPortalClick = () => {
@@ -184,7 +374,20 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
       {pathname !== '/results' && (
         <div className="lg:hidden flex items-center px-3 py-1.5 space-x-3 h-14 bg-[var(--background)]">
           <div className="flex-1 flex items-center justify-start">
-            {React.createElement(Image, { src: '/grandline-logo.png', alt: 'Grandline Logo', width: 150, height: 40, className: 'h-10 w-auto rounded-xl', priority: true })}
+            {isPortalPage ? (
+              <button
+                onClick={onOpenMobilePortalMenu}
+                className="w-10 h-10 rounded-md flex items-center justify-center text-gray-800 dark:text-gray-200"
+                aria-label={isMobilePortalMenuOpen ? 'Close portal menu' : 'Open portal menu'}
+                aria-expanded={isMobilePortalMenuOpen}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            ) : (
+              React.createElement(Image, { src: '/grandline-logo.png', alt: 'Grandline Logo', width: 150, height: 40, className: 'h-10 w-auto rounded-xl', priority: true })
+            )}
           </div>
           <div className="flex-none">
             <NotificationBell navigateToPage isMobile />
@@ -194,7 +397,6 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
           </button>
         </div>
       )}
-
       <div className="hidden lg:flex items-center justify-between px-4 min-h-[72px]">
         <div className="flex items-center space-x-4">
           <button onClick={onToggleSidebar} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200 transition-colors ${sidebarOpen ? 'bg-gray-50 dark:bg-gray-900' : ''}`} aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'} aria-expanded={sidebarOpen}>
