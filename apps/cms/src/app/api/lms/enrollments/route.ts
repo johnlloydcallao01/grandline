@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
             category: 'learning',
             title: `🎓 Welcome to ${course.title}!`,
             body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
-            link: `/portal/courses/${course.id}`,
+            link: `/portal/account/enrollments/${newEnrollment.id}`,
             metadata: {
               enrollmentId: newEnrollment.id,
               courseId: course.id,

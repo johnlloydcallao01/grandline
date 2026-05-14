@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 type NotificationTypeId =
   | 'all'
@@ -407,11 +408,14 @@ export function NotificationsPanel({ items, filters, isLoading = false, onMarkAs
                         </div>
                       </div>
 
-                      {notification.actionText && (
+                      {notification.actionText && notification.actionPath && (
                         <div className="mt-3">
-                          <button className="text-sm font-medium text-[#201a7c] dark:text-[#5c54e0] hover:text-[#1a1569] dark:hover:text-[#6a62f5] transition-colors">
+                          <Link
+                            href={notification.actionPath as any}
+                            className="text-sm font-medium text-[#201a7c] dark:text-[#5c54e0] hover:text-[#1a1569] dark:hover:text-[#6a62f5] transition-colors"
+                          >
                             {notification.actionText} →
-                          </button>
+                          </Link>
                         </div>
                       )}
                     </div>

@@ -21,6 +21,23 @@ interface NotificationsContextType {
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
+function getEnrollmentDetailsPath(enrollmentId: unknown): string | undefined {
+  if (enrollmentId === null || enrollmentId === undefined) return undefined;
+  return `/portal/account/enrollments/${String(enrollmentId)}`;
+}
+
+function resolveNotificationActionPath(notification: any): string | undefined {
+  const enrollmentPath =
+    getEnrollmentDetailsPath(notification?.metadata?.enrollmentId) ||
+    getEnrollmentDetailsPath(notification?.notification?.metadata?.enrollmentId);
+
+  if (enrollmentPath) {
+    return enrollmentPath;
+  }
+
+  return notification?.link || undefined;
+}
+
 export function NotificationsProvider({ children, userId }: { children: React.ReactNode; userId?: string | number }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -57,8 +74,8 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
         icon: getNotificationIcon(n.category),
         iconColor: getIconColor(n.category),
         iconBg: getIconBg(n.category),
-        actionText: n.link ? 'View Details' : undefined,
-        actionPath: n.link || undefined,
+        actionText: resolveNotificationActionPath(n) ? 'View Details' : undefined,
+        actionPath: resolveNotificationActionPath(n),
       }));
 
       setNotifications(transformed);
@@ -136,8 +153,8 @@ export function NotificationsProvider({ children, userId }: { children: React.Re
               icon: getNotificationIcon(newNotification.category),
               iconColor: getIconColor(newNotification.category),
               iconBg: getIconBg(newNotification.category),
-              actionText: newNotification.link ? 'View Details' : undefined,
-              actionPath: newNotification.link || undefined,
+              actionText: resolveNotificationActionPath(newNotification) ? 'View Details' : undefined,
+              actionPath: resolveNotificationActionPath(newNotification),
             };
 
             setNotifications((prev) => [transformed, ...prev]);

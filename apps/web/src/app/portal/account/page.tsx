@@ -1510,10 +1510,7 @@ export default function AccountPage() {
 
                               <div className="flex-shrink-0 md:pl-4">
                                 <Link
-                                  href={{
-                                    pathname: '/portal/account/enrollments/[enrollmentId]',
-                                    query: { enrollmentId: String(enrollment.id) },
-                                  }}
+                                  href={`/portal/account/enrollments/${enrollment.id}`}
                                   className="whitespace-nowrap text-sm font-medium text-[#201a7c] transition-colors hover:text-[#1a1563] dark:text-[#7b75ef] dark:hover:text-[#968fff]"
                                 >
                                   {getEnrollmentActionLabel(enrollment.status)} →

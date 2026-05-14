@@ -379,7 +379,7 @@ export const CourseEnrollments: CollectionConfig = {
               category: 'learning',
               title: `🎓 Welcome to ${course.title}!`,
               body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
-              link: `/portal/courses/${course.id}`,
+              link: `/portal/account/enrollments/${doc.id}`,
               metadata: {
                 enrollmentId: doc.id,
                 courseId: course.id,
@@ -396,7 +396,7 @@ export const CourseEnrollments: CollectionConfig = {
             title: `🎓 Welcome to ${course.title}!`,
             body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
             category: 'learning',
-            link: `/portal/courses/${course.id}`,
+            link: `/portal/account/enrollments/${doc.id}`,
             metadata: {
               enrollmentId: doc.id,
               courseId: course.id,

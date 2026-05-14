@@ -309,12 +309,7 @@ export default function EnrollmentDetailsPage() {
   const course = enrollment.course;
   const studentName = getPersonName(enrollment.student?.user);
   const instructorName = getPersonName(course?.instructor?.user);
-  const coursePlayerLink = course?.id
-    ? {
-        pathname: '/portal/courses/[courseId]/player',
-        query: { courseId: String(course.id) },
-      }
-    : null;
+  const coursePlayerLink = course?.id ? `/portal/courses/${course.id}/player` : null;
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-[10px] py-6">
@@ -349,7 +344,7 @@ export default function EnrollmentDetailsPage() {
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
               {coursePlayerLink ? (
                 <Link
-                  href={coursePlayerLink}
+                  href={coursePlayerLink as any}
                   className="inline-flex items-center justify-center rounded-lg bg-[#201a7c] px-5 py-2.5 font-medium text-white transition-colors hover:bg-[#1a1563] dark:bg-[#3028a3] dark:hover:bg-[#3b32c4]"
                 >
                   Open Course Player

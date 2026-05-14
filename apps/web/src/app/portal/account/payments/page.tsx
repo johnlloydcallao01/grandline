@@ -263,10 +263,7 @@ export default function AccountPaymentsPage() {
                     </div>
 
                     <Link
-                      href={{
-                        pathname: '/portal/account/enrollments/[enrollmentId]',
-                        query: { enrollmentId: String(enrollment.id) },
-                      }}
+                      href={`/portal/account/enrollments/${enrollment.id}`}
                       className="inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm font-medium text-[#201a7c] transition-colors hover:bg-gray-50 dark:text-[#7b75ef] dark:hover:bg-gray-800"
                     >
                       View Details
