@@ -1,0 +1,21 @@
+{
+  "name": "Grandline Maritime Training",
+  "short_name": "Grandline",
+  "description": "Grandline Maritime trainee portal",
+  "start_url": "/portal/account",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/grandline-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/grandline-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@lexical/html": "0.28.0",
+    "@lexical/html": "0.41.0",
     "server-only": "0.0.1"
   },
   "exports": {

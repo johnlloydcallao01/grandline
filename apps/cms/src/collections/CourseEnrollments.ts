@@ -1,6 +1,6 @@
 import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
-import { broadcastNotification } from '../utils/supabaseNotifications'
+import { createNotificationFanout } from '../utils/notificationFanout'
 
 export const CourseEnrollments: CollectionConfig = {
   slug: 'course-enrollments',
@@ -336,76 +336,39 @@ export const CourseEnrollments: CollectionConfig = {
             collection: 'courses',
             id: courseId,
             depth: 0,
+            overrideAccess: true,
           })
 
-          // 3. Find COURSE_ENROLLED template
-          const templateRes = await payload.find({
-            collection: 'notification-templates',
-            where: {
-              code: { equals: 'COURSE_ENROLLED' }
-            },
-            limit: 1,
-          })
-          const template = templateRes.docs[0]
+          const title = `🎓 Welcome to ${course.title}!`
+          const body = `You have been successfully enrolled in ${course.title}. Start learning now!`
+          const link = `/portal/account/enrollments/${doc.id}`
+          const metadata = {
+            enrollmentId: doc.id,
+            courseId: course.id,
+            courseName: course.title,
+            enrollmentType: doc.enrollmentType,
+          }
 
-          // 4. Create broadcast notification
-          const notification = await payload.create({
-            collection: 'notifications',
-            data: {
-              ...(template && { template: template.id }),
-              category: 'learning',
-              title: `🎓 Welcome to ${course.title}!`,
-              body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
-              metadata: {
-                enrollmentId: doc.id,
-                courseId: course.id,
-                courseName: course.title,
-                enrollmentType: doc.enrollmentType,
-              },
-              sourceType: 'enrollment',
-              sourceId: String(doc.id),
-              origin: 'automatic',
-              audienceType: 'specific-users',
-              status: 'sent',
-            },
-          })
-
-          // 5. Create per-user notification (for bell icon)
-          const userNotification = await payload.create({
-            collection: 'user-notifications',
-            data: {
-              user: userId,
-              notification: notification.id,
-              category: 'learning',
-              title: `🎓 Welcome to ${course.title}!`,
-              body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
-              link: `/portal/account/enrollments/${doc.id}`,
-              metadata: {
-                enrollmentId: doc.id,
-                courseId: course.id,
-                courseName: course.title,
-              },
-              channel: 'in-app',
-              deliveredAt: new Date().toISOString(),
-            },
-          })
-
-          // 6. Broadcast via Supabase Realtime for instant delivery
-          await broadcastNotification(userId, {
-            id: userNotification.id,
-            title: `🎓 Welcome to ${course.title}!`,
-            body: `You have been successfully enrolled in ${course.title}. Start learning now!`,
+          await createNotificationFanout({
+            payload,
+            userId,
+            templateCode: 'COURSE_ENROLLED',
             category: 'learning',
-            link: `/portal/account/enrollments/${doc.id}`,
-            metadata: {
-              enrollmentId: doc.id,
-              courseId: course.id,
-              courseName: course.title,
+            title,
+            body,
+            link,
+            metadata,
+            sourceType: 'enrollment',
+            sourceId: String(doc.id),
+            push: {
+              title,
+              body,
+              url: link,
+              data: metadata,
             },
-            deliveredAt: new Date().toISOString(),
           })
 
-          console.log(`[CourseEnrollments Hook] Notification created & broadcast for user ${userId}, course ${course.title}`)
+          console.log(`[CourseEnrollments Hook] Notification created, broadcast, and push fan-out attempted for user ${userId}, course ${course.title}`)
         } catch (notifyError) {
           // Log error but don't fail the enrollment
           console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)

@@ -187,6 +187,14 @@ export const Users: CollectionConfig = {
         description: 'Inactive users cannot log in',
       },
     },
+    {
+      name: 'pushNotificationsEnabled',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Allows this user to receive browser web push notifications when they have an active subscription',
+      },
+    },
 
     {
       name: 'lastLogin',

@@ -97,6 +97,7 @@ import * as migration_20260422_120454 from './20260422_120454';
 import * as migration_20260508_063949_add_phone_to_users from './20260508_063949_add_phone_to_users';
 import * as migration_20260508_151000_fix_trigger_beginner_to_standard from './20260508_151000_fix_trigger_beginner_to_standard';
 import * as migration_20260512_120000_enforce_unique_emergency_contact_per_user from './20260512_120000_enforce_unique_emergency_contact_per_user';
+import * as migration_20260516_045852_add_web_push_notifications from './20260516_045852_add_web_push_notifications';
 
 export const migrations = [
   {
@@ -582,16 +583,21 @@ export const migrations = [
   {
     up: migration_20260508_063949_add_phone_to_users.up,
     down: migration_20260508_063949_add_phone_to_users.down,
-    name: '20260508_063949_add_phone_to_users'
+    name: '20260508_063949_add_phone_to_users',
   },
   {
     up: migration_20260508_151000_fix_trigger_beginner_to_standard.up,
     down: migration_20260508_151000_fix_trigger_beginner_to_standard.down,
-    name: '20260508_151000_fix_trigger_beginner_to_standard'
+    name: '20260508_151000_fix_trigger_beginner_to_standard',
   },
   {
     up: migration_20260512_120000_enforce_unique_emergency_contact_per_user.up,
     down: migration_20260512_120000_enforce_unique_emergency_contact_per_user.down,
-    name: '20260512_120000_enforce_unique_emergency_contact_per_user'
+    name: '20260512_120000_enforce_unique_emergency_contact_per_user',
+  },
+  {
+    up: migration_20260516_045852_add_web_push_notifications.up,
+    down: migration_20260516_045852_add_web_push_notifications.down,
+    name: '20260516_045852_add_web_push_notifications'
   },
 ];

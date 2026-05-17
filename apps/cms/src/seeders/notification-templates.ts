@@ -30,7 +30,7 @@ async function seedNotificationTemplates() {
     titleTemplate: '🎓 Welcome to {{courseName}}!',
     bodyTemplate: 'You have been successfully enrolled in {{courseName}}. Start learning now!',
     defaultLink: '/portal/courses/{{courseId}}',
-    channels: ['in-app'],
+    channels: ['in-app', 'push'],
     automatic: true,
     manual: false,
     metadataSchema: {

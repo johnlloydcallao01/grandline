@@ -42,6 +42,7 @@ const webEnvSchema = sharedEnvSchema.extend({
   // Performance
   NEXT_PUBLIC_ENABLE_PWA: z.string().transform(val => val === 'true').default('true'),
   NEXT_PUBLIC_ENABLE_SERVICE_WORKER: z.string().transform(val => val === 'true').default('true'),
+  NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY: z.string().optional(),
 
   // Development
   NEXT_PUBLIC_DEBUG_MODE: z.string().transform(val => val === 'true').default('false'),
@@ -87,6 +88,7 @@ const webClientEnvSchema = sharedClientEnvSchema.extend({
   // Performance
   NEXT_PUBLIC_ENABLE_PWA: z.string().transform(val => val === 'true').default('true'),
   NEXT_PUBLIC_ENABLE_SERVICE_WORKER: z.string().transform(val => val === 'true').default('true'),
+  NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY: z.string().optional(),
 
   // Development
   NEXT_PUBLIC_DEBUG_MODE: z.string().transform(val => val === 'true').default('false'),

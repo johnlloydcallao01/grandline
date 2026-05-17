@@ -13,6 +13,7 @@ import {
   getEmergencyContactRecord,
   upsertEmergencyContactRecord,
 } from '@/app/actions/user';
+import { disableWebPush, enableWebPush, getWebPushState } from '@/lib/push';
 import type { User } from '@/types/auth';
 
 const TABS = ['Profile', 'PII', 'Account', 'Preferences'];
@@ -373,6 +374,15 @@ export default function AccountPage() {
     marketing: false,
     security: true
   });
+  const [isUpdatingPushPreference, setIsUpdatingPushPreference] = useState(false);
+  const [pushSupport, setPushSupport] = useState<{
+    supported: boolean;
+    permission: NotificationPermission | 'unsupported';
+  }>({
+    supported: false,
+    permission: 'unsupported',
+  });
+  const [preferenceMessage, setPreferenceMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
   const [accountEnrollments, setAccountEnrollments] = useState<AccountEnrollment[]>([]);
   const [isLoadingAccountEnrollments, setIsLoadingAccountEnrollments] = useState(true);
@@ -394,6 +404,10 @@ export default function AccountPage() {
         const currentUser = await getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
+          setNotifications((prev) => ({
+            ...prev,
+            push: currentUser.pushNotificationsEnabled !== false,
+          }));
 
           let fetchedSrn = '';
           let fetchedCouponCode = '';
@@ -446,6 +460,28 @@ export default function AccountPage() {
             emergencyRelationship: fetchedEmergencyRelationship,
             emergencyCompleteAddress: fetchedEmergencyCompleteAddress
           });
+
+          try {
+            const pushState = await getWebPushState();
+            setPushSupport({
+              supported: pushState.supported,
+              permission: pushState.permission,
+            });
+            setNotifications((prev) => ({
+              ...prev,
+              push: currentUser.pushNotificationsEnabled !== false && pushState.subscribed,
+            }));
+          } catch (pushError) {
+            console.error('Failed to inspect web push state', pushError);
+            setPushSupport({
+              supported: false,
+              permission: 'unsupported',
+            });
+            setNotifications((prev) => ({
+              ...prev,
+              push: false,
+            }));
+          }
         }
       } catch (error) {
         console.error('Failed to load user', error);
@@ -585,6 +621,77 @@ export default function AccountPage() {
       setSaveMessage({ type: 'error', text: error.message || 'An unexpected error occurred' });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePushNotificationsToggle = async () => {
+    if (!user || isUpdatingPushPreference) return;
+
+    const nextEnabled = !notifications.push;
+
+    setIsUpdatingPushPreference(true);
+    setPreferenceMessage(null);
+
+    try {
+      if (nextEnabled) {
+        await enableWebPush();
+      } else {
+        await disableWebPush();
+      }
+
+      const result = await updateUserProfile(user.id, {
+        pushNotificationsEnabled: nextEnabled,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update push notification preference');
+      }
+
+      const refreshedPushState = await getWebPushState().catch(() => ({
+        supported: false,
+        permission: 'unsupported' as const,
+        subscribed: false,
+      }));
+
+      setPushSupport({
+        supported: refreshedPushState.supported,
+        permission: refreshedPushState.permission,
+      });
+      setNotifications((prev) => ({
+        ...prev,
+        push: nextEnabled && refreshedPushState.subscribed,
+      }));
+      setUser((prev) => prev ? {
+        ...prev,
+        pushNotificationsEnabled: nextEnabled,
+      } : prev);
+      setPreferenceMessage({
+        type: 'success',
+        text: nextEnabled
+          ? 'Web push notifications are enabled for this browser.'
+          : 'Web push notifications are disabled for this browser.',
+      });
+    } catch (error: any) {
+      const refreshedPushState = await getWebPushState().catch(() => ({
+        supported: false,
+        permission: 'unsupported' as const,
+        subscribed: false,
+      }));
+
+      setPushSupport({
+        supported: refreshedPushState.supported,
+        permission: refreshedPushState.permission,
+      });
+      setNotifications((prev) => ({
+        ...prev,
+        push: user.pushNotificationsEnabled !== false && refreshedPushState.subscribed,
+      }));
+      setPreferenceMessage({
+        type: 'error',
+        text: error?.message || 'Failed to update push notification preference',
+      });
+    } finally {
+      setIsUpdatingPushPreference(false);
     }
   };
 
@@ -1314,14 +1421,44 @@ export default function AccountPage() {
             <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6 pb-4 border-b border-[var(--card-border)]">Notification Preferences</h2>
 
+              {preferenceMessage && (
+                <div className={`mb-6 rounded-xl border p-4 text-sm ${preferenceMessage.type === 'success'
+                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300'
+                  : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'
+                  }`}>
+                  {preferenceMessage.text}
+                </div>
+              )}
+
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-gray-100">Push Notifications</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Real-time alerts for assignments and messages</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Real-time browser alerts for course enrollments and other important updates.
+                    </p>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      Clicking Enable will trigger the native browser permission popup only while this site's notification permission is still undecided.
+                    </p>
+                    {!pushSupport.supported && (
+                      <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                        This browser does not currently support web push notifications, or the site is not running in a secure context.
+                      </p>
+                    )}
+                    {pushSupport.supported && pushSupport.permission === 'denied' && (
+                      <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                        Browser notification permission is blocked. Re-enable it in your browser settings to turn push back on.
+                      </p>
+                    )}
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={notifications.push} onChange={() => setNotifications({ ...notifications, push: !notifications.push })} />
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={notifications.push}
+                      disabled={isUpdatingPushPreference || (!pushSupport.supported && !notifications.push)}
+                      onChange={handlePushNotificationsToggle}
+                    />
                     <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>

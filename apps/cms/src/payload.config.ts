@@ -43,6 +43,7 @@ import { FeedbackSubmissions } from './collections/FeedbackSubmissions'
 import { NotificationTemplates } from './collections/NotificationTemplates'
 import { Notifications } from './collections/Notifications'
 import { UserNotifications } from './collections/UserNotifications'
+import { WebPushSubscriptions } from './collections/WebPushSubscriptions'
 import { SupportTickets } from './collections/SupportTickets'
 import { SupportTicketMessages } from './collections/SupportTicketMessages'
 import { Chats } from './collections/Chats'
@@ -109,6 +110,7 @@ export default buildConfig({
     NotificationTemplates,
     Notifications,
     UserNotifications,
+    WebPushSubscriptions,
 
     // Support System
     SupportTickets,
