@@ -12,7 +12,7 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(title, {
       body,
       icon: '/grandline-logo.png',
-      badge: '/grandline-logo.png',
+      badge: '/notification-badge-96.png',
       tag: payload.tag || 'grandline-web-push',
       data: {
         url,
