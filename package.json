@@ -34,7 +34,7 @@
   },
   "pnpm": {
     "overrides": {
-      "baseline-browser-mapping": "latest",
+      "baseline-browser-mapping": "2.10.8",
       "next": "16.2.0",
       "eslint-config-next": "16.2.0",
       "react": "19.1.0",
