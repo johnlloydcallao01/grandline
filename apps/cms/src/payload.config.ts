@@ -9,6 +9,9 @@ import crypto from 'crypto'
 import { authLogger, createAuthLogContext } from './utils/auth-logger'
 import type { PayloadRequest, PayloadHandler } from 'payload'
 import sharp from 'sharp'
+import { getRequestMetadata } from './utils/request-metadata'
+import { sendResendEmail } from './utils/resend-email'
+import { createUserSecurityEvent } from './utils/user-security-events'
 
 import { Users } from './collections/Users'
 import { Instructors } from './collections/Instructors'
@@ -177,6 +180,189 @@ export default buildConfig({
       path: '/generate-certificate',
       method: 'post',
       handler: generateCertificateEndpoint as any,
+    },
+    {
+      path: '/portal-login',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        const requestId = crypto.randomUUID()
+        const startTime = Date.now()
+        const { ipAddress, userAgent } = getRequestMetadata(req)
+
+        try {
+          const body = await (req as any).json()
+          const email = String(body?.email || '').trim().toLowerCase()
+          const password = String(body?.password || '')
+
+          if (!email || !password) {
+            return new Response(
+              JSON.stringify({
+                message: 'Email and password are required.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+
+          const existingUsers = await req.payload.find({
+            collection: 'users',
+            overrideAccess: true,
+            limit: 1,
+            depth: 0,
+            where: {
+              email: {
+                equals: email,
+              },
+            },
+          })
+
+          const existingUser = existingUsers.docs[0] as any
+
+          try {
+            const result = await req.payload.login({
+              collection: 'users',
+              data: {
+                email,
+                password,
+              },
+            } as any)
+
+            const user = result.user as any
+
+            if (user?.role !== 'trainee') {
+              const logContext = createAuthLogContext(
+                requestId,
+                req,
+                user?.id,
+                user?.email,
+                user?.role,
+                Date.now() - startTime,
+              )
+              authLogger.logRoleViolation(logContext, 'trainee', user?.role || 'unknown')
+
+              return new Response(
+                JSON.stringify({
+                  message: 'Access denied. Only trainees can access this application.',
+                }),
+                { status: 403, headers: { 'Content-Type': 'application/json' } }
+              )
+            }
+
+            return new Response(
+              JSON.stringify({
+                message: 'Login successful.',
+                user: result.user,
+                token: result.token,
+                exp: result.exp,
+              }),
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
+            )
+          } catch (error) {
+            const refreshedUser = existingUser?.id
+              ? await req.payload.findByID({
+                collection: 'users',
+                id: existingUser.id,
+                overrideAccess: true,
+                depth: 0,
+              }).catch(() => null)
+              : null
+
+            const responseTime = Date.now() - startTime
+            const errorMessage = error instanceof Error ? error.message : 'Invalid email or password.'
+            const logContext = createAuthLogContext(
+              requestId,
+              req,
+              refreshedUser?.id,
+              refreshedUser?.email || email,
+              refreshedUser?.role,
+              responseTime,
+            )
+
+            authLogger.logLoginFailure(logContext, errorMessage, {
+              endpoint: '/portal-login',
+            })
+
+            if (refreshedUser?.id) {
+              const previousAttempts = Number(existingUser?.loginAttempts ?? 0)
+              const currentAttempts = Number(refreshedUser?.loginAttempts ?? 0)
+              const becameLocked = !existingUser?.lockUntil && Boolean(refreshedUser?.lockUntil)
+              const reachedThreshold = previousAttempts < 3 && currentAttempts >= 3
+
+              let emailSent = false
+              let emailSkipped = false
+              let emailId: string | undefined
+              let emailError: string | undefined
+
+              if (refreshedUser.securityAlertsEmailEnabled !== false && (becameLocked || reachedThreshold)) {
+                const result = await sendResendEmail({
+                  to: refreshedUser.email,
+                  subject: becameLocked
+                    ? 'Your Grandline Maritime account has been locked after failed sign-in attempts'
+                    : 'Failed sign-in attempts detected on your Grandline Maritime account',
+                  html: `
+                    <p>Hello ${refreshedUser.firstName || ''},</p>
+                    <p>We detected failed sign-in attempts on your Grandline Maritime account.</p>
+                    <p>Failed attempts: ${currentAttempts}</p>
+                    <p>IP address: ${ipAddress}</p>
+                    <p>Browser / device: ${userAgent}</p>
+                    ${refreshedUser.lockUntil ? `<p>Account locked until: ${new Date(refreshedUser.lockUntil).toISOString()}</p>` : ''}
+                    <p>If this was not you, we recommend changing your password and reviewing your account security settings.</p>
+                  `,
+                  tags: [
+                    { name: 'category', value: 'security-alert' },
+                    { name: 'event', value: 'login-failed' },
+                  ],
+                  idempotencyKey: `login-failed-${refreshedUser.id}-${currentAttempts}-${refreshedUser.lockUntil || 'no-lock'}`,
+                })
+
+                emailSent = result.sent
+                emailSkipped = result.skipped
+                emailId = result.id
+                emailError = result.error
+              } else {
+                emailSkipped = true
+              }
+
+              await createUserSecurityEvent({
+                payload: req.payload,
+                userId: refreshedUser.id,
+                eventType: 'LOGIN_FAILED',
+                eventData: {
+                  requestId,
+                  source: 'portal-login',
+                  previousAttempts,
+                  currentAttempts,
+                  becameLocked,
+                  reachedThreshold,
+                  lockUntil: refreshedUser.lockUntil || null,
+                  emailSent,
+                  emailSkipped,
+                  emailId,
+                  emailError,
+                  preferenceEnabled: refreshedUser.securityAlertsEmailEnabled !== false,
+                },
+                ipAddress,
+                userAgent,
+              })
+            }
+
+            return new Response(
+              JSON.stringify({
+                message: 'Invalid email or password.',
+              }),
+              { status: 401, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+        } catch (error) {
+          console.error(`Portal login failed unexpectedly [${requestId}]`, error)
+
+          return new Response(
+            JSON.stringify({
+              message: 'Login failed. Please try again.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+      }) as PayloadHandler,
     },
     {
       path: '/refresh-token',
@@ -432,45 +618,34 @@ export default buildConfig({
             rawToken
           )}`;
 
-          const resendApiKey = process.env.RESEND_API_KEY;
-          const enableEmailNotifications =
-            process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
-          const fromEmail =
-            process.env.RESEND_FROM_EMAIL || 'no-reply@tap2goph.com';
-          const fromName = process.env.EMAIL_FROM_NAME || 'Tap2Go';
-          const replyTo = process.env.EMAIL_REPLY_TO || fromEmail;
+          try {
+            const emailResult = await sendResendEmail({
+              to: user.email,
+              subject: 'Reset your Grandline Maritime password',
+              html: `
+                <p>Hello ${user.firstName || ''},</p>
+                <p>You requested to reset your password for your Grandline Maritime account.</p>
+                <p>Click the link below to set a new password:</p>
+                <p><a href="${resetUrl}">${resetUrl}</a></p>
+                <p>If you did not request this, you can safely ignore this email.</p>
+              `,
+              tags: [
+                { name: 'category', value: 'auth' },
+                { name: 'event', value: 'forgot-password' },
+              ],
+              idempotencyKey: `forgot-password-${user.id}-${hashedToken}`,
+            })
 
-          if (resendApiKey && enableEmailNotifications) {
-            try {
-              await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${resendApiKey}`,
-                },
-                body: JSON.stringify({
-                  from: `${fromName} <${fromEmail}>`,
-                  to: user.email,
-                  subject: 'Reset your Grandline Maritime password',
-                  html: `
-                    <p>Hello ${user.firstName || ''},</p>
-                    <p>You requested to reset your password for your Grandline Maritime account.</p>
-                    <p>Click the link below to set a new password:</p>
-                    <p><a href="${resetUrl}">${resetUrl}</a></p>
-                    <p>If you did not request this, you can safely ignore this email.</p>
-                  `,
-                  reply_to: replyTo,
-                }),
-              });
-            } catch (emailError) {
-              console.error(
-                `Password reset email failed to send [${requestId}]:`,
-                emailError
-              );
+            if (!emailResult.sent) {
+              console.warn(
+                `Forgot-password email was not sent [${requestId}]`,
+                emailResult.error,
+              )
             }
-          } else {
-            console.warn(
-              `Resend email not sent for forgot-password [${requestId}]: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not 'true'`
+          } catch (emailError) {
+            console.error(
+              `Password reset email failed to send [${requestId}]:`,
+              emailError
             );
           }
 
@@ -612,51 +787,6 @@ export default buildConfig({
               lockUntil: null,
             },
           });
-
-          const appBaseUrl =
-            process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com';
-          const appUrl = appBaseUrl.replace(/\/$/, '');
-
-          const resendApiKey = process.env.RESEND_API_KEY;
-          const enableEmailNotifications =
-            process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true';
-          const fromEmail =
-            process.env.RESEND_FROM_EMAIL || 'no-reply@tap2goph.com';
-          const fromName = process.env.EMAIL_FROM_NAME || 'Tap2Go';
-          const replyTo = process.env.EMAIL_REPLY_TO || fromEmail;
-
-          if (resendApiKey && enableEmailNotifications) {
-            try {
-              await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${resendApiKey}`,
-                },
-                body: JSON.stringify({
-                  from: `${fromName} <${fromEmail}>`,
-                  to: user.email,
-                  subject: 'Your Grandline Maritime password has been changed',
-                  html: `
-                    <p>Hello ${user.firstName || ''},</p>
-                    <p>Your Grandline Maritime password has been updated.</p>
-                    <p>If you did not perform this change, please contact support immediately.</p>
-                    <p>You can sign in again here: <a href="${appUrl}/signin">${appUrl}/signin</a></p>
-                  `,
-                  reply_to: replyTo,
-                }),
-              });
-            } catch (emailError) {
-              console.error(
-                'Password reset confirmation email failed to send:',
-                emailError
-              );
-            }
-          } else {
-            console.warn(
-              'Resend email not sent for reset-password: missing RESEND_API_KEY or ENABLE_EMAIL_NOTIFICATIONS is not \'true\''
-            );
-          }
 
           return new Response(
             JSON.stringify({

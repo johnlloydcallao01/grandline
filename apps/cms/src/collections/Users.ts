@@ -1,6 +1,11 @@
+import crypto from 'crypto'
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { adminOnly } from '../access'
+import { authLogger, createAuthLogContext } from '../utils/auth-logger'
+import { getRequestMetadata, inferPasswordChangeSource } from '../utils/request-metadata'
+import { sendResendEmail } from '../utils/resend-email'
+import { createUserSecurityEvent } from '../utils/user-security-events'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -39,6 +44,125 @@ export const Users: CollectionConfig = {
     beforeDelete: [
       async ({ id }) => {
         console.log(`🗑️ Attempting to delete user ${id}`);
+      },
+    ],
+    afterLogin: [
+      async ({ req, user, token }) => {
+        const requestId = crypto.randomUUID()
+        const { ipAddress, userAgent } = getRequestMetadata(req)
+        const logContext = createAuthLogContext(requestId, req, user.id, user.email, user.role)
+
+        authLogger.logLoginSuccess(logContext, {
+          endpoint: '/users/login',
+          tokenIssued: Boolean(token),
+        })
+
+        try {
+          await req.payload.update({
+            collection: 'users',
+            id: user.id,
+            data: {
+              lastLogin: new Date().toISOString(),
+            },
+            overrideAccess: true,
+          })
+        } catch (error) {
+          console.warn(`Failed to update lastLogin after login [${requestId}]`, error)
+        }
+
+        try {
+          await createUserSecurityEvent({
+            payload: req.payload,
+            userId: user.id,
+            eventType: 'LOGIN_SUCCESS',
+            eventData: {
+              requestId,
+              source: 'users.afterLogin',
+              role: user.role,
+            },
+            triggeredBy: user.id,
+            ipAddress,
+            userAgent,
+          })
+        } catch (error) {
+          console.warn(`Failed to record login success event [${requestId}]`, error)
+        }
+
+        return user
+      },
+    ],
+    afterChange: [
+      async ({ req, doc, data, operation }) => {
+        if (operation !== 'update' || !data || !('password' in data) || !data.password) {
+          return doc
+        }
+
+        const requestId = crypto.randomUUID()
+        const { ipAddress, userAgent } = getRequestMetadata(req)
+        const appBaseUrl = process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com'
+        const appUrl = appBaseUrl.replace(/\/$/, '')
+        const source = inferPasswordChangeSource(req, doc.id)
+
+        let emailSent = false
+        let emailSkipped = false
+        let emailId: string | undefined
+        let emailError: string | undefined
+
+        if (doc.securityAlertsEmailEnabled !== false && doc.email) {
+          const result = await sendResendEmail({
+            to: doc.email,
+            subject: 'Your Grandline Maritime password has been changed',
+            html: `
+              <p>Hello ${doc.firstName || ''},</p>
+              <p>Your Grandline Maritime password has been updated.</p>
+              <p>Source: ${source}</p>
+              <p>IP address: ${ipAddress}</p>
+              <p>Browser / device: ${userAgent}</p>
+              <p>If you did not perform this change, please contact support immediately.</p>
+              <p>You can review your account here: <a href="${appUrl}/portal/account?tab=Preferences">${appUrl}/portal/account?tab=Preferences</a></p>
+            `,
+            tags: [
+              { name: 'category', value: 'security-alert' },
+              { name: 'event', value: 'password-changed' },
+            ],
+            idempotencyKey: `password-changed-${doc.id}-${requestId}`,
+          })
+
+          emailSent = result.sent
+          emailSkipped = result.skipped
+          emailId = result.id
+          emailError = result.error
+
+          if (!result.sent && !result.skipped) {
+            console.error(`Password change security email failed [${requestId}]`, result.error)
+          }
+        } else {
+          emailSkipped = true
+        }
+
+        try {
+          await createUserSecurityEvent({
+            payload: req.payload,
+            userId: doc.id,
+            eventType: 'PASSWORD_CHANGED',
+            eventData: {
+              requestId,
+              source,
+              emailSent,
+              emailSkipped,
+              emailId,
+              emailError,
+              preferenceEnabled: doc.securityAlertsEmailEnabled !== false,
+            },
+            triggeredBy: req.user?.id,
+            ipAddress,
+            userAgent,
+          })
+        } catch (error) {
+          console.warn(`Failed to record password change event [${requestId}]`, error)
+        }
+
+        return doc
       },
     ],
   },
@@ -193,6 +317,14 @@ export const Users: CollectionConfig = {
       defaultValue: true,
       admin: {
         description: 'Allows this user to receive browser web push notifications when they have an active subscription',
+      },
+    },
+    {
+      name: 'securityAlertsEmailEnabled',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Allows this user to receive email alerts for password changes and meaningful failed login attempts',
       },
     },
 

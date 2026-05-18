@@ -375,6 +375,7 @@ export default function AccountPage() {
     security: true
   });
   const [isUpdatingPushPreference, setIsUpdatingPushPreference] = useState(false);
+  const [isUpdatingSecurityPreference, setIsUpdatingSecurityPreference] = useState(false);
   const [pushSupport, setPushSupport] = useState<{
     supported: boolean;
     permission: NotificationPermission | 'unsupported';
@@ -407,6 +408,7 @@ export default function AccountPage() {
           setNotifications((prev) => ({
             ...prev,
             push: currentUser.pushNotificationsEnabled !== false,
+            security: currentUser.securityAlertsEmailEnabled !== false,
           }));
 
           let fetchedSrn = '';
@@ -692,6 +694,51 @@ export default function AccountPage() {
       });
     } finally {
       setIsUpdatingPushPreference(false);
+    }
+  };
+
+  const handleSecurityAlertsToggle = async () => {
+    if (!user || isUpdatingSecurityPreference) return;
+
+    const nextEnabled = !notifications.security;
+
+    setIsUpdatingSecurityPreference(true);
+    setPreferenceMessage(null);
+
+    try {
+      const result = await updateUserProfile(user.id, {
+        securityAlertsEmailEnabled: nextEnabled,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update security alert preference');
+      }
+
+      setNotifications((prev) => ({
+        ...prev,
+        security: nextEnabled,
+      }));
+      setUser((prev) => prev ? {
+        ...prev,
+        securityAlertsEmailEnabled: nextEnabled,
+      } : prev);
+      setPreferenceMessage({
+        type: 'success',
+        text: nextEnabled
+          ? 'Security alert emails are enabled.'
+          : 'Security alert emails are disabled.',
+      });
+    } catch (error: any) {
+      setNotifications((prev) => ({
+        ...prev,
+        security: user.securityAlertsEmailEnabled !== false,
+      }));
+      setPreferenceMessage({
+        type: 'error',
+        text: error?.message || 'Failed to update security alert preference',
+      });
+    } finally {
+      setIsUpdatingSecurityPreference(false);
     }
   };
 
@@ -1466,11 +1513,19 @@ export default function AccountPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-gray-100">Security Alerts</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Login attempts and password changes</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Email alerts for meaningful failed login attempts and password changes.
+                    </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={notifications.security} disabled />
-                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 opacity-50"></div>
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={notifications.security}
+                      disabled={isUpdatingSecurityPreference}
+                      onChange={handleSecurityAlertsToggle}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
               </div>

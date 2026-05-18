@@ -98,6 +98,7 @@ import * as migration_20260508_063949_add_phone_to_users from './20260508_063949
 import * as migration_20260508_151000_fix_trigger_beginner_to_standard from './20260508_151000_fix_trigger_beginner_to_standard';
 import * as migration_20260512_120000_enforce_unique_emergency_contact_per_user from './20260512_120000_enforce_unique_emergency_contact_per_user';
 import * as migration_20260516_045852_add_web_push_notifications from './20260516_045852_add_web_push_notifications';
+import * as migration_20260518_120000_add_security_alert_email_preference from './20260518_120000_add_security_alert_email_preference';
 
 export const migrations = [
   {
@@ -599,5 +600,10 @@ export const migrations = [
     up: migration_20260516_045852_add_web_push_notifications.up,
     down: migration_20260516_045852_add_web_push_notifications.down,
     name: '20260516_045852_add_web_push_notifications'
+  },
+  {
+    up: migration_20260518_120000_add_security_alert_email_preference.up,
+    down: migration_20260518_120000_add_security_alert_email_preference.down,
+    name: '20260518_120000_add_security_alert_email_preference'
   },
 ];
