@@ -7,6 +7,46 @@ import { getRequestMetadata, inferPasswordChangeSource } from '../utils/request-
 import { sendResendEmail } from '../utils/resend-email'
 import { createUserSecurityEvent } from '../utils/user-security-events'
 
+const PASSWORD_CHANGE_CONTEXT_KEY = 'userPasswordChangeSecurityAlert'
+
+interface PasswordChangeSecurityContext {
+  requestId: string
+  source: string
+  ipAddress: string
+  userAgent: string
+  targetUserId: string
+}
+
+function setPasswordChangeSecurityContext(
+  req: { context?: Record<string, unknown> | null },
+  value: PasswordChangeSecurityContext,
+): void {
+  const context = (req.context || {}) as Record<string, unknown>
+  context[PASSWORD_CHANGE_CONTEXT_KEY] = value
+  req.context = context
+}
+
+function consumePasswordChangeSecurityContext(
+  req: { context?: Record<string, unknown> | null },
+  targetUserId: string | number,
+): PasswordChangeSecurityContext | null {
+  const context = req.context as Record<string, unknown> | null | undefined
+  const stored = context?.[PASSWORD_CHANGE_CONTEXT_KEY]
+
+  if (!stored || typeof stored !== 'object') {
+    return null
+  }
+
+  const passwordChangeContext = stored as PasswordChangeSecurityContext
+  delete context?.[PASSWORD_CHANGE_CONTEXT_KEY]
+
+  if (passwordChangeContext.targetUserId !== String(targetUserId)) {
+    return null
+  }
+
+  return passwordChangeContext
+}
+
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
@@ -44,6 +84,32 @@ export const Users: CollectionConfig = {
     beforeDelete: [
       async ({ id }) => {
         console.log(`🗑️ Attempting to delete user ${id}`);
+      },
+    ],
+    beforeChange: [
+      async ({ req, data, operation, originalDoc }) => {
+        if (operation !== 'update' || !data || typeof data.password !== 'string' || !data.password) {
+          return data
+        }
+
+        const targetUserId = data.id || originalDoc?.id
+
+        if (!targetUserId) {
+          return data
+        }
+
+        const requestId = crypto.randomUUID()
+        const { ipAddress, userAgent } = getRequestMetadata(req)
+
+        setPasswordChangeSecurityContext(req, {
+          requestId,
+          source: inferPasswordChangeSource(req, targetUserId),
+          ipAddress,
+          userAgent,
+          targetUserId: String(targetUserId),
+        })
+
+        return data
       },
     ],
     afterLogin: [
@@ -92,16 +158,20 @@ export const Users: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ req, doc, data, operation }) => {
-        if (operation !== 'update' || !data || !('password' in data) || !data.password) {
+      async ({ req, doc, operation }) => {
+        if (operation !== 'update') {
           return doc
         }
 
-        const requestId = crypto.randomUUID()
-        const { ipAddress, userAgent } = getRequestMetadata(req)
+        const passwordChangeContext = consumePasswordChangeSecurityContext(req, doc.id)
+
+        if (!passwordChangeContext) {
+          return doc
+        }
+
+        const { requestId, source, ipAddress, userAgent } = passwordChangeContext
         const appBaseUrl = process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com'
         const appUrl = appBaseUrl.replace(/\/$/, '')
-        const source = inferPasswordChangeSource(req, doc.id)
 
         let emailSent = false
         let emailSkipped = false
