@@ -54,7 +54,7 @@ export async function sendResendEmail({
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
-      replyTo: replyTo || fallbackReplyTo,
+      reply_to: replyTo || fallbackReplyTo,
       tags,
     }),
   })

@@ -9,6 +9,7 @@ import crypto from 'crypto'
 import { authLogger, createAuthLogContext } from './utils/auth-logger'
 import type { PayloadRequest, PayloadHandler } from 'payload'
 import sharp from 'sharp'
+import { runInBackground } from './utils/background-task'
 import { getRequestMetadata } from './utils/request-metadata'
 import { sendResendEmail } from './utils/resend-email'
 import { createUserSecurityEvent } from './utils/user-security-events'
@@ -287,61 +288,70 @@ export default buildConfig({
               const becameLocked = !existingUser?.lockUntil && Boolean(refreshedUser?.lockUntil)
               const reachedThreshold = previousAttempts < 3 && currentAttempts >= 3
 
-              let emailSent = false
-              let emailSkipped = false
-              let emailId: string | undefined
-              let emailError: string | undefined
+              const eventPayload = req.payload
+              const refreshedUserId = refreshedUser.id
+              const refreshedUserEmail = refreshedUser.email
+              const refreshedUserFirstName = refreshedUser.firstName || ''
+              const lockUntil = refreshedUser.lockUntil || null
+              const preferenceEnabled = refreshedUser.securityAlertsEmailEnabled !== false
 
-              if (refreshedUser.securityAlertsEmailEnabled !== false && (becameLocked || reachedThreshold)) {
-                const result = await sendResendEmail({
-                  to: refreshedUser.email,
-                  subject: becameLocked
-                    ? 'Your Grandline Maritime account has been locked after failed sign-in attempts'
-                    : 'Failed sign-in attempts detected on your Grandline Maritime account',
-                  html: `
-                    <p>Hello ${refreshedUser.firstName || ''},</p>
-                    <p>We detected failed sign-in attempts on your Grandline Maritime account.</p>
-                    <p>Failed attempts: ${currentAttempts}</p>
-                    <p>IP address: ${ipAddress}</p>
-                    <p>Browser / device: ${userAgent}</p>
-                    ${refreshedUser.lockUntil ? `<p>Account locked until: ${new Date(refreshedUser.lockUntil).toISOString()}</p>` : ''}
-                    <p>If this was not you, we recommend changing your password and reviewing your account security settings.</p>
-                  `,
-                  tags: [
-                    { name: 'category', value: 'security-alert' },
-                    { name: 'event', value: 'login-failed' },
-                  ],
-                  idempotencyKey: `login-failed-${refreshedUser.id}-${currentAttempts}-${refreshedUser.lockUntil || 'no-lock'}`,
+              runInBackground(`Failed login security alert [${requestId}]`, async () => {
+                let emailSent = false
+                let emailSkipped = false
+                let emailId: string | undefined
+                let emailError: string | undefined
+
+                if (preferenceEnabled && (becameLocked || reachedThreshold)) {
+                  const result = await sendResendEmail({
+                    to: refreshedUserEmail,
+                    subject: becameLocked
+                      ? 'Your Grandline Maritime account has been locked after failed sign-in attempts'
+                      : 'Failed sign-in attempts detected on your Grandline Maritime account',
+                    html: `
+                      <p>Hello ${refreshedUserFirstName},</p>
+                      <p>We detected failed sign-in attempts on your Grandline Maritime account.</p>
+                      <p>Failed attempts: ${currentAttempts}</p>
+                      <p>IP address: ${ipAddress}</p>
+                      <p>Browser / device: ${userAgent}</p>
+                      ${lockUntil ? `<p>Account locked until: ${new Date(lockUntil).toISOString()}</p>` : ''}
+                      <p>If this was not you, we recommend changing your password and reviewing your account security settings.</p>
+                    `,
+                    tags: [
+                      { name: 'category', value: 'security-alert' },
+                      { name: 'event', value: 'login-failed' },
+                    ],
+                    idempotencyKey: `login-failed-${refreshedUserId}-${currentAttempts}-${lockUntil || 'no-lock'}`,
+                  })
+
+                  emailSent = result.sent
+                  emailSkipped = result.skipped
+                  emailId = result.id
+                  emailError = result.error
+                } else {
+                  emailSkipped = true
+                }
+
+                await createUserSecurityEvent({
+                  payload: eventPayload,
+                  userId: refreshedUserId,
+                  eventType: 'LOGIN_FAILED',
+                  eventData: {
+                    requestId,
+                    source: 'portal-login',
+                    previousAttempts,
+                    currentAttempts,
+                    becameLocked,
+                    reachedThreshold,
+                    lockUntil,
+                    emailSent,
+                    emailSkipped,
+                    emailId,
+                    emailError,
+                    preferenceEnabled,
+                  },
+                  ipAddress,
+                  userAgent,
                 })
-
-                emailSent = result.sent
-                emailSkipped = result.skipped
-                emailId = result.id
-                emailError = result.error
-              } else {
-                emailSkipped = true
-              }
-
-              await createUserSecurityEvent({
-                payload: req.payload,
-                userId: refreshedUser.id,
-                eventType: 'LOGIN_FAILED',
-                eventData: {
-                  requestId,
-                  source: 'portal-login',
-                  previousAttempts,
-                  currentAttempts,
-                  becameLocked,
-                  reachedThreshold,
-                  lockUntil: refreshedUser.lockUntil || null,
-                  emailSent,
-                  emailSkipped,
-                  emailId,
-                  emailError,
-                  preferenceEnabled: refreshedUser.securityAlertsEmailEnabled !== false,
-                },
-                ipAddress,
-                userAgent,
               })
             }
 

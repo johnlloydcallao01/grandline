@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { adminOnly } from '../access'
 import { authLogger, createAuthLogContext } from '../utils/auth-logger'
+import { runInBackground } from '../utils/background-task'
 import { getRequestMetadata, inferPasswordChangeSource } from '../utils/request-metadata'
 import { sendResendEmail } from '../utils/resend-email'
 import { createUserSecurityEvent } from '../utils/user-security-events'
@@ -173,64 +174,73 @@ export const Users: CollectionConfig = {
         const appBaseUrl = process.env.WEB_PROD_URL || 'https://app.grandlinemaritime.com'
         const appUrl = appBaseUrl.replace(/\/$/, '')
 
-        let emailSent = false
-        let emailSkipped = false
-        let emailId: string | undefined
-        let emailError: string | undefined
+        const eventPayload = req.payload
+        const triggeredBy = req.user?.id
+        const preferenceEnabled = doc.securityAlertsEmailEnabled !== false
+        const docId = doc.id
+        const docEmail = doc.email
+        const docFirstName = doc.firstName || ''
 
-        if (doc.securityAlertsEmailEnabled !== false && doc.email) {
-          const result = await sendResendEmail({
-            to: doc.email,
-            subject: 'Your Grandline Maritime password has been changed',
-            html: `
-              <p>Hello ${doc.firstName || ''},</p>
-              <p>Your Grandline Maritime password has been updated.</p>
-              <p>Source: ${source}</p>
-              <p>IP address: ${ipAddress}</p>
-              <p>Browser / device: ${userAgent}</p>
-              <p>If you did not perform this change, please contact support immediately.</p>
-              <p>You can review your account here: <a href="${appUrl}/portal/account?tab=Preferences">${appUrl}/portal/account?tab=Preferences</a></p>
-            `,
-            tags: [
-              { name: 'category', value: 'security-alert' },
-              { name: 'event', value: 'password-changed' },
-            ],
-            idempotencyKey: `password-changed-${doc.id}-${requestId}`,
-          })
+        runInBackground(`Password change security alert [${requestId}]`, async () => {
+          let emailSent = false
+          let emailSkipped = false
+          let emailId: string | undefined
+          let emailError: string | undefined
 
-          emailSent = result.sent
-          emailSkipped = result.skipped
-          emailId = result.id
-          emailError = result.error
+          if (preferenceEnabled && docEmail) {
+            const result = await sendResendEmail({
+              to: docEmail,
+              subject: 'Your Grandline Maritime password has been changed',
+              html: `
+                <p>Hello ${docFirstName},</p>
+                <p>Your Grandline Maritime password has been updated.</p>
+                <p>Source: ${source}</p>
+                <p>IP address: ${ipAddress}</p>
+                <p>Browser / device: ${userAgent}</p>
+                <p>If you did not perform this change, please contact support immediately.</p>
+                <p>You can review your account here: <a href="${appUrl}/portal/account?tab=Preferences">${appUrl}/portal/account?tab=Preferences</a></p>
+              `,
+              tags: [
+                { name: 'category', value: 'security-alert' },
+                { name: 'event', value: 'password-changed' },
+              ],
+              idempotencyKey: `password-changed-${docId}-${requestId}`,
+            })
 
-          if (!result.sent && !result.skipped) {
-            console.error(`Password change security email failed [${requestId}]`, result.error)
+            emailSent = result.sent
+            emailSkipped = result.skipped
+            emailId = result.id
+            emailError = result.error
+
+            if (!result.sent && !result.skipped) {
+              console.error(`Password change security email failed [${requestId}]`, result.error)
+            }
+          } else {
+            emailSkipped = true
           }
-        } else {
-          emailSkipped = true
-        }
 
-        try {
-          await createUserSecurityEvent({
-            payload: req.payload,
-            userId: doc.id,
-            eventType: 'PASSWORD_CHANGED',
-            eventData: {
-              requestId,
-              source,
-              emailSent,
-              emailSkipped,
-              emailId,
-              emailError,
-              preferenceEnabled: doc.securityAlertsEmailEnabled !== false,
-            },
-            triggeredBy: req.user?.id,
-            ipAddress,
-            userAgent,
-          })
-        } catch (error) {
-          console.warn(`Failed to record password change event [${requestId}]`, error)
-        }
+          try {
+            await createUserSecurityEvent({
+              payload: eventPayload,
+              userId: docId,
+              eventType: 'PASSWORD_CHANGED',
+              eventData: {
+                requestId,
+                source,
+                emailSent,
+                emailSkipped,
+                emailId,
+                emailError,
+                preferenceEnabled,
+              },
+              triggeredBy,
+              ipAddress,
+              userAgent,
+            })
+          } catch (error) {
+            console.warn(`Failed to record password change event [${requestId}]`, error)
+          }
+        })
 
         return doc
       },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -50,6 +50,42 @@ type AccountEnrollment = {
     } | null;
   } | null;
 };
+
+type ProfileFormState = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  nameExtension: string;
+  username: string;
+  email: string;
+  bio: string;
+  gender: string;
+  civilStatus: string;
+  nationality: string;
+  srn: string;
+  birthDate: string;
+  placeOfBirth: string;
+  completeAddress: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  couponCode: string;
+  emergencyFirstName: string;
+  emergencyMiddleName: string;
+  emergencyLastName: string;
+  emergencyContactNumber: string;
+  emergencyRelationship: string;
+  emergencyCompleteAddress: string;
+};
+
+type ProfileFormSnapshot = Omit<ProfileFormState, 'password' | 'confirmPassword'>;
+
+function createProfileSnapshot(profile: ProfileFormState): ProfileFormSnapshot {
+  const { password, confirmPassword, ...snapshot } = profile;
+  void password;
+  void confirmPassword;
+  return snapshot;
+}
 
 function getMediaUrl(media?: EnrollmentMedia | null): string {
   if (!media) return COURSE_FALLBACK_IMAGE;
@@ -368,6 +404,7 @@ export default function AccountPage() {
     emergencyRelationship: '',
     emergencyCompleteAddress: ''
   });
+  const profileSnapshotRef = useRef<ProfileFormSnapshot | null>(null);
 
   const [notifications, setNotifications] = useState({
     push: true,
@@ -436,7 +473,7 @@ export default function AccountPage() {
             fetchedEmergencyCompleteAddress = emergencyRes.emergencyContact.completeAddress || '';
           }
 
-          setProfileData({
+          const nextProfileData: ProfileFormState = {
             firstName: currentUser.firstName || '',
             middleName: currentUser.middleName || '',
             lastName: currentUser.lastName || '',
@@ -461,7 +498,10 @@ export default function AccountPage() {
             emergencyContactNumber: fetchedEmergencyContactNumber,
             emergencyRelationship: fetchedEmergencyRelationship,
             emergencyCompleteAddress: fetchedEmergencyCompleteAddress
-          });
+          };
+
+          setProfileData(nextProfileData);
+          profileSnapshotRef.current = createProfileSnapshot(nextProfileData);
 
           try {
             const pushState = await getWebPushState();
@@ -562,6 +602,43 @@ export default function AccountPage() {
         }
       }
 
+      const currentSnapshot = createProfileSnapshot(profileData);
+      const previousSnapshot = profileSnapshotRef.current;
+      const hasPasswordChange = Boolean(profileData.password);
+      const hasUserFieldChanges = !previousSnapshot || (
+        currentSnapshot.firstName !== previousSnapshot.firstName ||
+        currentSnapshot.middleName !== previousSnapshot.middleName ||
+        currentSnapshot.lastName !== previousSnapshot.lastName ||
+        currentSnapshot.nameExtension !== previousSnapshot.nameExtension ||
+        currentSnapshot.username !== previousSnapshot.username ||
+        currentSnapshot.email !== previousSnapshot.email ||
+        currentSnapshot.bio !== previousSnapshot.bio ||
+        currentSnapshot.gender !== previousSnapshot.gender ||
+        currentSnapshot.civilStatus !== previousSnapshot.civilStatus ||
+        currentSnapshot.nationality !== previousSnapshot.nationality ||
+        currentSnapshot.birthDate !== previousSnapshot.birthDate ||
+        currentSnapshot.placeOfBirth !== previousSnapshot.placeOfBirth ||
+        currentSnapshot.completeAddress !== previousSnapshot.completeAddress ||
+        currentSnapshot.phone !== previousSnapshot.phone
+      );
+      const hasTraineeChanges = Boolean(traineeId) && (!previousSnapshot || (
+        currentSnapshot.srn !== previousSnapshot.srn ||
+        currentSnapshot.couponCode !== previousSnapshot.couponCode
+      ));
+      const hasEmergencyChanges = !previousSnapshot || (
+        currentSnapshot.emergencyFirstName !== previousSnapshot.emergencyFirstName ||
+        currentSnapshot.emergencyMiddleName !== previousSnapshot.emergencyMiddleName ||
+        currentSnapshot.emergencyLastName !== previousSnapshot.emergencyLastName ||
+        currentSnapshot.emergencyContactNumber !== previousSnapshot.emergencyContactNumber ||
+        currentSnapshot.emergencyRelationship !== previousSnapshot.emergencyRelationship ||
+        currentSnapshot.emergencyCompleteAddress !== previousSnapshot.emergencyCompleteAddress
+      );
+
+      if (!hasPasswordChange && !hasUserFieldChanges && !hasTraineeChanges && !hasEmergencyChanges) {
+        setSaveMessage({ type: 'success', text: 'No changes to save.' });
+        return;
+      }
+
       const updateData: any = {
         firstName: profileData.firstName,
         middleName: profileData.middleName,
@@ -583,42 +660,58 @@ export default function AccountPage() {
         updateData.password = profileData.password;
       }
 
-      const result = await updateUserProfile(user.id, updateData);
+      let updatedUser = user;
 
-      if (result.success && result.user) {
-        setUser(result.user);
+      if (hasPasswordChange || hasUserFieldChanges) {
+        const result = await updateUserProfile(user.id, updateData);
 
-        if (traineeId && (profileData.srn !== undefined || profileData.couponCode !== undefined)) {
-          const traineeRes = await updateTraineeRecord(traineeId, {
-            srn: profileData.srn,
-            couponCode: profileData.couponCode
-          });
-          if (!traineeRes.success) {
-            setSaveMessage({ type: 'error', text: traineeRes.error || 'Profile updated, but failed to update trainee records' });
-            return;
-          }
+        if (!result.success || !result.user) {
+          setSaveMessage({ type: 'error', text: result.error || 'Failed to update profile' });
+          return;
         }
 
-        const emergencyRes = await upsertEmergencyContactRecord(user.id, {
+        updatedUser = result.user;
+        setUser(result.user);
+      }
+
+      const followUpUpdates: Array<Promise<{ success: boolean; error?: string }>> = [];
+
+      if (hasTraineeChanges && traineeId) {
+        followUpUpdates.push(updateTraineeRecord(traineeId, {
+          srn: profileData.srn,
+          couponCode: profileData.couponCode
+        }));
+      }
+
+      if (hasEmergencyChanges) {
+        followUpUpdates.push(upsertEmergencyContactRecord(user.id, {
           firstName: profileData.emergencyFirstName,
           middleName: profileData.emergencyMiddleName || null,
           lastName: profileData.emergencyLastName,
           contactNumber: profileData.emergencyContactNumber,
           relationship: profileData.emergencyRelationship,
           completeAddress: profileData.emergencyCompleteAddress,
-        });
-        if (!emergencyRes.success) {
-          setSaveMessage({ type: 'error', text: emergencyRes.error || 'Profile updated, but failed to update emergency contact' });
-          return;
-        }
-
-        setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
-
-        // Clear passwords from state after successful save
-        setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
-      } else {
-        setSaveMessage({ type: 'error', text: result.error || 'Failed to update profile' });
+        }));
       }
+
+      const followUpResults = await Promise.all(followUpUpdates);
+      const failedFollowUp = followUpResults.find((result) => !result.success);
+
+      if (failedFollowUp) {
+        setSaveMessage({ type: 'error', text: failedFollowUp.error || 'Failed to update related profile records' });
+        return;
+      }
+
+      const nextProfileData: ProfileFormState = {
+        ...profileData,
+        password: '',
+        confirmPassword: '',
+      };
+
+      setProfileData(nextProfileData);
+      profileSnapshotRef.current = createProfileSnapshot(nextProfileData);
+      setUser(updatedUser);
+      setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error: any) {
       setSaveMessage({ type: 'error', text: error.message || 'An unexpected error occurred' });
     } finally {
@@ -958,7 +1051,7 @@ export default function AccountPage() {
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-colors"
                 onClick={() => {
                   if (user) {
-                    setProfileData({
+                    const nextProfileData: ProfileFormState = {
                       ...profileData,
                       firstName: user.firstName || '',
                       middleName: user.middleName || '',
@@ -970,7 +1063,10 @@ export default function AccountPage() {
                       gender: user.gender || '',
                       civilStatus: user.civilStatus || '',
                       nationality: user.nationality || ''
-                    });
+                    };
+
+                    setProfileData(nextProfileData);
+                    profileSnapshotRef.current = createProfileSnapshot(nextProfileData);
                     setSaveMessage(null);
                   }
                 }}
@@ -1346,7 +1442,7 @@ export default function AccountPage() {
                       fetchedEmergencyCompleteAddress = emergencyRes.emergencyContact.completeAddress || '';
                     }
 
-                    setProfileData({
+                    const nextProfileData: ProfileFormState = {
                       ...profileData,
                       firstName: user.firstName || '',
                       middleName: user.middleName || '',
@@ -1371,7 +1467,10 @@ export default function AccountPage() {
                       emergencyContactNumber: fetchedEmergencyContactNumber,
                       emergencyRelationship: fetchedEmergencyRelationship,
                       emergencyCompleteAddress: fetchedEmergencyCompleteAddress
-                    });
+                    };
+
+                    setProfileData(nextProfileData);
+                    profileSnapshotRef.current = createProfileSnapshot(nextProfileData);
 
                     setSaveMessage(null);
                   }
