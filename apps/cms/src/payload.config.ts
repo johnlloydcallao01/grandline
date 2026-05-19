@@ -25,6 +25,8 @@ import { Posts } from './collections/Posts'
 import { PostCategories } from './collections/PostCategories'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
+import { CouponCodes } from './collections/CouponCodes'
+import { CouponRedemptions } from './collections/CouponRedemptions'
 import { CourseEnrollments } from './collections/CourseEnrollments'
 import { CourseModules } from './collections/CourseModules'
 import { CourseLessons } from './collections/CourseLessons'
@@ -90,6 +92,8 @@ export default buildConfig({
     // Learning Management System
     Courses,
     CourseCategories,
+    CouponCodes,
+    CouponRedemptions,
     CourseEnrollments,
     Certificates,
     CertificateTemplates,

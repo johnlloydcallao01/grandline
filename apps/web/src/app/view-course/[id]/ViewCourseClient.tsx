@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { AuthorAvatar } from './AuthorAvatar'
 import { CourseNavigationCarousel } from '@/components/CourseNavigationCarousel'
 import { recordRecentlyViewed } from '@/lib/recentlyViewed'
@@ -52,6 +53,7 @@ function CourseOverviewCard({
 }) {
   const { wishlistMap, toggleWishlist } = useWishlist()
   const { user, isAuthenticated } = useUser()
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
 
@@ -83,7 +85,6 @@ function CourseOverviewCard({
     return 'Enroll Now'
   })
   const [isLoadingEnrollment, setIsLoadingEnrollment] = useState(false)
-  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false)
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false)
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean
@@ -163,55 +164,8 @@ function CourseOverviewCard({
   const handleRequestEnrollment = async () => {
     if (!user?.id || !course?.id) return
 
-    setIsSubmittingRequest(true)
-    try {
-      const token = localStorage.getItem('grandline_auth_token_trainee')
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      if (token) {
-        headers.Authorization = `users JWT ${token}`
-      }
-
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
-
-      const res = await fetch(`${apiBase}/lms/enrollment-requests`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          userId: user.id,
-          courseId: course.id,
-        }),
-      })
-
-      if (res.ok) {
-        setShowModal(false)
-        setFeedbackModal({
-          isOpen: true,
-          type: 'success',
-          title: 'Enrollment Request Sent',
-          message: 'We have received your request. Our team will review it and contact you shortly via email.',
-        })
-      } else {
-        setFeedbackModal({
-          isOpen: true,
-          type: 'error',
-          title: 'Request Failed',
-          message: 'We couldn\'t process your request at this time. Please try again later or contact support.',
-        })
-      }
-    } catch (error) {
-      console.error('Error sending enrollment request:', error)
-      setFeedbackModal({
-        isOpen: true,
-        type: 'error',
-        title: 'An Error Occurred',
-        message: 'Something went wrong. Please check your internet connection and try again.',
-      })
-    } finally {
-      setIsSubmittingRequest(false)
-    }
+    setShowModal(false)
+    router.push(`/view-course/${course.id}/request-enrollment` as any)
   }
 
   const handlePrimaryAction = () => {
@@ -425,9 +379,8 @@ function CourseOverviewCard({
                       <button
                         className="w-full bg-[#201a7c] dark:bg-[#3028a3] hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all active:scale-[0.98]"
                         onClick={handleRequestEnrollment}
-                        disabled={isSubmittingRequest}
                       >
-                        {isSubmittingRequest ? 'Requesting...' : 'Request Enrollment'}
+                        Request Enrollment
                       </button>
                       <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
                         By requesting enrollment, you agree to our Terms of Service and Privacy Policy.

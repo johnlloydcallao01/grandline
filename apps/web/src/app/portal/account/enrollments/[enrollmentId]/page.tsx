@@ -29,6 +29,11 @@ type EnrollmentDetail = {
   paymentStatus?: string | null;
   accessExpiresAt?: string | null;
   amountPaid?: number | null;
+  couponCode?: string | null;
+  couponDiscountAmount?: number | null;
+  listPriceSnapshot?: number | null;
+  finalPriceSnapshot?: number | null;
+  pricingBreakdown?: Record<string, unknown> | null;
   progressPercentage?: number | null;
   lastAccessedAt?: string | null;
   completedAt?: string | null;
@@ -242,6 +247,11 @@ export default function EnrollmentDetailsPage() {
     return Object.entries(enrollment.metadata);
   }, [enrollment?.metadata]);
 
+  const pricingBreakdownEntries = useMemo(() => {
+    if (!enrollment?.pricingBreakdown || typeof enrollment.pricingBreakdown !== 'object') return [];
+    return Object.entries(enrollment.pricingBreakdown);
+  }, [enrollment?.pricingBreakdown]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--background)] px-[10px] py-6">
@@ -390,6 +400,22 @@ export default function EnrollmentDetailsPage() {
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatCurrency(enrollment.amountPaid)}</p>
                 </div>
                 <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Coupon Code Snapshot</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{enrollment.couponCode || 'Not applied'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Coupon Discount Snapshot</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatCurrency(enrollment.couponDiscountAmount)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Original Price Snapshot</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatCurrency(enrollment.listPriceSnapshot)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Final Price Snapshot</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatCurrency(enrollment.finalPriceSnapshot)}</p>
+                </div>
+                <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Course Price</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatCurrency(course?.price)}</p>
                 </div>
@@ -406,6 +432,26 @@ export default function EnrollmentDetailsPage() {
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{getRelationshipName(enrollment.enrolledBy)}</p>
                 </div>
               </div>
+
+              {pricingBreakdownEntries.length > 0 ? (
+                <div className="mt-6 rounded-xl border border-[var(--card-border)] bg-gray-50 px-4 py-4 dark:bg-gray-800/40">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pricing Breakdown Snapshot</h3>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {pricingBreakdownEntries.map(([key, value]) => (
+                      <div key={key}>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                          {formatStatusLabel(key)}
+                        </p>
+                        <p className="mt-1 break-words text-sm text-gray-900 dark:text-gray-100">
+                          {typeof value === 'number'
+                            ? formatCurrency(value)
+                            : renderMetadataValue(value)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-background)] p-6 shadow-sm">

@@ -246,18 +246,26 @@ function AccountFormSkeleton({ dense = false }: { dense?: boolean }) {
 function AccountTabOverviewSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
-      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
           <div className="space-y-3">
-            <div className="h-6 w-44 rounded bg-gray-200 dark:bg-gray-800"></div>
-            <div className="h-4 w-80 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
-            <div className="h-3 w-28 rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className="h-6 w-36 rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className="h-4 w-72 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+            <div className="h-10 w-full rounded-lg bg-gray-200 dark:bg-gray-800"></div>
           </div>
-          <div className="h-10 w-full rounded-lg bg-gray-200 dark:bg-gray-800 lg:w-80"></div>
         </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div className="h-6 w-44 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-4 w-80 max-w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="h-3 w-28 rounded bg-gray-200 dark:bg-gray-800"></div>
+            </div>
+            <div className="h-10 w-full rounded-lg bg-gray-200 dark:bg-gray-800 lg:w-80"></div>
+          </div>
+        </div>
+
         {Array.from({ length: 2 }).map((_, index) => (
           <div key={index} className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
             <div className="space-y-4">
@@ -424,6 +432,9 @@ export default function AccountPage() {
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
   const [accountEnrollments, setAccountEnrollments] = useState<AccountEnrollment[]>([]);
   const [isLoadingAccountEnrollments, setIsLoadingAccountEnrollments] = useState(true);
+  const [isEditingAccountCouponCode, setIsEditingAccountCouponCode] = useState(false);
+  const [accountCouponCodeDraft, setAccountCouponCodeDraft] = useState('');
+  const [accountCouponSaveMessage, setAccountCouponSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Sync state when URL changes (e.g. user hits back button)
   useEffect(() => {
@@ -714,6 +725,54 @@ export default function AccountPage() {
       setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error: any) {
       setSaveMessage({ type: 'error', text: error.message || 'An unexpected error occurred' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAccountCouponCode = async () => {
+    if (!traineeId) {
+      setAccountCouponSaveMessage({ type: 'error', text: 'Coupon code cannot be updated right now.' });
+      return;
+    }
+
+    const normalizedCouponCode = accountCouponCodeDraft.toUpperCase();
+
+    if (normalizedCouponCode === profileData.couponCode) {
+      setAccountCouponSaveMessage({ type: 'success', text: 'No changes to save.' });
+      setIsEditingAccountCouponCode(false);
+      return;
+    }
+
+    setIsSaving(true);
+    setAccountCouponSaveMessage(null);
+    setSaveMessage(null);
+
+    try {
+      const result = await updateTraineeRecord(traineeId, {
+        srn: profileData.srn,
+        couponCode: normalizedCouponCode,
+      });
+
+      if (!result.success) {
+        setAccountCouponSaveMessage({ type: 'error', text: result.error || 'Failed to update coupon code' });
+        return;
+      }
+
+      const nextProfileData: ProfileFormState = {
+        ...profileData,
+        couponCode: normalizedCouponCode,
+      };
+
+      setProfileData(nextProfileData);
+      profileSnapshotRef.current = profileSnapshotRef.current
+        ? { ...profileSnapshotRef.current, couponCode: normalizedCouponCode }
+        : createProfileSnapshot(nextProfileData);
+      setAccountCouponCodeDraft(normalizedCouponCode);
+      setIsEditingAccountCouponCode(false);
+      setAccountCouponSaveMessage({ type: 'success', text: 'Coupon code updated successfully!' });
+    } catch (error: any) {
+      setAccountCouponSaveMessage({ type: 'error', text: error.message || 'An unexpected error occurred' });
     } finally {
       setIsSaving(false);
     }
@@ -1638,76 +1697,156 @@ export default function AccountPage() {
               <AccountTabOverviewSkeleton />
             ) : (
               <>
-                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Enrolled Courses</h2>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        All of your enrolled courses are shown here in one list, regardless of status.
-                      </p>
-                      <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                        {accountEnrollments.length} total enrollments
-                      </p>
-                    </div>
-
-                    <div className="relative w-full lg:w-80">
-                      <input
-                        type="text"
-                        placeholder="Search enrolled courses..."
-                        value={accountSearchQuery}
-                        onChange={(e) => setAccountSearchQuery(e.target.value)}
-                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] py-2 pl-10 pr-4 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:ring-2 focus:ring-[#201a7c] dark:text-gray-100 dark:placeholder:text-gray-400"
-                      />
-                      <i className="fa fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500"></i>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      Total Amount Paid
-                    </p>
-                    <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                          {formatCurrency(totalAmountPaid)}
-                        </p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Coupon Code</h2>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          Combined `Amount Paid` across all enrolled courses in your account.
+                          Update the coupon code associated with your account.
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Based on {accountEnrollments.length} enrollment{accountEnrollments.length === 1 ? '' : 's'}
-                        </div>
-                        <Link
-                          href={{ pathname: '/portal/account/payments' }}
-                          className="inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm font-medium text-[#201a7c] transition-colors hover:bg-gray-50 dark:text-[#7b75ef] dark:hover:bg-gray-800"
+                      {!isEditingAccountCouponCode ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountCouponCodeDraft(profileData.couponCode);
+                            setAccountCouponSaveMessage(null);
+                            setIsEditingAccountCouponCode(true);
+                          }}
+                          className="inline-flex items-center justify-center self-start rounded-lg border border-[var(--card-border)] px-3 py-2 text-sm font-medium text-[#201a7c] transition-colors hover:bg-gray-50 dark:text-[#7b75ef] dark:hover:bg-gray-800"
+                          aria-label="Edit coupon code"
+                          title="Edit"
                         >
-                          Breakdown
-                        </Link>
+                          <i className="fa fa-pencil text-sm"></i>
+                        </button>
+                      ) : null}
+                    </div>
+                    {accountCouponSaveMessage && (
+                      <div className={`mt-4 rounded-xl border p-4 text-sm ${accountCouponSaveMessage.type === 'success'
+                        ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300'
+                        : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'
+                        }`}>
+                        {accountCouponSaveMessage.text}
+                      </div>
+                    )}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Coupon Code</label>
+                      {isEditingAccountCouponCode ? (
+                        <>
+                          <input
+                            type="text"
+                            name="couponCode"
+                            value={accountCouponCodeDraft}
+                            onChange={(e) => {
+                              setAccountCouponCodeDraft(e.target.value.toUpperCase());
+                              setAccountCouponSaveMessage(null);
+                            }}
+                            placeholder="Enter a valid coupon code"
+                            className="w-full px-4 py-2 bg-[var(--background)] text-gray-900 dark:text-gray-100 border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-[#201a7c] focus:border-transparent uppercase"
+                          />
+                          <div className="mt-4 flex justify-end gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAccountCouponCodeDraft(profileData.couponCode);
+                                setAccountCouponSaveMessage(null);
+                                setIsEditingAccountCouponCode(false);
+                              }}
+                              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isSaving}
+                              onClick={handleSaveAccountCouponCode}
+                              className="px-4 py-2 bg-[#201a7c] dark:bg-[#3028a3] text-white rounded-lg hover:bg-[#1a1563] dark:hover:bg-[#3b32c4] font-medium transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
+                            >
+                              {isSaving ? <i className="fa fa-spinner fa-spin"></i> : null}
+                              {isSaving ? 'Saving...' : 'Save'}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="min-h-[42px] rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-4 py-2 text-gray-900 dark:text-gray-100">
+                          {profileData.couponCode || 'No coupon code added'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                      <div>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Enrolled Courses</h2>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          All of your enrolled courses are shown here in one list, regardless of status.
+                        </p>
+                        <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                          {accountEnrollments.length} total enrollments
+                        </p>
+                      </div>
+
+                      <div className="relative w-full lg:w-80">
+                        <input
+                          type="text"
+                          placeholder="Search enrolled courses..."
+                          value={accountSearchQuery}
+                          onChange={(e) => setAccountSearchQuery(e.target.value)}
+                          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] py-2 pl-10 pr-4 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:ring-2 focus:ring-[#201a7c] dark:text-gray-100 dark:placeholder:text-gray-400"
+                        />
+                        <i className="fa fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500"></i>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      Payable Amount
-                    </p>
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                          {formatCurrency(totalPayableAmount)}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          Remaining balance for paid enrollments, calculated from `Course Price` minus `Amount Paid`.
-                        </p>
+                  <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Total Amount Paid
+                      </p>
+                      <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            {formatCurrency(totalAmountPaid)}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Combined `Amount Paid` across all enrolled courses in your account.
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            Based on {accountEnrollments.length} enrollment{accountEnrollments.length === 1 ? '' : 's'}
+                          </div>
+                          <Link
+                            href={{ pathname: '/portal/account/payments' }}
+                            className="inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm font-medium text-[#201a7c] transition-colors hover:bg-gray-50 dark:text-[#7b75ef] dark:hover:bg-gray-800"
+                          >
+                            Breakdown
+                          </Link>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Only includes enrollments with `Enrollment Type` set to `paid`
+                    </div>
+                  </div>
+
+                  <div className="bg-[var(--card-background)] rounded-xl border border-[var(--card-border)] shadow-sm p-6">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Payable Amount
+                      </p>
+                      <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            {formatCurrency(totalPayableAmount)}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Remaining balance for paid enrollments, calculated from `Course Price` minus `Amount Paid`.
+                          </p>
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          Only includes enrollments with `Enrollment Type` set to `paid`
+                        </div>
                       </div>
                     </div>
                   </div>

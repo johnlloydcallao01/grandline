@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
+import { getCourseOriginalPrice, getEffectiveCoursePrice, getCourseSalePrice, validateCouponForEnrollment } from '@/utils/couponEngine'
 
 // GET /api/lms/enrollments - Get enrollments with filtering
 export async function GET(request: NextRequest) {
@@ -100,6 +101,64 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const course = await payload.findByID({
+      collection: 'courses',
+      id: body.course,
+      depth: 1,
+      overrideAccess: true,
+    })
+
+    const trainee = await payload.findByID({
+      collection: 'trainees',
+      id: body.student,
+      depth: 1,
+      overrideAccess: true,
+    })
+
+    const traineeUser = trainee?.user && typeof trainee.user === 'object'
+      ? trainee.user
+      : null
+
+    const originalPrice = getCourseOriginalPrice(course)
+    const courseSalePrice = getCourseSalePrice(course)
+    const effectivePrice = getEffectiveCoursePrice(course)
+    const couponCodeInput = String(body.couponCode || body.coupon || '').trim()
+    let couponValidation: Awaited<ReturnType<typeof validateCouponForEnrollment>> | null = null
+
+    if (couponCodeInput) {
+      couponValidation = await validateCouponForEnrollment({
+        payload,
+        code: couponCodeInput,
+        course,
+        traineeId: body.student,
+        userId: traineeUser?.id || null,
+        userEmail: traineeUser?.email || null,
+        subtotal: effectivePrice,
+      })
+
+      if (!couponValidation.valid) {
+        return NextResponse.json(
+          { error: couponValidation.reason },
+          { status: 400 },
+        )
+      }
+    }
+
+    const couponDiscount = couponValidation?.valid ? couponValidation.pricing.couponDiscount : 0
+    const finalPrice = couponValidation?.valid ? couponValidation.pricing.finalPrice : effectivePrice
+    const pricingBreakdown = {
+      currency: 'PHP',
+      originalPrice,
+      courseSalePrice,
+      effectivePrice,
+      couponDiscount,
+      finalPrice,
+      couponDiscountType: couponValidation?.valid ? couponValidation.pricing.discountType : null,
+      couponDiscountValue: couponValidation?.valid ? couponValidation.pricing.discountValue : null,
+      couponMaxDiscountAmount: couponValidation?.valid ? couponValidation.pricing.maxDiscountAmount : null,
+      calculatedAt: new Date().toISOString(),
+    }
+
     // Create enrollment
     const newEnrollment = await payload.create({
       collection: 'course-enrollments',
@@ -108,8 +167,52 @@ export async function POST(request: NextRequest) {
         enrolledAt: new Date().toISOString(),
         status: body.status || 'active',
         progressPercentage: 0,
+        coupon: couponValidation?.valid ? couponValidation.coupon.id : body.coupon || null,
+        couponCode: couponValidation?.valid ? couponValidation.normalizedCode : null,
+        couponDiscountAmount: couponDiscount,
+        listPriceSnapshot: originalPrice,
+        finalPriceSnapshot: finalPrice,
+        pricingBreakdown,
       },
     })
+
+    if (couponValidation?.valid) {
+      const couponId = couponValidation.coupon.id
+
+      try {
+        await payload.create({
+          collection: 'coupon-redemptions',
+          data: {
+            coupon: couponId,
+            trainee: body.student,
+            user: traineeUser?.id || null,
+            courseEnrollment: newEnrollment.id,
+            course: body.course,
+            contextType: 'checkout_commit',
+            status: 'applied',
+            codeSnapshot: couponValidation.normalizedCode,
+            discountTypeSnapshot: couponValidation.pricing.discountType,
+            discountAmountSnapshot: couponValidation.pricing.couponDiscount,
+            subtotalSnapshot: couponValidation.pricing.effectivePrice,
+            finalTotalSnapshot: couponValidation.pricing.finalPrice,
+            currencySnapshot: 'PHP',
+            appliedAt: new Date().toISOString(),
+            metadata: {
+              source: 'lms-enrollments-post',
+            },
+          },
+          overrideAccess: true,
+        })
+      } catch (redemptionError) {
+        await payload.delete({
+          collection: 'course-enrollments',
+          id: newEnrollment.id,
+          overrideAccess: true,
+        })
+
+        throw redemptionError
+      }
+    }
 
     return NextResponse.json(newEnrollment, { status: 201 })
   } catch (error) {

@@ -117,6 +117,55 @@ export const CourseEnrollments: CollectionConfig = {
         description: 'Amount paid for the course (if applicable)',
       },
     },
+    {
+      name: 'coupon',
+      type: 'relationship',
+      relationTo: 'coupon-codes',
+      index: true,
+      admin: {
+        description: 'Coupon applied to this enrollment, if any.',
+      },
+    },
+    {
+      name: 'couponCode',
+      type: 'text',
+      index: true,
+      admin: {
+        description: 'Coupon code snapshot stored at enrollment time.',
+      },
+    },
+    {
+      name: 'couponDiscountAmount',
+      type: 'number',
+      min: 0,
+      defaultValue: 0,
+      admin: {
+        description: 'Discount amount applied by the coupon for this enrollment.',
+      },
+    },
+    {
+      name: 'listPriceSnapshot',
+      type: 'number',
+      min: 0,
+      admin: {
+        description: 'Original course price at the time of enrollment.',
+      },
+    },
+    {
+      name: 'finalPriceSnapshot',
+      type: 'number',
+      min: 0,
+      admin: {
+        description: 'Final calculated price after course sale and coupon logic.',
+      },
+    },
+    {
+      name: 'pricingBreakdown',
+      type: 'json',
+      admin: {
+        description: 'Detailed pricing breakdown snapshot for auditing.',
+      },
+    },
 
     // === PROGRESS TRACKING ===
     {
@@ -313,9 +362,19 @@ export const CourseEnrollments: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, operation, req }) => {
-        // Only create notification on CREATE operation for active enrollments
-        if (operation !== 'create' || doc.status !== 'active') return
+      async ({ doc, operation, req, previousDoc }) => {
+        const currentStatus = typeof doc.status === 'string' ? doc.status : ''
+        const previousStatus = typeof previousDoc?.status === 'string' ? previousDoc.status : ''
+
+        const shouldNotifyActive =
+          currentStatus === 'active' &&
+          (operation === 'create' || previousStatus !== 'active')
+
+        const shouldNotifyPending =
+          currentStatus === 'pending' &&
+          (operation === 'create' || previousStatus !== 'pending')
+
+        if (!shouldNotifyActive && !shouldNotifyPending) return
 
         try {
           const payload = req.payload
@@ -339,20 +398,26 @@ export const CourseEnrollments: CollectionConfig = {
             overrideAccess: true,
           })
 
-          const title = `🎓 Welcome to ${course.title}!`
-          const body = `You have been successfully enrolled in ${course.title}. Start learning now!`
+          const isPendingNotification = currentStatus === 'pending'
+          const title = isPendingNotification
+            ? `📝 Enrollment Request Received: ${course.title}`
+            : `🎓 Welcome to ${course.title}!`
+          const body = isPendingNotification
+            ? `Your enrollment request for ${course.title} has been received and is now pending review. We will notify you once it is approved.`
+            : `You have been successfully enrolled in ${course.title}. Start learning now!`
           const link = `/portal/account/enrollments/${doc.id}`
           const metadata = {
             enrollmentId: doc.id,
             courseId: course.id,
             courseName: course.title,
             enrollmentType: doc.enrollmentType,
+            enrollmentStatus: currentStatus,
           }
 
           await createNotificationFanout({
             payload,
             userId,
-            templateCode: 'COURSE_ENROLLED',
+            templateCode: isPendingNotification ? 'COURSE_ENROLLMENT_PENDING' : 'COURSE_ENROLLED',
             category: 'learning',
             title,
             body,
