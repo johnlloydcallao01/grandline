@@ -26,9 +26,6 @@ export default function CoursesPage() {
   const [modalSearchQuery, setModalSearchQuery] = useState('');
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [enrollingCourseId, setEnrollingCourseId] = useState<string | number | null>(null);
-  const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean, type: 'success' | 'error', title: string, message: string }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -103,43 +100,10 @@ export default function CoursesPage() {
     }
   }, [isEnrollModalOpen, availableCourses.length]);
 
-  const handleRequestEnrollment = async (courseId: string | number) => {
-    try {
-      setEnrollingCourseId(courseId);
-      setIsSubmitting(true);
-      const user = await getCurrentUser();
-      if (!user) return;
-
-      const token = localStorage.getItem('grandline_auth_token_trainee');
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers.Authorization = `users JWT ${token}`;
-
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
-      const res = await fetch(`${baseUrl}/api/lms/enrollment-requests`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ userId: user.id, courseId })
-      });
-
-      if (res.ok) {
-        setFeedbackModal({ isOpen: true, type: 'success', title: 'Enrollment Request Sent', message: 'We have received your request. Our team will review it and contact you shortly via email.' });
-
-        // Refresh enrollments list silently in background
-        const enrollRes = await fetch(`${baseUrl}/api/lms/enrollments?userId=${user.id}&limit=100`, { cache: 'no-store' });
-        if (enrollRes.ok) {
-          const data = await enrollRes.json();
-          setEnrollments(data.docs || []);
-        }
-      } else {
-        setFeedbackModal({ isOpen: true, type: 'error', title: 'Request Failed', message: 'We couldn\'t process your request at this time. Please try again later.' });
-      }
-    } catch (err) {
-      console.error(err);
-      setFeedbackModal({ isOpen: true, type: 'error', title: 'An Error Occurred', message: 'Something went wrong. Please check your internet connection.' });
-    } finally {
-      setIsSubmitting(false);
-      setEnrollingCourseId(null);
-    }
+  const handleRequestEnrollment = (courseId: string | number) => {
+    setIsEnrollModalOpen(false);
+    setModalSearchQuery('');
+    router.push(`/view-course/${courseId}/request-enrollment`);
   };
 
   const filteredEnrollments = enrollments.filter(enrollment => {
@@ -462,10 +426,9 @@ export default function CoursesPage() {
                             ) : (
                               <button
                                 onClick={() => handleRequestEnrollment(course.id)}
-                                disabled={isSubmitting && enrollingCourseId === course.id}
-                                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-70"
+                                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                               >
-                                {enrollingCourseId === course.id ? 'Requesting...' : 'Request Enrollment'}
+                                Request Enrollment
                               </button>
                             )}
                           </div>
@@ -481,29 +444,6 @@ export default function CoursesPage() {
         document.body
       )}
 
-      {/* Feedback Modal */}
-      {mounted && feedbackModal.isOpen && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black/50 dark:bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-[var(--card-background)] border border-[var(--card-border)] rounded-xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${feedbackModal.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
-              {feedbackModal.type === 'success' ? (
-                <i className="fa fa-check text-2xl"></i>
-              ) : (
-                <i className="fa fa-times text-2xl"></i>
-              )}
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{feedbackModal.title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{feedbackModal.message}</p>
-            <button
-              onClick={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
-              className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
     </div>
   );
 }

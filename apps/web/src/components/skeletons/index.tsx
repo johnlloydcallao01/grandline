@@ -101,9 +101,9 @@ export function DashboardPageSkeleton() {
  */
 export function CoursePlayerSkeleton() {
   return (
-    <div className="h-screen overflow-hidden bg-[#f5f5f7] flex flex-col">
+    <div className="h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)] flex flex-col">
       {/* Header Skeleton */}
-      <header className="bg-white border-b border-gray-200 shrink-0">
+      <header className="bg-[var(--card-background)] border-b border-[var(--card-border)] shrink-0">
         <div className="h-14 flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3 w-1/3">
              {/* Back Button */}
@@ -135,8 +135,8 @@ export function CoursePlayerSkeleton() {
 
       <div className="flex-1 flex min-h-0">
         {/* Sidebar Skeleton (Desktop) */}
-        <aside className="hidden lg:flex w-96 shrink-0 bg-white shadow-sm h-full flex-col border-r border-gray-200">
-          <div className="p-4 border-b border-gray-100">
+        <aside className="hidden lg:flex w-96 shrink-0 bg-[var(--card-background)] shadow-sm h-full flex-col border-r border-[var(--card-border)]">
+          <div className="p-4 border-b border-[var(--card-border)]">
              <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse mb-2"></div>
              <div className="space-y-3 mt-4">
                {[1, 2, 3, 4, 5].map((i) => (
@@ -146,7 +146,7 @@ export function CoursePlayerSkeleton() {
                        <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
                     </div>
                     {i === 1 && (
-                      <div className="pl-4 space-y-3 mt-2 border-l-2 border-gray-100">
+                      <div className="pl-4 space-y-3 mt-2 border-l-2 border-[var(--card-border)]">
                          <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
                          <div className="h-3 bg-gray-200 rounded w-5/6 animate-pulse"></div>
                          <div className="h-3 bg-gray-200 rounded w-4/5 animate-pulse"></div>
@@ -159,7 +159,7 @@ export function CoursePlayerSkeleton() {
         </aside>
 
         {/* Main Content Skeleton */}
-        <main className="flex-1 flex flex-col bg-[#f5f5f7] min-w-0 overflow-hidden relative">
+        <main className="flex-1 flex flex-col bg-[var(--background)] min-w-0 overflow-hidden relative">
           <div className="flex-1 overflow-y-auto p-4 md:p-8">
              <div className="max-w-4xl mx-auto space-y-8">
                 {/* Content Header */}
@@ -177,7 +177,7 @@ export function CoursePlayerSkeleton() {
                 </div>
 
                 {/* Content Body */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-10 space-y-6">
+                <div className="bg-[var(--card-background)] rounded-xl shadow-sm border border-[var(--card-border)] p-6 md:p-10 space-y-6">
                    {/* Text paragraphs */}
                    <div className="space-y-3">
                       <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
@@ -187,7 +187,7 @@ export function CoursePlayerSkeleton() {
                    </div>
                    
                    {/* Media Placeholder */}
-                   <div className="w-full aspect-video bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
+                   <div className="w-full aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse flex items-center justify-center">
                       <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                    </div>
 

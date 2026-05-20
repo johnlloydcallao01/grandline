@@ -127,7 +127,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
 
   const getAcceptString = () => {
     if (!allowedFileTypes || allowedFileTypes.length === 0) return undefined;
-    
+
     const mimeTypes: string[] = [];
     allowedFileTypes.forEach((type: string) => {
       switch (type) {
@@ -140,7 +140,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
         default: mimeTypes.push(`.${type}`);
       }
     });
-    
+
     return mimeTypes.join(',');
   };
 
@@ -195,21 +195,23 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
         ) : (
           <p className="text-gray-500 dark:text-gray-400">No instructions provided.</p>
         )}
-        
+
         {attachments && attachments.length > 0 && (
           <div className="mt-4 pt-4 border-t border-[var(--card-border)]">
             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-sm">Attachments:</h4>
             <div className="flex flex-wrap gap-2">
               {attachments.map((att: any) => (
-                <a 
-                  key={att.id} 
-                  href={getMediaUrl(att)} 
-                  target="_blank" 
+                <a
+                  key={att.id}
+                  href={getMediaUrl(att)}
+                  target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-[var(--card-border)] rounded-lg text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                  className="flex w-full min-w-0 max-w-full items-start gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-[var(--card-border)] rounded-lg text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-colors sm:inline-flex sm:w-auto"
                 >
-                  <i className="fa fa-download"></i>
-                  {att.filename || 'Download File'}
+                  <i className="fa fa-download mt-0.5 shrink-0"></i>
+                  <span className="min-w-0 flex-1 break-all whitespace-normal">
+                    {att.filename || 'Download File'}
+                  </span>
                 </a>
               ))}
             </div>
@@ -220,14 +222,13 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
       {latestSubmission ? (
         <div className="mt-8 pt-8 border-t border-[var(--card-border)]">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Your Submission</h3>
-          
-          <div className={`p-4 rounded-xl border mb-6 ${
-            latestSubmission.status === 'graded' 
-              ? (latestSubmission.score >= passingScore ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800')
-              : latestSubmission.status === 'returned_for_revision'
-                ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
-                : 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
-          }`}>
+
+          <div className={`p-4 rounded-xl border mb-6 ${latestSubmission.status === 'graded'
+            ? (latestSubmission.score >= passingScore ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800')
+            : latestSubmission.status === 'returned_for_revision'
+              ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
+              : 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
+            }`}>
             <div className="flex justify-between items-start mb-4">
               <div>
                 <p className="font-semibold text-gray-900 dark:text-gray-100 capitalize">Status: {latestSubmission.status.replace(/_/g, ' ')}</p>
@@ -260,28 +261,30 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
                 {extractText(latestSubmission.submittedText)}
               </div>
             )}
-            
+
             {latestSubmission.uploadedFiles && latestSubmission.uploadedFiles.length > 0 && (
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Files:</p>
                 <div className="flex flex-wrap gap-2">
                   {latestSubmission.uploadedFiles.map((file: any) => (
-                    <a 
-                      key={file.id} 
-                      href={getMediaUrl(file)} 
-                      target="_blank" 
+                    <a
+                      key={file.id}
+                      href={getMediaUrl(file)}
+                      target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--card-background)] border border-[var(--card-border)] rounded text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      className="flex w-full min-w-0 max-w-full items-start gap-2 px-3 py-1 bg-[var(--card-background)] border border-[var(--card-border)] rounded text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors sm:inline-flex sm:w-auto"
                     >
-                      <i className="fa fa-file"></i>
-                      {file.filename || 'View File'}
+                      <i className="fa fa-file mt-0.5 shrink-0"></i>
+                      <span className="min-w-0 flex-1 break-all whitespace-normal">
+                        {file.filename || 'View File'}
+                      </span>
                     </a>
                   ))}
                 </div>
               </div>
             )}
           </div>
-          
+
           {(latestSubmission.status === 'returned_for_revision' || latestSubmission.status === 'draft') && (
             <div className="mt-6">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You can submit a new revision below.</p>
@@ -295,14 +298,14 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
             {latestSubmission ? 'Submit Revision' : 'Submit your work'}
           </h3>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg text-sm">
               <i className="fa fa-exclamation-circle mr-2"></i>
               {error}
             </div>
           )}
-          
+
           {success && (
             <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-lg text-sm">
               <i className="fa fa-check-circle mr-2"></i>
@@ -349,7 +352,7 @@ export function AssignmentPlayer({ assignment, submissions, onSubmit }: Assignme
             )}
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || (!content.trim() && files.length === 0)}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
