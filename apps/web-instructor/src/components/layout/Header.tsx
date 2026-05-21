@@ -96,7 +96,6 @@ export function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
               aria-expanded={isProfileDropdownOpen}
             >
               {profilePictureUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profilePictureUrl}
                   alt={user?.profilePicture?.alt || `${displayName || 'Instructor'} profile picture`}
@@ -122,7 +121,6 @@ export function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                 <div className="border-b border-white/10 px-4 py-4">
                   <div className="flex items-center gap-3">
                     {profilePictureUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={profilePictureUrl}
                         alt={user?.profilePicture?.alt || `${displayName || 'Instructor'} profile picture`}
@@ -196,7 +194,6 @@ export function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
               aria-expanded={isProfileDropdownOpen}
             >
               {profilePictureUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profilePictureUrl}
                   alt={user?.profilePicture?.alt || `${displayName || 'Instructor'} profile picture`}

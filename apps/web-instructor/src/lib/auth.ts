@@ -74,7 +74,7 @@ export async function makeAuthRequest<T>(
   }
 }
 
-import { serverLogin, serverLogout, getServerUser, serverRefresh, getServerToken } from '@/app/actions/auth';
+import { serverLogin, serverLogout, getServerUser, serverRefresh } from '@/app/actions/auth';
 
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
