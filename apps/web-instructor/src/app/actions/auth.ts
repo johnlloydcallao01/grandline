@@ -3,7 +3,44 @@
 import { cookies } from 'next/headers';
 import type { LoginCredentials, AuthResponse, User } from '@/types/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
+function normalizeApiBaseUrl(raw?: string): string {
+    const fallback = 'https://cms.grandlinemaritime.com/api';
+    const trimmed = (raw || '').trim();
+    let base = trimmed || fallback;
+
+    if (!/^https?:\/\//i.test(base)) {
+        base = `https://${base}`;
+    }
+
+    base = base.replace(/\/+$/, '');
+
+    if (!/\/api$/i.test(base)) {
+        base = `${base}/api`;
+    }
+
+    return base;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+
+async function readJsonResponse(response: Response): Promise<any> {
+    const contentType = response.headers.get('content-type') || '';
+    const text = await response.text();
+
+    if (!text) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        if (contentType.includes('text/html') || text.trim().startsWith('<')) {
+            throw new Error(`Instructor auth endpoint returned HTML instead of JSON. Check NEXT_PUBLIC_API_URL: ${API_BASE_URL}`);
+        }
+
+        throw new Error(`Instructor auth endpoint returned a non-JSON response. Check NEXT_PUBLIC_API_URL: ${API_BASE_URL}`);
+    }
+}
 
 export async function serverLogin(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/instructor-login`, {
@@ -12,7 +49,7 @@ export async function serverLogin(credentials: LoginCredentials): Promise<AuthRe
         body: JSON.stringify(credentials),
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     if (!response.ok) {
         throw new Error(data.message || data.errors?.[0]?.message || 'Login failed');
@@ -69,7 +106,7 @@ export async function getServerUser(): Promise<User | null> {
 
         if (!response.ok) return null;
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
 
         if (data.user && data.user.role === 'instructor') {
             return data.user;
@@ -99,7 +136,7 @@ export async function serverRefresh(): Promise<AuthResponse> {
         headers: { Authorization: `users JWT ${currentToken}` },
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     if (!response.ok) {
         throw new Error(data.message || 'Access denied during refresh');
