@@ -64,6 +64,36 @@ import { migrations } from './migrations'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const normalizeCorsOrigin = (origin?: string): string | null => {
+  const value = origin?.trim()
+
+  if (!value) {
+    return null
+  }
+
+  return value.replace(/\/+$/, '')
+}
+
+const allowedCorsOrigins = Array.from(
+  new Set(
+    [
+      process.env.ADMIN_PROD_URL,
+      process.env.ADMIN_LOCAL_URL,
+      process.env.WEB_PROD_URL,
+      process.env.WEB_LOCAL_URL,
+      process.env.CMS_PROD_URL,
+      process.env.CMS_LOCAL_URL,
+      process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
+      'https://www.grandlinemaritime.com',
+      process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',
+      process.env.INSTRUCTOR_PROD_URL || 'https://instructor.grandlinemaritime.com',
+      process.env.INSTRUCTOR_LOCAL_URL || 'http://localhost:3004',
+    ]
+      .map(normalizeCorsOrigin)
+      .filter((origin): origin is string => Boolean(origin))
+  )
+)
+
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 import { getTraineeDashboardSummary } from './endpoints/getTraineeDashboardSummary'
 
@@ -135,24 +165,7 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-do-not-use-in-production',
-  cors: [
-    // Production web-admin
-    process.env.ADMIN_PROD_URL!,
-    // Local development
-    process.env.ADMIN_LOCAL_URL!,
-    // Production web app (for trainee registration)
-    process.env.WEB_PROD_URL!,
-    // Local web app development
-    process.env.WEB_LOCAL_URL!,
-    // CMS admin panel itself
-    process.env.CMS_PROD_URL!,
-    process.env.CMS_LOCAL_URL!,
-    // Production web-landing (both www and non-www)
-    process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
-    'https://www.grandlinemaritime.com', // www variant
-    // Local web-landing development
-    process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',
-  ],
+  cors: allowedCorsOrigins,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
