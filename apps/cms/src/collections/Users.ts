@@ -124,36 +124,44 @@ export const Users: CollectionConfig = {
           tokenIssued: Boolean(token),
         })
 
-        try {
-          await req.payload.update({
-            collection: 'users',
-            id: user.id,
-            data: {
-              lastLogin: new Date().toISOString(),
-            },
-            overrideAccess: true,
-          })
-        } catch (error) {
-          console.warn(`Failed to update lastLogin after login [${requestId}]`, error)
-        }
+        const payload = req.payload
+        const userId = user.id
+        const userRole = user.role
 
-        try {
-          await createUserSecurityEvent({
-            payload: req.payload,
-            userId: user.id,
-            eventType: 'LOGIN_SUCCESS',
-            eventData: {
-              requestId,
-              source: 'users.afterLogin',
-              role: user.role,
-            },
-            triggeredBy: user.id,
-            ipAddress,
-            userAgent,
-          })
-        } catch (error) {
-          console.warn(`Failed to record login success event [${requestId}]`, error)
-        }
+        runInBackground(`Update lastLogin after login [${requestId}]`, async () => {
+          try {
+            await payload.update({
+              collection: 'users',
+              id: userId,
+              data: {
+                lastLogin: new Date().toISOString(),
+              },
+              overrideAccess: true,
+            })
+          } catch (error) {
+            console.warn(`Failed to update lastLogin after login [${requestId}]`, error)
+          }
+        })
+
+        runInBackground(`Record login success event [${requestId}]`, async () => {
+          try {
+            await createUserSecurityEvent({
+              payload,
+              userId,
+              eventType: 'LOGIN_SUCCESS',
+              eventData: {
+                requestId,
+                source: 'users.afterLogin',
+                role: userRole,
+              },
+              triggeredBy: userId,
+              ipAddress,
+              userAgent,
+            })
+          } catch (error) {
+            console.warn(`Failed to record login success event [${requestId}]`, error)
+          }
+        })
 
         return user
       },

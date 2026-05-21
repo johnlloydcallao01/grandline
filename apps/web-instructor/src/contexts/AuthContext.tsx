@@ -189,8 +189,8 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
       let initialToken: string | null = null;
 
       try {
-        const cached = localStorage.getItem('grandline_auth_user_admin');
-        initialToken = localStorage.getItem('grandline_auth_token_admin');
+        const cached = localStorage.getItem('grandline_auth_user_instructor');
+        initialToken = localStorage.getItem('grandline_auth_token_instructor');
         if (cached) {
           initialUser = JSON.parse(cached);
           dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser, token: initialToken } });
@@ -203,9 +203,9 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
 
       // Update local storage token just in case legacy code needs it
       if (token) {
-        localStorage.setItem('grandline_auth_token_admin', token);
+        localStorage.setItem('grandline_auth_token_instructor', token);
       } else {
-        localStorage.removeItem('grandline_auth_token_admin');
+        localStorage.removeItem('grandline_auth_token_instructor');
       }
 
       dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user, token } });

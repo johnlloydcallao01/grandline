@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { ToastProvider } from "@/components/ui/Toast";
 import { cmsConfig, getCMSImageUrl } from "@/lib/cms";
+import { getServerUser, getServerToken } from "@/app/actions/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -77,9 +78,12 @@ type LayoutProps = {
   children: React.ReactNode;
 };
 
-export default function RootLayout({ children }: LayoutProps) {
+export default async function RootLayout({ children }: LayoutProps) {
+  const initialUser = await getServerUser();
+  const initialToken = await getServerToken();
+
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -148,7 +152,7 @@ export default function RootLayout({ children }: LayoutProps) {
         <InstantLoadingController />
 
         <AuthErrorBoundary>
-          <AuthProvider>
+          <AuthProvider initialUser={initialUser} initialToken={initialToken}>
             <ToastProvider>
               <LoadingScreenWrapper>
                 {children}

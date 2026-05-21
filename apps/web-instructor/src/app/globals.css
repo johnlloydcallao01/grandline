@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --primary: #3127a4;
+  --primary-foreground: #ffffff;
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-border: rgba(255, 255, 255, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-poppins);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.85rem 1.35rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 0.85rem 1.35rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.25);
+}
