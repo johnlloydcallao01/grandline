@@ -571,6 +571,198 @@ export default buildConfig({
       }) as PayloadHandler,
     },
     {
+      path: '/admin-login',
+      method: 'post',
+      handler: (async (req: PayloadRequest) => {
+        const requestId = crypto.randomUUID()
+        const startTime = Date.now()
+        const { ipAddress, userAgent } = getRequestMetadata(req)
+
+        try {
+          const body = await (req as any).json()
+          const email = String(body?.email || '').trim().toLowerCase()
+          const password = String(body?.password || '')
+
+          if (!email || !password) {
+            return new Response(
+              JSON.stringify({
+                message: 'Email and password are required.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+
+          const existingUsers = await req.payload.find({
+            collection: 'users',
+            overrideAccess: true,
+            limit: 1,
+            depth: 0,
+            where: {
+              email: {
+                equals: email,
+              },
+            },
+          })
+
+          const existingUser = existingUsers.docs[0] as any
+
+          try {
+            const result = await req.payload.login({
+              collection: 'users',
+              data: {
+                email,
+                password,
+              },
+            } as any)
+
+            const user = result.user as any
+
+            if (user?.role !== 'admin') {
+              const logContext = createAuthLogContext(
+                requestId,
+                req,
+                user?.id,
+                user?.email,
+                user?.role,
+                Date.now() - startTime,
+              )
+              authLogger.logRoleViolation(logContext, 'admin', user?.role || 'unknown')
+
+              return new Response(
+                JSON.stringify({
+                  message: 'Access denied. Only administrators can access this application.',
+                }),
+                { status: 403, headers: { 'Content-Type': 'application/json' } }
+              )
+            }
+
+            return new Response(
+              JSON.stringify({
+                message: 'Login successful.',
+                user: result.user,
+                token: result.token,
+                exp: result.exp,
+              }),
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
+            )
+          } catch (error) {
+            const refreshedUser = existingUser?.id
+              ? await req.payload.findByID({
+                collection: 'users',
+                id: existingUser.id,
+                overrideAccess: true,
+                depth: 0,
+              }).catch(() => null)
+              : null
+
+            const responseTime = Date.now() - startTime
+            const errorMessage = error instanceof Error ? error.message : 'Invalid email or password.'
+            const logContext = createAuthLogContext(
+              requestId,
+              req,
+              refreshedUser?.id,
+              refreshedUser?.email || email,
+              refreshedUser?.role,
+              responseTime,
+            )
+
+            authLogger.logLoginFailure(logContext, errorMessage, {
+              endpoint: '/admin-login',
+            })
+
+            if (refreshedUser?.id) {
+              const previousAttempts = Number(existingUser?.loginAttempts ?? 0)
+              const currentAttempts = Number(refreshedUser?.loginAttempts ?? 0)
+              const becameLocked = !existingUser?.lockUntil && Boolean(refreshedUser?.lockUntil)
+              const reachedThreshold = previousAttempts < 3 && currentAttempts >= 3
+
+              const eventPayload = req.payload
+              const refreshedUserId = refreshedUser.id
+              const refreshedUserEmail = refreshedUser.email
+              const refreshedUserFirstName = refreshedUser.firstName || ''
+              const lockUntil = refreshedUser.lockUntil || null
+              const preferenceEnabled = refreshedUser.securityAlertsEmailEnabled !== false
+
+              runInBackground(`Admin failed login security alert [${requestId}]`, async () => {
+                let emailSent = false
+                let emailSkipped = false
+                let emailId: string | undefined
+                let emailError: string | undefined
+
+                if (preferenceEnabled && (becameLocked || reachedThreshold)) {
+                  const result = await sendResendEmail({
+                    to: refreshedUserEmail,
+                    subject: becameLocked
+                      ? 'Your Grandline Maritime admin account has been locked after failed sign-in attempts'
+                      : 'Failed sign-in attempts detected on your Grandline Maritime admin account',
+                    html: `
+                      <p>Hello ${refreshedUserFirstName},</p>
+                      <p>We detected failed sign-in attempts on your Grandline Maritime admin account.</p>
+                      <p>Failed attempts: ${currentAttempts}</p>
+                      <p>IP address: ${ipAddress}</p>
+                      <p>Browser / device: ${userAgent}</p>
+                      ${lockUntil ? `<p>Account locked until: ${new Date(lockUntil).toISOString()}</p>` : ''}
+                      <p>If this was not you, we recommend changing your password and reviewing your account security settings.</p>
+                    `,
+                    tags: [
+                      { name: 'category', value: 'security-alert' },
+                      { name: 'event', value: 'admin-login-failed' },
+                    ],
+                    idempotencyKey: `admin-login-failed-${refreshedUserId}-${currentAttempts}-${lockUntil || 'no-lock'}`,
+                  })
+
+                  emailSent = result.sent
+                  emailSkipped = result.skipped
+                  emailId = result.id
+                  emailError = result.error
+                } else {
+                  emailSkipped = true
+                }
+
+                await createUserSecurityEvent({
+                  payload: eventPayload,
+                  userId: refreshedUserId,
+                  eventType: 'LOGIN_FAILED',
+                  eventData: {
+                    requestId,
+                    source: 'admin-login',
+                    previousAttempts,
+                    currentAttempts,
+                    becameLocked,
+                    reachedThreshold,
+                    lockUntil,
+                    emailSent,
+                    emailSkipped,
+                    emailId,
+                    emailError,
+                    preferenceEnabled,
+                  },
+                  ipAddress,
+                  userAgent,
+                })
+              })
+            }
+
+            return new Response(
+              JSON.stringify({
+                message: 'Invalid email or password.',
+              }),
+              { status: 401, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+        } catch (error) {
+          console.error(`Admin login failed unexpectedly [${requestId}]`, error)
+
+          return new Response(
+            JSON.stringify({
+              message: 'Login failed. Please try again.',
+            }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+      }) as PayloadHandler,
+    },
+    {
       path: '/refresh-token',
       method: 'post',
       handler: (async (req: PayloadRequest) => {
@@ -623,14 +815,14 @@ export default buildConfig({
             );
           }
 
-          // Security Check 3: Verify user role (trainee and instructor portal access)
-          if (user.role !== 'trainee' && user.role !== 'instructor') {
+          // Security Check 3: Verify user role (portal and dashboard access)
+          if (user.role !== 'trainee' && user.role !== 'instructor' && user.role !== 'admin') {
             const logContext = createAuthLogContext(requestId, req, user.id, user.email, user.role, Date.now() - startTime);
-            authLogger.logRoleViolation(logContext, 'trainee|instructor', user.role);
+            authLogger.logRoleViolation(logContext, 'trainee|instructor|admin', user.role);
 
             return new Response(
               JSON.stringify({
-                error: 'Access denied. Only trainees can access this application.',
+                error: 'Access denied. Only authorized portal users can access this application.',
                 code: 'ROLE_DENIED',
                 timestamp: new Date().toISOString(),
                 requestId

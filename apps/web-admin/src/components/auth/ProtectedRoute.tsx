@@ -48,16 +48,7 @@ export const ProtectedRoute = ({
   }
 
   if (!isAuthenticated) {
-    return (
-      fallback || (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-10 h-10 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Redirecting to sign in...</p>
-          </div>
-        </div>
-      )
-    );
+    return fallback || null;
   }
 
   return <>{children}</>;

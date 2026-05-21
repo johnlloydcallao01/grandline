@@ -6,7 +6,7 @@ import type { LoginCredentials, AuthResponse, User } from '@/types/auth';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 
 export async function serverLogin(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/users/login`, {
+    const response = await fetch(`${API_BASE_URL}/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -63,7 +63,7 @@ export async function getServerUser(): Promise<User | null> {
 
     try {
         const response = await fetch(`${API_BASE_URL}/users/me?depth=2`, {
-            headers: { Authorization: `users JWT ${token}` },
+            headers: { Authorization: `JWT ${token}` },
             cache: 'no-store',
         });
 
