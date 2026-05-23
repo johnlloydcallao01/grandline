@@ -100,6 +100,8 @@ import * as migration_20260512_120000_enforce_unique_emergency_contact_per_user 
 import * as migration_20260516_045852_add_web_push_notifications from './20260516_045852_add_web_push_notifications';
 import * as migration_20260518_120000_add_security_alert_email_preference from './20260518_120000_add_security_alert_email_preference';
 import * as migration_20260519_084138_add_coupon_codes_system from './20260519_084138_add_coupon_codes_system';
+import * as migration_20260522_113259_phase_1_accounting_foundation from './20260522_113259_phase_1_accounting_foundation';
+import * as migration_20260523_024707_phase_1_accounting_reversal_audit from './20260523_024707_phase_1_accounting_reversal_audit';
 
 export const migrations = [
   {
@@ -610,6 +612,16 @@ export const migrations = [
   {
     up: migration_20260519_084138_add_coupon_codes_system.up,
     down: migration_20260519_084138_add_coupon_codes_system.down,
-    name: '20260519_084138_add_coupon_codes_system'
+    name: '20260519_084138_add_coupon_codes_system',
+  },
+  {
+    up: migration_20260522_113259_phase_1_accounting_foundation.up,
+    down: migration_20260522_113259_phase_1_accounting_foundation.down,
+    name: '20260522_113259_phase_1_accounting_foundation',
+  },
+  {
+    up: migration_20260523_024707_phase_1_accounting_reversal_audit.up,
+    down: migration_20260523_024707_phase_1_accounting_reversal_audit.down,
+    name: '20260523_024707_phase_1_accounting_reversal_audit'
   },
 ];

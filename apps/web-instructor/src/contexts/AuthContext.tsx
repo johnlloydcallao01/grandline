@@ -21,8 +21,6 @@ import {
   checkAuthStatus,
   clearAuthState,
   emitAuthEvent,
-  startSessionMonitoring,
-  monitorSessionExpiration,
 } from '@/lib/auth';
 import { getServerToken } from '@/app/actions/auth';
 
@@ -185,15 +183,28 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
     isInitializedRef.current = true;
 
     try {
-      let initialUser: User | null = null;
-      let initialToken: string | null = null;
+      // Trust the server-seeded session on first load. It already came from
+      // the HTTP-only cookie and avoids clobbering a valid session with a
+      // transient client-side revalidation failure.
+      if (initialUser && initialToken) {
+        try {
+          localStorage.setItem('grandline_auth_user_instructor', JSON.stringify(initialUser));
+          localStorage.setItem('grandline_auth_token_instructor', initialToken);
+        } catch { void 0; }
+
+        emitAuthEvent('session_restored', { user: initialUser });
+        return;
+      }
+
+      let cachedUser: User | null = null;
+      let cachedToken: string | null = null;
 
       try {
         const cached = localStorage.getItem('grandline_auth_user_instructor');
-        initialToken = localStorage.getItem('grandline_auth_token_instructor');
+        cachedToken = localStorage.getItem('grandline_auth_token_instructor');
         if (cached) {
-          initialUser = JSON.parse(cached);
-          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: initialUser, token: initialToken } });
+          cachedUser = JSON.parse(cached);
+          dispatch({ type: 'AUTH_INIT_SUCCESS', payload: { user: cachedUser, token: cachedToken } });
         }
       } catch { void 0; }
 
@@ -304,10 +315,6 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
       // Ignore auth:session_expired to prevent auto-logout
     };
 
-    // Start session monitoring
-    const stopSessionMonitoring = startSessionMonitoring();
-    const stopExpirationMonitoring = monitorSessionExpiration();
-
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth:logout', handleAuthEvent as EventListener);
     window.addEventListener('auth:session_expired', handleAuthEvent as EventListener);
@@ -316,8 +323,6 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth:logout', handleAuthEvent as EventListener);
       window.removeEventListener('auth:session_expired', handleAuthEvent as EventListener);
-      stopSessionMonitoring();
-      stopExpirationMonitoring();
     };
   }, [state.isAuthenticated, state.isInitialized]);
 
