@@ -34,9 +34,8 @@ const defaultMetadata: Metadata = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { siteSettings, faviconUrl } = await getSiteSettingsFavicon();
-  const version = encodeURIComponent(siteSettings?.updatedAt || faviconUrl || "fallback");
-  const iconUrl = `/favicon.ico?v=${version}`;
+  const { faviconUrl } = await getSiteSettingsFavicon();
+  const iconUrl = faviconUrl || "/grandline-logo.png";
 
   return {
     ...defaultMetadata,

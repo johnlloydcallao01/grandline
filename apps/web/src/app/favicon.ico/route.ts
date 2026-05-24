@@ -5,7 +5,7 @@ import { getSiteSettingsFavicon } from "@/server/siteSettings";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const FALLBACK_ICON_PATH = path.join(process.cwd(), "src", "app", "grandline-logo.ico");
+const FALLBACK_ICON_PATH = path.join(process.cwd(), "public", "grandline-logo.png");
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
   Pragma: "no-cache",
@@ -23,7 +23,7 @@ function buildResponse(body: BodyInit | null, contentType: string) {
 
 async function getFallbackIconResponse() {
   const fallbackIcon = await readFile(FALLBACK_ICON_PATH);
-  return buildResponse(fallbackIcon, "image/x-icon");
+  return buildResponse(fallbackIcon, "image/png");
 }
 
 async function getDynamicFaviconResponse() {
