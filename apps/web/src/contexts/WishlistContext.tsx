@@ -5,9 +5,13 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
-import { fetchWishlist, toggleWishlist as toggleWishlistApi } from '@/lib/wishlist';
+import {
+  fetchWishlistState,
+  toggleWishlist as toggleWishlistApi,
+} from '@/lib/wishlist';
 
 type WishlistMap = Record<string, boolean>;
 
@@ -20,46 +24,25 @@ const WishlistContext = createContext<WishlistContextValue | undefined>(
   undefined
 );
 
-const STORAGE_KEY = 'grandline_wishlist_state';
-
 export function WishlistProvider({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactNode {
   const [wishlistMap, setWishlistMap] = useState<WishlistMap>({});
+  const stateVersionRef = useRef(0);
 
   useEffect(() => {
     let active = true;
-
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as unknown;
-        if (Array.isArray(parsed)) {
-          const next: WishlistMap = {};
-          for (const id of parsed) {
-            const key = String(id);
-            if (key) {
-              next[key] = true;
-            }
-          }
-          if (active) {
-            setWishlistMap(next);
-          }
-        }
-      }
-    } catch {
-      void 0;
-    }
+    const requestVersion = stateVersionRef.current;
 
     (async () => {
       try {
-        const courses = await fetchWishlist();
-        if (!active) return;
+        const data = await fetchWishlistState();
+        if (!active || stateVersionRef.current !== requestVersion) return;
         const next: WishlistMap = {};
-        for (const course of courses) {
-          const key = String(course.id);
+        for (const courseId of data.courseIds) {
+          const key = String(courseId);
           if (key) {
             next[key] = true;
           }
@@ -79,19 +62,11 @@ export function WishlistProvider({
     };
   }, []);
 
-  useEffect(() => {
-    try {
-      const ids = Object.keys(wishlistMap).filter((key) => wishlistMap[key]);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-    } catch {
-      void 0;
-    }
-  }, [wishlistMap]);
-
   const toggleWishlist = useCallback(
     async (courseId: string | number): Promise<boolean> => {
       const key = String(courseId);
       let optimisticNext = false;
+      stateVersionRef.current += 1;
 
       setWishlistMap((prev) => {
         const current = !!prev[key];
@@ -152,4 +127,3 @@ export function useWishlist(): WishlistContextValue {
   }
   return ctx;
 }
-

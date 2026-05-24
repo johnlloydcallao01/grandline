@@ -82,7 +82,7 @@ export default function WishlistsPage() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Your wishlist is empty</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">Start adding courses you&apos;re interested in!</p>
             <Link
-              href="/courses/available"
+              href="/"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
             >
               Browse Courses

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function POST(
   request: NextRequest,
@@ -6,12 +7,14 @@ export async function POST(
 ) {
   try {
     const { id: courseId } = await context.params
-    const { lessonId, completed, userId } = await request.json()
+    const { lessonId, completed } = await request.json()
+    const user = await getServerUser()
+    const userId = user?.id ? String(user.id) : null
 
     if (!courseId || !lessonId || !userId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: userId ? 400 : 401 }
       )
     }
 

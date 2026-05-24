@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function POST(
     request: NextRequest,
@@ -7,10 +8,12 @@ export async function POST(
     try {
         const { id: courseId } = await context.params
         const body = await request.json()
-        const { userId, progressPercentage } = body
+        const { progressPercentage } = body
+        const user = await getServerUser()
+        const userId = user?.id ? String(user.id) : null
 
         if (!userId || progressPercentage === undefined) {
-            return NextResponse.json({ error: 'Missing userId or progressPercentage' }, { status: 400 })
+            return NextResponse.json({ error: userId ? 'Missing progressPercentage' : 'Unauthorized' }, { status: userId ? 400 : 401 })
         }
 
         const apiKey = process.env.PAYLOAD_API_KEY

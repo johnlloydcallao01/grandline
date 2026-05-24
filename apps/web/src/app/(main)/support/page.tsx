@@ -143,7 +143,7 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] pb-12">
       {/* Header */}
-      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)] sticky top-0 z-30">
+      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
         <div className="w-full px-[10px]">
           <div className="py-6 flex justify-between items-center">
             <div>

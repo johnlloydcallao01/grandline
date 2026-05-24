@@ -2,111 +2,109 @@
 
 import 'server-only';
 
+import { getServerUser } from '@/app/actions/auth';
+import type { Course } from '@/types/course';
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 
-type WishlistDoc = {
-  course: string | number | { id?: string | number } | null;
+type WishlistState = {
+  items: Course[];
+  courseIds: string[];
+  totalDocs: number;
 };
 
-type WishlistResponse = {
-  docs: WishlistDoc[];
-};
-
-import { cookies } from 'next/headers';
-
-export async function isCourseWishlisted(courseId: string | number): Promise<boolean> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('grandline-web-token')?.value;
-
-  if (!token) return false;
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Authorization: `users JWT ${token}`,
-  };
-
+async function getWishlistStateForUser(
+  userId: string | number
+): Promise<WishlistState> {
   const params = new URLSearchParams();
-  params.set('where[course][equals]', String(courseId));
-  params.set('limit', '1');
-  params.set('depth', '0');
+  params.set('userId', String(userId));
+  params.set('limit', '100');
 
   try {
-    const res = await fetch(`${API_BASE_URL}/wishlists?${params.toString()}`, {
+    const res = await fetch(`${API_BASE_URL}/lms/wishlist?${params.toString()}`, {
       method: 'GET',
-      headers,
       cache: 'no-store',
     });
 
-    if (!res.ok) return false;
+    if (!res.ok) {
+      return {
+        items: [],
+        courseIds: [],
+        totalDocs: 0,
+      };
+    }
 
-    const json = (await res.json()) as WishlistResponse;
-    return Array.isArray(json.docs) && json.docs.length > 0;
+    const json = (await res.json()) as Partial<WishlistState>;
+    const items = Array.isArray(json.items) ? json.items : [];
+    const courseIds = Array.isArray(json.courseIds)
+      ? json.courseIds.map((id) => String(id))
+      : [];
+
+    return {
+      items,
+      courseIds,
+      totalDocs:
+        typeof json.totalDocs === 'number' && !Number.isNaN(json.totalDocs)
+          ? json.totalDocs
+          : items.length,
+    };
   } catch {
-    return false;
+    return {
+      items: [],
+      courseIds: [],
+      totalDocs: 0,
+    };
   }
 }
 
-export async function toggleWishlist(courseId: string | number): Promise<boolean> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('grandline-web-token')?.value;
-
-  if (!token) return false;
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Authorization: `users JWT ${token}`,
-  };
-
-  // First get the user to know their ID
-  let userId: string | number | null = null;
-  try {
-    const meRes = await fetch(`${API_BASE_URL}/users/me`, { headers, cache: 'no-store' });
-    if (meRes.ok) {
-      const meData = await meRes.json();
-      userId = meData.user?.id;
-    }
-  } catch (_err) {
-    // Return null on failure (implicitly handled below)
+export async function getWishlistState(): Promise<WishlistState> {
+  const user = await getServerUser();
+  if (!user?.id) {
+    return {
+      items: [],
+      courseIds: [],
+      totalDocs: 0,
+    };
   }
 
-  if (!userId) return false;
+  return getWishlistStateForUser(user.id);
+}
 
-  const lookupParams = new URLSearchParams();
-  lookupParams.set('where[course][equals]', String(courseId));
-  lookupParams.set('where[user][equals]', String(userId));
-  lookupParams.set('limit', '1');
-  lookupParams.set('depth', '0');
+export async function fetchWishlist(): Promise<Course[]> {
+  const data = await getWishlistState();
+  return data.items;
+}
+
+export async function isCourseWishlisted(courseId: string | number): Promise<boolean> {
+  const data = await getWishlistState();
+  return data.courseIds.includes(String(courseId));
+}
+
+export async function toggleWishlist(courseId: string | number): Promise<boolean> {
+  const user = await getServerUser();
+  if (!user?.id) return false;
 
   try {
-    const existingRes = await fetch(`${API_BASE_URL}/wishlists?${lookupParams.toString()}`, {
-      method: 'GET',
-      headers,
-      cache: 'no-store',
-    });
-
-    if (existingRes.ok) {
-      const json = (await existingRes.json()) as WishlistResponse;
-      const first = Array.isArray(json.docs) && json.docs.length > 0 ? json.docs[0] : null;
-      if (first && 'id' in first) {
-        const deleteRes = await fetch(`${API_BASE_URL}/wishlists/${(first as any).id}`, {
-          method: 'DELETE',
-          headers,
-        });
-        if (deleteRes.ok) return false;
-      }
-    }
-
-    const createRes = await fetch(`${API_BASE_URL}/wishlists`, {
+    const res = await fetch(`${API_BASE_URL}/lms/wishlist`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
       body: JSON.stringify({
-        user: userId,
-        course: courseId,
+        userId: user.id,
+        courseId,
       }),
     });
 
-    return createRes.ok;
+    if (!res.ok) {
+      return false;
+    }
+
+    const json = (await res.json()) as { wishlisted?: boolean };
+
+    return Boolean(json.wishlisted);
   } catch {
     return false;
   }
@@ -114,49 +112,6 @@ export async function toggleWishlist(courseId: string | number): Promise<boolean
 export async function getWishlistCourseIdsForUser(
   userId: string | number
 ): Promise<string[]> {
-  const apiKey = process.env.PAYLOAD_API_KEY || '';
-  if (!apiKey) {
-    return [];
-  }
-
-  const params = new URLSearchParams();
-  params.set('where[user][equals]', String(userId));
-  params.set('sort', '-createdAt');
-  params.set('limit', '100');
-  params.set('depth', '1');
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Authorization: `users API-Key ${apiKey}`,
-    PAYLOAD_API_KEY: apiKey,
-  };
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/wishlists?${params.toString()}`, {
-      headers,
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      return [];
-    }
-
-    const json = (await res.json()) as WishlistResponse;
-    const docs = Array.isArray(json.docs) ? json.docs : [];
-
-    const ids: string[] = [];
-    for (const d of docs) {
-      const c = d.course as any;
-      if (!c) continue;
-      const id =
-        typeof c === 'object' && c !== null && 'id' in c ? c.id : c;
-      if (id === null || id === undefined) continue;
-      ids.push(String(id));
-    }
-
-    return ids;
-  } catch {
-    return [];
-  }
+  const data = await getWishlistStateForUser(userId);
+  return data.courseIds;
 }
-

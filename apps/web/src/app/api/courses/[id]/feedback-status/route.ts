@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function GET(
     request: NextRequest,
@@ -6,11 +7,11 @@ export async function GET(
 ) {
     try {
         const { id: courseId } = await context.params
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        const user = await getServerUser()
+        const userId = user?.id ? String(user.id) : null
 
         if (!courseId || !userId) {
-            return NextResponse.json({ hasSubmitted: false }, { status: 400 })
+            return NextResponse.json({ hasSubmitted: false }, { status: 401 })
         }
 
         const apiKey = process.env.PAYLOAD_API_KEY

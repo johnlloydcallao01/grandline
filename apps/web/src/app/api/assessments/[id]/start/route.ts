@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function POST(
   request: NextRequest,
@@ -6,7 +7,9 @@ export async function POST(
 ) {
   try {
     const { id: assessmentIdRaw } = await context.params
-    const { userId, courseId: courseIdRaw } = await request.json()
+    const { courseId: courseIdRaw } = await request.json()
+    const user = await getServerUser()
+    const userId = user?.id ? String(user.id) : null
 
     // Ensure IDs are numbers if they look like numbers, as Payload relationship validation 
     // can be strict about types (especially with Postgres)
@@ -18,10 +21,10 @@ export async function POST(
       ? Number(courseIdRaw)
       : courseIdRaw;
 
-    if (!assessmentId || !userId || !courseId) {
+    if (!assessmentId || !courseId || !userId) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId, courseId' },
-        { status: 400 }
+        { error: 'Missing required fields: courseId' },
+        { status: userId ? 400 : 401 }
       )
     }
 

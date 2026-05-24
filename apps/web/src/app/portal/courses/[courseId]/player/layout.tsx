@@ -68,34 +68,7 @@ export default function CoursePlayerLayout({
       try {
         setLoading(true);
         setError(null);
-
-        let userIdParam: string | null = null;
-        if (typeof window !== 'undefined') {
-          try {
-            const raw = localStorage.getItem('grandline_auth_user_trainee');
-            if (raw) {
-              const parsed = JSON.parse(raw) as { id?: string | number } | null;
-              const value = parsed && parsed.id;
-              if (value !== undefined && value !== null) {
-                userIdParam = String(value);
-              }
-            }
-          } catch {
-            void 0;
-          }
-        }
-
-        const searchParams = new URLSearchParams();
-        if (userIdParam) {
-          searchParams.set('userId', userIdParam);
-        }
-
-        const url =
-          searchParams.toString().length > 0
-            ? `/api/courses/${courseId}?${searchParams.toString()}`
-            : `/api/courses/${courseId}`;
-
-        const res = await fetch(url, {
+        const res = await fetch(`/api/courses/${courseId}`, {
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
         });
@@ -120,49 +93,47 @@ export default function CoursePlayerLayout({
 
         // Fetch progress from the new endpoint
         let fetchedProgress = false;
-        if (userIdParam) {
-          try {
-            const [progressRes, assignmentsRes, feedbackRes] = await Promise.all([
-              fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store',
-              }),
-              fetchAssignmentSubmissions(courseId).catch(err => {
-                console.error('Failed to fetch assignments', err);
-                return {};
-              }),
-              fetch(`/api/courses/${courseId}/feedback-status?userId=${userIdParam}`, {
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store',
-              }).catch(err => {
-                console.error('Failed to fetch feedback status', err);
-                return null;
-              })
-            ]);
+        try {
+          const [progressRes, assignmentsRes, feedbackRes] = await Promise.all([
+            fetch(`/api/courses/${courseId}/progress`, {
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+            }),
+            fetchAssignmentSubmissions(courseId).catch(err => {
+              console.error('Failed to fetch assignments', err);
+              return {};
+            }),
+            fetch(`/api/courses/${courseId}/feedback-status`, {
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+            }).catch(err => {
+              console.error('Failed to fetch feedback status', err);
+              return null;
+            })
+          ]);
 
-            setAssignmentSubmissions(assignmentsRes || {});
+          setAssignmentSubmissions(assignmentsRes || {});
 
-            if (feedbackRes && feedbackRes.ok) {
-              const feedbackData = await feedbackRes.json();
-              setHasSubmittedFeedback(feedbackData.hasSubmitted === true);
-            }
-
-            if (progressRes.ok) {
-              const progressData = await progressRes.json();
-              if (Array.isArray(progressData.completedLessonIds)) {
-                setCompletedLessonIds(progressData.completedLessonIds.map(String));
-              }
-              if (progressData.attemptCounts) {
-                setAttemptCounts(progressData.attemptCounts);
-              }
-              if (progressData.submissionHistory) {
-                setSubmissionHistory(progressData.submissionHistory);
-              }
-              fetchedProgress = true;
-            }
-          } catch (e) {
-            console.error('Failed to fetch progress', e);
+          if (feedbackRes && feedbackRes.ok) {
+            const feedbackData = await feedbackRes.json();
+            setHasSubmittedFeedback(feedbackData.hasSubmitted === true);
           }
+
+          if (progressRes.ok) {
+            const progressData = await progressRes.json();
+            if (Array.isArray(progressData.completedLessonIds)) {
+              setCompletedLessonIds(progressData.completedLessonIds.map(String));
+            }
+            if (progressData.attemptCounts) {
+              setAttemptCounts(progressData.attemptCounts);
+            }
+            if (progressData.submissionHistory) {
+              setSubmissionHistory(progressData.submissionHistory);
+            }
+            fetchedProgress = true;
+          }
+        } catch (e) {
+          console.error('Failed to fetch progress', e);
         }
 
         // Fallback to legacy data only if new fetch didn't happen/succeed
@@ -457,21 +428,10 @@ export default function CoursePlayerLayout({
     let active = true;
     const syncProgress = async () => {
       try {
-        let userIdParam: string | null = null;
-        if (typeof window !== 'undefined') {
-          const raw = localStorage.getItem('grandline_auth_user_trainee');
-          if (raw) {
-            const parsed = JSON.parse(raw) as { id?: string | number } | null;
-            userIdParam = parsed?.id ? String(parsed.id) : null;
-          }
-        }
-
-        if (!userIdParam) return;
-
         const res = await fetch(`/api/courses/${courseId}/sync-progress`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: userIdParam, progressPercentage: progressPercent })
+          body: JSON.stringify({ progressPercentage: progressPercent })
         });
 
         if (!active) return;
@@ -504,31 +464,12 @@ export default function CoursePlayerLayout({
     setCompletedLessonIds(newCompleted);
 
     try {
-      let userIdParam: string | null = null;
-      if (typeof window !== 'undefined') {
-        try {
-          const raw = localStorage.getItem('grandline_auth_user_trainee');
-          if (raw) {
-            const parsed = JSON.parse(raw) as { id?: string | number } | null;
-            const value = parsed && parsed.id;
-            if (value !== undefined && value !== null) {
-              userIdParam = String(value);
-            }
-          }
-        } catch {
-          void 0;
-        }
-      }
-
-      if (!userIdParam) return;
-
       const res = await fetch(`/api/courses/${courseId}/lesson-completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lessonId,
           completed: !isCompleted,
-          userId: userIdParam
         })
       });
 
@@ -551,21 +492,10 @@ export default function CoursePlayerLayout({
 
   const startAssessment = async (assessmentId: string) => {
     try {
-      let userIdParam: string | null = null;
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user_trainee');
-        if (raw) {
-          const parsed = JSON.parse(raw) as { id?: string | number } | null;
-          userIdParam = parsed?.id ? String(parsed.id) : null;
-        }
-      }
-
-      if (!userIdParam) return null;
-
       const res = await fetch(`/api/assessments/${assessmentId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userIdParam, courseId })
+        body: JSON.stringify({ courseId })
       });
 
       if (!res.ok) {
@@ -623,30 +553,20 @@ export default function CoursePlayerLayout({
       const result = await res.json();
 
       // Refresh progress after submission (regardless of pass/fail to update attempt counts)
-      let userIdParam: string | null = null;
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user_trainee');
-        if (raw) {
-          const parsed = JSON.parse(raw) as { id?: string | number } | null;
-          userIdParam = parsed?.id ? String(parsed.id) : null;
+      const progressRes = await fetch(`/api/courses/${courseId}/progress`, {
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+      });
+      if (progressRes.ok) {
+        const progressData = await progressRes.json();
+        if (Array.isArray(progressData.completedLessonIds)) {
+          setCompletedLessonIds(progressData.completedLessonIds.map(String));
         }
-      }
-      if (userIdParam) {
-        const progressRes = await fetch(`/api/courses/${courseId}/progress?userId=${userIdParam}`, {
-          headers: { 'Content-Type': 'application/json' },
-          cache: 'no-store',
-        });
-        if (progressRes.ok) {
-          const progressData = await progressRes.json();
-          if (Array.isArray(progressData.completedLessonIds)) {
-            setCompletedLessonIds(progressData.completedLessonIds.map(String));
-          }
-          if (progressData.attemptCounts) {
-            setAttemptCounts(progressData.attemptCounts);
-          }
-          if (progressData.submissionHistory) {
-            setSubmissionHistory(progressData.submissionHistory);
-          }
+        if (progressData.attemptCounts) {
+          setAttemptCounts(progressData.attemptCounts);
+        }
+        if (progressData.submissionHistory) {
+          setSubmissionHistory(progressData.submissionHistory);
         }
       }
 
@@ -702,24 +622,10 @@ export default function CoursePlayerLayout({
     setIsMobileMenuOpen(false);
 
     try {
-      let userIdParam: string | null = null;
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('grandline_auth_user_trainee');
-        if (raw) {
-          const parsed = JSON.parse(raw) as { id?: string | number } | null;
-          userIdParam = parsed?.id ? String(parsed.id) : null;
-        }
-      }
-
-      if (!userIdParam) {
-        setEnrollmentStatus(previousStatus); // Revert on auth error
-        return;
-      }
-
       const res = await fetch(`/api/courses/${courseId}/finish-course`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userIdParam })
+        body: JSON.stringify({})
       });
 
       const data = await res.json();

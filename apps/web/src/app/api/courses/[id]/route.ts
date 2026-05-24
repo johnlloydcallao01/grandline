@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
@@ -20,8 +21,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'
 
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const user = await getServerUser()
+    const userId = user?.id ? String(user.id) : null
 
     const courseRes = await fetch(`${apiUrl}/courses/${id}?depth=3`, {
       headers,

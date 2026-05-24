@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerUser } from '@/app/actions/auth'
 
 export async function GET(
     request: NextRequest,
@@ -25,11 +26,11 @@ export async function GET(
         // we'll assume the client sends the user ID in a header or query param for this internal API.
         // CHECK: The existing lesson-completion route expects userId in the body.
         // Let's look for userId in query params.
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        const user = await getServerUser()
+        const userId = user?.id ? String(user.id) : null
 
         if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         // 1.5 Fetch Trainee ID for this user
