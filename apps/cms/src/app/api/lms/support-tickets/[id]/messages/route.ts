@@ -96,6 +96,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id } = await context.params
     const body = await request.json()
     const { message } = body
+    const payloadRequest = request as any
+    payloadRequest.user = user
 
     if (!id || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -117,6 +119,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const newMessage = await payload.create({
       collection: 'support-ticket-messages',
+      req: payloadRequest,
+      user,
       data: {
         ticket: ticket.id,
         sender: user.id,

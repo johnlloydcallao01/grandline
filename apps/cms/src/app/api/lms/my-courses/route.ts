@@ -165,29 +165,106 @@ function computeProgressSummary(args: {
     }
   }
 
-  if (
-    [
-      'exam',
-      'quizzes',
-      'lessons_quizzes',
-      'quizzes_exam',
-      'lessons_quizzes_exam',
-    ].includes(evaluationMode)
-  ) {
-    const totalItems = flatItems.length
+  if (evaluationMode === 'exam') {
+    const trackedItems = flatItems.filter((item) => item.type === 'finalExam')
+    const totalItems = trackedItems.length
     let completedItems = 0
 
-    for (const item of flatItems) {
+    for (const item of trackedItems) {
+      if (assessmentSubmissionIds.has(item.id)) {
+        completedItems += 1
+      }
+    }
+
+    return {
+      progressPercentage:
+        totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : stored,
+      completedItems,
+      totalItems,
+      source: 'derived',
+    }
+  }
+
+  if (evaluationMode === 'quizzes') {
+    const trackedItems = flatItems.filter((item) => item.type === 'assessment')
+    const totalItems = trackedItems.length
+    let completedItems = 0
+
+    for (const item of trackedItems) {
+      if (assessmentSubmissionIds.has(item.id)) {
+        completedItems += 1
+      }
+    }
+
+    return {
+      progressPercentage:
+        totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : stored,
+      completedItems,
+      totalItems,
+      source: 'derived',
+    }
+  }
+
+  if (evaluationMode === 'lessons_quizzes') {
+    const trackedItems = flatItems.filter(
+      (item) => item.type === 'lesson' || item.type === 'assessment',
+    )
+    const totalItems = trackedItems.length
+    let completedItems = 0
+
+    for (const item of trackedItems) {
+      if (item.type === 'lesson' && completedLessonIds.has(item.id)) {
+        completedItems += 1
+      } else if (item.type === 'assessment' && assessmentSubmissionIds.has(item.id)) {
+        completedItems += 1
+      }
+    }
+
+    return {
+      progressPercentage:
+        totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : stored,
+      completedItems,
+      totalItems,
+      source: 'derived',
+    }
+  }
+
+  if (evaluationMode === 'quizzes_exam') {
+    const trackedItems = flatItems.filter(
+      (item) => item.type === 'assessment' || item.type === 'finalExam',
+    )
+    const totalItems = trackedItems.length
+    let completedItems = 0
+
+    for (const item of trackedItems) {
+      if (assessmentSubmissionIds.has(item.id)) {
+        completedItems += 1
+      }
+    }
+
+    return {
+      progressPercentage:
+        totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : stored,
+      completedItems,
+      totalItems,
+      source: 'derived',
+    }
+  }
+
+  if (evaluationMode === 'lessons_quizzes_exam') {
+    const trackedItems = flatItems.filter(
+      (item) =>
+        item.type === 'lesson' || item.type === 'assessment' || item.type === 'finalExam',
+    )
+    const totalItems = trackedItems.length
+    let completedItems = 0
+
+    for (const item of trackedItems) {
       if (item.type === 'lesson' && completedLessonIds.has(item.id)) {
         completedItems += 1
       } else if (
         (item.type === 'assessment' || item.type === 'finalExam') &&
         assessmentSubmissionIds.has(item.id)
-      ) {
-        completedItems += 1
-      } else if (
-        item.type === 'assignment' &&
-        submittedAssignmentIds.has(item.id)
       ) {
         completedItems += 1
       }

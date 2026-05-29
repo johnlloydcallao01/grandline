@@ -77,6 +77,8 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request)
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
+    const payloadRequest = request as any
+    payloadRequest.user = user
 
     const { subject, category, priority, message } = body
 
@@ -86,6 +88,8 @@ export async function POST(request: NextRequest) {
 
     const ticket = await payload.create({
       collection: 'support-tickets',
+      req: payloadRequest,
+      user,
       data: {
         subject,
         category,
@@ -95,11 +99,18 @@ export async function POST(request: NextRequest) {
       },
       overrideAccess: true,
     })
+    const ticketId = (ticket as any)?.id
+
+    if (!ticketId) {
+      throw new Error('Ticket creation did not return an ID')
+    }
 
     await payload.create({
       collection: 'support-ticket-messages',
+      req: payloadRequest,
+      user,
       data: {
-        ticket: ticket.id,
+        ticket: ticketId,
         sender: user.id,
         message: createLexicalMessage(message),
         isInternal: false,

@@ -1,10 +1,52 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { getServerToken, getServerUser } from '@/app/actions/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 
-function getChatAuthHeaders(token: string): Record<string, string> {
+export interface AskInstructorQuestion {
+    id: string;
+    subject: string;
+    preview: string;
+    instructor: string;
+    instructorParticipant?: any;
+    status: 'pending' | 'answered' | 'archived';
+    date?: string;
+    createdAt?: string | null;
+    lastMessageAt?: string | null;
+}
+
+export interface AskInstructorThreadMessage {
+    id: string;
+    plainText: string;
+    senderName: string;
+    senderRole?: string;
+    senderId?: string;
+    isMine: boolean;
+    createdAt: string;
+}
+
+export interface AskInstructorThreadData {
+    question: {
+        id: string;
+        subject: string;
+        instructor: string;
+        instructorParticipant?: any;
+        status: 'pending' | 'answered' | 'archived';
+        createdAt?: string | null;
+        lastMessageAt?: string | null;
+    };
+    messages: AskInstructorThreadMessage[];
+}
+
+async function getAskInstructorHeaders() {
+    const token = await getServerToken();
+
+    if (!token) {
+        throw new Error('Unauthorized');
+    }
+
     return {
         'Content-Type': 'application/json',
         'Authorization': `JWT ${token}`,
@@ -12,7 +54,9 @@ function getChatAuthHeaders(token: string): Record<string, string> {
 }
 
 async function getAskInstructorLmsData(params: URLSearchParams) {
+    const headers = await getAskInstructorHeaders();
     const res = await fetch(`${API_BASE_URL}/lms/ask-instructor?${params.toString()}`, {
+        headers,
         cache: 'no-store',
     });
 
@@ -53,178 +97,66 @@ export async function fetchAskInstructorPageData() {
     };
 }
 
-export async function fetchQuestionTopic(chatId: number) {
-    const user = await getServerUser();
-    if (!user) throw new Error('Unauthorized');
-
-    const params = new URLSearchParams({
-        userId: String(user.id),
-        chatId: String(chatId),
-        limit: '1',
-    });
-
-    const data = await getAskInstructorLmsData(params);
-    return data.question || null;
-}
-
 export async function askNewQuestion(instructorUserId: number, subject: string, message: string, courseId?: number) {
-    const token = await getServerToken();
-    const user = await getServerUser();
-    if (!token || !user) throw new Error('Unauthorized');
-
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
-
-    if (token) {
-        headers['Authorization'] = `users JWT ${token}`;
-    } else if (process.env.PAYLOAD_API_KEY) {
-        headers['Authorization'] = `users API-Key ${process.env.PAYLOAD_API_KEY}`;
-    }
-
-    // 1. Create the chat using the Payload REST API (correct endpoint for direct creation)
-    //    participants must be an array of user IDs for the hasMany relationship
-    const chatRes = await fetch(`${API_BASE_URL}/chats`, {
+    const headers = await getAskInstructorHeaders();
+    const chatRes = await fetch(`${API_BASE_URL}/lms/ask-instructor`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            type: 'instructor_trainee',
-            title: subject,
-            status: 'active',
-            participants: [Number(user.id), Number(instructorUserId)],
-            metadata: {
-                isAskInstructor: true,
-                subject,
-                courseId,
-                status: 'pending'
-            }
+            instructorUserId,
+            subject,
+            message,
+            courseId,
         }),
     });
 
     if (!chatRes.ok) {
-        const err = await chatRes.json();
-        throw new Error(err.error || err.errors?.[0]?.message || 'Failed to create chat');
+        const errText = await chatRes.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to create ask instructor question: ${chatRes.status} ${errText}`);
     }
 
     const chatData = await chatRes.json();
-    // Payload REST returns { doc: {...} } on create
-    const chatId = chatData.doc?.id || chatData.id;
-
-    // Convert simple string to Payload Lexical richText JSON
-    const lexicalContent = {
-        root: {
-            type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
-            children: [
-                {
-                    type: 'paragraph',
-                    format: '',
-                    indent: 0,
-                    version: 1,
-                    children: [
-                        {
-                            detail: 0,
-                            format: 0,
-                            mode: 'normal',
-                            style: '',
-                            text: message,
-                            type: 'text',
-                            version: 1
-                        }
-                    ]
-                }
-            ]
-        }
-    };
-
-    // 2. Post the initial message via the custom chat messages endpoint
-    const CMS_BASE_URL_FOR_MSG = API_BASE_URL.replace('/api', '');
-    const msgRes = await fetch(`${CMS_BASE_URL_FOR_MSG}/api/chat/${chatId}/messages`, {
-        method: 'POST',
-        headers: getChatAuthHeaders(token),
-        body: JSON.stringify({
-            content: lexicalContent,
-            type: 'text',
-        }),
-    });
-
-    if (!msgRes.ok) {
-        const err = await msgRes.json();
-        throw new Error(err.error || err.errors?.[0]?.message || 'Failed to post initial message');
-    }
-
+    revalidatePath('/portal/ask-instructor');
     return chatData.doc;
 }
 
-export async function getQuestionMessages(chatId: number) {
-    const token = await getServerToken();
-    if (!token) throw new Error('Unauthorized');
-
-    const CMS_BASE_URL_MSG = API_BASE_URL.replace('/api', '');
-    const res = await fetch(`${CMS_BASE_URL_MSG}/api/chat/${chatId}/messages?direction=forward&limit=100`, {
-        headers: getChatAuthHeaders(token),
+export async function fetchAskInstructorThread(chatId: number): Promise<AskInstructorThreadData | null> {
+    const headers = await getAskInstructorHeaders();
+    const res = await fetch(`${API_BASE_URL}/lms/ask-instructor/${chatId}/thread`, {
+        headers,
         cache: 'no-store',
     });
 
-    if (!res.ok) {
-        throw new Error('Failed to fetch messages');
+    if (res.status === 404 || res.status === 403) {
+        return null;
     }
 
-    const data = await res.json();
-    // The custom /api/chat/[id]/messages endpoint returns { data: { data: [...], hasMore, ... } }
-    return data?.data?.data || [];
+    if (!res.ok) {
+        const errText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to fetch ask instructor thread: ${res.status} ${errText}`);
+    }
+
+    return res.json();
 }
 
 export async function replyToQuestion(chatId: number, content: string) {
-    const token = await getServerToken();
-    if (!token) throw new Error('Unauthorized');
-
-    const lexicalContent = {
-        root: {
-            type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
-            children: [
-                {
-                    type: 'paragraph',
-                    format: '',
-                    indent: 0,
-                    version: 1,
-                    children: [
-                        {
-                            detail: 0,
-                            format: 0,
-                            mode: 'normal',
-                            style: '',
-                            text: content,
-                            type: 'text',
-                            version: 1
-                        }
-                    ]
-                }
-            ]
-        }
-    };
-
-    const CMS_BASE_URL_REPLY = API_BASE_URL.replace('/api', '');
-    const res = await fetch(`${CMS_BASE_URL_REPLY}/api/chat/${chatId}/messages`, {
+    const headers = await getAskInstructorHeaders();
+    const res = await fetch(`${API_BASE_URL}/lms/ask-instructor/${chatId}/messages`, {
         method: 'POST',
-        headers: getChatAuthHeaders(token),
+        headers,
         body: JSON.stringify({
-            content: lexicalContent,
-            type: 'text',
+            message: content,
         }),
     });
 
     if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || err.errors?.[0]?.message || 'Failed to post reply');
+        const errText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to post ask instructor reply: ${res.status} ${errText}`);
     }
 
+    revalidatePath('/portal/ask-instructor');
+    revalidatePath(`/portal/ask-instructor/${chatId}`);
+
     const data = await res.json();
-    // The custom /api/chat/[id]/messages POST returns { data: messageObject }
-    return data.data;
+    return data;
 }
