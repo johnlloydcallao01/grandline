@@ -33,6 +33,7 @@ export const AccountingExpenses: CollectionConfig = {
     { name: 'subtotal', type: 'number', required: true, min: 0, defaultValue: 0 },
     { name: 'taxTotal', type: 'number', defaultValue: 0, admin: { readOnly: true } },
     { name: 'total', type: 'number', defaultValue: 0, admin: { readOnly: true } },
+    { name: 'project', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.projects, index: true },
     { name: 'expenseAccount', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts, required: true },
     { name: 'taxCode', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.taxCodes },
     { name: 'paymentAccount', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts },

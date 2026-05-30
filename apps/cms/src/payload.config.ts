@@ -95,6 +95,24 @@ import { AccountingRevenueRecognitionSchedules } from './accounting/collections/
 import { AccountingScholarshipAwards } from './accounting/collections/AccountingScholarshipAwards'
 import { AccountingCorporateBillingLinks } from './accounting/collections/AccountingCorporateBillingLinks'
 import { AccountingInstructorPayouts } from './accounting/collections/AccountingInstructorPayouts'
+import { AccountingBranches } from './accounting/collections/AccountingBranches'
+import { AccountingDepartments } from './accounting/collections/AccountingDepartments'
+import { AccountingLocations } from './accounting/collections/AccountingLocations'
+import { AccountingProjects } from './accounting/collections/AccountingProjects'
+import { AccountingProjectTasks } from './accounting/collections/AccountingProjectTasks'
+import { AccountingBudgets } from './accounting/collections/AccountingBudgets'
+import { AccountingBudgetLines } from './accounting/collections/AccountingBudgetLines'
+import { AccountingForecastScenarios } from './accounting/collections/AccountingForecastScenarios'
+import { AccountingTimeEntries } from './accounting/collections/AccountingTimeEntries'
+import { AccountingTimesheets } from './accounting/collections/AccountingTimesheets'
+import { AccountingFixedAssets } from './accounting/collections/AccountingFixedAssets'
+import { AccountingDepreciationEntries } from './accounting/collections/AccountingDepreciationEntries'
+import { AccountingAssetDisposals } from './accounting/collections/AccountingAssetDisposals'
+import { AccountingPayrollRuns } from './accounting/collections/AccountingPayrollRuns'
+import { AccountingPayrollEntries } from './accounting/collections/AccountingPayrollEntries'
+import { AccountingApprovalWorkflows } from './accounting/collections/AccountingApprovalWorkflows'
+import { AccountingApprovalRequests } from './accounting/collections/AccountingApprovalRequests'
+import { AccountingAuditLogs } from './accounting/collections/AccountingAuditLogs'
 import { AccountingSettings } from './accounting/globals/AccountingSettings'
 import { postAccountingJournalEntryEndpoint } from './endpoints/accounting/post-journal-entry'
 import { reverseAccountingJournalEntryEndpoint } from './endpoints/accounting/reverse-journal-entry'
@@ -202,6 +220,24 @@ export default buildConfig({
     AccountingScholarshipAwards,
     AccountingCorporateBillingLinks,
     AccountingInstructorPayouts,
+    AccountingBranches,
+    AccountingDepartments,
+    AccountingLocations,
+    AccountingProjects,
+    AccountingProjectTasks,
+    AccountingBudgets,
+    AccountingBudgetLines,
+    AccountingForecastScenarios,
+    AccountingTimeEntries,
+    AccountingTimesheets,
+    AccountingFixedAssets,
+    AccountingDepreciationEntries,
+    AccountingAssetDisposals,
+    AccountingPayrollRuns,
+    AccountingPayrollEntries,
+    AccountingApprovalWorkflows,
+    AccountingApprovalRequests,
+    AccountingAuditLogs,
 
     // Learning Management System
     Courses,

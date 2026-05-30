@@ -37,6 +37,24 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   instructorPayoutRules: 'accounting-instructor-payout-rules',
   instructorPayouts: 'accounting-instructor-payouts',
   courseFeeProfiles: 'accounting-course-fee-profiles',
+  branches: 'accounting-branches',
+  departments: 'accounting-departments',
+  locations: 'accounting-locations',
+  projects: 'accounting-projects',
+  projectTasks: 'accounting-project-tasks',
+  timeEntries: 'accounting-time-entries',
+  timesheets: 'accounting-timesheets',
+  budgets: 'accounting-budgets',
+  budgetLines: 'accounting-budget-lines',
+  forecastScenarios: 'accounting-forecast-scenarios',
+  fixedAssets: 'accounting-fixed-assets',
+  depreciationEntries: 'accounting-depreciation-entries',
+  assetDisposals: 'accounting-asset-disposals',
+  payrollRuns: 'accounting-payroll-runs',
+  payrollEntries: 'accounting-payroll-entries',
+  approvalWorkflows: 'accounting-approval-workflows',
+  approvalRequests: 'accounting-approval-requests',
+  auditLogs: 'accounting-audit-logs',
 } as const
 
 export const ACCOUNTING_GLOBAL_SLUGS = {
@@ -237,6 +255,23 @@ export const ACCOUNTING_ENTITY_TYPE_OPTIONS = [
   { label: 'Scholarship Award', value: 'scholarship_award' },
   { label: 'Corporate Billing Link', value: 'corporate_billing_link' },
   { label: 'Instructor Payout', value: 'instructor_payout' },
+  { label: 'Branch', value: 'branch' },
+  { label: 'Department', value: 'department' },
+  { label: 'Location', value: 'location' },
+  { label: 'Project', value: 'project' },
+  { label: 'Project Task', value: 'project_task' },
+  { label: 'Time Entry', value: 'time_entry' },
+  { label: 'Timesheet', value: 'timesheet' },
+  { label: 'Budget', value: 'budget' },
+  { label: 'Forecast Scenario', value: 'forecast_scenario' },
+  { label: 'Fixed Asset', value: 'fixed_asset' },
+  { label: 'Depreciation Entry', value: 'depreciation_entry' },
+  { label: 'Asset Disposal', value: 'asset_disposal' },
+  { label: 'Payroll Run', value: 'payroll_run' },
+  { label: 'Payroll Entry', value: 'payroll_entry' },
+  { label: 'Approval Workflow', value: 'approval_workflow' },
+  { label: 'Approval Request', value: 'approval_request' },
+  { label: 'Audit Log', value: 'audit_log' },
 ] as const
 
 export const INVOICE_ITEM_TYPE_OPTIONS = [
@@ -348,6 +383,181 @@ export const LMS_PAYOUT_STATUS_OPTIONS = [
   { label: 'Approved', value: 'approved' },
   { label: 'Paid', value: 'paid' },
   { label: 'Voided', value: 'voided' },
+] as const
+
+export const ACCOUNTING_DIMENSION_STATUS_OPTIONS = [
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' },
+  { label: 'Archived', value: 'archived' },
+] as const
+
+export const ACCOUNTING_PROJECT_TYPE_OPTIONS = [
+  { label: 'Internal', value: 'internal' },
+  { label: 'Customer Project', value: 'customer_project' },
+  { label: 'Training Delivery', value: 'training_delivery' },
+  { label: 'Implementation', value: 'implementation' },
+] as const
+
+export const ACCOUNTING_PROJECT_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Active', value: 'active' },
+  { label: 'On Hold', value: 'on_hold' },
+  { label: 'Completed', value: 'completed' },
+  { label: 'Cancelled', value: 'cancelled' },
+] as const
+
+export const ACCOUNTING_PROJECT_TASK_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Open', value: 'open' },
+  { label: 'In Progress', value: 'in_progress' },
+  { label: 'Completed', value: 'completed' },
+  { label: 'Cancelled', value: 'cancelled' },
+] as const
+
+export const ACCOUNTING_TIME_ENTRY_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Submitted', value: 'submitted' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Posted', value: 'posted' },
+] as const
+
+export const ACCOUNTING_TIME_ENTRY_SOURCE_TYPE_OPTIONS = [
+  { label: 'Manual', value: 'manual' },
+  { label: 'Timer', value: 'timer' },
+  { label: 'Course Delivery', value: 'course_delivery' },
+  { label: 'Project Work', value: 'project_work' },
+  { label: 'Support', value: 'support' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const ACCOUNTING_TIMESHEET_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Submitted', value: 'submitted' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Locked', value: 'locked' },
+] as const
+
+export const ACCOUNTING_BUDGET_TYPE_OPTIONS = [
+  { label: 'Annual', value: 'annual' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Project', value: 'project' },
+  { label: 'Department', value: 'department' },
+  { label: 'Course Category', value: 'course_category' },
+] as const
+
+export const ACCOUNTING_BUDGET_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Locked', value: 'locked' },
+  { label: 'Archived', value: 'archived' },
+] as const
+
+export const ACCOUNTING_SCENARIO_TYPE_OPTIONS = [
+  { label: 'Base Case', value: 'base_case' },
+  { label: 'Best Case', value: 'best_case' },
+  { label: 'Worst Case', value: 'worst_case' },
+  { label: 'Custom', value: 'custom' },
+] as const
+
+export const ACCOUNTING_SCENARIO_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Archived', value: 'archived' },
+] as const
+
+export const ACCOUNTING_FIXED_ASSET_CATEGORY_OPTIONS = [
+  { label: 'Equipment', value: 'equipment' },
+  { label: 'Furniture', value: 'furniture' },
+  { label: 'IT Infrastructure', value: 'it_infrastructure' },
+  { label: 'Vehicle', value: 'vehicle' },
+  { label: 'Leasehold Improvement', value: 'leasehold_improvement' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const ACCOUNTING_DEPRECIATION_METHOD_OPTIONS = [
+  { label: 'Straight Line', value: 'straight_line' },
+  { label: 'Manual', value: 'manual' },
+] as const
+
+export const ACCOUNTING_FIXED_ASSET_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Active', value: 'active' },
+  { label: 'Fully Depreciated', value: 'fully_depreciated' },
+  { label: 'Disposed', value: 'disposed' },
+  { label: 'Written Off', value: 'written_off' },
+] as const
+
+export const ACCOUNTING_DEPRECIATION_ENTRY_STATUS_OPTIONS = [
+  { label: 'Scheduled', value: 'scheduled' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Reversed', value: 'reversed' },
+] as const
+
+export const ACCOUNTING_ASSET_DISPOSAL_TYPE_OPTIONS = [
+  { label: 'Sale', value: 'sale' },
+  { label: 'Write Off', value: 'write_off' },
+  { label: 'Scrap', value: 'scrap' },
+  { label: 'Transfer', value: 'transfer' },
+] as const
+
+export const ACCOUNTING_ASSET_DISPOSAL_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const ACCOUNTING_PAYROLL_RUN_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Review', value: 'review' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const ACCOUNTING_PAYROLL_ENTRY_TYPE_OPTIONS = [
+  { label: 'Salary', value: 'salary' },
+  { label: 'Contractor', value: 'contractor' },
+  { label: 'Reimbursement', value: 'reimbursement' },
+  { label: 'Adjustment', value: 'adjustment' },
+] as const
+
+export const ACCOUNTING_PAYROLL_ENTRY_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const ACCOUNTING_APPROVAL_ENTITY_TYPE_OPTIONS = [
+  { label: 'Invoice', value: 'invoice' },
+  { label: 'Bill', value: 'bill' },
+  { label: 'Expense', value: 'expense' },
+  { label: 'Journal', value: 'journal' },
+  { label: 'Budget', value: 'budget' },
+  { label: 'Asset Disposal', value: 'asset_disposal' },
+  { label: 'Timesheet', value: 'timesheet' },
+  { label: 'Payroll Run', value: 'payroll_run' },
+] as const
+
+export const ACCOUNTING_APPROVAL_REQUEST_STATUS_OPTIONS = [
+  { label: 'Pending', value: 'pending' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Cancelled', value: 'cancelled' },
+] as const
+
+export const ACCOUNTING_FINANCE_AUDIT_ACTION_OPTIONS = [
+  { label: 'Created', value: 'created' },
+  { label: 'Updated', value: 'updated' },
+  { label: 'Submitted', value: 'submitted' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Reversed', value: 'reversed' },
+  { label: 'Voided', value: 'voided' },
+  { label: 'Exported', value: 'exported' },
 ] as const
 
 export const DEFAULT_ACCOUNTING_SETTINGS = {

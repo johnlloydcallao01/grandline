@@ -27,6 +27,7 @@ export const AccountingInvoices: CollectionConfig = {
   fields: [
     { name: 'invoiceNumber', type: 'text', required: true, unique: true, index: true },
     { name: 'customer', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.customers, required: true, index: true },
+    { name: 'project', type: 'relationship', relationTo: ACCOUNTING_COLLECTION_SLUGS.projects, index: true },
     { name: 'invoiceDate', type: 'date', required: true, defaultValue: () => new Date().toISOString() },
     { name: 'postingDate', type: 'date', required: true, defaultValue: () => new Date().toISOString() },
     { name: 'dueDate', type: 'date', required: true },

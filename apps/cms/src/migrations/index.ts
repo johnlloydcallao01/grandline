@@ -105,6 +105,7 @@ import * as migration_20260523_024707_phase_1_accounting_reversal_audit from './
 import * as migration_20260530_033359_phase_2_accounting_commercial from './20260530_033359_phase_2_accounting_commercial';
 import * as migration_20260530_060527_phase_2_accounting_completion from './20260530_060527_phase_2_accounting_completion';
 import * as migration_20260530_065034_phase_3_accounting_lms_monetization from './20260530_065034_phase_3_accounting_lms_monetization';
+import * as migration_20260530_132756_phase_4_accounting_operational_finance from './20260530_132756_phase_4_accounting_operational_finance';
 
 export const migrations = [
   {
@@ -640,6 +641,11 @@ export const migrations = [
   {
     up: migration_20260530_065034_phase_3_accounting_lms_monetization.up,
     down: migration_20260530_065034_phase_3_accounting_lms_monetization.down,
-    name: '20260530_065034_phase_3_accounting_lms_monetization'
+    name: '20260530_065034_phase_3_accounting_lms_monetization',
+  },
+  {
+    up: migration_20260530_132756_phase_4_accounting_operational_finance.up,
+    down: migration_20260530_132756_phase_4_accounting_operational_finance.down,
+    name: '20260530_132756_phase_4_accounting_operational_finance'
   },
 ];
