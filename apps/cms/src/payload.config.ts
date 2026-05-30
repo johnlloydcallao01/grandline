@@ -65,6 +65,36 @@ import { AccountingPeriods } from './accounting/collections/AccountingPeriods'
 import { AccountingTaxCodes } from './accounting/collections/AccountingTaxCodes'
 import { AccountingJournalEntries } from './accounting/collections/AccountingJournalEntries'
 import { AccountingJournalEntryLines } from './accounting/collections/AccountingJournalEntryLines'
+import { AccountingCustomers } from './accounting/collections/AccountingCustomers'
+import { AccountingVendors } from './accounting/collections/AccountingVendors'
+import { AccountingInvoices } from './accounting/collections/AccountingInvoices'
+import { AccountingInvoiceLineItems } from './accounting/collections/AccountingInvoiceLineItems'
+import { AccountingBills } from './accounting/collections/AccountingBills'
+import { AccountingBillLineItems } from './accounting/collections/AccountingBillLineItems'
+import { AccountingCreditNotes } from './accounting/collections/AccountingCreditNotes'
+import { AccountingVendorCredits } from './accounting/collections/AccountingVendorCredits'
+import { AccountingPaymentsReceived } from './accounting/collections/AccountingPaymentsReceived'
+import { AccountingPaymentsMade } from './accounting/collections/AccountingPaymentsMade'
+import { AccountingExpenses } from './accounting/collections/AccountingExpenses'
+import { AccountingBankAccounts } from './accounting/collections/AccountingBankAccounts'
+import { AccountingBankTransactions } from './accounting/collections/AccountingBankTransactions'
+import { AccountingBankReconciliations } from './accounting/collections/AccountingBankReconciliations'
+import { AccountingDeposits } from './accounting/collections/AccountingDeposits'
+import { AccountingTransfers } from './accounting/collections/AccountingTransfers'
+import { AccountingDocumentLinks } from './accounting/collections/AccountingDocumentLinks'
+import { AccountingCourseFeeProfiles } from './accounting/collections/AccountingCourseFeeProfiles'
+import { AccountingScholarshipSponsors } from './accounting/collections/AccountingScholarshipSponsors'
+import { AccountingCorporateAccounts } from './accounting/collections/AccountingCorporateAccounts'
+import { AccountingInstructorPayoutRules } from './accounting/collections/AccountingInstructorPayoutRules'
+import { AccountingEnrollmentBillingLinks } from './accounting/collections/AccountingEnrollmentBillingLinks'
+import { AccountingBillingAdjustments } from './accounting/collections/AccountingBillingAdjustments'
+import { AccountingPaymentAllocations } from './accounting/collections/AccountingPaymentAllocations'
+import { AccountingReceipts } from './accounting/collections/AccountingReceipts'
+import { AccountingRefunds } from './accounting/collections/AccountingRefunds'
+import { AccountingRevenueRecognitionSchedules } from './accounting/collections/AccountingRevenueRecognitionSchedules'
+import { AccountingScholarshipAwards } from './accounting/collections/AccountingScholarshipAwards'
+import { AccountingCorporateBillingLinks } from './accounting/collections/AccountingCorporateBillingLinks'
+import { AccountingInstructorPayouts } from './accounting/collections/AccountingInstructorPayouts'
 import { AccountingSettings } from './accounting/globals/AccountingSettings'
 import { postAccountingJournalEntryEndpoint } from './endpoints/accounting/post-journal-entry'
 import { reverseAccountingJournalEntryEndpoint } from './endpoints/accounting/reverse-journal-entry'
@@ -142,6 +172,36 @@ export default buildConfig({
     AccountingTaxCodes,
     AccountingJournalEntries,
     AccountingJournalEntryLines,
+    AccountingCustomers,
+    AccountingVendors,
+    AccountingBankAccounts,
+    AccountingInvoices,
+    AccountingInvoiceLineItems,
+    AccountingBills,
+    AccountingBillLineItems,
+    AccountingCreditNotes,
+    AccountingVendorCredits,
+    AccountingPaymentsReceived,
+    AccountingPaymentsMade,
+    AccountingExpenses,
+    AccountingDeposits,
+    AccountingTransfers,
+    AccountingBankTransactions,
+    AccountingBankReconciliations,
+    AccountingDocumentLinks,
+    AccountingCourseFeeProfiles,
+    AccountingScholarshipSponsors,
+    AccountingCorporateAccounts,
+    AccountingInstructorPayoutRules,
+    AccountingEnrollmentBillingLinks,
+    AccountingBillingAdjustments,
+    AccountingPaymentAllocations,
+    AccountingReceipts,
+    AccountingRefunds,
+    AccountingRevenueRecognitionSchedules,
+    AccountingScholarshipAwards,
+    AccountingCorporateBillingLinks,
+    AccountingInstructorPayouts,
 
     // Learning Management System
     Courses,

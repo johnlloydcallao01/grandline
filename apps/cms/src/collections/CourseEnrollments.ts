@@ -1,6 +1,7 @@
 import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
 import { createNotificationFanout } from '../utils/notificationFanout'
+import { AccountingLmsBridgeSyncService } from '../accounting/services/enrollment-billing/AccountingLmsBridgeSyncService'
 
 export const CourseEnrollments: CollectionConfig = {
   slug: 'course-enrollments',
@@ -365,6 +366,27 @@ export const CourseEnrollments: CollectionConfig = {
       async ({ doc, operation, req, previousDoc }) => {
         const currentStatus = typeof doc.status === 'string' ? doc.status : ''
         const previousStatus = typeof previousDoc?.status === 'string' ? previousDoc.status : ''
+        const payload = req.payload
+
+        try {
+          const recognitionTrigger =
+            currentStatus === 'completed'
+              ? 'completion'
+              : currentStatus === 'active'
+                ? 'activation'
+                : 'schedule_only'
+
+          await AccountingLmsBridgeSyncService.syncEnrollmentArtifacts({
+            payload,
+            enrollmentId: doc.id,
+            userId: req.user?.id,
+            createZeroValueInvoice: false,
+            autoPost: false,
+            recognitionTrigger,
+          })
+        } catch (accountingError) {
+          console.error('[CourseEnrollments Hook] Failed to sync LMS accounting bridge:', accountingError)
+        }
 
         const shouldNotifyActive =
           currentStatus === 'active' &&
@@ -377,8 +399,6 @@ export const CourseEnrollments: CollectionConfig = {
         if (!shouldNotifyActive && !shouldNotifyPending) return
 
         try {
-          const payload = req.payload
-
           // 1. Get trainee's user ID
           const studentId = typeof doc.student === 'object' ? doc.student.id : doc.student
           const trainee = await payload.findByID({

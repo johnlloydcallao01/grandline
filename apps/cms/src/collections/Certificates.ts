@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly } from '../access'
+import {
+  AccountingCertificateMonetizationService,
+  CERTIFICATE_ACCOUNTING_CONTEXT_KEY,
+} from '../accounting/services/certificates/AccountingCertificateMonetizationService'
 
 export const Certificates: CollectionConfig = {
   slug: 'certificates',
@@ -131,4 +135,25 @@ export const Certificates: CollectionConfig = {
       required: true,
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, req, context }) => {
+        if (context?.[CERTIFICATE_ACCOUNTING_CONTEXT_KEY]) {
+          return doc
+        }
+
+        try {
+          await AccountingCertificateMonetizationService.syncCertificateAccounting({
+            payload: req.payload,
+            certificateId: doc.id,
+            userId: req.user?.id,
+          })
+        } catch (error) {
+          console.error('[Certificates Hook] Failed to sync certificate accounting:', error)
+        }
+
+        return doc
+      },
+    ],
+  },
 }

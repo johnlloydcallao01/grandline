@@ -41,6 +41,103 @@ export const AccountingSettings: GlobalConfig = {
       defaultValue: DEFAULT_ACCOUNTING_SETTINGS.journalNumberPrefix,
     },
     {
+      type: 'row',
+      fields: [
+        {
+          name: 'customerNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.customerNumberPrefix,
+        },
+        {
+          name: 'vendorNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.vendorNumberPrefix,
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'invoiceNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.invoiceNumberPrefix,
+        },
+        {
+          name: 'billNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.billNumberPrefix,
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'paymentReceivedNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.paymentReceivedNumberPrefix,
+        },
+        {
+          name: 'paymentMadeNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.paymentMadeNumberPrefix,
+        },
+        {
+          name: 'officialReceiptNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.officialReceiptNumberPrefix,
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'creditNoteNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.creditNoteNumberPrefix,
+        },
+        {
+          name: 'vendorCreditNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.vendorCreditNumberPrefix,
+        },
+        {
+          name: 'refundNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.refundNumberPrefix,
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'depositNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.depositNumberPrefix,
+        },
+        {
+          name: 'transferNumberPrefix',
+          type: 'text',
+          required: true,
+          defaultValue: DEFAULT_ACCOUNTING_SETTINGS.transferNumberPrefix,
+        },
+      ],
+    },
+    {
       name: 'openingBalanceSourceType',
       type: 'select',
       required: true,
@@ -49,6 +146,31 @@ export const AccountingSettings: GlobalConfig = {
     },
     {
       name: 'defaultSuspenseAccount',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+    },
+    {
+      name: 'defaultReceivableAccount',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+    },
+    {
+      name: 'defaultPayableAccount',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+    },
+    {
+      name: 'defaultUndepositedFundsAccount',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+    },
+    {
+      name: 'defaultOutputTaxAccount',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+    },
+    {
+      name: 'defaultInputTaxAccount',
       type: 'relationship',
       relationTo: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
     },
@@ -85,9 +207,28 @@ export const AccountingSettings: GlobalConfig = {
           return data
         }
 
-        data.journalNumberPrefix = String(data.journalNumberPrefix || DEFAULT_ACCOUNTING_SETTINGS.journalNumberPrefix)
-          .trim()
-          .toUpperCase()
+        const prefixFields = [
+          'journalNumberPrefix',
+          'customerNumberPrefix',
+          'vendorNumberPrefix',
+          'invoiceNumberPrefix',
+          'billNumberPrefix',
+          'paymentReceivedNumberPrefix',
+          'paymentMadeNumberPrefix',
+          'officialReceiptNumberPrefix',
+          'creditNoteNumberPrefix',
+          'vendorCreditNumberPrefix',
+          'refundNumberPrefix',
+          'depositNumberPrefix',
+          'transferNumberPrefix',
+        ] as const
+
+        for (const field of prefixFields) {
+          data[field] = String(data[field] || DEFAULT_ACCOUNTING_SETTINGS[field] || '')
+            .trim()
+            .toUpperCase()
+        }
+
         data.updatedBy = getRequestUserId(req)
 
         return data

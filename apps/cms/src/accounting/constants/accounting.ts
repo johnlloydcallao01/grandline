@@ -7,6 +7,36 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   taxCodes: 'accounting-tax-codes',
   journalEntries: 'accounting-journal-entries',
   journalEntryLines: 'accounting-journal-entry-lines',
+  customers: 'accounting-customers',
+  vendors: 'accounting-vendors',
+  invoices: 'accounting-invoices',
+  invoiceLineItems: 'accounting-invoice-line-items',
+  bills: 'accounting-bills',
+  billLineItems: 'accounting-bill-line-items',
+  paymentsReceived: 'accounting-payments-received',
+  paymentsMade: 'accounting-payments-made',
+  expenses: 'accounting-expenses',
+  creditNotes: 'accounting-credit-notes',
+  vendorCredits: 'accounting-vendor-credits',
+  bankAccounts: 'accounting-bank-accounts',
+  bankTransactions: 'accounting-bank-transactions',
+  bankReconciliations: 'accounting-bank-reconciliations',
+  deposits: 'accounting-deposits',
+  transfers: 'accounting-transfers',
+  documentLinks: 'accounting-document-links',
+  enrollmentBillingLinks: 'accounting-enrollment-billing-links',
+  paymentAllocations: 'accounting-payment-allocations',
+  receipts: 'accounting-receipts',
+  refunds: 'accounting-refunds',
+  billingAdjustments: 'accounting-billing-adjustments',
+  revenueRecognitionSchedules: 'accounting-revenue-recognition-schedules',
+  scholarshipSponsors: 'accounting-scholarship-sponsors',
+  scholarshipAwards: 'accounting-scholarship-awards',
+  corporateAccounts: 'accounting-corporate-accounts',
+  corporateBillingLinks: 'accounting-corporate-billing-links',
+  instructorPayoutRules: 'accounting-instructor-payout-rules',
+  instructorPayouts: 'accounting-instructor-payouts',
+  courseFeeProfiles: 'accounting-course-fee-profiles',
 } as const
 
 export const ACCOUNTING_GLOBAL_SLUGS = {
@@ -99,17 +129,259 @@ export const POSTING_STATUS_OPTIONS = [
   { label: 'Voided', value: 'voided' },
 ] as const
 
+export const ACCOUNTING_PARTY_STATUS_OPTIONS = [
+  { label: 'Active', value: 'active' },
+  { label: 'On Hold', value: 'on_hold' },
+  { label: 'Inactive', value: 'inactive' },
+  { label: 'Archived', value: 'archived' },
+] as const
+
+export const CUSTOMER_TYPE_OPTIONS = [
+  { label: 'Individual', value: 'individual' },
+  { label: 'Company', value: 'company' },
+  { label: 'Sponsor', value: 'sponsor' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const VENDOR_TYPE_OPTIONS = [
+  { label: 'Supplier', value: 'supplier' },
+  { label: 'Contractor', value: 'contractor' },
+  { label: 'Utility', value: 'utility' },
+  { label: 'Government', value: 'government' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const DOCUMENT_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Partially Paid', value: 'partially_paid' },
+  { label: 'Paid', value: 'paid' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const SIMPLE_POSTING_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const BANK_RECONCILIATION_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'In Progress', value: 'in_progress' },
+  { label: 'Completed', value: 'completed' },
+  { label: 'Locked', value: 'locked' },
+] as const
+
+export const PAYMENT_METHOD_OPTIONS = [
+  { label: 'Cash', value: 'cash' },
+  { label: 'Bank Transfer', value: 'bank_transfer' },
+  { label: 'Check', value: 'check' },
+  { label: 'Card', value: 'card' },
+  { label: 'E-Wallet', value: 'e_wallet' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const EXPENSE_PAYMENT_METHOD_OPTIONS = [
+  { label: 'Cash', value: 'cash' },
+  { label: 'Bank', value: 'bank' },
+  { label: 'Card', value: 'card' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const BANK_ACCOUNT_TYPE_OPTIONS = [
+  { label: 'Bank', value: 'bank' },
+  { label: 'Cash On Hand', value: 'cash_on_hand' },
+  { label: 'Undeposited Funds', value: 'undeposited_funds' },
+] as const
+
+export const BANK_TRANSACTION_MATCH_STATUS_OPTIONS = [
+  { label: 'Unmatched', value: 'unmatched' },
+  { label: 'Suggested', value: 'suggested' },
+  { label: 'Matched', value: 'matched' },
+  { label: 'Ignored', value: 'ignored' },
+] as const
+
+export const ACCOUNTING_DOCUMENT_CATEGORY_OPTIONS = [
+  { label: 'Invoice', value: 'invoice' },
+  { label: 'Bill', value: 'bill' },
+  { label: 'Receipt', value: 'receipt' },
+  { label: 'Proof Of Payment', value: 'proof_of_payment' },
+  { label: 'Expense Receipt', value: 'expense_receipt' },
+  { label: 'Bank Statement', value: 'bank_statement' },
+  { label: 'Contract', value: 'contract' },
+  { label: 'Tax', value: 'tax' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const ACCOUNTING_ENTITY_TYPE_OPTIONS = [
+  { label: 'Customer', value: 'customer' },
+  { label: 'Vendor', value: 'vendor' },
+  { label: 'Invoice', value: 'invoice' },
+  { label: 'Bill', value: 'bill' },
+  { label: 'Payment Received', value: 'payment_received' },
+  { label: 'Payment Made', value: 'payment_made' },
+  { label: 'Expense', value: 'expense' },
+  { label: 'Credit Note', value: 'credit_note' },
+  { label: 'Vendor Credit', value: 'vendor_credit' },
+  { label: 'Bank Transaction', value: 'bank_transaction' },
+  { label: 'Bank Reconciliation', value: 'bank_reconciliation' },
+  { label: 'Deposit', value: 'deposit' },
+  { label: 'Transfer', value: 'transfer' },
+  { label: 'Journal Entry', value: 'journal_entry' },
+  { label: 'Enrollment Billing Link', value: 'enrollment_billing_link' },
+  { label: 'Payment Allocation', value: 'payment_allocation' },
+  { label: 'Receipt', value: 'receipt' },
+  { label: 'Refund', value: 'refund' },
+  { label: 'Revenue Recognition Schedule', value: 'revenue_recognition_schedule' },
+  { label: 'Scholarship Award', value: 'scholarship_award' },
+  { label: 'Corporate Billing Link', value: 'corporate_billing_link' },
+  { label: 'Instructor Payout', value: 'instructor_payout' },
+] as const
+
+export const INVOICE_ITEM_TYPE_OPTIONS = [
+  { label: 'Service', value: 'service' },
+  { label: 'Product', value: 'product' },
+  { label: 'Fee', value: 'fee' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const LMS_BILLING_STATUS_OPTIONS = [
+  { label: 'Not Started', value: 'not_started' },
+  { label: 'Drafted', value: 'drafted' },
+  { label: 'Invoiced', value: 'invoiced' },
+  { label: 'Partially Paid', value: 'partially_paid' },
+  { label: 'Paid', value: 'paid' },
+  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Refunded', value: 'refunded' },
+] as const
+
+export const LMS_ALLOCATION_TYPE_OPTIONS = [
+  { label: 'Invoice Settlement', value: 'invoice_settlement' },
+  { label: 'Deposit Application', value: 'deposit_application' },
+  { label: 'Installment Payment', value: 'installment_payment' },
+  { label: 'Refund Reversal', value: 'refund_reversal' },
+  { label: 'Manual Adjustment', value: 'manual_adjustment' },
+] as const
+
+export const LMS_RECEIPT_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Issued', value: 'issued' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const LMS_REFUND_TYPE_OPTIONS = [
+  { label: 'Full', value: 'full' },
+  { label: 'Partial', value: 'partial' },
+  { label: 'Credit Only', value: 'credit_only' },
+] as const
+
+export const LMS_REFUND_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Requested', value: 'requested' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Processed', value: 'processed' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
+export const LMS_ADJUSTMENT_TYPE_OPTIONS = [
+  { label: 'Manual Discount', value: 'manual_discount' },
+  { label: 'Manual Surcharge', value: 'manual_surcharge' },
+  { label: 'Late Fee', value: 'late_fee' },
+  { label: 'Certificate Fee', value: 'certificate_fee' },
+  { label: 'Retake Fee', value: 'retake_fee' },
+  { label: 'Reassessment Fee', value: 'reassessment_fee' },
+  { label: 'Renewal Fee', value: 'renewal_fee' },
+] as const
+
+export const LMS_ADJUSTMENT_DIRECTION_OPTIONS = [
+  { label: 'Increase', value: 'increase' },
+  { label: 'Decrease', value: 'decrease' },
+] as const
+
+export const LMS_RECOGNITION_METHOD_OPTIONS = [
+  { label: 'On Activation', value: 'on_activation' },
+  { label: 'Straight Line', value: 'straight_line' },
+  { label: 'Completion Based', value: 'completion_based' },
+  { label: 'Certificate Based', value: 'certificate_based' },
+  { label: 'Manual', value: 'manual' },
+] as const
+
+export const LMS_RECOGNITION_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Scheduled', value: 'scheduled' },
+  { label: 'Partially Recognized', value: 'partially_recognized' },
+  { label: 'Recognized', value: 'recognized' },
+  { label: 'Cancelled', value: 'cancelled' },
+] as const
+
+export const LMS_SPONSOR_STATUS_OPTIONS = [
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' },
+  { label: 'Archived', value: 'archived' },
+] as const
+
+export const LMS_SCHOLARSHIP_AWARD_TYPE_OPTIONS = [
+  { label: 'Full', value: 'full' },
+  { label: 'Partial', value: 'partial' },
+  { label: 'Contra Revenue', value: 'contra_revenue' },
+  { label: 'Third Party Billed', value: 'third_party_billed' },
+] as const
+
+export const LMS_COVERAGE_TYPE_OPTIONS = [
+  { label: 'Full Company Pay', value: 'full_company_pay' },
+  { label: 'Shared Pay', value: 'shared_pay' },
+  { label: 'Credit Terms', value: 'credit_terms' },
+] as const
+
+export const LMS_PAYOUT_METHOD_OPTIONS = [
+  { label: 'Flat', value: 'flat' },
+  { label: 'Revenue Share', value: 'revenue_share' },
+  { label: 'Per Enrollment', value: 'per_enrollment' },
+  { label: 'Hybrid', value: 'hybrid' },
+] as const
+
+export const LMS_PAYOUT_STATUS_OPTIONS = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'Calculated', value: 'calculated' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Paid', value: 'paid' },
+  { label: 'Voided', value: 'voided' },
+] as const
+
 export const DEFAULT_ACCOUNTING_SETTINGS = {
   baseCurrency: 'PHP',
   timezone: 'Asia/Manila',
   journalNumberPrefix: 'JE',
+  invoiceNumberPrefix: 'INV',
+  billNumberPrefix: 'BILL',
+  paymentReceivedNumberPrefix: 'RCPT',
+  paymentMadeNumberPrefix: 'PAY',
+  officialReceiptNumberPrefix: 'OR',
+  creditNoteNumberPrefix: 'CN',
+  vendorCreditNumberPrefix: 'VCN',
+  refundNumberPrefix: 'REF',
+  depositNumberPrefix: 'DEP',
+  transferNumberPrefix: 'TRF',
+  customerNumberPrefix: 'CUST',
+  vendorNumberPrefix: 'VEND',
   openingBalanceSourceType: 'opening_balance',
   allowBackdatedPosting: false,
   defaultTaxBehavior: 'exclusive',
+  defaultReceivableAccount: null,
+  defaultPayableAccount: null,
+  defaultUndepositedFundsAccount: null,
+  defaultOutputTaxAccount: null,
+  defaultInputTaxAccount: null,
 } as const
 
 export const ACCOUNTING_HOOK_CONTEXT = {
   skipJournalTotalsSync: 'skipJournalTotalsSync',
   skipPostedImmutability: 'skipPostedImmutability',
   skipReversalSync: 'skipReversalSync',
+  skipInvoiceTotalsSync: 'skipInvoiceTotalsSync',
+  skipBillTotalsSync: 'skipBillTotalsSync',
+  skipInvoiceBalanceSync: 'skipInvoiceBalanceSync',
+  skipBillBalanceSync: 'skipBillBalanceSync',
 } as const

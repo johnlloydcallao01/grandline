@@ -102,6 +102,9 @@ import * as migration_20260518_120000_add_security_alert_email_preference from '
 import * as migration_20260519_084138_add_coupon_codes_system from './20260519_084138_add_coupon_codes_system';
 import * as migration_20260522_113259_phase_1_accounting_foundation from './20260522_113259_phase_1_accounting_foundation';
 import * as migration_20260523_024707_phase_1_accounting_reversal_audit from './20260523_024707_phase_1_accounting_reversal_audit';
+import * as migration_20260530_033359_phase_2_accounting_commercial from './20260530_033359_phase_2_accounting_commercial';
+import * as migration_20260530_060527_phase_2_accounting_completion from './20260530_060527_phase_2_accounting_completion';
+import * as migration_20260530_065034_phase_3_accounting_lms_monetization from './20260530_065034_phase_3_accounting_lms_monetization';
 
 export const migrations = [
   {
@@ -622,6 +625,21 @@ export const migrations = [
   {
     up: migration_20260523_024707_phase_1_accounting_reversal_audit.up,
     down: migration_20260523_024707_phase_1_accounting_reversal_audit.down,
-    name: '20260523_024707_phase_1_accounting_reversal_audit'
+    name: '20260523_024707_phase_1_accounting_reversal_audit',
+  },
+  {
+    up: migration_20260530_033359_phase_2_accounting_commercial.up,
+    down: migration_20260530_033359_phase_2_accounting_commercial.down,
+    name: '20260530_033359_phase_2_accounting_commercial',
+  },
+  {
+    up: migration_20260530_060527_phase_2_accounting_completion.up,
+    down: migration_20260530_060527_phase_2_accounting_completion.down,
+    name: '20260530_060527_phase_2_accounting_completion',
+  },
+  {
+    up: migration_20260530_065034_phase_3_accounting_lms_monetization.up,
+    down: migration_20260530_065034_phase_3_accounting_lms_monetization.down,
+    name: '20260530_065034_phase_3_accounting_lms_monetization'
   },
 ];
