@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Header, Sidebar } from "@/components/layout";
+import { AccountingSidebar, Header, Sidebar } from "@/components/layout";
 
 interface AdminDashboardProps {
   children?: React.ReactNode;
@@ -36,6 +36,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
 
   // Check if we are on the builder page
   const isBuilderPage = pathname?.startsWith('/certifications/builder');
+  const isAccountingPage = pathname?.startsWith('/accounting');
 
   // Automatically close sidebar on builder page
   useEffect(() => {
@@ -68,10 +69,17 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
           />
         )}
         {!isBuilderPage && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onToggle={toggleSidebar}
-          />
+          isAccountingPage ? (
+            <AccountingSidebar
+              isOpen={sidebarOpen}
+              onToggle={toggleSidebar}
+            />
+          ) : (
+            <Sidebar
+              isOpen={sidebarOpen}
+              onToggle={toggleSidebar}
+            />
+          )
         )}
         <main className={`transition-all duration-300 ${!isBuilderPage && sidebarOpen ? 'lg:ml-60' : !isBuilderPage ? 'lg:ml-20' : ''}`}>
           <div className={`min-h-full ${!isBuilderPage ? 'px-[10px]' : ''}`}>

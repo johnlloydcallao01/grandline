@@ -49,6 +49,20 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         />
                     </div>
 
+                    {isOpen && <hr className="border-gray-200" />}
+
+                    {/* 2. ACCOUNTING */}
+                    <div className="space-y-1">
+                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Accounting</div>}
+                        <SidebarItem
+                            icon="transaction"
+                            label="Accounting Dashboard"
+                            active={pathname?.startsWith('/accounting')}
+                            collapsed={!isOpen}
+                            href="/accounting/dashboard"
+                        />
+                    </div>
+
 
 
                     {/* 3. TRAINEES */}
@@ -214,69 +228,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             active={pathname?.startsWith('/reviews')}
                             collapsed={!isOpen}
                             href="/reviews"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 8. ACCOUNTING */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Accounting</div>}
-                        <SidebarItem
-                            icon="audit"
-                            label="Chart of Accounts"
-                            active={pathname?.startsWith('/accounting/chart')}
-                            collapsed={!isOpen}
-                            href="/accounting/chart"
-                        />
-                        <SidebarItem
-                            icon="transaction"
-                            label="Transactions"
-                            active={pathname?.startsWith('/accounting/transactions')}
-                            collapsed={!isOpen}
-                            href="/accounting/transactions"
-                        />
-                        <SidebarItem
-                            icon="invoice"
-                            label="Invoicing"
-                            active={pathname?.startsWith('/accounting/invoices')}
-                            collapsed={!isOpen}
-                            href="/accounting/invoices"
-                        />
-                        <SidebarItem
-                            icon="payments"
-                            label="Payments & Receipts"
-                            active={pathname?.startsWith('/accounting/payments')}
-                            collapsed={!isOpen}
-                            href="/accounting/payments"
-                        />
-                        <SidebarItem
-                            icon="pricing"
-                            label="Pricing Management"
-                            active={pathname?.startsWith('/accounting/pricing')}
-                            collapsed={!isOpen}
-                            href="/accounting/pricing"
-                        />
-                        <SidebarItem
-                            icon="payout"
-                            label="Payouts"
-                            active={pathname?.startsWith('/accounting/payouts')}
-                            collapsed={!isOpen}
-                            href="/accounting/payouts"
-                        />
-                        <SidebarItem
-                            icon="report"
-                            label="Financial Reports"
-                            active={pathname?.startsWith('/accounting/reports')}
-                            collapsed={!isOpen}
-                            href="/accounting/reports"
-                        />
-                        <SidebarItem
-                            icon="bank"
-                            label="Banking"
-                            active={pathname?.startsWith('/accounting/banking')}
-                            collapsed={!isOpen}
-                            href="/accounting/banking"
                         />
                     </div>
 
