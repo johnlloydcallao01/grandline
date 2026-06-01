@@ -135,62 +135,6 @@ const tabs: SetupControlsTab[] = [
       },
     ],
   },
-  {
-    id: 'approval-assignees',
-    label: 'Approval Assignees',
-    description: 'Review approver users and approver-role text configured inside approval workflow steps.',
-    searchPlaceholder: 'Search workflow code, entity type, approver user, approver role, or active state',
-    filters: ['Active Workflows', 'With Approver User', 'With Approver Role', 'Expense'],
-    actions: [
-      { label: 'Create Workflow', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Assignees', icon: 'refresh', variant: 'secondary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Active Workflows', value: '8', change: 'Approval workflows currently enabled', trend: 'up' },
-      { label: 'Configured Steps', value: '21', change: 'Workflow steps carrying assignee info', trend: 'up' },
-      { label: 'Approver Users Set', value: '12', change: 'Steps mapped to a specific user', trend: 'neutral' },
-      { label: 'Approver Roles Set', value: '9', change: 'Steps mapped to an approver-role text', trend: 'neutral' },
-    ],
-    tableTitle: 'Approval Assignee Register',
-    tableDescription: 'Workflow-step assignees using workflow code, entity type, step number, approver user, and approver role.',
-    columns: ['Workflow Code', 'Entity Type', 'Step', 'Label', 'Approver User', 'Approver Role'],
-    rows: [
-      {
-        id: 'assignee-1',
-        cells: [
-          { text: 'WF-EXP-001', emphasis: true },
-          'expense',
-          '1',
-          'Finance Review',
-          'finance.admin@grandline.com',
-          'Finance Admin',
-        ],
-      },
-      {
-        id: 'assignee-2',
-        cells: [
-          { text: 'WF-JE-001', emphasis: true },
-          'journal_entry',
-          '2',
-          'Controller Approval',
-          'controller@grandline.com',
-          'Controller',
-        ],
-      },
-      {
-        id: 'assignee-3',
-        cells: [
-          { text: 'WF-PERIOD-001', emphasis: true },
-          'period_close',
-          '1',
-          'Close Owner Review',
-          '-',
-          'Finance Lead',
-        ],
-      },
-    ],
-  },
 ];
 
 export default function AccessPermissionsPage() {
@@ -198,7 +142,7 @@ export default function AccessPermissionsPage() {
     <SetupControlsPage
       eyebrow="Core / Setup & Controls"
       title="Access & Permissions"
-      description="Review the real access-related records available today in apps/cms: user roles, user accounts, and approval assignee configuration."
+      description="Review the real access-related records available today in apps/cms: user roles and user accounts. Workflow assignee operations now live in the dedicated Approvals area."
       headerActions={[
         { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
         { label: 'New Access Record', icon: 'plus', variant: 'primary' },

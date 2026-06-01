@@ -189,72 +189,207 @@ const bankingCashMenuItems = [
   },
 ] as const;
 
-const operationsMenuItems = [
+const documentsInboxMenuItems = [
   {
-    icon: 'posts',
-    label: 'Documents & Inbox',
-    href: '/accounting/documents-inbox',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/documents-inbox'),
+    label: 'Document Intake',
+    href: '/accounting/documents-inbox/document-intake',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/documents-inbox/document-intake'),
   },
   {
-    icon: 'analytics',
-    label: 'Reports & Analytics',
-    href: '/accounting/reports-analytics',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/reports-analytics'),
+    label: 'Document Library',
+    href: '/accounting/documents-inbox/document-library',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/documents-inbox/document-library'),
   },
   {
-    icon: 'permissions',
-    label: 'Approvals',
-    href: '/accounting/approvals',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/approvals'),
+    label: 'Document Governance',
+    href: '/accounting/documents-inbox/document-governance',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/documents-inbox/document-governance'),
   },
 ] as const;
 
-const lmsFinanceMenuItems = [
+const reportsAnalyticsMenuItems = [
   {
-    icon: 'pricing',
-    label: 'LMS Monetization Setup',
-    href: '/accounting/lms-monetization-setup',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-monetization-setup'),
+    label: 'Financial & Ledger Reporting',
+    href: '/accounting/reports-analytics/financial-ledger-reporting',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/reports-analytics/financial-ledger-reporting'),
   },
   {
-    icon: 'billing',
-    label: 'LMS Billing & Collections',
-    href: '/accounting/lms-billing-collections',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-billing-collections'),
+    label: 'Operational Reporting',
+    href: '/accounting/reports-analytics/operational-reporting',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/reports-analytics/operational-reporting'),
   },
   {
-    icon: 'analytics',
-    label: 'LMS Finance Reporting',
-    href: '/accounting/lms-finance-reporting',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-finance-reporting'),
+    label: 'Performance & Planning Analytics',
+    href: '/accounting/reports-analytics/performance-planning-analytics',
+    isActive: (pathname: string | null) =>
+      pathname?.startsWith('/accounting/reports-analytics/performance-planning-analytics'),
+  },
+  {
+    label: 'Reporting Operations',
+    href: '/accounting/reports-analytics/reporting-operations',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/reports-analytics/reporting-operations'),
   },
 ] as const;
 
-const advancedFinanceMenuItems = [
+const approvalsMenuItems = [
   {
-    icon: 'team',
-    label: 'Projects & Time',
-    href: '/accounting/projects-time',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/projects-time'),
+    label: 'Approval Center',
+    href: '/accounting/approvals/approval-center',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/approvals/approval-center'),
   },
   {
-    icon: 'report',
-    label: 'Budgets & Forecasts',
-    href: '/accounting/budgets-forecasts',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/budgets-forecasts'),
+    label: 'Workflow Management',
+    href: '/accounting/approvals/workflow-management',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/approvals/workflow-management'),
   },
   {
-    icon: 'bank',
-    label: 'Fixed Assets',
-    href: '/accounting/fixed-assets',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/fixed-assets'),
+    label: 'Entity Approval Coverage',
+    href: '/accounting/approvals/entity-approval-coverage',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/approvals/entity-approval-coverage'),
+  },
+] as const;
+
+const lmsMonetizationMenuItems = [
+  {
+    label: 'Course Pricing & Fees',
+    href: '/accounting/lms-monetization-setup/course-pricing-fees',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-monetization-setup/course-pricing-fees'),
   },
   {
-    icon: 'payout',
-    label: 'Payroll & Contractor Finance',
-    href: '/accounting/payroll-contractor-finance',
-    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/payroll-contractor-finance'),
+    label: 'Billing Policy Setup',
+    href: '/accounting/lms-monetization-setup/billing-policy-setup',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-monetization-setup/billing-policy-setup'),
+  },
+  {
+    label: 'Revenue & Discount Mapping',
+    href: '/accounting/lms-monetization-setup/revenue-discount-mapping',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-monetization-setup/revenue-discount-mapping'),
+  },
+  {
+    label: 'Instructor Payout Setup',
+    href: '/accounting/lms-monetization-setup/instructor-payout-setup',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-monetization-setup/instructor-payout-setup'),
+  },
+] as const;
+
+const lmsBillingCollectionsMenuItems = [
+  {
+    label: 'Enrollment Billing Operations',
+    href: '/accounting/lms-billing-collections/enrollment-billing-operations',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-billing-collections/enrollment-billing-operations'),
+  },
+  {
+    label: 'Receipt & Payment Review',
+    href: '/accounting/lms-billing-collections/receipt-payment-review',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-billing-collections/receipt-payment-review'),
+  },
+  {
+    label: 'Sponsor & Corporate Billing',
+    href: '/accounting/lms-billing-collections/sponsor-corporate-billing',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-billing-collections/sponsor-corporate-billing'),
+  },
+  {
+    label: 'Adjustments & Revenue Carrying',
+    href: '/accounting/lms-billing-collections/adjustments-revenue-carrying',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-billing-collections/adjustments-revenue-carrying'),
+  },
+] as const;
+
+const lmsFinanceReportingMenuItems = [
+  {
+    label: 'Revenue Analysis',
+    href: '/accounting/lms-finance-reporting/revenue-analysis',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-finance-reporting/revenue-analysis'),
+  },
+  {
+    label: 'Billing Pipeline Monitoring',
+    href: '/accounting/lms-finance-reporting/billing-pipeline-monitoring',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-finance-reporting/billing-pipeline-monitoring'),
+  },
+  {
+    label: 'Discount & Scholarship Analytics',
+    href: '/accounting/lms-finance-reporting/discount-scholarship-analytics',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-finance-reporting/discount-scholarship-analytics'),
+  },
+  {
+    label: 'Recognition & Certificate Reporting',
+    href: '/accounting/lms-finance-reporting/recognition-certificate-reporting',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/lms-finance-reporting/recognition-certificate-reporting'),
+  },
+] as const;
+
+const projectsTimeMenuItems = [
+  {
+    label: 'Project Operations',
+    href: '/accounting/projects-time/project-operations',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/projects-time/project-operations'),
+  },
+  {
+    label: 'Time & Work Tracking',
+    href: '/accounting/projects-time/time-work-tracking',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/projects-time/time-work-tracking'),
+  },
+  {
+    label: 'Project Finance',
+    href: '/accounting/projects-time/project-finance',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/projects-time/project-finance'),
+  },
+] as const;
+
+const budgetsForecastsMenuItems = [
+  {
+    label: 'Budget Planning',
+    href: '/accounting/budgets-forecasts/budget-planning',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/budgets-forecasts/budget-planning'),
+  },
+  {
+    label: 'Forecast Modeling',
+    href: '/accounting/budgets-forecasts/forecast-modeling',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/budgets-forecasts/forecast-modeling'),
+  },
+  {
+    label: 'Budget Monitoring',
+    href: '/accounting/budgets-forecasts/budget-monitoring',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/budgets-forecasts/budget-monitoring'),
+  },
+] as const;
+
+const fixedAssetsMenuItems = [
+  {
+    label: 'Asset Register & Setup',
+    href: '/accounting/fixed-assets/asset-register-setup',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/fixed-assets/asset-register-setup'),
+  },
+  {
+    label: 'Asset Lifecycle',
+    href: '/accounting/fixed-assets/asset-lifecycle',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/fixed-assets/asset-lifecycle'),
+  },
+  {
+    label: 'Depreciation & Reporting',
+    href: '/accounting/fixed-assets/depreciation-reporting',
+    isActive: (pathname: string | null) => pathname?.startsWith('/accounting/fixed-assets/depreciation-reporting'),
+  },
+] as const;
+
+const payrollContractorFinanceMenuItems = [
+  {
+    label: 'Payroll Operations',
+    href: '/accounting/payroll-contractor-finance/payroll-operations',
+    isActive: (pathname: string | null) =>
+      pathname?.startsWith('/accounting/payroll-contractor-finance/payroll-operations'),
+  },
+  {
+    label: 'Contractor & Mapping Setup',
+    href: '/accounting/payroll-contractor-finance/contractor-mapping-setup',
+    isActive: (pathname: string | null) =>
+      pathname?.startsWith('/accounting/payroll-contractor-finance/contractor-mapping-setup'),
+  },
+  {
+    label: 'Payroll Reporting',
+    href: '/accounting/payroll-contractor-finance/payroll-reporting',
+    isActive: (pathname: string | null) =>
+      pathname?.startsWith('/accounting/payroll-contractor-finance/payroll-reporting'),
   },
 ] as const;
 
@@ -316,6 +451,53 @@ function SidebarDropdownGroup({
   );
 }
 
+function renderSidebarChildLink(
+  item: {
+    label: string;
+    href: string;
+    isActive: (pathname: string | null) => boolean | undefined;
+  },
+  pathname: string | null,
+) {
+  return (
+    <div key={item.href}>
+      <Link
+        href={item.href}
+        className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+          item.isActive(pathname)
+            ? 'bg-gray-100 font-medium text-gray-900'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        }`}
+      >
+        <span className="truncate">{item.label}</span>
+      </Link>
+    </div>
+  );
+}
+
+function renderSidebarNavItem(
+  item: {
+    icon: IconName;
+    label: string;
+    href: string;
+    isActive: (pathname: string | null) => boolean | undefined;
+  },
+  pathname: string | null,
+  isOpen: boolean,
+) {
+  return (
+    <div key={item.href}>
+      <SidebarItem
+        icon={item.icon}
+        label={item.label}
+        active={item.isActive(pathname)}
+        collapsed={!isOpen}
+        href={item.href}
+      />
+    </div>
+  );
+}
+
 export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps) {
   const pathname = usePathname();
   const hasActiveSetupControlsChild = setupControlsMenuItems.some((item) => item.isActive(pathname));
@@ -327,6 +509,18 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
   const hasActivePurchasesPayablesChild = purchasesPayablesMenuItems.some((item) => item.isActive(pathname));
   const hasActiveExpensesChild = expensesMenuItems.some((item) => item.isActive(pathname));
   const hasActiveBankingCashChild = bankingCashMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveDocumentsInboxChild = documentsInboxMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveReportsAnalyticsChild = reportsAnalyticsMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveApprovalsChild = approvalsMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveLmsMonetizationChild = lmsMonetizationMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveLmsBillingCollectionsChild = lmsBillingCollectionsMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveLmsFinanceReportingChild = lmsFinanceReportingMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveProjectsTimeChild = projectsTimeMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveBudgetsForecastsChild = budgetsForecastsMenuItems.some((item) => item.isActive(pathname));
+  const hasActiveFixedAssetsChild = fixedAssetsMenuItems.some((item) => item.isActive(pathname));
+  const hasActivePayrollContractorFinanceChild = payrollContractorFinanceMenuItems.some((item) =>
+    item.isActive(pathname),
+  );
   const [isSetupControlsExpanded, setIsSetupControlsExpanded] = React.useState(hasActiveSetupControlsChild);
   const [isMasterRecordsExpanded, setIsMasterRecordsExpanded] = React.useState(hasActiveMasterRecordsChild);
   const [isJournalsLedgerExpanded, setIsJournalsLedgerExpanded] = React.useState(hasActiveJournalsLedgerChild);
@@ -336,6 +530,18 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
   const [isPurchasesPayablesExpanded, setIsPurchasesPayablesExpanded] = React.useState(hasActivePurchasesPayablesChild);
   const [isExpensesExpanded, setIsExpensesExpanded] = React.useState(hasActiveExpensesChild);
   const [isBankingCashExpanded, setIsBankingCashExpanded] = React.useState(hasActiveBankingCashChild);
+  const [isDocumentsInboxExpanded, setIsDocumentsInboxExpanded] = React.useState(hasActiveDocumentsInboxChild);
+  const [isReportsAnalyticsExpanded, setIsReportsAnalyticsExpanded] = React.useState(hasActiveReportsAnalyticsChild);
+  const [isApprovalsExpanded, setIsApprovalsExpanded] = React.useState(hasActiveApprovalsChild);
+  const [isLmsMonetizationExpanded, setIsLmsMonetizationExpanded] = React.useState(hasActiveLmsMonetizationChild);
+  const [isLmsBillingCollectionsExpanded, setIsLmsBillingCollectionsExpanded] = React.useState(hasActiveLmsBillingCollectionsChild);
+  const [isLmsFinanceReportingExpanded, setIsLmsFinanceReportingExpanded] = React.useState(hasActiveLmsFinanceReportingChild);
+  const [isProjectsTimeExpanded, setIsProjectsTimeExpanded] = React.useState(hasActiveProjectsTimeChild);
+  const [isBudgetsForecastsExpanded, setIsBudgetsForecastsExpanded] = React.useState(hasActiveBudgetsForecastsChild);
+  const [isFixedAssetsExpanded, setIsFixedAssetsExpanded] = React.useState(hasActiveFixedAssetsChild);
+  const [isPayrollContractorFinanceExpanded, setIsPayrollContractorFinanceExpanded] = React.useState(
+    hasActivePayrollContractorFinanceChild,
+  );
 
   React.useEffect(() => {
     if (hasActiveSetupControlsChild) {
@@ -391,6 +597,66 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
     }
   }, [hasActiveBankingCashChild]);
 
+  React.useEffect(() => {
+    if (hasActiveDocumentsInboxChild) {
+      setIsDocumentsInboxExpanded(true);
+    }
+  }, [hasActiveDocumentsInboxChild]);
+
+  React.useEffect(() => {
+    if (hasActiveReportsAnalyticsChild) {
+      setIsReportsAnalyticsExpanded(true);
+    }
+  }, [hasActiveReportsAnalyticsChild]);
+
+  React.useEffect(() => {
+    if (hasActiveApprovalsChild) {
+      setIsApprovalsExpanded(true);
+    }
+  }, [hasActiveApprovalsChild]);
+
+  React.useEffect(() => {
+    if (hasActiveLmsMonetizationChild) {
+      setIsLmsMonetizationExpanded(true);
+    }
+  }, [hasActiveLmsMonetizationChild]);
+
+  React.useEffect(() => {
+    if (hasActiveLmsBillingCollectionsChild) {
+      setIsLmsBillingCollectionsExpanded(true);
+    }
+  }, [hasActiveLmsBillingCollectionsChild]);
+
+  React.useEffect(() => {
+    if (hasActiveLmsFinanceReportingChild) {
+      setIsLmsFinanceReportingExpanded(true);
+    }
+  }, [hasActiveLmsFinanceReportingChild]);
+
+  React.useEffect(() => {
+    if (hasActiveProjectsTimeChild) {
+      setIsProjectsTimeExpanded(true);
+    }
+  }, [hasActiveProjectsTimeChild]);
+
+  React.useEffect(() => {
+    if (hasActiveBudgetsForecastsChild) {
+      setIsBudgetsForecastsExpanded(true);
+    }
+  }, [hasActiveBudgetsForecastsChild]);
+
+  React.useEffect(() => {
+    if (hasActiveFixedAssetsChild) {
+      setIsFixedAssetsExpanded(true);
+    }
+  }, [hasActiveFixedAssetsChild]);
+
+  React.useEffect(() => {
+    if (hasActivePayrollContractorFinanceChild) {
+      setIsPayrollContractorFinanceExpanded(true);
+    }
+  }, [hasActivePayrollContractorFinanceChild]);
+
   return (
     <aside
       data-sidebar="accounting"
@@ -434,18 +700,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsSetupControlsExpanded((current) => !current)}
               active={hasActiveSetupControlsChild}
             >
-              {setupControlsMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {setupControlsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="storage"
@@ -455,18 +710,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsMasterRecordsExpanded((current) => !current)}
               active={hasActiveMasterRecordsChild}
             >
-              {masterRecordsMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {masterRecordsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="report"
@@ -476,18 +720,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsJournalsLedgerExpanded((current) => !current)}
               active={hasActiveJournalsLedgerChild}
             >
-              {journalsLedgerMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {journalsLedgerMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="billing"
@@ -497,18 +730,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsTaxComplianceExpanded((current) => !current)}
               active={hasActiveTaxComplianceChild}
             >
-              {taxComplianceMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {taxComplianceMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="audit"
@@ -518,29 +740,9 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsAuditHistoryExpanded((current) => !current)}
               active={hasActiveAuditHistoryChild}
             >
-              {auditHistoryMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {auditHistoryMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
-            {coreMenuItems.slice(1).map((item) => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                active={item.isActive(pathname)}
-                collapsed={!isOpen}
-                href={item.href}
-              />
-            ))}
+            {coreMenuItems.slice(1).map((item) => renderSidebarNavItem(item, pathname, isOpen))}
           </div>
 
           {isOpen && <hr className="border-gray-200" />}
@@ -555,18 +757,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsSalesReceivablesExpanded((current) => !current)}
               active={hasActiveSalesReceivablesChild}
             >
-              {salesReceivablesMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {salesReceivablesMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="billing"
@@ -576,18 +767,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsPurchasesPayablesExpanded((current) => !current)}
               active={hasActivePurchasesPayablesChild}
             >
-              {purchasesPayablesMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {purchasesPayablesMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="payments"
@@ -597,18 +777,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsExpensesExpanded((current) => !current)}
               active={hasActiveExpensesChild}
             >
-              {expensesMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {expensesMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
             <SidebarDropdownGroup
               icon="bank"
@@ -618,61 +787,120 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
               onToggle={() => setIsBankingCashExpanded((current) => !current)}
               active={hasActiveBankingCashChild}
             >
-              {bankingCashMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${item.isActive(pathname)
-                      ? 'bg-gray-100 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                >
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              ))}
+              {bankingCashMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
-            {operationsMenuItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                active={item.isActive(pathname)}
-                collapsed={!isOpen}
-                href={item.href}
-              />
-            ))}
+            <SidebarDropdownGroup
+              icon="posts"
+              label="Documents & Inbox"
+              isOpen={isOpen}
+              isExpanded={isDocumentsInboxExpanded}
+              onToggle={() => setIsDocumentsInboxExpanded((current) => !current)}
+              active={hasActiveDocumentsInboxChild}
+            >
+              {documentsInboxMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="analytics"
+              label="Reports & Analytics"
+              isOpen={isOpen}
+              isExpanded={isReportsAnalyticsExpanded}
+              onToggle={() => setIsReportsAnalyticsExpanded((current) => !current)}
+              active={hasActiveReportsAnalyticsChild}
+            >
+              {reportsAnalyticsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="permissions"
+              label="Approvals"
+              isOpen={isOpen}
+              isExpanded={isApprovalsExpanded}
+              onToggle={() => setIsApprovalsExpanded((current) => !current)}
+              active={hasActiveApprovalsChild}
+            >
+              {approvalsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
           </div>
 
           {isOpen && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={isOpen}>LMS Finance</SidebarSectionLabel>
-            {lmsFinanceMenuItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                active={item.isActive(pathname)}
-                collapsed={!isOpen}
-                href={item.href}
-              />
-            ))}
+            <SidebarDropdownGroup
+              icon="pricing"
+              label="LMS Monetization Setup"
+              isOpen={isOpen}
+              isExpanded={isLmsMonetizationExpanded}
+              onToggle={() => setIsLmsMonetizationExpanded((current) => !current)}
+              active={hasActiveLmsMonetizationChild}
+            >
+              {lmsMonetizationMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="billing"
+              label="LMS Billing & Collections"
+              isOpen={isOpen}
+              isExpanded={isLmsBillingCollectionsExpanded}
+              onToggle={() => setIsLmsBillingCollectionsExpanded((current) => !current)}
+              active={hasActiveLmsBillingCollectionsChild}
+            >
+              {lmsBillingCollectionsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="analytics"
+              label="LMS Finance Reporting"
+              isOpen={isOpen}
+              isExpanded={isLmsFinanceReportingExpanded}
+              onToggle={() => setIsLmsFinanceReportingExpanded((current) => !current)}
+              active={hasActiveLmsFinanceReportingChild}
+            >
+              {lmsFinanceReportingMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
           </div>
 
           {isOpen && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={isOpen}>Advanced Finance</SidebarSectionLabel>
-            {advancedFinanceMenuItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                active={item.isActive(pathname)}
-                collapsed={!isOpen}
-                href={item.href}
-              />
-            ))}
+            <SidebarDropdownGroup
+              icon="team"
+              label="Projects & Time"
+              isOpen={isOpen}
+              isExpanded={isProjectsTimeExpanded}
+              onToggle={() => setIsProjectsTimeExpanded((current) => !current)}
+              active={hasActiveProjectsTimeChild}
+            >
+              {projectsTimeMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="report"
+              label="Budgets & Forecasts"
+              isOpen={isOpen}
+              isExpanded={isBudgetsForecastsExpanded}
+              onToggle={() => setIsBudgetsForecastsExpanded((current) => !current)}
+              active={hasActiveBudgetsForecastsChild}
+            >
+              {budgetsForecastsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="bank"
+              label="Fixed Assets"
+              isOpen={isOpen}
+              isExpanded={isFixedAssetsExpanded}
+              onToggle={() => setIsFixedAssetsExpanded((current) => !current)}
+              active={hasActiveFixedAssetsChild}
+            >
+              {fixedAssetsMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
+            <SidebarDropdownGroup
+              icon="payout"
+              label="Payroll & Contractor Finance"
+              isOpen={isOpen}
+              isExpanded={isPayrollContractorFinanceExpanded}
+              onToggle={() => setIsPayrollContractorFinanceExpanded((current) => !current)}
+              active={hasActivePayrollContractorFinanceChild}
+            >
+              {payrollContractorFinanceMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
+            </SidebarDropdownGroup>
           </div>
         </nav>
       </div>

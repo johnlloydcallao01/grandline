@@ -48,9 +48,9 @@ Suggested page composition:
 - Accounting Settings
   Tabs: General | Numbering & Sequences | Default Accounts | Posting Rules | Manual Entry Rules
 - Access & Permissions
-  Tabs: Roles | Permission Matrix | Page Access | Approval Rights | Report Access
+  Tabs: Roles | Permission Matrix | Page Access | User Directory | Report Access
 - Close & Approval Controls
-  Tabs: Lock Dates | Period Controls | Fiscal Close Rules | Reopen Requests | Workflow List | Journal Rules | Close Rules
+  Tabs: Lock & Close State | Approval Readiness | Reopen Safeguards
 - Financial Reference Setup
   Tabs: Currency List | Exchange Rates | Base Currency | Rate History | Payment Methods | Expense Categories | Tax Defaults | Tax Document Rules
 
@@ -115,49 +115,49 @@ Suggested page composition:
 
 10. Documents & Inbox
 - Document Intake
-  Tabs: Accounting Inbox | OCR Capture Queue
+  Tabs: Accounting Inbox | Unlinked Uploads
 - Document Library
-  Tabs: All Files | Document Folders | Receipt Archive | Linked Documents
+  Tabs: All Files | Receipt Archive | Linked Documents
 - Document Governance
-  Tabs: Document Permissions & Retention
+  Tabs: Document Categories | Entity Links | Primary Documents
 
 11. Reports & Analytics
 - Financial & Ledger Reporting
-  Tabs: Financial Statements | Ledger Reports
+  Tabs: Trial Balance | General Ledger | Asset Register
 - Operational Reporting
-  Tabs: Sales Reports | Purchase Reports | Expense Reports | Banking Reports | Tax Reports | Aging Reports
+  Tabs: Sales Reports | Purchase Reports | Expense Reports | Cash Activity | Tax Summary | Aging Reports
 - Performance & Planning Analytics
-  Tabs: Budget vs Actual | Project & Profitability Reports
+  Tabs: Budget vs Actual | Project Profitability
 - Reporting Operations
-  Tabs: Scheduled Reports | Custom Dashboards
+  Tabs: Dashboard Summary | Report Catalog
 
 12. LMS Monetization Setup
 - Course Pricing & Fees
-  Tabs: Course Fee Profiles
+  Tabs: Course Fee Profiles | Fee Components & Recognition
 - Billing Policy Setup
-  Tabs: Enrollment Billing Rules | Scholarship Sponsor Setup | Corporate Billing Setup
+  Tabs: Scholarship Sponsors | Corporate Accounts
 - Revenue & Discount Mapping
-  Tabs: Coupon & Discount Finance Mapping | Revenue Recognition Policies | Maritime Chart of Accounts Guidance
+  Tabs: Revenue Account Mapping | Coupon & Discount Mapping | Recognition Schedules
 - Instructor Payout Setup
-  Tabs: Instructor Payout Rules
+  Tabs: Instructor Payout Rules | Payout Register
 
 13. LMS Billing & Collections
 - Enrollment Billing Operations
-  Tabs: Enrollment Billing Links | Enrollment Finance Summary | Installment Plans | Payment Allocations
+  Tabs: Enrollment Billing Links | Enrollment Finance Summary | Payment Allocations
 - Receipt & Payment Review
   Tabs: Receipts | Proof of Payment
 - Sponsor & Corporate Billing
   Tabs: Scholarship Awards | Corporate Billing Links
 - Adjustments & Revenue Carrying
-  Tabs: Billing Adjustments | Refunds | Credit Memos | Deferred Revenue Schedules | Certificate & Renewal Charges
+  Tabs: Billing Adjustments | Refunds & Credit Notes | Deferred Revenue Schedules | Certificate Charges
 
 14. LMS Finance Reporting
 - Revenue Analysis
   Tabs: Revenue By Course | Revenue By Instructor | Revenue By Enrollment Type
 - Billing Pipeline Monitoring
-  Tabs: Pending Enrollment Billing | Corporate Receivables Report | Trainee Collections Report
+  Tabs: Pending Enrollment Billing | Corporate Receivables | Trainee Collections
 - Discount & Scholarship Analytics
-  Tabs: Discount Leakage Report | Scholarship Utilization Report
+  Tabs: Coupon Revenue Impact | Scholarship Utilization
 - Recognition & Certificate Reporting
   Tabs: Completion To Revenue Report | Certificate Revenue Report
 
@@ -165,7 +165,7 @@ Suggested page composition:
 - Project Operations
   Tabs: Projects | Project Tasks
 - Time & Work Tracking
-  Tabs: Time Entries | Timer | Timesheets
+  Tabs: Time Entries | Timer-Based Entries | Timesheets
 - Project Finance
   Tabs: Project Expenses | Project Billing | Project Profitability
 
@@ -173,15 +173,15 @@ Suggested page composition:
 - Budget Planning
   Tabs: Budgets | Budget Lines
 - Forecast Modeling
-  Tabs: Forecast Scenarios | Scenario Planning
+  Tabs: Forecast Scenarios | Scenario Assumptions
 - Budget Monitoring
-  Tabs: Budget Dashboard
+  Tabs: Budget Vs Actual
 
 17. Fixed Assets
 - Asset Register & Setup
-  Tabs: Fixed Assets | Asset Categories
+  Tabs: Fixed Assets | Asset Categories & Depreciation Setup
 - Asset Lifecycle
-  Tabs: Acquisition Records | Asset Disposal & Write-Offs
+  Tabs: Acquisition Details | Asset Disposal & Write-Offs
 - Depreciation & Reporting
   Tabs: Depreciation Schedules | Depreciation Entries | Asset Register Report
 
@@ -189,17 +189,17 @@ Suggested page composition:
 - Payroll Operations
   Tabs: Payroll Runs | Payroll Entries | Payroll Posting
 - Contractor & Mapping Setup
-  Tabs: Contractor Payouts | Salary & Deduction Mapping
+  Tabs: Instructor Payouts | Payroll Account Mapping
 - Payroll Reporting
   Tabs: Payroll Posting Report
 
 19. Approvals
 - Approval Center
-  Tabs: Approval Inbox | Approval Requests
-- Transaction Approvals
-  Tabs: Invoice Approvals | Bill Approvals | Expense Approvals | Discount Approvals | Refund Approvals | Journal Approvals | Purchase Order Approvals
-- Operational Approvals
-  Tabs: Timesheet Approvals | Budget Approvals | Asset Disposal Approvals | Payroll Approvals | Period Close Approvals
+  Tabs: Approval Queue | Approval Requests | Resolution Trail
+- Workflow Management
+  Tabs: Workflow Directory | Workflow Steps | Active Workflows
+- Entity Approval Coverage
+  Tabs: Transactions | Operations
 
 20. Audit & History
 - Audit Logs

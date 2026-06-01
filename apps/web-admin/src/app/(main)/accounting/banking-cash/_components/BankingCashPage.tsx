@@ -304,7 +304,9 @@ export function BankingCashPage({ eyebrow, title, description, tabs, headerActio
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
             {selectedTab.metrics.map((metric) => (
-              <MetricCard key={`${selectedTab.id}-${metric.label}`} metric={metric} />
+              <div key={`${selectedTab.id}-${metric.label}`}>
+                <MetricCard metric={metric} />
+              </div>
             ))}
           </div>
 
@@ -408,7 +410,7 @@ export function BankingCashPage({ eyebrow, title, description, tabs, headerActio
               {selectedTab.sidePanels.length ? (
                 <div className="space-y-4">
                   {selectedTab.sidePanels.map((panel) => (
-                    <PanelCard key={`${selectedTab.id}-${panel.title}`} panel={panel} />
+                    <div key={`${selectedTab.id}-${panel.title}`}><PanelCard panel={panel} /></div>
                   ))}
                 </div>
               ) : null}
@@ -418,7 +420,7 @@ export function BankingCashPage({ eyebrow, title, description, tabs, headerActio
           {selectedTab.footerPanels?.length ? (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               {selectedTab.footerPanels.map((panel) => (
-                <PanelCard key={`${selectedTab.id}-footer-${panel.title}`} panel={panel} />
+                <div key={`${selectedTab.id}-footer-${panel.title}`}><PanelCard panel={panel} /></div>
               ))}
             </div>
           ) : null}

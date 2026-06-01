@@ -5,7 +5,6 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Download,
-  FileText,
   Filter,
   MoreHorizontal,
   Plus,
@@ -273,7 +272,9 @@ export default function AccountingDashboardPage() {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {overviewStats.map((metric) => (
-                  <MetricCard key={metric.label} {...metric} />
+                  <div key={metric.label}>
+                    <MetricCard {...metric} />
+                  </div>
                 ))}
               </div>
 
@@ -521,14 +522,15 @@ export default function AccountingDashboardPage() {
                   <div className="space-y-6 p-5">
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
                       {reportingMetrics.map((item) => (
-                        <MetricCard
-                          key={item.label}
-                          label={item.label}
-                          value={item.value}
-                          note={item.note}
-                          change="Supported by reporting services"
-                          trend="up"
-                        />
+                        <div key={item.label}>
+                          <MetricCard
+                            label={item.label}
+                            value={item.value}
+                            note={item.note}
+                            change="Supported by reporting services"
+                            trend="up"
+                          />
+                        </div>
                       ))}
                     </div>
 

@@ -267,7 +267,9 @@ export function TaxCompliancePage({
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
             {selectedTab.metrics.map((metric) => (
-              <MetricCard key={`${selectedTab.id}-${metric.label}`} metric={metric} />
+              <div key={`${selectedTab.id}-${metric.label}`}>
+                <MetricCard metric={metric} />
+              </div>
             ))}
           </div>
 
