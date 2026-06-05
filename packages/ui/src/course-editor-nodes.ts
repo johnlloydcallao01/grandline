@@ -2,7 +2,6 @@
 import React from 'react';
 import {
   DecoratorNode,
-  $createParagraphNode,
   type SerializedLexicalNode,
   type NodeKey,
   type EditorConfig,

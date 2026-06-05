@@ -6,7 +6,6 @@ import {
   LMS_SCHOLARSHIP_AWARD_TYPE_OPTIONS,
   LMS_SPONSOR_STATUS_OPTIONS,
 } from '../constants/accounting'
-import { AccountingLmsBridgeSyncService } from '../services/enrollment-billing/AccountingLmsBridgeSyncService'
 import { applyCreatedAndUpdatedBy } from '../utils/accounting-audit'
 
 export const AccountingScholarshipAwards: CollectionConfig = {
@@ -44,32 +43,6 @@ export const AccountingScholarshipAwards: CollectionConfig = {
         if (!data) return data
         applyCreatedAndUpdatedBy({ data, originalDoc, req })
         return data
-      },
-    ],
-    afterChange: [
-      async ({ doc, req }) => {
-        await AccountingLmsBridgeSyncService.syncEnrollmentArtifactsForBillingLink({
-          payload: req.payload,
-          billingLinkId: doc.enrollmentBillingLink,
-          userId: req.user?.id,
-          createZeroValueInvoice: false,
-          autoPost: false,
-          recognitionTrigger: 'schedule_only',
-        })
-        return doc
-      },
-    ],
-    afterDelete: [
-      async ({ doc, req }) => {
-        await AccountingLmsBridgeSyncService.syncEnrollmentArtifactsForBillingLink({
-          payload: req.payload,
-          billingLinkId: doc.enrollmentBillingLink,
-          userId: req.user?.id,
-          createZeroValueInvoice: false,
-          autoPost: false,
-          recognitionTrigger: 'schedule_only',
-        })
-        return doc
       },
     ],
   },

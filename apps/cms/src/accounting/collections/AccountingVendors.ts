@@ -13,7 +13,7 @@ export const AccountingVendors: CollectionConfig = {
   slug: ACCOUNTING_COLLECTION_SLUGS.vendors,
   admin: {
     useAsTitle: 'displayName',
-    defaultColumns: ['vendorCode', 'displayName', 'vendorType', 'status', 'currency'],
+    defaultColumns: ['vendorCode', 'displayName', 'vendorType', 'status', 'currencyReference'],
     group: ACCOUNTING_ADMIN_GROUP,
     description: 'Vendor master data for payables and direct expenses.',
   },
@@ -33,8 +33,20 @@ export const AccountingVendors: CollectionConfig = {
     { name: 'billingAddress', type: 'textarea' },
     { name: 'taxId', type: 'text' },
     { name: 'taxProfile', type: 'json' },
-    { name: 'currency', type: 'text', required: true, defaultValue: 'PHP' },
-    { name: 'paymentTerms', type: 'text' },
+    {
+      name: 'currencyReference',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.currencies,
+      index: true,
+      required: true,
+    },
+    {
+      name: 'paymentTermReference',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.paymentTerms,
+      index: true,
+      required: true,
+    },
     { name: 'status', type: 'select', required: true, defaultValue: 'active', options: [...ACCOUNTING_PARTY_STATUS_OPTIONS], index: true },
     { name: 'notes', type: 'textarea' },
     { name: 'createdBy', type: 'relationship', relationTo: 'users', admin: { readOnly: true, position: 'sidebar' } },
@@ -48,6 +60,7 @@ export const AccountingVendors: CollectionConfig = {
           data.vendorCode = await AccountingVendorService.generateVendorCode(req.payload)
         }
         AccountingVendorService.normalizeData(data)
+        await AccountingVendorService.validateLookupReferences(req.payload, data)
         applyCreatedAndUpdatedBy({ data, req })
         return data
       },

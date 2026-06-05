@@ -7,6 +7,8 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   taxCodes: 'accounting-tax-codes',
   journalEntries: 'accounting-journal-entries',
   journalEntryLines: 'accounting-journal-entry-lines',
+  currencies: 'accounting-currencies',
+  paymentTerms: 'accounting-payment-terms',
   customers: 'accounting-customers',
   vendors: 'accounting-vendors',
   invoices: 'accounting-invoices',

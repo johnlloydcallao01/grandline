@@ -25,7 +25,9 @@ module.exports = [
         HTMLImageElement: "readonly",
         HTMLIFrameElement: "readonly",
         HTMLDivElement: "readonly",
+        HTMLInputElement: "readonly",
         DOMParser: "readonly",
+        File: "readonly",
       },
     },
     rules: {

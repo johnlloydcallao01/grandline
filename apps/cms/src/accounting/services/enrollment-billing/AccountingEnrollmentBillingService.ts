@@ -76,6 +76,10 @@ export class AccountingEnrollmentBillingService {
     }
 
     const customerCode = await AccountingCustomerService.generateCustomerCode(payload)
+    const [currencyReference, paymentTermReference] = await Promise.all([
+      AccountingCustomerService.getRequiredCurrencyReference(payload, LMS_CURRENCY),
+      AccountingCustomerService.getRequiredPaymentTermReference(payload, { name: 'Due on receipt', code: 'CASH' }),
+    ])
     const createdCustomer = await payload.create({
       collection: ACCOUNTING_COLLECTION_SLUGS.customers,
       overrideAccess: true,
@@ -88,8 +92,8 @@ export class AccountingEnrollmentBillingService {
         email: email || undefined,
         phone: user?.phone || undefined,
         billingAddress: user?.completeAddress || undefined,
-        currency: LMS_CURRENCY,
-        paymentTerms: 'Due on receipt',
+        currencyReference,
+        paymentTermReference,
         status: 'active',
         notes: trainee?.srn ? `Auto-created from trainee ${trainee.srn}` : 'Auto-created from LMS enrollment',
       },
@@ -413,6 +417,20 @@ export class AccountingEnrollmentBillingService {
           : summary.amountPaid >= summary.finalCharge
             ? 'completed'
             : 'pending'
+
+    const current = await payload.findByID({
+      collection: 'course-enrollments',
+      id: enrollmentId,
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    const currentPaymentStatus = typeof current.paymentStatus === 'string' ? current.paymentStatus : ''
+    const currentAmountPaid = Number(current.amountPaid ?? 0)
+
+    if (currentPaymentStatus === paymentStatus && currentAmountPaid === summary.amountPaid) {
+      return
+    }
 
     return payload.update({
       collection: 'course-enrollments',

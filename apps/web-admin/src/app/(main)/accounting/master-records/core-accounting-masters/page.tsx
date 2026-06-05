@@ -1,6 +1,15 @@
-import { MasterRecordsPage, type MasterRecordsTab } from '../_components/MasterRecordsPage';
+import {
+  getChartOfAccountsRegister,
+  getFiscalYearsRegister,
+  getPeriodsRegister,
+  getTaxCodesRegister,
+} from './actions';
+import {
+  CoreAccountingMastersClient,
+  type StaticCoreAccountingTab,
+} from './CoreAccountingMastersClient';
 
-const tabs: MasterRecordsTab[] = [
+const tabs: StaticCoreAccountingTab[] = [
   {
     id: 'chart-of-accounts',
     label: 'Chart of Accounts',
@@ -249,17 +258,40 @@ const tabs: MasterRecordsTab[] = [
   },
 ];
 
-export default function CoreAccountingMastersPage() {
+type CoreAccountingMastersPageProps = {
+  searchParams?: Promise<{
+    tab?: string | string[];
+  }>;
+};
+
+function normalizeCoreAccountingTab(value?: string | string[]) {
+  const tabValue = Array.isArray(value) ? value[0] : value;
+  return tabValue === 'fiscal-years' || tabValue === 'accounting-periods' || tabValue === 'tax-codes'
+    ? tabValue
+    : 'chart-of-accounts';
+}
+
+export default async function CoreAccountingMastersPage({
+  searchParams,
+}: CoreAccountingMastersPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const initialTab = normalizeCoreAccountingTab(resolvedSearchParams?.tab);
+  const [initialChartData, initialFiscalYearsData, initialPeriodsData, initialTaxCodesData] =
+    await Promise.all([
+      getChartOfAccountsRegister().catch(() => null),
+      getFiscalYearsRegister().catch(() => null),
+      getPeriodsRegister().catch(() => null),
+      getTaxCodesRegister().catch(() => null),
+    ]);
+
   return (
-    <MasterRecordsPage
-      eyebrow="Core / Master Records"
-      title="Core Accounting Masters"
-      description="Maintain the foundational accounting reference records that control the ledger, fiscal calendar, posting windows, and tax setup."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'New Master Record', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
+    <CoreAccountingMastersClient
+      staticTabs={tabs}
+      initialChartData={initialChartData}
+      initialFiscalYearsData={initialFiscalYearsData}
+      initialPeriodsData={initialPeriodsData}
+      initialTaxCodesData={initialTaxCodesData}
+      initialTab={initialTab}
     />
   );
 }

@@ -13,7 +13,7 @@ export const AccountingCustomers: CollectionConfig = {
   slug: ACCOUNTING_COLLECTION_SLUGS.customers,
   admin: {
     useAsTitle: 'displayName',
-    defaultColumns: ['customerCode', 'displayName', 'customerType', 'status', 'currency'],
+    defaultColumns: ['customerCode', 'displayName', 'customerType', 'status', 'currencyReference'],
     group: ACCOUNTING_ADMIN_GROUP,
     description: 'Customer master data for receivables and commercial accounting.',
   },
@@ -34,8 +34,20 @@ export const AccountingCustomers: CollectionConfig = {
     { name: 'shippingAddress', type: 'textarea' },
     { name: 'taxId', type: 'text' },
     { name: 'taxProfile', type: 'json' },
-    { name: 'currency', type: 'text', required: true, defaultValue: 'PHP' },
-    { name: 'paymentTerms', type: 'text' },
+    {
+      name: 'currencyReference',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.currencies,
+      index: true,
+      required: true,
+    },
+    {
+      name: 'paymentTermReference',
+      type: 'relationship',
+      relationTo: ACCOUNTING_COLLECTION_SLUGS.paymentTerms,
+      index: true,
+      required: true,
+    },
     { name: 'creditLimit', type: 'number', min: 0, defaultValue: 0 },
     { name: 'status', type: 'select', required: true, defaultValue: 'active', options: [...ACCOUNTING_PARTY_STATUS_OPTIONS], index: true },
     { name: 'notes', type: 'textarea' },
@@ -50,6 +62,7 @@ export const AccountingCustomers: CollectionConfig = {
           data.customerCode = await AccountingCustomerService.generateCustomerCode(req.payload)
         }
         AccountingCustomerService.normalizeData(data)
+        await AccountingCustomerService.validateLookupReferences(req.payload, data)
         applyCreatedAndUpdatedBy({ data, req })
         return data
       },

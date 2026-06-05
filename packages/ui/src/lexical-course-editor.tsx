@@ -25,7 +25,10 @@ import {
   DROP_COMMAND,
   CUT_COMMAND,
   TextNode,
+  type ParagraphNode,
+  type DecoratorNode,
 } from 'lexical';
+import type { ReactNode } from 'react';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { LinkNode } from '@lexical/link';
@@ -385,9 +388,9 @@ const EditorInner: React.FC<{
         const root = $getRoot();
         root.clear();
         
-        let currentParagraph: any = null;
+        let currentParagraph: ParagraphNode | null = null;
         for (const node of nodes) {
-          if (($isElementNode(node) && !node.isInline()) || ($isDecoratorNode(node) && !(node as any).isInline())) {
+          if (($isElementNode(node) && !node.isInline()) || ($isDecoratorNode(node) && !(node as DecoratorNode<ReactNode>).isInline())) {
             root.append(node);
             currentParagraph = null;
           } else {

@@ -127,6 +127,10 @@ export class AccountingScholarshipService {
     }
 
     const customerCode = await AccountingCustomerService.generateCustomerCode(payload)
+    const [currencyReference, paymentTermReference] = await Promise.all([
+      AccountingCustomerService.getRequiredCurrencyReference(payload, 'PHP'),
+      AccountingCustomerService.getRequiredPaymentTermReference(payload, { name: 'Due on receipt', code: 'CASH' }),
+    ])
     const customer = await payload.create({
       collection: ACCOUNTING_COLLECTION_SLUGS.customers,
       overrideAccess: true,
@@ -139,8 +143,8 @@ export class AccountingScholarshipService {
         email: sponsor.email || undefined,
         phone: sponsor.phone || undefined,
         billingAddress: sponsor.billingAddress || undefined,
-        paymentTerms: 'Due on receipt',
-        currency: 'PHP',
+        paymentTermReference,
+        currencyReference,
         status: 'active',
       },
     })
