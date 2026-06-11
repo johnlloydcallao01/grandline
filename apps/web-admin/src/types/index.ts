@@ -72,8 +72,6 @@ export type IconName =
   | 'announcement'
   | 'review'
   | 'notifications'
-  | 'help'
-  | 'support'
   | 'billing'
   | 'profile'
   | 'storage'

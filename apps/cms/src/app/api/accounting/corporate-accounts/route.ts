@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
       where.status = { in: statuses } as never
     }
 
+    const creditFilter = searchParams.get('creditFilter')
+    if (creditFilter === 'hasCredit') {
+      where.creditTerms = { exists: true } as never
+    }
+
     const result = await payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
       where: where as never,
@@ -98,6 +103,7 @@ export async function GET(request: NextRequest) {
         filters: [
           { label: 'Active', value: 'active' },
           { label: 'Inactive', value: 'inactive' },
+          { label: 'With Credit Terms', value: 'hasCredit' },
         ],
         metrics: [
           { label: 'Active Corporate Accounts', value: String(activeAccounts), change: 'Available for company-billed training', trend: 'up' as const },

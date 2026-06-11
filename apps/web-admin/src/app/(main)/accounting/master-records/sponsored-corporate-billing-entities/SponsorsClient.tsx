@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowDownRight,
@@ -82,10 +82,12 @@ type CorporateAccountCreateFormState = {
 
 type SponsorFilterState = {
   statuses: string[];
+  contactFilter?: string;
 };
 
 type CorporateAccountFilterState = {
   statuses: string[];
+  creditFilter?: string;
 };
 
 const TAB_IDS = {
@@ -244,7 +246,22 @@ export function SponsorsClient({
   const [isCoverageLoading, setIsCoverageLoading] = useState(false);
   const [coverageError, setCoverageError] = useState<string | null>(null);
   const [coverageCurrentPage, setCoverageCurrentPage] = useState(1);
+  const [coverageFilters, setCoverageFilters] = useState<string[]>([]);
   const COVERAGE_PAGE_SIZE = 10;
+
+  const coverageFilteredRows = useMemo(() => {
+    const allRows = coverageData?.section.table.rows ?? [];
+    if (coverageFilters.length === 0) return allRows;
+    return allRows.filter((row) => {
+      const linkType = typeof row.cells[0] === 'string' ? row.cells[0] : '';
+      const statusCell = row.cells[5];
+      const status = typeof statusCell === 'string' ? statusCell : (statusCell && typeof statusCell === 'object' && 'text' in statusCell ? (statusCell as { text: string }).text : '');
+      if (coverageFilters.includes('scholarship') && linkType === 'Scholarship Award') return true;
+      if (coverageFilters.includes('corporate') && linkType === 'Corporate Billing Link') return true;
+      if (coverageFilters.includes('active') && status === 'active') return true;
+      return false;
+    });
+  }, [coverageData, coverageFilters]);
 
   const [customerChoices, setCustomerChoices] = useState<CustomerChoice[]>([]);
 
@@ -363,11 +380,12 @@ export function SponsorsClient({
       setSponsorError(null);
 
       try {
-        const payload = await getSponsorRegister({
-          search,
-          page,
-          statuses: activeFilters.statuses,
-        });
+      const payload = await getSponsorRegister({
+        search,
+        page,
+        statuses: activeFilters.statuses,
+        contactFilter: activeFilters.contactFilter,
+      });
         setSponsorData(payload);
         setSponsorCurrentPage(payload.pagination.page);
       } catch (error) {
@@ -393,11 +411,12 @@ export function SponsorsClient({
       setCorporateError(null);
 
       try {
-        const payload = await getCorporateAccountRegister({
-          search,
-          page,
-          statuses: activeFilters.statuses,
-        });
+      const payload = await getCorporateAccountRegister({
+        search,
+        page,
+        statuses: activeFilters.statuses,
+        creditFilter: activeFilters.creditFilter,
+      });
         setCorporateData(payload);
         setCorporateCurrentPage(payload.pagination.page);
       } catch (error) {
@@ -669,7 +688,7 @@ export function SponsorsClient({
   }, [corporateData]);
 
   const handleExportCoverage = useCallback(() => {
-    const rows = coverageData?.section.table.rows ?? [];
+    const rows = coverageFilteredRows;
     if (!rows.length) {
       return;
     }
@@ -1142,11 +1161,15 @@ export function SponsorsClient({
   const handleSponsorFilterToggle = useCallback(
     (filterValue: string) => {
       const newFilters = { ...appliedSponsorFilters };
-      const index = newFilters.statuses.indexOf(filterValue);
-      if (index >= 0) {
-        newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
+      if (filterValue === 'hasContact') {
+        newFilters.contactFilter = appliedSponsorFilters.contactFilter === 'hasContact' ? '' : 'hasContact';
       } else {
-        newFilters.statuses = [...newFilters.statuses, filterValue];
+        const index = newFilters.statuses.indexOf(filterValue);
+        if (index >= 0) {
+          newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
+        } else {
+          newFilters.statuses = [...newFilters.statuses, filterValue];
+        }
       }
       setAppliedSponsorFilters(newFilters);
       fetchSponsorRegister({ search: sponsorSubmittedSearch, page: 1, activeFilters: newFilters });
@@ -1157,17 +1180,29 @@ export function SponsorsClient({
   const handleCorporateFilterToggle = useCallback(
     (filterValue: string) => {
       const newFilters = { ...appliedCorporateFilters };
-      const index = newFilters.statuses.indexOf(filterValue);
-      if (index >= 0) {
-        newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
+      if (filterValue === 'hasCredit') {
+        newFilters.creditFilter = appliedCorporateFilters.creditFilter === 'hasCredit' ? '' : 'hasCredit';
       } else {
-        newFilters.statuses = [...newFilters.statuses, filterValue];
+        const index = newFilters.statuses.indexOf(filterValue);
+        if (index >= 0) {
+          newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
+        } else {
+          newFilters.statuses = [...newFilters.statuses, filterValue];
+        }
       }
       setAppliedCorporateFilters(newFilters);
       fetchCorporateAccountRegister({ search: corporateSubmittedSearch, page: 1, activeFilters: newFilters });
     },
     [appliedCorporateFilters, fetchCorporateAccountRegister, corporateSubmittedSearch],
   );
+
+  const handleCoverageFilterToggle = (filterValue: string) => {
+    setCoverageFilters((prev) => {
+      const index = prev.indexOf(filterValue);
+      return index >= 0 ? prev.filter((v) => v !== filterValue) : [...prev, filterValue];
+    });
+    setCoverageCurrentPage(1);
+  };
 
   const renderSponsorTable = () => (
     <div className="space-y-4">
@@ -1257,9 +1292,11 @@ export function SponsorsClient({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(sponsorData?.section.filters ?? []).map((filter) => {
-              const isActive = appliedSponsorFilters.statuses.includes(filter.value);
-              return (
+      {(sponsorData?.section.filters ?? []).map((filter) => {
+        const isActive = filter.value === 'hasContact'
+          ? appliedSponsorFilters.contactFilter === 'hasContact'
+          : appliedSponsorFilters.statuses.includes(filter.value);
+        return (
                 <button
                   key={`sponsor-filter-${filter.value}`}
                   type="button"
@@ -1529,9 +1566,11 @@ export function SponsorsClient({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(corporateData?.section.filters ?? []).map((filter) => {
-              const isActive = appliedCorporateFilters.statuses.includes(filter.value);
-              return (
+      {(corporateData?.section.filters ?? []).map((filter) => {
+        const isActive = filter.value === 'hasCredit'
+          ? appliedCorporateFilters.creditFilter === 'hasCredit'
+          : appliedCorporateFilters.statuses.includes(filter.value);
+        return (
                 <button
                   key={`corp-filter-${filter.value}`}
                   type="button"
@@ -1786,6 +1825,27 @@ export function SponsorsClient({
         </div>
       ) : null}
 
+      {/* Coverage quick filter chips */}
+      <div className="flex flex-wrap gap-2 px-1">
+        {(coverageData?.section.filters ?? []).map((filter) => {
+          const isActive = coverageFilters.includes(filter.value);
+          return (
+            <button
+              key={`cov-filter-${filter.value}`}
+              type="button"
+              onClick={() => handleCoverageFilterToggle(filter.value)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {filter.label}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="space-y-4 p-5">
           <div className="flex items-start justify-between gap-3">
@@ -1799,9 +1859,9 @@ export function SponsorsClient({
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span>{coverageData?.section.table.rows.length ?? 0} matching coverage links</span>
+              <span>{coverageFilteredRows.length} matching coverage links</span>
               <span className="text-sm text-gray-400">
-                Page {coverageCurrentPage} of {Math.max(1, Math.ceil((coverageData?.section.table.rows.length ?? 0) / COVERAGE_PAGE_SIZE))}
+                Page {coverageCurrentPage} of {Math.max(1, Math.ceil(coverageFilteredRows.length / COVERAGE_PAGE_SIZE))}
               </span>
               <button
                 type="button"
@@ -1846,13 +1906,24 @@ export function SponsorsClient({
                         Loading coverage links...
                       </td>
                     </tr>
-                  ) : coverageData?.section.table.rows.length ? (
+                  ) : coverageData && coverageFilteredRows.length ? (
                     (() => {
                       const allRows = coverageData.section.table.rows;
-                      const totalPages = Math.max(1, Math.ceil(allRows.length / COVERAGE_PAGE_SIZE));
+                      const filteredRows = coverageFilters.length > 0
+                        ? allRows.filter((row) => {
+                            const linkType = typeof row.cells[0] === 'string' ? row.cells[0] : '';
+                            const statusCell = row.cells[5];
+                            const status = typeof statusCell === 'string' ? statusCell : (statusCell && typeof statusCell === 'object' && 'text' in statusCell ? (statusCell as { text: string }).text : '');
+                            if (coverageFilters.includes('scholarship') && linkType === 'Scholarship Award') return true;
+                            if (coverageFilters.includes('corporate') && linkType === 'Corporate Billing Link') return true;
+                            if (coverageFilters.includes('active') && status === 'active') return true;
+                            return coverageFilters.length === 0;
+                          })
+                        : allRows;
+                      const totalPages = Math.max(1, Math.ceil(filteredRows.length / COVERAGE_PAGE_SIZE));
                       const safePage = Math.min(coverageCurrentPage, totalPages);
                       const startIdx = (safePage - 1) * COVERAGE_PAGE_SIZE;
-                      const paginatedRows = allRows.slice(startIdx, startIdx + COVERAGE_PAGE_SIZE);
+                      const paginatedRows = filteredRows.slice(startIdx, startIdx + COVERAGE_PAGE_SIZE);
                       return paginatedRows.map((row) => (
                       <tr key={row.id} className="hover:bg-gray-50">
                         {row.cells.map((cell, index) => {
@@ -1928,10 +1999,10 @@ export function SponsorsClient({
             </div>
           </div>
 
-          {coverageData?.section.table.rows.length ? (
+          {coverageFilteredRows.length ? (
             <div className="flex items-center justify-between px-5 pb-5">
               <p className="text-sm text-gray-600">
-                Page {coverageCurrentPage} of {Math.max(1, Math.ceil(coverageData.section.table.rows.length / COVERAGE_PAGE_SIZE))}
+                Page {coverageCurrentPage} of {Math.max(1, Math.ceil(coverageFilteredRows.length / COVERAGE_PAGE_SIZE))}
               </p>
               <div className="flex gap-2">
                 <button
@@ -1944,7 +2015,7 @@ export function SponsorsClient({
                 </button>
                 <button
                   type="button"
-                  disabled={coverageCurrentPage >= Math.ceil(coverageData.section.table.rows.length / COVERAGE_PAGE_SIZE)}
+                  disabled={coverageCurrentPage >= Math.ceil(coverageFilteredRows.length / COVERAGE_PAGE_SIZE)}
                   onClick={() => setCoverageCurrentPage((p) => p + 1)}
                   className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >

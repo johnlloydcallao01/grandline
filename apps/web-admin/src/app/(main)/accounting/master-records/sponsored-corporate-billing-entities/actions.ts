@@ -206,12 +206,14 @@ type SponsorRegisterQuery = {
   search?: string;
   page?: number;
   statuses?: string[];
+  contactFilter?: string;
 };
 
 type CorporateAccountRegisterQuery = {
   search?: string;
   page?: number;
   statuses?: string[];
+  creditFilter?: string;
 };
 
 async function fetchAccountingAdmin<T>(path: string, init?: RequestInit): Promise<T> {
@@ -253,6 +255,10 @@ export async function getSponsorRegister(query: SponsorRegisterQuery = {}): Prom
 
   for (const status of query.statuses || []) {
     params.append('status', status);
+  }
+
+  if (query.contactFilter) {
+    params.set('contactFilter', query.contactFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -325,6 +331,10 @@ export async function getCorporateAccountRegister(
 
   for (const status of query.statuses || []) {
     params.append('status', status);
+  }
+
+  if (query.creditFilter) {
+    params.set('creditFilter', query.creditFilter);
   }
 
   params.set('page', String(query.page || 1));

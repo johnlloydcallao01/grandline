@@ -49,46 +49,16 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         />
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 2. ACCOUNTING */}
+                    {/* 2. COURSE MANAGEMENT */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Accounting</div>}
+                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core LMS</div>}
                         <SidebarItem
-                            icon="transaction"
-                            label="Accounting Dashboard"
-                            active={pathname?.startsWith('/accounting')}
+                            icon="team"
+                            label="Enrollments"
+                            active={pathname?.startsWith('/enrollments')}
                             collapsed={!isOpen}
-                            href="/accounting/dashboard"
+                            href="/enrollments"
                         />
-                    </div>
-
-
-
-                    {/* 3. TRAINEES */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Trainees</div>}
-                        <SidebarItem
-                            icon="trainee"
-                            label="Trainee Accounts"
-                            active={pathname?.startsWith('/trainees/accounts')}
-                            collapsed={!isOpen}
-                            href="/trainees/accounts"
-                        />
-                        <SidebarItem
-                            icon="analytics"
-                            label="Trainee Progress"
-                            active={pathname?.startsWith('/trainees/progress')}
-                            collapsed={!isOpen}
-                            href="/trainees/progress"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 3. COURSE MANAGEMENT */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Course Management</div>}
                         <SidebarItem
                             icon="content"
                             label="Course Categories"
@@ -111,13 +81,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             href="/courses"
                         />
                         <SidebarItem
-                            icon="team"
-                            label="Enrollments"
-                            active={pathname?.startsWith('/enrollments')}
-                            collapsed={!isOpen}
-                            href="/enrollments"
-                        />
-                        <SidebarItem
                             icon="grade"
                             label="Assessments"
                             active={pathname?.startsWith('/assessments')}
@@ -130,6 +93,76 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             active={pathname?.startsWith('/question-bank')}
                             collapsed={!isOpen}
                             href="/question-bank"
+                        />
+                        <SidebarItem
+                            icon="grade"
+                            label="Grade Management"
+                            active={pathname === '/grades'}
+                            collapsed={!isOpen}
+                            href="/grades"
+                        />
+                        <SidebarItem
+                            icon="report"
+                            label="Grade Reports"
+                            active={pathname?.startsWith('/grades/reports')}
+                            collapsed={!isOpen}
+                            href="/grades/reports"
+                        />
+                        <SidebarItem
+                            icon="template"
+                            label="Certificate Templates"
+                            active={pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')}
+                            collapsed={!isOpen}
+                            href="/certifications/templates"
+                        />
+                        <SidebarItem
+                            icon="issuance"
+                            label="Certificate Issuance"
+                            active={pathname?.startsWith('/certifications/issuance')}
+                            collapsed={!isOpen}
+                            href="/certifications/issuance"
+                        />
+                        <SidebarItem
+                            icon="verification"
+                            label="Certificate Verification"
+                            active={pathname?.startsWith('/certifications/verification')}
+                            collapsed={!isOpen}
+                            href="/certifications/verification"
+                        />
+                    </div>
+
+                    {isOpen && <hr className="border-gray-200" />}
+
+                    {/* 3. USERS */}
+                    <div className="space-y-1">
+                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</div>}
+                        <SidebarItem
+                            icon="trainee"
+                            label="Trainee Accounts"
+                            active={pathname?.startsWith('/trainees/accounts')}
+                            collapsed={!isOpen}
+                            href="/trainees/accounts"
+                        />
+                        <SidebarItem
+                            icon="analytics"
+                            label="Trainee Progress"
+                            active={pathname?.startsWith('/trainees/progress')}
+                            collapsed={!isOpen}
+                            href="/trainees/progress"
+                        />
+                        <SidebarItem
+                            icon="instructor"
+                            label="Instructors"
+                            active={pathname === '/instructors'}
+                            collapsed={!isOpen}
+                            href="/instructors"
+                        />
+                        <SidebarItem
+                            icon="payout"
+                            label="Payouts"
+                            active={pathname === '/instructors/payouts'}
+                            collapsed={!isOpen}
+                            href="/instructors/payouts"
                         />
                     </div>
 
@@ -156,56 +189,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
 
                     {isOpen && <hr className="border-gray-200" />}
 
-                    {/* 5. GRADEBOOK */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gradebook</div>}
-                        <SidebarItem
-                            icon="grade"
-                            label="Grade Management"
-                            active={pathname === '/grades'}
-                            collapsed={!isOpen}
-                            href="/grades"
-                        />
-                        <SidebarItem
-                            icon="report"
-                            label="Grade Reports"
-                            active={pathname?.startsWith('/grades/reports')}
-                            collapsed={!isOpen}
-                            href="/grades/reports"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 6. CERTIFICATIONS */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Certifications</div>}
-                        <SidebarItem
-                            icon="template"
-                            label="Certificate Templates"
-                            active={pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')}
-                            collapsed={!isOpen}
-                            href="/certifications/templates"
-                        />
-                        <SidebarItem
-                            icon="issuance"
-                            label="Certificate Issuance"
-                            active={pathname?.startsWith('/certifications/issuance')}
-                            collapsed={!isOpen}
-                            href="/certifications/issuance"
-                        />
-                        <SidebarItem
-                            icon="verification"
-                            label="Certificate Verification"
-                            active={pathname?.startsWith('/certifications/verification')}
-                            collapsed={!isOpen}
-                            href="/certifications/verification"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 7. COMMUNICATIONS */}
+                    {/* 5. COMMUNICATIONS */}
                     <div className="space-y-1">
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communications</div>}
                         <SidebarItem
@@ -235,7 +219,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
 
                     {/* 9. MARKETING */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Marketing</div>}
+                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</div>}
                         <SidebarItem
                             icon="promotion"
                             label="Promotions"
@@ -249,6 +233,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             active={pathname?.startsWith('/marketing/content')}
                             collapsed={!isOpen}
                             href="/marketing/content"
+                        />
+                        <SidebarItem
+                            icon="transaction"
+                            label="Accounting Dashboard"
+                            active={pathname?.startsWith('/accounting')}
+                            collapsed={!isOpen}
+                            href="/accounting/dashboard"
                         />
                     </div>
 
@@ -284,48 +275,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             active={pathname?.startsWith('/settings/integrations')}
                             collapsed={!isOpen}
                             href="/settings/integrations"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 11. INSTRUCTOR MANAGEMENT */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor Mgmt</div>}
-                        <SidebarItem
-                            icon="instructor"
-                            label="Instructors"
-                            active={pathname === '/instructors'}
-                            collapsed={!isOpen}
-                            href="/instructors"
-                        />
-                        <SidebarItem
-                            icon="payout"
-                            label="Payouts"
-                            active={pathname === '/instructors/payouts'}
-                            collapsed={!isOpen}
-                            href="/instructors/payouts"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 12. SUPPORT */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Support</div>}
-                        <SidebarItem
-                            icon="help"
-                            label="Help Desk"
-                            active={pathname?.startsWith('/support/help')}
-                            collapsed={!isOpen}
-                            href="/support/help"
-                        />
-                        <SidebarItem
-                            icon="support"
-                            label="Documentation"
-                            active={pathname?.startsWith('/support/docs')}
-                            collapsed={!isOpen}
-                            href="/support/docs"
                         />
                     </div>
 

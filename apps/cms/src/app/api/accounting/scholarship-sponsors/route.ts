@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
       where.status = { in: statuses } as never
     }
 
+    const contactFilter = searchParams.get('contactFilter')
+    if (contactFilter === 'hasContact') {
+      where.contactName = { exists: true } as never
+    }
+
     const result = await payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
       where: where as never,
@@ -97,6 +102,7 @@ export async function GET(request: NextRequest) {
         filters: [
           { label: 'Active', value: 'active' },
           { label: 'Inactive', value: 'inactive' },
+          { label: 'With Contact Info', value: 'hasContact' },
         ],
         metrics: [
           { label: 'Active Sponsors', value: String(activeSponsors), change: 'Sponsors usable for scholarship billing', trend: 'up' as const },

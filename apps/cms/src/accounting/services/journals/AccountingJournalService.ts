@@ -115,12 +115,18 @@ export class AccountingJournalService {
       throw new Error('Each journal entry line must reference an account.')
     }
 
-    const account = await payload.findByID({
-      collection: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
-      id: accountId,
-      depth: 0,
-      overrideAccess: true,
-    })
+    let account: Record<string, unknown> | null = null
+    try {
+      const found = await payload.findByID({
+        collection: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
+        id: accountId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      account = found ? (found as unknown as Record<string, unknown>) : null
+    } catch {
+      throw new Error(`Account with ID ${accountId} not found.`)
+    }
 
     if (!account) {
       throw new Error('The referenced account does not exist.')
@@ -172,14 +178,24 @@ export class AccountingJournalService {
   }
 
   static async assertEntryIsMutable(payload: Payload, journalEntryId: number | string) {
-    const entry = await payload.findByID({
-      collection: ACCOUNTING_COLLECTION_SLUGS.journalEntries,
-      id: journalEntryId,
-      depth: 0,
-      overrideAccess: true,
-    })
+    let entry: Record<string, unknown> | null = null
+    try {
+      const found = await payload.findByID({
+        collection: ACCOUNTING_COLLECTION_SLUGS.journalEntries,
+        id: journalEntryId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      entry = found ? (found as unknown as Record<string, unknown>) : null
+    } catch {
+      throw new Error(`Journal entry with ID ${journalEntryId} not found.`)
+    }
 
-    if (['posted', 'reversed', 'voided'].includes(String(entry?.status || ''))) {
+    if (!entry) {
+      throw new Error(`Journal entry with ID ${journalEntryId} not found.`)
+    }
+
+    if (['posted', 'reversed', 'voided'].includes(String(entry.status || ''))) {
       throw new Error('Posted, reversed, or voided journal entries cannot be edited directly.')
     }
 

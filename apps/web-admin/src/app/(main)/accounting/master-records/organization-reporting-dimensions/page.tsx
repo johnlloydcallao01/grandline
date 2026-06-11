@@ -1,61 +1,28 @@
-import { MasterRecordsPage, type MasterRecordsTab } from '../_components/MasterRecordsPage';
+import { getBranchesRegister, getDepartmentsRegister, getLocationsRegister } from './actions';
+import { OrganizationReportingDimensionsClient, type StaticOrgDimensionTab } from './OrganizationReportingDimensionsClient';
 
-const tabs: MasterRecordsTab[] = [
+const staticTabs: StaticOrgDimensionTab[] = [
   {
     id: 'branches',
     label: 'Branches',
     description: 'Maintain branch master records with branch code, name, status, address, and audit fields.',
     searchPlaceholder: 'Search branch code, branch name, status, or address',
-    filters: ['Active', 'Inactive', 'With Address', 'Recent'],
+    filters: ['Active', 'Inactive', 'With Address'],
     actions: [
       { label: 'Create Branch', icon: 'plus', variant: 'primary' },
       { label: 'Refresh Branches', icon: 'refresh', variant: 'secondary' },
       { label: 'Download View', icon: 'download', variant: 'ghost' },
     ],
     metrics: [
-      { label: 'Active Branches', value: '7', change: 'Branches available in finance selectors', trend: 'up' },
-      { label: 'Inactive Branches', value: '1', change: 'Retained for historical reporting', trend: 'down' },
-      { label: 'With Address', value: '6', change: 'Branches carrying full address data', trend: 'neutral' },
-      { label: 'Audited Changes', value: '14', change: 'Branch updates tracked by audited hooks', trend: 'up' },
+      { label: 'Active Branches', value: '0', change: 'Branches available in finance selectors', trend: 'up' },
+      { label: 'Inactive Branches', value: '0', change: 'Retained for historical reporting', trend: 'down' },
+      { label: 'With Address', value: '0', change: 'Branches carrying full address data', trend: 'neutral' },
+      { label: 'Total Branches', value: '0', change: 'Branch master records on file', trend: 'neutral' },
     ],
     tableTitle: 'Branch Register',
     tableDescription: 'Branch master records using branch code, name, address, and status.',
     columns: ['Branch Code', 'Name', 'Address', 'Created By', 'Updated By', 'Status'],
-    rows: [
-      {
-        id: 'branch-1',
-        cells: [
-          { text: 'BR-MNL', emphasis: true },
-          'Manila Main',
-          'Malate, Manila',
-          'finance.admin',
-          'finance.admin',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'branch-2',
-        cells: [
-          { text: 'BR-CEB', emphasis: true },
-          'Cebu Branch',
-          'Cebu City',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'branch-3',
-        cells: [
-          { text: 'BR-DVO', emphasis: true },
-          'Davao Branch',
-          'Davao City',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Inactive', tone: 'amber' },
-        ],
-      },
-    ],
+    rows: [],
   },
   {
     id: 'departments',
@@ -69,49 +36,15 @@ const tabs: MasterRecordsTab[] = [
       { label: 'Download View', icon: 'download', variant: 'ghost' },
     ],
     metrics: [
-      { label: 'Active Departments', value: '14', change: 'Departments available for segmentation', trend: 'up' },
-      { label: 'Branch Linked', value: '11', change: 'Departments tied to a branch', trend: 'up' },
-      { label: 'Inactive Departments', value: '2', change: 'Retained for historical analysis', trend: 'down' },
-      { label: 'Audited Changes', value: '22', change: 'Department updates captured by audit hooks', trend: 'up' },
+      { label: 'Active Departments', value: '0', change: 'Departments available for segmentation', trend: 'up' },
+      { label: 'Branch Linked', value: '0', change: 'Departments tied to a branch', trend: 'up' },
+      { label: 'Inactive Departments', value: '0', change: 'Retained for historical analysis', trend: 'down' },
+      { label: 'Total Departments', value: '0', change: 'Department records on file', trend: 'neutral' },
     ],
     tableTitle: 'Department Register',
     tableDescription: 'Department master records using code, name, branch relationship, and status.',
     columns: ['Department Code', 'Name', 'Branch', 'Created By', 'Updated By', 'Status'],
-    rows: [
-      {
-        id: 'dept-1',
-        cells: [
-          { text: 'DEP-FIN', emphasis: true },
-          'Finance',
-          'BR-MNL',
-          'finance.admin',
-          'gl.manager',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'dept-2',
-        cells: [
-          { text: 'DEP-OPS', emphasis: true },
-          'Operations',
-          'BR-CEB',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'dept-3',
-        cells: [
-          { text: 'DEP-ADM', emphasis: true },
-          'Administration',
-          'BR-MNL',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Inactive', tone: 'amber' },
-        ],
-      },
-    ],
+    rows: [],
   },
   {
     id: 'locations',
@@ -125,63 +58,44 @@ const tabs: MasterRecordsTab[] = [
       { label: 'Download View', icon: 'download', variant: 'ghost' },
     ],
     metrics: [
-      { label: 'Active Locations', value: '16', change: 'Locations available for assets and reporting', trend: 'up' },
-      { label: 'Branch Linked', value: '12', change: 'Locations tied to a branch record', trend: 'up' },
-      { label: 'Inactive Locations', value: '3', change: 'Retained for historical reporting', trend: 'down' },
-      { label: 'Audited Changes', value: '19', change: 'Location updates captured by audit hooks', trend: 'up' },
+      { label: 'Active Locations', value: '0', change: 'Locations available for assets and reporting', trend: 'up' },
+      { label: 'Branch Linked', value: '0', change: 'Locations tied to a branch record', trend: 'up' },
+      { label: 'Inactive Locations', value: '0', change: 'Retained for historical reporting', trend: 'down' },
+      { label: 'Total Locations', value: '0', change: 'Location master records on file', trend: 'neutral' },
     ],
     tableTitle: 'Location Register',
     tableDescription: 'Location master records using code, name, branch relationship, and status.',
     columns: ['Location Code', 'Name', 'Branch', 'Created By', 'Updated By', 'Status'],
-    rows: [
-      {
-        id: 'loc-1',
-        cells: [
-          { text: 'LOC-MNL-01', emphasis: true },
-          'Manila Training Center',
-          'BR-MNL',
-          'finance.admin',
-          'asset.admin',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'loc-2',
-        cells: [
-          { text: 'LOC-CEB-01', emphasis: true },
-          'Cebu Assessment Hub',
-          'BR-CEB',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'loc-3',
-        cells: [
-          { text: 'LOC-DVO-01', emphasis: true },
-          'Davao Satellite Office',
-          'BR-DVO',
-          'finance.admin',
-          'ops.finance',
-          { text: 'Inactive', tone: 'amber' },
-        ],
-      },
-    ],
+    rows: [],
   },
 ];
 
-export default function OrganizationReportingDimensionsPage() {
+type OrgDimensionPageProps = {
+  searchParams?: Promise<{ tab?: string | string[] }>;
+};
+
+function normalizeTab(value?: string | string[]) {
+  const tab = Array.isArray(value) ? value[0] : value;
+  if (tab === 'departments' || tab === 'locations') return tab;
+  return 'branches';
+}
+
+export default async function OrganizationReportingDimensionsPage({ searchParams }: OrgDimensionPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const initialTab = normalizeTab(resolvedSearchParams?.tab);
+  const [initialBranchesData, initialDepartmentsData, initialLocationsData] = await Promise.all([
+    getBranchesRegister().catch(() => null),
+    getDepartmentsRegister().catch(() => null),
+    getLocationsRegister().catch(() => null),
+  ]);
+
   return (
-    <MasterRecordsPage
-      eyebrow="Core / Master Records"
-      title="Organization & Reporting Dimensions"
-      description="Maintain branches, departments, and locations used to segment records and drive accounting reporting filters."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'New Dimension', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
+    <OrganizationReportingDimensionsClient
+      staticTabs={staticTabs}
+      initialBranchesData={initialBranchesData}
+      initialDepartmentsData={initialDepartmentsData}
+      initialLocationsData={initialLocationsData}
+      initialTab={initialTab}
     />
   );
 }
