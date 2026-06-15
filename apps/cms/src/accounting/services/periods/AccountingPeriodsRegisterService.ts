@@ -30,6 +30,7 @@ export type AccountingPeriodsRegisterQuery = {
   search?: string
   statuses?: AccountingPeriodStatus[]
   fiscalYearId?: string
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -90,6 +91,7 @@ export type AccountingPeriodsRegisterResult = {
     search: string
     statuses: AccountingPeriodStatus[]
     fiscalYearId: string
+    quickFilters: string[]
   }
   pagination: PeriodsRegisterPagination
   totals: {
@@ -221,6 +223,23 @@ const matchesFiscalYear = (
   return String(row.fiscalYearId) === fiscalYearId
 }
 
+const matchesQuickFilters = (
+  row: AccountingPeriodsRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue.startsWith('status:')) {
+      return Boolean(row.status && row.status === filterValue.replace('status:', ''))
+    }
+
+    return false
+  })
+}
+
 const sortPeriods = (docs: PeriodRegisterDoc[]) =>
   [...docs].sort((left, right) => {
     const leftFy = resolveFiscalYear(left.fiscalYear)
@@ -289,6 +308,7 @@ export class AccountingPeriodsRegisterService {
     const normalizedSearch = normalizeSearch(query.search)
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const fiscalYearId = String(query.fiscalYearId || '').trim()
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -306,7 +326,8 @@ export class AccountingPeriodsRegisterService {
       return (
         matchesSearch(row, normalizedSearch) &&
         matchesStatuses(row, statuses) &&
-        matchesFiscalYear(row, fiscalYearId)
+        matchesFiscalYear(row, fiscalYearId) &&
+        matchesQuickFilters(row, quickFilters)
       )
     })
 
@@ -350,6 +371,7 @@ export class AccountingPeriodsRegisterService {
         search: normalizeText(query.search),
         statuses,
         fiscalYearId,
+        quickFilters,
       },
       pagination: {
         page,

@@ -26,6 +26,7 @@ export type JournalEntryLinesRegisterQuery = {
   hasTaxCode?: boolean
   hasReference?: boolean
   lineTypes?: string[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -76,7 +77,7 @@ export type JournalEntryLinesRegisterResult = {
   rows: JournalEntryLinesRegisterRow[]
   metrics: RegisterMetric[]
   filterOptions: RegisterFilterOptions
-  appliedFilters: { search: string; hasTaxCode: boolean; hasReference: boolean; lineTypes: string[] }
+  appliedFilters: { search: string; hasTaxCode: boolean; hasReference: boolean; lineTypes: string[]; quickFilters: string[] }
   pagination: RegisterPagination
   totals: { totalLines: number; filteredLines: number; taxCodedLines: number; referencedLines: number; debitLines: number }
 }
@@ -213,6 +214,7 @@ export class AccountingJournalEntryLinesRegisterService {
     const hasTaxCode = Boolean(query.hasTaxCode)
     const hasReference = Boolean(query.hasReference)
     const lineTypes = Array.isArray(query.lineTypes) ? query.lineTypes : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -226,9 +228,33 @@ export class AccountingJournalEntryLinesRegisterService {
     const sorted = sortLines(docs)
     let allRows = sorted.map(mapLineRow)
 
-    const filtered = allRows.filter(
+    let filtered = allRows.filter(
       (row) => matchesSearch(row, search) && matchesFilters(row, hasTaxCode, hasReference, lineTypes),
     )
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue === 'hasTaxCode:true') {
+            return Boolean(row.taxCode)
+          }
+
+          if (filterValue === 'hasReference:true') {
+            return Boolean(row.referenceEntityType)
+          }
+
+          if (filterValue === 'lineType:debit') {
+            return row.debit != null && row.debit > 0
+          }
+
+          if (filterValue === 'lineType:credit') {
+            return row.credit != null && row.credit > 0
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -240,7 +266,7 @@ export class AccountingJournalEntryLinesRegisterService {
       rows,
       metrics: buildMetrics(allRows),
       filterOptions: buildFilterOptions(),
-      appliedFilters: { search: normalizeText(query.search), hasTaxCode, hasReference, lineTypes },
+      appliedFilters: { search: normalizeText(query.search), hasTaxCode, hasReference, lineTypes, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: {
         totalLines: allRows.length,

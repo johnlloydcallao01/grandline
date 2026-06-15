@@ -34,6 +34,7 @@ export type AccountingVendorRegisterQuery = {
   search?: string
   vendorTypes?: AccountingVendorType[]
   statuses?: AccountingPartyStatus[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -107,6 +108,7 @@ export type AccountingVendorRegisterResult = {
     search: string
     statuses: AccountingPartyStatus[]
     vendorTypes: AccountingVendorType[]
+    quickFilters: string[]
   }
   pagination: VendorRegisterPagination
   referenceData: VendorRegisterReferenceData
@@ -226,6 +228,30 @@ const matchesStatuses = (
   return Boolean(vendor.status && statuses.includes(vendor.status))
 }
 
+const matchesQuickFilters = (
+  vendor: AccountingVendorRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue.startsWith('status:')) {
+      return Boolean(vendor.status && vendor.status === filterValue.replace('status:', ''))
+    }
+
+    if (filterValue.startsWith('vendorType:')) {
+      return Boolean(
+        vendor.vendorType &&
+          vendor.vendorType === filterValue.replace('vendorType:', ''),
+      )
+    }
+
+    return false
+  })
+}
+
 const buildMetrics = (vendors: AccountingVendorRegisterRow[]): VendorRegisterMetric[] => {
   const activeVendors = vendors.filter((vendor) => vendor.status === 'active').length
   const suppliers = vendors.filter((vendor) => vendor.vendorType === 'supplier').length
@@ -328,6 +354,7 @@ export class AccountingVendorRegisterService {
     const normalizedSearch = normalizeSearch(query.search)
     const vendorTypes = Array.isArray(query.vendorTypes) ? query.vendorTypes : []
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -346,7 +373,8 @@ export class AccountingVendorRegisterService {
       return (
         matchesSearch(vendor, normalizedSearch) &&
         matchesVendorTypes(vendor, vendorTypes) &&
-        matchesStatuses(vendor, statuses)
+        matchesStatuses(vendor, statuses) &&
+        matchesQuickFilters(vendor, quickFilters)
       )
     })
 
@@ -364,6 +392,7 @@ export class AccountingVendorRegisterService {
         search: normalizeText(query.search),
         statuses,
         vendorTypes,
+        quickFilters,
       },
       pagination: {
         page,

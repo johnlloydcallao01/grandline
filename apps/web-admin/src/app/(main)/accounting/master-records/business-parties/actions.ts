@@ -62,6 +62,7 @@ export type CustomerRegisterResponse = {
     statuses: string[];
     customerTypes: string[];
     hasCreditLimit: boolean;
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -202,6 +203,7 @@ export type VendorRegisterResponse = {
     search: string;
     statuses: string[];
     vendorTypes: string[];
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -345,6 +347,7 @@ export type BankAccountRegisterResponse = {
     defaultReceiptOnly: boolean;
     defaultDisbursementOnly: boolean;
     ledgerMappedOnly: boolean;
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -425,6 +428,7 @@ type CustomerRegisterQuery = {
   statuses?: string[];
   customerTypes?: string[];
   hasCreditLimit?: boolean;
+  quickFilters?: string[];
 };
 
 type VendorRegisterQuery = {
@@ -432,6 +436,7 @@ type VendorRegisterQuery = {
   page?: number;
   statuses?: string[];
   vendorTypes?: string[];
+  quickFilters?: string[];
 };
 
 type BankAccountRegisterQuery = {
@@ -442,6 +447,7 @@ type BankAccountRegisterQuery = {
   defaultReceiptOnly?: boolean;
   defaultDisbursementOnly?: boolean;
   ledgerMappedOnly?: boolean;
+  quickFilters?: string[];
 };
 
 function normalizeRelationshipId(value: number | string | null | undefined) {
@@ -509,6 +515,10 @@ export async function getCustomerRegister(query: CustomerRegisterQuery = {}): Pr
 
   if (query.hasCreditLimit) {
     params.set('hasCreditLimit', 'true');
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -597,6 +607,10 @@ export async function getVendorRegister(query: VendorRegisterQuery = {}): Promis
 
   for (const vendorType of query.vendorTypes || []) {
     params.append('vendorType', vendorType);
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -707,6 +721,10 @@ export async function getBankAccountRegister(
 
   if (query.ledgerMappedOnly) {
     params.set('ledgerMappedOnly', 'true');
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));

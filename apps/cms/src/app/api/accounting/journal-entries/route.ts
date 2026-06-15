@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       statuses: parseListParam(searchParams, 'status'),
       sourceTypes: parseListParam(searchParams, 'sourceType'),
       isUnbalanced: searchParams.get('isUnbalanced') === 'true',
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

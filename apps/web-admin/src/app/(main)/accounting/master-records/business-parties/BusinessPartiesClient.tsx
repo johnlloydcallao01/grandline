@@ -236,8 +236,23 @@ function getCustomerFilterCount(filters: CustomerFilterState) {
   return filters.statuses.length + filters.customerTypes.length + (filters.hasCreditLimit ? 1 : 0);
 }
 
+function getCustomerQuickFilterValue(filterKey: CustomerQuickFilterKey) {
+  const config = customerQuickFilterConfig[filterKey];
+
+  if (config.type === 'hasCreditLimit') {
+    return 'hasCreditLimit:true';
+  }
+
+  return `${config.type}:${config.value}`;
+}
+
 function getVendorFilterCount(filters: VendorFilterState) {
   return filters.statuses.length + filters.vendorTypes.length;
+}
+
+function getVendorQuickFilterValue(filterKey: VendorQuickFilterKey) {
+  const config = vendorQuickFilterConfig[filterKey];
+  return `${config.type}:${config.value}`;
 }
 
 function getBankAccountFilterCount(filters: BankAccountFilterState) {
@@ -248,6 +263,20 @@ function getBankAccountFilterCount(filters: BankAccountFilterState) {
     (filters.defaultDisbursementOnly ? 1 : 0) +
     (filters.ledgerMappedOnly ? 1 : 0)
   );
+}
+
+function getBankAccountQuickFilterValue(filterKey: BankAccountQuickFilterKey) {
+  const config = bankAccountQuickFilterConfig[filterKey];
+
+  if (config.type === 'defaultReceiptOnly') {
+    return 'defaultReceiptOnly:true';
+  }
+
+  if (config.type === 'defaultDisbursementOnly') {
+    return 'defaultDisbursementOnly:true';
+  }
+
+  return `${config.type}:${config.value}`;
 }
 
 function areCustomerFilterStatesEqual(left: CustomerFilterState, right: CustomerFilterState) {
@@ -272,51 +301,19 @@ function areBankAccountFilterStatesEqual(left: BankAccountFilterState, right: Ba
   );
 }
 
-function isCustomerQuickFilterActive(filterKey: CustomerQuickFilterKey, filters: CustomerFilterState) {
-  const config = customerQuickFilterConfig[filterKey];
-
-  if (config.type === 'hasCreditLimit') {
-    return filters.hasCreditLimit;
-  }
-
-  if (!config.value) {
-    return false;
-  }
-
-  return config.type === 'status'
-    ? filters.statuses.includes(config.value)
-    : filters.customerTypes.includes(config.value);
+function isCustomerQuickFilterActive(filterKey: CustomerQuickFilterKey, quickFilters: string[]) {
+  return quickFilters.includes(getCustomerQuickFilterValue(filterKey));
 }
 
-function isVendorQuickFilterActive(filterKey: VendorQuickFilterKey, filters: VendorFilterState) {
-  const config = vendorQuickFilterConfig[filterKey];
-
-  return config.type === 'status'
-    ? filters.statuses.includes(config.value)
-    : filters.vendorTypes.includes(config.value);
+function isVendorQuickFilterActive(filterKey: VendorQuickFilterKey, quickFilters: string[]) {
+  return quickFilters.includes(getVendorQuickFilterValue(filterKey));
 }
 
 function isBankAccountQuickFilterActive(
   filterKey: BankAccountQuickFilterKey,
-  filters: BankAccountFilterState,
+  quickFilters: string[],
 ) {
-  const config = bankAccountQuickFilterConfig[filterKey];
-
-  if (config.type === 'defaultReceiptOnly') {
-    return filters.defaultReceiptOnly;
-  }
-
-  if (config.type === 'defaultDisbursementOnly') {
-    return filters.defaultDisbursementOnly;
-  }
-
-  if (!config.value) {
-    return false;
-  }
-
-  return config.type === 'status'
-    ? filters.statuses.includes(config.value)
-    : filters.accountTypes.includes(config.value);
+  return quickFilters.includes(getBankAccountQuickFilterValue(filterKey));
 }
 
 function getBankAccountStatus(isActive?: boolean | null) {
@@ -611,6 +608,9 @@ export function BusinessPartiesClient({
     customerTypes: initialCustomerData?.appliedFilters.customerTypes || [],
     hasCreditLimit: initialCustomerData?.appliedFilters.hasCreditLimit || false,
   });
+  const [customerQuickFilters, setCustomerQuickFilters] = useState<string[]>(
+    initialCustomerData?.appliedFilters.quickFilters || [],
+  );
   const [isCustomerFilterPanelOpen, setIsCustomerFilterPanelOpen] = useState(false);
   const [isCustomerCreateModalOpen, setIsCustomerCreateModalOpen] = useState(false);
   const [isCustomerCreateSubmitting, setIsCustomerCreateSubmitting] = useState(false);
@@ -654,6 +654,9 @@ export function BusinessPartiesClient({
     statuses: initialVendorData?.appliedFilters.statuses || [],
     vendorTypes: initialVendorData?.appliedFilters.vendorTypes || [],
   });
+  const [vendorQuickFilters, setVendorQuickFilters] = useState<string[]>(
+    initialVendorData?.appliedFilters.quickFilters || [],
+  );
   const [isVendorFilterPanelOpen, setIsVendorFilterPanelOpen] = useState(false);
   const [isVendorCreateModalOpen, setIsVendorCreateModalOpen] = useState(false);
   const [isVendorCreateSubmitting, setIsVendorCreateSubmitting] = useState(false);
@@ -714,6 +717,9 @@ export function BusinessPartiesClient({
     defaultDisbursementOnly: initialBankAccountData?.appliedFilters.defaultDisbursementOnly || false,
     ledgerMappedOnly: initialBankAccountData?.appliedFilters.ledgerMappedOnly || false,
   });
+  const [bankAccountQuickFilters, setBankAccountQuickFilters] = useState<string[]>(
+    initialBankAccountData?.appliedFilters.quickFilters || [],
+  );
   const [isBankAccountFilterPanelOpen, setIsBankAccountFilterPanelOpen] = useState(false);
   const [isBankAccountCreateModalOpen, setIsBankAccountCreateModalOpen] = useState(false);
   const [isBankAccountCreateSubmitting, setIsBankAccountCreateSubmitting] = useState(false);
@@ -747,21 +753,25 @@ export function BusinessPartiesClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: CustomerFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsCustomerLoading(true);
       setCustomerError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? customerQuickFilters;
         const payload = await getCustomerRegister({
           search,
           page,
           statuses: activeFilters.statuses,
           customerTypes: activeFilters.customerTypes,
           hasCreditLimit: activeFilters.hasCreditLimit,
+          quickFilters,
         });
 
         setCustomerData(payload);
@@ -771,7 +781,7 @@ export function BusinessPartiesClient({
         setIsCustomerLoading(false);
       }
     },
-    [],
+    [customerQuickFilters],
   );
 
   const fetchVendorRegister = useCallback(
@@ -779,20 +789,24 @@ export function BusinessPartiesClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: VendorFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsVendorLoading(true);
       setVendorError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? vendorQuickFilters;
         const payload = await getVendorRegister({
           search,
           page,
           statuses: activeFilters.statuses,
           vendorTypes: activeFilters.vendorTypes,
+          quickFilters,
         });
 
         setVendorData(payload);
@@ -802,7 +816,7 @@ export function BusinessPartiesClient({
         setIsVendorLoading(false);
       }
     },
-    [],
+    [vendorQuickFilters],
   );
 
   const fetchBankAccountRegister = useCallback(
@@ -810,15 +824,18 @@ export function BusinessPartiesClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: BankAccountFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsBankAccountLoading(true);
       setBankAccountError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? bankAccountQuickFilters;
         const payload = await getBankAccountRegister({
           search,
           page,
@@ -827,6 +844,7 @@ export function BusinessPartiesClient({
           defaultReceiptOnly: activeFilters.defaultReceiptOnly,
           defaultDisbursementOnly: activeFilters.defaultDisbursementOnly,
           ledgerMappedOnly: activeFilters.ledgerMappedOnly,
+          quickFilters,
         });
 
         setBankAccountData(payload);
@@ -836,7 +854,7 @@ export function BusinessPartiesClient({
         setIsBankAccountLoading(false);
       }
     },
-    [],
+    [bankAccountQuickFilters],
   );
 
   useEffect(() => {
@@ -853,11 +871,13 @@ export function BusinessPartiesClient({
       search: customerSubmittedSearch,
       page: customerCurrentPage,
       activeFilters: appliedCustomerFilters,
+      nextQuickFilters: customerQuickFilters,
     });
   }, [
     activeTab,
     appliedCustomerFilters,
     customerCurrentPage,
+    customerQuickFilters,
     customerSubmittedSearch,
     fetchCustomerRegister,
     initialCustomerData,
@@ -877,12 +897,14 @@ export function BusinessPartiesClient({
       search: vendorSubmittedSearch,
       page: vendorCurrentPage,
       activeFilters: appliedVendorFilters,
+      nextQuickFilters: vendorQuickFilters,
     });
   }, [
     activeTab,
     appliedVendorFilters,
     fetchVendorRegister,
     initialVendorData,
+    vendorQuickFilters,
     vendorCurrentPage,
     vendorSubmittedSearch,
   ]);
@@ -901,11 +923,13 @@ export function BusinessPartiesClient({
       search: bankAccountSubmittedSearch,
       page: bankAccountCurrentPage,
       activeFilters: appliedBankAccountFilters,
+      nextQuickFilters: bankAccountQuickFilters,
     });
   }, [
     activeTab,
     appliedBankAccountFilters,
     bankAccountCurrentPage,
+    bankAccountQuickFilters,
     bankAccountSubmittedSearch,
     fetchBankAccountRegister,
     initialBankAccountData,
@@ -972,160 +996,24 @@ export function BusinessPartiesClient({
   };
 
   const handleToggleCustomerQuickFilter = (filterKey: CustomerQuickFilterKey) => {
-    const config = customerQuickFilterConfig[filterKey];
     setCustomerCurrentPage(1);
-
-    setAppliedCustomerFilters((previous) => {
-      if (config.type === 'hasCreditLimit') {
-        return {
-          ...previous,
-          hasCreditLimit: !previous.hasCreditLimit,
-        };
-      }
-
-      if (!config.value) {
-        return previous;
-      }
-
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        customerTypes: toggleFilterValue(previous.customerTypes, config.value),
-      };
-    });
-
-    setDraftCustomerFilters((previous) => {
-      if (config.type === 'hasCreditLimit') {
-        return {
-          ...previous,
-          hasCreditLimit: !previous.hasCreditLimit,
-        };
-      }
-
-      if (!config.value) {
-        return previous;
-      }
-
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        customerTypes: toggleFilterValue(previous.customerTypes, config.value),
-      };
-    });
+    setCustomerQuickFilters((previous) =>
+      toggleFilterValue(previous, getCustomerQuickFilterValue(filterKey)),
+    );
   };
 
   const handleToggleVendorQuickFilter = (filterKey: VendorQuickFilterKey) => {
-    const config = vendorQuickFilterConfig[filterKey];
     setVendorCurrentPage(1);
-
-    setAppliedVendorFilters((previous) => {
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        vendorTypes: toggleFilterValue(previous.vendorTypes, config.value),
-      };
-    });
-
-    setDraftVendorFilters((previous) => {
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        vendorTypes: toggleFilterValue(previous.vendorTypes, config.value),
-      };
-    });
+    setVendorQuickFilters((previous) =>
+      toggleFilterValue(previous, getVendorQuickFilterValue(filterKey)),
+    );
   };
 
   const handleToggleBankAccountQuickFilter = (filterKey: BankAccountQuickFilterKey) => {
-    const config = bankAccountQuickFilterConfig[filterKey];
     setBankAccountCurrentPage(1);
-
-    setAppliedBankAccountFilters((previous) => {
-      if (config.type === 'defaultReceiptOnly') {
-        return {
-          ...previous,
-          defaultReceiptOnly: !previous.defaultReceiptOnly,
-        };
-      }
-
-      if (config.type === 'defaultDisbursementOnly') {
-        return {
-          ...previous,
-          defaultDisbursementOnly: !previous.defaultDisbursementOnly,
-        };
-      }
-
-      if (!config.value) {
-        return previous;
-      }
-
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        accountTypes: toggleFilterValue(previous.accountTypes, config.value),
-      };
-    });
-
-    setDraftBankAccountFilters((previous) => {
-      if (config.type === 'defaultReceiptOnly') {
-        return {
-          ...previous,
-          defaultReceiptOnly: !previous.defaultReceiptOnly,
-        };
-      }
-
-      if (config.type === 'defaultDisbursementOnly') {
-        return {
-          ...previous,
-          defaultDisbursementOnly: !previous.defaultDisbursementOnly,
-        };
-      }
-
-      if (!config.value) {
-        return previous;
-      }
-
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        accountTypes: toggleFilterValue(previous.accountTypes, config.value),
-      };
-    });
+    setBankAccountQuickFilters((previous) =>
+      toggleFilterValue(previous, getBankAccountQuickFilterValue(filterKey)),
+    );
   };
 
   const handleToggleStatusFilter = (status: string) => {
@@ -2282,7 +2170,7 @@ export function BusinessPartiesClient({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(Object.keys(customerQuickFilterConfig) as CustomerQuickFilterKey[]).map((filterKey) => {
-                    const isActive = isCustomerQuickFilterActive(filterKey, appliedCustomerFilters);
+                    const isActive = isCustomerQuickFilterActive(filterKey, customerQuickFilters);
                     return (
                       <button
                         key={filterKey}
@@ -2689,7 +2577,7 @@ export function BusinessPartiesClient({
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {(Object.keys(vendorQuickFilterConfig) as VendorQuickFilterKey[]).map((filterKey) => {
-                        const isActive = isVendorQuickFilterActive(filterKey, appliedVendorFilters);
+                        const isActive = isVendorQuickFilterActive(filterKey, vendorQuickFilters);
                         return (
                           <button
                             key={filterKey}
@@ -3082,7 +2970,7 @@ export function BusinessPartiesClient({
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {(Object.keys(bankAccountQuickFilterConfig) as BankAccountQuickFilterKey[]).map((filterKey) => {
-                        const isActive = isBankAccountQuickFilterActive(filterKey, appliedBankAccountFilters);
+                        const isActive = isBankAccountQuickFilterActive(filterKey, bankAccountQuickFilters);
                         return (
                           <button
                             key={filterKey}

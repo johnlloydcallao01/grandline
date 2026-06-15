@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ACCOUNTING_COLLECTION_SLUGS } from '@/accounting/constants/accounting'
+import { AccountingAuditService } from '@/accounting/services/audit/AccountingAuditService'
 import type { AccountingTaxCalculationMethod, AccountingTaxScope } from '@/accounting/types/accounting'
 import {
   AccountingApiError,
@@ -29,6 +30,19 @@ type TaxCodeRecord = {
   updatedAt?: string | null
 }
 
+const normalizeRelationshipId = (value: unknown) => {
+  if (value === undefined || value === null || value === '') {
+    return null
+  }
+
+  const stringValue = String(value).trim()
+  if (!stringValue || stringValue === 'null' || stringValue === 'undefined') {
+    return null
+  }
+
+  return parseNumberParam(stringValue)
+}
+
 const normalizeTaxCodeMutationBody = (body: Record<string, unknown>) => {
   const code =
     typeof body.code === 'string'
@@ -48,6 +62,8 @@ const normalizeTaxCodeMutationBody = (body: Record<string, unknown>) => {
     typeof body.description === 'string'
       ? body.description.trim() || null
       : (body.description as string | null | undefined)
+  const purchaseAccount = normalizeRelationshipId(body.purchaseAccount)
+  const salesAccount = normalizeRelationshipId(body.salesAccount)
 
   return {
     ...(code !== undefined ? { code } : {}),
@@ -55,8 +71,8 @@ const normalizeTaxCodeMutationBody = (body: Record<string, unknown>) => {
     ...(body.scope !== undefined ? { scope: (typeof body.scope === 'string' ? body.scope : 'both') as AccountingTaxScope } : {}),
     ...(body.rate !== undefined ? { rate: typeof body.rate === 'number' ? body.rate : Number(body.rate ?? 0) } : {}),
     ...(body.calculationMethod !== undefined ? { calculationMethod: (typeof body.calculationMethod === 'string' ? body.calculationMethod : 'exclusive') as AccountingTaxCalculationMethod } : {}),
-    ...(body.purchaseAccount !== undefined ? { purchaseAccount: body.purchaseAccount !== '' ? body.purchaseAccount : null } : {}),
-    ...(body.salesAccount !== undefined ? { salesAccount: body.salesAccount !== '' ? body.salesAccount : null } : {}),
+    ...(body.purchaseAccount !== undefined ? { purchaseAccount } : {}),
+    ...(body.salesAccount !== undefined ? { salesAccount } : {}),
     ...(body.isActive !== undefined ? { isActive: typeof body.isActive === 'boolean' ? body.isActive : true } : {}),
     ...(description !== undefined ? { description: description as string | null | undefined } : {}),
     ...(body.createdBy !== undefined ? { createdBy: body.createdBy as number | undefined } : {}),
@@ -104,7 +120,7 @@ const assertTaxCodeUpdatePayload = async (
   }
 
   if ('purchaseAccount' in body) {
-    const purchaseAccountId = body.purchaseAccount !== undefined && body.purchaseAccount !== '' ? body.purchaseAccount : null
+    const purchaseAccountId = normalizeRelationshipId(body.purchaseAccount)
 
     if (purchaseAccountId !== null) {
       try {
@@ -121,7 +137,7 @@ const assertTaxCodeUpdatePayload = async (
   }
 
   if ('salesAccount' in body) {
-    const salesAccountId = body.salesAccount !== undefined && body.salesAccount !== '' ? body.salesAccount : null
+    const salesAccountId = normalizeRelationshipId(body.salesAccount)
 
     if (salesAccountId !== null) {
       try {
@@ -251,6 +267,17 @@ const buildTaxCodeDetailResponse = async (
   }
 }
 
+const buildTaxCodeAuditSnapshot = (record: TaxCodeRecord) => ({
+  id: record.id,
+  code: record.code || null,
+  name: record.name || null,
+  scope: record.scope || null,
+  rate: record.rate ?? null,
+  calculationMethod: record.calculationMethod || null,
+  isActive: record.isActive !== false,
+  description: record.description || null,
+})
+
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { payload } = await requireAccountingAdmin(request)
@@ -281,6 +308,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       depth: 0,
       overrideAccess: true,
     })) as TaxCodeRecord
+    const beforeSnapshot = buildTaxCodeAuditSnapshot(currentRecord)
     await assertTaxCodeUpdatePayload(payload, body, currentRecord)
 
     const record = (await payload.update({
@@ -294,6 +322,24 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       } as never,
     })) as unknown as TaxCodeRecord
 
+    await AccountingAuditService.logAction({
+      payload,
+      entityType: 'audit_log',
+      entityId: String(record.code || record.id),
+      actionType: 'updated',
+      performedBy: user.id,
+      beforeData: beforeSnapshot,
+      afterData: buildTaxCodeAuditSnapshot(record),
+      reason: `Updated tax code ${record.code || record.id}.`,
+      metadata: {
+        domain: 'tax-code',
+        eventSource: 'tax-code-record',
+        taxCodeId: String(record.id),
+        taxCodeCode: record.code || null,
+        taxCodeName: record.name || null,
+      },
+    })
+
     return NextResponse.json(await buildTaxCodeDetailResponse(payload, record))
   } catch (error) {
     return handleAccountingApiError(error)
@@ -302,9 +348,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { payload } = await requireAccountingAdmin(request)
+    const { payload, user } = await requireAccountingAdmin(request)
     const { id } = await context.params
     const taxCodeId = parseNumberParam(id) || id
+    const currentRecord = (await payload.findByID({
+      collection: ACCOUNTING_COLLECTION_SLUGS.taxCodes,
+      id: taxCodeId,
+      depth: 0,
+      overrideAccess: true,
+    })) as TaxCodeRecord
 
     const usage = await computeTaxCodeUsageSummary(payload, taxCodeId)
 
@@ -332,6 +384,23 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
         409,
       )
     }
+
+    await AccountingAuditService.logAction({
+      payload,
+      entityType: 'audit_log',
+      entityId: String(currentRecord.code || currentRecord.id),
+      actionType: 'voided',
+      performedBy: user.id,
+      beforeData: buildTaxCodeAuditSnapshot(currentRecord),
+      reason: `Deleted tax code ${currentRecord.code || currentRecord.id}.`,
+      metadata: {
+        domain: 'tax-code',
+        eventSource: 'tax-code-record',
+        taxCodeId: String(currentRecord.id),
+        taxCodeCode: currentRecord.code || null,
+        taxCodeName: currentRecord.name || null,
+      },
+    })
 
     await payload.delete({
       collection: ACCOUNTING_COLLECTION_SLUGS.taxCodes,

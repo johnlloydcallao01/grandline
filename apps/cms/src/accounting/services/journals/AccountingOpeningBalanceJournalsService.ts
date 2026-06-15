@@ -25,6 +25,7 @@ export type OpeningBalanceJournalsQuery = {
   search?: string
   statuses?: string[]
   balancedFilters?: string[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -53,7 +54,7 @@ export type OpeningBalanceJournalsResult = {
   rows: OpeningBalanceJournalsRow[]
   metrics: Metric[]
   filterOptions: FilterOptions
-  appliedFilters: { search: string; statuses: string[]; balancedFilters: string[] }
+  appliedFilters: { search: string; statuses: string[]; balancedFilters: string[]; quickFilters: string[] }
   pagination: Pagination
   totals: { totalEntries: number; filteredEntries: number; postedEntries: number; draftEntries: number; balancedEntries: number }
 }
@@ -141,6 +142,7 @@ export class AccountingOpeningBalanceJournalsService {
     const search = normalizeSearch(query.search)
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const balancedFilters = Array.isArray(query.balancedFilters) ? query.balancedFilters : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit); const requestedPage = sanitizePage(query.page)
 
     const allDocs = await findAllDocs<OpeningBalDoc>({ payload, collection: ACCOUNTING_COLLECTION_SLUGS.journalEntries, depth: 1, sort: '-entryDate' })
@@ -148,7 +150,27 @@ export class AccountingOpeningBalanceJournalsService {
     const sorted = sortEntries(openingDocs)
     const allRows = sorted.map(mapRow)
 
-    const filtered = allRows.filter((row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesBalanced(row, balancedFilters))
+    let filtered = allRows.filter((row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesBalanced(row, balancedFilters))
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue.startsWith('status:')) {
+            return Boolean(row.status && normalizeText(row.status) === normalizeText(filterValue.replace('status:', '')))
+          }
+
+          if (filterValue === 'balanced:true') {
+            return row.isBalanced === true
+          }
+
+          if (filterValue === 'balanced:false') {
+            return row.isBalanced === false
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length; const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
     const page = Math.min(requestedPage, totalPages)
@@ -156,7 +178,7 @@ export class AccountingOpeningBalanceJournalsService {
 
     return {
       rows, metrics: buildMetrics(allRows), filterOptions: buildFilterOptions(),
-      appliedFilters: { search: normalizeText(query.search), statuses, balancedFilters },
+      appliedFilters: { search: normalizeText(query.search), statuses, balancedFilters, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: { totalEntries: allRows.length, filteredEntries: totalDocs, postedEntries: allRows.filter((r) => r.status === 'posted').length, draftEntries: allRows.filter((r) => r.status === 'draft').length, balancedEntries: allRows.filter((r) => r.isBalanced === true).length },
     }

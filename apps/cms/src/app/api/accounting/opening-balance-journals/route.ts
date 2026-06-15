@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || '',
       statuses: parseListParam(searchParams, 'status'),
       balancedFilters: parseListParam(searchParams, 'balancedFilter'),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1), limit: parseIntegerParam(searchParams.get('limit'), 10),
     })
     return NextResponse.json({

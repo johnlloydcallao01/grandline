@@ -52,6 +52,7 @@ export type AccountingChartOfAccountsRegisterQuery = {
   manualEntriesOnly?: boolean
   retainedEarningsOnly?: boolean
   parentAccountsOnly?: boolean
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -139,6 +140,7 @@ export type AccountingChartOfAccountsRegisterResult = {
     manualEntriesOnly: boolean
     retainedEarningsOnly: boolean
     parentAccountsOnly: boolean
+    quickFilters: string[]
   }
   pagination: ChartOfAccountsRegisterPagination
   referenceData: ChartOfAccountsReferenceData
@@ -358,6 +360,39 @@ const matchesAccountSubTypes = (
   return Boolean(account.accountSubType && accountSubTypes.includes(account.accountSubType))
 }
 
+const matchesQuickFilters = (
+  account: AccountingChartOfAccountsRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue.startsWith('status:')) {
+      return account.status === filterValue.replace('status:', '')
+    }
+
+    if (filterValue === 'controlAccountsOnly:true') {
+      return account.isControlAccount
+    }
+
+    if (filterValue === 'manualEntriesOnly:true') {
+      return account.allowManualEntries
+    }
+
+    if (filterValue === 'retainedEarningsOnly:true') {
+      return account.isRetainedEarnings
+    }
+
+    if (filterValue === 'parentAccountsOnly:true') {
+      return !account.parentAccountId
+    }
+
+    return false
+  })
+}
+
 const buildMetrics = (
   accounts: AccountingChartOfAccountsRegisterRow[],
 ): ChartOfAccountsRegisterMetric[] => {
@@ -460,6 +495,7 @@ export class AccountingChartOfAccountsRegisterService {
     const manualEntriesOnly = Boolean(query.manualEntriesOnly)
     const retainedEarningsOnly = Boolean(query.retainedEarningsOnly)
     const parentAccountsOnly = Boolean(query.parentAccountsOnly)
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -483,7 +519,8 @@ export class AccountingChartOfAccountsRegisterService {
         (!controlAccountsOnly || account.isControlAccount) &&
         (!manualEntriesOnly || account.allowManualEntries) &&
         (!retainedEarningsOnly || account.isRetainedEarnings) &&
-        (!parentAccountsOnly || !account.parentAccountId)
+        (!parentAccountsOnly || !account.parentAccountId) &&
+        matchesQuickFilters(account, quickFilters)
       )
     })
 
@@ -510,6 +547,7 @@ export class AccountingChartOfAccountsRegisterService {
         manualEntriesOnly,
         retainedEarningsOnly,
         parentAccountsOnly,
+        quickFilters,
       },
       pagination: {
         page,

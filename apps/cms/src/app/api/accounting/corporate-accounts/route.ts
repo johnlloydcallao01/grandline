@@ -8,6 +8,21 @@ const parseIntegerParam = (value: string | null, fallback: number) => {
   return Number.isFinite(parsedValue) ? parsedValue : fallback
 }
 
+const parseListParam = (searchParams: URLSearchParams, key: string): string[] => {
+  return Array.from(
+    new Set(
+      searchParams
+        .getAll(key)
+        .flatMap((value) => String(value || '').split(','))
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  )
+}
+
+const normalizeText = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+const normalizeSearch = (value: unknown) => normalizeText(value).toLowerCase()
+
 export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
@@ -16,39 +31,19 @@ export async function GET(request: NextRequest) {
     const page = parseIntegerParam(searchParams.get('page'), 1)
     const limit = parseIntegerParam(searchParams.get('limit'), 10)
 
-    const where: Record<string, unknown> = {}
-
-    if (search.trim()) {
-      where.or = [
-        { accountCode: { like: search } } as never,
-        { name: { like: search } } as never,
-        { billingContact: { like: search } } as never,
-        { email: { like: search } } as never,
-        { status: { like: search } } as never,
-      ]
-    }
-
-    const statuses = searchParams.getAll('status')
-    if (statuses.length > 0) {
-      where.status = { in: statuses } as never
-    }
-
-    const creditFilter = searchParams.get('creditFilter')
-    if (creditFilter === 'hasCredit') {
-      where.creditTerms = { exists: true } as never
-    }
+    const statuses = parseListParam(searchParams, 'status')
+    const creditFilter = searchParams.get('creditFilter') || ''
+    const quickFilters = parseListParam(searchParams, 'quickFilter')
 
     const result = await payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
-      where: where as never,
-      page,
-      limit,
+      limit: 10000,
       sort: '-createdAt',
       overrideAccess: true,
       depth: 0,
     })
 
-    const rows = result.docs.map((doc) => ({
+    const allRows = result.docs.map((doc) => ({
       id: doc.id,
       accountCode: doc.accountCode || null,
       name: doc.name || null,
@@ -72,27 +67,53 @@ export async function GET(request: NextRequest) {
       ],
     }))
 
-    const [activeCount, allDocs] = await Promise.all([
-      payload.count({
-        collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
-        where: { status: { equals: 'active' } } as never,
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
-        limit: 10000,
-        depth: 0,
-        overrideAccess: true,
-      }),
-    ])
+    const normalizedSearch = search.trim().toLowerCase()
+    let filteredRows = allRows.filter((row) => {
+      if (normalizedSearch) {
+        const matchesSearch = [
+          row.accountCode,
+          row.name,
+          row.billingContact,
+          row.email,
+          row.statusLabel,
+          row.status,
+        ].some((value) => normalizeSearch(value).includes(normalizedSearch))
 
-    const activeAccounts = Number(activeCount.totalDocs || 0)
-    const totalDocs = result.totalDocs
-    const inactiveAccounts = totalDocs - activeAccounts
-    const creditTermsFilter = (d: unknown) => {
-      return (d as { creditTerms?: unknown }).creditTerms
+        if (!matchesSearch) return false
+      }
+
+      if (statuses.length > 0 && (!row.status || !statuses.includes(row.status))) {
+        return false
+      }
+
+      if (creditFilter === 'hasCredit' && !row.creditTerms) {
+        return false
+      }
+
+      return true
+    })
+
+    if (quickFilters.length > 0) {
+      filteredRows = filteredRows.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue === 'hasCredit') {
+            return Boolean(row.creditTerms)
+          }
+
+          return Boolean(row.status && row.status === filterValue)
+        }),
+      )
     }
-    const withCreditTerms = allDocs.docs.filter(creditTermsFilter).length
+
+    const totalDocs = filteredRows.length
+    const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
+    const currentPage = Math.min(Math.max(page, 1), totalPages)
+    const startIndex = (currentPage - 1) * limit
+    const rows = filteredRows.slice(startIndex, startIndex + limit)
+
+    const activeAccounts = allRows.filter((row) => row.status === 'active').length
+    const inactiveAccounts = allRows.filter((row) => row.status === 'inactive').length
+    const withCreditTerms = allRows.filter((row) => row.creditTerms).length
 
     return NextResponse.json({
       section: {
@@ -118,16 +139,22 @@ export async function GET(request: NextRequest) {
           rows,
         },
       },
+      appliedFilters: {
+        search,
+        statuses,
+        creditFilter,
+        quickFilters,
+      },
       pagination: {
-        page: result.page,
-        limit: result.limit,
-        totalDocs: result.totalDocs,
-        totalPages: result.totalPages,
-        hasPrevPage: result.hasPrevPage,
-        hasNextPage: result.hasNextPage,
+        page: currentPage,
+        limit,
+        totalDocs,
+        totalPages,
+        hasPrevPage: currentPage > 1,
+        hasNextPage: currentPage < totalPages,
       },
       totals: {
-        totalAccounts: totalDocs,
+        totalAccounts: allRows.length,
         filteredAccounts: totalDocs,
       },
     })

@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       statuses: parseListParam<AccountingPartyStatus>(searchParams, 'status'),
       customerTypes: parseListParam<AccountingCustomerType>(searchParams, 'customerType'),
       hasCreditLimit: parseBooleanParam(searchParams.get('hasCreditLimit')),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

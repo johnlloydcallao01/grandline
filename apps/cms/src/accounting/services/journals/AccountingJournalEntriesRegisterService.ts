@@ -34,6 +34,7 @@ export type JournalEntriesRegisterQuery = {
   statuses?: string[]
   sourceTypes?: string[]
   isUnbalanced?: boolean
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -93,7 +94,7 @@ export type JournalEntriesRegisterResult = {
   rows: JournalEntriesRegisterRow[]
   metrics: RegisterMetric[]
   filterOptions: RegisterFilterOptions
-  appliedFilters: { search: string; statuses: string[]; sourceTypes: string[]; isUnbalanced: boolean }
+  appliedFilters: { search: string; statuses: string[]; sourceTypes: string[]; isUnbalanced: boolean; quickFilters: string[] }
   pagination: RegisterPagination
   totals: { totalEntries: number; filteredEntries: number; draftEntries: number; postedEntries: number; unbalancedEntries: number }
 }
@@ -260,6 +261,7 @@ export class AccountingJournalEntriesRegisterService {
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const sourceTypes = Array.isArray(query.sourceTypes) ? query.sourceTypes : []
     const isUnbalanced = Boolean(query.isUnbalanced)
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -273,9 +275,29 @@ export class AccountingJournalEntriesRegisterService {
     const sorted = sortEntries(docs)
     let allRows = sorted.map(mapJournalEntryRow)
 
-    const filtered = allRows.filter(
+    let filtered = allRows.filter(
       (row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesSourceTypes(row, sourceTypes) && (isUnbalanced ? row.isBalanced === false : true),
     )
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue.startsWith('status:')) {
+            return Boolean(row.status && normalizeText(row.status) === normalizeText(filterValue.replace('status:', '')))
+          }
+
+          if (filterValue.startsWith('sourceType:')) {
+            return Boolean(row.sourceType && normalizeText(row.sourceType) === normalizeText(filterValue.replace('sourceType:', '')))
+          }
+
+          if (filterValue === 'isUnbalanced:true') {
+            return row.isBalanced === false
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -287,7 +309,7 @@ export class AccountingJournalEntriesRegisterService {
       rows,
       metrics: buildMetrics(allRows),
       filterOptions: buildFilterOptions(),
-      appliedFilters: { search: normalizeText(query.search), statuses, sourceTypes, isUnbalanced },
+      appliedFilters: { search: normalizeText(query.search), statuses, sourceTypes, isUnbalanced, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: {
         totalEntries: allRows.length,

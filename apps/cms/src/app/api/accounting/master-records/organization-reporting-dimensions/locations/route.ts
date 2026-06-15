@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       statuses: parseListParam(searchParams, 'status'),
       branchIds,
       branchFilters: parseListParam(searchParams, 'branchFilter'),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

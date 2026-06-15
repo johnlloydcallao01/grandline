@@ -8,6 +8,21 @@ const parseIntegerParam = (value: string | null, fallback: number) => {
   return Number.isFinite(parsedValue) ? parsedValue : fallback
 }
 
+const parseListParam = (searchParams: URLSearchParams, key: string): string[] => {
+  return Array.from(
+    new Set(
+      searchParams
+        .getAll(key)
+        .flatMap((value) => String(value || '').split(','))
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  )
+}
+
+const normalizeText = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+const normalizeSearch = (value: unknown) => normalizeText(value).toLowerCase()
+
 export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
@@ -16,39 +31,19 @@ export async function GET(request: NextRequest) {
     const page = parseIntegerParam(searchParams.get('page'), 1)
     const limit = parseIntegerParam(searchParams.get('limit'), 10)
 
-    const where: Record<string, unknown> = {}
-
-    if (search.trim()) {
-      where.or = [
-        { sponsorCode: { like: search } } as never,
-        { name: { like: search } } as never,
-        { contactName: { like: search } } as never,
-        { email: { like: search } } as never,
-        { status: { like: search } } as never,
-      ]
-    }
-
-    const statuses = searchParams.getAll('status')
-    if (statuses.length > 0) {
-      where.status = { in: statuses } as never
-    }
-
-    const contactFilter = searchParams.get('contactFilter')
-    if (contactFilter === 'hasContact') {
-      where.contactName = { exists: true } as never
-    }
+    const statuses = parseListParam(searchParams, 'status')
+    const contactFilter = searchParams.get('contactFilter') || ''
+    const quickFilters = parseListParam(searchParams, 'quickFilter')
 
     const result = await payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
-      where: where as never,
-      page,
-      limit,
+      limit: 10000,
       sort: '-createdAt',
       overrideAccess: true,
       depth: 0,
     })
 
-    const rows = result.docs.map((doc) => ({
+    const allRows = result.docs.map((doc) => ({
       id: doc.id,
       sponsorCode: doc.sponsorCode || null,
       name: doc.name || null,
@@ -70,28 +65,53 @@ export async function GET(request: NextRequest) {
       ],
     }))
 
-    const [activeCount, allDocs] = await Promise.all([
-      payload.count({
-        collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
-        where: { status: { equals: 'active' } } as never,
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
-        limit: 10000,
-        depth: 0,
-        overrideAccess: true,
-      }),
-    ])
+    const normalizedSearch = search.trim().toLowerCase()
+    let filteredRows = allRows.filter((row) => {
+      if (normalizedSearch) {
+        const matchesSearch = [
+          row.sponsorCode,
+          row.name,
+          row.contactName,
+          row.email,
+          row.statusLabel,
+          row.status,
+        ].some((value) => normalizeSearch(value).includes(normalizedSearch))
 
-    const activeSponsors = Number(activeCount.totalDocs || 0)
-    const totalDocs = result.totalDocs
-    const inactiveSponsors = totalDocs - activeSponsors
-    const contactInfoFilter = (d: unknown) => {
-      const r = d as { contactName?: unknown; email?: unknown; phone?: unknown }
-      return r.contactName || r.email || r.phone
+        if (!matchesSearch) return false
+      }
+
+      if (statuses.length > 0 && (!row.status || !statuses.includes(row.status))) {
+        return false
+      }
+
+      if (contactFilter === 'hasContact' && !(row.contactName || row.email || row.phone)) {
+        return false
+      }
+
+      return true
+    })
+
+    if (quickFilters.length > 0) {
+      filteredRows = filteredRows.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue === 'hasContact') {
+            return Boolean(row.contactName || row.email || row.phone)
+          }
+
+          return Boolean(row.status && row.status === filterValue)
+        }),
+      )
     }
-    const withContactInfo = allDocs.docs.filter(contactInfoFilter).length
+
+    const totalDocs = filteredRows.length
+    const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
+    const currentPage = Math.min(Math.max(page, 1), totalPages)
+    const startIndex = (currentPage - 1) * limit
+    const rows = filteredRows.slice(startIndex, startIndex + limit)
+
+    const activeSponsors = allRows.filter((row) => row.status === 'active').length
+    const inactiveSponsors = allRows.filter((row) => row.status === 'inactive').length
+    const withContactInfo = allRows.filter((row) => row.contactName || row.email || row.phone).length
 
     return NextResponse.json({
       section: {
@@ -117,16 +137,22 @@ export async function GET(request: NextRequest) {
           rows,
         },
       },
+      appliedFilters: {
+        search,
+        statuses,
+        contactFilter,
+        quickFilters,
+      },
       pagination: {
-        page: result.page,
-        limit: result.limit,
-        totalDocs: result.totalDocs,
-        totalPages: result.totalPages,
-        hasPrevPage: result.hasPrevPage,
-        hasNextPage: result.hasNextPage,
+        page: currentPage,
+        limit,
+        totalDocs,
+        totalPages,
+        hasPrevPage: currentPage > 1,
+        hasNextPage: currentPage < totalPages,
       },
       totals: {
-        totalSponsors: totalDocs,
+        totalSponsors: allRows.length,
         filteredSponsors: totalDocs,
       },
     })

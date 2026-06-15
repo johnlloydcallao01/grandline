@@ -6,6 +6,19 @@ import {
   requireAccountingAdmin,
 } from '../_utils/auth'
 
+const mapBranchResponse = (record: Record<string, unknown>) => ({
+  id: record.id,
+  branchCode: typeof record.branchCode === 'string' ? record.branchCode : null,
+  name: typeof record.name === 'string' ? record.name : null,
+  status: typeof record.status === 'string' ? record.status : null,
+  address: typeof record.address === 'string' ? record.address : null,
+  notes: typeof record.notes === 'string' ? record.notes : null,
+  createdBy: record.createdBy ?? null,
+  updatedBy: record.updatedBy ?? null,
+  createdAt: typeof record.createdAt === 'string' ? record.createdAt : null,
+  updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt : null,
+})
+
 const normalizeBody = (body: Record<string, unknown>) => ({
   branchCode:
     typeof body.branchCode === 'string'
@@ -65,14 +78,17 @@ export async function GET(request: NextRequest) {
 
     const result = await payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.branches,
-      depth: 1,
+      depth: 0,
       sort: 'branchCode',
       page,
       limit,
       overrideAccess: true,
     })
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      ...result,
+      docs: result.docs.map((doc) => mapBranchResponse(doc as unknown as Record<string, unknown>)),
+    })
   } catch (error) {
     return handleAccountingApiError(error)
   }
@@ -92,10 +108,10 @@ export async function POST(request: NextRequest) {
         createdBy: user.id,
         updatedBy: user.id,
       } as never,
-      depth: 1,
+      depth: 0,
     })
 
-    return NextResponse.json(record, { status: 201 })
+    return NextResponse.json(mapBranchResponse(record as unknown as Record<string, unknown>), { status: 201 })
   } catch (error) {
     return handleAccountingApiError(error)
   }

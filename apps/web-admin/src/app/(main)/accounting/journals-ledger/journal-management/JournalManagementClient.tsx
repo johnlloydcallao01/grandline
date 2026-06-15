@@ -369,6 +369,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
     sourceTypes: initialData?.appliedFilters.sourceTypes || [],
     isUnbalanced: initialData?.appliedFilters.isUnbalanced || false,
   });
+  const [quickFilters, setQuickFilters] = useState<string[]>(initialData?.appliedFilters.quickFilters || []);
   const initialFetchRef = useRef(false);
 
   // --- Create state ---
@@ -407,6 +408,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   const [lineSubmittedSearch, setLineSubmittedSearch] = useState('');
   const [lineCurrentPage, setLineCurrentPage] = useState(1);
   const [lineFilters, setLineFilters] = useState<JournalEntryDetailFilterState>({ hasTaxCode: false, hasReference: false, lineTypes: [] });
+  const [lineQuickFilters, setLineQuickFilters] = useState<string[]>([]);
   const [draftLineFilters, setDraftLineFilters] = useState<JournalEntryDetailFilterState>({ hasTaxCode: false, hasReference: false, lineTypes: [] });
   const [isLineFilterPanelOpen, setIsLineFilterPanelOpen] = useState(false);
 
@@ -444,6 +446,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   const [stSubmittedSearch, setStSubmittedSearch] = useState('');
   const [stCurrentPage, setStCurrentPage] = useState(1);
   const [stFilters, setStFilters] = useState<{ sourceTypes: string[]; statuses: string[] }>({ sourceTypes: [], statuses: [] });
+  const [stQuickFilters, setStQuickFilters] = useState<string[]>([]);
   const [draftStFilters, setDraftStFilters] = useState<{ sourceTypes: string[]; statuses: string[] }>({ sourceTypes: [], statuses: [] });
   const [isStFilterPanelOpen, setIsStFilterPanelOpen] = useState(false);
 
@@ -471,11 +474,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   const stFilterCount = stFilters.sourceTypes.length + stFilters.statuses.length;
 
   // --- Fetch ---
-  const fetchData = useCallback(async ({ search, page, filters: f }: { search: string; page: number; filters: JournalEntryFilterState }) => {
+  const fetchData = useCallback(async ({ search, page, filters: f, nextQuickFilters }: { search: string; page: number; filters: JournalEntryFilterState; nextQuickFilters: string[] }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await getJournalEntriesRegister({ search, page, statuses: f.statuses, sourceTypes: f.sourceTypes, isUnbalanced: f.isUnbalanced });
+      const result = await getJournalEntriesRegister({ search, page, statuses: f.statuses, sourceTypes: f.sourceTypes, isUnbalanced: f.isUnbalanced, quickFilters: nextQuickFilters });
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load journal entries.');
@@ -485,7 +488,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   }, []);
 
   // --- Lines fetch ---
-  const fetchLines = useCallback(async ({ search, page, filters: f }: { search: string; page: number; filters: JournalEntryDetailFilterState }) => {
+  const fetchLines = useCallback(async ({ search, page, filters: f, nextQuickFilters }: { search: string; page: number; filters: JournalEntryDetailFilterState; nextQuickFilters: string[] }) => {
     setIsLineLoading(true);
     setLineError(null);
     try {
@@ -495,6 +498,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
         hasTaxCode: f.hasTaxCode,
         hasReference: f.hasReference,
         lineTypes: f.lineTypes,
+        quickFilters: nextQuickFilters,
       });
       setLineData(result);
     } catch (err) {
@@ -505,11 +509,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   }, []);
 
   // --- Source types fetch ---
-  const fetchSt = useCallback(async ({ search, page, filters: f }: { search: string; page: number; filters: { sourceTypes: string[]; statuses: string[] } }) => {
+  const fetchSt = useCallback(async ({ search, page, filters: f, nextQuickFilters }: { search: string; page: number; filters: { sourceTypes: string[]; statuses: string[] }; nextQuickFilters: string[] }) => {
     setIsStLoading(true);
     setStError(null);
     try {
-      const result = await getSourceTypesRegister({ search, page, sourceTypes: f.sourceTypes, statuses: f.statuses });
+      const result = await getSourceTypesRegister({ search, page, sourceTypes: f.sourceTypes, statuses: f.statuses, quickFilters: nextQuickFilters });
       setStData(result);
     } catch (err) {
       setStError(err instanceof Error ? err.message : 'Unable to load journal source types.');
@@ -522,26 +526,26 @@ export default function JournalManagementClient({ initialData }: JournalManageme
   useEffect(() => {
     if (activeTab !== 'journal-entries') return;
     if (!initialFetchRef.current && initialData) { initialFetchRef.current = true; return; }
-    void fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters });
-  }, [activeTab, appliedFilters, currentPage, submittedSearch, fetchData, initialData]);
+    void fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters, nextQuickFilters: quickFilters });
+  }, [activeTab, appliedFilters, currentPage, submittedSearch, quickFilters, fetchData, initialData]);
 
   // --- Lines fetch on tab switch ---
   useEffect(() => {
     if (activeTab !== 'journal-entry-detail') return;
-    void fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters });
-  }, [activeTab, lineFilters, lineCurrentPage, lineSubmittedSearch, fetchLines]);
+    void fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters });
+  }, [activeTab, lineFilters, lineCurrentPage, lineSubmittedSearch, lineQuickFilters, fetchLines]);
 
   // --- Source types fetch on tab switch ---
   useEffect(() => {
     if (activeTab !== 'journal-source-types') return;
-    void fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters });
-  }, [activeTab, stFilters, stCurrentPage, stSubmittedSearch, fetchSt]);
+    void fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters, nextQuickFilters: stQuickFilters });
+  }, [activeTab, stFilters, stCurrentPage, stSubmittedSearch, stQuickFilters, fetchSt]);
 
   // --- Search ---
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittedSearch(searchInput);
-    fetchData({ search: searchInput, page: 1, filters: appliedFilters });
+    fetchData({ search: searchInput, page: 1, filters: appliedFilters, nextQuickFilters: quickFilters });
   };
 
   // --- Filter apply/reset ---
@@ -563,27 +567,13 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
   // --- Quick filter toggle ---
   const handleToggleQuickFilter = (value: string) => {
-    if (value.startsWith('status:')) {
-      const status = value.replace('status:', '');
-      const newStatuses = toggleFilterValue(appliedFilters.statuses, status);
-      setAppliedFilters((prev) => ({ ...prev, statuses: newStatuses }));
-      setDraftFilters((prev) => ({ ...prev, statuses: newStatuses }));
-    } else if (value.startsWith('sourceType:')) {
-      const st = value.replace('sourceType:', '');
-      const newSourceTypes = toggleFilterValue(appliedFilters.sourceTypes, st);
-      setAppliedFilters((prev) => ({ ...prev, sourceTypes: newSourceTypes }));
-      setDraftFilters((prev) => ({ ...prev, sourceTypes: newSourceTypes }));
-    } else if (value === 'isUnbalanced:true') {
-      const newVal = !appliedFilters.isUnbalanced;
-      setAppliedFilters((prev) => ({ ...prev, isUnbalanced: newVal }));
-      setDraftFilters((prev) => ({ ...prev, isUnbalanced: newVal }));
-    }
+    setQuickFilters((previous) => toggleFilterValue(previous, value));
     setCurrentPage(1);
   };
 
   // --- Refresh ---
   const handleRefresh = () => {
-    fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters });
+    fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters, nextQuickFilters: quickFilters });
   };
 
   // --- Create ---
@@ -617,9 +607,9 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       handleCloseCreate();
       setCurrentPage(1);
       if (activeTab === 'journal-source-types') {
-        fetchSt({ search: stSubmittedSearch, page: 1, filters: stFilters });
+        fetchSt({ search: stSubmittedSearch, page: 1, filters: stFilters, nextQuickFilters: stQuickFilters });
       } else {
-        fetchData({ search: submittedSearch, page: 1, filters: appliedFilters });
+        fetchData({ search: submittedSearch, page: 1, filters: appliedFilters, nextQuickFilters: quickFilters });
       }
       handleView(created.id);
     } catch (err) {
@@ -700,9 +690,9 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       });
       handleCloseEdit();
       if (activeTab === 'journal-source-types') {
-        fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters });
+        fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters, nextQuickFilters: stQuickFilters });
       } else {
-        fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters });
+        fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters, nextQuickFilters: quickFilters });
       }
     } catch (err) {
       setEditErr(err instanceof Error ? err.message : 'Unable to update journal entry.');
@@ -748,9 +738,9 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       }
       handleCloseDelete();
       if (activeTab === 'journal-source-types') {
-        fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters });
+        fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters, nextQuickFilters: stQuickFilters });
       } else {
-        fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters });
+        fetchData({ search: submittedSearch, page: currentPage, filters: appliedFilters, nextQuickFilters: quickFilters });
       }
     } catch (err) {
       setDeleteErr(err instanceof Error ? err.message : 'Unable to delete journal entry.');
@@ -837,7 +827,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
                 <Plus className="h-4 w-4" /> Create Journal
               </button>
-              <button type="button" onClick={() => fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters })}
+              <button type="button" onClick={() => fetchSt({ search: stSubmittedSearch, page: stCurrentPage, filters: stFilters, nextQuickFilters: stQuickFilters })}
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
                 <RefreshCw className="h-4 w-4" /> Refresh
               </button>
@@ -882,7 +872,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
               </div>
               <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-                  <form onSubmit={(e) => { e.preventDefault(); setStSubmittedSearch(stSearchInput); fetchSt({ search: stSearchInput, page: 1, filters: stFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
+                  <form onSubmit={(e) => { e.preventDefault(); setStSubmittedSearch(stSearchInput); fetchSt({ search: stSearchInput, page: 1, filters: stFilters, nextQuickFilters: stQuickFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input type="text" placeholder="Search source type, entry no., source reference, memo, or user"
                     value={stSearchInput} onChange={(e) => setStSearchInput(e.target.value)}
@@ -903,13 +893,10 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                   const qf = stData?.section?.filters?.quickFilters;
                   if (qf && qf.length > 0) {
                     return qf.map((f) => {
-                      let isActive = false;
-                      if (f.value.startsWith('sourceType:')) isActive = stFilters.sourceTypes.includes(f.value.replace('sourceType:', ''));
-                      else if (f.value.startsWith('status:')) isActive = stFilters.statuses.includes(f.value.replace('status:', ''));
+                      const isActive = stQuickFilters.includes(f.value);
                       return (
                         <button key={f.value} type="button" onClick={() => {
-                          if (f.value.startsWith('sourceType:')) { const v = f.value.replace('sourceType:', ''); setStFilters((p) => ({ ...p, sourceTypes: toggleFilterValue(p.sourceTypes, v) })); setDraftStFilters((p) => ({ ...p, sourceTypes: toggleFilterValue(p.sourceTypes, v) })); }
-                          else if (f.value.startsWith('status:')) { const v = f.value.replace('status:', ''); setStFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, v) })); setDraftStFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, v) })); }
+                          setStQuickFilters((previous) => toggleFilterValue(previous, f.value));
                           setStCurrentPage(1);
                         }}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
@@ -1054,7 +1041,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
                 <Plus className="h-4 w-4" /> Create Line
               </button>
-              <button type="button" onClick={() => fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters })}
+              <button type="button" onClick={() => fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters })}
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
                 <RefreshCw className="h-4 w-4" /> Refresh
               </button>
@@ -1104,7 +1091,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
               </div>
               <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-                  <form onSubmit={(e) => { e.preventDefault(); setLineSubmittedSearch(lineSearchInput); fetchLines({ search: lineSearchInput, page: 1, filters: lineFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
+                  <form onSubmit={(e) => { e.preventDefault(); setLineSubmittedSearch(lineSearchInput); fetchLines({ search: lineSearchInput, page: 1, filters: lineFilters, nextQuickFilters: lineQuickFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input type="text" placeholder="Search entry no., account, line description, tax code, or reference entity"
                     value={lineSearchInput} onChange={(e) => setLineSearchInput(e.target.value)}
@@ -1127,18 +1114,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                   const quickFilters = lineData?.section?.filters?.quickFilters;
                   if (quickFilters && quickFilters.length > 0) {
                     return quickFilters.map((qf) => {
-                      let isActive = false;
-                      if (qf.value === 'hasTaxCode:true') isActive = lineFilters.hasTaxCode;
-                      else if (qf.value === 'hasReference:true') isActive = lineFilters.hasReference;
-            else if (qf.value === 'lineType:debit') isActive = lineFilters.lineTypes.includes('debit');
-            else if (qf.value === 'lineType:credit') isActive = lineFilters.lineTypes.includes('credit');
-            return (
-              <button key={qf.value} type="button" onClick={() => {
-                if (qf.value === 'hasTaxCode:true') setLineFilters((p) => ({ ...p, hasTaxCode: !p.hasTaxCode }));
-                else if (qf.value === 'hasReference:true') setLineFilters((p) => ({ ...p, hasReference: !p.hasReference }));
-                else if (qf.value === 'lineType:debit') setLineFilters((p) => ({ ...p, lineTypes: toggleFilterValue(p.lineTypes, 'debit') }));
-                else if (qf.value === 'lineType:credit') setLineFilters((p) => ({ ...p, lineTypes: toggleFilterValue(p.lineTypes, 'credit') }));
-                setLineCurrentPage(1);
+                      const isActive = lineQuickFilters.includes(qf.value);
+                      return (
+                        <button key={qf.value} type="button" onClick={() => {
+                          setLineQuickFilters((previous) => toggleFilterValue(previous, qf.value));
+                          setLineCurrentPage(1);
                         }}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                           {qf.label}
@@ -1344,13 +1324,10 @@ export default function JournalManagementClient({ initialData }: JournalManageme
               {/* Quick filter chips */}
               <div className="flex flex-wrap gap-2">
                 {(() => {
-                  const quickFilters = data?.section?.filters?.quickFilters;
-                  if (quickFilters && quickFilters.length > 0) {
-                    return quickFilters.map((qf) => {
-                      let isActive = false;
-                      if (qf.value.startsWith('status:')) isActive = appliedFilters.statuses.includes(qf.value.replace('status:', ''));
-                      else if (qf.value.startsWith('sourceType:')) isActive = appliedFilters.sourceTypes.includes(qf.value.replace('sourceType:', ''));
-                      else if (qf.value === 'isUnbalanced:true') isActive = appliedFilters.isUnbalanced;
+                  const quickFilterOptions = data?.section?.filters?.quickFilters;
+                  if (quickFilterOptions && quickFilterOptions.length > 0) {
+                    return quickFilterOptions.map((qf) => {
+                      const isActive = quickFilters.includes(qf.value);
                       return (
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
@@ -1694,7 +1671,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       {/* Line Create SlideOver */}
       <SlideOver isOpen={isLineCreateOpen} onClose={() => { setIsLineCreateOpen(false); setLineCreateErr(null); }} title="Create Journal Line">
         {lineCreateErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineCreateErr}</div>}
-        <form onSubmit={async (e) => { e.preventDefault(); setIsLineCreateSubmitting(true); setLineCreateErr(null); try { await createJournalEntryLine({ journalEntry: Number(lineCreateForm.journalEntry), account: Number(lineCreateForm.account), description: lineCreateForm.description || null, debit: Number(lineCreateForm.debit) || 0, credit: Number(lineCreateForm.credit) || 0, taxCode: lineCreateForm.taxCode ? Number(lineCreateForm.taxCode) : null, referenceEntityType: lineCreateForm.referenceEntityType || null, referenceEntityId: lineCreateForm.referenceEntityId || null }); setIsLineCreateOpen(false); setLineCreateErr(null); setLineCreateForm(initialLineForm); setIsLineCreateSubmitting(false); setLineCurrentPage(1); fetchLines({ search: lineSubmittedSearch, page: 1, filters: lineFilters }); } catch (err) { setLineCreateErr(err instanceof Error ? err.message : 'Unable to create line.'); setIsLineCreateSubmitting(false); } }} className="space-y-4">
+        <form onSubmit={async (e) => { e.preventDefault(); setIsLineCreateSubmitting(true); setLineCreateErr(null); try { await createJournalEntryLine({ journalEntry: Number(lineCreateForm.journalEntry), account: Number(lineCreateForm.account), description: lineCreateForm.description || null, debit: Number(lineCreateForm.debit) || 0, credit: Number(lineCreateForm.credit) || 0, taxCode: lineCreateForm.taxCode ? Number(lineCreateForm.taxCode) : null, referenceEntityType: lineCreateForm.referenceEntityType || null, referenceEntityId: lineCreateForm.referenceEntityId || null }); setIsLineCreateOpen(false); setLineCreateErr(null); setLineCreateForm(initialLineForm); setIsLineCreateSubmitting(false); setLineCurrentPage(1); fetchLines({ search: lineSubmittedSearch, page: 1, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineCreateErr(err instanceof Error ? err.message : 'Unable to create line.'); setIsLineCreateSubmitting(false); } }} className="space-y-4">
            <FormField label="Journal Entry" required>
             <select value={lineCreateForm.journalEntry} onChange={(v) => setLineCreateForm((p) => ({ ...p, journalEntry: v.target.value }))}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
@@ -1739,7 +1716,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       {/* Line Edit SlideOver */}
       <SlideOver isOpen={isLineEditOpen} onClose={() => { setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); }} title="Edit Journal Line">
         {lineEditErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineEditErr}</div>}
-        <form onSubmit={async (e) => { e.preventDefault(); if (lineEditingId === null) return; setIsLineEditSubmitting(true); setLineEditErr(null); try { await updateJournalEntryLine(lineEditingId, { account: Number(lineEditForm.account), description: lineEditForm.description || null, debit: Number(lineEditForm.debit) || 0, credit: Number(lineEditForm.credit) || 0, taxCode: lineEditForm.taxCode ? Number(lineEditForm.taxCode) : null, referenceEntityType: lineEditForm.referenceEntityType || null, referenceEntityId: lineEditForm.referenceEntityId || null }); setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); setLineEditForm(initialLineForm); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters }); } catch (err) { setLineEditErr(err instanceof Error ? err.message : 'Unable to update line.'); setIsLineEditSubmitting(false); } }} className="space-y-4">
+        <form onSubmit={async (e) => { e.preventDefault(); if (lineEditingId === null) return; setIsLineEditSubmitting(true); setLineEditErr(null); try { await updateJournalEntryLine(lineEditingId, { account: Number(lineEditForm.account), description: lineEditForm.description || null, debit: Number(lineEditForm.debit) || 0, credit: Number(lineEditForm.credit) || 0, taxCode: lineEditForm.taxCode ? Number(lineEditForm.taxCode) : null, referenceEntityType: lineEditForm.referenceEntityType || null, referenceEntityId: lineEditForm.referenceEntityId || null }); setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); setLineEditForm(initialLineForm); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineEditErr(err instanceof Error ? err.message : 'Unable to update line.'); setIsLineEditSubmitting(false); } }} className="space-y-4">
            <FormField label="Account" required>
             <select value={lineEditForm.account} onChange={(v) => setLineEditForm((p) => ({ ...p, account: v.target.value }))}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
@@ -1787,7 +1764,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => { setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); }} disabled={isLineDeleteSubmitting}
               className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50">Cancel</button>
-            <button type="button" onClick={async () => { if (lineDeletingId === null) return; setIsLineDeleteSubmitting(true); setLineDeleteErr(null); try { await deleteJournalEntryLine(lineDeletingId); setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); setIsLineDeleteSubmitting(false); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters }); } catch (err) { setLineDeleteErr(err instanceof Error ? err.message : 'Unable to delete line.'); setIsLineDeleteSubmitting(false); } }}
+            <button type="button" onClick={async () => { if (lineDeletingId === null) return; setIsLineDeleteSubmitting(true); setLineDeleteErr(null); try { await deleteJournalEntryLine(lineDeletingId); setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); setIsLineDeleteSubmitting(false); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineDeleteErr(err instanceof Error ? err.message : 'Unable to delete line.'); setIsLineDeleteSubmitting(false); } }}
               disabled={isLineDeleteSubmitting}
               className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
               {isLineDeleteSubmitting ? 'Deleting...' : 'Delete Line'}

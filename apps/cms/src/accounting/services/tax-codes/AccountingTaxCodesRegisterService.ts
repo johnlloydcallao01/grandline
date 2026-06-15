@@ -34,7 +34,8 @@ export type AccountingTaxCodesRegisterQuery = {
   search?: string
   scopes?: AccountingTaxScope[]
   calculationMethods?: AccountingTaxCalculationMethod[]
-  isActive?: boolean
+  statuses?: string[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -93,7 +94,8 @@ export type AccountingTaxCodesRegisterResult = {
     search: string
     scopes: AccountingTaxScope[]
     calculationMethods: AccountingTaxCalculationMethod[]
-    isActive: boolean | null
+    statuses: string[]
+    quickFilters: string[]
   }
   pagination: TaxCodesRegisterPagination
   totals: {
@@ -219,15 +221,16 @@ const matchesCalculationMethods = (
   return Boolean(row.calculationMethod && methods.includes(row.calculationMethod))
 }
 
-const matchesIsActive = (
+const matchesStatuses = (
   row: AccountingTaxCodesRegisterRow,
-  isActive: boolean | null,
+  statuses: string[],
 ) => {
-  if (isActive === null || isActive === undefined) {
+  if (!statuses.length) {
     return true
   }
 
-  return row.isActive === isActive
+  const rowStatus = row.isActive ? 'active' : 'inactive'
+  return statuses.includes(rowStatus)
 }
 
 const sortTaxCodes = (docs: TaxCodeRegisterDoc[]) =>
@@ -288,7 +291,8 @@ const buildFilterOptions = (): TaxCodesRegisterFilterOptions => ({
     value: option.value,
   })),
   quickFilters: [
-    { label: 'Active', value: 'isActive:true' },
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
     { label: 'Sales', value: 'scope:sales' },
     { label: 'Purchase', value: 'scope:purchase' },
     { label: 'Both', value: 'scope:both' },
@@ -303,7 +307,8 @@ export class AccountingTaxCodesRegisterService {
     const normalizedSearch = normalizeSearch(query.search)
     const scopes = Array.isArray(query.scopes) ? query.scopes : []
     const calculationMethods = Array.isArray(query.calculationMethods) ? query.calculationMethods : []
-    const isActive = query.isActive !== undefined ? query.isActive : null
+    const statuses = Array.isArray(query.statuses) ? query.statuses : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -317,14 +322,38 @@ export class AccountingTaxCodesRegisterService {
     const sortedDocs = sortTaxCodes(taxCodeDocs)
     const allRows = sortedDocs.map(mapTaxCodeRow)
 
-    const filteredRows = allRows.filter((row) => {
+    let filteredRows = allRows.filter((row) => {
       return (
         matchesSearch(row, normalizedSearch) &&
         matchesScopes(row, scopes) &&
         matchesCalculationMethods(row, calculationMethods) &&
-        matchesIsActive(row, isActive)
+        matchesStatuses(row, statuses)
       )
     })
+
+    if (quickFilters.length > 0) {
+      filteredRows = filteredRows.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue === 'active') {
+            return row.isActive
+          }
+
+          if (filterValue === 'inactive') {
+            return !row.isActive
+          }
+
+          if (filterValue.startsWith('scope:')) {
+            return normalizeText(row.scope || '') === normalizeText(filterValue.replace('scope:', ''))
+          }
+
+          if (filterValue.startsWith('method:')) {
+            return normalizeText(row.calculationMethod || '') === normalizeText(filterValue.replace('method:', ''))
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filteredRows.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -340,7 +369,8 @@ export class AccountingTaxCodesRegisterService {
         search: normalizeText(query.search),
         scopes,
         calculationMethods,
-        isActive,
+        statuses,
+        quickFilters,
       },
       pagination: {
         page,

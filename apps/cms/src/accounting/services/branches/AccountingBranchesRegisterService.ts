@@ -4,21 +4,22 @@ import { findAllDocs } from '../../utils/findAllDocs'
 
 type BranchDoc = {
   id: number | string
-  branchCode?: string | null
-  name?: string | null
-  status?: string | null
-  address?: string | null
-  notes?: string | null
-  createdBy?: { id: number | string } | number | string | null
-  updatedBy?: { id: number | string } | number | string | null
-  createdAt?: string | null
-  updatedAt?: string | null
+  branchCode?: unknown
+  name?: unknown
+  status?: unknown
+  address?: unknown
+  notes?: unknown
+  createdBy?: Record<string, unknown> | number | string | null
+  updatedBy?: Record<string, unknown> | number | string | null
+  createdAt?: unknown
+  updatedAt?: unknown
 }
 
 export type AccountingBranchesRegisterQuery = {
   search?: string
   statuses?: string[]
   addressFilter?: string
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -63,7 +64,7 @@ export type AccountingBranchesRegisterResult = {
   rows: AccountingBranchesRegisterRow[]
   metrics: BranchesRegisterMetric[]
   filterOptions: BranchesRegisterFilterOptions
-  appliedFilters: { search: string; statuses: string[]; addressFilter: string }
+  appliedFilters: { search: string; statuses: string[]; addressFilter: string; quickFilters: string[] }
   pagination: BranchesRegisterPagination
   totals: { totalBranches: number; filteredBranches: number; activeBranches: number; inactiveBranches: number; withAddress: number }
 }
@@ -77,6 +78,11 @@ const statusLabelMap = new Map<string, string>(
 
 const normalizeText = (value?: string | null) => String(value || '').trim()
 const normalizeSearch = (value?: string | null) => normalizeText(value).toLowerCase()
+const normalizeOptionalText = (value: unknown) => {
+  if (typeof value !== 'string') return null
+  const normalized = value.trim()
+  return normalized || null
+}
 
 const sanitizePage = (page?: number) => {
   if (!Number.isFinite(page)) return 1
@@ -90,36 +96,40 @@ const sanitizeLimit = (limit?: number) => {
 
 const resolveUser = (user: BranchDoc['createdBy']): string | null => {
   if (typeof user === 'object' && user !== null) {
-    const u = user as Record<string, unknown>
-    const firstName = typeof u.firstName === 'string' ? u.firstName.trim() : ''
-    const lastName = typeof u.lastName === 'string' ? u.lastName.trim() : ''
-    const middleName = typeof u.middleName === 'string' ? u.middleName.trim() : ''
+    const firstName = typeof user.firstName === 'string' ? user.firstName.trim() : ''
+    const lastName = typeof user.lastName === 'string' ? user.lastName.trim() : ''
+    const middleName = typeof user.middleName === 'string' ? user.middleName.trim() : ''
     const parts = [firstName, middleName, lastName].filter(Boolean)
-    return parts.length > 0 ? parts.join(' ') : String(u.id)
+    return parts.length > 0 ? parts.join(' ') : (user.id != null ? String(user.id) : null)
   }
   return user ? String(user) : null
 }
 
 const mapBranchRow = (doc: BranchDoc): AccountingBranchesRegisterRow => {
-  const status = doc.status || null
+  const branchCode = normalizeOptionalText(doc.branchCode)
+  const name = normalizeOptionalText(doc.name)
+  const status = normalizeOptionalText(doc.status)
   const statusLabel = status ? statusLabelMap.get(status) || status : null
+  const address = normalizeOptionalText(doc.address)
+  const createdBy = resolveUser(doc.createdBy)
+  const updatedBy = resolveUser(doc.updatedBy)
   return {
     id: doc.id,
-    branchCode: doc.branchCode || null,
-    name: doc.name || null,
+    branchCode,
+    name,
     status,
     statusLabel,
-    address: doc.address || null,
-    createdBy: resolveUser(doc.createdBy),
-    updatedBy: resolveUser(doc.updatedBy),
-    createdAt: doc.createdAt || null,
-    updatedAt: doc.updatedAt || null,
+    address,
+    createdBy,
+    updatedBy,
+    createdAt: normalizeOptionalText(doc.createdAt),
+    updatedAt: normalizeOptionalText(doc.updatedAt),
     cells: [
-      { text: doc.branchCode || '-', emphasis: true },
-      doc.name || '-',
-      doc.address || '-',
-      resolveUser(doc.createdBy) || '-',
-      resolveUser(doc.updatedBy) || '-',
+      { text: branchCode || '-', emphasis: true },
+      name || '-',
+      address || '-',
+      createdBy || '-',
+      updatedBy || '-',
       { text: statusLabel || '-', tone: status === 'active' ? 'green' as const : status === 'archived' ? 'gray' as const : 'amber' as const },
     ],
   }
@@ -143,7 +153,13 @@ const matchesAddressFilter = (row: AccountingBranchesRegisterRow, addressFilter:
 }
 
 const sortBranches = (docs: BranchDoc[]) =>
-  [...docs].sort((a, b) => normalizeText(a.branchCode).localeCompare(normalizeText(b.branchCode), undefined, { numeric: true, sensitivity: 'base' }))
+  [...docs].sort((a, b) =>
+    normalizeText(normalizeOptionalText(a.branchCode)).localeCompare(
+      normalizeText(normalizeOptionalText(b.branchCode)),
+      undefined,
+      { numeric: true, sensitivity: 'base' },
+    ),
+  )
 
 const buildMetrics = (rows: AccountingBranchesRegisterRow[]): BranchesRegisterMetric[] => {
   const active = rows.filter((r) => r.status === 'active').length
@@ -174,20 +190,39 @@ export class AccountingBranchesRegisterService {
     const search = normalizeSearch(query.search)
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const addressFilter = query.addressFilter || ''
+    const quickFilters = Array.isArray(query.quickFilters)
+      ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean)
+      : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
     const docs = await findAllDocs<BranchDoc>({
       payload,
       collection: ACCOUNTING_COLLECTION_SLUGS.branches,
-      depth: 1,
+      depth: 0,
       sort: 'branchCode',
     })
 
     const sorted = sortBranches(docs)
     const allRows = sorted.map(mapBranchRow)
 
-    const filtered = allRows.filter((row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesAddressFilter(row, addressFilter))
+    let filtered = allRows.filter((row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesAddressFilter(row, addressFilter))
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue.startsWith('status:')) {
+            return Boolean(row.status && normalizeText(row.status) === normalizeText(filterValue.replace('status:', '')))
+          }
+
+          if (filterValue === 'hasAddress') {
+            return Boolean(row.address)
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -199,7 +234,7 @@ export class AccountingBranchesRegisterService {
       rows,
       metrics: buildMetrics(allRows),
       filterOptions: buildFilterOptions(),
-      appliedFilters: { search: normalizeText(query.search), statuses, addressFilter },
+      appliedFilters: { search: normalizeText(query.search), statuses, addressFilter, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: {
         totalBranches: allRows.length,

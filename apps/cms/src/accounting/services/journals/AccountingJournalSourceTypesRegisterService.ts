@@ -26,6 +26,7 @@ export type SourceTypesRegisterQuery = {
   search?: string
   sourceTypes?: string[]
   statuses?: string[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -78,7 +79,7 @@ export type SourceTypesRegisterResult = {
   rows: SourceTypesRegisterRow[]
   metrics: RegisterMetric[]
   filterOptions: RegisterFilterOptions
-  appliedFilters: { search: string; sourceTypes: string[]; statuses: string[] }
+  appliedFilters: { search: string; sourceTypes: string[]; statuses: string[]; quickFilters: string[] }
   pagination: RegisterPagination
   totals: { totalEntries: number; filteredEntries: number; manualCount: number; openingBalanceCount: number; adjustmentCount: number; reversalCount: number; systemCount: number; draftCount: number; postedCount: number }
 }
@@ -215,6 +216,7 @@ export class AccountingJournalSourceTypesRegisterService {
     const search = normalizeSearch(query.search)
     const sourceTypes = Array.isArray(query.sourceTypes) ? query.sourceTypes : []
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -228,9 +230,25 @@ export class AccountingJournalSourceTypesRegisterService {
     const sorted = sortEntries(docs)
     const allRows = sorted.map(mapSourceTypeRow)
 
-    const filtered = allRows.filter(
+    let filtered = allRows.filter(
       (row) => matchesSearch(row, search) && matchesSourceTypes(row, sourceTypes) && matchesStatuses(row, statuses),
     )
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue.startsWith('sourceType:')) {
+            return Boolean(row.sourceType && normalizeText(row.sourceType) === normalizeText(filterValue.replace('sourceType:', '')))
+          }
+
+          if (filterValue.startsWith('status:')) {
+            return Boolean(row.status && normalizeText(row.status) === normalizeText(filterValue.replace('status:', '')))
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -242,7 +260,7 @@ export class AccountingJournalSourceTypesRegisterService {
       rows,
       metrics: buildMetrics(allRows),
       filterOptions: buildFilterOptions(),
-      appliedFilters: { search: normalizeText(query.search), sourceTypes, statuses },
+      appliedFilters: { search: normalizeText(query.search), sourceTypes, statuses, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: {
         totalEntries: allRows.length,

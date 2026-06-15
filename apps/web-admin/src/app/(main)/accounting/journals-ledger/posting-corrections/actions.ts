@@ -26,7 +26,7 @@ export type OpeningBalRegisterResponse = {
     metrics: OpeningBalMetric[];
     table: { title: string; description: string; columns: string[]; rows: OpeningBalRegisterRow[] };
   };
-  appliedFilters: { search: string; statuses: string[]; balancedFilters: string[] };
+  appliedFilters: { search: string; statuses: string[]; balancedFilters: string[]; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalEntries: number; filteredEntries: number; postedEntries: number; draftEntries: number; balancedEntries: number };
 };
@@ -52,13 +52,92 @@ async function fetchAccountingAdmin<T>(path: string, init?: RequestInit): Promis
   return payload as T;
 }
 
-export async function getOpeningBalRegister(query: { search?: string; page?: number; statuses?: string[]; balancedFilters?: string[] } = {}): Promise<OpeningBalRegisterResponse> {
+export async function getOpeningBalRegister(query: { search?: string; page?: number; statuses?: string[]; balancedFilters?: string[]; quickFilters?: string[] } = {}): Promise<OpeningBalRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   for (const s of query.statuses || []) params.append('status', s);
   for (const bf of query.balancedFilters || []) params.append('balancedFilter', bf);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1)); params.set('limit', '10');
   return fetchAccountingAdmin<OpeningBalRegisterResponse>(`/accounting/opening-balance-journals?${params.toString()}`);
+}
+
+// --- Adjustment Entries ---
+
+export type AdjustmentMetric = {
+  id: string; label: string; value: number; change: string; trend: 'up' | 'down' | 'neutral';
+};
+
+export type AdjustmentFilterOption = {
+  label: string; value: string;
+};
+
+export type AdjustmentRegisterRow = {
+  id: number | string; entryNumber: string | null; postingDate: string | null;
+  referenceNumber: string | null; memo: string | null; status: string | null;
+  statusLabel: string | null; totalDebit: number | null; isBalanced: boolean | null;
+  createdBy: string | null; createdAt: string | null; updatedAt: string | null;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type AdjustmentRegisterResponse = {
+  section: {
+    id: string; label: string; description: string; searchPlaceholder: string;
+    filters: { statuses: AdjustmentFilterOption[]; quickFilters: AdjustmentFilterOption[] };
+    metrics: AdjustmentMetric[];
+    table: { title: string; description: string; columns: string[]; rows: AdjustmentRegisterRow[] };
+  };
+  appliedFilters: { search: string; statuses: string[]; balancedFilters: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalEntries: number; filteredEntries: number; postedEntries: number; draftEntries: number; referencedEntries: number; balancedEntries: number };
+};
+
+export async function getAdjustmentEntriesRegister(query: { search?: string; page?: number; statuses?: string[]; balancedFilters?: string[]; quickFilters?: string[] } = {}): Promise<AdjustmentRegisterResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const s of query.statuses || []) params.append('status', s);
+  for (const bf of query.balancedFilters || []) params.append('balancedFilter', bf);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1)); params.set('limit', '10');
+  return fetchAccountingAdmin<AdjustmentRegisterResponse>(`/accounting/adjustment-journals?${params.toString()}`);
+}
+
+// --- Reversal Entries ---
+
+export type ReversalMetric = {
+  id: string; label: string; value: number; change: string; trend: 'up' | 'down' | 'neutral';
+};
+
+export type ReversalFilterOption = {
+  label: string; value: string;
+};
+
+export type ReversalRegisterRow = {
+  id: number | string; entryNumber: string | null; originalEntry: string | null; postingDate: string | null;
+  memo: string | null; status: string | null;
+  statusLabel: string | null; isBalanced: boolean | null; createdBy: string | null; createdAt: string | null; updatedAt: string | null;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type ReversalRegisterResponse = {
+  section: {
+    id: string; label: string; description: string; searchPlaceholder: string;
+    filters: { statuses: ReversalFilterOption[]; quickFilters: ReversalFilterOption[] };
+    metrics: ReversalMetric[];
+    table: { title: string; description: string; columns: string[]; rows: ReversalRegisterRow[] };
+  };
+  appliedFilters: { search: string; statuses: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalEntries: number; filteredEntries: number; postedEntries: number; draftEntries: number; balancedEntries: number };
+};
+
+export async function getReversalEntriesRegister(query: { search?: string; page?: number; statuses?: string[]; quickFilters?: string[] } = {}): Promise<ReversalRegisterResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const s of query.statuses || []) params.append('status', s);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1)); params.set('limit', '10');
+  return fetchAccountingAdmin<ReversalRegisterResponse>(`/accounting/reversal-journals?${params.toString()}`);
 }
 
 // --- Reused from journal-management for CRUD ---

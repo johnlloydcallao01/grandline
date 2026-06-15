@@ -30,6 +30,7 @@ export type AccountingFiscalYearsRegisterQuery = {
   search?: string
   statuses?: AccountingFiscalYearStatus[]
   closeModes?: AccountingFiscalYearCloseMode[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -90,6 +91,7 @@ export type AccountingFiscalYearsRegisterResult = {
     search: string
     statuses: AccountingFiscalYearStatus[]
     closeModes: AccountingFiscalYearCloseMode[]
+    quickFilters: string[]
   }
   pagination: FiscalYearsRegisterPagination
   totals: {
@@ -212,6 +214,27 @@ const matchesCloseModes = (
   return Boolean(row.closeMode && closeModes.includes(row.closeMode))
 }
 
+const matchesQuickFilters = (
+  row: AccountingFiscalYearsRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue.startsWith('status:')) {
+      return Boolean(row.status && row.status === filterValue.replace('status:', ''))
+    }
+
+    if (filterValue.startsWith('closeMode:')) {
+      return Boolean(row.closeMode && row.closeMode === filterValue.replace('closeMode:', ''))
+    }
+
+    return false
+  })
+}
+
 const sortFiscalYears = (docs: FiscalYearRegisterDoc[]) =>
   [...docs].sort((left, right) => {
     const leftCode = normalizeText(left.code)
@@ -326,6 +349,7 @@ export class AccountingFiscalYearsRegisterService {
     const normalizedSearch = normalizeSearch(query.search)
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const closeModes = Array.isArray(query.closeModes) ? query.closeModes : []
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean) : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -345,7 +369,8 @@ export class AccountingFiscalYearsRegisterService {
       return (
         matchesSearch(row, normalizedSearch) &&
         matchesStatuses(row, statuses) &&
-        matchesCloseModes(row, closeModes)
+        matchesCloseModes(row, closeModes) &&
+        matchesQuickFilters(row, quickFilters)
       )
     })
 
@@ -363,6 +388,7 @@ export class AccountingFiscalYearsRegisterService {
         search: normalizeText(query.search),
         statuses,
         closeModes,
+        quickFilters,
       },
       pagination: {
         page,

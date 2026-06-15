@@ -40,7 +40,7 @@ export type BranchesRegisterResponse = {
     metrics: OrgDimensionMetric[];
     table: { title: string; description: string; columns: string[]; rows: BranchRegisterRow[] };
   };
-  appliedFilters: { search: string; statuses: string[]; addressFilter: string };
+  appliedFilters: { search: string; statuses: string[]; addressFilter: string; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalBranches: number; filteredBranches: number; activeBranches: number; inactiveBranches: number; withAddress: number };
 };
@@ -102,7 +102,7 @@ export type DepartmentsRegisterResponse = {
     metrics: OrgDimensionMetric[];
     table: { title: string; description: string; columns: string[]; rows: DepartmentRegisterRow[] };
   };
-  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[] };
+  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[]; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalDepartments: number; filteredDepartments: number; activeDepartments: number; inactiveDepartments: number; branchLinked: number };
 };
@@ -156,7 +156,7 @@ export type LocationsRegisterResponse = {
     metrics: OrgDimensionMetric[];
     table: { title: string; description: string; columns: string[]; rows: LocationRegisterRow[] };
   };
-  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[] };
+  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[]; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalLocations: number; filteredLocations: number; activeLocations: number; inactiveLocations: number; branchLinked: number };
 };
@@ -203,24 +203,37 @@ async function fetchAccountingAdmin<T>(path: string, init?: RequestInit): Promis
     cache: 'no-store',
   });
 
-  const payload = (await response.json().catch(() => null)) as T | { error?: string } | null;
+  const rawBody = await response.text().catch(() => '');
+  let payload: T | { error?: string } | null = null;
+
+  if (rawBody) {
+    try {
+      payload = JSON.parse(rawBody) as T | { error?: string };
+    } catch {
+      payload = null;
+    }
+  }
 
   if (!response.ok) {
+    const textFallback = rawBody.trim();
     const errorMessage =
       payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
         ? payload.error
-        : 'Failed to load accounting data.';
+        : textFallback && !textFallback.startsWith('<')
+          ? textFallback
+          : `Failed to load accounting data (${response.status}).`;
     throw new Error(errorMessage);
   }
 
   return payload as T;
 }
 
-export async function getBranchesRegister(query: { search?: string; statuses?: string[]; addressFilter?: string; page?: number; limit?: number } = {}): Promise<BranchesRegisterResponse> {
+export async function getBranchesRegister(query: { search?: string; statuses?: string[]; addressFilter?: string; quickFilters?: string[]; page?: number; limit?: number } = {}): Promise<BranchesRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   for (const s of query.statuses || []) params.append('status', s);
   if (query.addressFilter) params.set('addressFilter', query.addressFilter);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<BranchesRegisterResponse>(`/accounting/master-records/organization-reporting-dimensions/branches?${params.toString()}`);
@@ -260,12 +273,13 @@ export async function deleteBranch(branchId: number | string): Promise<{ success
   return fetchAccountingAdmin<{ success: boolean }>(`/accounting/branches/${branchId}`, { method: 'DELETE' });
 }
 
-export async function getDepartmentsRegister(query: { search?: string; statuses?: string[]; branchIds?: (number | string)[]; branchFilters?: string[]; page?: number; limit?: number } = {}): Promise<DepartmentsRegisterResponse> {
+export async function getDepartmentsRegister(query: { search?: string; statuses?: string[]; branchIds?: (number | string)[]; branchFilters?: string[]; quickFilters?: string[]; page?: number; limit?: number } = {}): Promise<DepartmentsRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   for (const s of query.statuses || []) params.append('status', s);
   for (const b of query.branchIds || []) params.append('branchId', String(b));
   for (const bf of query.branchFilters || []) params.append('branchFilter', bf);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<DepartmentsRegisterResponse>(`/accounting/master-records/organization-reporting-dimensions/departments?${params.toString()}`);
@@ -305,12 +319,13 @@ export async function deleteDepartment(departmentId: number | string): Promise<{
   return fetchAccountingAdmin<{ success: boolean }>(`/accounting/departments/${departmentId}`, { method: 'DELETE' });
 }
 
-export async function getLocationsRegister(query: { search?: string; statuses?: string[]; branchIds?: (number | string)[]; branchFilters?: string[]; page?: number; limit?: number } = {}): Promise<LocationsRegisterResponse> {
+export async function getLocationsRegister(query: { search?: string; statuses?: string[]; branchIds?: (number | string)[]; branchFilters?: string[]; quickFilters?: string[]; page?: number; limit?: number } = {}): Promise<LocationsRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   for (const s of query.statuses || []) params.append('status', s);
   for (const b of query.branchIds || []) params.append('branchId', String(b));
   for (const bf of query.branchFilters || []) params.append('branchFilter', bf);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<LocationsRegisterResponse>(`/accounting/master-records/organization-reporting-dimensions/locations?${params.toString()}`);

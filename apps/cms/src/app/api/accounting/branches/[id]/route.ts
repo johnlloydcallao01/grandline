@@ -11,6 +11,19 @@ type RouteContext = {
   params: Promise<{ id: string }>
 }
 
+const mapBranchResponse = (record: Record<string, unknown>) => ({
+  id: record.id,
+  branchCode: typeof record.branchCode === 'string' ? record.branchCode : null,
+  name: typeof record.name === 'string' ? record.name : null,
+  status: typeof record.status === 'string' ? record.status : null,
+  address: typeof record.address === 'string' ? record.address : null,
+  notes: typeof record.notes === 'string' ? record.notes : null,
+  createdBy: record.createdBy ?? null,
+  updatedBy: record.updatedBy ?? null,
+  createdAt: typeof record.createdAt === 'string' ? record.createdAt : null,
+  updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt : null,
+})
+
 const normalizeBody = (body: Record<string, unknown>) => ({
   ...(body.branchCode !== undefined
     ? {
@@ -79,11 +92,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const record = await payload.findByID({
       collection: ACCOUNTING_COLLECTION_SLUGS.branches,
       id: parseNumberParam(id) || id,
-      depth: 1,
+      depth: 0,
       overrideAccess: true,
     })
 
-    return NextResponse.json(record)
+    return NextResponse.json(mapBranchResponse(record as unknown as Record<string, unknown>))
   } catch (error) {
     return handleAccountingApiError(error)
   }
@@ -108,7 +121,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const record = await payload.update({
       collection: ACCOUNTING_COLLECTION_SLUGS.branches,
       id: currentId,
-      depth: 1,
+      depth: 0,
       overrideAccess: true,
       data: {
         ...body,
@@ -116,7 +129,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       } as never,
     })
 
-    return NextResponse.json(record)
+    return NextResponse.json(mapBranchResponse(record as unknown as Record<string, unknown>))
   } catch (error) {
     return handleAccountingApiError(error)
   }

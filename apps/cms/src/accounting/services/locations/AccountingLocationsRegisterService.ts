@@ -23,6 +23,7 @@ export type AccountingLocationsRegisterQuery = {
   statuses?: string[]
   branchIds?: (number | string)[]
   branchFilters?: string[]
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -70,7 +71,7 @@ export type AccountingLocationsRegisterResult = {
   rows: AccountingLocationsRegisterRow[]
   metrics: RegisterMetric[]
   filterOptions: RegisterFilterOptions
-  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[] }
+  appliedFilters: { search: string; statuses: string[]; branchIds: (number | string)[]; branchFilters: string[]; quickFilters: string[] }
   pagination: RegisterPagination
   totals: { totalLocations: number; filteredLocations: number; activeLocations: number; inactiveLocations: number; branchLinked: number }
 }
@@ -213,6 +214,9 @@ export class AccountingLocationsRegisterService {
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const branchIds = Array.isArray(query.branchIds) ? query.branchIds : []
     const branchFilters = Array.isArray(query.branchFilters) ? query.branchFilters : []
+    const quickFilters = Array.isArray(query.quickFilters)
+      ? query.quickFilters.map((value) => normalizeText(value)).filter(Boolean)
+      : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -226,9 +230,29 @@ export class AccountingLocationsRegisterService {
     const sorted = sortLocations(docs)
     const allRows = sorted.map(mapLocationRow)
 
-    const filtered = allRows.filter(
+    let filtered = allRows.filter(
       (row) => matchesSearch(row, search) && matchesStatuses(row, statuses) && matchesBranchIds(row, branchIds) && matchesBranchFilter(row, branchFilters),
     )
+
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((row) =>
+        quickFilters.some((filterValue) => {
+          if (filterValue.startsWith('status:')) {
+            return Boolean(row.status && normalizeText(row.status) === normalizeText(filterValue.replace('status:', '')))
+          }
+
+          if (filterValue === 'byBranch') {
+            return row.branchId !== null
+          }
+
+          if (filterValue === 'withoutBranch') {
+            return row.branchId === null
+          }
+
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -240,7 +264,7 @@ export class AccountingLocationsRegisterService {
       rows,
       metrics: buildMetrics(allRows),
       filterOptions: buildFilterOptions(allRows),
-      appliedFilters: { search: normalizeText(query.search), statuses, branchIds, branchFilters },
+      appliedFilters: { search: normalizeText(query.search), statuses, branchIds, branchFilters, quickFilters },
       pagination: { page, limit, totalDocs, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
       totals: {
         totalLocations: allRows.length,

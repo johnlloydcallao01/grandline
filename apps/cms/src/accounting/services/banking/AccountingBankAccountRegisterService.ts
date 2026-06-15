@@ -41,6 +41,7 @@ export type AccountingBankAccountRegisterQuery = {
   defaultReceiptOnly?: boolean
   defaultDisbursementOnly?: boolean
   ledgerMappedOnly?: boolean
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -119,6 +120,7 @@ export type AccountingBankAccountRegisterResult = {
     defaultReceiptOnly: boolean
     defaultDisbursementOnly: boolean
     ledgerMappedOnly: boolean
+    quickFilters: string[]
   }
   pagination: BankAccountRegisterPagination
   referenceData: BankAccountRegisterReferenceData
@@ -289,6 +291,42 @@ const matchesLedgerMapped = (
   return bankAccount.isLedgerMapped
 }
 
+const matchesQuickFilters = (
+  bankAccount: AccountingBankAccountRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue.startsWith('status:')) {
+      return bankAccount.status === filterValue.replace('status:', '')
+    }
+
+    if (filterValue.startsWith('accountType:')) {
+      return Boolean(
+        bankAccount.accountType &&
+          bankAccount.accountType === filterValue.replace('accountType:', ''),
+      )
+    }
+
+    if (filterValue === 'defaultReceiptOnly:true') {
+      return bankAccount.isDefaultReceiptAccount
+    }
+
+    if (filterValue === 'defaultDisbursementOnly:true') {
+      return bankAccount.isDefaultDisbursementAccount
+    }
+
+    if (filterValue === 'ledgerMappedOnly:true') {
+      return bankAccount.isLedgerMapped
+    }
+
+    return false
+  })
+}
+
 const buildMetrics = (
   bankAccounts: AccountingBankAccountRegisterRow[],
 ): BankAccountRegisterMetric[] => {
@@ -395,6 +433,7 @@ export class AccountingBankAccountRegisterService {
     const defaultReceiptOnly = Boolean(query.defaultReceiptOnly)
     const defaultDisbursementOnly = Boolean(query.defaultDisbursementOnly)
     const ledgerMappedOnly = Boolean(query.ledgerMappedOnly)
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -416,7 +455,8 @@ export class AccountingBankAccountRegisterService {
         matchesStatuses(bankAccount, statuses) &&
         matchesDefaultReceipt(bankAccount, defaultReceiptOnly) &&
         matchesDefaultDisbursement(bankAccount, defaultDisbursementOnly) &&
-        matchesLedgerMapped(bankAccount, ledgerMappedOnly)
+        matchesLedgerMapped(bankAccount, ledgerMappedOnly) &&
+        matchesQuickFilters(bankAccount, quickFilters)
       )
     })
 
@@ -437,6 +477,7 @@ export class AccountingBankAccountRegisterService {
         defaultReceiptOnly,
         defaultDisbursementOnly,
         ledgerMappedOnly,
+        quickFilters,
       },
       pagination: {
         page,

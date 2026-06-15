@@ -117,7 +117,6 @@ type PeriodFilterState = {
 type TaxCodeFilterState = {
   scopes: string[];
   calculationMethods: string[];
-  isActive: boolean | null;
 };
 
 type CreateFormState = {
@@ -297,17 +296,16 @@ function getChartFilterCount(filters: ChartFilterState) {
   );
 }
 
-function isQuickFilterActive(
-  filterKey: keyof typeof chartQuickFilterConfig,
-  filters: ChartFilterState,
-) {
+function getChartQuickFilterValue(filterKey: keyof typeof chartQuickFilterConfig) {
   const config = chartQuickFilterConfig[filterKey];
+  return config.type === 'status' ? `${config.type}:${config.value}` : `${config.type}:true`;
+}
 
-  if (config.type === 'status') {
-    return filters.statuses.includes(config.value);
-  }
-
-  return filters[config.type];
+function isChartQuickFilterActive(
+  filterKey: keyof typeof chartQuickFilterConfig,
+  quickFilters: string[],
+) {
+  return quickFilters.includes(getChartQuickFilterValue(filterKey));
 }
 
 function getChartFallbackTab(staticTabs: StaticCoreAccountingTab[]) {
@@ -491,6 +489,9 @@ export function CoreAccountingMastersClient({
     retainedEarningsOnly: initialChartData?.appliedFilters.retainedEarningsOnly || false,
     parentAccountsOnly: initialChartData?.appliedFilters.parentAccountsOnly || false,
   });
+  const [chartQuickFilters, setChartQuickFilters] = useState<string[]>(
+    initialChartData?.appliedFilters.quickFilters || [],
+  );
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateSubmitting, setIsCreateSubmitting] = useState(false);
@@ -533,6 +534,9 @@ export function CoreAccountingMastersClient({
     statuses: initialFiscalYearsData?.appliedFilters.statuses || [],
     closeModes: initialFiscalYearsData?.appliedFilters.closeModes || [],
   });
+  const [fyQuickFilters, setFyQuickFilters] = useState<string[]>(
+    initialFiscalYearsData?.appliedFilters.quickFilters || [],
+  );
 
   const [isFyCreateModalOpen, setIsFyCreateModalOpen] = useState(false);
   const [isFyCreateSubmitting, setIsFyCreateSubmitting] = useState(false);
@@ -575,6 +579,9 @@ export function CoreAccountingMastersClient({
     statuses: initialPeriodsData?.appliedFilters.statuses || [],
     fiscalYearId: initialPeriodsData?.appliedFilters.fiscalYearId || '',
   });
+  const [periodQuickFilters, setPeriodQuickFilters] = useState<string[]>(
+    initialPeriodsData?.appliedFilters.quickFilters || [],
+  );
 
   const [isPeriodCreateModalOpen, setIsPeriodCreateModalOpen] = useState(false);
   const [isPeriodCreateSubmitting, setIsPeriodCreateSubmitting] = useState(false);
@@ -631,13 +638,14 @@ export function CoreAccountingMastersClient({
   const [draftTcFilters, setDraftTcFilters] = useState<TaxCodeFilterState>({
     scopes: initialTaxCodesData?.appliedFilters.scopes || [],
     calculationMethods: initialTaxCodesData?.appliedFilters.calculationMethods || [],
-    isActive: initialTaxCodesData?.appliedFilters.isActive ?? null,
   });
   const [appliedTcFilters, setAppliedTcFilters] = useState<TaxCodeFilterState>({
     scopes: initialTaxCodesData?.appliedFilters.scopes || [],
     calculationMethods: initialTaxCodesData?.appliedFilters.calculationMethods || [],
-    isActive: initialTaxCodesData?.appliedFilters.isActive ?? null,
   });
+  const [tcQuickFilters, setTcQuickFilters] = useState<string[]>(
+    initialTaxCodesData?.appliedFilters.quickFilters || [],
+  );
 
   const [isTcCreateModalOpen, setIsTcCreateModalOpen] = useState(false);
   const [isTcCreateSubmitting, setIsTcCreateSubmitting] = useState(false);
@@ -698,15 +706,18 @@ export function CoreAccountingMastersClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: ChartFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsChartLoading(true);
       setChartError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? chartQuickFilters;
         const payload = await getChartOfAccountsRegister({
           search,
           page,
@@ -717,6 +728,7 @@ export function CoreAccountingMastersClient({
           manualEntriesOnly: activeFilters.manualEntriesOnly,
           retainedEarningsOnly: activeFilters.retainedEarningsOnly,
           parentAccountsOnly: activeFilters.parentAccountsOnly,
+          quickFilters,
         });
 
         setChartData(payload);
@@ -726,7 +738,7 @@ export function CoreAccountingMastersClient({
         setIsChartLoading(false);
       }
     },
-    [],
+    [chartQuickFilters],
   );
 
   const fetchFiscalYearsRegister = useCallback(
@@ -734,20 +746,24 @@ export function CoreAccountingMastersClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: FiscalYearFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsFyLoading(true);
       setFyError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? fyQuickFilters;
         const payload = await getFiscalYearsRegister({
           search,
           page,
           statuses: activeFilters.statuses,
           closeModes: activeFilters.closeModes,
+          quickFilters,
         });
 
         setFyData(payload);
@@ -757,7 +773,7 @@ export function CoreAccountingMastersClient({
         setIsFyLoading(false);
       }
     },
-    [],
+    [fyQuickFilters],
   );
 
   const fetchPeriodsRegister = useCallback(
@@ -765,20 +781,24 @@ export function CoreAccountingMastersClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: PeriodFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsPeriodLoading(true);
       setPeriodError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? periodQuickFilters;
         const payload = await getPeriodsRegister({
           search,
           page,
           statuses: activeFilters.statuses,
           fiscalYearId: activeFilters.fiscalYearId,
+          quickFilters,
         });
 
         setPeriodData(payload);
@@ -788,7 +808,7 @@ export function CoreAccountingMastersClient({
         setIsPeriodLoading(false);
       }
     },
-    [],
+    [periodQuickFilters],
   );
 
   const fetchTaxCodesRegister = useCallback(
@@ -796,21 +816,24 @@ export function CoreAccountingMastersClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: TaxCodeFilterState;
+      nextQuickFilters?: string[];
     }) => {
       setIsTcLoading(true);
       setTcError(null);
 
       try {
+        const quickFilters = nextQuickFilters ?? tcQuickFilters;
         const payload = await getTaxCodesRegister({
           search,
           page,
           scopes: activeFilters.scopes,
           calculationMethods: activeFilters.calculationMethods,
-          isActive: activeFilters.isActive ?? undefined,
+          quickFilters,
         });
 
         setTcData(payload);
@@ -820,7 +843,7 @@ export function CoreAccountingMastersClient({
         setIsTcLoading(false);
       }
     },
-    [],
+    [tcQuickFilters],
   );
 
   useEffect(() => {
@@ -837,11 +860,13 @@ export function CoreAccountingMastersClient({
       search: chartSubmittedSearch,
       page: chartCurrentPage,
       activeFilters: appliedChartFilters,
+      nextQuickFilters: chartQuickFilters,
     });
   }, [
     activeTab,
     appliedChartFilters,
     chartCurrentPage,
+    chartQuickFilters,
     chartSubmittedSearch,
     fetchChartRegister,
     initialChartData,
@@ -861,11 +886,13 @@ export function CoreAccountingMastersClient({
       search: fySubmittedSearch,
       page: fyCurrentPage,
       activeFilters: appliedFyFilters,
+      nextQuickFilters: fyQuickFilters,
     });
   }, [
     activeTab,
     appliedFyFilters,
     fyCurrentPage,
+    fyQuickFilters,
     fySubmittedSearch,
     fetchFiscalYearsRegister,
     initialFiscalYearsData,
@@ -885,11 +912,13 @@ export function CoreAccountingMastersClient({
       search: periodSubmittedSearch,
       page: periodCurrentPage,
       activeFilters: appliedPeriodFilters,
+      nextQuickFilters: periodQuickFilters,
     });
   }, [
     activeTab,
     appliedPeriodFilters,
     periodCurrentPage,
+    periodQuickFilters,
     periodSubmittedSearch,
     fetchPeriodsRegister,
     initialPeriodsData,
@@ -909,11 +938,13 @@ export function CoreAccountingMastersClient({
       search: tcSubmittedSearch,
       page: tcCurrentPage,
       activeFilters: appliedTcFilters,
+      nextQuickFilters: tcQuickFilters,
     });
   }, [
     activeTab,
     appliedTcFilters,
     tcCurrentPage,
+    tcQuickFilters,
     tcSubmittedSearch,
     fetchTaxCodesRegister,
     initialTaxCodesData,
@@ -961,10 +992,11 @@ export function CoreAccountingMastersClient({
       search: chartSubmittedSearch,
       page: chartCurrentPage,
       activeFilters: appliedChartFilters,
+      nextQuickFilters: chartQuickFilters,
     });
   };
 
-  const tcFilterCount = appliedTcFilters.scopes.length + appliedTcFilters.calculationMethods.length + (appliedTcFilters.isActive !== null ? 1 : 0);
+  const tcFilterCount = appliedTcFilters.scopes.length + appliedTcFilters.calculationMethods.length;
 
   const tcSection = tcData?.section ?? {
     id: 'tax-codes',
@@ -987,8 +1019,7 @@ export function CoreAccountingMastersClient({
       draftTcFilters.scopes.length !== appliedTcFilters.scopes.length ||
       !draftTcFilters.scopes.every((entry) => appliedTcFilters.scopes.includes(entry)) ||
       draftTcFilters.calculationMethods.length !== appliedTcFilters.calculationMethods.length ||
-      !draftTcFilters.calculationMethods.every((entry) => appliedTcFilters.calculationMethods.includes(entry)) ||
-      draftTcFilters.isActive !== appliedTcFilters.isActive
+      !draftTcFilters.calculationMethods.every((entry) => appliedTcFilters.calculationMethods.includes(entry))
     ) {
       setTcCurrentPage(1);
       setAppliedTcFilters(draftTcFilters);
@@ -997,7 +1028,7 @@ export function CoreAccountingMastersClient({
   };
 
   const handleTcResetFilters = () => {
-    const resetState: TaxCodeFilterState = { scopes: [], calculationMethods: [], isActive: null };
+    const resetState: TaxCodeFilterState = { scopes: [], calculationMethods: [] };
     setDraftTcFilters(resetState);
     setAppliedTcFilters(resetState);
     setTcCurrentPage(1);
@@ -1009,6 +1040,7 @@ export function CoreAccountingMastersClient({
       search: tcSubmittedSearch,
       page: tcCurrentPage,
       activeFilters: appliedTcFilters,
+      nextQuickFilters: tcQuickFilters,
     });
   };
 
@@ -1120,6 +1152,7 @@ export function CoreAccountingMastersClient({
         search: tcSubmittedSearch,
         page: tcCurrentPage,
         activeFilters: appliedTcFilters,
+        nextQuickFilters: tcQuickFilters,
       });
     } catch (error) {
       setTcDeleteError(error instanceof Error ? error.message : 'Unable to delete tax code.');
@@ -1242,6 +1275,7 @@ export function CoreAccountingMastersClient({
         search: tcSubmittedSearch,
         page: 1,
         activeFilters: appliedTcFilters,
+        nextQuickFilters: tcQuickFilters,
       });
       await handleViewTaxCode(created.id);
     } catch (error) {
@@ -1279,6 +1313,7 @@ export function CoreAccountingMastersClient({
         search: tcSubmittedSearch,
         page: tcCurrentPage,
         activeFilters: appliedTcFilters,
+        nextQuickFilters: tcQuickFilters,
       });
       await handleViewTaxCode(updated.id);
     } catch (error) {
@@ -1288,30 +1323,13 @@ export function CoreAccountingMastersClient({
   };
 
   const handleToggleTcQuickFilter = (value: string) => {
-    if (value.startsWith('isActive:')) {
-      const newIsActive = appliedTcFilters.isActive === true ? null : true;
-      setAppliedTcFilters((previous) => ({ ...previous, isActive: newIsActive }));
-      setDraftTcFilters((previous) => ({ ...previous, isActive: newIsActive }));
-      setTcCurrentPage(1);
-      return;
-    }
+    setTcQuickFilters((previous) => toggleFilterValue(previous, value));
+    setTcCurrentPage(1);
+  };
 
-    if (value.startsWith('scope:')) {
-      const scopeValue = value.replace('scope:', '');
-      setAppliedTcFilters((previous) => {
-        const scopes = previous.scopes.includes(scopeValue)
-          ? previous.scopes.filter((entry) => entry !== scopeValue)
-          : [...previous.scopes, scopeValue];
-        return { ...previous, scopes };
-      });
-      setDraftTcFilters((previous) => {
-        const scopes = previous.scopes.includes(scopeValue)
-          ? previous.scopes.filter((entry) => entry !== scopeValue)
-          : [...previous.scopes, scopeValue];
-        return { ...previous, scopes };
-      });
-      setTcCurrentPage(1);
-    }
+  const handleToggleFyQuickFilter = (value: string) => {
+    setFyQuickFilters((previous) => toggleFilterValue(previous, value));
+    setFyCurrentPage(1);
   };
 
   const fyFilterCount = appliedFyFilters.statuses.length + appliedFyFilters.closeModes.length;
@@ -1358,6 +1376,7 @@ export function CoreAccountingMastersClient({
       search: fySubmittedSearch,
       page: fyCurrentPage,
       activeFilters: appliedFyFilters,
+      nextQuickFilters: fyQuickFilters,
     });
   };
 
@@ -1465,6 +1484,7 @@ export function CoreAccountingMastersClient({
         search: fySubmittedSearch,
         page: fyCurrentPage,
         activeFilters: appliedFyFilters,
+        nextQuickFilters: fyQuickFilters,
       });
     } catch (error) {
       setFyDeleteError(error instanceof Error ? error.message : 'Unable to delete fiscal year.');
@@ -1539,6 +1559,7 @@ export function CoreAccountingMastersClient({
         search: fySubmittedSearch,
         page: 1,
         activeFilters: appliedFyFilters,
+        nextQuickFilters: fyQuickFilters,
       });
       await handleViewFiscalYear(created.id);
     } catch (error) {
@@ -1575,6 +1596,7 @@ export function CoreAccountingMastersClient({
         search: fySubmittedSearch,
         page: fyCurrentPage,
         activeFilters: appliedFyFilters,
+        nextQuickFilters: fyQuickFilters,
       });
       await handleViewFiscalYear(updated.id);
     } catch (error) {
@@ -1630,6 +1652,7 @@ export function CoreAccountingMastersClient({
       search: periodSubmittedSearch,
       page: periodCurrentPage,
       activeFilters: appliedPeriodFilters,
+      nextQuickFilters: periodQuickFilters,
     });
   };
 
@@ -1737,6 +1760,7 @@ export function CoreAccountingMastersClient({
         search: periodSubmittedSearch,
         page: periodCurrentPage,
         activeFilters: appliedPeriodFilters,
+        nextQuickFilters: periodQuickFilters,
       });
     } catch (error) {
       setPeriodDeleteError(error instanceof Error ? error.message : 'Unable to delete period.');
@@ -1854,6 +1878,7 @@ export function CoreAccountingMastersClient({
         search: periodSubmittedSearch,
         page: 1,
         activeFilters: appliedPeriodFilters,
+        nextQuickFilters: periodQuickFilters,
       });
       await handleViewPeriod(created.id);
     } catch (error) {
@@ -1890,6 +1915,7 @@ export function CoreAccountingMastersClient({
         search: periodSubmittedSearch,
         page: periodCurrentPage,
         activeFilters: appliedPeriodFilters,
+        nextQuickFilters: periodQuickFilters,
       });
       await handleViewPeriod(updated.id);
     } catch (error) {
@@ -1899,53 +1925,12 @@ export function CoreAccountingMastersClient({
   };
 
   const handleTogglePeriodQuickFilter = (value: string) => {
-    const statusValue = value.replace('status:', '');
-    setAppliedPeriodFilters((previous) => {
-      const statuses = previous.statuses.includes(statusValue)
-        ? previous.statuses.filter((entry) => entry !== statusValue)
-        : [...previous.statuses, statusValue];
-      return { ...previous, statuses };
-    });
-    setDraftPeriodFilters((previous) => {
-      const statuses = previous.statuses.includes(statusValue)
-        ? previous.statuses.filter((entry) => entry !== statusValue)
-        : [...previous.statuses, statusValue];
-      return { ...previous, statuses };
-    });
+    setPeriodQuickFilters((previous) => toggleFilterValue(previous, value));
     setPeriodCurrentPage(1);
   };
 
   const handleToggleQuickFilter = (filterKey: keyof typeof chartQuickFilterConfig) => {
-    const config = chartQuickFilterConfig[filterKey];
-
-    setDraftChartFilters((previous) => {
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        [config.type]: !previous[config.type],
-      };
-    });
-
-    setAppliedChartFilters((previous) => {
-      if (config.type === 'status') {
-        return {
-          ...previous,
-          statuses: toggleFilterValue(previous.statuses, config.value),
-        };
-      }
-
-      return {
-        ...previous,
-        [config.type]: !previous[config.type],
-      };
-    });
-
+    setChartQuickFilters((previous) => toggleFilterValue(previous, getChartQuickFilterValue(filterKey)));
     setChartCurrentPage(1);
   };
 
@@ -2068,6 +2053,7 @@ export function CoreAccountingMastersClient({
         search: chartSubmittedSearch,
         page: chartCurrentPage,
         activeFilters: appliedChartFilters,
+        nextQuickFilters: chartQuickFilters,
       });
     } catch (error) {
       setDeleteError(error instanceof Error ? error.message : 'Unable to delete account.');
@@ -2147,6 +2133,7 @@ export function CoreAccountingMastersClient({
         search: chartSubmittedSearch,
         page: 1,
         activeFilters: appliedChartFilters,
+        nextQuickFilters: chartQuickFilters,
       });
       await handleViewAccount(created.id);
     } catch (error) {
@@ -2188,6 +2175,7 @@ export function CoreAccountingMastersClient({
         search: chartSubmittedSearch,
         page: chartCurrentPage,
         activeFilters: appliedChartFilters,
+        nextQuickFilters: chartQuickFilters,
       });
       await handleViewAccount(updated.id);
     } catch (error) {
@@ -2406,7 +2394,7 @@ export function CoreAccountingMastersClient({
                                   : filter.value === 'manualEntriesOnly:true'
                                     ? 'manual'
                                     : 'retained';
-                            const isActive = isQuickFilterActive(quickFilterKey, appliedChartFilters);
+                            const isActive = isChartQuickFilterActive(quickFilterKey, chartQuickFilters);
 
                             return (
                               <button
@@ -2833,61 +2821,13 @@ export function CoreAccountingMastersClient({
                                 { label: 'Manual Close', value: 'closeMode:manual' },
                               ]
                           ).map((filter) => {
-                            const isActive = filter.value.startsWith('status:')
-                              ? appliedFyFilters.statuses.includes(filter.value.replace('status:', ''))
-                              : filter.value.startsWith('closeMode:')
-                                ? appliedFyFilters.closeModes.includes(filter.value.replace('closeMode:', ''))
-                                : false;
+                            const isActive = fyQuickFilters.includes(filter.value);
 
                             return (
                               <button
                                 key={filter.value}
                                 type="button"
-                                onClick={() => {
-                                  setDraftFyFilters((previous) => {
-                                    if (filter.value.startsWith('status:')) {
-                                      const statusValue = filter.value.replace('status:', '');
-                                      return {
-                                        ...previous,
-                                        statuses: previous.statuses.includes(statusValue)
-                                          ? previous.statuses.filter((entry) => entry !== statusValue)
-                                          : [...previous.statuses, statusValue],
-                                      };
-                                    }
-                                    if (filter.value.startsWith('closeMode:')) {
-                                      const closeModeValue = filter.value.replace('closeMode:', '');
-                                      return {
-                                        ...previous,
-                                        closeModes: previous.closeModes.includes(closeModeValue)
-                                          ? previous.closeModes.filter((entry) => entry !== closeModeValue)
-                                          : [...previous.closeModes, closeModeValue],
-                                      };
-                                    }
-                                    return previous;
-                                  });
-                                  setAppliedFyFilters((previous) => {
-                                    if (filter.value.startsWith('status:')) {
-                                      const statusValue = filter.value.replace('status:', '');
-                                      return {
-                                        ...previous,
-                                        statuses: previous.statuses.includes(statusValue)
-                                          ? previous.statuses.filter((entry) => entry !== statusValue)
-                                          : [...previous.statuses, statusValue],
-                                      };
-                                    }
-                                    if (filter.value.startsWith('closeMode:')) {
-                                      const closeModeValue = filter.value.replace('closeMode:', '');
-                                      return {
-                                        ...previous,
-                                        closeModes: previous.closeModes.includes(closeModeValue)
-                                          ? previous.closeModes.filter((entry) => entry !== closeModeValue)
-                                          : [...previous.closeModes, closeModeValue],
-                                      };
-                                    }
-                                    return previous;
-                                  });
-                                  setFyCurrentPage(1);
-                                }}
+                                onClick={() => handleToggleFyQuickFilter(filter.value)}
                                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                                   isActive
                                     ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
@@ -3220,9 +3160,7 @@ export function CoreAccountingMastersClient({
                                 { label: 'Closed', value: 'status:closed' },
                               ]
                           ).map((filter) => {
-                            const isActive = filter.value.startsWith('status:')
-                              ? appliedPeriodFilters.statuses.includes(filter.value.replace('status:', ''))
-                              : false;
+                            const isActive = periodQuickFilters.includes(filter.value);
 
                             return (
                               <button
@@ -3570,17 +3508,14 @@ export function CoreAccountingMastersClient({
                           {(tcSection.filters.quickFilters.length
                             ? tcSection.filters.quickFilters
                             : [
-                                { label: 'Active', value: 'isActive:true' },
+                                { label: 'Active', value: 'active' },
+                                { label: 'Inactive', value: 'inactive' },
                                 { label: 'Sales', value: 'scope:sales' },
                                 { label: 'Purchase', value: 'scope:purchase' },
                                 { label: 'Both', value: 'scope:both' },
                               ]
                           ).map((filter) => {
-                            const isActive = filter.value.startsWith('isActive:')
-                              ? appliedTcFilters.isActive === true
-                              : filter.value.startsWith('scope:')
-                                ? appliedTcFilters.scopes.includes(filter.value.replace('scope:', ''))
-                                : false;
+                            const isActive = tcQuickFilters.includes(filter.value);
 
                             return (
                               <button

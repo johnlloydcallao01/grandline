@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || '',
       sourceTypes: parseListParam(searchParams, 'sourceType'),
       statuses: parseListParam(searchParams, 'status'),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

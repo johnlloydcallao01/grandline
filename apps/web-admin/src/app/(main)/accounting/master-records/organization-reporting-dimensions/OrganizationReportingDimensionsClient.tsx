@@ -344,6 +344,7 @@ export function OrganizationReportingDimensionsClient({
   const [branchCurrentPage, setBranchCurrentPage] = useState(initialBranchesData?.pagination.page || 1);
   const [draftBranchFilters, setDraftBranchFilters] = useState<BranchFilterState>({ statuses: initialBranchesData?.appliedFilters.statuses || [], addressFilter: initialBranchesData?.appliedFilters.addressFilter || '' });
   const [appliedBranchFilters, setAppliedBranchFilters] = useState<BranchFilterState>({ statuses: initialBranchesData?.appliedFilters.statuses || [], addressFilter: initialBranchesData?.appliedFilters.addressFilter || '' });
+  const [branchQuickFilters, setBranchQuickFilters] = useState<string[]>(initialBranchesData?.appliedFilters.quickFilters || []);
   const initialBranchFetchRef = useRef(false);
 
   const [isBranchCreateOpen, setIsBranchCreateOpen] = useState(false);
@@ -378,6 +379,7 @@ export function OrganizationReportingDimensionsClient({
   const [deptCurrentPage, setDeptCurrentPage] = useState(initialDepartmentsData?.pagination.page || 1);
   const [draftDeptFilters, setDraftDeptFilters] = useState<DepartmentFilterState>({ statuses: initialDepartmentsData?.appliedFilters.statuses || [], branchIds: initialDepartmentsData?.appliedFilters.branchIds || [], branchFilters: initialDepartmentsData?.appliedFilters.branchFilters || [] });
   const [appliedDeptFilters, setAppliedDeptFilters] = useState<DepartmentFilterState>({ statuses: initialDepartmentsData?.appliedFilters.statuses || [], branchIds: initialDepartmentsData?.appliedFilters.branchIds || [], branchFilters: initialDepartmentsData?.appliedFilters.branchFilters || [] });
+  const [deptQuickFilters, setDeptQuickFilters] = useState<string[]>(initialDepartmentsData?.appliedFilters.quickFilters || []);
   const initialDeptFetchRef = useRef(false);
 
   const [isDeptCreateOpen, setIsDeptCreateOpen] = useState(false);
@@ -412,6 +414,7 @@ export function OrganizationReportingDimensionsClient({
   const [locCurrentPage, setLocCurrentPage] = useState(initialLocationsData?.pagination.page || 1);
   const [draftLocFilters, setDraftLocFilters] = useState<LocationFilterState>({ statuses: initialLocationsData?.appliedFilters.statuses || [], branchIds: initialLocationsData?.appliedFilters.branchIds || [], branchFilters: initialLocationsData?.appliedFilters.branchFilters || [] });
   const [appliedLocFilters, setAppliedLocFilters] = useState<LocationFilterState>({ statuses: initialLocationsData?.appliedFilters.statuses || [], branchIds: initialLocationsData?.appliedFilters.branchIds || [], branchFilters: initialLocationsData?.appliedFilters.branchFilters || [] });
+  const [locQuickFilters, setLocQuickFilters] = useState<string[]>(initialLocationsData?.appliedFilters.quickFilters || []);
   const initialLocFetchRef = useRef(false);
 
   const [isLocCreateOpen, setIsLocCreateOpen] = useState(false);
@@ -462,11 +465,11 @@ export function OrganizationReportingDimensionsClient({
   const currentTotal = activeTab === 'branches' ? branchData?.totals.filteredBranches : activeTab === 'departments' ? deptData?.totals.filteredDepartments : locData?.totals.filteredLocations;
 
   // --- Fetch functions ---
-  const fetchBranches = useCallback(async ({ search, page, filters }: { search: string; page: number; filters: BranchFilterState }) => {
+  const fetchBranches = useCallback(async ({ search, page, filters, nextQuickFilters }: { search: string; page: number; filters: BranchFilterState; nextQuickFilters: string[] }) => {
     setIsBranchLoading(true);
     setBranchError(null);
     try {
-      const data = await getBranchesRegister({ search, page, statuses: filters.statuses, addressFilter: filters.addressFilter });
+      const data = await getBranchesRegister({ search, page, statuses: filters.statuses, addressFilter: filters.addressFilter, quickFilters: nextQuickFilters });
       setBranchData(data);
     } catch (err) {
       setBranchError(err instanceof Error ? err.message : 'Unable to load branches.');
@@ -475,11 +478,11 @@ export function OrganizationReportingDimensionsClient({
     }
   }, []);
 
-  const fetchDepartments = useCallback(async ({ search, page, filters }: { search: string; page: number; filters: DepartmentFilterState }) => {
+  const fetchDepartments = useCallback(async ({ search, page, filters, nextQuickFilters }: { search: string; page: number; filters: DepartmentFilterState; nextQuickFilters: string[] }) => {
     setIsDeptLoading(true);
     setDeptError(null);
     try {
-      const data = await getDepartmentsRegister({ search, page, statuses: filters.statuses, branchIds: filters.branchIds, branchFilters: filters.branchFilters });
+      const data = await getDepartmentsRegister({ search, page, statuses: filters.statuses, branchIds: filters.branchIds, branchFilters: filters.branchFilters, quickFilters: nextQuickFilters });
       setDeptData(data);
     } catch (err) {
       setDeptError(err instanceof Error ? err.message : 'Unable to load departments.');
@@ -488,11 +491,11 @@ export function OrganizationReportingDimensionsClient({
     }
   }, []);
 
-  const fetchLocations = useCallback(async ({ search, page, filters }: { search: string; page: number; filters: LocationFilterState }) => {
+  const fetchLocations = useCallback(async ({ search, page, filters, nextQuickFilters }: { search: string; page: number; filters: LocationFilterState; nextQuickFilters: string[] }) => {
     setIsLocLoading(true);
     setLocError(null);
     try {
-      const data = await getLocationsRegister({ search, page, statuses: filters.statuses, branchIds: filters.branchIds, branchFilters: filters.branchFilters });
+      const data = await getLocationsRegister({ search, page, statuses: filters.statuses, branchIds: filters.branchIds, branchFilters: filters.branchFilters, quickFilters: nextQuickFilters });
       setLocData(data);
     } catch (err) {
       setLocError(err instanceof Error ? err.message : 'Unable to load locations.');
@@ -505,20 +508,20 @@ export function OrganizationReportingDimensionsClient({
   useEffect(() => {
     if (activeTab !== 'branches') return;
     if (!initialBranchFetchRef.current && initialBranchesData) { initialBranchFetchRef.current = true; return; }
-    void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters });
-  }, [activeTab, appliedBranchFilters, branchCurrentPage, branchSubmittedSearch, fetchBranches, initialBranchesData]);
+    void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters, nextQuickFilters: branchQuickFilters });
+  }, [activeTab, appliedBranchFilters, branchCurrentPage, branchSubmittedSearch, branchQuickFilters, fetchBranches, initialBranchesData]);
 
   useEffect(() => {
     if (activeTab !== 'departments') return;
     if (!initialDeptFetchRef.current && initialDepartmentsData) { initialDeptFetchRef.current = true; return; }
-    void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters });
-  }, [activeTab, appliedDeptFilters, deptCurrentPage, deptSubmittedSearch, fetchDepartments, initialDepartmentsData]);
+    void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters, nextQuickFilters: deptQuickFilters });
+  }, [activeTab, appliedDeptFilters, deptCurrentPage, deptSubmittedSearch, deptQuickFilters, fetchDepartments, initialDepartmentsData]);
 
   useEffect(() => {
     if (activeTab !== 'locations') return;
     if (!initialLocFetchRef.current && initialLocationsData) { initialLocFetchRef.current = true; return; }
-    void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters });
-  }, [activeTab, appliedLocFilters, locCurrentPage, locSubmittedSearch, fetchLocations, initialLocationsData]);
+    void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters, nextQuickFilters: locQuickFilters });
+  }, [activeTab, appliedLocFilters, locCurrentPage, locSubmittedSearch, locQuickFilters, fetchLocations, initialLocationsData]);
 
   // --- Tab change ---
   const handleTabChange = (tabId: OrgDimensionTab) => {
@@ -578,52 +581,22 @@ export function OrganizationReportingDimensionsClient({
 
   const handleToggleQuickFilter = (value: string) => {
     if (activeTab === 'branches') {
-      if (value.startsWith('status:')) {
-        const status = value.replace('status:', '');
-        const newStatuses = toggleFilterValue(appliedBranchFilters.statuses, status);
-        setAppliedBranchFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setDraftBranchFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setBranchCurrentPage(1);
-      } else if (value === 'hasAddress') {
-        const newVal = appliedBranchFilters.addressFilter === 'hasAddress' ? '' : 'hasAddress';
-        setAppliedBranchFilters((prev) => ({ ...prev, addressFilter: newVal }));
-        setDraftBranchFilters((prev) => ({ ...prev, addressFilter: newVal }));
-        setBranchCurrentPage(1);
-      }
+      setBranchQuickFilters((previous) => toggleFilterValue(previous, value));
+      setBranchCurrentPage(1);
     } else if (activeTab === 'departments') {
-      if (value.startsWith('status:')) {
-        const status = value.replace('status:', '');
-        const newStatuses = toggleFilterValue(appliedDeptFilters.statuses, status);
-        setAppliedDeptFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setDraftDeptFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setDeptCurrentPage(1);
-      } else if (value === 'byBranch' || value === 'withoutBranch') {
-        const newBranchFilters = toggleFilterValue(appliedDeptFilters.branchFilters, value);
-        setAppliedDeptFilters((prev) => ({ ...prev, branchFilters: newBranchFilters }));
-        setDraftDeptFilters((prev) => ({ ...prev, branchFilters: newBranchFilters }));
-        setDeptCurrentPage(1);
-      }
+      setDeptQuickFilters((previous) => toggleFilterValue(previous, value));
+      setDeptCurrentPage(1);
     } else {
-      if (value.startsWith('status:')) {
-        const status = value.replace('status:', '');
-        const newStatuses = toggleFilterValue(appliedLocFilters.statuses, status);
-        setAppliedLocFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setDraftLocFilters((prev) => ({ ...prev, statuses: newStatuses }));
-        setLocCurrentPage(1);
-      } else if (value === 'byBranch' || value === 'withoutBranch') {
-        const newBranchFilters = toggleFilterValue(appliedLocFilters.branchFilters, value);
-        setAppliedLocFilters((prev) => ({ ...prev, branchFilters: newBranchFilters }));
-        setDraftLocFilters((prev) => ({ ...prev, branchFilters: newBranchFilters }));
-        setLocCurrentPage(1);
-      }
+      setLocQuickFilters((previous) => toggleFilterValue(previous, value));
+      setLocCurrentPage(1);
     }
   };
 
   // --- Refresh ---
   const handleRefresh = () => {
-    if (activeTab === 'branches') void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters });
-    else if (activeTab === 'departments') void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters });
-    else void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters });
+    if (activeTab === 'branches') void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters, nextQuickFilters: branchQuickFilters });
+    else if (activeTab === 'departments') void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters, nextQuickFilters: deptQuickFilters });
+    else void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters, nextQuickFilters: locQuickFilters });
   };
 
   // --- Export CSV ---
@@ -721,19 +694,19 @@ export function OrganizationReportingDimensionsClient({
       setIsBranchDeleteSubmitting(true); setBranchDeleteError(null);
       try {
         await deleteBranch(deletingBranchId); handleCloseDelete();
-        void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters });
+        void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters, nextQuickFilters: branchQuickFilters });
       } catch (err) { setBranchDeleteError(err instanceof Error ? err.message : 'Unable to delete branch.'); setIsBranchDeleteSubmitting(false); }
     } else if (activeTab === 'departments' && deletingDeptId !== null) {
       setIsDeptDeleteSubmitting(true); setDeptDeleteError(null);
       try {
         await deleteDepartment(deletingDeptId); handleCloseDelete();
-        void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters });
+        void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters, nextQuickFilters: deptQuickFilters });
       } catch (err) { setDeptDeleteError(err instanceof Error ? err.message : 'Unable to delete department.'); setIsDeptDeleteSubmitting(false); }
     } else if (activeTab === 'locations' && deletingLocId !== null) {
       setIsLocDeleteSubmitting(true); setLocDeleteError(null);
       try {
         await deleteLocation(deletingLocId); handleCloseDelete();
-        void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters });
+        void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters, nextQuickFilters: locQuickFilters });
       } catch (err) { setLocDeleteError(err instanceof Error ? err.message : 'Unable to delete location.'); setIsLocDeleteSubmitting(false); }
     }
   };
@@ -762,7 +735,7 @@ export function OrganizationReportingDimensionsClient({
           notes: branchCreateForm.notes || null,
         });
         handleCloseCreate(); setBranchCurrentPage(1);
-        await fetchBranches({ search: branchSubmittedSearch, page: 1, filters: appliedBranchFilters });
+        await fetchBranches({ search: branchSubmittedSearch, page: 1, filters: appliedBranchFilters, nextQuickFilters: branchQuickFilters });
         await handleView(created.id);
       } catch (err) { setBranchCreateError(err instanceof Error ? err.message : 'Unable to create branch.'); setIsBranchCreateSubmitting(false); }
     } else if (activeTab === 'departments') {
@@ -774,7 +747,7 @@ export function OrganizationReportingDimensionsClient({
           notes: deptCreateForm.notes || null,
         });
         handleCloseCreate(); setDeptCurrentPage(1);
-        await fetchDepartments({ search: deptSubmittedSearch, page: 1, filters: appliedDeptFilters });
+        await fetchDepartments({ search: deptSubmittedSearch, page: 1, filters: appliedDeptFilters, nextQuickFilters: deptQuickFilters });
         await handleView(created.id);
       } catch (err) { setDeptCreateError(err instanceof Error ? err.message : 'Unable to create department.'); setIsDeptCreateSubmitting(false); }
     } else {
@@ -786,7 +759,7 @@ export function OrganizationReportingDimensionsClient({
           notes: locCreateForm.notes || null,
         });
         handleCloseCreate(); setLocCurrentPage(1);
-        await fetchLocations({ search: locSubmittedSearch, page: 1, filters: appliedLocFilters });
+        await fetchLocations({ search: locSubmittedSearch, page: 1, filters: appliedLocFilters, nextQuickFilters: locQuickFilters });
         await handleView(created.id);
       } catch (err) { setLocCreateError(err instanceof Error ? err.message : 'Unable to create location.'); setIsLocCreateSubmitting(false); }
     }
@@ -824,7 +797,7 @@ export function OrganizationReportingDimensionsClient({
           notes: branchEditForm.notes || null,
         });
         handleCloseEdit();
-        void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters });
+        void fetchBranches({ search: branchSubmittedSearch, page: branchCurrentPage, filters: appliedBranchFilters, nextQuickFilters: branchQuickFilters });
         await handleView(updated.id);
       } catch (err) { setBranchEditError(err instanceof Error ? err.message : 'Unable to update branch.'); setIsBranchEditSubmitting(false); }
     } else if (activeTab === 'departments' && editingDeptId !== null) {
@@ -836,7 +809,7 @@ export function OrganizationReportingDimensionsClient({
           notes: deptEditForm.notes || null,
         });
         handleCloseEdit();
-        void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters });
+        void fetchDepartments({ search: deptSubmittedSearch, page: deptCurrentPage, filters: appliedDeptFilters, nextQuickFilters: deptQuickFilters });
         await handleView(updated.id);
       } catch (err) { setDeptEditError(err instanceof Error ? err.message : 'Unable to update department.'); setIsDeptEditSubmitting(false); }
     } else if (activeTab === 'locations' && editingLocId !== null) {
@@ -848,7 +821,7 @@ export function OrganizationReportingDimensionsClient({
           notes: locEditForm.notes || null,
         });
         handleCloseEdit();
-        void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters });
+        void fetchLocations({ search: locSubmittedSearch, page: locCurrentPage, filters: appliedLocFilters, nextQuickFilters: locQuickFilters });
         await handleView(updated.id);
       } catch (err) { setLocEditError(err instanceof Error ? err.message : 'Unable to update location.'); setIsLocEditSubmitting(false); }
     }
@@ -991,9 +964,7 @@ export function OrganizationReportingDimensionsClient({
                   if (activeTab === 'branches') {
                     if (branchQf && branchQf.length > 0) {
                       return branchQf.map((qf) => {
-                        const isActive = qf.value.startsWith('status:')
-                          ? appliedBranchFilters.statuses.includes(qf.value.replace('status:', ''))
-                          : appliedBranchFilters.addressFilter === qf.value;
+                        const isActive = branchQuickFilters.includes(qf.value);
                         return (
                           <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
@@ -1002,9 +973,13 @@ export function OrganizationReportingDimensionsClient({
                         );
                       });
                     }
-                    return tabsStatic?.filters.map((f, i) => (
+                    return tabsStatic?.filters.map((f) => (
                       <button key={f} type="button" onClick={() => handleToggleQuickFilter(f === 'With Address' ? 'hasAddress' : `status:${f.toLowerCase()}`)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${i === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                          branchQuickFilters.includes(f === 'With Address' ? 'hasAddress' : `status:${f.toLowerCase()}`)
+                            ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}>
                         {f}
                       </button>
                     ));
@@ -1012,9 +987,7 @@ export function OrganizationReportingDimensionsClient({
 
                   if (activeTab === 'departments' && deptQf && deptQf.length > 0) {
                     return deptQf.map((qf) => {
-                      const isActive = qf.value.startsWith('status:')
-                        ? appliedDeptFilters.statuses.includes(qf.value.replace('status:', ''))
-                        : appliedDeptFilters.branchFilters.includes(qf.value);
+                      const isActive = deptQuickFilters.includes(qf.value);
                       return (
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -1030,9 +1003,7 @@ export function OrganizationReportingDimensionsClient({
 
                   if (activeTab === 'locations' && locQf && locQf.length > 0) {
                     return locQf.map((qf) => {
-                      const isActive = qf.value.startsWith('status:')
-                        ? appliedLocFilters.statuses.includes(qf.value.replace('status:', ''))
-                        : appliedLocFilters.branchFilters.includes(qf.value);
+                      const isActive = locQuickFilters.includes(qf.value);
                       return (
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${

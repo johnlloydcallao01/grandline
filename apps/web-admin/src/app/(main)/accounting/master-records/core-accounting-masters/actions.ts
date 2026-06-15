@@ -73,6 +73,7 @@ export type ChartOfAccountsRegisterResponse = {
     manualEntriesOnly: boolean;
     retainedEarningsOnly: boolean;
     parentAccountsOnly: boolean;
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -179,6 +180,7 @@ type ChartOfAccountsRegisterQuery = {
   manualEntriesOnly?: boolean;
   retainedEarningsOnly?: boolean;
   parentAccountsOnly?: boolean;
+  quickFilters?: string[];
 };
 
 function normalizeRelationshipId(value: number | string | null | undefined) {
@@ -270,6 +272,10 @@ export async function getChartOfAccountsRegister(
 
   if (query.parentAccountsOnly) {
     params.set('parentAccountsOnly', 'true');
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -377,6 +383,7 @@ export type FiscalYearsRegisterResponse = {
     search: string;
     statuses: string[];
     closeModes: string[];
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -451,6 +458,7 @@ type FiscalYearsRegisterQuery = {
   page?: number;
   statuses?: string[];
   closeModes?: string[];
+  quickFilters?: string[];
 };
 
 export async function getFiscalYearsRegister(
@@ -468,6 +476,10 @@ export async function getFiscalYearsRegister(
 
   for (const closeMode of query.closeModes || []) {
     params.append('closeMode', closeMode);
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -571,6 +583,7 @@ export type PeriodsRegisterResponse = {
     search: string;
     statuses: string[];
     fiscalYearId: string;
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -642,6 +655,7 @@ type PeriodsRegisterQuery = {
   page?: number;
   statuses?: string[];
   fiscalYearId?: string;
+  quickFilters?: string[];
 };
 
 export async function getPeriodsRegister(
@@ -659,6 +673,10 @@ export async function getPeriodsRegister(
 
   if (query.fiscalYearId?.trim()) {
     params.set('fiscalYearId', query.fiscalYearId.trim());
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -763,7 +781,8 @@ export type TaxCodesRegisterResponse = {
     search: string;
     scopes: string[];
     calculationMethods: string[];
-    isActive: boolean | null;
+    statuses: string[];
+    quickFilters: string[];
   };
   pagination: {
     page: number;
@@ -849,7 +868,8 @@ type TaxCodesRegisterQuery = {
   page?: number;
   scopes?: string[];
   calculationMethods?: string[];
-  isActive?: boolean;
+  statuses?: string[];
+  quickFilters?: string[];
 };
 
 export async function getTaxCodesRegister(
@@ -869,8 +889,12 @@ export async function getTaxCodesRegister(
     params.append('calculationMethod', method);
   }
 
-  if (query.isActive !== undefined) {
-    params.set('isActive', String(query.isActive));
+  for (const status of query.statuses || []) {
+    params.append('status', status);
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));

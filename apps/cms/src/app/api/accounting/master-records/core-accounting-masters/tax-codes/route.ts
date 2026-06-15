@@ -24,18 +24,6 @@ const parseListParam = <T extends string>(searchParams: URLSearchParams, key: st
   return Array.from(new Set(values)) as T[]
 }
 
-const parseBooleanParam = (value: string | null): boolean | undefined => {
-  if (value === 'true') {
-    return true
-  }
-
-  if (value === 'false') {
-    return false
-  }
-
-  return undefined
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
@@ -46,7 +34,8 @@ export async function GET(request: NextRequest) {
         search: searchParams.get('search') || '',
         scopes: parseListParam<AccountingTaxScope>(searchParams, 'scope'),
         calculationMethods: parseListParam<AccountingTaxCalculationMethod>(searchParams, 'calculationMethod'),
-        isActive: parseBooleanParam(searchParams.get('isActive')),
+        statuses: parseListParam(searchParams, 'status'),
+        quickFilters: parseListParam(searchParams, 'quickFilter'),
         page: parseIntegerParam(searchParams.get('page'), 1),
         limit: parseIntegerParam(searchParams.get('limit'), 10),
       }),
@@ -54,7 +43,6 @@ export async function GET(request: NextRequest) {
         payload,
         collection: ACCOUNTING_COLLECTION_SLUGS.chartOfAccounts,
         depth: 0,
-        sort: 'code',
       }),
     ])
 

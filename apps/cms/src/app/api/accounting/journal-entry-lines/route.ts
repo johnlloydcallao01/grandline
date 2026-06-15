@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       hasTaxCode: searchParams.get('hasTaxCode') === 'true',
       hasReference: searchParams.get('hasReference') === 'true',
       lineTypes: parseListParam(searchParams, 'lineType'),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

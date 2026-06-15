@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || '',
       statuses: parseListParam<AccountingFiscalYearStatus>(searchParams, 'status'),
       closeModes: parseListParam<AccountingFiscalYearCloseMode>(searchParams, 'closeMode'),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

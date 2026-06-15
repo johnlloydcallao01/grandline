@@ -63,7 +63,7 @@ export type JournalEntriesRegisterResponse = {
       rows: JournalEntryRegisterRow[];
     };
   };
-  appliedFilters: { search: string; statuses: string[]; sourceTypes: string[]; isUnbalanced: boolean };
+  appliedFilters: { search: string; statuses: string[]; sourceTypes: string[]; isUnbalanced: boolean; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalEntries: number; filteredEntries: number; draftEntries: number; postedEntries: number; unbalancedEntries: number };
 };
@@ -120,6 +120,7 @@ type JournalEntriesRegisterQuery = {
   statuses?: string[];
   sourceTypes?: string[];
   isUnbalanced?: boolean;
+  quickFilters?: string[];
 };
 
 async function fetchAccountingAdmin<T>(path: string, init?: RequestInit): Promise<T> {
@@ -150,6 +151,7 @@ export async function getJournalEntriesRegister(query: JournalEntriesRegisterQue
   for (const s of query.statuses || []) params.append('status', s);
   for (const st of query.sourceTypes || []) params.append('sourceType', st);
   if (query.isUnbalanced) params.set('isUnbalanced', 'true');
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<JournalEntriesRegisterResponse>(
@@ -232,7 +234,7 @@ export type JournalEntryLinesRegisterResponse = {
     metrics: JournalEntryMetric[];
     table: { title: string; description: string; columns: string[]; rows: JournalEntryLineRegisterRow[] };
   };
-  appliedFilters: { search: string; hasTaxCode: boolean; hasReference: boolean; lineTypes: string[] };
+  appliedFilters: { search: string; hasTaxCode: boolean; hasReference: boolean; lineTypes: string[]; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalLines: number; filteredLines: number; taxCodedLines: number; referencedLines: number; debitLines: number };
 };
@@ -281,12 +283,14 @@ export async function getJournalEntryLinesRegister(query: {
   hasTaxCode?: boolean;
   hasReference?: boolean;
   lineTypes?: string[];
+  quickFilters?: string[];
 } = {}): Promise<JournalEntryLinesRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   if (query.hasTaxCode) params.set('hasTaxCode', 'true');
   if (query.hasReference) params.set('hasReference', 'true');
   for (const lt of query.lineTypes || []) params.append('lineType', lt);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<JournalEntryLinesRegisterResponse>(
@@ -367,7 +371,7 @@ export type SourceTypesRegisterResponse = {
     metrics: JournalEntryMetric[];
     table: { title: string; description: string; columns: string[]; rows: SourceTypeRegisterRow[] };
   };
-  appliedFilters: { search: string; sourceTypes: string[]; statuses: string[] };
+  appliedFilters: { search: string; sourceTypes: string[]; statuses: string[]; quickFilters: string[] };
   pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
   totals: { totalEntries: number; filteredEntries: number; manualCount: number; openingBalanceCount: number; adjustmentCount: number; reversalCount: number; systemCount: number; draftCount: number; postedCount: number };
 };
@@ -377,15 +381,16 @@ export async function getSourceTypesRegister(query: {
   page?: number;
   sourceTypes?: string[];
   statuses?: string[];
+  quickFilters?: string[];
 } = {}): Promise<SourceTypesRegisterResponse> {
   const params = new URLSearchParams();
   if (query.search?.trim()) params.set('search', query.search.trim());
   for (const st of query.sourceTypes || []) params.append('sourceType', st);
   for (const s of query.statuses || []) params.append('status', s);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
   return fetchAccountingAdmin<SourceTypesRegisterResponse>(
     `/accounting/journal-source-types?${params.toString()}`,
   );
 }
-

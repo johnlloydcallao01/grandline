@@ -220,27 +220,31 @@ export function SponsorsClient({
     [pathname, router, searchParams],
   );
 
-  const [sponsorSearchInput, setSponsorSearchInput] = useState(initialSponsorData?.section.searchPlaceholder ? '' : '');
-  const [sponsorSubmittedSearch, setSponsorSubmittedSearch] = useState('');
+  const [sponsorSearchInput, setSponsorSearchInput] = useState(initialSponsorData?.appliedFilters.search || '');
+  const [sponsorSubmittedSearch, setSponsorSubmittedSearch] = useState(initialSponsorData?.appliedFilters.search || '');
   const [sponsorCurrentPage, setSponsorCurrentPage] = useState(initialSponsorData?.pagination?.page || 1);
   const [sponsorData, setSponsorData] = useState<SponsorRegisterResponse | null>(initialSponsorData ?? null);
   const [sponsorError, setSponsorError] = useState<string | null>(null);
   const [isSponsorLoading, setIsSponsorLoading] = useState(!initialSponsorData);
-  const [appliedSponsorFilters, setAppliedSponsorFilters] = useState<SponsorFilterState>({
-    statuses: [],
+  const [appliedSponsorFilters] = useState<SponsorFilterState>({
+    statuses: initialSponsorData?.appliedFilters.statuses || [],
+    contactFilter: initialSponsorData?.appliedFilters.contactFilter || '',
   });
+  const [sponsorQuickFilters, setSponsorQuickFilters] = useState<string[]>(initialSponsorData?.appliedFilters.quickFilters || []);
 
-  const [corporateSearchInput, setCorporateSearchInput] = useState('');
-  const [corporateSubmittedSearch, setCorporateSubmittedSearch] = useState('');
+  const [corporateSearchInput, setCorporateSearchInput] = useState(initialCorporateAccountData?.appliedFilters.search || '');
+  const [corporateSubmittedSearch, setCorporateSubmittedSearch] = useState(initialCorporateAccountData?.appliedFilters.search || '');
   const [corporateCurrentPage, setCorporateCurrentPage] = useState(initialCorporateAccountData?.pagination?.page || 1);
   const [corporateData, setCorporateData] = useState<CorporateAccountRegisterResponse | null>(
     initialCorporateAccountData ?? null,
   );
   const [corporateError, setCorporateError] = useState<string | null>(null);
   const [isCorporateLoading, setIsCorporateLoading] = useState(!initialCorporateAccountData);
-  const [appliedCorporateFilters, setAppliedCorporateFilters] = useState<CorporateAccountFilterState>({
-    statuses: [],
+  const [appliedCorporateFilters] = useState<CorporateAccountFilterState>({
+    statuses: initialCorporateAccountData?.appliedFilters.statuses || [],
+    creditFilter: initialCorporateAccountData?.appliedFilters.creditFilter || '',
   });
+  const [corporateQuickFilters, setCorporateQuickFilters] = useState<string[]>(initialCorporateAccountData?.appliedFilters.quickFilters || []);
 
   const [coverageData, setCoverageData] = useState<CoverageLinkRegisterResponse | null>(null);
   const [isCoverageLoading, setIsCoverageLoading] = useState(false);
@@ -371,10 +375,12 @@ export function SponsorsClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: SponsorFilterState;
+      nextQuickFilters: string[];
     }) => {
       setIsSponsorLoading(true);
       setSponsorError(null);
@@ -385,6 +391,7 @@ export function SponsorsClient({
         page,
         statuses: activeFilters.statuses,
         contactFilter: activeFilters.contactFilter,
+        quickFilters: nextQuickFilters,
       });
         setSponsorData(payload);
         setSponsorCurrentPage(payload.pagination.page);
@@ -402,10 +409,12 @@ export function SponsorsClient({
       search,
       page,
       activeFilters,
+      nextQuickFilters,
     }: {
       search: string;
       page: number;
       activeFilters: CorporateAccountFilterState;
+      nextQuickFilters: string[];
     }) => {
       setIsCorporateLoading(true);
       setCorporateError(null);
@@ -416,6 +425,7 @@ export function SponsorsClient({
         page,
         statuses: activeFilters.statuses,
         creditFilter: activeFilters.creditFilter,
+        quickFilters: nextQuickFilters,
       });
         setCorporateData(payload);
         setCorporateCurrentPage(payload.pagination.page);
@@ -724,7 +734,7 @@ export function SponsorsClient({
 
   useEffect(() => {
     if (!sponsorData && activeTab === TAB_IDS.SCHOLARSHIP_SPONSORS && !isSponsorLoading) {
-      fetchSponsorRegister({ search: '', page: 1, activeFilters: { statuses: [] } });
+      fetchSponsorRegister({ search: '', page: 1, activeFilters: { statuses: [] }, nextQuickFilters: [] });
     }
   }, [sponsorData, activeTab, fetchSponsorRegister, isSponsorLoading]);
 
@@ -736,7 +746,7 @@ export function SponsorsClient({
 
   useEffect(() => {
     if (!corporateData && activeTab === TAB_IDS.CORPORATE_ACCOUNTS && !isCorporateLoading) {
-      fetchCorporateAccountRegister({ search: '', page: 1, activeFilters: { statuses: [] } });
+      fetchCorporateAccountRegister({ search: '', page: 1, activeFilters: { statuses: [] }, nextQuickFilters: [] });
     }
   }, [corporateData, activeTab, fetchCorporateAccountRegister, isCorporateLoading]);
 
@@ -746,8 +756,9 @@ export function SponsorsClient({
       search: sponsorSearchInput,
       page: 1,
       activeFilters: appliedSponsorFilters,
+      nextQuickFilters: sponsorQuickFilters,
     });
-  }, [sponsorSearchInput, fetchSponsorRegister, appliedSponsorFilters]);
+  }, [sponsorSearchInput, fetchSponsorRegister, appliedSponsorFilters, sponsorQuickFilters]);
 
   const handleCorporateSearch = useCallback(() => {
     setCorporateSubmittedSearch(corporateSearchInput);
@@ -755,8 +766,9 @@ export function SponsorsClient({
       search: corporateSearchInput,
       page: 1,
       activeFilters: appliedCorporateFilters,
+      nextQuickFilters: corporateQuickFilters,
     });
-  }, [corporateSearchInput, fetchCorporateAccountRegister, appliedCorporateFilters]);
+  }, [corporateSearchInput, fetchCorporateAccountRegister, appliedCorporateFilters, corporateQuickFilters]);
 
   const handleOpenSponsorCreateModal = useCallback(() => {
     setSponsorCreateForm(initialSponsorCreateFormState);
@@ -799,13 +811,14 @@ export function SponsorsClient({
           search: sponsorSubmittedSearch,
           page: sponsorCurrentPage,
           activeFilters: appliedSponsorFilters,
+          nextQuickFilters: sponsorQuickFilters,
         });
       } catch (error) {
         setSponsorCreateError(error instanceof Error ? error.message : 'Unable to create sponsor.');
         setIsSponsorCreateSubmitting(false);
       }
     },
-    [sponsorCreateForm, handleCloseSponsorCreateModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters],
+    [sponsorCreateForm, handleCloseSponsorCreateModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters, sponsorQuickFilters],
   );
 
   const handleOpenSponsorEditModal = useCallback(async (sponsorId: number | string) => {
@@ -867,13 +880,14 @@ export function SponsorsClient({
           search: sponsorSubmittedSearch,
           page: sponsorCurrentPage,
           activeFilters: appliedSponsorFilters,
+          nextQuickFilters: sponsorQuickFilters,
         });
       } catch (error) {
         setSponsorEditError(error instanceof Error ? error.message : 'Unable to update sponsor.');
         setIsSponsorEditSubmitting(false);
       }
     },
-    [editingSponsorId, sponsorEditForm, handleCloseSponsorEditModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters],
+    [editingSponsorId, sponsorEditForm, handleCloseSponsorEditModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters, sponsorQuickFilters],
   );
 
   const handleViewSponsor = useCallback(async (sponsorId: number | string) => {
@@ -952,12 +966,13 @@ export function SponsorsClient({
         search: sponsorSubmittedSearch,
         page: sponsorCurrentPage,
         activeFilters: appliedSponsorFilters,
+        nextQuickFilters: sponsorQuickFilters,
       });
     } catch (error) {
       setSponsorDeleteError(error instanceof Error ? error.message : 'Unable to delete sponsor.');
       setIsSponsorDeleteSubmitting(false);
     }
-  }, [deletingSponsorId, handleCloseSponsorDeleteModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters]);
+  }, [deletingSponsorId, handleCloseSponsorDeleteModal, fetchSponsorRegister, sponsorSubmittedSearch, sponsorCurrentPage, appliedSponsorFilters, sponsorQuickFilters]);
 
   const handleOpenCorporateCreateModal = useCallback(() => {
     setCorporateCreateForm(initialCorporateAccountCreateFormState);
@@ -999,13 +1014,14 @@ export function SponsorsClient({
           search: corporateSubmittedSearch,
           page: corporateCurrentPage,
           activeFilters: appliedCorporateFilters,
+          nextQuickFilters: corporateQuickFilters,
         });
       } catch (error) {
         setCorporateCreateError(error instanceof Error ? error.message : 'Unable to create corporate account.');
         setIsCorporateCreateSubmitting(false);
       }
     },
-    [corporateCreateForm, handleCloseCorporateCreateModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters],
+    [corporateCreateForm, handleCloseCorporateCreateModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters, corporateQuickFilters],
   );
 
   const handleOpenCorporateEditModal = useCallback(async (accountId: number | string) => {
@@ -1066,13 +1082,14 @@ export function SponsorsClient({
           search: corporateSubmittedSearch,
           page: corporateCurrentPage,
           activeFilters: appliedCorporateFilters,
+          nextQuickFilters: corporateQuickFilters,
         });
       } catch (error) {
         setCorporateEditError(error instanceof Error ? error.message : 'Unable to update corporate account.');
         setIsCorporateEditSubmitting(false);
       }
     },
-    [editingCorporateId, corporateEditForm, handleCloseCorporateEditModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters],
+    [editingCorporateId, corporateEditForm, handleCloseCorporateEditModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters, corporateQuickFilters],
   );
 
   const handleViewCorporate = useCallback(async (accountId: number | string) => {
@@ -1151,49 +1168,34 @@ export function SponsorsClient({
         search: corporateSubmittedSearch,
         page: corporateCurrentPage,
         activeFilters: appliedCorporateFilters,
+        nextQuickFilters: corporateQuickFilters,
       });
     } catch (error) {
       setCorporateDeleteError(error instanceof Error ? error.message : 'Unable to delete corporate account.');
       setIsCorporateDeleteSubmitting(false);
     }
-  }, [deletingCorporateId, handleCloseCorporateDeleteModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters]);
+  }, [deletingCorporateId, handleCloseCorporateDeleteModal, fetchCorporateAccountRegister, corporateSubmittedSearch, corporateCurrentPage, appliedCorporateFilters, corporateQuickFilters]);
 
   const handleSponsorFilterToggle = useCallback(
     (filterValue: string) => {
-      const newFilters = { ...appliedSponsorFilters };
-      if (filterValue === 'hasContact') {
-        newFilters.contactFilter = appliedSponsorFilters.contactFilter === 'hasContact' ? '' : 'hasContact';
-      } else {
-        const index = newFilters.statuses.indexOf(filterValue);
-        if (index >= 0) {
-          newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
-        } else {
-          newFilters.statuses = [...newFilters.statuses, filterValue];
-        }
-      }
-      setAppliedSponsorFilters(newFilters);
-      fetchSponsorRegister({ search: sponsorSubmittedSearch, page: 1, activeFilters: newFilters });
+      const newQuickFilters = sponsorQuickFilters.includes(filterValue)
+        ? sponsorQuickFilters.filter((value) => value !== filterValue)
+        : [...sponsorQuickFilters, filterValue];
+      setSponsorQuickFilters(newQuickFilters);
+      fetchSponsorRegister({ search: sponsorSubmittedSearch, page: 1, activeFilters: appliedSponsorFilters, nextQuickFilters: newQuickFilters });
     },
-    [appliedSponsorFilters, fetchSponsorRegister, sponsorSubmittedSearch],
+    [sponsorQuickFilters, fetchSponsorRegister, sponsorSubmittedSearch, appliedSponsorFilters],
   );
 
   const handleCorporateFilterToggle = useCallback(
     (filterValue: string) => {
-      const newFilters = { ...appliedCorporateFilters };
-      if (filterValue === 'hasCredit') {
-        newFilters.creditFilter = appliedCorporateFilters.creditFilter === 'hasCredit' ? '' : 'hasCredit';
-      } else {
-        const index = newFilters.statuses.indexOf(filterValue);
-        if (index >= 0) {
-          newFilters.statuses = [...newFilters.statuses.filter((s) => s !== filterValue)];
-        } else {
-          newFilters.statuses = [...newFilters.statuses, filterValue];
-        }
-      }
-      setAppliedCorporateFilters(newFilters);
-      fetchCorporateAccountRegister({ search: corporateSubmittedSearch, page: 1, activeFilters: newFilters });
+      const newQuickFilters = corporateQuickFilters.includes(filterValue)
+        ? corporateQuickFilters.filter((value) => value !== filterValue)
+        : [...corporateQuickFilters, filterValue];
+      setCorporateQuickFilters(newQuickFilters);
+      fetchCorporateAccountRegister({ search: corporateSubmittedSearch, page: 1, activeFilters: appliedCorporateFilters, nextQuickFilters: newQuickFilters });
     },
-    [appliedCorporateFilters, fetchCorporateAccountRegister, corporateSubmittedSearch],
+    [corporateQuickFilters, fetchCorporateAccountRegister, corporateSubmittedSearch, appliedCorporateFilters],
   );
 
   const handleCoverageFilterToggle = (filterValue: string) => {
@@ -1229,6 +1231,7 @@ export function SponsorsClient({
                 search: sponsorSubmittedSearch,
                 page: 1,
                 activeFilters: appliedSponsorFilters,
+                nextQuickFilters: sponsorQuickFilters,
               })
             }
             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
@@ -1293,9 +1296,7 @@ export function SponsorsClient({
           </div>
           <div className="flex flex-wrap gap-2">
       {(sponsorData?.section.filters ?? []).map((filter) => {
-        const isActive = filter.value === 'hasContact'
-          ? appliedSponsorFilters.contactFilter === 'hasContact'
-          : appliedSponsorFilters.statuses.includes(filter.value);
+        const isActive = sponsorQuickFilters.includes(filter.value);
         return (
                 <button
                   key={`sponsor-filter-${filter.value}`}
@@ -1450,6 +1451,7 @@ export function SponsorsClient({
                       search: sponsorSubmittedSearch,
                       page: sponsorCurrentPage - 1,
                       activeFilters: appliedSponsorFilters,
+                      nextQuickFilters: sponsorQuickFilters,
                     })
                   }
                   className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
@@ -1464,6 +1466,7 @@ export function SponsorsClient({
                       search: sponsorSubmittedSearch,
                       page: sponsorCurrentPage + 1,
                       activeFilters: appliedSponsorFilters,
+                      nextQuickFilters: sponsorQuickFilters,
                     })
                   }
                   className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
@@ -1503,6 +1506,7 @@ export function SponsorsClient({
                 search: corporateSubmittedSearch,
                 page: 1,
                 activeFilters: appliedCorporateFilters,
+                nextQuickFilters: corporateQuickFilters,
               })
             }
             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
@@ -1567,9 +1571,7 @@ export function SponsorsClient({
           </div>
           <div className="flex flex-wrap gap-2">
       {(corporateData?.section.filters ?? []).map((filter) => {
-        const isActive = filter.value === 'hasCredit'
-          ? appliedCorporateFilters.creditFilter === 'hasCredit'
-          : appliedCorporateFilters.statuses.includes(filter.value);
+        const isActive = corporateQuickFilters.includes(filter.value);
         return (
                 <button
                   key={`corp-filter-${filter.value}`}
@@ -1725,6 +1727,7 @@ export function SponsorsClient({
                       search: corporateSubmittedSearch,
                       page: corporateCurrentPage - 1,
                       activeFilters: appliedCorporateFilters,
+                      nextQuickFilters: corporateQuickFilters,
                     })
                   }
                   className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
@@ -1739,6 +1742,7 @@ export function SponsorsClient({
                       search: corporateSubmittedSearch,
                       page: corporateCurrentPage + 1,
                       activeFilters: appliedCorporateFilters,
+                      nextQuickFilters: corporateQuickFilters,
                     })
                   }
                   className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"

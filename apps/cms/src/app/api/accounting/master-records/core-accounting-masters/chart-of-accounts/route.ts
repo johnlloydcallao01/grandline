@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       manualEntriesOnly: parseBooleanParam(searchParams.get('manualEntriesOnly')),
       retainedEarningsOnly: parseBooleanParam(searchParams.get('retainedEarningsOnly')),
       parentAccountsOnly: parseBooleanParam(searchParams.get('parentAccountsOnly')),
+      quickFilters: parseListParam(searchParams, 'quickFilter'),
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })

@@ -36,6 +36,7 @@ export type AccountingCustomerRegisterQuery = {
   customerTypes?: AccountingCustomerType[]
   statuses?: AccountingPartyStatus[]
   hasCreditLimit?: boolean
+  quickFilters?: string[]
   page?: number
   limit?: number
 }
@@ -112,6 +113,7 @@ export type AccountingCustomerRegisterResult = {
     statuses: AccountingPartyStatus[]
     customerTypes: AccountingCustomerType[]
     hasCreditLimit: boolean
+    quickFilters: string[]
   }
   pagination: CustomerRegisterPagination
   referenceData: CustomerRegisterReferenceData
@@ -250,6 +252,34 @@ const matchesCreditLimit = (
   return customer.hasCreditLimit
 }
 
+const matchesQuickFilters = (
+  customer: AccountingCustomerRegisterRow,
+  quickFilters: string[],
+) => {
+  if (!quickFilters.length) {
+    return true
+  }
+
+  return quickFilters.some((filterValue) => {
+    if (filterValue === 'hasCreditLimit:true') {
+      return customer.hasCreditLimit
+    }
+
+    if (filterValue.startsWith('status:')) {
+      return Boolean(customer.status && customer.status === filterValue.replace('status:', ''))
+    }
+
+    if (filterValue.startsWith('customerType:')) {
+      return Boolean(
+        customer.customerType &&
+          customer.customerType === filterValue.replace('customerType:', ''),
+      )
+    }
+
+    return false
+  })
+}
+
 const buildMetrics = (customers: AccountingCustomerRegisterRow[]): CustomerRegisterMetric[] => {
   const activeCustomers = customers.filter((customer) => customer.status === 'active').length
   const corporateCustomers = customers.filter((customer) => customer.customerType === 'company').length
@@ -351,6 +381,7 @@ export class AccountingCustomerRegisterService {
     const customerTypes = Array.isArray(query.customerTypes) ? query.customerTypes : []
     const statuses = Array.isArray(query.statuses) ? query.statuses : []
     const hasCreditLimit = Boolean(query.hasCreditLimit)
+    const quickFilters = Array.isArray(query.quickFilters) ? query.quickFilters : []
     const limit = sanitizeLimit(query.limit)
     const requestedPage = sanitizePage(query.page)
 
@@ -370,7 +401,8 @@ export class AccountingCustomerRegisterService {
         matchesSearch(customer, normalizedSearch) &&
         matchesCustomerTypes(customer, customerTypes) &&
         matchesStatuses(customer, statuses) &&
-        matchesCreditLimit(customer, hasCreditLimit)
+        matchesCreditLimit(customer, hasCreditLimit) &&
+        matchesQuickFilters(customer, quickFilters)
       )
     })
 
@@ -389,6 +421,7 @@ export class AccountingCustomerRegisterService {
         statuses,
         customerTypes,
         hasCreditLimit,
+        quickFilters,
       },
       pagination: {
         page,

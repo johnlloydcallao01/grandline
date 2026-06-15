@@ -46,6 +46,12 @@ export type SponsorRegisterResponse = {
       rows: SponsorRegisterRow[];
     };
   };
+  appliedFilters: {
+    search: string;
+    statuses: string[];
+    contactFilter: string;
+    quickFilters: string[];
+  };
   pagination: {
     page: number;
     limit: number;
@@ -138,6 +144,12 @@ export type CorporateAccountRegisterResponse = {
       rows: CorporateAccountRegisterRow[];
     };
   };
+  appliedFilters: {
+    search: string;
+    statuses: string[];
+    creditFilter: string;
+    quickFilters: string[];
+  };
   pagination: {
     page: number;
     limit: number;
@@ -207,6 +219,7 @@ type SponsorRegisterQuery = {
   page?: number;
   statuses?: string[];
   contactFilter?: string;
+  quickFilters?: string[];
 };
 
 type CorporateAccountRegisterQuery = {
@@ -214,6 +227,7 @@ type CorporateAccountRegisterQuery = {
   page?: number;
   statuses?: string[];
   creditFilter?: string;
+  quickFilters?: string[];
 };
 
 async function fetchAccountingAdmin<T>(path: string, init?: RequestInit): Promise<T> {
@@ -259,6 +273,10 @@ export async function getSponsorRegister(query: SponsorRegisterQuery = {}): Prom
 
   if (query.contactFilter) {
     params.set('contactFilter', query.contactFilter);
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
@@ -335,6 +353,10 @@ export async function getCorporateAccountRegister(
 
   if (query.creditFilter) {
     params.set('creditFilter', query.creditFilter);
+  }
+
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
   }
 
   params.set('page', String(query.page || 1));
