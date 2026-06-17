@@ -20,12 +20,12 @@
 - [✅] **Guided Selections**: Use dropdowns/selectors for relations, not free text.
 
 ## 4. Filters & Search
-- [✅] **Multi-Select Allowed**: Users can select multiple filters in the same group (widens results).
-- [✅] **Cross-Group Filtering**: Selecting from different groups narrows results.
-- [✅] **Filter Logic**: Quick filters map directly to backend array logic (e.g., `statuses: string[]`).
+- [✅] **Multi-Select Allowed**: Users can select multiple filters in the same group and results must widen.
+- [✅] **Cross-Group Filtering Uses OR Too**: Selecting filters from different groups must still widen results, never narrow them.
+- [✅] **Filter Logic**: Quick filters map directly to backend array logic (e.g., `statuses: string[]`) and must resolve using OR behavior.
 - [✅] **Same-Group Quick Filters Use OR**: If users check multiple quick filters/tabs/chips in the same filter group, results must widen using OR logic, never shrink using AND logic.
 - [✅] **Show As Many As Possible**: Adding another checked quick filter in the same group must return the union of matching rows, not only the overlap.
-- [✅] **AND Only Across Different Intentional Groups**: Narrowing behavior is allowed only when users combine different filter groups such as `status` plus `entityType`, not multiple options inside one group.
+- [✅] **OR In All Cases**: Narrowing behavior using AND is not allowed for checked filters; all checked filters must expand the result set as much as possible.
 
 ## 5. Metrics & Table Data
 - [✅] **Metrics Update Instantly**: Metrics refresh automatically based on filtered data.
