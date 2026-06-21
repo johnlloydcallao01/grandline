@@ -21,6 +21,7 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   creditNotes: 'accounting-credit-notes',
   vendorCredits: 'accounting-vendor-credits',
   bankAccounts: 'accounting-bank-accounts',
+  bankStatementImports: 'accounting-bank-statement-imports',
   bankTransactions: 'accounting-bank-transactions',
   bankReconciliations: 'accounting-bank-reconciliations',
   deposits: 'accounting-deposits',

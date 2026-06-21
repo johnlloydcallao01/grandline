@@ -23,6 +23,9 @@ export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
     const { searchParams } = new URL(request.url)
+    // #region debug-point A:finance-audit-log-entry
+    void import('node:fs/promises').then(async (fs) => { let u = 'http://127.0.0.1:7777/event', s = 'accounting-500-errors'; try { const e = await fs.readFile('.dbg/accounting-500-errors.env', 'utf8'); u = e.match(/DEBUG_SERVER_URL=(.+)/)?.[1] || u; s = e.match(/DEBUG_SESSION_ID=(.+)/)?.[1] || s } catch { return undefined } return fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: s, runId: 'pre-fix', hypothesisId: 'A', location: 'finance-audit-log/route.ts', msg: '[DEBUG] finance-audit-log GET entry', data: { search: searchParams.get('search') || '', actionTypes: parseListParam(searchParams, 'actionType'), entityTypes: parseListParam(searchParams, 'entityType'), quickFilters: parseListParam(searchParams, 'quickFilter'), page: parseIntegerParam(searchParams.get('page'), 1), limit: parseIntegerParam(searchParams.get('limit'), 10) }, ts: Date.now() }) }).catch(() => undefined) })
+    // #endregion
 
     const result = await AccountingFinanceAuditLogService.getFinanceAuditLog(payload, {
       search: searchParams.get('search') || '',
@@ -32,6 +35,9 @@ export async function GET(request: NextRequest) {
       page: parseIntegerParam(searchParams.get('page'), 1),
       limit: parseIntegerParam(searchParams.get('limit'), 10),
     })
+    // #region debug-point B:finance-audit-log-success
+    void import('node:fs/promises').then(async (fs) => { let u = 'http://127.0.0.1:7777/event', s = 'accounting-500-errors'; try { const e = await fs.readFile('.dbg/accounting-500-errors.env', 'utf8'); u = e.match(/DEBUG_SERVER_URL=(.+)/)?.[1] || u; s = e.match(/DEBUG_SESSION_ID=(.+)/)?.[1] || s } catch { return undefined } return fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: s, runId: 'pre-fix', hypothesisId: 'B', location: 'finance-audit-log/route.ts', msg: '[DEBUG] finance-audit-log GET success', data: { rowCount: result.rows.length, totalRows: result.totals.totalRows, filteredRows: result.totals.filteredRows }, ts: Date.now() }) }).catch(() => undefined) })
+    // #endregion
 
     return NextResponse.json({
       section: {
@@ -55,6 +61,9 @@ export async function GET(request: NextRequest) {
       totals: result.totals,
     })
   } catch (error) {
+    // #region debug-point C:finance-audit-log-error
+    void import('node:fs/promises').then(async (fs) => { let u = 'http://127.0.0.1:7777/event', s = 'accounting-500-errors'; try { const e = await fs.readFile('.dbg/accounting-500-errors.env', 'utf8'); u = e.match(/DEBUG_SERVER_URL=(.+)/)?.[1] || u; s = e.match(/DEBUG_SESSION_ID=(.+)/)?.[1] || s } catch { return undefined } const candidate = error as { name?: string; message?: string; stack?: string; cause?: unknown }; return fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: s, runId: 'pre-fix', hypothesisId: 'C', location: 'finance-audit-log/route.ts', msg: '[DEBUG] finance-audit-log GET error', data: { name: candidate?.name || null, message: candidate?.message || String(error), stack: candidate?.stack || null, cause: candidate?.cause ? String(candidate.cause) : null }, ts: Date.now() }) }).catch(() => undefined) })
+    // #endregion
     return handleAccountingApiError(error)
   }
 }

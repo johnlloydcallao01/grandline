@@ -43,7 +43,7 @@ export function cmsApiFetch(url: string, options: RequestInit = {}): Promise<Res
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('grandline_auth_token_admin');
     if (token && !headers.has('Authorization')) {
-      headers.set('Authorization', `users JWT ${token}`);
+      headers.set('Authorization', `JWT ${token}`);
     }
   }
 

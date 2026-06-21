@@ -86,7 +86,7 @@ async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
 
     const headers: Record<string, string> = {};
     if (payloadToken) {
-        headers.Authorization = `users JWT ${payloadToken}`;
+        headers.Authorization = `JWT ${payloadToken}`;
     }
 
     const res = await fetch(url, {
@@ -192,7 +192,7 @@ function CertificateBuilderContent() {
 
                             const headers: Record<string, string> = {};
                             const token = getPayloadToken();
-                            if (token) headers.Authorization = `users JWT ${token}`;
+                            if (token) headers.Authorization = `JWT ${token}`;
 
                             const mediaRes = await fetch(mediaUrl, { headers, credentials: 'include' });
                             if (mediaRes.ok) {

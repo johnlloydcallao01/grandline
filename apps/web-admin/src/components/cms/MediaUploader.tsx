@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import { MediaLibraryModal } from '@encreasl/ui/media-library-modal';
+import type { SharedMediaItem } from '@encreasl/ui/lexical-course-editor';
 import { Upload, X, File as FileIcon } from '@/components/ui/IconWrapper';
 // Note: useUploadMediaMutation available but using direct fetch for now
-import { getCMSImageUrl } from '@/lib/cms';
+import { cmsApiFetch, cmsConfig, getCMSImageUrl } from '@/lib/cms';
 // Authentication is now handled by middleware
 
 interface MediaUploaderProps {
@@ -23,14 +25,63 @@ interface MediaItem {
   filesize: number;
 }
 
-interface UploadResponse {
-  doc: {
-    id: string;
-    url?: string;
-    filename: string;
-    alt?: string;
-    mimeType?: string;
-    filesize?: number;
+interface MediaResponse {
+  id: string | number;
+  url?: string;
+  filename?: string;
+  alt?: string;
+  mimeType?: string;
+  filesize?: number;
+  cloudinaryURL?: string;
+  thumbnailURL?: string;
+  doc?: MediaResponse;
+}
+
+interface MediaCollectionResponse {
+  docs?: MediaResponse[];
+}
+
+function getPayloadToken() {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('grandline_auth_token_admin');
+  }
+  return null;
+}
+
+function getMediaEndpoint(path = '') {
+  const base = (cmsConfig.apiUrl || '').replace(/\/$/, '');
+  return `${base}/media${path}`;
+}
+
+function normalizeMediaResponse(payload: unknown): MediaResponse | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  const response = payload as MediaResponse;
+  if (response.doc && typeof response.doc === 'object') {
+    return response.doc;
+  }
+
+  return response;
+}
+
+function isMeaningfulValue(value: string | number | undefined) {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return normalized !== '' && normalized !== 'undefined' && normalized !== 'null';
+}
+
+function mapMediaResponseToItem(media: MediaResponse): MediaItem {
+  const id = String(media.id ?? '').trim();
+  const filename = media.filename || media.alt || (id ? `Media ${id}` : 'Uploaded file');
+
+  return {
+    id,
+    url: media.cloudinaryURL || media.thumbnailURL || media.url || getCMSImageUrl(media.filename || ''),
+    filename,
+    alt: media.alt || '',
+    mimeType: media.mimeType || '',
+    filesize: media.filesize || 0,
   };
 }
 
@@ -43,6 +94,7 @@ export function MediaUploader({
 }: MediaUploaderProps) {
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
@@ -55,22 +107,12 @@ export function MediaUploader({
     if (!isAuthenticated) return;
 
     try {
-      // Use direct fetch for now - could be replaced with RTK Query
-      const response = await fetch(`/api/media/${mediaId}`, {
-        credentials: 'include',
-      });
+      const response = await cmsApiFetch(getMediaEndpoint(`/${mediaId}`));
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.doc) {
-          setSelectedMedia({
-            id: data.doc.id,
-            url: data.doc.url || getCMSImageUrl(data.doc.filename),
-            filename: data.doc.filename,
-            alt: data.doc.alt || '',
-            mimeType: data.doc.mimeType || '',
-            filesize: data.doc.filesize || 0,
-          });
+        const data = normalizeMediaResponse(await response.json());
+        if (data) {
+          setSelectedMedia(mapMediaResponseToItem(data));
         }
       }
     } catch (err) {
@@ -80,8 +122,9 @@ export function MediaUploader({
 
   // Load selected media info when value changes
   React.useEffect(() => {
-    if (value && isAuthenticated) {
-      loadMediaInfo(value);
+    if (isMeaningfulValue(value) && isAuthenticated) {
+      const mediaId = value as string | number;
+      loadMediaInfo(mediaId);
     } else {
       setSelectedMedia(null);
     }
@@ -121,32 +164,42 @@ export function MediaUploader({
               reject(new Error('Invalid response format'));
             }
           } else {
-            reject(new Error(`Upload failed: ${xhr.statusText}`));
+            let errorMessage = `Upload failed: ${xhr.statusText || `HTTP ${xhr.status}`}`;
+            try {
+              const payload = JSON.parse(xhr.responseText) as { errors?: Array<{ message?: string }>; message?: string };
+              errorMessage =
+                payload.errors?.[0]?.message ||
+                payload.message ||
+                errorMessage;
+            } catch {
+              // Keep the default message when the error body is not JSON.
+            }
+            reject(new Error(errorMessage));
           }
         };
 
         xhr.onerror = () => reject(new Error('Upload failed'));
 
-        xhr.open('POST', `/api/media`);
-        // Credentials are handled by the browser with credentials: 'include'
+        const token = getPayloadToken();
+        if (!token) {
+          reject(new Error('No admin session available for media upload.'));
+          return;
+        }
+
+        xhr.open('POST', getMediaEndpoint());
+        xhr.setRequestHeader('Authorization', `JWT ${token}`);
         xhr.send(formData);
       });
 
-      const response = await uploadPromise as UploadResponse;
-
-      if (response.doc) {
-        const mediaItem: MediaItem = {
-          id: response.doc.id,
-          url: response.doc.url || getCMSImageUrl(response.doc.filename),
-          filename: response.doc.filename,
-          alt: response.doc.alt || '',
-          mimeType: response.doc.mimeType || '',
-          filesize: response.doc.filesize || 0,
-        };
-
-        setSelectedMedia(mediaItem);
-        onChange?.(mediaItem.id);
+      const response = await uploadPromise as unknown;
+      const mediaDoc = normalizeMediaResponse(response);
+      if (!mediaDoc || !isMeaningfulValue(mediaDoc.id)) {
+        throw new Error('Upload succeeded but no media record was returned.');
       }
+
+      const mediaItem = mapMediaResponseToItem(mediaDoc);
+      setSelectedMedia(mediaItem);
+      onChange?.(mediaItem.id);
     } catch (err: unknown) {
       console.error('Upload failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Upload failed. Please try again.';
@@ -196,11 +249,58 @@ export function MediaUploader({
 
   const handleRemove = () => {
     setSelectedMedia(null);
+    setError(null);
     onChange?.('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  const loadMediaLibrary = useCallback(async (): Promise<SharedMediaItem[]> => {
+    const response = await cmsApiFetch(getMediaEndpoint('?limit=60&sort=-updatedAt'));
+    if (!response.ok) {
+      throw new Error('Failed to load media library.');
+    }
+
+    const payload = (await response.json()) as MediaCollectionResponse;
+    const items: SharedMediaItem[] = [];
+
+    for (const media of payload.docs || []) {
+      const normalized = normalizeMediaResponse(media);
+      if (!normalized || !isMeaningfulValue(normalized.id)) {
+        continue;
+      }
+
+      const item = mapMediaResponseToItem(normalized);
+      if (!item.id || !item.url) {
+        continue;
+      }
+
+      items.push({
+        id: item.id,
+        url: item.url,
+        alt: item.alt || item.filename,
+        mimeType: item.mimeType,
+        filename: item.filename,
+      });
+    }
+
+    return items;
+  }, []);
+
+  const handleSelectFromLibrary = useCallback((item: SharedMediaItem) => {
+    setError(null);
+    setSelectedMedia({
+      id: item.id,
+      url: item.url,
+      filename: item.filename || item.alt || `Media ${item.id}`,
+      alt: item.alt || '',
+      mimeType: item.mimeType || '',
+      filesize: 0,
+    });
+    onChange?.(item.id);
+    setIsLibraryOpen(false);
+  }, [onChange]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -231,7 +331,7 @@ export function MediaUploader({
                 </div>
               )}
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
                 {selectedMedia.filename}
@@ -245,7 +345,7 @@ export function MediaUploader({
                 </p>
               )}
             </div>
-            
+
             <button
               type="button"
               onClick={handleRemove}
@@ -310,16 +410,26 @@ export function MediaUploader({
         className="hidden"
       />
 
-      {/* Media Library Button - TODO: Implement media library modal */}
+      {/* Media Library Button */}
       <button
         type="button"
         onClick={() => {
-          // TODO: Implement media library functionality
+          setError(null);
+          setIsLibraryOpen(true);
         }}
         className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium py-2"
       >
         Choose from Media Library
       </button>
+
+      <MediaLibraryModal
+        isOpen={isLibraryOpen}
+        onClose={() => setIsLibraryOpen(false)}
+        onSelect={handleSelectFromLibrary}
+        loadMedia={loadMediaLibrary}
+        title="Choose Media"
+        zIndex={9999}
+      />
     </div>
   );
 }

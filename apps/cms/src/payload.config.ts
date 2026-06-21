@@ -79,6 +79,7 @@ import { AccountingPaymentsReceived } from './accounting/collections/AccountingP
 import { AccountingPaymentsMade } from './accounting/collections/AccountingPaymentsMade'
 import { AccountingExpenses } from './accounting/collections/AccountingExpenses'
 import { AccountingBankAccounts } from './accounting/collections/AccountingBankAccounts'
+import { AccountingBankStatementImports } from './accounting/collections/AccountingBankStatementImports'
 import { AccountingBankTransactions } from './accounting/collections/AccountingBankTransactions'
 import { AccountingBankReconciliations } from './accounting/collections/AccountingBankReconciliations'
 import { AccountingDeposits } from './accounting/collections/AccountingDeposits'
@@ -162,6 +163,7 @@ const rawCmsCollections: CollectionConfig[] = [
   AccountingExpenses,
   AccountingDeposits,
   AccountingTransfers,
+  AccountingBankStatementImports,
   AccountingBankTransactions,
   AccountingBankReconciliations,
   AccountingDocumentLinks,

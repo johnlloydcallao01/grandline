@@ -170,7 +170,7 @@ export async function getSessionInfo(): Promise<SessionInfo> {
     let headers: Record<string, string> | undefined;
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('grandline_auth_token_admin');
-      if (token) headers = { Authorization: `users JWT ${token}` };
+      if (token) headers = { Authorization: `JWT ${token}` };
     }
     const response = await makeAuthRequest<PayloadMeResponse>('/me', { headers });
 

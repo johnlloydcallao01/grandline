@@ -56,7 +56,7 @@ export async function getCurrentAdminUser(): Promise<PayloadUser | null> {
     // For now, return a mock user
     const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/users/me`, {
       headers: {
-        'Authorization': `users JWT ${token}`,
+        'Authorization': `JWT ${token}`,
       },
     });
 

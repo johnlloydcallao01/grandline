@@ -4,8 +4,23 @@ import { getRelationshipId } from '../../utils/accounting-audit'
 import { AccountingAuditService } from '../audit/AccountingAuditService'
 import { AccountingTimeTrackingService } from '../time/AccountingTimeTrackingService'
 
-const toNumericId = (value: unknown) =>
-  typeof value === 'number' ? value : value ? Number(value) : undefined
+const toRelationshipId = (value: unknown) => {
+  const relationshipId = getRelationshipId(value)
+  if (relationshipId === null || relationshipId === '') {
+    return undefined
+  }
+
+  if (typeof relationshipId === 'number' && Number.isFinite(relationshipId)) {
+    return relationshipId
+  }
+
+  if (typeof relationshipId === 'string') {
+    const parsed = Number(relationshipId)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+
+  return undefined
+}
 
 type ApprovalEntityType =
   | 'invoice'
@@ -125,21 +140,26 @@ export class AccountingApprovalService {
     }
 
     const firstStep = Array.isArray(workflow.steps) ? workflow.steps.slice().sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))[0] : null
+    const workflowRelationshipId = toRelationshipId(workflow)
+
+    if (!workflowRelationshipId) {
+      throw new APIError('The selected approval workflow is invalid.', 400)
+    }
 
     const request = await payload.create({
       collection: ACCOUNTING_COLLECTION_SLUGS.approvalRequests,
       overrideAccess: true,
       depth: 1,
       data: {
-        workflow: workflow.id,
+        workflow: workflowRelationshipId,
         entityType,
         entityId: String(entityId),
         status: 'pending',
-        requestedBy: toNumericId(requestedBy),
-        currentApprover: toNumericId(firstStep?.approverUser),
+        requestedBy: toRelationshipId(requestedBy),
+        currentApprover: toRelationshipId(firstStep?.approverUser),
         requestedAt: new Date().toISOString(),
         resolutionNotes: resolutionNotes || undefined,
-      },
+      } as never,
     })
 
     if (entityType === 'timesheet') {
@@ -206,7 +226,7 @@ export class AccountingApprovalService {
     }
 
     const collection = this.getEntityCollection(entityType)
-    const numericApprover = toNumericId(approverUserId)
+    const numericApprover = toRelationshipId(approverUserId)
     const data: Record<string, unknown> =
       decision === 'approved'
         ? entityType === 'budget'
@@ -278,7 +298,7 @@ export class AccountingApprovalService {
 
     nextTrail.push({
       stepNumber: currentStep?.stepNumber || nextTrail.length + 1,
-      approver: toNumericId(approverUserId),
+      approver: toRelationshipId(approverUserId),
       decision: 'approved',
       notes: notes || undefined,
       actedAt: new Date().toISOString(),
@@ -295,7 +315,7 @@ export class AccountingApprovalService {
       data: {
         approvalTrail: nextTrail,
         status: isFinalApproval ? 'approved' : 'pending',
-        currentApprover: isFinalApproval ? undefined : toNumericId(followingStep?.approverUser),
+        currentApprover: isFinalApproval ? undefined : toRelationshipId(followingStep?.approverUser),
         resolvedAt: isFinalApproval ? new Date().toISOString() : undefined,
         resolutionNotes: isFinalApproval ? notes || undefined : request.resolutionNotes || undefined,
       },
@@ -360,7 +380,7 @@ export class AccountingApprovalService {
           ...(Array.isArray(request.approvalTrail) ? request.approvalTrail : []),
           {
             stepNumber: (Array.isArray(request.approvalTrail) ? request.approvalTrail.length : 0) + 1,
-            approver: toNumericId(approverUserId),
+            approver: toRelationshipId(approverUserId),
             decision: 'rejected',
             notes: notes || undefined,
             actedAt: new Date().toISOString(),
