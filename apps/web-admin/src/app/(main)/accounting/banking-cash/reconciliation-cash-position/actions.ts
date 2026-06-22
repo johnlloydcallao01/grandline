@@ -202,6 +202,198 @@ export type ReconciliationMutationInput = {
   notes?: string | null;
 };
 
+export type CashFlowFilterOption = {
+  label: string;
+  value: string;
+};
+
+export type CashFlowMetric = {
+  id: string;
+  label: string;
+  value: string | number;
+  change: string;
+  trend: 'up' | 'down' | 'neutral';
+};
+
+export type CashFlowCell =
+  | string
+  | {
+      text: string;
+      tone?: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+      emphasis?: boolean;
+      align?: 'left' | 'right' | 'center';
+    };
+
+export type CashFlowActivityRow = {
+  id: string;
+  activityDate: string | null;
+  activityDateLabel: string;
+  documentNumber: string;
+  sourceType: string;
+  sourceLabel: string;
+  direction: 'inflow' | 'outflow';
+  directionLabel: string;
+  amount: number;
+  amountLabel: string;
+  status: string;
+  notes: string;
+  cells: CashFlowCell[];
+};
+
+export type CashFlowBankTransactionRow = {
+  id: string;
+  transactionDate: string | null;
+  transactionDateLabel: string;
+  valueDate: string | null;
+  valueDateLabel: string;
+  referenceNumber: string;
+  description: string;
+  amount: number;
+  amountLabel: string;
+  runningBalance: number;
+  runningBalanceLabel: string;
+  matchStatus: string;
+  matchStatusLabel: string;
+  matchStatusTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  matchedEntityLabel: string;
+  cells: CashFlowCell[];
+};
+
+export type CashFlowRow = {
+  id: string;
+  bankAccountId: string;
+  bankAccountLabel: string;
+  bankName: string;
+  accountNumberMasked: string;
+  branchName: string;
+  accountType: string;
+  accountTypeLabel: string;
+  currency: string;
+  currentBalance: number;
+  currentBalanceLabel: string;
+  rollingInflow30: number;
+  rollingInflow30Label: string;
+  rollingOutflow30: number;
+  rollingOutflow30Label: string;
+  netMovement30: number;
+  netMovement30Label: string;
+  projectedClosingBalance: number;
+  projectedClosingBalanceLabel: string;
+  projectedNet7: number;
+  projectedNet7Label: string;
+  averageDailyInflow30: number;
+  averageDailyOutflow30: number;
+  recentActivityCount: number;
+  liquidityState: string;
+  liquidityStateLabel: string;
+  liquidityStateTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  reconciliationState: string;
+  reconciliationStateLabel: string;
+  reconciliationStateTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  latestReconciliationId: string | null;
+  latestReconciliationPeriodLabel: string;
+  latestReconciliationDifference: number;
+  latestReconciliationDifferenceLabel: string;
+  hasReconciliationVariance: boolean;
+  searchableText: string;
+  cells: CashFlowCell[];
+};
+
+export type CashFlowRegisterResponse = {
+  rows: CashFlowRow[];
+  metrics: CashFlowMetric[];
+  filterOptions: {
+    accountTypes: CashFlowFilterOption[];
+    liquidityStates: CashFlowFilterOption[];
+    reconciliationStates: CashFlowFilterOption[];
+    quickFilters: CashFlowFilterOption[];
+  };
+  appliedFilters: {
+    search: string;
+    accountTypes: string[];
+    liquidityStates: string[];
+    reconciliationStates: string[];
+    quickFilters: string[];
+  };
+  meta: {
+    id: string;
+    label: string;
+    description: string;
+    searchPlaceholder: string;
+    tableTitle: string;
+    tableDescription: string;
+    columns: Array<string | { label: string; align: string }>;
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    totalDocs: number;
+    totalPages: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+  };
+  totals: {
+    totalRows: number;
+    filteredRows: number;
+  };
+  referenceData: {
+    bankAccounts: Array<{
+      id: number | string;
+      accountName: string | null;
+      bankName: string | null;
+      accountNumberMasked: string | null;
+      accountType: string | null;
+      currency: string | null;
+      ledgerAccountCode: string | null;
+      ledgerAccountName: string | null;
+      isActive: boolean;
+    }>;
+  };
+  flags: {
+    detailEnabledIds: string[];
+  };
+};
+
+export type CashFlowDetail = CashFlowRow & {
+  ledgerAccountLabel: string;
+  latestReconciliation: {
+    id: string;
+    sessionLabel: string;
+    status: string;
+    statusLabel: string;
+    statusTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+    statementPeriodLabel: string;
+    completedAt: string | null;
+    completedAtLabel: string;
+    completedByLabel: string;
+    differenceAmount: number;
+    differenceLabel: string;
+    bankTransactionCount: number;
+    matchedTransactionCount: number;
+    unmatchedTransactionCount: number;
+  } | null;
+  summary: {
+    currentBalance: number;
+    currentBalanceLabel: string;
+    rollingInflow30: number;
+    rollingInflow30Label: string;
+    rollingOutflow30: number;
+    rollingOutflow30Label: string;
+    netMovement30: number;
+    netMovement30Label: string;
+    projectedClosingBalance: number;
+    projectedClosingBalanceLabel: string;
+    projectedNet7: number;
+    projectedNet7Label: string;
+    averageDailyInflow30: number;
+    averageDailyInflow30Label: string;
+    averageDailyOutflow30: number;
+    averageDailyOutflow30Label: string;
+  };
+  recentActivities: CashFlowActivityRow[];
+  recentBankTransactions: CashFlowBankTransactionRow[];
+};
+
 export async function getReconciliations(
   query: {
     search?: string;
@@ -274,5 +466,35 @@ export async function completeReconciliation(
     {
       method: 'POST',
     },
+  );
+}
+
+export async function getCashFlow(
+  query: {
+    search?: string;
+    page?: number;
+    accountTypes?: string[];
+    liquidityStates?: string[];
+    reconciliationStates?: string[];
+    quickFilters?: string[];
+  } = {},
+): Promise<CashFlowRegisterResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const value of query.accountTypes || []) params.append('accountType', value);
+  for (const value of query.liquidityStates || []) params.append('liquidityState', value);
+  for (const value of query.reconciliationStates || []) params.append('reconciliationState', value);
+  for (const value of query.quickFilters || []) params.append('quickFilter', value);
+  params.set('page', String(query.page || 1));
+  params.set('limit', '10');
+
+  return fetchAccountingAdmin<CashFlowRegisterResponse>(
+    `/accounting/banking-cash/reconciliation-cash-position/cash-flow?${params.toString()}`,
+  );
+}
+
+export async function getCashFlowDetail(id: string | number): Promise<CashFlowDetail> {
+  return fetchAccountingAdmin<CashFlowDetail>(
+    `/accounting/banking-cash/reconciliation-cash-position/cash-flow/${id}`,
   );
 }

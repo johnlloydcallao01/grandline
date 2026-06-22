@@ -34,7 +34,7 @@
     "seed:statement-imports": "pnpm exec tsx src/seeders/accounting-bank-statement-imports.ts",
     "seed:official-receipts": "pnpm exec tsx src/seeders/accounting-official-receipts.ts",
     "seed:overdue-invoices": "pnpm exec tsx src/seeders/accounting-overdue-invoices.ts",
-    "seed:bank-reconciliations": "npx tsx src/seeders/accounting-bank-reconciliations.ts",
+    "seed:bank-reconciliations": "pnpm exec tsx src/seeders/accounting-bank-reconciliations.ts",
     "seed:journal-entries": "npx tsx src/seeders/accounting-journal-entries.ts",
     "seed:journal-entry-lines": "npx tsx src/seeders/accounting-journal-entry-lines.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",

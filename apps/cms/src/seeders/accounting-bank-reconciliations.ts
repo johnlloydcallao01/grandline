@@ -7,7 +7,9 @@ type BankAccountDoc = {
   id: number | string
   accountName?: string | null
   bankName?: string | null
+  accountType?: string | null
   isActive?: boolean | null
+  ledgerAccount?: number | string | { id?: number | string | null } | null
 }
 
 type UserDoc = {
@@ -30,53 +32,83 @@ type SeedReconciliationRecord = {
   updatedBy?: number | string | null
 }
 
-const sampleWindows = [
-  {
-    seedKey: 'control-history-recon-001',
-    statementStartDate: '2026-03-01T00:00:00.000Z',
-    statementEndDate: '2026-03-31T23:59:59.999Z',
-    statementClosingBalance: 582340.25,
-    bookClosingBalance: 582340.25,
-    differenceAmount: 0,
-    status: 'completed' as const,
-    completedAt: '2026-04-02T09:30:00.000Z',
-    noteSuffix: 'Completed month-end reconciliation with zero variance.',
-  },
-  {
-    seedKey: 'control-history-recon-002',
-    statementStartDate: '2026-04-01T00:00:00.000Z',
-    statementEndDate: '2026-04-30T23:59:59.999Z',
-    statementClosingBalance: 411280.8,
-    bookClosingBalance: 408950.8,
-    differenceAmount: 2330,
-    status: 'in_progress' as const,
-    noteSuffix: 'In-progress reconciliation with outstanding reconciling items.',
-  },
-  {
-    seedKey: 'control-history-recon-003',
-    statementStartDate: '2026-05-01T00:00:00.000Z',
-    statementEndDate: '2026-05-31T23:59:59.999Z',
-    statementClosingBalance: 915000,
-    bookClosingBalance: 915000,
-    differenceAmount: 0,
-    status: 'locked' as const,
-    completedAt: '2026-06-02T15:00:00.000Z',
-    noteSuffix: 'Locked after review for control-history-exports verification.',
-  },
-  {
-    seedKey: 'control-history-recon-004',
-    statementStartDate: '2026-06-01T00:00:00.000Z',
-    statementEndDate: '2026-06-30T23:59:59.999Z',
-    statementClosingBalance: 268455.12,
-    bookClosingBalance: 265955.12,
-    differenceAmount: 2500,
-    status: 'draft' as const,
-    noteSuffix: 'Draft reconciliation prepared to validate draft-state visibility.',
-  },
+type SampleWindowTemplate = {
+  seedKey: string
+  statementStartDate: string
+  statementEndDate: string
+  statementClosingBalance: number
+  bookClosingBalance: number
+  differenceAmount: number
+  status: 'draft' | 'in_progress' | 'completed' | 'locked'
+  completedAt?: string
+  noteSuffix: string
+}
+
+const SAMPLE_COUNT = 20
+
+const monthThemes = [
+  'month-end treasury review',
+  'daily collections sweep validation',
+  'payroll clearing review',
+  'merchant settlement matching',
+  'branch deposit tie-out',
+  'cash concentration review',
+  'tuition receipts balancing',
+  'refund clearing follow-up',
 ] as const
+
+const roundAmount = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100
+
+const buildMonthStart = (index: number) => {
+  const year = 2025 + Math.floor(index / 12)
+  const month = index % 12
+  return new Date(Date.UTC(year, month, 1, 0, 0, 0, 0))
+}
+
+const buildSampleWindows = (): SampleWindowTemplate[] =>
+  Array.from({ length: SAMPLE_COUNT }, (_, index) => {
+    const sequence = index + 1
+    const startDate = buildMonthStart(index)
+    const endDate = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() + 1, 0, 23, 59, 59, 999))
+    const differenceAmount =
+      sequence % 5 === 0
+        ? 0
+        : sequence % 4 === 0
+          ? roundAmount(850 + sequence * 97.45)
+          : sequence % 3 === 0
+            ? roundAmount(1450 + sequence * 121.3)
+            : roundAmount(320 + sequence * 54.2)
+    const bookClosingBalance = roundAmount(235000 + sequence * 18425 + (index % 4) * 3625.75)
+    const statementClosingBalance = roundAmount(bookClosingBalance + differenceAmount)
+    const status =
+      sequence % 6 === 0
+        ? 'locked'
+        : sequence % 5 === 0
+          ? 'completed'
+          : sequence % 2 === 0
+            ? 'in_progress'
+            : 'draft'
+    const completedAt =
+      status === 'completed' || status === 'locked'
+        ? new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate() + 2, 10, 0, 0, 0)).toISOString()
+        : undefined
+
+    return {
+      seedKey: `reconciliation-session-${String(sequence).padStart(3, '0')}`,
+      statementStartDate: startDate.toISOString(),
+      statementEndDate: endDate.toISOString(),
+      statementClosingBalance,
+      bookClosingBalance,
+      differenceAmount,
+      status,
+      completedAt,
+      noteSuffix: `Sample reconciliation seeded for ${monthThemes[index % monthThemes.length]}.`,
+    }
+  })
 
 async function seedAccountingBankReconciliations() {
   const payload = await getPayload({ config })
+  const sampleWindows = buildSampleWindows()
 
   const [adminUsers, bankAccounts] = await Promise.all([
     payload.find({
@@ -88,20 +120,30 @@ async function seedAccountingBankReconciliations() {
     }),
     payload.find({
       collection: ACCOUNTING_COLLECTION_SLUGS.bankAccounts as any,
-      where: { isActive: { not_equals: false } } as never,
-      limit: sampleWindows.length,
-      depth: 0,
+      where: {
+        and: [
+          { isActive: { not_equals: false } },
+          { accountType: { equals: 'bank' } },
+        ],
+      } as never,
+      limit: 200,
+      depth: 1,
       sort: 'accountName',
       overrideAccess: true,
     }),
   ])
 
   const adminId = (adminUsers.docs[0] as UserDoc | undefined)?.id ?? null
-  const availableBankAccounts = bankAccounts.docs as BankAccountDoc[]
+  const availableBankAccounts = (bankAccounts.docs as BankAccountDoc[]).filter((bankAccount) => {
+    const ledgerAccount = bankAccount.ledgerAccount
+    if (!ledgerAccount) return false
+    if (typeof ledgerAccount === 'object') return Boolean(ledgerAccount.id)
+    return true
+  })
 
   if (availableBankAccounts.length === 0) {
     throw new Error(
-      'No active accounting bank accounts were found. Seed bank accounts first, then rerun this reconciliation seeder.',
+      'No active bank-type accounts with ledger accounts were found. Seed bank accounts first, then rerun this reconciliation seeder.',
     )
   }
 

@@ -9,6 +9,8 @@
     "@lexical/react": "0.28.0",
     "@lexical/rich-text": "0.28.0",
     "@lexical/utils": "0.28.0",
+    "echarts": "6.1.0",
+    "echarts-for-react": "3.0.6",
     "lexical": "0.28.0",
     "server-only": "0.0.1"
   },
