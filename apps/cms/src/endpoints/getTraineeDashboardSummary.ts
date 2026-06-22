@@ -1,4 +1,5 @@
 import type { PayloadRequest } from 'payload'
+import { getCmsApiBaseUrl } from '../utils/cms-url'
 
 export const getTraineeDashboardSummary = async (req: PayloadRequest): Promise<Response> => {
   const startTime = Date.now()
@@ -154,7 +155,7 @@ export const getTraineeDashboardSummary = async (req: PayloadRequest): Promise<R
 
         // Ensure absolute URL for local files
         if (thumbnailUrl && !thumbnailUrl.startsWith('http')) {
-          const baseUrl = (process.env.PAYLOAD_API_URL || 'http://localhost:3001/api').replace(/\/api$/, '')
+          const baseUrl = getCmsApiBaseUrl(req.url).replace(/\/api$/, '')
           thumbnailUrl = `${baseUrl}${thumbnailUrl}`
         }
       }
@@ -179,7 +180,7 @@ export const getTraineeDashboardSummary = async (req: PayloadRequest): Promise<R
       if (course?.thumbnail && typeof course.thumbnail === 'object') {
         thumbnailUrl = course.thumbnail.cloudinaryURL || course.thumbnail.url || null
         if (thumbnailUrl && !thumbnailUrl.startsWith('http')) {
-          const baseUrl = (process.env.PAYLOAD_API_URL || 'http://localhost:3001/api').replace(/\/api$/, '')
+          const baseUrl = getCmsApiBaseUrl(req.url).replace(/\/api$/, '')
           thumbnailUrl = `${baseUrl}${thumbnailUrl}`
         }
       }
@@ -316,7 +317,7 @@ export const getTraineeDashboardSummary = async (req: PayloadRequest): Promise<R
         if (user.profilePicture.cloudinaryURL) {
           profilePictureUrl = user.profilePicture.cloudinaryURL.replace(/[`'"]/g, '').trim();
         } else if (user.profilePicture.url) {
-          const baseUrl = (process.env.PAYLOAD_API_URL || 'http://localhost:3001/api').replace(/\/api$/, '');
+          const baseUrl = getCmsApiBaseUrl(req.url).replace(/\/api$/, '');
           profilePictureUrl = user.profilePicture.url.startsWith('http')
             ? user.profilePicture.url
             : `${baseUrl}${user.profilePicture.url}`;

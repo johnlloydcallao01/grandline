@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { CertificatePDF } from '../components/CertificatePDF';
 import { randomBytes } from 'crypto';
+import { getCmsServerUrl } from '../utils/cms-url';
 
 export const generateCertificateEndpoint = async (req: PayloadRequest) => {
   const encoder = new TextEncoder();
@@ -110,9 +111,9 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
           if (bgImage.cloudinaryURL) {
               backgroundUrl = bgImage.cloudinaryURL;
           } else if (bgImage.url) {
-              backgroundUrl = bgImage.url.startsWith('http') 
-                  ? bgImage.url 
-                  : `${process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3001'}${bgImage.url}`;
+              backgroundUrl = bgImage.url.startsWith('http')
+                  ? bgImage.url
+                  : `${getCmsServerUrl(req.url)}${bgImage.url}`;
           }
       }
 

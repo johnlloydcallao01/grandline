@@ -132,6 +132,18 @@ import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const isRenderRuntime = process.env.RENDER === 'true' || Boolean(process.env.RENDER_SERVICE_NAME)
+
+const parseIntegerEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value || '', 10)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const defaultDatabasePoolMax = isRenderRuntime ? 2 : 10
+const defaultDatabasePoolMin = 0
+const defaultDatabaseIdleTimeout = isRenderRuntime ? 30000 : 300000
+const defaultDatabaseConnectionTimeout = isRenderRuntime ? 10000 : 15000
+const defaultDatabaseMaxUses = isRenderRuntime ? 1000 : 7500
 
 const rawCmsCollections: CollectionConfig[] = [
   Users,
@@ -326,14 +338,15 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
-      // Connection Pool Configuration for High-Performance with generous timeouts
-      max: parseInt(process.env.DATABASE_POOL_MAX || '10'), // Maximum connections (reduced for serverless)
-      min: Math.max(0, parseInt(process.env.DATABASE_POOL_MIN || '0')),  // Minimum connections (0 for serverless)
-      idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '300000'), // 5 minutes
-      connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '15000'), // 15 seconds (fail fast on serverless)
-      // Additional pool settings for stability
+      max: parseIntegerEnv(process.env.DATABASE_POOL_MAX, defaultDatabasePoolMax),
+      min: Math.max(0, parseIntegerEnv(process.env.DATABASE_POOL_MIN, defaultDatabasePoolMin)),
+      idleTimeoutMillis: parseIntegerEnv(process.env.DATABASE_IDLE_TIMEOUT, defaultDatabaseIdleTimeout),
+      connectionTimeoutMillis: parseIntegerEnv(
+        process.env.DATABASE_CONNECTION_TIMEOUT,
+        defaultDatabaseConnectionTimeout,
+      ),
       allowExitOnIdle: true,
-      maxUses: parseInt(process.env.DATABASE_MAX_USES || '7500'), // Recycle connections after 7500 uses
+      maxUses: parseIntegerEnv(process.env.DATABASE_MAX_USES, defaultDatabaseMaxUses),
     },
     prodMigrations: migrations,
     push: false,
