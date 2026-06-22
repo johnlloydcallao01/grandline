@@ -284,7 +284,7 @@ const getStatusTone = (status: string | null | undefined): StatusTone => {
   }
 }
 
-const formatUserLabel = (value: RelatedUser) => {
+const formatUserLabel = (value: RelatedUser | undefined) => {
   if (typeof value === 'object' && value) {
     const firstName = String(value.firstName || '').trim()
     const lastName = String(value.lastName || '').trim()
@@ -294,7 +294,7 @@ const formatUserLabel = (value: RelatedUser) => {
   return '-'
 }
 
-const formatBankAccountLabel = (bankAccount: RelatedBankAccount) => {
+const formatBankAccountLabel = (bankAccount: RelatedBankAccount | undefined) => {
   if (typeof bankAccount === 'object' && bankAccount) {
     const suffix = bankAccount.accountNumberMasked ? ` (${bankAccount.accountNumberMasked})` : ''
     return `${bankAccount.accountName || bankAccount.bankName || 'Unnamed bank account'}${suffix}`
@@ -303,7 +303,7 @@ const formatBankAccountLabel = (bankAccount: RelatedBankAccount) => {
   return ''
 }
 
-const formatLedgerAccountLabel = (bankAccount: RelatedBankAccount) => {
+const formatLedgerAccountLabel = (bankAccount: RelatedBankAccount | undefined) => {
   if (typeof bankAccount === 'object' && bankAccount?.ledgerAccount) {
     const code = String(bankAccount.ledgerAccount.code || '').trim()
     const name = String(bankAccount.ledgerAccount.name || '').trim()
@@ -314,14 +314,14 @@ const formatLedgerAccountLabel = (bankAccount: RelatedBankAccount) => {
   return ''
 }
 
-const formatMediaFilename = (statementFile: RelatedMedia) => {
+const formatMediaFilename = (statementFile: RelatedMedia | undefined) => {
   if (typeof statementFile === 'object' && statementFile) {
     return String(statementFile.filename || '').trim() || 'Unnamed file'
   }
   return 'No file'
 }
 
-const formatMediaUrl = (statementFile: RelatedMedia) => {
+const formatMediaUrl = (statementFile: RelatedMedia | undefined) => {
   if (typeof statementFile === 'object' && statementFile) {
     return String(statementFile.url || '').trim()
   }

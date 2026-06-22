@@ -21,11 +21,13 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   creditNotes: 'accounting-credit-notes',
   vendorCredits: 'accounting-vendor-credits',
   bankAccounts: 'accounting-bank-accounts',
+  bankFeeds: 'accounting-bank-feeds',
   bankStatementImports: 'accounting-bank-statement-imports',
   bankTransactions: 'accounting-bank-transactions',
   bankReconciliations: 'accounting-bank-reconciliations',
   deposits: 'accounting-deposits',
   transfers: 'accounting-transfers',
+  bouncedPayments: 'accounting-bounced-payments',
   documentLinks: 'accounting-document-links',
   enrollmentBillingLinks: 'accounting-enrollment-billing-links',
   paymentAllocations: 'accounting-payment-allocations',
@@ -216,11 +218,58 @@ export const BANK_ACCOUNT_TYPE_OPTIONS = [
   { label: 'Undeposited Funds', value: 'undeposited_funds' },
 ] as const
 
+export const BANK_FEED_CONNECTOR_TYPE_OPTIONS = [
+  { label: 'Direct API', value: 'direct_api' },
+  { label: 'Treasury Hub', value: 'treasury_hub' },
+  { label: 'CSV Bridge', value: 'csv_bridge' },
+  { label: 'Plaid', value: 'plaid' },
+  { label: 'Manual Sync', value: 'manual_sync' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const BANK_FEED_CONNECTION_STATUS_OPTIONS = [
+  { label: 'Connected', value: 'connected' },
+  { label: 'Sync Delayed', value: 'sync_delayed' },
+  { label: 'Action Required', value: 'action_required' },
+  { label: 'Disconnected', value: 'disconnected' },
+] as const
+
+export const BANK_FEED_HEALTH_STATUS_OPTIONS = [
+  { label: 'Healthy', value: 'healthy' },
+  { label: 'Monitor', value: 'monitor' },
+  { label: 'Warning', value: 'warning' },
+  { label: 'Critical', value: 'critical' },
+] as const
+
+export const BANK_FEED_SYNC_FREQUENCY_OPTIONS = [
+  { label: 'Hourly', value: 'hourly' },
+  { label: 'Daily', value: 'daily' },
+  { label: 'Manual', value: 'manual' },
+] as const
+
 export const BANK_TRANSACTION_MATCH_STATUS_OPTIONS = [
   { label: 'Unmatched', value: 'unmatched' },
   { label: 'Suggested', value: 'suggested' },
   { label: 'Matched', value: 'matched' },
   { label: 'Ignored', value: 'ignored' },
+] as const
+
+export const BOUNCED_PAYMENT_REASON_OPTIONS = [
+  { label: 'Insufficient Funds', value: 'insufficient_funds' },
+  { label: 'Account Closed', value: 'account_closed' },
+  { label: 'Payment Recalled', value: 'payment_recalled' },
+  { label: 'Stop Payment', value: 'stop_payment' },
+  { label: 'Invalid Account', value: 'invalid_account' },
+  { label: 'Bank Error', value: 'bank_error' },
+  { label: 'Other', value: 'other' },
+] as const
+
+export const BOUNCED_PAYMENT_CASE_STATUS_OPTIONS = [
+  { label: 'Open', value: 'open' },
+  { label: 'Awaiting Reversal', value: 'awaiting_reversal' },
+  { label: 'Collections Follow-up', value: 'collections_follow_up' },
+  { label: 'Resolved', value: 'resolved' },
+  { label: 'Written Off', value: 'written_off' },
 ] as const
 
 export const ACCOUNTING_DOCUMENT_CATEGORY_OPTIONS = [

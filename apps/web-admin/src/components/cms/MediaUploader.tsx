@@ -85,6 +85,60 @@ function mapMediaResponseToItem(media: MediaResponse): MediaItem {
   };
 }
 
+function getAcceptTokens(accept: string) {
+  return accept
+    .split(',')
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function getFileExtension(filename: string) {
+  const extensionIndex = filename.lastIndexOf('.');
+  if (extensionIndex < 0) return '';
+  return filename.slice(extensionIndex).toLowerCase();
+}
+
+function matchesAcceptToken(file: File, token: string) {
+  const mimeType = String(file.type || '').toLowerCase();
+  const extension = getFileExtension(file.name);
+
+  if (token.startsWith('.')) {
+    return extension === token;
+  }
+
+  if (token.endsWith('/*')) {
+    const mimePrefix = token.slice(0, -1);
+    return mimeType.startsWith(mimePrefix);
+  }
+
+  if (token.includes('/')) {
+    return mimeType === token;
+  }
+
+  return extension === `.${token}`;
+}
+
+function isAcceptedFileType(file: File, accept: string) {
+  const tokens = getAcceptTokens(accept);
+  if (tokens.length === 0) return true;
+  return tokens.some((token) => matchesAcceptToken(file, token));
+}
+
+function formatAcceptedTypes(accept: string) {
+  const labels = getAcceptTokens(accept).map((token) => {
+    if (token.startsWith('.')) return token.slice(1).toUpperCase();
+    if (token.endsWith('/*')) return token.replace('/*', '').toUpperCase();
+    if (token === 'text/csv' || token === 'application/csv') return 'CSV';
+    if (token === 'application/pdf') return 'PDF';
+    if (token === 'application/x-ofx' || token === 'application/ofx' || token === 'text/ofx') return 'OFX';
+    if (token === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return 'XLSX';
+    if (token === 'application/vnd.ms-excel') return 'XLS';
+    return token;
+  });
+
+  return Array.from(new Set(labels)).join(', ');
+}
+
 export function MediaUploader({
   value,
   onChange,
@@ -220,8 +274,11 @@ export function MediaUploader({
     }
 
     // Validate file type
-    if (accept && !file.type.match(accept.replace('*', '.*'))) {
-      setError('Invalid file type');
+    if (accept && !isAcceptedFileType(file, accept)) {
+      setError(`Invalid file type. Allowed types: ${formatAcceptedTypes(accept)}`);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -245,6 +302,7 @@ export function MediaUploader({
     if (files && files.length > 0) {
       handleFileSelect(files[0]);
     }
+    e.target.value = '';
   };
 
   const handleRemove = () => {
@@ -360,12 +418,20 @@ export function MediaUploader({
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isUploading ? 'border-blue-400 bg-blue-50/40' : 'border-gray-300 hover:border-gray-400'}`}
         >
           {isUploading ? (
-            <div className="space-y-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-sm text-gray-600">Uploading... {uploadProgress}%</p>
+            <div className="space-y-3">
+              <div className="relative mx-auto flex h-12 w-12 items-center justify-center">
+                <div className="absolute inset-0 animate-ping rounded-full bg-blue-100"></div>
+                <div className="relative rounded-full bg-blue-600 p-3 text-white shadow-sm">
+                  <Upload className="h-6 w-6 animate-bounce" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-blue-700">Uploading file...</p>
+                <p className="text-xs text-blue-600">{uploadProgress}% complete</p>
+              </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
@@ -380,6 +446,7 @@ export function MediaUploader({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Click to upload
@@ -388,6 +455,9 @@ export function MediaUploader({
               </div>
               <p className="text-xs text-gray-900">
                 {accept.includes('image') ? 'Images' : 'Files'} up to {maxSize}MB
+              </p>
+              <p className="text-xs text-gray-500">
+                Supported: {formatAcceptedTypes(accept)}
               </p>
             </div>
           )}
@@ -417,7 +487,8 @@ export function MediaUploader({
           setError(null);
           setIsLibraryOpen(true);
         }}
-        className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium py-2"
+        disabled={isUploading}
+        className="w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Choose from Media Library
       </button>

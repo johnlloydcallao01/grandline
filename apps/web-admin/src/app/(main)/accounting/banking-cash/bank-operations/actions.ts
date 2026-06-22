@@ -487,3 +487,255 @@ export async function retryStatementImports(ids: Array<string | number>): Promis
     },
   );
 }
+
+export type BankFeedFilterOption = {
+  label: string;
+  value: string;
+};
+
+export type BankFeedMetric = {
+  id: string;
+  label: string;
+  value: string | number;
+  change: string;
+  trend: 'up' | 'down' | 'neutral';
+};
+
+export type BankFeedRow = {
+  id: string;
+  feedReference: string;
+  bankAccountId: string;
+  bankAccountLabel: string;
+  bankAccountType: string;
+  currency: string;
+  connectorType: string;
+  connectorTypeLabel: string;
+  connectorName: string;
+  providerReference: string;
+  externalAccountId: string;
+  connectionStatus: string;
+  connectionStatusLabel: string;
+  connectionStatusTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  healthStatus: string;
+  healthStatusLabel: string;
+  healthStatusTone: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  syncFrequency: string;
+  syncFrequencyLabel: string;
+  lastSyncAt: string | null;
+  lastSyncAtLabel: string;
+  lastSuccessfulSyncAt: string | null;
+  lastSuccessfulSyncAtLabel: string;
+  lastAttemptedSyncAt: string | null;
+  lastAttemptedSyncAtLabel: string;
+  nextScheduledSyncAt: string | null;
+  nextScheduledSyncAtLabel: string;
+  lastImportedRowCount: number;
+  lastImportedTransactionCount: number;
+  feedRuleSetName: string;
+  feedRuleCount: number;
+  autoPostRuleCount: number;
+  manualReviewRuleCount: number;
+  lastRuleChangeAt: string | null;
+  lastRuleChangeAtLabel: string;
+  syncDelayMinutes: number;
+  averageSyncLatencySeconds: number;
+  tokenExpiresAt: string | null;
+  tokenExpiresAtLabel: string;
+  needsReconnection: boolean;
+  disconnectReason: string;
+  lastErrorSummary: string;
+  notes: string;
+  requiresAttention: boolean;
+  hasRecentRuleChange: boolean;
+  isHealthy: boolean;
+  isDisconnected: boolean;
+  isSyncDelayed: boolean;
+  searchableText: string;
+  cells: BankTransactionCell[];
+};
+
+export type BankFeedRegisterResponse = {
+  rows: BankFeedRow[];
+  metrics: BankFeedMetric[];
+  filterOptions: {
+    statuses: BankFeedFilterOption[];
+    connectors: BankFeedFilterOption[];
+    healthStates: BankFeedFilterOption[];
+    quickFilters: BankFeedFilterOption[];
+  };
+  appliedFilters: {
+    search: string;
+    statuses: string[];
+    connectors: string[];
+    healthStates: string[];
+    quickFilters: string[];
+  };
+  meta: {
+    id: string;
+    label: string;
+    description: string;
+    searchPlaceholder: string;
+    tableTitle: string;
+    tableDescription: string;
+    columns: Array<string | { label: string; align: string }>;
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    totalDocs: number;
+    totalPages: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+  };
+  totals: {
+    totalRows: number;
+    filteredRows: number;
+  };
+  referenceData: {
+    bankAccounts: Array<{
+      id: number | string;
+      accountName: string | null;
+      bankName: string | null;
+      accountNumberMasked: string | null;
+      accountType: string | null;
+      isActive: boolean;
+    }>;
+    connectorTypes: Array<{
+      label: string;
+      value: string;
+    }>;
+    connectionStatuses: Array<{
+      label: string;
+      value: string;
+    }>;
+    healthStatuses: Array<{
+      label: string;
+      value: string;
+    }>;
+    syncFrequencies: Array<{
+      label: string;
+      value: string;
+    }>;
+  };
+  flags: {
+    syncableFeedIds: string[];
+  };
+};
+
+export type BankFeedDetail = BankFeedRow & {
+  bankLedgerAccountLabel: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  usageSummary: {
+    canEdit: boolean;
+    canDelete: boolean;
+    canSync: boolean;
+    deleteBlockedReason: string | null;
+  };
+};
+
+export type BankFeedMutationInput = {
+  feedReference?: string | null;
+  bankAccount: string;
+  connectorType: string;
+  connectorName: string;
+  providerReference?: string | null;
+  externalAccountId?: string | null;
+  connectionStatus: string;
+  healthStatus: string;
+  syncFrequency: string;
+  lastSyncAt?: string | null;
+  lastSuccessfulSyncAt?: string | null;
+  lastAttemptedSyncAt?: string | null;
+  nextScheduledSyncAt?: string | null;
+  lastImportedRowCount: number;
+  lastImportedTransactionCount: number;
+  feedRuleSetName?: string | null;
+  feedRuleCount: number;
+  autoPostRuleCount: number;
+  manualReviewRuleCount: number;
+  lastRuleChangeAt?: string | null;
+  syncDelayMinutes: number;
+  averageSyncLatencySeconds: number;
+  tokenExpiresAt?: string | null;
+  needsReconnection: boolean;
+  disconnectReason?: string | null;
+  lastErrorSummary?: string | null;
+  notes?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+
+export async function getBankFeeds(
+  query: {
+    search?: string;
+    page?: number;
+    statuses?: string[];
+    connectors?: string[];
+    healthStates?: string[];
+    quickFilters?: string[];
+  } = {},
+): Promise<BankFeedRegisterResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const value of query.statuses || []) params.append('status', value);
+  for (const value of query.connectors || []) params.append('connector', value);
+  for (const value of query.healthStates || []) params.append('health', value);
+  for (const value of query.quickFilters || []) params.append('quickFilter', value);
+  params.set('page', String(query.page || 1));
+  params.set('limit', '10');
+
+  return fetchAccountingAdmin<BankFeedRegisterResponse>(
+    `/accounting/banking-cash/bank-operations/bank-feeds?${params.toString()}`,
+  );
+}
+
+export async function getBankFeedDetail(id: string | number): Promise<BankFeedDetail> {
+  return fetchAccountingAdmin<BankFeedDetail>(
+    `/accounting/banking-cash/bank-operations/bank-feeds/${id}`,
+  );
+}
+
+export async function createBankFeed(
+  input: BankFeedMutationInput,
+): Promise<BankFeedDetail> {
+  return fetchAccountingAdmin<BankFeedDetail>(
+    `/accounting/banking-cash/bank-operations/bank-feeds`,
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export async function updateBankFeed(
+  id: string | number,
+  input: BankFeedMutationInput,
+): Promise<BankFeedDetail> {
+  return fetchAccountingAdmin<BankFeedDetail>(
+    `/accounting/banking-cash/bank-operations/bank-feeds/${id}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export async function deleteBankFeed(id: string | number): Promise<{ success: boolean }> {
+  return fetchAccountingAdmin<{ success: boolean }>(
+    `/accounting/banking-cash/bank-operations/bank-feeds/${id}`,
+    {
+      method: 'DELETE',
+    },
+  );
+}
+
+export async function syncBankFeeds(ids: Array<string | number>): Promise<{ success: boolean; syncedCount: number; skippedCount: number }> {
+  return fetchAccountingAdmin<{ success: boolean; syncedCount: number; skippedCount: number }>(
+    `/accounting/banking-cash/bank-operations/bank-feeds/sync`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    },
+  );
+}

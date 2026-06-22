@@ -15,49 +15,43 @@ import {
   Plus,
   RefreshCw,
   Search,
+  SendHorizonal,
   Trash2,
-  Upload,
   Wallet,
   X,
 } from 'lucide-react';
 import {
-  createBankTransaction,
-  deleteBankTransaction,
-  getBankTransactionDetail,
-  getBankTransactions,
-  updateBankTransaction,
-  type BankTransactionCell,
-  type BankTransactionDetail,
-  type BankTransactionMetric,
-  type BankTransactionMutationInput,
-  type BankTransactionRegisterResponse,
-  type BankTransactionRow,
+  createDeposit,
+  deleteDeposit,
+  getDepositDetail,
+  getDeposits,
+  postDeposit,
+  updateDeposit,
+  type DepositCell,
+  type DepositDetail,
+  type DepositMetric,
+  type DepositMutationInput,
+  type DepositRegisterResponse,
+  type DepositRow,
 } from './actions';
-import { BankFeedsPanel } from './BankFeedsPanel';
-import { StatementImportsPanel } from './StatementImportsPanel';
+import { TransfersUndepositedPanel } from './TransfersUndepositedPanel';
+import { BouncedPaymentsPanel } from './BouncedPaymentsPanel';
 
-type TabId = 'bank-transactions' | 'statement-imports' | 'bank-feeds';
+type TabId = 'deposits' | 'transfers-undeposited' | 'bounced-payments';
 
-type BankTransactionFilterState = {
+type DepositFilterState = {
   statuses: string[];
-  directions: string[];
+  bankAccounts: string[];
   coverageStates: string[];
 };
 
-type BankTransactionFormState = {
+type DepositFormState = {
+  depositNumber: string;
+  depositDate: string;
   bankAccount: string;
-  transactionDate: string;
-  valueDate: string;
-  description: string;
-  referenceNumber: string;
-  amountIn: string;
-  amountOut: string;
-  runningBalance: string;
-  matchStatus: string;
-  matchedEntityType: string;
-  matchedEntityId: string;
+  sourceAccount: string;
+  amount: string;
   notes: string;
-  preservedMetadata: Record<string, unknown> | null;
 };
 
 type StaticMetric = {
@@ -68,162 +62,150 @@ type StaticMetric = {
 };
 
 type StaticTab = {
-  id: Exclude<TabId, 'bank-transactions'>;
+  id: Exclude<TabId, 'deposits'>;
   label: string;
   description: string;
   searchPlaceholder: string;
   quickFilters: string[];
   actions: Array<{
     label: string;
-    icon: 'upload' | 'download' | 'refresh' | 'plus';
+    icon: 'plus' | 'download' | 'refresh';
     variant: 'primary' | 'secondary' | 'ghost';
   }>;
   metrics: StaticMetric[];
   tableTitle: string;
   tableDescription: string;
   columns: string[];
-  rows: Array<{ id: string; cells: BankTransactionCell[] }>;
+  rows: Array<{ id: string; cells: DepositCell[] }>;
 };
 
 const LIVE_TAB = {
-  id: 'bank-transactions' as const,
-  label: 'Bank Transactions',
-  description: 'Review bank transaction intake and matching status across imported and manually entered records.',
-  searchPlaceholder: 'Search by reference, counterparty, amount, or memo',
-  columns: ['Date', 'Bank Account', 'Reference', 'Counterparty', 'Amount', 'Status'],
+  id: 'deposits' as const,
+  label: 'Deposits',
+  description: 'Track deposit drafts, posted batches, journal linkage, and source-account coverage using live deposit records.',
+  searchPlaceholder: 'Search deposit batch, bank account, source account, note, or prepared by',
 };
 
 const STATIC_TABS: StaticTab[] = [
   {
-    id: 'statement-imports',
-    label: 'Statement Imports',
-    description: 'Manage statement import queue, file history, parsing errors, and import outcomes.',
-    searchPlaceholder: 'Search by filename, account, uploader, or import batch',
-    quickFilters: ['Queued', 'Imported', 'Parsing Errors', 'Requires Re-upload'],
+    id: 'transfers-undeposited',
+    label: 'Transfers & Undeposited Funds',
+    description: 'Monitor internal transfers and cash still waiting to be deposited.',
+    searchPlaceholder: 'Search transfer id, source account, receipt batch, or destination account',
+    quickFilters: ['Transfers Pending', 'Undeposited Receipts', 'Internal Moves', 'Exceptions'],
     actions: [
-      { label: 'Upload File', icon: 'upload', variant: 'primary' },
-      { label: 'Download Template', icon: 'download', variant: 'secondary' },
-      { label: 'Retry Failed Imports', icon: 'refresh', variant: 'ghost' },
+      { label: 'Create Transfer', icon: 'plus', variant: 'primary' },
+      { label: 'Refresh Balances', icon: 'refresh', variant: 'secondary' },
+      { label: 'Download Cash Staging', icon: 'download', variant: 'ghost' },
     ],
     metrics: [
-      { label: 'Files In Queue', value: '9', change: '3 waiting validation', trend: 'neutral' },
-      { label: 'Imported Today', value: '14', change: '2,481 lines parsed', trend: 'up' },
-      { label: 'Failed Imports', value: '3', change: '1 critical format issue', trend: 'down' },
-      { label: 'Oldest Pending File', value: '42 min', change: 'Uploaded 08:18 AM', trend: 'neutral' },
+      { label: 'Pending Transfers', value: '5', change: '2 awaiting approval', trend: 'neutral' },
+      { label: 'Undeposited Funds', value: 'PHP 412,700', change: '26 receipts not batched', trend: 'up' },
+      { label: 'Internal Cash Moves Today', value: 'PHP 920,000', change: 'Across 4 bank hops', trend: 'up' },
+      { label: 'Staging Exceptions', value: '3', change: '1 deposit batch overdue', trend: 'down' },
     ],
-    tableTitle: 'Statement Import Batches',
-    tableDescription: 'Track every uploaded bank statement, parse outcome, and finance follow-up action.',
-    columns: ['Uploaded', 'Filename', 'Bank Account', 'Lines', 'Uploaded By', 'Import Status'],
+    tableTitle: 'Cash Movement Queue',
+    tableDescription: 'Combined view of transfers, staged receipts, and undeposited amounts that still need action.',
+    columns: ['Movement', 'Source', 'Destination / Batch', 'Owner', 'Amount', 'Status'],
     rows: [
       {
-        id: 'imp-1',
+        id: 'mov-1',
         cells: [
-          '08:18 AM',
-          { text: 'BDO-main-2026-05-31.csv', emphasis: true },
+          { text: 'TRF-2026-0531-04', emphasis: true },
+          'RCBC Reserve',
           'BDO Operations',
-          '241',
-          'finance.ops@grandline',
-          { text: 'Queued', tone: 'blue' },
+          'Treasury Team',
+          { text: 'PHP 250,000', emphasis: true, align: 'right' },
+          { text: 'Pending Approval', tone: 'amber' },
         ],
       },
       {
-        id: 'imp-2',
+        id: 'mov-2',
         cells: [
-          '07:42 AM',
-          { text: 'ub-payroll-2026-05-31.xlsx', emphasis: true },
-          'UnionBank Payroll',
-          '86',
-          'treasury@grandline',
-          { text: 'Imported', tone: 'green' },
+          { text: 'Undeposited Batch UDF-118', emphasis: true },
+          'Cashier Receipts',
+          'Awaiting Deposit Group',
+          'Front Desk',
+          { text: 'PHP 68,200', emphasis: true, align: 'right' },
+          { text: 'Needs Batch', tone: 'blue' },
         ],
       },
       {
-        id: 'imp-3',
+        id: 'mov-3',
         cells: [
-          'Yesterday',
-          { text: 'metrobank-main-2026-05-30.csv', emphasis: true },
+          { text: 'TRF-2026-0530-11', emphasis: true },
           'Metrobank Main',
-          '311',
-          'finance.lead@grandline',
-          { text: 'Parse Error', tone: 'red' },
+          'UnionBank Payroll',
+          'Treasury Team',
+          { text: 'PHP 430,000', emphasis: true, align: 'right' },
+          { text: 'Posted', tone: 'green' },
         ],
       },
       {
-        id: 'imp-4',
+        id: 'mov-4',
         cells: [
-          'Yesterday',
-          { text: 'bdo-daily-2026-05-30.csv', emphasis: true },
-          'BDO Operations',
-          '227',
-          'finance.ops@grandline',
-          { text: 'Needs Re-upload', tone: 'amber' },
+          { text: 'Undeposited Batch UDF-104', emphasis: true },
+          'Collections Desk',
+          'Stale Since Yesterday',
+          'Cashier Lead',
+          { text: 'PHP 17,500', emphasis: true, align: 'right' },
+          { text: 'Overdue', tone: 'red' },
         ],
       },
     ],
   },
   {
-    id: 'bank-feeds',
-    label: 'Bank Feeds',
-    description: 'Monitor connected accounts, feed health, sync history, and feed rules.',
-    searchPlaceholder: 'Search by bank account, connector, sync token, or rule',
-    quickFilters: ['Healthy Feeds', 'Sync Delays', 'Rule Changes', 'Disconnected'],
+    id: 'bounced-payments',
+    label: 'Bounced Payments',
+    description: 'Track failed incoming payments, reversals, charges, and resolution progress.',
+    searchPlaceholder: 'Search case id, invoice no., payer, or reversal reference',
+    quickFilters: ['Open Cases', 'Awaiting Reversal', 'Charges Applied', 'Resolved'],
     actions: [
-      { label: 'Connect Bank Feed', icon: 'plus', variant: 'primary' },
-      { label: 'Sync Now', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export Feed Log', icon: 'download', variant: 'ghost' },
+      { label: 'Create Bounce Case', icon: 'plus', variant: 'primary' },
+      { label: 'Post Reversal', icon: 'refresh', variant: 'secondary' },
+      { label: 'Export Case Log', icon: 'download', variant: 'ghost' },
     ],
     metrics: [
-      { label: 'Connected Accounts', value: '6', change: '5 healthy / 1 delayed', trend: 'up' },
-      { label: 'Last Sync Success', value: '09:26 AM', change: '4 min average latency', trend: 'up' },
-      { label: 'Feed Rules Active', value: '18', change: '3 auto-classify rules edited', trend: 'neutral' },
-      { label: 'Disconnected Feeds', value: '1', change: 'Payroll account token expired', trend: 'down' },
+      { label: 'Open Bounce Cases', value: '6', change: '2 require same-day reversal', trend: 'down' },
+      { label: 'Bank Charges', value: 'PHP 3,250', change: 'Month to date', trend: 'up' },
+      { label: 'Recovery Rate', value: '71%', change: 'Recovered within 14 days', trend: 'up' },
+      { label: 'Customer Follow-ups', value: '4', change: 'Pending collections outreach', trend: 'neutral' },
     ],
-    tableTitle: 'Connected Feed Accounts',
-    tableDescription: 'Operational status of each connected bank feed and the rules attached to it.',
-    columns: ['Bank Account', 'Connector', 'Last Sync', 'Imported Rows', 'Rule Set', 'Health'],
+    tableTitle: 'Bounced Payment Caseboard',
+    tableDescription: 'Track every failed payment from bank notification to reversal, charge posting, and recovery handling.',
+    columns: ['Case ID', 'Customer', 'Original Receipt', 'Bounce Reason', 'Exposure', 'Case Status'],
     rows: [
       {
-        id: 'feed-1',
+        id: 'bpc-1',
         cells: [
-          { text: 'BDO Operations', emphasis: true },
-          'Plaid via Treasury Hub',
-          '09:26 AM',
-          '127',
-          'Collections + Refund Rules',
-          { text: 'Healthy', tone: 'green' },
+          { text: 'BNC-2026-042', emphasis: true },
+          'Harbor Training Ltd.',
+          'RCT-2026-1183',
+          'Insufficient funds',
+          { text: 'PHP 24,500', emphasis: true, align: 'right' },
+          { text: 'Awaiting Reversal', tone: 'red' },
         ],
       },
       {
-        id: 'feed-2',
+        id: 'bpc-2',
         cells: [
-          { text: 'Metrobank Main', emphasis: true },
-          'CSV Bridge',
-          '09:02 AM',
-          '91',
-          'Manual Review Fallback',
-          { text: 'Healthy', tone: 'green' },
+          { text: 'BNC-2026-041', emphasis: true },
+          'Blue Anchor Marine',
+          'RCT-2026-1179',
+          'Account closed',
+          { text: 'PHP 12,000', emphasis: true, align: 'right' },
+          { text: 'Collections Follow-up', tone: 'amber' },
         ],
       },
       {
-        id: 'feed-3',
+        id: 'bpc-3',
         cells: [
-          { text: 'UnionBank Payroll', emphasis: true },
-          'Direct API',
-          'Yesterday 05:11 PM',
-          '0',
-          'Payroll Settlement Rules',
-          { text: 'Token Expired', tone: 'red' },
-        ],
-      },
-      {
-        id: 'feed-4',
-        cells: [
-          { text: 'RCBC Reserve', emphasis: true },
-          'Direct API',
-          '08:55 AM',
-          '14',
-          'Treasury Transfer Rules',
-          { text: 'Sync Delay', tone: 'amber' },
+          { text: 'BNC-2026-039', emphasis: true },
+          'SM Shipping Corp.',
+          'RCT-2026-1164',
+          'Payment recalled',
+          { text: 'PHP 86,500', emphasis: true, align: 'right' },
+          { text: 'Resolved', tone: 'green' },
         ],
       },
     ],
@@ -236,7 +218,7 @@ function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondar
   return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
 }
 
-function getMetricTone(trend: BankTransactionMetric['trend'] | StaticMetric['trend']) {
+function getMetricTone(trend: DepositMetric['trend'] | StaticMetric['trend']) {
   if (trend === 'down') return 'text-red-600 bg-red-50';
   if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
   return 'text-green-600 bg-green-50';
@@ -251,11 +233,6 @@ function toggleFilterValue(values: string[], value: string) {
   return values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 }
 
-function getMetadataNote(value: Record<string, unknown> | null | undefined) {
-  if (!value || typeof value.manualNote !== 'string') return '';
-  return value.manualNote.trim();
-}
-
 function toDateInputValue(value: string | null | undefined) {
   if (!value) return '';
   const date = new Date(value);
@@ -263,67 +240,37 @@ function toDateInputValue(value: string | null | undefined) {
   return date.toISOString().slice(0, 10);
 }
 
-function createEmptyForm(): BankTransactionFormState {
+function createEmptyForm(): DepositFormState {
   const today = new Date().toISOString().slice(0, 10);
   return {
+    depositNumber: '',
+    depositDate: today,
     bankAccount: '',
-    transactionDate: today,
-    valueDate: '',
-    description: '',
-    referenceNumber: '',
-    amountIn: '0',
-    amountOut: '0',
-    runningBalance: '',
-    matchStatus: 'unmatched',
-    matchedEntityType: '',
-    matchedEntityId: '',
+    sourceAccount: '',
+    amount: '0',
     notes: '',
-    preservedMetadata: null,
   };
 }
 
-function buildFormFromDetail(detail: BankTransactionDetail): BankTransactionFormState {
+function buildFormFromDetail(detail: DepositDetail): DepositFormState {
   return {
+    depositNumber: detail.depositNumber || '',
+    depositDate: toDateInputValue(detail.depositDate),
     bankAccount: detail.bankAccountId || '',
-    transactionDate: toDateInputValue(detail.transactionDate),
-    valueDate: toDateInputValue(detail.valueDate),
-    description: detail.description || '',
-    referenceNumber: detail.referenceNumber || '',
-    amountIn: String(detail.amountIn || 0),
-    amountOut: String(detail.amountOut || 0),
-    runningBalance: detail.runningBalance || detail.runningBalance === 0 ? String(detail.runningBalance) : '',
-    matchStatus: detail.matchStatus || 'unmatched',
-    matchedEntityType: detail.matchedEntityType || '',
-    matchedEntityId: detail.matchedEntityId || '',
-    notes: getMetadataNote(detail.metadata),
-    preservedMetadata: detail.metadata || null,
+    sourceAccount: detail.sourceAccountId || '',
+    amount: String(detail.amount || 0),
+    notes: detail.notes || '',
   };
 }
 
-function toMutationInput(formState: BankTransactionFormState): BankTransactionMutationInput {
-  const trimmedNote = formState.notes.trim();
-  const metadata = { ...(formState.preservedMetadata || {}) } as Record<string, unknown>;
-  if (trimmedNote) {
-    metadata.manualNote = trimmedNote;
-  } else {
-    delete metadata.manualNote;
-  }
-
-  const normalizedMetadata = Object.keys(metadata).length > 0 ? metadata : null;
-
+function toMutationInput(formState: DepositFormState): DepositMutationInput {
   return {
+    depositNumber: formState.depositNumber.trim() || null,
+    depositDate: formState.depositDate,
     bankAccount: formState.bankAccount,
-    transactionDate: formState.transactionDate,
-    valueDate: formState.valueDate || null,
-    description: formState.description.trim(),
-    referenceNumber: formState.referenceNumber.trim() || null,
-    amountIn: Number(formState.amountIn || 0),
-    amountOut: Number(formState.amountOut || 0),
-    runningBalance: formState.runningBalance === '' ? null : Number(formState.runningBalance),
-    matchStatus: formState.matchStatus,
-    matchedEntityType: formState.matchedEntityType || null,
-    matchedEntityId: formState.matchedEntityId.trim() || null,
-    metadata: normalizedMetadata,
+    sourceAccount: formState.sourceAccount,
+    amount: Number(formState.amount || 0),
+    notes: formState.notes.trim() || null,
   };
 }
 
@@ -382,15 +329,7 @@ function SlideOver({
   );
 }
 
-function FormField({
-  label,
-  children,
-  required,
-}: {
-  label: string;
-  children: React.ReactNode;
-  required?: boolean;
-}) {
+function FormField({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-gray-700">
@@ -460,15 +399,7 @@ function Select({
   );
 }
 
-function TextArea({
-  value,
-  onChange,
-  rows = 3,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  rows?: number;
-}) {
+function TextArea({ value, onChange, rows = 3 }: { value: string; onChange: (value: string) => void; rows?: number }) {
   return (
     <textarea
       value={value}
@@ -543,7 +474,7 @@ function LoadingSkeleton({ columnCount = 6 }: { columnCount?: number }) {
   );
 }
 
-function renderCell(cell: BankTransactionCell, index: number) {
+function renderCell(cell: DepositCell, index: number) {
   if (typeof cell === 'string') {
     return (
       <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
@@ -580,13 +511,6 @@ function renderCell(cell: BankTransactionCell, index: number) {
   );
 }
 
-function getStaticActionIcon(icon: StaticTab['actions'][number]['icon']) {
-  if (icon === 'upload') return Upload;
-  if (icon === 'download') return Download;
-  if (icon === 'plus') return Plus;
-  return RefreshCw;
-}
-
 function StaticTabPanel({ tab }: { tab: StaticTab }) {
   return (
     <div className="space-y-6">
@@ -594,28 +518,20 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">{tab.label}</h2>
           <p className="text-sm text-gray-600">{tab.description}</p>
-          <p className="text-sm text-gray-500">{tab.rows.length} matching rows</p>
+          <p className="text-sm text-gray-500">{tab.rows.length} sample rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {tab.actions.map((action) => {
-            const Icon = getStaticActionIcon(action.icon);
-            return (
-              <button
-                key={`${tab.id}-${action.label}`}
-                type="button"
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses(action.variant)}`}
-              >
-                <Icon className="h-4 w-4" />
-                {action.label}
-              </button>
-            );
-          })}
+          {tab.actions.map((action) => (
+            <button key={action.label} type="button" className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses(action.variant)}`}>
+              {action.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {tab.metrics.map((metric) => (
-          <div key={`${tab.id}-${metric.label}`}>
+          <div key={metric.label}>
             <MetricCard label={metric.label} value={metric.value} change={metric.change} trend={metric.trend} />
           </div>
         ))}
@@ -624,13 +540,9 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-            <div className="relative min-w-0 flex-1 max-w-xl">
+            <div className="relative min-w-0 max-w-xl flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder={tab.searchPlaceholder}
-                className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
+              <input type="text" placeholder={tab.searchPlaceholder} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
             </div>
             <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
               <Filter className="h-4 w-4" />
@@ -639,11 +551,7 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
           </div>
           <div className="flex flex-wrap gap-2">
             {tab.quickFilters.map((filter, index) => (
-              <button
-                key={`${tab.id}-${filter}`}
-                type="button"
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
+              <button key={filter} type="button" className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                 {filter}
               </button>
             ))}
@@ -668,7 +576,7 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
                 <thead className="bg-gray-50">
                   <tr>
                     {tab.columns.map((column) => (
-                      <th key={`${tab.id}-${column}`} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${column === 'Amount' || column === 'Exposure' ? 'text-right' : 'text-left'}`}>
                         {column}
                       </th>
                     ))}
@@ -680,8 +588,8 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
                     <tr key={row.id} className="hover:bg-gray-50">
                       {row.cells.map((cell, index) => renderCell(cell, index))}
                       <td className="px-4 py-3 text-right">
-                        <button type="button" className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
-                          View
+                        <button type="button" className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
+                          <Eye className="h-4 w-4" />
                         </button>
                       </td>
                     </tr>
@@ -696,44 +604,49 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
   );
 }
 
-function BankTransactionsPanel() {
-  const [data, setData] = useState<BankTransactionRegisterResponse | null>(null);
+function DepositsPanel() {
+  const [data, setData] = useState<DepositRegisterResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<BankTransactionFilterState>({ statuses: [], directions: [], coverageStates: [] });
-  const [draftFilters, setDraftFilters] = useState<BankTransactionFilterState>({ statuses: [], directions: [], coverageStates: [] });
+  const [filters, setFilters] = useState<DepositFilterState>({ statuses: [], bankAccounts: [], coverageStates: [] });
+  const [draftFilters, setDraftFilters] = useState<DepositFilterState>({ statuses: [], bankAccounts: [], coverageStates: [] });
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  const [viewDetail, setViewDetail] = useState<BankTransactionDetail | null>(null);
+  const [viewDetail, setViewDetail] = useState<DepositDetail | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isViewLoading, setIsViewLoading] = useState(false);
 
-  const [createForm, setCreateForm] = useState<BankTransactionFormState>(createEmptyForm());
+  const [createForm, setCreateForm] = useState<DepositFormState>(createEmptyForm());
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreateSubmitting, setIsCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<BankTransactionFormState>(createEmptyForm());
+  const [editForm, setEditForm] = useState<DepositFormState>(createEmptyForm());
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const [deleteTarget, setDeleteTarget] = useState<BankTransactionRow | null>(null);
-  const [deleteDetail, setDeleteDetail] = useState<BankTransactionDetail | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DepositRow | null>(null);
+  const [deleteDetail, setDeleteDetail] = useState<DepositDetail | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const filterCount = filters.statuses.length + filters.directions.length + filters.coverageStates.length;
+  const [postTarget, setPostTarget] = useState<DepositDetail | null>(null);
+  const [isPostOpen, setIsPostOpen] = useState(false);
+  const [isPostSubmitting, setIsPostSubmitting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
 
-  const fetchData = useCallback(
+  const filterCount = filters.statuses.length + filters.bankAccounts.length + filters.coverageStates.length;
+
+  const fetchRegister = useCallback(
     async ({
       search,
       page,
@@ -742,23 +655,23 @@ function BankTransactionsPanel() {
     }: {
       search: string;
       page: number;
-      nextFilters: BankTransactionFilterState;
+      nextFilters: DepositFilterState;
       nextQuickFilters: string[];
     }) => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getBankTransactions({
+        const response = await getDeposits({
           search,
           page,
           statuses: nextFilters.statuses,
-          directions: nextFilters.directions,
+          bankAccounts: nextFilters.bankAccounts,
           coverageStates: nextFilters.coverageStates,
           quickFilters: nextQuickFilters,
         });
         setData(response);
       } catch (fetchError) {
-        setError(fetchError instanceof Error ? fetchError.message : 'Unable to load bank transactions.');
+        setError(fetchError instanceof Error ? fetchError.message : 'Unable to load deposits.');
       } finally {
         setIsLoading(false);
       }
@@ -767,16 +680,16 @@ function BankTransactionsPanel() {
   );
 
   useEffect(() => {
-    void fetchData({
+    void fetchRegister({
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
       nextQuickFilters: quickFilters,
     });
-  }, [currentPage, fetchData, filters, quickFilters, submittedSearch]);
+  }, [currentPage, fetchRegister, filters, quickFilters, submittedSearch]);
 
   const handleRefresh = () => {
-    void fetchData({
+    void fetchRegister({
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
@@ -788,7 +701,7 @@ function BankTransactionsPanel() {
     event.preventDefault();
     setSubmittedSearch(searchInput);
     setCurrentPage(1);
-    void fetchData({
+    void fetchRegister({
       search: searchInput,
       page: 1,
       nextFilters: filters,
@@ -803,23 +716,23 @@ function BankTransactionsPanel() {
 
   const handleExport = () => {
     if (!data?.rows.length) return;
-    const headers = ['Date', 'Bank Account', 'Reference', 'Counterparty', 'Amount', 'Status', 'Direction', 'Matched Entity'];
+    const headers = ['Batch No.', 'Deposit Date', 'Bank Account', 'Source Account', 'Amount', 'Status', 'Journal', 'Prepared By'];
     const csvRows = data.rows.map((row) => [
-      row.transactionDateLabel,
+      row.depositNumber,
+      row.depositDateLabel,
       row.bankAccountLabel,
-      row.referenceNumber || '-',
-      row.description || '-',
-      row.netAmountLabel,
-      row.matchStatusLabel,
-      row.directionLabel,
-      row.hasMatchLink ? `${row.matchedEntityTypeLabel || row.matchedEntityType} ${row.matchedEntityId}` : '-',
+      row.sourceAccountLabel,
+      row.amountLabel,
+      row.statusLabel,
+      row.postedJournalEntryLabel,
+      row.preparedByLabel,
     ]);
     const csvContent = [headers, ...csvRows].map((row) => row.map((cell) => escapeCsvValue(cell)).join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'bank-transactions.csv';
+    link.download = 'cash-movement-deposits.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -831,10 +744,10 @@ function BankTransactionsPanel() {
     setIsViewLoading(true);
     setViewDetail(null);
     try {
-      const detail = await getBankTransactionDetail(id);
+      const detail = await getDepositDetail(id);
       setViewDetail(detail);
     } catch (detailError) {
-      setError(detailError instanceof Error ? detailError.message : 'Unable to load transaction detail.');
+      setError(detailError instanceof Error ? detailError.message : 'Unable to load deposit detail.');
     } finally {
       setIsViewLoading(false);
     }
@@ -851,17 +764,12 @@ function BankTransactionsPanel() {
     setCreateError(null);
     setIsCreateSubmitting(true);
     try {
-      await createBankTransaction(toMutationInput(createForm));
+      await createDeposit(toMutationInput(createForm));
       setIsCreateOpen(false);
       setCurrentPage(1);
-      await fetchData({
-        search: submittedSearch,
-        page: 1,
-        nextFilters: filters,
-        nextQuickFilters: quickFilters,
-      });
+      await fetchRegister({ search: submittedSearch, page: 1, nextFilters: filters, nextQuickFilters: quickFilters });
     } catch (submissionError) {
-      setCreateError(submissionError instanceof Error ? submissionError.message : 'Unable to create bank transaction.');
+      setCreateError(submissionError instanceof Error ? submissionError.message : 'Unable to create deposit.');
     } finally {
       setIsCreateSubmitting(false);
     }
@@ -873,10 +781,10 @@ function BankTransactionsPanel() {
     setIsEditOpen(true);
     setIsEditLoading(true);
     try {
-      const detail = await getBankTransactionDetail(id);
+      const detail = await getDepositDetail(id);
       setEditForm(buildFormFromDetail(detail));
     } catch (detailError) {
-      setEditError(detailError instanceof Error ? detailError.message : 'Unable to load transaction detail.');
+      setEditError(detailError instanceof Error ? detailError.message : 'Unable to load deposit detail.');
     } finally {
       setIsEditLoading(false);
     }
@@ -888,28 +796,28 @@ function BankTransactionsPanel() {
     setEditError(null);
     setIsEditSubmitting(true);
     try {
-      await updateBankTransaction(editingId, toMutationInput(editForm));
+      await updateDeposit(editingId, toMutationInput(editForm));
       setIsEditOpen(false);
       setEditingId(null);
       handleRefresh();
     } catch (submissionError) {
-      setEditError(submissionError instanceof Error ? submissionError.message : 'Unable to update bank transaction.');
+      setEditError(submissionError instanceof Error ? submissionError.message : 'Unable to update deposit.');
     } finally {
       setIsEditSubmitting(false);
     }
   };
 
-  const handleOpenDelete = async (row: BankTransactionRow) => {
+  const handleOpenDelete = async (row: DepositRow) => {
     setDeleteTarget(row);
     setDeleteDetail(null);
     setDeleteError(null);
     setIsDeleteOpen(true);
     setIsDeleteLoading(true);
     try {
-      const detail = await getBankTransactionDetail(row.id);
+      const detail = await getDepositDetail(row.id);
       setDeleteDetail(detail);
     } catch (detailError) {
-      setDeleteError(detailError instanceof Error ? detailError.message : 'Unable to load transaction detail.');
+      setDeleteError(detailError instanceof Error ? detailError.message : 'Unable to load deposit detail.');
     } finally {
       setIsDeleteLoading(false);
     }
@@ -920,40 +828,62 @@ function BankTransactionsPanel() {
     setIsDeleteSubmitting(true);
     setDeleteError(null);
     try {
-      await deleteBankTransaction(deleteTarget.id);
+      await deleteDeposit(deleteTarget.id);
       setIsDeleteOpen(false);
       setDeleteTarget(null);
       setDeleteDetail(null);
       handleRefresh();
     } catch (deletionError) {
-      setDeleteError(deletionError instanceof Error ? deletionError.message : 'Unable to delete bank transaction.');
+      setDeleteError(deletionError instanceof Error ? deletionError.message : 'Unable to delete deposit.');
     } finally {
       setIsDeleteSubmitting(false);
     }
   };
 
-  const bankAccountOptions = [{ label: 'Select bank account', value: '' }].concat(
-    (data?.referenceData.bankAccounts || [])
-      .filter((account) => account.isActive)
-      .map((account) => ({
-        label: `${account.accountName || 'Unnamed bank account'}${account.accountNumberMasked ? ` (${account.accountNumberMasked})` : ''}`,
-        value: String(account.id),
-      })),
-  );
+  const handleOpenPost = async (row: DepositRow) => {
+    setPostError(null);
+    setIsPostOpen(true);
+    try {
+      const detail = await getDepositDetail(row.id);
+      setPostTarget(detail);
+    } catch (detailError) {
+      setPostError(detailError instanceof Error ? detailError.message : 'Unable to load deposit detail.');
+    }
+  };
 
-  const matchedEntityTypeOptions = [{ label: 'No matched entity', value: '' }].concat(
-    (data?.referenceData.matchedEntityTypes || []).map((entityType) => ({
-      label: entityType.label,
-      value: entityType.value,
+  const handleConfirmPost = async () => {
+    if (!postTarget) return;
+    setIsPostSubmitting(true);
+    setPostError(null);
+    try {
+      await postDeposit(postTarget.id);
+      setIsPostOpen(false);
+      setPostTarget(null);
+      handleRefresh();
+    } catch (postingError) {
+      setPostError(postingError instanceof Error ? postingError.message : 'Unable to post deposit.');
+    } finally {
+      setIsPostSubmitting(false);
+    }
+  };
+
+  const bankAccountOptions = [{ label: 'Select bank account', value: '' }].concat(
+    (data?.referenceData.bankAccounts || []).map((account) => ({
+      label: `${account.accountName || account.bankName || 'Unnamed bank account'}${account.accountNumberMasked ? ` (${account.accountNumberMasked})` : ''}`,
+      value: String(account.id),
     })),
   );
 
-  const liveColumns = data?.meta.columns || LIVE_TAB.columns;
-  const mutableIds = new Set(data?.flags.mutableTransactionIds || []);
+  const sourceAccountOptions = [{ label: 'Select source account', value: '' }].concat(
+    (data?.referenceData.sourceAccounts || []).map((account) => ({
+      label: `${account.code ? `${account.code} - ` : ''}${account.name || `Account ${account.id}`}`,
+      value: String(account.id),
+    })),
+  );
 
   const renderForm = (
-    formState: BankTransactionFormState,
-    setFormState: React.Dispatch<React.SetStateAction<BankTransactionFormState>>,
+    formState: DepositFormState,
+    setFormState: React.Dispatch<React.SetStateAction<DepositFormState>>,
     submitLabel: string,
     isSubmitting: boolean,
     errorMessage: string | null,
@@ -969,77 +899,31 @@ function BankTransactionsPanel() {
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
+        <FormField label="Deposit Batch No.">
+          <Input value={formState.depositNumber} onChange={(value) => setFormState((previous) => ({ ...previous, depositNumber: value }))} placeholder="Auto-generated when blank" />
+        </FormField>
+        <FormField label="Deposit Date" required>
+          <Input type="date" value={formState.depositDate} onChange={(value) => setFormState((previous) => ({ ...previous, depositDate: value }))} required />
+        </FormField>
         <FormField label="Bank Account" required>
-          <Select
-            value={formState.bankAccount}
-            onChange={(value) => setFormState((previous) => ({ ...previous, bankAccount: value }))}
-            options={bankAccountOptions}
-            required
-          />
+          <Select value={formState.bankAccount} onChange={(value) => setFormState((previous) => ({ ...previous, bankAccount: value }))} options={bankAccountOptions} required />
         </FormField>
-        <FormField label="Match Status" required>
-          <Select
-            value={formState.matchStatus}
-            onChange={(value) => setFormState((previous) => ({ ...previous, matchStatus: value }))}
-            options={(data?.filterOptions.statuses || []).map((status) => ({ label: status.label, value: status.value }))}
-            required
-          />
+        <FormField label="Source Account" required>
+          <Select value={formState.sourceAccount} onChange={(value) => setFormState((previous) => ({ ...previous, sourceAccount: value }))} options={sourceAccountOptions} required />
         </FormField>
-        <FormField label="Transaction Date" required>
-          <Input type="date" value={formState.transactionDate} onChange={(value) => setFormState((previous) => ({ ...previous, transactionDate: value }))} required />
-        </FormField>
-        <FormField label="Value Date">
-          <Input type="date" value={formState.valueDate} onChange={(value) => setFormState((previous) => ({ ...previous, valueDate: value }))} />
-        </FormField>
-        <FormField label="Reference Number">
-          <Input value={formState.referenceNumber} onChange={(value) => setFormState((previous) => ({ ...previous, referenceNumber: value }))} placeholder="e.g. BNK-240531-019" />
-        </FormField>
-        <FormField label="Matched Entity Type">
-          <Select
-            value={formState.matchedEntityType}
-            onChange={(value) => setFormState((previous) => ({ ...previous, matchedEntityType: value }))}
-            options={matchedEntityTypeOptions}
-          />
-        </FormField>
-        <FormField label="Amount In" required>
-          <Input type="number" value={formState.amountIn} onChange={(value) => setFormState((previous) => ({ ...previous, amountIn: value }))} required />
-        </FormField>
-        <FormField label="Amount Out" required>
-          <Input type="number" value={formState.amountOut} onChange={(value) => setFormState((previous) => ({ ...previous, amountOut: value }))} required />
-        </FormField>
-        <FormField label="Running Balance">
-          <Input type="number" value={formState.runningBalance} onChange={(value) => setFormState((previous) => ({ ...previous, runningBalance: value }))} />
-        </FormField>
-        <FormField label="Matched Entity ID">
-          <Input value={formState.matchedEntityId} onChange={(value) => setFormState((previous) => ({ ...previous, matchedEntityId: value }))} placeholder="Enter linked record ID" />
+        <FormField label="Batch Amount" required>
+          <Input type="number" value={formState.amount} onChange={(value) => setFormState((previous) => ({ ...previous, amount: value }))} required />
         </FormField>
       </div>
-
-      <FormField label="Counterparty / Description" required>
-        <Input value={formState.description} onChange={(value) => setFormState((previous) => ({ ...previous, description: value }))} required />
-      </FormField>
-
-      <FormField label="Notes / Memo">
-        <TextArea value={formState.notes} onChange={(value) => setFormState((previous) => ({ ...previous, notes: value }))} rows={4} />
-      </FormField>
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <h4 className="text-sm font-semibold text-gray-900">Movement Preview</h4>
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Net Movement</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{Number(formState.amountIn || 0) - Number(formState.amountOut || 0)}</p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Entity Link</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{formState.matchedEntityType && formState.matchedEntityId ? 'Ready' : 'Not Linked'}</p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Running Balance</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{formState.runningBalance || '-'}</p>
-          </div>
-        </div>
+        <h4 className="text-sm font-semibold text-gray-900">Posting Guidance</h4>
+        <p className="mt-1 text-sm text-gray-600">Draft deposits can be reviewed and edited here, then posted later from the table using the dedicated Post action.</p>
       </div>
+
+      <FormField label="Notes">
+        <TextArea value={formState.notes} onChange={(value) => setFormState((previous) => ({ ...previous, notes: value }))} rows={4} />
+      </FormField>
 
       <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
         <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
@@ -1056,18 +940,18 @@ function BankTransactionsPanel() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{data?.meta.label || LIVE_TAB.label}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{data?.meta.label || 'Deposits'}</h2>
           <p className="text-sm text-gray-600">{data?.meta.description || LIVE_TAB.description}</p>
           <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" />
-            Refresh Feed
+            Refresh Deposits
           </button>
           <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
             <Plus className="h-4 w-4" />
-            Create Manual Transaction
+            New Deposit Batch
           </button>
         </div>
       </div>
@@ -1132,10 +1016,10 @@ function BankTransactionsPanel() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                  <p className="mt-1 text-sm text-gray-600">Select as many filter values as needed. Bank transaction filters widen results using OR behavior across all checked options.</p>
+                  <p className="mt-1 text-sm text-gray-600">Select as many filter values as needed. Deposits filters widen results using OR behavior across all checked options.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], directions: [], coverageStates: [] }); setFilters({ statuses: [], directions: [], coverageStates: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], bankAccounts: [], coverageStates: [] }); setFilters({ statuses: [], bankAccounts: [], coverageStates: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">
                     Clear all
                   </button>
                   <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -1163,12 +1047,12 @@ function BankTransactionsPanel() {
                 </div>
 
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Direction</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Bank Account</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {(data?.filterOptions.directions || []).map((option) => {
-                      const isSelected = draftFilters.directions.includes(option.value);
+                    {(data?.filterOptions.bankAccounts || []).map((option) => {
+                      const isSelected = draftFilters.bankAccounts.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, directions: toggleFilterValue(previous.directions, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, bankAccounts: toggleFilterValue(previous.bankAccounts, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
                           {option.label}
                         </button>
                       );
@@ -1195,8 +1079,8 @@ function BankTransactionsPanel() {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'Incoming Transaction Queue'}</h3>
-              <p className="text-sm text-gray-600">{data?.meta.tableDescription || 'Operational queue for bank transactions waiting to be matched, reviewed, or maintained.'}</p>
+              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'Deposit Register'}</h3>
+              <p className="text-sm text-gray-600">{data?.meta.tableDescription || 'Live register of deposit records and their posting progress.'}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
               <span>{data?.totals.filteredRows ?? 0} matching rows</span>
@@ -1215,7 +1099,7 @@ function BankTransactionsPanel() {
           ) : null}
 
           {isLoading ? (
-            <LoadingSkeleton columnCount={liveColumns.length + 1} />
+            <LoadingSkeleton columnCount={(data?.meta.columns || []).length + 1 || 7} />
           ) : (
             <>
               <div className="overflow-hidden rounded-xl border border-gray-200">
@@ -1223,12 +1107,12 @@ function BankTransactionsPanel() {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        {liveColumns.map((column) => {
-                          const columnLabel = typeof column === 'string' ? column : column.label;
+                        {(data?.meta.columns || ['Batch No.', 'Deposit Date', 'Bank Account', 'Source Account', { label: 'Batch Amount', align: 'right' }, 'Status']).map((column) => {
+                          const label = typeof column === 'string' ? column : column.label;
                           const align = typeof column === 'string' ? 'left' : column.align;
                           return (
-                            <th key={columnLabel} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
-                              {columnLabel}
+                            <th key={label} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+                              {label}
                             </th>
                           );
                         })}
@@ -1245,10 +1129,13 @@ function BankTransactionsPanel() {
                                 <button type="button" onClick={() => handleOpenView(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Edit' : 'Matched transactions cannot be edited directly'}>
+                                <button type="button" onClick={() => handleOpenPost(row)} disabled={!row.isDraft} className="inline-flex items-center gap-1 rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40" title={row.isDraft ? 'Post deposit' : 'Only draft deposits can be posted'}>
+                                  <SendHorizonal className="h-4 w-4" />
+                                </button>
+                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!row.isDraft} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40" title={row.isDraft ? 'Edit' : 'Only draft deposits can be edited'}>
                                   <Edit className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => handleOpenDelete(row)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Delete' : 'Matched transactions cannot be deleted directly'}>
+                                <button type="button" onClick={() => handleOpenDelete(row)} disabled={!row.isDraft} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40" title={row.isDraft ? 'Delete' : 'Only draft deposits can be deleted'}>
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
@@ -1257,8 +1144,8 @@ function BankTransactionsPanel() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={liveColumns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">
-                            No bank transactions match the current search and filter combination.
+                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">
+                            No deposit rows match the current search and filter combination.
                           </td>
                         </tr>
                       )}
@@ -1285,23 +1172,23 @@ function BankTransactionsPanel() {
         </div>
       </div>
 
-      <SlideOver isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Bank Transaction Detail" description="Review the selected bank transaction including bank account mapping, movement, and match status.">
+      <SlideOver isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Deposit Detail" description="Review posting state, journal linkage, bank destination, and source clearing account for the selected deposit batch.">
         {isViewLoading ? (
           <LoadingSkeleton columnCount={2} />
         ) : viewDetail ? (
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               {[
+                ['Deposit Batch No.', viewDetail.depositNumber || '-'],
+                ['Deposit Date', viewDetail.depositDateLabel],
                 ['Bank Account', viewDetail.bankAccountLabel],
-                ['Bank Account Type', viewDetail.bankAccountType || '-'],
-                ['Ledger Account', viewDetail.bankLedgerAccountLabel || '-'],
-                ['Transaction Date', viewDetail.transactionDateLabel],
-                ['Value Date', viewDetail.valueDateLabel],
-                ['Reference Number', viewDetail.referenceNumber || '-'],
-                ['Direction', viewDetail.directionLabel],
-                ['Match Status', viewDetail.matchStatusLabel],
-                ['Matched Entity Type', viewDetail.matchedEntityTypeLabel || '-'],
-                ['Matched Entity ID', viewDetail.matchedEntityId || '-'],
+                ['Bank Ledger Account', viewDetail.bankLedgerAccountLabel || '-'],
+                ['Source Account', viewDetail.sourceAccountLabel],
+                ['Amount', viewDetail.amountLabel],
+                ['Status', viewDetail.statusLabel],
+                ['Journal Link', viewDetail.postedJournalEntryLabel],
+                ['Prepared By', viewDetail.preparedByLabel],
+                ['Updated By', viewDetail.updatedByLabel],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
@@ -1310,27 +1197,9 @@ function BankTransactionsPanel() {
               ))}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                ['Amount In', viewDetail.amountInLabel],
-                ['Amount Out', viewDetail.amountOutLabel],
-                ['Net Movement', viewDetail.netAmountLabel],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{value}</p>
-                </div>
-              ))}
-            </div>
-
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h4 className="text-sm font-semibold text-gray-900">Counterparty / Description</h4>
-              <p className="mt-2 text-sm text-gray-700">{viewDetail.description || '-'}</p>
-            </div>
-
-            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h4 className="text-sm font-semibold text-gray-900">Notes / Memo</h4>
-              <p className="mt-2 text-sm text-gray-700">{getMetadataNote(viewDetail.metadata) || '-'}</p>
+              <h4 className="text-sm font-semibold text-gray-900">Notes</h4>
+              <p className="mt-2 text-sm text-gray-700">{viewDetail.notes || '-'}</p>
             </div>
           </div>
         ) : (
@@ -1338,11 +1207,11 @@ function BankTransactionsPanel() {
         )}
       </SlideOver>
 
-      <SlideOver isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create Manual Transaction" description="Create a manual bank transaction entry using the current banking-cash register contract.">
-        {renderForm(createForm, setCreateForm, 'Create Transaction', isCreateSubmitting, createError, () => setIsCreateOpen(false), handleCreateSubmit)}
+      <SlideOver isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="New Deposit Batch" description="Create a draft deposit record using the real deposit collection in the accounting backend.">
+        {renderForm(createForm, setCreateForm, 'Create Deposit', isCreateSubmitting, createError, () => setIsCreateOpen(false), handleCreateSubmit)}
       </SlideOver>
 
-      <SlideOver isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Bank Transaction" description="Update the selected bank transaction before it becomes a locked matched item.">
+      <SlideOver isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Deposit Batch" description="Update a draft deposit before it is posted into journals.">
         {isEditLoading ? (
           <LoadingSkeleton columnCount={2} />
         ) : (
@@ -1350,7 +1219,7 @@ function BankTransactionsPanel() {
         )}
       </SlideOver>
 
-      <SlideOver isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Bank Transaction" description="Delete this bank transaction only when it is not already linked to another accounting entity.">
+      <SlideOver isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Deposit Batch" description="Delete this draft deposit record only if it has not been posted.">
         <div className="space-y-6">
           {deleteError ? (
             <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -1360,7 +1229,7 @@ function BankTransactionsPanel() {
           ) : null}
 
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <p className="font-medium">Delete {deleteTarget?.referenceNumber || deleteTarget?.description || 'this transaction'}?</p>
+            <p className="font-medium">Delete {deleteTarget?.depositNumber || 'this deposit batch'}?</p>
             <p className="mt-1">This action cannot be undone.</p>
           </div>
 
@@ -1371,23 +1240,9 @@ function BankTransactionsPanel() {
               {!deleteDetail.usageSummary.canDelete ? (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                   <p className="font-medium">Delete is blocked.</p>
-                  <p className="mt-1">This transaction is already linked to a matched accounting entity.</p>
+                  <p className="mt-1">{deleteDetail.usageSummary.deleteBlockedReason || 'Posted or voided deposits cannot be deleted.'}</p>
                 </div>
               ) : null}
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="flex justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-500">Bank Account</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.bankAccountLabel}</span>
-                </div>
-                <div className="mt-3 flex justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-500">Transaction Date</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.transactionDateLabel}</span>
-                </div>
-                <div className="mt-3 flex justify-between">
-                  <span className="text-sm text-gray-500">Net Movement</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.netAmountLabel}</span>
-                </div>
-              </div>
             </div>
           ) : null}
 
@@ -1396,7 +1251,59 @@ function BankTransactionsPanel() {
               Cancel
             </button>
             <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting || (deleteDetail ? !deleteDetail.usageSummary.canDelete : true)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
-              {isDeleteSubmitting ? 'Deleting...' : 'Delete Transaction'}
+              {isDeleteSubmitting ? 'Deleting...' : 'Delete Deposit'}
+            </button>
+          </div>
+        </div>
+      </SlideOver>
+
+      <SlideOver isOpen={isPostOpen} onClose={() => setIsPostOpen(false)} title="Post Deposit Batch" description="Post this draft deposit into journals using the existing accounting banking service.">
+        <div className="space-y-6">
+          {postError ? (
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              {postError}
+            </div>
+          ) : null}
+
+          {postTarget ? (
+            <>
+              {!postTarget.usageSummary.canPost ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <p className="font-medium">Post is blocked.</p>
+                  <p className="mt-1">{postTarget.usageSummary.postBlockedReason || 'This deposit cannot be posted yet.'}</p>
+                </div>
+              ) : null}
+
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-500">Deposit Batch</span>
+                  <span className="text-sm font-medium text-gray-900">{postTarget.depositNumber}</span>
+                </div>
+                <div className="mt-3 flex justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-500">Bank Account</span>
+                  <span className="text-sm font-medium text-gray-900">{postTarget.bankAccountLabel}</span>
+                </div>
+                <div className="mt-3 flex justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-500">Source Account</span>
+                  <span className="text-sm font-medium text-gray-900">{postTarget.sourceAccountLabel}</span>
+                </div>
+                <div className="mt-3 flex justify-between">
+                  <span className="text-sm text-gray-500">Amount</span>
+                  <span className="text-sm font-medium text-gray-900">{postTarget.amountLabel}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">Loading deposit detail...</p>
+          )}
+
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+            <button type="button" onClick={() => setIsPostOpen(false)} disabled={isPostSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+              Cancel
+            </button>
+            <button type="button" onClick={handleConfirmPost} disabled={isPostSubmitting || !postTarget?.usageSummary.canPost} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+              {isPostSubmitting ? 'Posting...' : 'Post Deposit'}
             </button>
           </div>
         </div>
@@ -1405,22 +1312,15 @@ function BankTransactionsPanel() {
   );
 }
 
-export function BankOperationsClient() {
+export function CashMovementClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const rawTab = searchParams.get('tab');
-  const activeTab: TabId =
-    rawTab === 'statement-imports' || rawTab === 'bank-feeds' || rawTab === 'bank-transactions'
-      ? rawTab
-      : 'bank-transactions';
-
-  const tabs = useMemo(
-    () => [
-      { id: LIVE_TAB.id, label: LIVE_TAB.label },
-      ...STATIC_TABS.map((tab) => ({ id: tab.id, label: tab.label })),
-    ],
-    [],
+  const activeTab: TabId = (rawTab === 'transfers-undeposited' || rawTab === 'bounced-payments' ? rawTab : 'deposits');
+  const currentStaticTab = useMemo(
+    () => STATIC_TABS.find((tab) => tab.id === activeTab),
+    [activeTab],
   );
 
   const handleTabChange = (tabId: TabId) => {
@@ -1428,8 +1328,6 @@ export function BankOperationsClient() {
     params.set('tab', tabId);
     router.push(`${pathname}?${params.toString()}`);
   };
-
-  const currentStaticTab = STATIC_TABS.find((tab) => tab.id === activeTab);
 
   return (
     <div className="space-y-6 p-6">
@@ -1441,8 +1339,8 @@ export function BankOperationsClient() {
               <Landmark className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bank Operations</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">Manage bank transaction intake, statement imports, and connected bank feeds in one operations workspace.</p>
+              <h1 className="text-2xl font-bold text-gray-900">Cash Movement</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600">Manage deposits, internal transfers, undeposited funds, and bounced payment exceptions in one cash-movement workspace.</p>
             </div>
           </div>
         </div>
@@ -1450,7 +1348,7 @@ export function BankOperationsClient() {
 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
-          {tabs.map((tab) => {
+          {[LIVE_TAB, ...STATIC_TABS].map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -1467,12 +1365,12 @@ export function BankOperationsClient() {
       </div>
 
       <div className="mt-6">
-        {activeTab === 'bank-transactions' ? (
-          <BankTransactionsPanel />
-        ) : activeTab === 'statement-imports' ? (
-          <StatementImportsPanel />
-        ) : activeTab === 'bank-feeds' ? (
-          <BankFeedsPanel />
+        {activeTab === 'deposits' ? (
+          <DepositsPanel />
+        ) : activeTab === 'transfers-undeposited' ? (
+          <TransfersUndepositedPanel />
+        ) : activeTab === 'bounced-payments' ? (
+          <BouncedPaymentsPanel />
         ) : currentStaticTab ? (
           <StaticTabPanel tab={currentStaticTab} />
         ) : null}

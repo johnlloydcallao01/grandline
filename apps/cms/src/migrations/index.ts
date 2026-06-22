@@ -111,6 +111,9 @@ import * as migration_20260603_140500_drop_legacy_customer_currency_payment_text
 import * as migration_20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters from './20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters';
 import * as migration_20260603_170000_upgrade_vendors_to_lookup_masters from './20260603_170000_upgrade_vendors_to_lookup_masters';
 import * as migration_20260603_180000_upgrade_bank_accounts_to_currency_lookup from './20260603_180000_upgrade_bank_accounts_to_currency_lookup';
+import * as migration_20260621_094044 from './20260621_094044';
+import * as migration_20260621_160500_bank_feeds from './20260621_160500_bank_feeds';
+import * as migration_20260621_190000_bounced_payments from './20260621_190000_bounced_payments';
 
 export const migrations = [
   {
@@ -651,31 +654,46 @@ export const migrations = [
   {
     up: migration_20260530_132756_phase_4_accounting_operational_finance.up,
     down: migration_20260530_132756_phase_4_accounting_operational_finance.down,
-    name: '20260530_132756_phase_4_accounting_operational_finance'
+    name: '20260530_132756_phase_4_accounting_operational_finance',
   },
   {
     up: migration_20260603_133000_add_accounting_customer_lookup_masters.up,
     down: migration_20260603_133000_add_accounting_customer_lookup_masters.down,
-    name: '20260603_133000_add_accounting_customer_lookup_masters'
+    name: '20260603_133000_add_accounting_customer_lookup_masters',
   },
   {
     up: migration_20260603_140500_drop_legacy_customer_currency_payment_text.up,
     down: migration_20260603_140500_drop_legacy_customer_currency_payment_text.down,
-    name: '20260603_140500_drop_legacy_customer_currency_payment_text'
+    name: '20260603_140500_drop_legacy_customer_currency_payment_text',
   },
   {
     up: migration_20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters.up,
     down: migration_20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters.down,
-    name: '20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters'
+    name: '20260603_160000_fix_locked_document_rels_for_accounting_lookup_masters',
   },
   {
     up: migration_20260603_170000_upgrade_vendors_to_lookup_masters.up,
     down: migration_20260603_170000_upgrade_vendors_to_lookup_masters.down,
-    name: '20260603_170000_upgrade_vendors_to_lookup_masters'
+    name: '20260603_170000_upgrade_vendors_to_lookup_masters',
   },
   {
     up: migration_20260603_180000_upgrade_bank_accounts_to_currency_lookup.up,
     down: migration_20260603_180000_upgrade_bank_accounts_to_currency_lookup.down,
-    name: '20260603_180000_upgrade_bank_accounts_to_currency_lookup'
+    name: '20260603_180000_upgrade_bank_accounts_to_currency_lookup',
+  },
+  {
+    up: migration_20260621_094044.up,
+    down: migration_20260621_094044.down,
+    name: '20260621_094044'
+  },
+  {
+    up: migration_20260621_160500_bank_feeds.up,
+    down: migration_20260621_160500_bank_feeds.down,
+    name: '20260621_160500_bank_feeds'
+  },
+  {
+    up: migration_20260621_190000_bounced_payments.up,
+    down: migration_20260621_190000_bounced_payments.down,
+    name: '20260621_190000_bounced_payments',
   },
 ];
