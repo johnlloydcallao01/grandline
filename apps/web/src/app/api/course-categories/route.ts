@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'PAYLOAD_API_KEY': apiKey,
+      'Authorization': `users API-Key ${apiKey}`,
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api'

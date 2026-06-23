@@ -115,12 +115,7 @@ export async function fetchActiveAssignedPostCategories(): Promise<
   const res = await globalThis.fetch(
     `${getBlogsApiUrl()}/post-categories/active`,
     {
-      headers: {
-        "Content-Type": "application/json",
-        PAYLOAD_API_KEY:
-          process.env.PAYLOAD_API_KEY ||
-          "db6c3436-72f8-47d0-855a-30112b7e9214",
-      },
+      headers,
       cache: "no-store",
     },
   );

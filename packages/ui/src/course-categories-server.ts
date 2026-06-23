@@ -31,7 +31,7 @@ export class CourseCategoryService {
 
       const apiKey = process.env.PAYLOAD_API_KEY;
       if (apiKey) {
-        headers['PAYLOAD_API_KEY'] = apiKey;
+        headers['Authorization'] = `users API-Key ${apiKey}`;
       }
 
       const url = `${CourseCategoryService.API_BASE}/course-categories/active`;
