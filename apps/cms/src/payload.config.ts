@@ -132,18 +132,35 @@ import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const isRenderRuntime = process.env.RENDER === 'true' || Boolean(process.env.RENDER_SERVICE_NAME)
 
 const parseIntegerEnv = (value: string | undefined, fallback: number): number => {
   const parsed = Number.parseInt(value || '', 10)
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
-const defaultDatabasePoolMax = isRenderRuntime ? 2 : 10
+const parseBooleanEnv = (value: string | undefined, fallback: boolean): boolean => {
+  if (value == null) {
+    return fallback
+  }
+
+  const normalized = value.trim().toLowerCase()
+
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true
+  }
+
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false
+  }
+
+  return fallback
+}
+
+const defaultDatabasePoolMax = 5
 const defaultDatabasePoolMin = 0
-const defaultDatabaseIdleTimeout = isRenderRuntime ? 30000 : 300000
-const defaultDatabaseConnectionTimeout = isRenderRuntime ? 10000 : 15000
-const defaultDatabaseMaxUses = isRenderRuntime ? 1000 : 7500
+const defaultDatabaseIdleTimeout = 30000
+const defaultDatabaseConnectionTimeout = 30000
+const defaultDatabaseMaxUses = 1000
 
 const rawCmsCollections: CollectionConfig[] = [
   Users,
@@ -249,7 +266,7 @@ const rawCmsCollections: CollectionConfig[] = [
   ChatMessages,
   ChatMessageStatus,
   ChatTypingStatus,
-] 
+]
 
 const lockDocumentAllowList = new Set<string>([
   Posts.slug,
@@ -266,13 +283,19 @@ const lockDocumentAllowList = new Set<string>([
   CertificateTemplates.slug,
 ])
 
+// Document locking adds extra admin form-state queries through `payload_locked_documents`.
+// With the CMS running on Oracle against a remote managed Postgres instance, those lock
+// queries are the ones timing out on save. Keep locking disabled by default and only
+// re-enable it intentionally through env if concurrent editing is ever truly needed.
+const enableDocumentLocks = parseBooleanEnv(process.env.PAYLOAD_ENABLE_DOCUMENT_LOCKS, false)
+
 const cmsCollections: CollectionConfig[] = rawCmsCollections.map((collection) =>
-  lockDocumentAllowList.has(collection.slug)
+  enableDocumentLocks && lockDocumentAllowList.has(collection.slug)
     ? collection
     : {
-        ...collection,
-        lockDocuments: false,
-      },
+      ...collection,
+      lockDocuments: false,
+    },
 )
 
 const cmsGlobals: GlobalConfig[] = [
