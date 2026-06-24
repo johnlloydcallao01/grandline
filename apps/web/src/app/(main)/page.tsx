@@ -2,6 +2,7 @@ import React from "react";
 import { HeroSection } from "@/components/sections";
 import { HomeCoursesSection } from "@/components/sections/HomeCoursesSection";
 import { getCourseCategories } from "@/server";
+import { fetchPortalCourses } from "@/app/portal/courses/actions";
 
 /**
  * Home page component - FULLY ISR OPTIMIZED
@@ -12,12 +13,13 @@ import { getCourseCategories } from "@/server";
  */
 export default async function Home() {
   const categories = await getCourseCategories(50);
+  const enrollments = await fetchPortalCourses();
   return (
     <div className="bg-[var(--background)] lg:min-h-screen home-no-min">
       {/* Hero Section */}
       <HeroSection />
 
-      <HomeCoursesSection categories={categories} />
+      <HomeCoursesSection categories={categories} enrollments={enrollments} />
     </div>
   );
 }

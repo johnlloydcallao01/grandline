@@ -11,6 +11,9 @@ interface CoursesGridProps {
   title?: string;
   paddingClass?: string;
   viewAllLink?: string;
+  keyPrefix?: string;
+  ribbonMap?: Record<string, React.ReactNode>;
+  cardImageClassName?: string;
 }
 
 // Course Card Skeleton
@@ -29,7 +32,7 @@ function CourseCardSkeleton() {
   );
 }
 
-export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink }: CoursesGridProps) {
+export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink, keyPrefix, ribbonMap, cardImageClassName }: CoursesGridProps) {
   const { wishlistMap, toggleWishlist } = useWishlist();
 
   if (isLoading && (!courses || courses.length === 0)) {
@@ -88,13 +91,15 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
           .map((course) => {
             const idKey = String(course.id);
             const isWishlisted = wishlistMap ? wishlistMap[idKey] ?? false : false;
+            const ribbon = ribbonMap?.[idKey];
 
-            return (
+            const card = (
               <CourseCard
-                key={course.id}
+                key={keyPrefix ? `${keyPrefix}-${course.id}` : course.id}
                 course={course}
                 variant="grid"
                 isWishlisted={isWishlisted}
+                imageContainerClassName={cardImageClassName}
                 onToggleWishlist={async (courseId) => {
                   try {
                     await toggleWishlist(courseId);
@@ -109,6 +114,17 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
                 )}
               />
             );
+
+            if (ribbon) {
+              return (
+                <div key={keyPrefix ? `${keyPrefix}-${course.id}` : course.id} className="relative">
+                  {card}
+                  <div className="absolute top-3 left-3 z-10">{ribbon}</div>
+                </div>
+              );
+            }
+
+            return card;
           })}
       </div>
     </div>

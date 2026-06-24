@@ -19,7 +19,7 @@ function CourseCardSkeleton() {
   )
 }
 
-export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', viewAllLink }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string; viewAllLink?: string }) {
+export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', viewAllLink, keyPrefix, ribbonMap, cardImageClassName }: { courses: Course[]; isLoading?: boolean; skeletonCount?: number; title?: string; viewAllLink?: string; keyPrefix?: string; ribbonMap?: Record<string, React.ReactNode>; cardImageClassName?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const { wishlistMap, toggleWishlist } = useWishlist()
@@ -123,13 +123,15 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
             .map((course) => {
               const idKey = String(course.id)
               const isWishlisted = wishlistMap ? wishlistMap[idKey] ?? false : false
+              const ribbon = ribbonMap?.[idKey]
 
               return (
-                <div key={course.id} className="flex-shrink-0" style={{ pointerEvents: "auto" }}>
+                <div key={keyPrefix ? `${keyPrefix}-${course.id}` : course.id} className="flex-shrink-0 relative" style={{ pointerEvents: "auto" }}>
                   <CourseCard
                     course={course}
                     variant="carousel"
                     isWishlisted={isWishlisted}
+                    imageContainerClassName={cardImageClassName}
                     onToggleWishlist={async (courseId) => {
                       try {
                         await toggleWishlist(courseId)
@@ -143,6 +145,7 @@ export function CoursesCarousel({ courses, isLoading = false, skeletonCount = 8,
                       </Link>
                     )}
                   />
+                  {ribbon && <div className="absolute top-3 left-3 z-10">{ribbon}</div>}
                 </div>
               )
             })}

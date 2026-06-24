@@ -8,7 +8,7 @@ import { useCourses } from '@/hooks/useCourses';
 import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export function HomeCoursesSection({ categories }: { categories: CourseCategory[] }) {
+export function HomeCoursesSection({ categories, enrollments = [] }: { categories: CourseCategory[]; enrollments?: any[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialIdFromUrl = (() => {
@@ -31,6 +31,56 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
   const featuredDisplay = useMemo(() => {
     return (Array.isArray(featuredCourses) ? featuredCourses : []).filter((c) => c.status === 'published' && c.isFeatured);
   }, [featuredCourses]);
+
+  const enrolledCourses = useMemo(() => {
+    const seen = new Set<string>();
+    return (Array.isArray(enrollments) ? enrollments : [])
+      .map((enrollment) => enrollment?.course)
+      .filter((c) => {
+        if (!c?.id) return false;
+        const key = String(c.id);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((c) => ({ ...c, status: c.status || 'published' }));
+  }, [enrollments]);
+
+  const enrolledCoursesLink = enrolledCourses.length > 8 ? '/portal/courses' : undefined;
+
+  const enrollmentStatusMap = useMemo(() => {
+    const map: Record<string, React.ReactNode> = {};
+    const statusClasses: Record<string, string> = {
+      active: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+      pending: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+      suspended: 'bg-gray-50 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700',
+      dropped: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
+      expired: 'bg-gray-50 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700',
+      completed: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+    };
+    (Array.isArray(enrollments) ? enrollments : []).forEach((enrollment) => {
+      const courseId = enrollment?.course?.id;
+      if (!courseId) return;
+      const key = String(courseId);
+      if (map[key]) return;
+      const status = enrollment.status;
+      const isPassed = status === 'completed' && enrollment.finalEvaluation === 'passed';
+      const isFailed = status === 'completed' && enrollment.finalEvaluation === 'failed';
+      let label: string;
+      let classKey: string;
+      if (isPassed) { label = 'Passed'; classKey = 'completed'; }
+      else if (isFailed) { label = 'Failed'; classKey = 'dropped'; }
+      else if (status === 'completed') { label = 'Completed'; classKey = 'completed'; }
+      else { label = status; classKey = status; }
+      const cls = statusClasses[classKey] || statusClasses.completed;
+      map[key] = (
+        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize border ${cls}`}>
+          {label}
+        </span>
+      );
+    });
+    return map;
+  }, [enrollments]);
 
   const [categoriesState, setCategoriesState] = useState<CourseCategory[]>(Array.isArray(categories) ? categories : []);
   useEffect(() => {
@@ -123,6 +173,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
           skeletonCount={categoryId ? 4 : 8}
           title="Available Courses"
           viewAllLink={availableCoursesLink}
+          keyPrefix="available"
         />
       </div>
       {typeof categoryId === 'number' ? (
@@ -134,6 +185,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
             skeletonCount={4}
             paddingClass="p-[10px]"
             viewAllLink={availableCoursesLink}
+            keyPrefix="available"
           />
         </div>
       ) : (
@@ -144,6 +196,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
             skeletonCount={8}
             title="Available Courses"
             viewAllLink={availableCoursesLink}
+            keyPrefix="available"
           />
         </div>
       )}
@@ -176,6 +229,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
               isLoading={isLoadingFeatured}
               skeletonCount={8}
               viewAllLink={featuredCoursesLink}
+              keyPrefix="featured"
             />
           </div>
           <div className="lg:hidden">
@@ -185,6 +239,7 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
               skeletonCount={8}
               title="Featured Courses"
               viewAllLink={featuredCoursesLink}
+              keyPrefix="featured"
             />
           </div>
           <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
@@ -205,6 +260,32 @@ export function HomeCoursesSection({ categories }: { categories: CourseCategory[
                 </button>
               </div>
             )}
+          </div>
+        </>
+      )}
+
+      {enrolledCourses.length > 0 && (
+        <>
+          <div className="hidden lg:block">
+            <CoursesGrid
+              title="Enrolled Courses"
+              courses={enrolledCourses.slice(0, 8)}
+              skeletonCount={4}
+              viewAllLink={enrolledCoursesLink}
+              keyPrefix="enrolled"
+              ribbonMap={enrollmentStatusMap}
+              cardImageClassName="aspect-[3/4]"
+            />
+          </div>
+          <div className="lg:hidden">
+            <CoursesCarousel
+              courses={enrolledCourses.slice(0, 8)}
+              title="Enrolled Courses"
+              viewAllLink={enrolledCoursesLink}
+              keyPrefix="enrolled"
+              ribbonMap={enrollmentStatusMap}
+              cardImageClassName="aspect-[3/4]"
+            />
           </div>
         </>
       )}

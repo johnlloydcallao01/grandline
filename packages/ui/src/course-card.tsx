@@ -24,6 +24,7 @@ export interface CourseCardProps {
     href?: string;
     renderLink?: (props: { href: string; className: string; children: React.ReactNode }) => React.ReactNode;
     className?: string;
+    imageContainerClassName?: string;
     wishlistStorageKey?: string;
     onToggleWishlist?: (courseId: string | number, next: boolean) => void;
     isWishlisted?: boolean;
@@ -35,6 +36,7 @@ export function CourseCard({
     href,
     renderLink,
     className = "",
+    imageContainerClassName,
     wishlistStorageKey,
     onToggleWishlist,
     isWishlisted,
@@ -77,7 +79,7 @@ export function CourseCard({
 
     const content = (
         <>
-            <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-3">
+            <div className={`relative ${imageContainerClassName || 'aspect-video'} bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-3`}>
                 {imageUrl ? (
                     <img
                         src={imageUrl}
