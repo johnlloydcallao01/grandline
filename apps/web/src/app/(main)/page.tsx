@@ -1,25 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { HeroSection } from "@/components/sections";
 import { HomeCoursesSection } from "@/components/sections/HomeCoursesSection";
 import { getCourseCategories } from "@/server";
 import { fetchPortalCourses } from "@/app/portal/courses/actions";
+import { HomePageSkeleton } from "@/components/skeletons";
 
-/**
- * Home page component - FULLY ISR OPTIMIZED
- * 
- * PERFORMANCE OPTIMIZED: Both categories and courses are pre-fetched 
- * server-side with ISR. This eliminates all client-side loading states 
- * and provides optimal SEO performance.
- */
-export default async function Home() {
-  const categories = await getCourseCategories(50);
-  const enrollments = await fetchPortalCourses();
+async function HomeCoursesContent() {
+  const [categories, enrollments] = await Promise.all([
+    getCourseCategories(50),
+    fetchPortalCourses(),
+  ]);
+  return <HomeCoursesSection categories={categories} enrollments={enrollments} />;
+}
+
+export default function Home() {
   return (
     <div className="bg-[var(--background)] lg:min-h-screen home-no-min">
-      {/* Hero Section */}
       <HeroSection />
-
-      <HomeCoursesSection categories={categories} enrollments={enrollments} />
+      <Suspense fallback={<HomePageSkeleton />}>
+        <HomeCoursesContent />
+      </Suspense>
     </div>
   );
 }

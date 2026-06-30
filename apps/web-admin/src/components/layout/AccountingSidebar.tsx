@@ -4,9 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import type { IconName, SidebarProps } from '@/types';
 import Link from '@/components/ui/LinkWrapper';
-import { SidebarItem } from '@/components/ui';
-import { ChevronDown } from '@/components/ui/IconWrapper';
-import { getIcon } from '@/utils';
+import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 
 const coreMenuItems = [
   {
@@ -401,52 +399,6 @@ function SidebarSectionLabel({ children, isOpen }: { children: React.ReactNode; 
   return (
     <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
       {children}
-    </div>
-  );
-}
-
-function SidebarDropdownGroup({
-  icon,
-  label,
-  isOpen,
-  isExpanded,
-  onToggle,
-  active,
-  children,
-}: {
-  icon: IconName;
-  label: string;
-  isOpen: boolean;
-  isExpanded: boolean;
-  onToggle: () => void;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  const baseClasses = 'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors';
-  const activeClasses = active
-    ? 'bg-gray-100 text-gray-900'
-    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
-
-  return (
-    <div className="space-y-1">
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`${baseClasses} ${activeClasses}`}
-        aria-expanded={isExpanded}
-      >
-        <div className="flex-shrink-0">{getIcon(icon)}</div>
-        {!isOpen ? null : (
-          <>
-            <span className="ml-3 flex-1 truncate text-left">{label}</span>
-            <ChevronDown
-              className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            />
-          </>
-        )}
-      </button>
-
-      {isOpen && isExpanded ? <div className="ml-4 space-y-1 border-l border-gray-200 pl-3">{children}</div> : null}
     </div>
   );
 }

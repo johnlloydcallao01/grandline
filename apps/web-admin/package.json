@@ -5,6 +5,7 @@
   "scripts": {
     "build": "cross-env BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true node ../../node_modules/next/dist/bin/next build",
     "dev": "cross-env ESLINT_NO_DEV_ERRORS=true node ../../node_modules/next/dist/bin/next dev --port 3002",
+    "devsafe": "node -e \"try { require('fs').rmSync('.next', {recursive:true}) } catch {}\" && cross-env node ../../node_modules/next/dist/bin/next dev --port 3002",
     "dev:nolint": "node ../../node_modules/next/dist/bin/next dev --port 3002",
     "lint": "eslint . --max-warnings 0",
     "start": "node ../../node_modules/next/dist/bin/next start",

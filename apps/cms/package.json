@@ -22,6 +22,7 @@
     "seed:ap-aging": "pnpm exec tsx src/seeders/accounting-ap-aging.ts",
     "seed:approval-workflows": "pnpm exec tsx src/seeders/accounting-approval-workflows.ts",
     "seed:expense-approval-requests": "pnpm exec tsx src/seeders/accounting-expense-approval-requests.ts",
+    "seed:fixed-assets": "pnpm exec tsx src/seeders/accounting-fixed-assets.ts",
     "seed:lock-close-state": "pnpm exec tsx src/seeders/accounting-lock-close-state.ts",
     "seed:vendor-credits": "pnpm exec tsx src/seeders/accounting-vendor-credits.ts",
     "seed:payments-received": "pnpm exec tsx src/seeders/accounting-payments-received.ts",

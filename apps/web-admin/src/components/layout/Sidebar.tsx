@@ -3,7 +3,8 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProps } from '@/types';
-import { SidebarItem } from '@/components/ui';
+import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
+import Link from '@/components/ui/LinkWrapper';
 
 /**
  * Sidebar component with navigation items for Admin Panel
@@ -11,6 +12,91 @@ import { SidebarItem } from '@/components/ui';
  */
 export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps) {
     const pathname = usePathname();
+
+    const [isEnrollmentsExpanded, setIsEnrollmentsExpanded] = React.useState(
+        pathname?.startsWith('/enrollments') ?? false
+    );
+
+    const hasActiveCourseManagerChild =
+        pathname?.startsWith('/courses') ||
+        pathname?.startsWith('/assessments') ||
+        pathname?.startsWith('/question-bank') ||
+        pathname?.startsWith('/categories');
+
+    const [isCourseManagerExpanded, setIsCourseManagerExpanded] = React.useState(hasActiveCourseManagerChild);
+
+    const hasActiveGradebookChild =
+        pathname?.startsWith('/grades/recent-activity') ||
+        pathname?.startsWith('/trainees/accounts');
+
+    const [isGradebookExpanded, setIsGradebookExpanded] = React.useState(hasActiveGradebookChild);
+
+    const hasActiveCertificationChild =
+        pathname?.startsWith('/certifications/templates') ||
+        pathname?.startsWith('/certifications/builder') ||
+        pathname?.startsWith('/certifications/issuance') ||
+        pathname?.startsWith('/certifications/verification');
+
+    const [isCertificationExpanded, setIsCertificationExpanded] = React.useState(hasActiveCertificationChild);
+
+    const hasActiveUsersChild =
+        pathname?.startsWith('/users/trainees') ||
+        pathname === '/instructors' ||
+        pathname?.startsWith('/users/admins');
+
+    const [isUsersExpanded, setIsUsersExpanded] = React.useState(hasActiveUsersChild);
+
+    const hasActiveCmsMediaChild =
+        pathname?.startsWith('/cms/media');
+
+    const [isCmsMediaExpanded, setIsCmsMediaExpanded] = React.useState(hasActiveCmsMediaChild);
+
+    const hasActiveCmsBlogPostsChild =
+        pathname?.startsWith('/cms/posts');
+
+    const [isCmsBlogPostsExpanded, setIsCmsBlogPostsExpanded] = React.useState(hasActiveCmsBlogPostsChild);
+
+    React.useEffect(() => {
+        if (pathname?.startsWith('/enrollments')) {
+            setIsEnrollmentsExpanded(true);
+        }
+    }, [pathname]);
+
+    React.useEffect(() => {
+        if (hasActiveCourseManagerChild) {
+            setIsCourseManagerExpanded(true);
+        }
+    }, [hasActiveCourseManagerChild]);
+
+    React.useEffect(() => {
+        if (hasActiveGradebookChild) {
+            setIsGradebookExpanded(true);
+        }
+    }, [hasActiveGradebookChild]);
+
+    React.useEffect(() => {
+        if (hasActiveCertificationChild) {
+            setIsCertificationExpanded(true);
+        }
+    }, [hasActiveCertificationChild]);
+
+    React.useEffect(() => {
+        if (hasActiveUsersChild) {
+            setIsUsersExpanded(true);
+        }
+    }, [hasActiveUsersChild]);
+
+    React.useEffect(() => {
+        if (hasActiveCmsMediaChild) {
+            setIsCmsMediaExpanded(true);
+        }
+    }, [hasActiveCmsMediaChild]);
+
+    React.useEffect(() => {
+        if (hasActiveCmsBlogPostsChild) {
+            setIsCmsBlogPostsExpanded(true);
+        }
+    }, [hasActiveCmsBlogPostsChild]);
 
     return (
         <aside
@@ -49,141 +135,301 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         />
                     </div>
 
+                    {isOpen && <hr className="border-gray-200" />}
+
                     {/* 2. COURSE MANAGEMENT */}
                     <div className="space-y-1">
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core LMS</div>}
-                        <SidebarItem
+                        <SidebarDropdownGroup
                             icon="team"
                             label="Enrollments"
-                            active={pathname?.startsWith('/enrollments')}
-                            collapsed={!isOpen}
-                            href="/enrollments"
-                        />
-                        <SidebarItem
-                            icon="content"
-                            label="Course Categories"
-                            active={pathname?.startsWith('/categories')}
-                            collapsed={!isOpen}
-                            href="/categories"
-                        />
-                        <SidebarItem
-                            icon="posts" // Placeholder icon
-                            label="Course Builder"
-                            active={pathname?.startsWith('/courses/builder')}
-                            collapsed={!isOpen}
-                            href="/courses/builder"
-                        />
-                        <SidebarItem
+                            isOpen={isOpen}
+                            isExpanded={isEnrollmentsExpanded}
+                            onToggle={() => setIsEnrollmentsExpanded((current) => !current)}
+                            active={pathname?.startsWith('/enrollments') ?? false}
+                        >
+                            <Link
+                                href="/enrollments/assign-unassign"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/assign-unassign')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Assign / Unassign</span>
+                            </Link>
+                            <Link
+                                href="/enrollments/reset-course-data"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/reset-course-data')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Reset Course Data</span>
+                            </Link>
+                        </SidebarDropdownGroup>
+                        <SidebarDropdownGroup
                             icon="products"
-                            label="Courses"
-                            active={pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/builder'))}
-                            collapsed={!isOpen}
-                            href="/courses"
-                        />
-                        <SidebarItem
+                            label="Course Manager"
+                            isOpen={isOpen}
+                            isExpanded={isCourseManagerExpanded}
+                            onToggle={() => setIsCourseManagerExpanded((current) => !current)}
+                            active={hasActiveCourseManagerChild}
+                        >
+                            <Link
+                                href="/courses"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assignments') && !pathname?.startsWith('/courses/tags'))
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Courses</span>
+                            </Link>
+                            <Link
+                                href="/courses/lessons"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/lessons')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Lessons</span>
+                            </Link>
+                            <Link
+                                href="/assessments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/assessments')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Assessments</span>
+                            </Link>
+                            <Link
+                                href="/question-bank"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/question-bank')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Questions</span>
+                            </Link>
+                            <Link
+                                href="/courses/assignments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/assignments')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Assignments</span>
+                            </Link>
+                            <Link
+                                href="/categories"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/categories')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Categories</span>
+                            </Link>
+                            <Link
+                                href="/courses/tags"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/tags')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Tags</span>
+                            </Link>
+                        </SidebarDropdownGroup>
+                        <SidebarDropdownGroup
                             icon="grade"
-                            label="Assessments"
-                            active={pathname?.startsWith('/assessments')}
-                            collapsed={!isOpen}
-                            href="/assessments"
-                        />
+                            label="Gradebook"
+                            isOpen={isOpen}
+                            isExpanded={isGradebookExpanded}
+                            onToggle={() => setIsGradebookExpanded((current) => !current)}
+                            active={hasActiveGradebookChild}
+                        >
+                            <Link
+                                href="/grades/recent-activity"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/grades/recent-activity')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Recent Activity</span>
+                            </Link>
+                            <Link
+                                href="/trainees/accounts"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/trainees/accounts')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Student Overview</span>
+                            </Link>
+                        </SidebarDropdownGroup>
+                        <SidebarDropdownGroup
+                            icon="certificate"
+                            label="Certification"
+                            isOpen={isOpen}
+                            isExpanded={isCertificationExpanded}
+                            onToggle={() => setIsCertificationExpanded((current) => !current)}
+                            active={hasActiveCertificationChild}
+                        >
+                            <Link
+                                href="/certifications/templates"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Templates</span>
+                            </Link>
+                            <Link
+                                href="/certifications/issuance"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/issuance')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Issuance</span>
+                            </Link>
+                            <Link
+                                href="/certifications/verification"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/verification')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Verification</span>
+                            </Link>
+                        </SidebarDropdownGroup>
                         <SidebarItem
-                            icon="bank"
-                            label="Question Bank"
-                            active={pathname?.startsWith('/question-bank')}
+                            icon="review"
+                            label="Feedback & Reviews"
+                            active={pathname?.startsWith('/reviews')}
                             collapsed={!isOpen}
-                            href="/question-bank"
+                            href="/reviews"
                         />
-                        <SidebarItem
-                            icon="grade"
-                            label="Grade Management"
-                            active={pathname === '/grades'}
-                            collapsed={!isOpen}
-                            href="/grades"
-                        />
-                        <SidebarItem
-                            icon="report"
-                            label="Grade Reports"
-                            active={pathname?.startsWith('/grades/reports')}
-                            collapsed={!isOpen}
-                            href="/grades/reports"
-                        />
-                        <SidebarItem
-                            icon="template"
-                            label="Certificate Templates"
-                            active={pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')}
-                            collapsed={!isOpen}
-                            href="/certifications/templates"
-                        />
-                        <SidebarItem
-                            icon="issuance"
-                            label="Certificate Issuance"
-                            active={pathname?.startsWith('/certifications/issuance')}
-                            collapsed={!isOpen}
-                            href="/certifications/issuance"
-                        />
-                        <SidebarItem
-                            icon="verification"
-                            label="Certificate Verification"
-                            active={pathname?.startsWith('/certifications/verification')}
-                            collapsed={!isOpen}
-                            href="/certifications/verification"
-                        />
+                        <SidebarDropdownGroup
+                            icon="users"
+                            label="Users"
+                            isOpen={isOpen}
+                            isExpanded={isUsersExpanded}
+                            onToggle={() => setIsUsersExpanded((current) => !current)}
+                            active={hasActiveUsersChild}
+                        >
+                            <Link
+                                href="/users/trainees"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/trainees')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Trainees</span>
+                            </Link>
+                            <Link
+                                href="/instructors"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/instructors'
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Instructors</span>
+                            </Link>
+                            <Link
+                                href="/users/admins"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/admins')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Admins</span>
+                            </Link>
+                        </SidebarDropdownGroup>
                     </div>
 
                     {isOpen && <hr className="border-gray-200" />}
 
-                    {/* 3. USERS */}
+                    {/* 3. CMS */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</div>}
-                        <SidebarItem
-                            icon="trainee"
-                            label="Trainee Accounts"
-                            active={pathname?.startsWith('/trainees/accounts')}
-                            collapsed={!isOpen}
-                            href="/trainees/accounts"
-                        />
-                        <SidebarItem
-                            icon="analytics"
-                            label="Trainee Progress"
-                            active={pathname?.startsWith('/trainees/progress')}
-                            collapsed={!isOpen}
-                            href="/trainees/progress"
-                        />
-                        <SidebarItem
-                            icon="instructor"
-                            label="Instructors"
-                            active={pathname === '/instructors'}
-                            collapsed={!isOpen}
-                            href="/instructors"
-                        />
-                        <SidebarItem
-                            icon="payout"
-                            label="Payouts"
-                            active={pathname === '/instructors/payouts'}
-                            collapsed={!isOpen}
-                            href="/instructors/payouts"
-                        />
-                    </div>
-
-                    {isOpen && <hr className="border-gray-200" />}
-
-                    {/* 4. MEDIA LIBRARY */}
-                    <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Media Library</div>}
-                        <SidebarItem
+                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">CMS</div>}
+                        <SidebarDropdownGroup
                             icon="media"
-                            label="All Media"
-                            active={pathname?.startsWith('/media')}
-                            collapsed={!isOpen}
-                            href="/media"
-                        />
+                            label="Media Files"
+                            isOpen={isOpen}
+                            isExpanded={isCmsMediaExpanded}
+                            onToggle={() => setIsCmsMediaExpanded((current) => !current)}
+                            active={hasActiveCmsMediaChild}
+                        >
+                            <Link
+                                href="/cms/media"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/cms/media'
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Library</span>
+                            </Link>
+                            <Link
+                                href="/cms/media/add"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/media/add')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Add Media File</span>
+                            </Link>
+                        </SidebarDropdownGroup>
+                        <SidebarDropdownGroup
+                            icon="posts"
+                            label="Blog Posts"
+                            isOpen={isOpen}
+                            isExpanded={isCmsBlogPostsExpanded}
+                            onToggle={() => setIsCmsBlogPostsExpanded((current) => !current)}
+                            active={hasActiveCmsBlogPostsChild}
+                        >
+                            <Link
+                                href="/cms/posts"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/cms/posts'
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">All Posts</span>
+                            </Link>
+                            <Link
+                                href="/cms/posts/add"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/add')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Add Posts</span>
+                            </Link>
+                            <Link
+                                href="/cms/posts/categories"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/categories')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Categories</span>
+                            </Link>
+                            <Link
+                                href="/cms/posts/tags"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/tags')
+                                    ? 'bg-gray-100 font-medium text-gray-900'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="truncate">Tags</span>
+                            </Link>
+                        </SidebarDropdownGroup>
                         <SidebarItem
-                            icon="storage"
-                            label="Storage Settings"
-                            active={pathname?.startsWith('/media/settings')}
+                            icon="review"
+                            label="Comments"
+                            active={pathname?.startsWith('/cms/comments')}
                             collapsed={!isOpen}
-                            href="/media/settings"
+                            href="/cms/comments"
                         />
                     </div>
 
@@ -206,13 +452,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             collapsed={!isOpen}
                             href="/announcements"
                         />
-                        <SidebarItem
-                            icon="review"
-                            label="Feedback & Reviews"
-                            active={pathname?.startsWith('/reviews')}
-                            collapsed={!isOpen}
-                            href="/reviews"
-                        />
                     </div>
 
                     {isOpen && <hr className="border-gray-200" />}
@@ -222,17 +461,17 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</div>}
                         <SidebarItem
                             icon="promotion"
-                            label="Promotions"
-                            active={pathname?.startsWith('/marketing/promotions')}
+                            label="Coupons"
+                            active={pathname?.startsWith('/business/coupons')}
                             collapsed={!isOpen}
-                            href="/marketing/promotions"
+                            href="/business/coupons"
                         />
                         <SidebarItem
-                            icon="content"
-                            label="Content"
-                            active={pathname?.startsWith('/marketing/content')}
+                            icon="payout"
+                            label="Payouts"
+                            active={pathname === '/instructors/payouts'}
                             collapsed={!isOpen}
-                            href="/marketing/content"
+                            href="/instructors/payouts"
                         />
                         <SidebarItem
                             icon="transaction"
@@ -268,13 +507,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             active={pathname?.startsWith('/settings/security')}
                             collapsed={!isOpen}
                             href="/settings/security"
-                        />
-                        <SidebarItem
-                            icon="integrations"
-                            label="Integrations"
-                            active={pathname?.startsWith('/settings/integrations')}
-                            collapsed={!isOpen}
-                            href="/settings/integrations"
                         />
                     </div>
 

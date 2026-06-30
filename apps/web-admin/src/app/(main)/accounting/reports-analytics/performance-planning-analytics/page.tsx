@@ -1,73 +1,11 @@
-import { ReportsAnalyticsPage, type ReportsAnalyticsTab } from '../_components/ReportsAnalyticsPage';
+'use client';
 
-const tabs: ReportsAnalyticsTab[] = [
-  {
-    id: 'budget-vs-actual',
-    label: 'Budget vs Actual',
-    description: 'Review budget-variance output backed by accounting budgets and the budget-variance service.',
-    searchPlaceholder: 'Search budget code, branch, department, project, budget amount, or variance',
-    filters: ['Budget vs Actual', 'Annual', 'By Project', 'Negative Variance'],
-    actions: [
-      { label: 'Open Budget Report', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Budget View', icon: 'refresh', variant: 'secondary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Budgets In Scope', value: '12', change: 'Budget records available for variance review', trend: 'up' },
-      { label: 'Budget Amount', value: 'PHP 18.40M', change: 'Configured budget amount across selected budgets', trend: 'up' },
-      { label: 'Actual Spend', value: 'PHP 14.92M', change: 'Actuals measured by variance service', trend: 'up' },
-      { label: 'Variance', value: 'PHP 3.48M', change: 'Remaining amount against active budgets', trend: 'neutral' },
-    ],
-    tableTitle: 'Budget vs Actual Analysis',
-    tableDescription: 'Budget variance view aligned to accounting budgets and the budget-variance service in apps/cms.',
-    columns: ['Budget Code', 'Scope', 'Budget Amount', 'Actual Amount', 'Variance', 'Status'],
-    rows: [
-      {
-        id: 'bva-1',
-        cells: [
-          { text: 'BUD-2026-OPS', emphasis: true },
-          'Operations / Company',
-          { text: 'PHP 6,000,000', emphasis: true, align: 'right' },
-          { text: 'PHP 5,124,880', align: 'right' },
-          { text: 'PHP 875,120', emphasis: true, align: 'right' },
-          { text: 'Within Budget', tone: 'green' },
-        ],
-      },
-      {
-        id: 'bva-2',
-        cells: [
-          { text: 'BUD-2026-TRAIN', emphasis: true },
-          'Training Delivery / Branch',
-          { text: 'PHP 3,800,000', emphasis: true, align: 'right' },
-          { text: 'PHP 4,018,420', align: 'right' },
-          { text: 'PHP -218,420', emphasis: true, align: 'right' },
-          { text: 'Over Budget', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'bva-3',
-        cells: [
-          { text: 'BUD-2026-IT', emphasis: true },
-          'IT / Department',
-          { text: 'PHP 2,200,000', emphasis: true, align: 'right' },
-          { text: 'PHP 1,642,300', align: 'right' },
-          { text: 'PHP 557,700', emphasis: true, align: 'right' },
-          { text: 'Within Budget', tone: 'green' },
-        ],
-      },
-      {
-        id: 'bva-4',
-        cells: [
-          { text: 'BUD-2026-PROJ07', emphasis: true },
-          'Project 07',
-          { text: 'PHP 1,500,000', emphasis: true, align: 'right' },
-          { text: 'PHP 1,366,910', align: 'right' },
-          { text: 'PHP 133,090', emphasis: true, align: 'right' },
-          { text: 'Within Budget', tone: 'green' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from 'lucide-react';
+import { ReportsAnalyticsPage, type ReportsAnalyticsTab } from '../_components/ReportsAnalyticsPage';
+import { BudgetVsActualClient } from './BudgetVsActualClient';
+
+const projectProfitabilityTab: ReportsAnalyticsTab[] = [
   {
     id: 'project-profitability',
     label: 'Project Profitability',
@@ -89,65 +27,59 @@ const tabs: ReportsAnalyticsTab[] = [
     tableDescription: 'Profitability view aligned to project, invoice, expense, payroll-entry, time-entry, and budget support in apps/cms.',
     columns: ['Project Code', 'Project Name', 'Revenue', 'Total Cost', 'Gross Profit', 'Status'],
     rows: [
-      {
-        id: 'pp-1',
-        cells: [
-          { text: 'PRJ-007', emphasis: true },
-          'Maritime Batch 7 Rollout',
-          { text: 'PHP 2,420,000', emphasis: true, align: 'right' },
-          { text: 'PHP 1,604,400', align: 'right' },
-          { text: 'PHP 815,600', emphasis: true, align: 'right' },
-          { text: 'Profitable', tone: 'green' },
-        ],
-      },
-      {
-        id: 'pp-2',
-        cells: [
-          { text: 'PRJ-011', emphasis: true },
-          'Harbor Expansion Training',
-          { text: 'PHP 1,880,000', emphasis: true, align: 'right' },
-          { text: 'PHP 1,264,210', align: 'right' },
-          { text: 'PHP 615,790', emphasis: true, align: 'right' },
-          { text: 'Profitable', tone: 'green' },
-        ],
-      },
-      {
-        id: 'pp-3',
-        cells: [
-          { text: 'PRJ-014', emphasis: true },
-          'Simulator Upgrade Support',
-          { text: 'PHP 1,120,000', emphasis: true, align: 'right' },
-          { text: 'PHP 1,242,330', align: 'right' },
-          { text: 'PHP -122,330', emphasis: true, align: 'right' },
-          { text: 'Negative Margin', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'pp-4',
-        cells: [
-          { text: 'PRJ-018', emphasis: true },
-          'Corporate Cadet Program',
-          { text: 'PHP 3,140,000', emphasis: true, align: 'right' },
-          { text: 'PHP 2,126,500', align: 'right' },
-          { text: 'PHP 1,013,500', emphasis: true, align: 'right' },
-          { text: 'Profitable', tone: 'green' },
-        ],
-      },
+      { id: 'pp-1', cells: [{ text: 'PRJ-007', emphasis: true }, 'Maritime Batch 7 Rollout', { text: 'PHP 2,420,000', emphasis: true, align: 'right' }, { text: 'PHP 1,604,400', align: 'right' }, { text: 'PHP 815,600', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
+      { id: 'pp-2', cells: [{ text: 'PRJ-011', emphasis: true }, 'Harbor Expansion Training', { text: 'PHP 1,880,000', emphasis: true, align: 'right' }, { text: 'PHP 1,264,210', align: 'right' }, { text: 'PHP 615,790', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
+      { id: 'pp-3', cells: [{ text: 'PRJ-014', emphasis: true }, 'Simulator Upgrade Support', { text: 'PHP 1,120,000', emphasis: true, align: 'right' }, { text: 'PHP 1,242,330', align: 'right' }, { text: 'PHP -122,330', emphasis: true, align: 'right' }, { text: 'Negative Margin', tone: 'amber' }] },
+      { id: 'pp-4', cells: [{ text: 'PRJ-018', emphasis: true }, 'Corporate Cadet Program', { text: 'PHP 3,140,000', emphasis: true, align: 'right' }, { text: 'PHP 2,126,500', align: 'right' }, { text: 'PHP 1,013,500', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
     ],
   },
 ];
 
+type TabId = 'budget-vs-actual' | 'project-profitability';
+const TABS = [
+  { id: 'budget-vs-actual' as TabId, label: 'Budget vs Actual' },
+  { id: 'project-profitability' as TabId, label: 'Project Profitability' },
+];
+
 export default function PerformancePlanningAnalyticsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const activeTab: TabId = (TABS.find((t) => t.id === rawTab)?.id) || 'budget-vs-actual';
+
+  const handleTabChange = (tabId: TabId) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tabId);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
-    <ReportsAnalyticsPage
-      eyebrow="Operations / Reports & Analytics"
-      title="Performance & Planning Analytics"
-      description="Review budget-variance and project-profitability analytics backed by accounting budgets, projects, and profitability services."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'Open Analytics View', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
-    />
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue-600">Operations / Reports & Analytics</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Performance & Planning Analytics</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600">Review budget-variance and project-profitability analytics backed by accounting budgets, projects, and profitability services.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {TABS.map((tab) => { const isActive = activeTab === tab.id; return (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>); })}
+        </nav>
+      </div>
+      <div className="mt-6">
+        {activeTab === 'budget-vs-actual' ? (
+          <BudgetVsActualClient />
+        ) : (
+          <ReportsAnalyticsPage eyebrow="" title="" description="" tabs={projectProfitabilityTab} />
+        )}
+      </div>
+    </div>
   );
 }

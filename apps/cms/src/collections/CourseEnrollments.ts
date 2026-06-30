@@ -280,6 +280,17 @@ export const CourseEnrollments: CollectionConfig = {
       },
     },
 
+    // === ARCHIVAL ===
+    {
+      name: 'isArchived',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'When true, this enrollment is hidden from the active management view (soft-delete)',
+        position: 'sidebar',
+      },
+    },
+
     // === FLEXIBLE METADATA ===
     {
       name: 'metadata',
@@ -367,6 +378,12 @@ export const CourseEnrollments: CollectionConfig = {
         const currentStatus = typeof doc.status === 'string' ? doc.status : ''
         const previousStatus = typeof previousDoc?.status === 'string' ? previousDoc.status : ''
         const payload = req.payload
+        const isAdminSource = (req as any)?.context?.source === 'admin'
+
+        if (isAdminSource) return
+        if (currentStatus === 'dropped' || currentStatus === 'expired' || currentStatus === 'suspended') {
+          return
+        }
 
         try {
           const recognitionTrigger =
