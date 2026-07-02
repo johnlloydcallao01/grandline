@@ -42,3 +42,29 @@ export async function getBudgetVsActual(query: { search?: string; page?: number;
   params.set('page', String(query.page || 1)); params.set('limit', '10');
   return fetchAccountingAdmin<BudgetVsActualResponse>(`/accounting/budget-vs-actual?${params.toString()}`);
 }
+
+export type PpMetric = { id: string; label: string; value: number | string; change: string; trend: 'up' | 'down' | 'neutral'; };
+export type PpFilterOption = { label: string; value: string };
+
+export type ProjectProfitabilityRow = {
+  id: string; projectId: string; projectCode: string; projectName: string; status: string; statusLabel: string;
+  revenue: number; totalCost: number; grossProfit: number; grossMarginPercent: number;
+  profitable: boolean; varianceStatus: string;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type ProjectProfitabilityResponse = {
+  section: { id: string; label: string; description: string; searchPlaceholder: string; filters: { statuses: PpFilterOption[]; quickFilters: PpFilterOption[] }; metrics: PpMetric[]; table: { title: string; description: string; columns: string[]; rows: ProjectProfitabilityRow[] }; };
+  appliedFilters: { search: string; statuses: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalRows: number; filteredRows: number; totalRevenue: number; totalCost: number; totalGrossProfit: number };
+};
+
+export async function getProjectProfitability(query: { search?: string; page?: number; statuses?: string[]; quickFilters?: string[] } = {}): Promise<ProjectProfitabilityResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const s of query.statuses || []) params.append('status', s);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1)); params.set('limit', '10');
+  return fetchAccountingAdmin<ProjectProfitabilityResponse>(`/accounting/project-profitability?${params.toString()}`);
+}

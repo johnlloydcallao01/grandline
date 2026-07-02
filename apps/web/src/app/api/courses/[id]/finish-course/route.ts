@@ -227,7 +227,7 @@ export async function POST(
         if (isEligible) {
             const updateBody: any = {
                 status: 'completed',
-                completionDate: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
                 finalEvaluation: isPassed ? 'passed' : 'failed'
             }
 

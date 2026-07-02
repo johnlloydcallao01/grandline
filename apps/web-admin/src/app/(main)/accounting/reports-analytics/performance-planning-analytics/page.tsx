@@ -2,38 +2,8 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FileText } from 'lucide-react';
-import { ReportsAnalyticsPage, type ReportsAnalyticsTab } from '../_components/ReportsAnalyticsPage';
 import { BudgetVsActualClient } from './BudgetVsActualClient';
-
-const projectProfitabilityTab: ReportsAnalyticsTab[] = [
-  {
-    id: 'project-profitability',
-    label: 'Project Profitability',
-    description: 'Review project profitability output using project revenue, expenses, payroll cost, time cost, and gross margin.',
-    searchPlaceholder: 'Search project code, project name, status, revenue, cost, or margin',
-    filters: ['Project Profitability', 'Active', 'Positive Margin', 'Negative Margin'],
-    actions: [
-      { label: 'Open Project Report', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Projects', icon: 'refresh', variant: 'secondary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Projects In Scope', value: '9', change: 'Projects with profitability data available', trend: 'up' },
-      { label: 'Revenue', value: 'PHP 9.86M', change: 'Posted invoice revenue linked to projects', trend: 'up' },
-      { label: 'Total Cost', value: 'PHP 6.24M', change: 'Expense, payroll, and time cost combined', trend: 'up' },
-      { label: 'Gross Profit', value: 'PHP 3.62M', change: 'Profitability service output', trend: 'neutral' },
-    ],
-    tableTitle: 'Project Profitability Analysis',
-    tableDescription: 'Profitability view aligned to project, invoice, expense, payroll-entry, time-entry, and budget support in apps/cms.',
-    columns: ['Project Code', 'Project Name', 'Revenue', 'Total Cost', 'Gross Profit', 'Status'],
-    rows: [
-      { id: 'pp-1', cells: [{ text: 'PRJ-007', emphasis: true }, 'Maritime Batch 7 Rollout', { text: 'PHP 2,420,000', emphasis: true, align: 'right' }, { text: 'PHP 1,604,400', align: 'right' }, { text: 'PHP 815,600', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
-      { id: 'pp-2', cells: [{ text: 'PRJ-011', emphasis: true }, 'Harbor Expansion Training', { text: 'PHP 1,880,000', emphasis: true, align: 'right' }, { text: 'PHP 1,264,210', align: 'right' }, { text: 'PHP 615,790', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
-      { id: 'pp-3', cells: [{ text: 'PRJ-014', emphasis: true }, 'Simulator Upgrade Support', { text: 'PHP 1,120,000', emphasis: true, align: 'right' }, { text: 'PHP 1,242,330', align: 'right' }, { text: 'PHP -122,330', emphasis: true, align: 'right' }, { text: 'Negative Margin', tone: 'amber' }] },
-      { id: 'pp-4', cells: [{ text: 'PRJ-018', emphasis: true }, 'Corporate Cadet Program', { text: 'PHP 3,140,000', emphasis: true, align: 'right' }, { text: 'PHP 2,126,500', align: 'right' }, { text: 'PHP 1,013,500', emphasis: true, align: 'right' }, { text: 'Profitable', tone: 'green' }] },
-    ],
-  },
-];
+import { ProjectProfitabilityClient } from './ProjectProfitabilityClient';
 
 type TabId = 'budget-vs-actual' | 'project-profitability';
 const TABS = [
@@ -74,11 +44,7 @@ export default function PerformancePlanningAnalyticsPage() {
         </nav>
       </div>
       <div className="mt-6">
-        {activeTab === 'budget-vs-actual' ? (
-          <BudgetVsActualClient />
-        ) : (
-          <ReportsAnalyticsPage eyebrow="" title="" description="" tabs={projectProfitabilityTab} />
-        )}
+        {activeTab === 'budget-vs-actual' ? <BudgetVsActualClient /> : <ProjectProfitabilityClient />}
       </div>
     </div>
   );

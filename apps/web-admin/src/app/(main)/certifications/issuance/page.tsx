@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, CheckCircle, AlertCircle, FileCheck, Info, Search, ChevronDown, Check, X } from 'lucide-react';
 import { getEligibleEnrollments } from './actions';
 
@@ -35,30 +35,51 @@ export default function CertificateIssuancePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // Combobox state
     const [query, setQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const comboboxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const fetchEnrollments = async () => {
-        setIsLoading(true);
+    const fetchEnrollments = useCallback(async (search?: string) => {
+        if (search === undefined) {
+            setIsLoading(true);
+        } else {
+            setIsSearching(true);
+        }
         try {
-            const data = await getEligibleEnrollments();
+            const data = await getEligibleEnrollments(search);
             setEnrollments(data);
         } catch (e: any) {
             console.error('Error fetching enrollments:', e);
             setMessage({ type: 'error', text: 'Failed to load eligible enrollments.' });
         } finally {
             setIsLoading(false);
+            setIsSearching(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchEnrollments();
-    }, []);
+    }, [fetchEnrollments]);
 
-    // Close dropdown when clicking outside
+    useEffect(() => {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+
+        debounceRef.current = setTimeout(() => {
+            fetchEnrollments(query);
+        }, 300);
+
+        return () => {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        };
+    }, [query, fetchEnrollments]);
+
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
@@ -71,20 +92,9 @@ export default function CertificateIssuancePage() {
         };
     }, []);
 
-    // Filter enrollments based on query
-    const filteredEnrollments = query === ''
-        ? enrollments
-        : enrollments.filter((enc) => {
-            const studentUser = typeof enc.student.user === 'object' ? enc.student.user : null;
-            const studentName = studentUser ? `${studentUser.firstName} ${studentUser.lastName}` : `Student #${enc.student.id}`;
-            const courseTitle = enc.course.title || '';
-            const searchString = `${studentName} ${courseTitle}`.toLowerCase();
-            return searchString.includes(query.toLowerCase());
-        });
-
     const handleSelect = (enrollment: Enrollment) => {
-        if (!enrollment.course.certificateTemplate) return; // Prevent selecting invalid options
-        
+        if (!enrollment.course.certificateTemplate) return;
+
         setSelectedEnrollmentId(enrollment.id.toString());
         const studentUser = typeof enrollment.student.user === 'object' ? enrollment.student.user : null;
         const studentName = studentUser ? `${studentUser.firstName} ${studentUser.lastName}` : `Student #${enrollment.student.id}`;
@@ -97,6 +107,12 @@ export default function CertificateIssuancePage() {
         setQuery('');
         setIsOpen(true);
         inputRef.current?.focus();
+    };
+
+    const handleInputChange = (value: string) => {
+        setQuery(value);
+        setIsOpen(true);
+        if (value === '') setSelectedEnrollmentId('');
     };
 
     const [progress, setProgress] = useState(0);
@@ -119,7 +135,6 @@ export default function CertificateIssuancePage() {
                 throw new Error('This course does not have a Certificate Template assigned. Please assign one in the Courses collection first.');
             }
 
-            // Call the proxy endpoint which streams progress
             const response = await fetch('/api/proxy-issuance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -136,14 +151,13 @@ export default function CertificateIssuancePage() {
                 const { value, done: doneReading } = await reader.read();
                 done = doneReading;
                 const chunkValue = decoder.decode(value, { stream: true });
-                
-                // Process NDJSON (Newline Delimited JSON) chunks
+
                 const lines = chunkValue.split('\n').filter(line => line.trim() !== '');
-                
+
                 for (const line of lines) {
                     try {
                         const data = JSON.parse(line);
-                        
+
                         if (data.error) {
                             throw new Error(data.message || 'Server error occurred');
                         }
@@ -160,7 +174,6 @@ export default function CertificateIssuancePage() {
                             fetchEnrollments();
                         }
                     } catch (parseError) {
-                        // Ignore partial JSON chunks if they happen (rare with line splitting)
                         console.warn('Error parsing stream chunk:', parseError);
                     }
                 }
@@ -171,7 +184,6 @@ export default function CertificateIssuancePage() {
             setMessage({ type: 'error', text: e.message || 'An error occurred during issuance.' });
         } finally {
             setIsSubmitting(false);
-            // Reset after a delay
             setTimeout(() => {
                 if (progress >= 100) setProgress(0);
             }, 3000);
@@ -182,7 +194,6 @@ export default function CertificateIssuancePage() {
 
     return (
         <div className="w-full h-full min-h-screen bg-gray-50/50 p-6 md:p-8 space-y-8">
-            {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Certificate Issuance</h1>
@@ -194,10 +205,8 @@ export default function CertificateIssuancePage() {
                 </div>
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                {/* Left Column: Issuance Form */}
+
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
@@ -223,8 +232,7 @@ export default function CertificateIssuancePage() {
                                     <label htmlFor="enrollment-combobox" className="block text-sm font-semibold text-gray-700">
                                         Select Eligible Course Enrollment
                                     </label>
-                                    
-                                    {/* Custom Combobox */}
+
                                     <div className="relative" ref={comboboxRef}>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -237,38 +245,29 @@ export default function CertificateIssuancePage() {
                                                 className="block w-full pl-10 pr-10 py-3 text-base text-gray-900 border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm"
                                                 placeholder="Search by student name or course title..."
                                                 value={query}
-                                                onChange={(event) => {
-                                                    setQuery(event.target.value);
-                                                    setIsOpen(true);
-                                                    if (event.target.value === '') setSelectedEnrollmentId('');
-                                                }}
+                                                onChange={(event) => handleInputChange(event.target.value)}
                                                 onFocus={() => setIsOpen(true)}
                                                 autoComplete="off"
                                             />
                                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
                                                 {selectedEnrollmentId ? (
                                                     <div onClick={handleClear} className="cursor-pointer">
-                                                        <X 
-                                                            className="h-5 w-5 text-gray-400 hover:text-gray-600" 
-                                                        />
+                                                        <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                                                     </div>
                                                 ) : (
-                                                    <div 
+                                                    <div
                                                         className="cursor-pointer"
                                                         onClick={() => {
                                                             setIsOpen(!isOpen);
                                                             if (!isOpen) inputRef.current?.focus();
                                                         }}
                                                     >
-                                                        <ChevronDown 
-                                                            className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} 
-                                                        />
+                                                        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Dropdown List */}
                                         {isOpen && (
                                             <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                                 {isLoading ? (
@@ -276,12 +275,12 @@ export default function CertificateIssuancePage() {
                                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
                                                         Loading...
                                                     </div>
-                                                ) : filteredEnrollments.length === 0 ? (
+                                                ) : enrollments.length === 0 ? (
                                                     <div className="relative cursor-default select-none py-4 px-4 text-gray-500 text-center">
-                                                        No enrollments found.
+                                                        {isSearching ? 'Searching...' : 'No enrollments found.'}
                                                     </div>
                                                 ) : (
-                                                    filteredEnrollments.map((enc) => {
+                                                    enrollments.map((enc) => {
                                                         const studentUser = typeof enc.student.user === 'object' ? enc.student.user : null;
                                                         const studentName = studentUser ? `${studentUser.firstName} ${studentUser.lastName}` : `Student #${enc.student.id}`;
                                                         const hasTemplate = !!enc.course.certificateTemplate;
@@ -344,8 +343,8 @@ export default function CertificateIssuancePage() {
                                 </div>
                                 {isSubmitting && (
                                     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-4">
-                                        <div 
-                                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out" 
+                                        <div
+                                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
                                             style={{ width: `${progress}%` }}
                                         ></div>
                                         <p className="text-xs text-center text-gray-500 mt-1">{Math.round(progress)}% — {progressMessage}</p>
@@ -356,9 +355,7 @@ export default function CertificateIssuancePage() {
                     </div>
                 </div>
 
-                {/* Right Column: Info & Summary */}
                 <div className="space-y-6">
-                    {/* Selected Summary Card */}
                     {selectedEnrollment && (
                         <div className="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden ring-4 ring-blue-50/50">
                             <div className="bg-blue-50/80 p-4 border-b border-blue-100">
@@ -384,7 +381,7 @@ export default function CertificateIssuancePage() {
                                         {selectedEnrollment.completedAt ? new Date(selectedEnrollment.completedAt).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'N/A'}
                                     </div>
                                 </div>
-                                
+
                                 <div className="pt-4 mt-2 border-t border-gray-100">
                                     <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-lg">
                                         <CheckCircle className="w-4 h-4" />
@@ -395,7 +392,6 @@ export default function CertificateIssuancePage() {
                         </div>
                     )}
 
-                    {/* Process Info Card */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                         <div className="p-5 border-b border-gray-100 bg-gray-50/30">
                             <h3 className="font-semibold text-gray-800">Issuance Process</h3>

@@ -4,6 +4,10 @@ import { renderToStream } from '@react-pdf/renderer';
 import { CertificatePDF } from '../components/CertificatePDF';
 import { randomBytes } from 'crypto';
 import { getCmsServerUrl } from '../utils/cms-url';
+import {
+  AccountingCertificateMonetizationService,
+  CERTIFICATE_ACCOUNTING_CONTEXT_KEY,
+} from '../accounting/services/certificates/AccountingCertificateMonetizationService';
 
 export const generateCertificateEndpoint = async (req: PayloadRequest) => {
   const encoder = new TextEncoder();
@@ -210,6 +214,9 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
       await sendProgress(80, 'Creating certificate record...');
 
       // 6. Create Certificate Record
+      // Pass context to skip the synchronous afterChange accounting hook.
+      // Accounting will be deferred and run asynchronously after the stream ends,
+      // so it does not block the progress bar or the issuance response.
       const certificate = await payload.create({
           collection: 'certificates',
           data: {
@@ -228,11 +235,17 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
               status: 'active'
           },
           overrideAccess: true,
+          context: {
+              [CERTIFICATE_ACCOUNTING_CONTEXT_KEY]: true,
+          },
       });
 
       await sendProgress(90, 'Finalizing enrollment...');
 
       // 7. Update Enrollment Status
+      // Use context.source = 'admin' to skip the enrollment afterChange hook
+      // (which would otherwise fire a redundant third accounting sync).
+      // The deferred certificate accounting call below handles all enrollment artifacts.
       await payload.update({
           collection: 'course-enrollments',
           id: enrollment.id,
@@ -240,6 +253,9 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
               certificateIssued: true
           },
           overrideAccess: true,
+          context: {
+              source: 'admin',
+          },
       });
 
       await sendProgress(100, 'Certificate generated successfully', {
@@ -249,6 +265,17 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
       });
 
       await writer.close();
+
+      // Deferred accounting: run after the stream is fully closed so it never
+      // blocks the issuance progress bar. Fire-and-forget — errors are logged
+      // but never surface to the caller.
+      AccountingCertificateMonetizationService.syncCertificateAccounting({
+          payload,
+          certificateId: certificate.id,
+          userId: user?.id,
+      }).catch((err) => {
+          console.error('[generate-certificate] Background accounting sync failed:', err)
+      })
 
     } catch (error: any) {
       console.error('Error generating certificate:', error);

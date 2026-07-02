@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
+import { cachedPayloadFind } from '@/utils/redis-cache'
 
-// GET /api/lms/announcements - Get announcements for a trainee's enrolled courses
 export async function GET(request: NextRequest) {
   try {
     const payload = await getPayload({ config: configPromise })
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const traineesForUser = await payload.find({
+    const traineesForUser = await cachedPayloadFind(payload, {
       collection: 'trainees',
       where: {
         user: { equals: userId },
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       ;(enrollmentWhere as any).course = { equals: course }
     }
 
-    const enrollments = await payload.find({
+    const enrollments = await cachedPayloadFind(payload, {
       collection: 'course-enrollments',
       where: enrollmentWhere,
       depth: 1,
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const announcements = await payload.find({
+    const announcements = await cachedPayloadFind(payload, {
       collection: 'announcements',
       where: {
         course: { in: courseIds },
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       limit,
       depth: 2,
       overrideAccess: true,
-    })
+    }, 120)
 
     return NextResponse.json({
       docs: announcements.docs,

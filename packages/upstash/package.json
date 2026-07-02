@@ -1,0 +1,23 @@
+{
+  "name": "@encreasl/upstash",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@upstash/ratelimit": "^2",
+    "@upstash/redis": "^1"
+  },
+  "devDependencies": {
+    "@encreasl/eslint-config": "workspace:*",
+    "@encreasl/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "eslint": "^9",
+    "typescript": "^5"
+  }
+}

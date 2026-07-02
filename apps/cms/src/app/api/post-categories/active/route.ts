@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { getActiveAssignedPostCategories } from '../../../../endpoints/post-categories-active'
 import { isAuthorizedServiceRequest } from '../../_utils/service-api-key'
+import { cacheEndpoint } from '@/utils/redis-cache'
 
 export async function GET(request: NextRequest) {
     try {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
         if (!isAuthorizedServiceRequest(request, process.env.PAYLOAD_API_KEY)) {
             return NextResponse.json({ error: 'Access denied' }, { status: 403 })
         }
-        const result = await getActiveAssignedPostCategories(payload)
+        const result = await cacheEndpoint('post-categories-active', () => getActiveAssignedPostCategories(payload))
         return NextResponse.json(result)
     } catch (error) {
         console.error('Error fetching assigned post categories:', error)

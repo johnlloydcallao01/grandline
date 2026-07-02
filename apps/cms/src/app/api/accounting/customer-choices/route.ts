@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ACCOUNTING_COLLECTION_SLUGS } from '@/accounting/constants/accounting'
 import { handleAccountingApiError, requireAccountingAdmin } from '../_utils/auth'
+import { cachedPayloadFind } from '@/utils/redis-cache'
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
       } as never
     }
 
-    const result = await payload.find({
+    const result = await cachedPayloadFind(payload, {
       collection: ACCOUNTING_COLLECTION_SLUGS.customers,
       where,
       limit: 10000,
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       overrideAccess: true,
     })
 
-    const choices = result.docs.map((d) => ({
+    const choices = result.docs.map((d: any) => ({
       value: d.id,
       label: `${(d as unknown as { customerCode?: string }).customerCode || ''} — ${(d as unknown as { displayName?: string }).displayName || ''}`,
     }))

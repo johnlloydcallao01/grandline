@@ -488,7 +488,7 @@ export default function CoursePlayerLayout({
       totalItems: total,
       progressLabel: 'learning items'
     };
-  }, [flatItems, currentItem, evaluationMode, completedLessonIds]);
+  }, [flatItems, currentItem, evaluationMode, completedLessonIds, submissionHistory]);
 
   useEffect(() => {
     if (!courseId || progressPercent === undefined || !mounted) return;
@@ -671,7 +671,7 @@ export default function CoursePlayerLayout({
   const confirmFinishCourse = async () => {
     setIsFinishConfirmationOpen(false);
 
-    if (course?.feedbackForm && typeof course.feedbackForm === 'object' && course.isFeedbackRequired) {
+    if (course?.feedbackForm && typeof course.feedbackForm === 'object' && course.isFeedbackRequired && !hasSubmittedFeedback) {
       router.push(`/portal/courses/${courseId}/player/feedback`);
       return;
     }

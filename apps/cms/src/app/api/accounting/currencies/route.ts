@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { handleAccountingApiError, requireAccountingAdmin } from '../_utils/auth'
+import { cachedPayloadFind } from '@/utils/redis-cache'
 
 export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
-    const records = await payload.find({
+    const records = await cachedPayloadFind(payload, {
       collection: 'accounting-currencies',
       depth: 0,
       sort: 'code',

@@ -13,6 +13,7 @@ import { runInBackground } from './utils/background-task'
 import { getRequestMetadata } from './utils/request-metadata'
 import { sendResendEmail } from './utils/resend-email'
 import { createUserSecurityEvent } from './utils/user-security-events'
+import { createCacheInvalidationHooks, checkRateLimit } from './utils/redis-cache'
 
 import { Users } from './collections/Users'
 import { Instructors } from './collections/Instructors'
@@ -289,14 +290,49 @@ const lockDocumentAllowList = new Set<string>([
 // re-enable it intentionally through env if concurrent editing is ever truly needed.
 const enableDocumentLocks = parseBooleanEnv(process.env.PAYLOAD_ENABLE_DOCUMENT_LOCKS, false)
 
-const cmsCollections: CollectionConfig[] = rawCmsCollections.map((collection) =>
-  enableDocumentLocks && lockDocumentAllowList.has(collection.slug)
-    ? collection
-    : {
-      ...collection,
+const cacheInvalidationSlugs = new Set<string>([
+  'courses',
+  'course-categories',
+  'posts',
+  'post-categories',
+  'course-modules',
+  'course-lessons',
+  'materials',
+  'announcements',
+])
+
+const cmsCollections: CollectionConfig[] = rawCmsCollections.map((collection) => {
+  let result = collection
+
+  if (!(enableDocumentLocks && lockDocumentAllowList.has(collection.slug))) {
+    result = {
+      ...result,
       lockDocuments: false,
-    },
-)
+    }
+  }
+
+  if (cacheInvalidationSlugs.has(collection.slug)) {
+    const invalidateHooks = createCacheInvalidationHooks(collection.slug)
+    const existingHooks = result.hooks || {}
+
+    result = {
+      ...result,
+      hooks: {
+        ...existingHooks,
+        afterChange: [
+          ...(existingHooks.afterChange || []),
+          ...invalidateHooks.afterChange,
+        ],
+        afterDelete: [
+          ...(existingHooks.afterDelete || []),
+          ...invalidateHooks.afterDelete,
+        ],
+      },
+    }
+  }
+
+  return result
+})
 
 const cmsGlobals: GlobalConfig[] = [
   {
@@ -441,6 +477,14 @@ export default buildConfig({
         const requestId = crypto.randomUUID()
         const startTime = Date.now()
         const { ipAddress, userAgent } = getRequestMetadata(req)
+
+        const rateLimit = await checkRateLimit(req)
+        if (!rateLimit.allowed) {
+          return new Response(
+            JSON.stringify({ message: 'Too many requests. Please try again later.', retryAfter: rateLimit.retryAfter }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) } }
+          )
+        }
 
         try {
           const body = await (req as any).json()
@@ -634,6 +678,14 @@ export default buildConfig({
         const startTime = Date.now()
         const { ipAddress, userAgent } = getRequestMetadata(req)
 
+        const rateLimit = await checkRateLimit(req)
+        if (!rateLimit.allowed) {
+          return new Response(
+            JSON.stringify({ message: 'Too many requests. Please try again later.', retryAfter: rateLimit.retryAfter }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) } }
+          )
+        }
+
         try {
           const body = await (req as any).json()
           const email = String(body?.email || '').trim().toLowerCase()
@@ -826,6 +878,14 @@ export default buildConfig({
         const startTime = Date.now()
         const { ipAddress, userAgent } = getRequestMetadata(req)
 
+        const rateLimit = await checkRateLimit(req)
+        if (!rateLimit.allowed) {
+          return new Response(
+            JSON.stringify({ message: 'Too many requests. Please try again later.', retryAfter: rateLimit.retryAfter }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) } }
+          )
+        }
+
         try {
           const body = await (req as any).json()
           const email = String(body?.email || '').trim().toLowerCase()
@@ -1016,6 +1076,14 @@ export default buildConfig({
       handler: (async (req: PayloadRequest) => {
         const requestId = crypto.randomUUID();
 
+        const rateLimit = await checkRateLimit(req, { window: '60 s', limit: 5 })
+        if (!rateLimit.allowed) {
+          return new Response(
+            JSON.stringify({ message: 'Too many requests. Please try again later.', retryAfter: rateLimit.retryAfter }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) } }
+          )
+        }
+
         try {
           const body = await (req as any).json();
           const rawEmail = body?.email ?? body?.Email ?? body?.username ?? '';
@@ -1145,6 +1213,14 @@ export default buildConfig({
       path: '/reset-password',
       method: 'post',
       handler: (async (req: PayloadRequest) => {
+        const rateLimit = await checkRateLimit(req, { window: '60 s', limit: 5 })
+        if (!rateLimit.allowed) {
+          return new Response(
+            JSON.stringify({ message: 'Too many requests. Please try again later.', retryAfter: rateLimit.retryAfter }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimit.retryAfter) } }
+          )
+        }
+
         try {
           const body = await (req as any).json();
           const rawToken = String(body?.token || '').trim();
