@@ -125,9 +125,9 @@ function PostsPageContent() {
   };
 
   return (
-    <div className="py-8">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Blog Posts</h1>
           <p className="text-gray-600 mt-1">Manage your blog content</p>
@@ -214,16 +214,16 @@ function PostsPageContent() {
             <div className="divide-y divide-gray-200">
               {posts.map((post: Post) => (
                 <div key={post.id} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center flex-wrap gap-2">
                         <h3 className="text-sm font-medium text-gray-900 truncate">
                           {post.title}
                         </h3>
                         {getStatusBadge(post.status)}
                       </div>
 
-                      <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
                         <span>
                           By {typeof post.author === 'object' && post.author ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() || 'Unknown Author' : 'Unknown Author'}
                         </span>
@@ -239,7 +239,7 @@ function PostsPageContent() {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-end sm:justify-start space-x-2">
                       <Link
                         href={`/posts/${post.id}/preview`}
                         className="p-2 text-gray-400 hover:text-gray-600"

@@ -706,11 +706,11 @@ export default function AssignUnassignPage() {
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <p className="text-sm text-gray-500">
                 Showing {((currentPage - 1) * 10) + 1}{'\u2013'}{Math.min(currentPage * 10, totalDocs)} of {totalDocs} enrollments
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-wrap">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage <= 1}

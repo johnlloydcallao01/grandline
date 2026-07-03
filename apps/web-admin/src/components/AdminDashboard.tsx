@@ -12,6 +12,9 @@ interface AdminDashboardProps {
 interface DashboardContextType {
   sidebarOpen: boolean;
   toggleSidebar: () => void;
+  mobileSidebarOpen: boolean;
+  toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -33,6 +36,7 @@ export function useDashboard() {
 export function AdminDashboard({ children }: AdminDashboardProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Check if we are on the builder page
   const isBuilderPage = pathname?.startsWith('/certifications/builder');
@@ -45,8 +49,31 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
     }
   }, [isBuilderPage]);
 
+  // Close the mobile drawer whenever the route changes
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when the mobile drawer is open
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSidebarOpen]);
+
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
+  };
+
+  const toggleMobileSidebar = () => {
+    setMobileSidebarOpen(prev => !prev);
+  };
+
+  const closeMobileSidebar = () => {
+    setMobileSidebarOpen(false);
   };
 
   const handleSearch = (_query: string) => {
@@ -56,6 +83,9 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
   const dashboardValue: DashboardContextType = {
     sidebarOpen,
     toggleSidebar,
+    mobileSidebarOpen,
+    toggleMobileSidebar,
+    closeMobileSidebar,
   };
 
   return (
@@ -65,6 +95,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
           <Header
             sidebarOpen={sidebarOpen}
             onToggleSidebar={toggleSidebar}
+            onToggleMobileSidebar={toggleMobileSidebar}
             onSearch={handleSearch}
           />
         )}
@@ -78,11 +109,13 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
             <Sidebar
               isOpen={sidebarOpen}
               onToggle={toggleSidebar}
+              mobileOpen={mobileSidebarOpen}
+              onCloseMobile={closeMobileSidebar}
             />
           )
         )}
         <main className={`transition-all duration-300 ${!isBuilderPage && sidebarOpen ? 'lg:ml-60' : !isBuilderPage ? 'lg:ml-20' : ''}`}>
-          <div className={`min-h-full ${!isBuilderPage ? 'px-[10px]' : ''}`}>
+          <div className={`min-h-full ${!isBuilderPage ? 'px-3 py-4 sm:px-[10px] sm:py-0' : ''}`}>
             {children || <DefaultDashboardContent />}
           </div>
         </main>

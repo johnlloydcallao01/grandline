@@ -39,8 +39,8 @@ export default function NotificationsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8">
+            <div className="border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <nav className="-mb-px flex space-x-8 overflow-x-auto">
                     {[
                         { id: 'email', label: 'Email Notifications', icon: Mail },
                         { id: 'in-app', label: 'In-App Notifications', icon: Bell },
@@ -104,6 +104,7 @@ function EmailNotificationsList() {
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr>
@@ -164,6 +165,7 @@ function EmailNotificationsList() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }
@@ -178,6 +180,7 @@ function InAppNotificationsList() {
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr>
@@ -220,6 +223,7 @@ function InAppNotificationsList() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

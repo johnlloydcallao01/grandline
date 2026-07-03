@@ -60,3 +60,66 @@ export async function approveRequest(approvalRequestId: string, notes?: string):
 export async function rejectRequest(approvalRequestId: string, notes?: string): Promise<void> {
   await postAccountingAdmin<void>(`/accounting/approvals/requests/${encodeURIComponent(approvalRequestId)}/reject`, { notes: notes || null });
 }
+
+export type EntityLookupRow = { entityId: string; label: string };
+export type EntityLookupResponse = { rows: EntityLookupRow[] };
+
+export async function lookupEntities(entityType: string, search?: string): Promise<EntityLookupResponse> {
+  const params = new URLSearchParams();
+  params.set('entityType', entityType);
+  if (search?.trim()) params.set('search', search.trim());
+  return fetchAccountingAdmin<EntityLookupResponse>(`/accounting/entity-lookup?${params.toString()}`);
+}
+
+export type ArReqMetric = { id: string; label: string; value: number | string; change: string; trend: 'up' | 'down' | 'neutral'; };
+export type ArReqFilterOption = { label: string; value: string };
+
+export type ApprovalRequestRow = {
+  id: string; approvalId: string; workflowName: string; entityType: string; entityTypeLabel: string;
+  entityId: string; status: string; statusLabel: string; statusTone: string;
+  requestedBy: string; currentApprover: string; requestedAt: string | null; requestedAtLabel: string;
+  resolvedAt: string | null; resolvedAtLabel: string; trailCount: number;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type ApprovalRequestsResponse = {
+  section: { id: string; label: string; description: string; searchPlaceholder: string; filters: { statuses: ArReqFilterOption[]; quickFilters: ArReqFilterOption[] }; metrics: ArReqMetric[]; table: { title: string; description: string; columns: string[]; rows: ApprovalRequestRow[] }; };
+  appliedFilters: { search: string; statuses: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalRows: number; filteredRows: number; pendingCount: number; approvedCount: number; rejectedCount: number };
+};
+
+export async function getApprovalRequests(query: { search?: string; page?: number; statuses?: string[]; quickFilters?: string[] } = {}): Promise<ApprovalRequestsResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const s of query.statuses || []) params.append('status', s);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1)); params.set('limit', '10');
+  return fetchAccountingAdmin<ApprovalRequestsResponse>(`/accounting/approval-requests?${params.toString()}`);
+}
+
+export type RtMetric = { id: string; label: string; value: number | string; change: string; trend: 'up' | 'down' | 'neutral'; };
+export type RtFilterOption = { label: string; value: string };
+
+export type ResolutionTrailRow = {
+  id: string; requestId: string; entityId: string; stepNumber: number | null;
+  approver: string; decision: string; decisionLabel: string; decisionTone: string;
+  notes: string; actedAt: string | null; actedAtLabel: string;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type ResolutionTrailResponse = {
+  section: { id: string; label: string; description: string; searchPlaceholder: string; filters: { decisions: RtFilterOption[]; quickFilters: RtFilterOption[] }; metrics: RtMetric[]; table: { title: string; description: string; columns: string[]; rows: ResolutionTrailRow[] }; };
+  appliedFilters: { search: string; decisions: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalRows: number; filteredRows: number; approvedSteps: number; rejectedSteps: number; withNotes: number };
+};
+
+export async function getResolutionTrail(query: { search?: string; page?: number; decisions?: string[]; quickFilters?: string[] } = {}): Promise<ResolutionTrailResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const d of query.decisions || []) params.append('decision', d);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1)); params.set('limit', '10');
+  return fetchAccountingAdmin<ResolutionTrailResponse>(`/accounting/resolution-trail?${params.toString()}`);
+}

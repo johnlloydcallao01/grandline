@@ -5,13 +5,26 @@ import { usePathname } from 'next/navigation';
 import { SidebarProps } from '@/types';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 import Link from '@/components/ui/LinkWrapper';
+import { useMediaQuery } from '@/hooks';
 
 /**
  * Sidebar component with navigation items for Admin Panel
  * Restructured to match the 12-section hierarchy
+ *
+ * Responsive behavior:
+ * - Mobile (<lg): behaves as a slide-in drawer. `mobileOpen` controls visibility
+ *   (translate-x-0 when open, -translate-x-full when closed). A backdrop overlay
+ *   is rendered behind it. Always full-width (w-64) on mobile.
+ * - Desktop (lg+): always visible, collapsible between w-60 (expanded) and w-20
+ *   (collapsed) based on `isOpen`.
  */
-export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = false, onCloseMobile }: SidebarProps & { mobileOpen?: boolean; onCloseMobile?: () => void }) {
     const pathname = usePathname();
+    const isDesktop = useMediaQuery('(min-width: 1024px)');
+
+    // On mobile the drawer should always render expanded (labels visible).
+    // On desktop, honor the collapse state.
+    const expanded = isDesktop ? isOpen : true;
 
     const [isEnrollmentsExpanded, setIsEnrollmentsExpanded] = React.useState(
         pathname?.startsWith('/enrollments') ?? false
@@ -99,12 +112,22 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
     }, [hasActiveCmsBlogPostsChild]);
 
     return (
+        <>
+        {/* Mobile backdrop overlay - only visible on small screens when drawer is open */}
+        {mobileOpen && (
+            <div
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                onClick={onCloseMobile}
+                aria-hidden="true"
+            />
+        )}
         <aside
             data-sidebar="admin"
-            className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-40 hidden lg:block ${isOpen
-                ? 'w-60 translate-x-0'
-                : 'w-20 translate-x-0'
-                }`}
+            className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
+                // Mobile drawer: full-width, slides in/out
+                w-64 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+                // Desktop: always visible, collapsible width
+                lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
             style={{
                 height: 'calc(100vh - 4rem)', // 4rem is header height
                 top: '4rem', // Position below header
@@ -118,32 +141,32 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
 
                     {/* 1. DASHBOARD & ANALYTICS */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard & Analytics</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard & Analytics</div>}
                         <SidebarItem
                             icon="overview"
                             label="Overview"
                             active={pathname === '/' || pathname === '/dashboard'}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/dashboard"
                         />
                         <SidebarItem
                             icon="report"
                             label="Reports"
                             active={pathname?.startsWith('/reports')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/reports"
                         />
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200" />}
 
                     {/* 2. COURSE MANAGEMENT */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core LMS</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core LMS</div>}
                         <SidebarDropdownGroup
                             icon="team"
                             label="Enrollments"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isEnrollmentsExpanded}
                             onToggle={() => setIsEnrollmentsExpanded((current) => !current)}
                             active={pathname?.startsWith('/enrollments') ?? false}
@@ -170,7 +193,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         <SidebarDropdownGroup
                             icon="products"
                             label="Course Manager"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isCourseManagerExpanded}
                             onToggle={() => setIsCourseManagerExpanded((current) => !current)}
                             active={hasActiveCourseManagerChild}
@@ -242,7 +265,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         <SidebarDropdownGroup
                             icon="grade"
                             label="Gradebook"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isGradebookExpanded}
                             onToggle={() => setIsGradebookExpanded((current) => !current)}
                             active={hasActiveGradebookChild}
@@ -269,7 +292,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         <SidebarDropdownGroup
                             icon="certificate"
                             label="Certification"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isCertificationExpanded}
                             onToggle={() => setIsCertificationExpanded((current) => !current)}
                             active={hasActiveCertificationChild}
@@ -306,13 +329,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             icon="review"
                             label="Feedback & Reviews"
                             active={pathname?.startsWith('/reviews')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/reviews"
                         />
                         <SidebarDropdownGroup
                             icon="users"
                             label="Users"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isUsersExpanded}
                             onToggle={() => setIsUsersExpanded((current) => !current)}
                             active={hasActiveUsersChild}
@@ -347,15 +370,15 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         </SidebarDropdownGroup>
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200" />}
 
                     {/* 3. CMS */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">CMS</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">CMS</div>}
                         <SidebarDropdownGroup
                             icon="media"
                             label="Media Files"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isCmsMediaExpanded}
                             onToggle={() => setIsCmsMediaExpanded((current) => !current)}
                             active={hasActiveCmsMediaChild}
@@ -382,7 +405,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                         <SidebarDropdownGroup
                             icon="posts"
                             label="Blog Posts"
-                            isOpen={isOpen}
+                            isOpen={expanded}
                             isExpanded={isCmsBlogPostsExpanded}
                             onToggle={() => setIsCmsBlogPostsExpanded((current) => !current)}
                             active={hasActiveCmsBlogPostsChild}
@@ -428,84 +451,84 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                             icon="review"
                             label="Comments"
                             active={pathname?.startsWith('/cms/comments')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/cms/comments"
                         />
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200" />}
 
                     {/* 5. COMMUNICATIONS */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communications</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communications</div>}
                         <SidebarItem
                             icon="notifications"
                             label="Notifications"
                             active={pathname?.startsWith('/notifications')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/notifications"
                         />
                         <SidebarItem
                             icon="announcement"
                             label="Announcements"
                             active={pathname?.startsWith('/announcements')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/announcements"
                         />
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200" />}
 
                     {/* 9. MARKETING */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</div>}
                         <SidebarItem
                             icon="promotion"
                             label="Coupons"
                             active={pathname?.startsWith('/business/coupons')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/business/coupons"
                         />
                         <SidebarItem
                             icon="payout"
                             label="Payouts"
                             active={pathname === '/instructors/payouts'}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/instructors/payouts"
                         />
                         <SidebarItem
                             icon="transaction"
                             label="Accounting Dashboard"
                             active={pathname?.startsWith('/accounting')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/accounting/dashboard"
                         />
                     </div>
 
-                    {isOpen && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200" />}
 
                     {/* 10. SYSTEM SETTINGS */}
                     <div className="space-y-1">
-                        {isOpen && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System Settings</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System Settings</div>}
                         <SidebarItem
                             icon="settings"
                             label="General Settings"
                             active={pathname === '/settings'}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/settings"
                         />
                         <SidebarItem
                             icon="users"
                             label="Users"
                             active={pathname?.startsWith('/users')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/users"
                         />
                         <SidebarItem
                             icon="security"
                             label="Security"
                             active={pathname?.startsWith('/settings/security')}
-                            collapsed={!isOpen}
+                            collapsed={!expanded}
                             href="/settings/security"
                         />
                     </div>
@@ -513,5 +536,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps)
                 </nav>
             </div>
         </aside>
+        </>
     );
 }

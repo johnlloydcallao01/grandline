@@ -14,6 +14,7 @@ export interface SidebarItemProps {
 export interface HeaderProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
+  onToggleMobileSidebar?: () => void;
   onSearch?: (query: string) => void;
 }
 

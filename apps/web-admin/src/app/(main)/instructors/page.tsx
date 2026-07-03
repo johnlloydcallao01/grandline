@@ -27,8 +27,8 @@ export default function InstructorsPage() {
 
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 {/* Tabs */}
-                <div className="border-b border-gray-200 px-6">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                <div className="border-b border-gray-200 px-4 sm:px-6">
+                    <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
                         <button className="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                             All Instructors
                         </button>
@@ -61,6 +61,7 @@ export default function InstructorsPage() {
                 </div>
 
                 {/* Table */}
+                <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -119,6 +120,7 @@ export default function InstructorsPage() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

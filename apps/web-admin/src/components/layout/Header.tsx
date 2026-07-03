@@ -17,6 +17,7 @@ import { getCMSImageUrl } from '@/lib/cms';
 export function Header({
   sidebarOpen,
   onToggleSidebar,
+  onToggleMobileSidebar,
   onSearch
 }: HeaderProps) {
   const { siteName, logoUrl } = useSiteSettings();
@@ -76,12 +77,24 @@ export function Header({
   return (
     <>
       <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
-        <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center justify-between px-3 py-2 sm:px-4 gap-2">
         {/* Left section */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+          {/* Mobile menu button - toggles the slide-in drawer */}
+          <button
+            onClick={onToggleMobileSidebar}
+            className="p-2 hover:bg-gray-100 rounded-full text-gray-800 transition-colors lg:hidden"
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          {/* Desktop collapse button - toggles the sidebar width */}
           <button
             onClick={onToggleSidebar}
-            className={`p-2 hover:bg-gray-100 rounded-full text-gray-800 transition-colors ${
+            className={`hidden lg:inline-flex p-2 hover:bg-gray-100 rounded-full text-gray-800 transition-colors ${
               sidebarOpen ? 'bg-gray-50' : ''
             }`}
             aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
@@ -91,23 +104,23 @@ export function Header({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <div className="flex items-center space-x-2">
-            <div className="relative w-12 h-12">
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0">
               <Image
                 src={logoUrl || "/calsiter-inc-logo.png"}
                 alt={`${siteName} Logo`}
                 fill
-                sizes="(max-width: 768px) 48px, 48px"
+                sizes="(max-width: 640px) 40px, 48px"
                 className="object-contain"
                 priority
               />
             </div>
-            <span className="text-xl font-semibold text-gray-900">{siteName}</span>
+            <span className="text-lg sm:text-xl font-semibold text-gray-900 truncate hidden sm:inline">{siteName}</span>
           </div>
         </div>
 
-        {/* Center search */}
-        <div className="flex-1 max-w-2xl mx-8">
+        {/* Center search - hidden on small screens to preserve header space */}
+        <div className="hidden md:block flex-1 max-w-2xl mx-4 lg:mx-8">
           <form onSubmit={handleSearch} className="flex">
             <div className="flex-1 relative">
               <input
@@ -120,7 +133,7 @@ export function Header({
             </div>
             <button 
               type="submit"
-              className="px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700"
+              className="px-4 sm:px-6 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 text-gray-700"
               aria-label="Search"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +144,7 @@ export function Header({
         </div>
 
         {/* Right section */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 shrink-0">
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -158,7 +171,7 @@ export function Header({
 
             {/* Dropdown Menu */}
             {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   {isLoading ? (

@@ -46,7 +46,7 @@ export default function ReviewsPage() {
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                     <div className="flex items-start justify-between">
                         <div>

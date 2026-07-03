@@ -27,7 +27,7 @@ export default function TraineeAccountsPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Trainee Accounts</h1>
                     <p className="text-gray-600 mt-1">Manage trainee profiles, accounts, and enrollment status</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm">
                         <Upload className="h-4 w-4 mr-2" />
                         Import
@@ -157,7 +157,7 @@ export default function TraineeAccountsPage() {
                 </div>
                 {/* Pagination */}
                 <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 flex items-center justify-between">
-                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div className="flex flex-col sm:flex-row flex-1 sm:flex sm:items-center sm:justify-between gap-3">
                         <div>
                             <p className="text-sm text-gray-700">
                                 Showing <span className="font-medium">1</span> to <span className="font-medium">6</span> of <span className="font-medium">24</span> results

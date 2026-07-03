@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, ArrowDownRight, ArrowUpRight, Check, Download, Eye, Filter, Plus, RefreshCw, Search, Wallet, X } from 'lucide-react';
-import { getApprovalQueue, createApprovalRequest, approveRequest, rejectRequest, type ApprovalQueueResponse, type ApprovalQueueRow, type AqMetric } from './actions';
+import { getApprovalQueue, createApprovalRequest, approveRequest, rejectRequest, lookupEntities, type ApprovalQueueResponse, type ApprovalQueueRow, type AqMetric, type EntityLookupRow } from './actions';
 
 function getActionClasses(v: 'primary' | 'secondary' | 'ghost' = 'secondary') { if (v === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700'; if (v === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900'; return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'; }
 function getMetricTone(t: AqMetric['trend']) { if (t === 'down') return 'text-red-600 bg-red-50'; if (t === 'neutral') return 'text-gray-600 bg-gray-100'; return 'text-green-600 bg-green-50'; }
@@ -18,7 +18,6 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
 }
 
 function FormField({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) { return <div className="space-y-1.5"><label className="block text-sm font-medium text-gray-700">{label}{required && <span className="ml-0.5 text-red-500">*</span>}</label>{children}</div>; }
-function Input({ value, onChange, placeholder, type = 'text', required }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean }) { return <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />; }
 
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: 'up' | 'down' | 'neutral' }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
@@ -67,8 +66,19 @@ export function ApprovalQueueClient() {
   const [createEntityType, setCreateEntityType] = useState('invoice');
   const [createEntityId, setCreateEntityId] = useState('');
   const [createNotes, setCreateNotes] = useState('');
+  const [allEntities, setAllEntities] = useState<EntityLookupRow[]>([]);
 
-  // Approve
+  const loadEntities = async (type: string) => {
+    setCreateEntityId('');
+    try { const r = await lookupEntities(type); setAllEntities(r.rows); }
+    catch { setAllEntities([]); }
+  };
+
+  const entityOptions = [{ label: 'Select an entity ID...', value: '' }].concat(
+    allEntities.map((e) => ({ label: e.entityId, value: e.entityId })),
+  );
+
+  const handleOpenCreate = () => { setCreateEntityType('invoice'); setCreateEntityId(''); setCreateNotes(''); setAllEntities([]); setCreateErr(null); setIsCreateOpen(true); loadEntities('invoice'); };
   const [approveTarget, setApproveTarget] = useState<ApprovalQueueRow | null>(null);
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isApproveSubmitting, setIsApproveSubmitting] = useState(false);
@@ -102,8 +112,6 @@ export function ApprovalQueueClient() {
   };
 
   const handleViewRow = (row: ApprovalQueueRow) => { setViewRow(row); setIsViewOpen(true); };
-
-  const handleOpenCreate = () => { setCreateEntityType('invoice'); setCreateEntityId(''); setCreateNotes(''); setCreateErr(null); setIsCreateOpen(true); };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setCreateErr(null); setIsCreateSubmitting(true);
@@ -168,8 +176,12 @@ export function ApprovalQueueClient() {
         <form onSubmit={handleCreateSubmit} className="space-y-6">
           {createErr && <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{createErr}</div>}
           <div className="space-y-4">
-            <FormField label="Entity Type" required><select value={createEntityType} onChange={(e) => setCreateEntityType(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">{ENTITY_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></FormField>
-            <FormField label="Entity ID" required><Input value={createEntityId} onChange={setCreateEntityId} placeholder="e.g. INV-2026-0418" required /></FormField>
+            <FormField label="Entity Type" required><select value={createEntityType} onChange={(e) => { setCreateEntityType(e.target.value); loadEntities(e.target.value); }} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">{ENTITY_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></FormField>
+            <FormField label="Entity ID" required>
+              <select value={createEntityId} onChange={(e) => setCreateEntityId(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                {entityOptions.map((opt) => (<option key={opt.value || '__empty'} value={opt.value}>{opt.label}</option>))}
+              </select>
+            </FormField>
             <FormField label="Notes"><textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} placeholder="Optional notes..." className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none" /></FormField>
           </div>
           <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4"><button type="button" onClick={() => setIsCreateOpen(false)} disabled={isCreateSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">Cancel</button><button type="submit" disabled={isCreateSubmitting} className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}>{isCreateSubmitting ? 'Submitting...' : 'Submit Request'}</button></div>

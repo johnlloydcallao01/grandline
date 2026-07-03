@@ -39,10 +39,10 @@ export default function GeneralSettingsPage() {
         <p className="text-gray-600 mt-1">Manage site configuration and email preferences</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6" aria-label="Tabs">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-4 sm:px-6 overflow-x-auto" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (

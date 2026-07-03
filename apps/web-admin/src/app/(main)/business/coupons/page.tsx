@@ -29,8 +29,8 @@ export default function CouponsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8">
+            <div className="border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <nav className="-mb-px flex space-x-8 overflow-x-auto">
                     {[
                         { id: 'coupons', label: 'Coupons & Discounts', icon: Ticket },
                         { id: 'campaigns', label: 'Email Campaigns', icon: Mail },
@@ -65,8 +65,8 @@ export default function CouponsPage() {
 function CouponsList() {
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="relative flex-1 max-w-md w-full">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
@@ -74,12 +74,13 @@ function CouponsList() {
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm">
+                <button className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Coupon
                 </button>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -121,6 +122,7 @@ function CouponsList() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );
@@ -129,8 +131,8 @@ function CouponsList() {
 function EmailCampaignsList() {
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="relative flex-1 max-w-md w-full">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
@@ -138,7 +140,7 @@ function EmailCampaignsList() {
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm">
+                <button className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm">
                     <Plus className="h-4 w-4 mr-2" />
                     New Campaign
                 </button>

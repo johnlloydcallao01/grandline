@@ -34,7 +34,7 @@ export default function AnnouncementsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit overflow-x-auto">
                 {[
                     { id: 'global', label: 'Global Announcements', icon: Globe },
                     { id: 'course', label: 'Course-Specific', icon: BookOpen },
@@ -43,7 +43,7 @@ export default function AnnouncementsPage() {
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
                         className={`
-                            flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
+                            flex-1 sm:flex-none flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
                             ${activeTab === tab.id
                                 ? 'bg-white text-gray-900 shadow-sm'
                                 : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
@@ -92,21 +92,21 @@ function GlobalAnnouncements() {
     return (
         <div className="space-y-4">
             {announcements.map((item) => (
-                <div key={item.id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
+                <div key={item.id} className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div className="flex items-start">
-                            <div className="p-3 bg-blue-50 rounded-lg mr-4">
+                            <div className="p-3 bg-blue-50 rounded-lg mr-4 shrink-0">
                                 <Globe className="h-6 w-6 text-blue-600" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{item.title}</h3>
-                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
                                     <span className="flex items-center"><Calendar className="h-3.5 w-3.5 mr-1" /> {item.date}</span>
                                     <span className="flex items-center"><User className="h-3.5 w-3.5 mr-1" /> {item.author}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'Published' ? 'bg-green-100 text-green-800' :
                                 item.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                 }`}>
@@ -117,7 +117,7 @@ function GlobalAnnouncements() {
                             </button>
                         </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-sm">
                         <span className="text-gray-500">{item.views} Views</span>
                         <div className="flex gap-3">
                             <button className="text-gray-600 hover:text-blue-600 font-medium text-xs flex items-center">
@@ -143,6 +143,7 @@ function CourseAnnouncements() {
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr>
@@ -180,6 +181,7 @@ function CourseAnnouncements() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

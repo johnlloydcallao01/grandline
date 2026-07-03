@@ -65,6 +65,7 @@ export default function InstructorPayoutsPage() {
                         </button>
                     </div>
                 </div>
+                <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -104,6 +105,7 @@ export default function InstructorPayoutsPage() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );
