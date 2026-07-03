@@ -156,8 +156,9 @@ export default function CertificateIssuancePage() {
                 const lines = chunkValue.split('\n').filter(line => line.trim() !== '');
 
                 for (const line of lines) {
+                    let data: any = null
                     try {
-                        const data = JSON.parse(line);
+                        data = JSON.parse(line);
 
                         if (data.error) {
                             throw new Error(data.message || 'Server error occurred');
@@ -178,6 +179,10 @@ export default function CertificateIssuancePage() {
                         }
                     } catch (parseError) {
                         console.warn('Error parsing stream chunk:', parseError);
+                    }
+
+                    if (data?.progress) {
+                        await new Promise((r) => setTimeout(r, 0))
                     }
                 }
             }

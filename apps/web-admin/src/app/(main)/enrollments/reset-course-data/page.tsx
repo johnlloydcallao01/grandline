@@ -159,7 +159,9 @@ export default function ResetCourseDataPage() {
           } catch (parseErr: any) {
             if (parseErr.message && !parseErr.message.includes('JSON')) throw parseErr
           }
-          }
+
+          await new Promise((r) => setTimeout(r, 0))
+        }
         }
     } catch (e: any) {
       setErrorMsg(e.message || 'Failed to reset enrollment')

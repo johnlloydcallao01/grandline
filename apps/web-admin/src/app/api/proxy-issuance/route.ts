@@ -1,8 +1,5 @@
 import { NextRequest } from 'next/server'
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -31,32 +28,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const reader = cmsRes.body.getReader()
-
-    const stream = new ReadableStream({
-      async pull(controller) {
-        try {
-          const { done, value } = await reader.read()
-          if (done) {
-            controller.close()
-            return
-          }
-          controller.enqueue(value)
-        } catch {
-          controller.close()
-        }
-      },
-      cancel() {
-        reader.cancel().catch(() => {})
-      },
-    })
-
-    return new Response(stream, {
+    return new Response(cmsRes.body, {
       headers: {
         'Content-Type': 'application/x-ndjson',
         'Cache-Control': 'no-cache, no-transform',
         'X-Accel-Buffering': 'no',
-        'Connection': 'keep-alive',
       },
     })
   } catch (error: any) {
