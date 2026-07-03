@@ -241,7 +241,7 @@ export async function POST(
                 return NextResponse.json({ error: 'Failed to update enrollment' }, { status: 500 })
             }
 
-            return NextResponse.json({ success: true })
+            return NextResponse.json({ success: true, finalEvaluation: isPassed ? 'passed' : 'failed' })
         }
 
         return NextResponse.json({ error: 'Unknown error' }, { status: 500 })

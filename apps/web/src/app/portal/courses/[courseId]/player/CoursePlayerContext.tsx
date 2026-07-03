@@ -9,6 +9,8 @@ interface CoursePlayerContextType {
   loading: boolean;
   error: string | null;
   enrollmentStatus: string | null;
+  finalEvaluation: string | null;
+  isFinishing: boolean;
   selectedKey: string | null;
   setSelectedKey: (key: string | null) => void;
   expandedModules: string[];

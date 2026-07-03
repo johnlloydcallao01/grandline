@@ -378,32 +378,35 @@ export const CourseEnrollments: CollectionConfig = {
         const currentStatus = typeof doc.status === 'string' ? doc.status : ''
         const previousStatus = typeof previousDoc?.status === 'string' ? previousDoc.status : ''
         const payload = req.payload
-        const isAdminSource = (req as any)?.context?.source === 'admin'
 
-        if (isAdminSource) return
         if (currentStatus === 'dropped' || currentStatus === 'expired' || currentStatus === 'suspended') {
           return
         }
 
-        try {
-          const recognitionTrigger =
-            currentStatus === 'completed'
-              ? 'completion'
-              : currentStatus === 'active'
-                ? 'activation'
-                : 'schedule_only'
+        const recognitionTrigger =
+          currentStatus === 'completed'
+            ? 'completion'
+            : currentStatus === 'active'
+              ? 'activation'
+              : 'schedule_only'
 
-          await AccountingLmsBridgeSyncService.syncEnrollmentArtifacts({
-            payload,
-            enrollmentId: doc.id,
-            userId: req.user?.id,
-            createZeroValueInvoice: false,
-            autoPost: false,
-            recognitionTrigger,
-          })
-        } catch (accountingError) {
-          console.error('[CourseEnrollments Hook] Failed to sync LMS accounting bridge:', accountingError)
-        }
+        const enrollmentId = doc.id
+        const userId = req.user?.id
+
+        void (async () => {
+          try {
+            await AccountingLmsBridgeSyncService.syncEnrollmentArtifacts({
+              payload,
+              enrollmentId,
+              userId,
+              createZeroValueInvoice: false,
+              autoPost: false,
+              recognitionTrigger,
+            })
+          } catch (accountingError) {
+            console.error('[CourseEnrollments Hook] Failed to sync LMS accounting bridge:', accountingError)
+          }
+        })()
 
         const shouldNotifyActive =
           currentStatus === 'active' &&
@@ -415,66 +418,70 @@ export const CourseEnrollments: CollectionConfig = {
 
         if (!shouldNotifyActive && !shouldNotifyPending) return
 
-        try {
-          // 1. Get trainee's user ID
-          const studentId = typeof doc.student === 'object' ? doc.student.id : doc.student
-          const trainee = await payload.findByID({
-            collection: 'trainees',
-            id: studentId,
-            depth: 0,
-          })
+        void (async () => {
+          try {
+            const studentId = typeof doc.student === 'object' ? doc.student.id : doc.student
+            const trainee = await payload.findByID({
+              collection: 'trainees',
+              id: studentId,
+              depth: 0,
+            })
 
-          const userId = typeof trainee.user === 'object' ? trainee.user.id : trainee.user
+            const userId = typeof trainee.user === 'object' ? trainee.user.id : trainee.user
 
-          // 2. Get course details
-          const courseId = typeof doc.course === 'object' ? doc.course.id : doc.course
-          const course = await payload.findByID({
-            collection: 'courses',
-            id: courseId,
-            depth: 0,
-            overrideAccess: true,
-          })
+            const courseId = typeof doc.course === 'object' ? doc.course.id : doc.course
+            const course = await payload.findByID({
+              collection: 'courses',
+              id: courseId,
+              depth: 0,
+              overrideAccess: true,
+            })
 
-          const isPendingNotification = currentStatus === 'pending'
-          const title = isPendingNotification
-            ? `📝 Enrollment Request Received: ${course.title}`
-            : `🎓 Welcome to ${course.title}!`
-          const body = isPendingNotification
-            ? `Your enrollment request for ${course.title} has been received and is now pending review. We will notify you once it is approved.`
-            : `You have been successfully enrolled in ${course.title}. Start learning now!`
-          const link = `/portal/account/enrollments/${doc.id}`
-          const metadata = {
-            enrollmentId: doc.id,
-            courseId: course.id,
-            courseName: course.title,
-            enrollmentType: doc.enrollmentType,
-            enrollmentStatus: currentStatus,
-          }
+            const isPendingNotification = currentStatus === 'pending'
+            const title = isPendingNotification
+              ? `📝 Enrollment Request Received: ${course.title}`
+              : `🎓 Welcome to ${course.title}!`
+            const body = isPendingNotification
+              ? `Your enrollment request for ${course.title} has been received and is now pending review. We will notify you once it is approved.`
+              : `You have been successfully enrolled in ${course.title}. Start learning now!`
+            const link = `/portal/account/enrollments/${doc.id}`
 
-          await createNotificationFanout({
-            payload,
-            userId,
-            templateCode: isPendingNotification ? 'COURSE_ENROLLMENT_PENDING' : 'COURSE_ENROLLED',
-            category: 'learning',
-            title,
-            body,
-            link,
-            metadata,
-            sourceType: 'enrollment',
-            sourceId: String(doc.id),
-            push: {
+            await createNotificationFanout({
+              payload,
+              userId,
+              templateCode: isPendingNotification ? 'COURSE_ENROLLMENT_PENDING' : 'COURSE_ENROLLED',
+              category: 'learning',
               title,
               body,
-              url: link,
-              data: metadata,
-            },
-          })
+              link,
+              metadata: {
+                enrollmentId: doc.id,
+                courseId: course.id,
+                courseName: course.title,
+                enrollmentType: doc.enrollmentType,
+                enrollmentStatus: currentStatus,
+              },
+              sourceType: 'enrollment',
+              sourceId: String(doc.id),
+              push: {
+                title,
+                body,
+                url: link,
+                data: {
+                  enrollmentId: doc.id,
+                  courseId: course.id,
+                  courseName: course.title,
+                  enrollmentType: doc.enrollmentType,
+                  enrollmentStatus: currentStatus,
+                },
+              },
+            })
 
-          console.log(`[CourseEnrollments Hook] Notification created, broadcast, and push fan-out attempted for user ${userId}, course ${course.title}`)
-        } catch (notifyError) {
-          // Log error but don't fail the enrollment
-          console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)
-        }
+            console.log(`[CourseEnrollments Hook] Notification created, broadcast, and push fan-out attempted for user ${userId}, course ${course.title}`)
+          } catch (notifyError) {
+            console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)
+          }
+        })()
       },
     ],
   },

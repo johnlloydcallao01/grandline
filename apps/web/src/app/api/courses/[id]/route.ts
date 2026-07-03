@@ -45,6 +45,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     let announcements: any[] = []
     let enrollmentStatus: string | null = null
     let completedLessons: string[] = []
+    let finalEvaluation: string | null = null
 
     if (courseId) {
       // Modules are now directly available in the course object and already ordered
@@ -283,6 +284,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
           if (rawStatus) {
             enrollmentStatus = rawStatus
           }
+          const rawEval = first && typeof first.finalEvaluation === 'string' ? first.finalEvaluation : null
+          if (rawEval) {
+            finalEvaluation = rawEval
+          }
           // Extract completedLessons
           if (first && Array.isArray(first.completedLessons)) {
              completedLessons = first.completedLessons
@@ -302,6 +307,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       announcements,
       enrollmentStatus,
       completedLessons,
+      finalEvaluation,
     }
 
     return NextResponse.json(responseBody, {

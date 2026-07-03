@@ -36,6 +36,7 @@ export default function CoursePlayerLayout({
 
   const [course, setCourse] = useState<CourseWithInstructor | null>(null);
   const [enrollmentStatus, setEnrollmentStatus] = useState<string | null>(null);
+  const [finalEvaluation, setFinalEvaluation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export default function CoursePlayerLayout({
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -85,6 +87,7 @@ export default function CoursePlayerLayout({
         const data = (await res.json()) as CourseWithInstructor & {
           enrollmentStatus?: string | null;
           completedLessons?: string[];
+          finalEvaluation?: string | null;
         };
 
         if (!active) return;
@@ -150,6 +153,12 @@ export default function CoursePlayerLayout({
             ? data.enrollmentStatus
             : null;
         setEnrollmentStatus(status);
+
+        const feval =
+          data && typeof data.finalEvaluation === 'string'
+            ? data.finalEvaluation
+            : null;
+        setFinalEvaluation(feval);
       } catch {
         if (active) {
           setError('Network error');
@@ -680,16 +689,17 @@ export default function CoursePlayerLayout({
   };
 
   const finalizeCourseCompletion = async () => {
-    setIsSuccessModalOpen(true); // Open success modal immediately
-
-    // Optimistic Update: Immediately show as completed
-    const previousStatus = enrollmentStatus;
-    setEnrollmentStatus('completed');
-
-    // Close mobile menu immediately if open
+    setIsFinishing(true);
     setIsMobileMenuOpen(false);
 
     try {
+      // Force-sync the latest progress to backend before finishing
+      await fetch(`/api/courses/${courseId}/sync-progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progressPercentage: progressPercent })
+      });
+
       const res = await fetch(`/api/courses/${courseId}/finish-course`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -699,20 +709,27 @@ export default function CoursePlayerLayout({
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        // Revert on API failure
-        setEnrollmentStatus(previousStatus);
-        console.error(data.error || 'Failed to finish course.');
-        // Optional: show toast/notification for error only
+        alert(data.detail || data.error || 'Failed to finish course. Please ensure all requirements are met.');
+        return;
       }
+
+      // Only update state AFTER API confirms success
+      setEnrollmentStatus('completed');
+      if (data.finalEvaluation) {
+        setFinalEvaluation(data.finalEvaluation);
+      }
+      setIsSuccessModalOpen(true);
     } catch (e) {
-      // Revert on network error
-      setEnrollmentStatus(previousStatus);
       console.error('Failed to finish course', e);
+      alert('Network error. Please try again.');
+    } finally {
+      setIsFinishing(false);
     }
   };
 
   const showFinishButton = useMemo(() => {
-    if (enrollmentStatus === 'completed') return false; // Hide if already done
+    if (enrollmentStatus === 'completed') return false;
+    if (finalEvaluation === 'passed' || finalEvaluation === 'failed') return false;
     if (enrollmentStatus !== 'active') return false;
 
     // Check feedback requirement first - if required but not submitted, completely block Finish Button
@@ -824,7 +841,7 @@ export default function CoursePlayerLayout({
     }
 
     return false;
-  }, [evaluationMode, enrollmentStatus, progressPercent, flatItems, submissionHistory, course?.isFeedbackRequired, hasSubmittedFeedback]);
+  }, [evaluationMode, enrollmentStatus, finalEvaluation, progressPercent, flatItems, submissionHistory, course?.isFeedbackRequired, hasSubmittedFeedback]);
 
   const showEvaluationButton = useMemo(() => {
     if (enrollmentStatus === 'completed' && evaluationMode === 'lessons') return true;
@@ -1011,6 +1028,8 @@ export default function CoursePlayerLayout({
         loading,
         error,
         enrollmentStatus,
+        finalEvaluation,
+        isFinishing,
         selectedKey,
         setSelectedKey,
         expandedModules,
@@ -1084,9 +1103,17 @@ export default function CoursePlayerLayout({
                 <button
                   type="button"
                   onClick={handleFinishCourse}
-                  className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 animate-pulse"
+                  disabled={isFinishing}
+                  className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Finish this Course
+                  {isFinishing ? (
+                    <>
+                      <i className="fa fa-spinner fa-spin mr-2" />
+                      Finishing...
+                    </>
+                  ) : (
+                    'Finish this Course'
+                  )}
                 </button>
               )}
               {totalItems > 0 && (
@@ -1207,9 +1234,17 @@ export default function CoursePlayerLayout({
                         setIsMobileMenuOpen(false);
                         handleFinishCourse();
                       }}
-                      className="w-full inline-flex justify-center items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 animate-pulse"
+                      disabled={isFinishing}
+                      className="w-full inline-flex justify-center items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Finish this Course
+                      {isFinishing ? (
+                        <>
+                          <i className="fa fa-spinner fa-spin mr-2" />
+                          Finishing...
+                        </>
+                      ) : (
+                        'Finish this Course'
+                      )}
                     </button>
                   )}
                 </div>
@@ -1809,9 +1844,17 @@ export default function CoursePlayerLayout({
                                     setIsEvaluationModalOpen(false);
                                     handleFinishCourse();
                                   }}
-                                  className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 shadow-sm animate-pulse"
+                                  disabled={isFinishing}
+                                  className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  Finish this Course
+                                  {isFinishing ? (
+                                    <>
+                                      <i className="fa fa-spinner fa-spin mr-2" />
+                                      Finishing...
+                                    </>
+                                  ) : (
+                                    'Finish this Course'
+                                  )}
                                 </button>
                               )}
                               <button
