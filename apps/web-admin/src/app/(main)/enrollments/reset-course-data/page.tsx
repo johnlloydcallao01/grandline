@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import {
   Search, Loader2, AlertTriangle, CheckCircle, User,
   BookOpen, Clock, Shield, FileText, FileCheck,
@@ -111,53 +112,55 @@ export default function ResetCourseDataPage() {
             const data = JSON.parse(line)
             if (data.error) throw new Error(data.error)
 
-            switch (data.phase) {
-              case 'scan':
-                setCurrentLabel(data.label)
-                break
+            flushSync(() => {
+              switch (data.phase) {
+                case 'scan':
+                  setCurrentLabel(data.label)
+                  break
 
-              case 'step_skip':
-                setStepStates((prev) => ({ ...prev, [data.stepKey]: 'complete' }))
-                break
+                case 'step_skip':
+                  setStepStates((prev) => ({ ...prev, [data.stepKey]: 'complete' }))
+                  break
 
-              case 'step_start':
-                setStepStates((prev) => ({ ...prev, [data.stepKey]: 'active' }))
-                setCurrentLabel(data.label)
-                setProgress(data.progress || 0)
-                setStepProgress((prev) => ({ ...prev, [data.stepKey]: { current: 0, total: data.total } }))
-                break
+                case 'step_start':
+                  setStepStates((prev) => ({ ...prev, [data.stepKey]: 'active' }))
+                  setCurrentLabel(data.label)
+                  setProgress(data.progress || 0)
+                  setStepProgress((prev) => ({ ...prev, [data.stepKey]: { current: 0, total: data.total } }))
+                  break
 
-              case 'step_progress':
-                setProgress(data.progress || 0)
-                setCurrentLabel(data.label)
-                setStepProgress((prev) => ({
-                  ...prev,
-                  [data.stepKey]: { current: data.current, total: data.total },
-                }))
-                break
+                case 'step_progress':
+                  setProgress(data.progress || 0)
+                  setCurrentLabel(data.label)
+                  setStepProgress((prev) => ({
+                    ...prev,
+                    [data.stepKey]: { current: data.current, total: data.total },
+                  }))
+                  break
 
-              case 'step_complete':
-                setStepStates((prev) => ({ ...prev, [data.stepKey]: 'complete' }))
-                setProgress(data.progress || 0)
-                setStepProgress((prev) => {
-                  const s = prev[data.stepKey]
-                  return { ...prev, [data.stepKey]: { current: s?.total || 0, total: s?.total || 0 } }
-                })
-                break
+                case 'step_complete':
+                  setStepStates((prev) => ({ ...prev, [data.stepKey]: 'complete' }))
+                  setProgress(data.progress || 0)
+                  setStepProgress((prev) => {
+                    const s = prev[data.stepKey]
+                    return { ...prev, [data.stepKey]: { current: s?.total || 0, total: s?.total || 0 } }
+                  })
+                  break
 
-              case 'done':
-                setProgress(100)
-                setCurrentLabel('Reset complete')
-                setStepStates(Object.fromEntries(STEP_DEFS.map((s) => [s.key, 'complete'])))
-                setDeletedCount(data.deleted || 0)
-                setPhase('done')
-                break
-            }
+                case 'done':
+                  setProgress(100)
+                  setCurrentLabel('Reset complete')
+                  setStepStates(Object.fromEntries(STEP_DEFS.map((s) => [s.key, 'complete'])))
+                  setDeletedCount(data.deleted || 0)
+                  setPhase('done')
+                  break
+              }
+            })
           } catch (parseErr: any) {
             if (parseErr.message && !parseErr.message.includes('JSON')) throw parseErr
           }
+          }
         }
-      }
     } catch (e: any) {
       setErrorMsg(e.message || 'Failed to reset enrollment')
       setPhase('confirm')

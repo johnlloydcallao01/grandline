@@ -1,42 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server'
 
-// This is a proxy route to the PayloadCMS streaming endpoint
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json();
-        const { enrollmentId } = body;
+  try {
+    const body = await req.json()
+    const { enrollmentId } = body
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const apiKey = process.env.PAYLOAD_API_KEY;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    const apiKey = process.env.PAYLOAD_API_KEY
 
-        if (!apiUrl || !apiKey) {
-            return NextResponse.json({ error: 'Missing API configuration' }, { status: 500 });
-        }
-
-        // Call the PayloadCMS endpoint
-        const response = await fetch(`${apiUrl}/generate-certificate`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `users API-Key ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ enrollmentId }),
-        });
-
-        if (!response.body) {
-            return NextResponse.json({ error: 'No response body from server' }, { status: 500 });
-        }
-
-        // Proxy the stream back to the client
-        return new Response(response.body, {
-            headers: {
-                'Content-Type': 'application/x-ndjson',
-                'Transfer-Encoding': 'chunked',
-            },
-        });
-
-    } catch (error: any) {
-        console.error('Proxy Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!apiUrl || !apiKey) {
+      return new Response(JSON.stringify({ error: 'Missing API configuration' }), { status: 500 })
     }
+
+    const cmsRes = await fetch(`${apiUrl}/generate-certificate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `users API-Key ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ enrollmentId }),
+    })
+
+    if (!cmsRes.ok || !cmsRes.body) {
+      return new Response(
+        JSON.stringify({ error: `CMS returned ${cmsRes.status}` }),
+        { status: 502 },
+      )
+    }
+
+    const reader = cmsRes.body.getReader()
+
+    const stream = new ReadableStream({
+      async pull(controller) {
+        try {
+          const { done, value } = await reader.read()
+          if (done) {
+            controller.close()
+            return
+          }
+          controller.enqueue(value)
+        } catch {
+          controller.close()
+        }
+      },
+      cancel() {
+        reader.cancel().catch(() => {})
+      },
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        'Cache-Control': 'no-cache, no-transform',
+        'X-Accel-Buffering': 'no',
+        'Connection': 'keep-alive',
+      },
+    })
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error?.message || 'Internal error' }), { status: 500 })
+  }
 }

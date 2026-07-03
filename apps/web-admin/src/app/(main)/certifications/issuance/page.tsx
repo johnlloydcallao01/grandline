@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { Send, CheckCircle, AlertCircle, FileCheck, Info, Search, ChevronDown, Check, X } from 'lucide-react';
 import { getEligibleEnrollments } from './actions';
 
@@ -163,8 +164,10 @@ export default function CertificateIssuancePage() {
                         }
 
                         if (data.progress) {
-                            setProgress(data.progress);
-                            if (data.message) setProgressMessage(data.message);
+                            flushSync(() => {
+                                setProgress(data.progress);
+                                if (data.message) setProgressMessage(data.message);
+                            });
                         }
 
                         if (data.success) {
