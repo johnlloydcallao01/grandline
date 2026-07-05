@@ -1,226 +1,45 @@
-import { ProjectsTimePage, type ProjectsTimeTab } from '../_components/ProjectsTimePage';
+'use client';
 
-const tabs: ProjectsTimeTab[] = [
-  {
-    id: 'project-expenses',
-    label: 'Project Expenses',
-    description:
-      'Review posted project-linked expenses used in profitability calculations, grouped by project, document number, vendor, and total cost.',
-    searchPlaceholder: 'Search project, expense number, vendor, posting status, or project expense total',
-    filters: ['Project Expenses', 'Posted', 'High Cost', 'Current Month'],
-    actions: [
-      { label: 'Open Expense', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Expenses', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Posted Project Expenses', value: '47', change: 'Expense records tied to projects and already posted', trend: 'up' },
-      { label: 'Direct Expense Cost', value: 'PHP 1.18M', change: 'Direct project expense cost in the current view', trend: 'up' },
-      { label: 'Average Project Expense', value: 'PHP 25.1K', change: 'Average posted project-expense amount', trend: 'neutral' },
-      { label: 'Projects With Expenses', value: '14', change: 'Projects currently carrying posted direct expenses', trend: 'up' },
-    ],
-    tableTitle: 'Project Expense Register',
-    tableDescription:
-      'Expense rows aligned to project-linked posted records in `accounting-expenses`, matching the cost components used by the project profitability service.',
-    columns: ['Expense Number', 'Project', 'Vendor', 'Posting Date', 'Total Cost', 'Status'],
-    rows: [
-      {
-        id: 'proj-exp-1',
-        cells: [
-          { text: 'EXP-2026-0511', emphasis: true },
-          'BlueWave Cadet Cohort 1',
-          'Harbor Uniform Supplies',
-          '2026-05-12',
-          { text: 'PHP 84,000', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'proj-exp-2',
-        cells: [
-          { text: 'EXP-2026-0524', emphasis: true },
-          'Oceanic Fleet Upskilling',
-          'Ocean View Venue Services',
-          '2026-05-18',
-          { text: 'PHP 112,500', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'proj-exp-3',
-        cells: [
-          { text: 'EXP-2026-0533', emphasis: true },
-          'Simulator Lab Rollout',
-          'Marine Tech Installers',
-          '2026-05-24',
-          { text: 'PHP 168,000', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'proj-exp-4',
-        cells: [
-          { text: 'EXP-2026-0541', emphasis: true },
-          'BST Internal Refresh',
-          'Training Material House',
-          '2026-05-27',
-          { text: 'PHP 36,400', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'project-billing',
-    label: 'Project Billing',
-    description:
-      'Review posted and collectible project-linked invoices used as the revenue side of project profitability calculations.',
-    searchPlaceholder: 'Search project, invoice number, customer, invoice total, balance due, or invoice status',
-    filters: ['Project Billing', 'Posted', 'Partially Paid', 'Paid'],
-    actions: [
-      { label: 'Open Invoice', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Billing', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Project Invoices', value: '39', change: 'Project-linked invoices contributing to profitability', trend: 'up' },
-      { label: 'Project Revenue', value: 'PHP 3.64M', change: 'Revenue tied to posted, partially paid, or paid invoices', trend: 'up' },
-      { label: 'Average Invoice', value: 'PHP 93.3K', change: 'Average value of project billing records', trend: 'neutral' },
-      { label: 'Open Project AR', value: 'PHP 844K', change: 'Remaining collectible balance on project invoices', trend: 'neutral' },
-    ],
-    tableTitle: 'Project Billing Register',
-    tableDescription:
-      'Invoice rows aligned to project-linked records in `accounting-invoices`, matching the revenue inputs used by the project profitability service.',
-    columns: ['Invoice Number', 'Project', 'Customer', 'Posting Date', 'Total', 'Status'],
-    rows: [
-      {
-        id: 'proj-inv-1',
-        cells: [
-          { text: 'INV-2026-0458', emphasis: true },
-          'BlueWave Cadet Cohort 1',
-          'BlueWave Manning Services',
-          '2026-05-13',
-          { text: 'PHP 420,000', align: 'right' },
-          { text: 'partially_paid', tone: 'blue' },
-        ],
-      },
-      {
-        id: 'proj-inv-2',
-        cells: [
-          { text: 'INV-2026-0467', emphasis: true },
-          'Oceanic Fleet Upskilling',
-          'Oceanic Fleet Management',
-          '2026-05-19',
-          { text: 'PHP 318,000', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'proj-inv-3',
-        cells: [
-          { text: 'INV-2026-0479', emphasis: true },
-          'Simulator Lab Rollout',
-          'Grandline Capital Program',
-          '2026-05-25',
-          { text: 'PHP 610,000', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'proj-inv-4',
-        cells: [
-          { text: 'INV-2026-0483', emphasis: true },
-          'BST Internal Refresh',
-          'Grandline Training Ops',
-          '2026-05-28',
-          { text: 'PHP 88,000', align: 'right' },
-          { text: 'paid', tone: 'green' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'project-profitability',
-    label: 'Project Profitability',
-    description:
-      'Review project profitability output using revenue, direct expenses, payroll cost, time cost, tracked hours, total cost, gross profit, margin, budget, and budget variance.',
-    searchPlaceholder: 'Search project code, revenue, time cost, total cost, gross profit, margin, or budget variance',
-    filters: ['Profitability', 'Positive Margin', 'Negative Variance', 'High Revenue'],
-    actions: [
-      { label: 'Open Profitability', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Profitability', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Projects With Profitability', value: '18', change: 'Projects carrying enough linked finance data for profitability review', trend: 'up' },
-      { label: 'Gross Profit', value: 'PHP 1.12M', change: 'Current gross profit across selected project set', trend: 'up' },
-      { label: 'Tracked Hours', value: '1,486h', change: 'Time hours flowing into profitability cost calculations', trend: 'up' },
-      { label: 'Average Gross Margin', value: '30.8%', change: 'Average gross margin across current project rows', trend: 'neutral' },
-    ],
-    tableTitle: 'Project Profitability Register',
-    tableDescription:
-      'Profitability view aligned to `AccountingProjectProfitabilityService.getProjectProfitability()`, including revenue, cost stack, gross profit, margin, and budget variance.',
-    columns: ['Project Code', 'Revenue', 'Total Cost', 'Gross Profit', 'Gross Margin', 'Budget Variance'],
-    rows: [
-      {
-        id: 'profit-1',
-        cells: [
-          { text: 'PRJ-20260601001', emphasis: true },
-          { text: 'PHP 420,000', align: 'right' },
-          { text: 'PHP 286,500', align: 'right' },
-          { text: 'PHP 133,500', align: 'right' },
-          { text: '31.8%', tone: 'green' },
-          { text: 'PHP 18,500', align: 'right' },
-        ],
-      },
-      {
-        id: 'profit-2',
-        cells: [
-          { text: 'PRJ-20260601003', emphasis: true },
-          { text: 'PHP 318,000', align: 'right' },
-          { text: 'PHP 229,400', align: 'right' },
-          { text: 'PHP 88,600', align: 'right' },
-          { text: '27.9%', tone: 'blue' },
-          { text: 'PHP -11,400', align: 'right' },
-        ],
-      },
-      {
-        id: 'profit-3',
-        cells: [
-          { text: 'PRJ-20260601004', emphasis: true },
-          { text: 'PHP 610,000', align: 'right' },
-          { text: 'PHP 472,300', align: 'right' },
-          { text: 'PHP 137,700', align: 'right' },
-          { text: '22.6%', tone: 'blue' },
-          { text: 'PHP -32,300', align: 'right' },
-        ],
-      },
-      {
-        id: 'profit-4',
-        cells: [
-          { text: 'PRJ-20260601002', emphasis: true },
-          { text: 'PHP 88,000', align: 'right' },
-          { text: 'PHP 64,800', align: 'right' },
-          { text: 'PHP 23,200', align: 'right' },
-          { text: '26.4%', tone: 'blue' },
-          { text: 'PHP 6,200', align: 'right' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from 'lucide-react';
+import { ProjectExpensesClient } from './ProjectExpensesClient';
+import { MockTabPanel, type MockTab } from '../../approvals/workflow-management/MockTabPanel';
+
+type TabId = 'project-expenses' | 'project-billing' | 'project-profitability';
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: 'project-expenses', label: 'Project Expenses' },
+  { id: 'project-billing', label: 'Project Billing' },
+  { id: 'project-profitability', label: 'Project Profitability' },
 ];
 
+const billingTab: MockTab = { id: 'proj-billing', label: 'Project Billing', description: 'Review posted and collectible project-linked invoices used as the revenue side of project profitability.', searchPlaceholder: 'Search project, invoice number, customer, total, or status', filters: ['Project Billing', 'Posted', 'Partially Paid', 'Paid'],
+  metrics: [{ label: 'Project Invoices', value: '31', change: 'Posted project-linked invoices', trend: 'up' }, { label: 'Total Revenue', value: 'PHP 5.4M', change: 'Combined revenue from project invoices', trend: 'up' }, { label: 'Outstanding Balance', value: 'PHP 1.2M', change: 'Unpaid portion of project invoices', trend: 'down' }, { label: 'Projects With Revenue', value: '12', change: 'Projects generating invoice revenue', trend: 'up' }],
+  tableTitle: 'Project Billing Register', tableDescription: 'Invoice rows aligned to project-linked records in accounting-invoices.', columns: ['Invoice Number', 'Project', 'Customer', 'Total', 'Balance Due', 'Status'],
+  rows: [{ id: 'pb1', cells: [{ text: 'INV-2026-0151', emphasis: true }, 'BlueWave Cadet Cohort 1', 'BlueWave Manning Services', { text: 'PHP 320,000', align: 'right' }, { text: 'PHP 80,000', align: 'right' }, { text: 'partially_paid', tone: 'amber' }] }, { id: 'pb2', cells: [{ text: 'INV-2026-0167', emphasis: true }, 'Oceanic Fleet Upskilling', 'Oceanic Fleet Management', { text: 'PHP 450,000', align: 'right' }, { text: 'PHP 0', align: 'right' }, { text: 'paid', tone: 'green' }] }, { id: 'pb3', cells: [{ text: 'INV-2026-0182', emphasis: true }, 'Simulator Lab Rollout', 'Grandline Capital Program', { text: 'PHP 168,000', align: 'right' }, { text: 'PHP 168,000', align: 'right' }, { text: 'posted', tone: 'blue' }] }, { id: 'pb4', cells: [{ text: 'INV-2026-0191', emphasis: true }, 'Corporate Cadet Program', 'BlueWave Manning Services', { text: 'PHP 280,000', align: 'right' }, { text: 'PHP 120,000', align: 'right' }, { text: 'partially_paid', tone: 'amber' }] }],
+};
+
+const profitabilityTab: MockTab = { id: 'proj-profit', label: 'Project Profitability', description: 'Review computed project profitability using revenue from invoices and costs from expenses, payroll, and time entries.', searchPlaceholder: 'Search project, revenue, cost, margin, or status', filters: ['Profitability', 'Positive Margin', 'Negative Margin', 'Budget Over'],
+  metrics: [{ label: 'Profitable Projects', value: '9', change: 'Projects with positive gross margin', trend: 'up' }, { label: 'Total Revenue', value: 'PHP 5.4M', change: 'Combined revenue from all active projects', trend: 'up' }, { label: 'Total Cost', value: 'PHP 3.8M', change: 'Expenses + payroll + time costs', trend: 'neutral' }, { label: 'Avg Margin %', value: '29.6%', change: 'Average gross margin across active projects', trend: 'up' }],
+  tableTitle: 'Project Profitability', tableDescription: 'Computed project profitability data from the AccountingProjectProfitabilityService.', columns: ['Project', 'Revenue', 'Total Cost', 'Gross Profit', 'Margin %', 'Budget'],
+  rows: [{ id: 'pp1', cells: ['BlueWave Cadet Cohort 1', { text: 'PHP 1.2M', align: 'right' }, { text: 'PHP 840K', align: 'right' }, { text: 'PHP 360K', align: 'right' }, { text: '30%', align: 'right' }, { text: 'PHP 2.5M', align: 'right' }] }, { id: 'pp2', cells: ['Oceanic Fleet Upskilling', { text: 'PHP 450K', align: 'right' }, { text: 'PHP 335K', align: 'right' }, { text: 'PHP 115K', align: 'right' }, { text: '25.6%', align: 'right' }, { text: '–', align: 'right' }] }, { id: 'pp3', cells: ['Corporate Cadet Program', { text: 'PHP 840K', align: 'right' }, { text: 'PHP 560K', align: 'right' }, { text: 'PHP 280K', align: 'right' }, { text: '33.3%', align: 'right' }, { text: 'PHP 3.5M', align: 'right' }] }, { id: 'pp4', cells: ['Simulator Lab Rollout', { text: 'PHP 168K', align: 'right' }, { text: 'PHP 195K', align: 'right' }, { text: '-PHP 27K', align: 'right' }, { text: '-16.1%', align: 'right' }, { text: 'PHP 1.5M', align: 'right' }] }],
+};
+
 export default function ProjectFinancePage() {
+  const router = useRouter(); const pathname = usePathname(); const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab'); const activeTab: TabId = (TABS.find((t) => t.id === rawTab)?.id) || 'project-expenses';
+  const handleTabChange = (tabId: TabId) => { const p = new URLSearchParams(searchParams.toString()); p.set('tab', tabId); router.push(`${pathname}?${p.toString()}`); };
+
   return (
-    <ProjectsTimePage
-      eyebrow="Advanced Finance / Projects & Time"
-      title="Project Finance"
-      description="Review project-linked expenses, project billing, and profitability outputs that combine revenue, direct costs, payroll, time cost, and budget variance."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'Export Finance View', icon: 'download', variant: 'ghost' },
-      ]}
-      tabs={tabs}
-    />
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div><p className="text-sm font-medium text-blue-600">Advanced Finance / Projects &#38; Time</p><div className="mt-2 flex items-center gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div><div><h1 className="text-2xl font-bold text-gray-900">Project Finance</h1><p className="mt-1 max-w-3xl text-sm text-gray-600">Review project-linked expenses, billing, and profitability calculations for project costing and margin analysis.</p></div></div></div>
+      </div>
+      <div className="border-b border-gray-200"><nav className="-mb-px flex space-x-8" aria-label="Tabs">{TABS.map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>))}</nav></div>
+      <div className="mt-6">
+        {activeTab === 'project-expenses' && <ProjectExpensesClient />}
+        {activeTab === 'project-billing' && <MockTabPanel tab={billingTab} />}
+        {activeTab === 'project-profitability' && <MockTabPanel tab={profitabilityTab} />}
+      </div>
+    </div>
   );
 }

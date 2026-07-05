@@ -66,7 +66,19 @@ export async function PATCH(
     const body = await request.json()
 
     const data: Record<string, unknown> = { updatedBy: user.id }
-    if (body.workflowCode !== undefined) data.workflowCode = body.workflowCode
+    if (body.workflowCode !== undefined) {
+      const duplicateCheck = await payload.find({
+        collection: ACCOUNTING_COLLECTION_SLUGS.approvalWorkflows,
+        where: { and: [{ workflowCode: { equals: body.workflowCode } }, { id: { not_equals: params.id } }] },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      if (duplicateCheck.docs.length > 0) {
+        return NextResponse.json({ error: `A workflow with code "${body.workflowCode}" already exists. Please use a unique code.` }, { status: 409 })
+      }
+      data.workflowCode = body.workflowCode
+    }
     if (body.name !== undefined) data.name = body.name
     if (body.entityType !== undefined) data.entityType = body.entityType
     if (body.isActive !== undefined) data.isActive = body.isActive

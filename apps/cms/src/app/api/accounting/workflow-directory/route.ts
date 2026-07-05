@@ -155,6 +155,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'workflowCode, name, and entityType are required.' }, { status: 400 })
     }
 
+    const duplicateCheck = await payload.find({
+      collection: ACCOUNTING_COLLECTION_SLUGS.approvalWorkflows,
+      where: { workflowCode: { equals: body.workflowCode } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    if (duplicateCheck.docs.length > 0) {
+      return NextResponse.json({ error: `A workflow with code "${body.workflowCode}" already exists. Please use a unique code.` }, { status: 409 })
+    }
+
     const steps = Array.isArray(body.steps) ? body.steps.map((s: any, i: number) => ({
       stepNumber: s.stepNumber || i + 1,
       label: s.label || undefined,

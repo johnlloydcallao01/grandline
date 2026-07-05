@@ -1,157 +1,59 @@
-import { ApprovalsPage, type ApprovalTab } from '../_components/ApprovalsPage';
+'use client';
 
-const tabs: ApprovalTab[] = [
-  {
-    id: 'transactions',
-    label: 'Transactions',
-    description:
-      'Review approval coverage for transaction entities that route through invoices, bills, expenses, and journal entries.',
-    searchPlaceholder: 'Search transaction entity type, collection, approval status behavior, or workflow coverage',
-    filters: ['Transactions', 'Financial Entries', 'Posting Sensitive', 'Active Workflow'],
-    actions: [
-      { label: 'Refresh Coverage', icon: 'refresh', variant: 'secondary' },
-      { label: 'Request Approval', icon: 'plus', variant: 'primary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Transaction Types', value: '4', change: 'Entity types supported by approval service', trend: 'neutral' },
-      { label: 'Collections Linked', value: '4', change: 'Mapped collections resolved by entity type', trend: 'up' },
-      { label: 'Status Mutations', value: '0', change: 'Approvals do not directly mutate these transaction records', trend: 'neutral' },
-      { label: 'Requestable Types', value: '4', change: 'All transaction types can create approval requests', trend: 'up' },
-    ],
-    tableTitle: 'Transaction Approval Coverage',
-    tableDescription:
-      'Entity-type coverage aligned to the approval service mapping for transaction collections and request creation support.',
-    columns: ['Entity Type', 'Mapped Collection', 'Request Support', 'Approve Outcome', 'Reject Outcome', 'Workflow Needed'],
-    rows: [
-      {
-        id: 'txn-1',
-        cells: [
-          { text: 'invoice', emphasis: true },
-          'invoices',
-          { text: 'Yes', tone: 'green' },
-          'No direct entity mutation',
-          'No direct entity mutation',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'txn-2',
-        cells: [
-          { text: 'bill', emphasis: true },
-          'bills',
-          { text: 'Yes', tone: 'green' },
-          'No direct entity mutation',
-          'No direct entity mutation',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'txn-3',
-        cells: [
-          { text: 'expense', emphasis: true },
-          'expenses',
-          { text: 'Yes', tone: 'green' },
-          'No direct entity mutation',
-          'No direct entity mutation',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'txn-4',
-        cells: [
-          { text: 'journal', emphasis: true },
-          'journalEntries',
-          { text: 'Yes', tone: 'green' },
-          'No direct entity mutation',
-          'No direct entity mutation',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'operations',
-    label: 'Operations',
-    description:
-      'Review approval coverage for operational entities where approval outcomes can update status or trigger operational workflow transitions.',
-    searchPlaceholder: 'Search operational entity type, collection, approval outcome, or workflow coverage',
-    filters: ['Operations', 'Status Change', 'Service Trigger', 'Active Workflow'],
-    actions: [
-      { label: 'Refresh Coverage', icon: 'refresh', variant: 'secondary' },
-      { label: 'Open Workflow', variant: 'primary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Operational Types', value: '4', change: 'Entity types supported by operational approval flows', trend: 'neutral' },
-      { label: 'Status Updates', value: '3', change: 'Entity types with direct status mutation on outcome', trend: 'up' },
-      { label: 'Service Hooks', value: '1', change: 'Timesheet flow delegates outcome to time tracking service', trend: 'up' },
-      { label: 'Payroll Review State', value: '1', change: 'Payroll runs move to review on request and stay review on reject', trend: 'neutral' },
-    ],
-    tableTitle: 'Operational Approval Coverage',
-    tableDescription:
-      'Operational entity mapping aligned to approval outcome behavior in the approval service, including status updates and time-tracking hooks.',
-    columns: ['Entity Type', 'Mapped Collection', 'Request Behavior', 'Approve Outcome', 'Reject Outcome', 'Workflow Needed'],
-    rows: [
-      {
-        id: 'ops-1',
-        cells: [
-          { text: 'budget', emphasis: true },
-          'budgets',
-          'Creates approval request',
-          'Sets status to approved',
-          'Returns status to draft',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'ops-2',
-        cells: [
-          { text: 'asset_disposal', emphasis: true },
-          'assetDisposals',
-          'Creates approval request',
-          'Sets status to approved',
-          'Returns status to draft',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'ops-3',
-        cells: [
-          { text: 'timesheet', emphasis: true },
-          'timesheets',
-          'Submitting request also submits timesheet',
-          'Calls timesheet approve service',
-          'Calls timesheet reject service',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'ops-4',
-        cells: [
-          { text: 'payroll_run', emphasis: true },
-          'payrollRuns',
-          'Request sets payroll run to review',
-          'Sets status to approved',
-          'Keeps status at review',
-          { text: 'Required', tone: 'amber' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from 'lucide-react';
+import { TransactionsClient } from './TransactionsClient';
+import { OperationalCoverageClient } from './OperationalCoverageClient';
+
+type TabId = 'transactions' | 'operations';
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: 'transactions', label: 'Transaction Coverage' },
+  { id: 'operations', label: 'Operational Coverage' },
 ];
 
 export default function EntityApprovalCoveragePage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const activeTab: TabId = (TABS.find((t) => t.id === rawTab)?.id) || 'transactions';
+
+  const handleTabChange = (tabId: TabId) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tabId);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
-    <ApprovalsPage
-      eyebrow="Operations / Approvals"
-      title="Entity Approval Coverage"
-      description="Review the exact entity types, collection mappings, and approval outcomes currently supported by the accounting approval service."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'Request Approval', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
-    />
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue-600">Administration / Approval Configuration</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Entity Approval Coverage</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600">Review the entity types and their associated approval workflows configured in the accounting system.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="mt-6">
+        {activeTab === 'transactions' && <TransactionsClient />}
+        {activeTab === 'operations' && <OperationalCoverageClient />}
+      </div>
+    </div>
   );
 }

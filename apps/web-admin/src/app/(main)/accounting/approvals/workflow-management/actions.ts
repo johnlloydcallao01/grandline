@@ -274,3 +274,61 @@ export async function deleteWorkflowStep(workflowId: string, stepNumber: number)
     .map((s) => ({ label: s.label, approverUserId: s.approverUser?.id || '', approverRole: s.approverRole }));
   await updateWorkflow(workflowId, { steps: newSteps });
 }
+
+export type ActiveWorkflowRow = {
+  id: string;
+  entityType: string;
+  entityTypeLabel: string;
+  workflowId: string;
+  workflowCode: string;
+  workflowName: string;
+  firstApproverName: string;
+  firstApproverUserId: string;
+  stepCount: number;
+  isActive: boolean;
+  status: string;
+  statusTone: string;
+  isGap: boolean;
+  workflowCount: number;
+  cells: Array<string | { text: string; emphasis?: boolean; tone?: string; align?: string }>;
+};
+
+export type ActiveWorkflowsResponse = {
+  section: {
+    id: string;
+    label: string;
+    description: string;
+    searchPlaceholder: string;
+    filters: {
+      entityTypes: WdFilterOption[];
+      quickFilters: WdFilterOption[];
+    };
+    metrics: WdMetric[];
+    table: {
+      title: string;
+      description: string;
+      columns: string[];
+      rows: ActiveWorkflowRow[];
+    };
+  };
+  appliedFilters: { search: string; entityTypes: string[]; quickFilters: string[] };
+  pagination: { page: number; limit: number; totalDocs: number; totalPages: number; hasPrevPage: boolean; hasNextPage: boolean };
+  totals: { totalRows: number; filteredRows: number; eligibleCount: number; multiStepActiveCount: number; firstApproversSetCount: number; gapCount: number };
+  referenceData: {
+    entityTypes: WdFilterOption[];
+    users: Array<{ id: string; label: string; email: string; username: string }>;
+    workflows: Array<{ id: string; workflowCode: string; name: string; entityType: string; entityTypeLabel: string }>;
+  };
+};
+
+export async function getActiveWorkflows(
+  query: { search?: string; page?: number; entityTypes?: string[]; quickFilters?: string[] } = {}
+): Promise<ActiveWorkflowsResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  for (const t of query.entityTypes || []) params.append('entityType', t);
+  for (const q of query.quickFilters || []) params.append('quickFilter', q);
+  params.set('page', String(query.page || 1));
+  params.set('limit', '10');
+  return fetchAccountingAdmin<ActiveWorkflowsResponse>(`/accounting/active-workflows?${params.toString()}`);
+}

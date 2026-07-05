@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FileText } from 'lucide-react';
 import { WorkflowDirectoryClient } from './WorkflowDirectoryClient';
 import { WorkflowStepsClient } from './WorkflowStepsClient';
-import { MockTabPanel, type MockTab } from './MockTabPanel';
+import { ActiveWorkflowsClient } from './ActiveWorkflowsClient';
 
 type TabId = 'workflow-directory' | 'workflow-steps' | 'active-workflows';
 const TABS: Array<{ id: TabId; label: string }> = [
@@ -12,29 +12,6 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'workflow-steps', label: 'Workflow Steps' },
   { id: 'active-workflows', label: 'Active Workflows' },
 ];
-
-const activeWorkflowsTab: MockTab = {
-  id: 'active-workflows',
-  label: 'Active Workflows',
-  description: 'Focus on enabled workflow records that can be discovered when a request is submitted without an explicit workflow id.',
-  searchPlaceholder: 'Search active workflow code, entity type, first approver, or current step count',
-  filters: ['Active Only', 'Transactions', 'Operations', 'Multi-Step'],
-  metrics: [
-    { label: 'Eligible For Requests', value: '7', change: 'Active workflows discoverable by entity type', trend: 'up' },
-    { label: 'Multi-Step Active', value: '4', change: 'Enabled workflows with more than one step', trend: 'up' },
-    { label: 'First Approvers Set', value: '7', change: 'Active workflows carrying a first approver user', trend: 'up' },
-    { label: 'Inactive Gaps', value: '1', change: 'Entity type currently missing active workflow coverage', trend: 'down' },
-  ],
-  tableTitle: 'Active Approval Coverage',
-  tableDescription: 'Active workflow coverage aligned to the workflow lookup behavior that finds the first active workflow for a requested entity type.',
-  columns: ['Entity Type', 'Workflow Code', 'Workflow Name', 'First Approver', 'Step Count', 'Status'],
-  rows: [
-    { id: 'active-1', cells: ['invoice', { text: 'WF-INV-001', emphasis: true }, 'Invoice Revenue Review', 'finance.manager', { text: '2', align: 'right' }, { text: 'Active', tone: 'green' }] },
-    { id: 'active-2', cells: ['expense', { text: 'WF-EXP-001', emphasis: true }, 'Expense Approval Flow', 'controller', { text: '2', align: 'right' }, { text: 'Active', tone: 'green' }] },
-    { id: 'active-3', cells: ['timesheet', { text: 'WF-TS-001', emphasis: true }, 'Timesheet Sign-Off', 'ops.director', { text: '1', align: 'right' }, { text: 'Active', tone: 'green' }] },
-    { id: 'active-4', cells: ['asset_disposal', { text: 'WF-AD-001', emphasis: true }, 'Asset Disposal Review', 'controller', { text: '2', align: 'right' }, { text: 'Inactive', tone: 'gray' }] },
-  ],
-};
 
 export default function WorkflowManagementPage() {
   const router = useRouter();
@@ -78,7 +55,7 @@ export default function WorkflowManagementPage() {
       <div className="mt-6">
         {activeTab === 'workflow-directory' && <WorkflowDirectoryClient />}
         {activeTab === 'workflow-steps' && <WorkflowStepsClient />}
-        {activeTab === 'active-workflows' && <MockTabPanel tab={activeWorkflowsTab} />}
+        {activeTab === 'active-workflows' && <ActiveWorkflowsClient />}
       </div>
     </div>
   );
