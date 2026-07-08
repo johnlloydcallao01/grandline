@@ -1,157 +1,24 @@
-import { BudgetsForecastsPage, type BudgetsForecastsTab } from '../_components/BudgetsForecastsPage';
+'use client';
 
-const tabs: BudgetsForecastsTab[] = [
-  {
-    id: 'budgets',
-    label: 'Budgets',
-    description:
-      'Review budget headers using budget code, name, fiscal year, status, budget type, dimensions, related project, course category, and linked scenario.',
-    searchPlaceholder: 'Search budget code, name, fiscal year, status, budget type, project, or scenario',
-    filters: ['Budgets', 'Draft', 'Approved', 'Annual'],
-    actions: [
-      { label: 'New Budget', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Budgets', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Budgets', value: '22', change: 'Planning headers available for finance monitoring and approvals', trend: 'up' },
-      { label: 'Approved Budgets', value: '11', change: 'Budgets already approved for active monitoring', trend: 'up' },
-      { label: 'Draft Budgets', value: '7', change: 'Budgets still being prepared or reviewed', trend: 'neutral' },
-      { label: 'Project-Linked Budgets', value: '9', change: 'Budgets linked directly to project planning', trend: 'up' },
-    ],
-    tableTitle: 'Budget Register',
-    tableDescription:
-      'Budget header records aligned to `accounting-budgets`, including fiscal year, status, budget type, dimensions, project, and scenario links.',
-    columns: ['Budget Code', 'Name', 'Fiscal Year', 'Budget Type', 'Scenario', 'Status'],
-    rows: [
-      {
-        id: 'budget-1',
-        cells: [
-          { text: 'BUD-2026-001', emphasis: true },
-          '2026 Corporate Training Budget',
-          'FY 2026',
-          'annual',
-          'Base Case FY 2026',
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-      {
-        id: 'budget-2',
-        cells: [
-          { text: 'BUD-2026-004', emphasis: true },
-          'BlueWave Cohort Budget',
-          'FY 2026',
-          'project',
-          'Conservative Case FY 2026',
-          { text: 'draft', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'budget-3',
-        cells: [
-          { text: 'BUD-2026-007', emphasis: true },
-          'Simulator Lab Capex Budget',
-          'FY 2026',
-          'capital',
-          'Base Case FY 2026',
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-      {
-        id: 'budget-4',
-        cells: [
-          { text: 'BUD-2026-011', emphasis: true },
-          'LMS Revenue Plan',
-          'FY 2026',
-          'annual',
-          'Aggressive Case FY 2026',
-          { text: 'submitted', tone: 'blue' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'budget-lines',
-    label: 'Budget Lines',
-    description:
-      'Review line-level planned values by budget, account, period, and planned amount for later comparison against posted actuals.',
-    searchPlaceholder: 'Search budget, account code, account name, period, or planned amount',
-    filters: ['Budget Lines', 'This Year', 'Revenue', 'Expense'],
-    actions: [
-      { label: 'New Budget Line', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Lines', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Budget Lines', value: '286', change: 'Line-level planned values loaded across all budgets', trend: 'up' },
-      { label: 'Planned Amount', value: 'PHP 18.4M', change: 'Combined planned amount across visible lines', trend: 'up' },
-      { label: 'Revenue Lines', value: '114', change: 'Lines mapped to revenue accounts', trend: 'up' },
-      { label: 'Period-Specific Lines', value: '251', change: 'Lines already tied to explicit accounting periods', trend: 'neutral' },
-    ],
-    tableTitle: 'Budget Line Register',
-    tableDescription:
-      'Budget-line records aligned to `accounting-budget-lines`, including budget relationship, account, period, and planned amount.',
-    columns: ['Budget', 'Account Code', 'Account Name', 'Period', 'Planned Amount', 'Line Type'],
-    rows: [
-      {
-        id: 'line-1',
-        cells: [
-          { text: '2026 Corporate Training Budget', emphasis: true },
-          '4100',
-          'Course Revenue',
-          '2026-01',
-          { text: 'PHP 950,000', align: 'right' },
-          { text: 'revenue', tone: 'green' },
-        ],
-      },
-      {
-        id: 'line-2',
-        cells: [
-          { text: 'BlueWave Cohort Budget', emphasis: true },
-          '5305',
-          'Instructor Delivery Expense',
-          '2026-02',
-          { text: 'PHP 145,000', align: 'right' },
-          { text: 'expense', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'line-3',
-        cells: [
-          { text: 'Simulator Lab Capex Budget', emphasis: true },
-          '1605',
-          'Training Equipment',
-          '2026-03',
-          { text: 'PHP 1,800,000', align: 'right' },
-          { text: 'asset', tone: 'blue' },
-        ],
-      },
-      {
-        id: 'line-4',
-        cells: [
-          { text: 'LMS Revenue Plan', emphasis: true },
-          '4190',
-          'Discount Contra Revenue',
-          '2026-04',
-          { text: 'PHP 120,000', align: 'right' },
-          { text: 'contra', tone: 'gray' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from 'lucide-react';
+import { BudgetsClient } from './BudgetsClient';
+import { BudgetLinesClient } from './BudgetLinesClient';
+
+type TabId = 'budgets' | 'budget-lines';
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: 'budgets', label: 'Budgets' },
+  { id: 'budget-lines', label: 'Budget Lines' },
 ];
 
 export default function BudgetPlanningPage() {
-  return (
-    <BudgetsForecastsPage
-      eyebrow="Advanced Finance / Budgets & Forecasts"
-      title="Budget Planning"
-      description="Review budget headers and budget lines that drive finance planning, approvals, and budget-vs-actual comparison."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'New Budget', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
-    />
-  );
+  const router = useRouter(); const pathname = usePathname(); const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab'); const activeTab: TabId = (TABS.find((t) => t.id === rawTab)?.id) || 'budgets';
+  const handleTabChange = (tabId: TabId) => { const p = new URLSearchParams(searchParams.toString()); p.set('tab', tabId); router.push(`${pathname}?${p.toString()}`); };
+
+  return (<div className="space-y-6 p-6">
+    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><p className="text-sm font-medium text-blue-600">Advanced Finance / Budgets &#38; Forecasts</p><div className="mt-2 flex items-center gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div><div><h1 className="text-2xl font-bold text-gray-900">Budget Planning</h1><p className="mt-1 max-w-3xl text-sm text-gray-600">Review budget headers and budget lines that drive finance planning, approvals, and budget-vs-actual comparison.</p></div></div></div></div>
+    <div className="border-b border-gray-200"><nav className="-mb-px flex space-x-8" aria-label="Tabs">{TABS.map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>))}</nav></div>
+    <div className="mt-6">{activeTab === 'budgets' ? <BudgetsClient /> : <BudgetLinesClient />}</div>
+  </div>);
 }

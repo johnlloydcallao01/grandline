@@ -33,6 +33,8 @@
     "seed:timer-entries": "pnpm exec tsx src/seeders/accounting-timer-entries.ts",
     "seed:timesheets": "pnpm exec tsx src/seeders/accounting-timesheets.ts",
     "seed:project-expenses": "pnpm exec tsx src/seeders/accounting-project-expenses.ts",
+    "seed:project-billing": "pnpm exec tsx src/seeders/accounting-project-billing.ts",
+    "seed:forecast-scenarios": "pnpm exec tsx src/seeders/accounting-forecast-scenarios.ts",
     "seed:payments-made": "pnpm exec tsx src/seeders/accounting-payments-made.ts",
     "seed:deposits": "pnpm exec tsx src/seeders/accounting-deposits.ts",
     "seed:transfers": "pnpm exec tsx src/seeders/accounting-transfers.ts",

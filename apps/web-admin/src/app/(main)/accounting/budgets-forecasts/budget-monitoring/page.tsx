@@ -1,88 +1,22 @@
-import { BudgetsForecastsPage, type BudgetsForecastsTab } from '../_components/BudgetsForecastsPage';
+'use client';
 
-const tabs: BudgetsForecastsTab[] = [
-  {
-    id: 'budget-vs-actual',
-    label: 'Budget Vs Actual',
-    description:
-      'Review budget variance output using planned amount, posted actual amount, and variance amount by account and period for the selected budget.',
-    searchPlaceholder: 'Search budget code, account code, account name, period, planned amount, actual amount, or variance',
-    filters: ['Budget Vs Actual', 'Positive Variance', 'Negative Variance', 'Posted Actuals'],
-    actions: [
-      { label: 'Open Variance', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Monitoring', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Monitored Budgets', value: '11', change: 'Approved budgets currently used for variance review', trend: 'up' },
-      { label: 'Planned Amount', value: 'PHP 12.6M', change: 'Planned amount across monitored budget rows', trend: 'up' },
-      { label: 'Actual Amount', value: 'PHP 11.9M', change: 'Posted actual amount collected from journal lines', trend: 'up' },
-      { label: 'Net Variance', value: 'PHP -700K', change: 'Combined actual minus plan across current budget set', trend: 'down' },
-    ],
-    tableTitle: 'Budget Vs Actual Register',
-    tableDescription:
-      'Variance view aligned to `AccountingBudgetService.getBudgetVsActual()` and `AccountingBudgetVarianceService.getBudgetVariance()`, including planned, actual, and variance by account-period row.',
-    columns: ['Budget', 'Account Code', 'Account Name', 'Planned', 'Actual', 'Variance'],
-    rows: [
-      {
-        id: 'variance-1',
-        cells: [
-          { text: 'BUD-2026-001', emphasis: true },
-          '4100',
-          'Course Revenue',
-          { text: 'PHP 950,000', align: 'right' },
-          { text: 'PHP 902,000', align: 'right' },
-          { text: 'PHP -48,000', align: 'right' },
-        ],
-      },
-      {
-        id: 'variance-2',
-        cells: [
-          { text: 'BUD-2026-004', emphasis: true },
-          '5305',
-          'Instructor Delivery Expense',
-          { text: 'PHP 145,000', align: 'right' },
-          { text: 'PHP 158,400', align: 'right' },
-          { text: 'PHP 13,400', align: 'right' },
-        ],
-      },
-      {
-        id: 'variance-3',
-        cells: [
-          { text: 'BUD-2026-007', emphasis: true },
-          '1605',
-          'Training Equipment',
-          { text: 'PHP 1,800,000', align: 'right' },
-          { text: 'PHP 1,620,000', align: 'right' },
-          { text: 'PHP -180,000', align: 'right' },
-        ],
-      },
-      {
-        id: 'variance-4',
-        cells: [
-          { text: 'BUD-2026-011', emphasis: true },
-          '4190',
-          'Discount Contra Revenue',
-          { text: 'PHP 120,000', align: 'right' },
-          { text: 'PHP 134,500', align: 'right' },
-          { text: 'PHP 14,500', align: 'right' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from 'lucide-react';
+import { BudgetVsActualClient } from './BudgetVsActualClient';
+
+type TabId = 'budget-vs-actual';
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: 'budget-vs-actual', label: 'Budget Vs Actual' },
 ];
 
 export default function BudgetMonitoringPage() {
-  return (
-    <BudgetsForecastsPage
-      eyebrow="Advanced Finance / Budgets & Forecasts"
-      title="Budget Monitoring"
-      description="Review budget-vs-actual variance using budget lines and posted journal activity from the existing budget reporting service."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'Export Variance', icon: 'download', variant: 'ghost' },
-      ]}
-      tabs={tabs}
-    />
-  );
+  const router = useRouter(); const pathname = usePathname(); const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab'); const activeTab: TabId = (TABS.find((t) => t.id === rawTab)?.id) || 'budget-vs-actual';
+  const handleTabChange = (tabId: TabId) => { const p = new URLSearchParams(searchParams.toString()); p.set('tab', tabId); router.push(`${pathname}?${p.toString()}`); };
+
+  return (<div className="space-y-6 p-6">
+    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"><div><p className="text-sm font-medium text-blue-600">Advanced Finance / Budgets &#38; Forecasts</p><div className="mt-2 flex items-center gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div><div><h1 className="text-2xl font-bold text-gray-900">Budget Monitoring</h1><p className="mt-1 max-w-3xl text-sm text-gray-600">Review budget-vs-actual variance using budget lines and posted journal activity from the existing budget reporting service.</p></div></div></div></div>
+    <div className="border-b border-gray-200"><nav className="-mb-px flex space-x-8" aria-label="Tabs">{TABS.map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>))}</nav></div>
+    <div className="mt-6"><BudgetVsActualClient /></div>
+  </div>);
 }
