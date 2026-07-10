@@ -114,6 +114,7 @@ import * as migration_20260603_180000_upgrade_bank_accounts_to_currency_lookup f
 import * as migration_20260621_094044 from './20260621_094044';
 import * as migration_20260621_160500_bank_feeds from './20260621_160500_bank_feeds';
 import * as migration_20260621_190000_bounced_payments from './20260621_190000_bounced_payments';
+import * as migration_20260709_add_acct_payroll_account_mappings from './20260709_add_acct_payroll_account_mappings';
 
 export const migrations = [
   {
@@ -695,5 +696,10 @@ export const migrations = [
     up: migration_20260621_190000_bounced_payments.up,
     down: migration_20260621_190000_bounced_payments.down,
     name: '20260621_190000_bounced_payments',
+  },
+  {
+    up: migration_20260709_add_acct_payroll_account_mappings.up,
+    down: migration_20260709_add_acct_payroll_account_mappings.down,
+    name: '20260709_add_acct_payroll_account_mappings',
   },
 ];

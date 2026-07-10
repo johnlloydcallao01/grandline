@@ -116,6 +116,7 @@ import { AccountingDepreciationEntries } from './accounting/collections/Accounti
 import { AccountingAssetDisposals } from './accounting/collections/AccountingAssetDisposals'
 import { AccountingPayrollRuns } from './accounting/collections/AccountingPayrollRuns'
 import { AccountingPayrollEntries } from './accounting/collections/AccountingPayrollEntries'
+import { AccountingPayrollAccountMappings } from './accounting/collections/AccountingPayrollAccountMappings'
 import { AccountingApprovalWorkflows } from './accounting/collections/AccountingApprovalWorkflows'
 import { AccountingApprovalRequests } from './accounting/collections/AccountingApprovalRequests'
 import { AccountingAuditLogs } from './accounting/collections/AccountingAuditLogs'
@@ -229,6 +230,7 @@ const rawCmsCollections: CollectionConfig[] = [
   AccountingAssetDisposals,
   AccountingPayrollRuns,
   AccountingPayrollEntries,
+  AccountingPayrollAccountMappings,
   AccountingApprovalWorkflows,
   AccountingApprovalRequests,
   AccountingAuditLogs,

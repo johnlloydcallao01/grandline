@@ -35,35 +35,53 @@ export async function GET(request: NextRequest) {
     const contactFilter = searchParams.get('contactFilter') || ''
     const quickFilters = parseListParam(searchParams, 'quickFilter')
 
-    const result = await payload.find({
-      collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
-      limit: 10000,
-      sort: '-createdAt',
-      overrideAccess: true,
-      depth: 0,
-    })
+    const [result, customersResult] = await Promise.all([
+      payload.find({
+        collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
+        limit: 10000,
+        sort: '-createdAt',
+        overrideAccess: true,
+        depth: 2,
+      }),
+      payload.find({
+        collection: ACCOUNTING_COLLECTION_SLUGS.customers,
+        limit: 500,
+        sort: 'displayName',
+        overrideAccess: true,
+        depth: 0,
+      }),
+    ])
 
-    const allRows = result.docs.map((doc) => ({
-      id: doc.id,
-      sponsorCode: doc.sponsorCode || null,
-      name: doc.name || null,
-      defaultCustomer: doc.defaultCustomer || null,
-      contactName: doc.contactName || null,
-      email: doc.email || null,
-      phone: doc.phone || null,
-      status: doc.status || null,
-      statusLabel: doc.status ? (doc.status as string).charAt(0).toUpperCase() + (doc.status as string).slice(1) : null,
-      createdAt: doc.createdAt || null,
-      updatedAt: doc.updatedAt || null,
-      cells: [
-        doc.sponsorCode || '-',
-        doc.name || '-',
-        doc.defaultCustomer ? `Customer #${doc.defaultCustomer}` : '-',
-        doc.contactName || '-',
-        doc.email || '-',
-        doc.status || '-',
-      ],
-    }))
+    const customerMap = new Map<string, string>()
+    for (const c of customersResult.docs) {
+      const cDoc = c as unknown as Record<string, unknown>
+      customerMap.set(String(c.id), String(cDoc.displayName || cDoc.customerCode || `Customer #${c.id}`))
+    }
+
+    const allRows = result.docs.map((doc) => {
+      const d = doc as unknown as Record<string, unknown>
+      const cust = d.defaultCustomer as unknown as Record<string, unknown> | undefined
+      const customerId = cust ? String(cust.id ?? cust) : ''
+      const customerLabel = cust
+        ? String(cust.displayName || cust.customerCode || customerMap.get(customerId) || `Customer #${customerId}`)
+        : '-'
+      return {
+        id: String(d.id),
+        sponsorCode: String(d.sponsorCode || ''),
+        name: String(d.name || ''),
+        defaultCustomer: customerId,
+        defaultCustomerLabel: customerLabel,
+        contactName: String(d.contactName || ''),
+        email: String(d.email || ''),
+        phone: String(d.phone || ''),
+        billingAddress: String(d.billingAddress || ''),
+        status: String(d.status || 'active'),
+        statusLabel: String(d.status ? String(d.status).charAt(0).toUpperCase() + String(d.status).slice(1) : ''),
+        notes: String(d.notes || ''),
+        createdAt: d.createdAt ? String(d.createdAt) : null,
+        updatedAt: d.updatedAt ? String(d.updatedAt) : null,
+      }
+    })
 
     const normalizedSearch = search.trim().toLowerCase()
     let filteredRows = allRows.filter((row) => {
@@ -71,6 +89,7 @@ export async function GET(request: NextRequest) {
         const matchesSearch = [
           row.sponsorCode,
           row.name,
+          row.defaultCustomerLabel,
           row.contactName,
           row.email,
           row.statusLabel,
@@ -107,41 +126,35 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
     const currentPage = Math.min(Math.max(page, 1), totalPages)
     const startIndex = (currentPage - 1) * limit
-    const rows = filteredRows.slice(startIndex, startIndex + limit)
+    const flatRows = filteredRows.slice(startIndex, startIndex + limit)
 
     const activeSponsors = allRows.filter((row) => row.status === 'active').length
     const inactiveSponsors = allRows.filter((row) => row.status === 'inactive').length
     const withContactInfo = allRows.filter((row) => row.contactName || row.email || row.phone).length
 
     return NextResponse.json({
-      section: {
-        id: 'scholarship-sponsors',
-        label: 'Scholarship Sponsors',
-        description: 'Maintain sponsor master records mapped to accounting customers with contact and status information.',
-        searchPlaceholder: 'Search sponsor code, name, default customer, contact, or status',
-        filters: [
+      rows: flatRows,
+      metrics: [
+        { id: 'active-sponsors', label: 'Active Sponsors', value: activeSponsors, change: 'Sponsors usable for scholarship billing', trend: activeSponsors > 0 ? 'up' as const : 'neutral' as const },
+        { id: 'total-sponsors', label: 'Total Sponsors', value: allRows.length, change: 'All sponsor master records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
+        { id: 'inactive-sponsors', label: 'Inactive Sponsors', value: inactiveSponsors, change: 'Retained for prior awards and billing links', trend: inactiveSponsors > 0 ? 'down' as const : 'neutral' as const },
+        { id: 'with-contact', label: 'With Contact Info', value: withContactInfo, change: 'Sponsors with operational contact details', trend: withContactInfo > 0 ? 'neutral' as const : 'down' as const },
+      ],
+      filterOptions: {
+        statuses: [
           { label: 'Active', value: 'active' },
           { label: 'Inactive', value: 'inactive' },
+          { label: 'Archived', value: 'archived' },
+        ],
+        contactFilters: [
           { label: 'With Contact Info', value: 'hasContact' },
         ],
-        metrics: [
-          { label: 'Active Sponsors', value: String(activeSponsors), change: 'Sponsors usable for scholarship billing', trend: 'up' as const },
-          { label: 'Total Sponsors', value: String(totalDocs), change: 'All sponsor master records', trend: 'neutral' as const },
-          { label: 'Inactive Sponsors', value: String(inactiveSponsors), change: 'Retained for prior awards and billing links', trend: 'down' as const },
-          { label: 'With Contact Info', value: String(withContactInfo), change: 'Sponsors with operational contact details', trend: 'neutral' as const },
-        ],
-        table: {
-          title: 'Scholarship Sponsor Register',
-          description: 'Sponsor records using sponsor code, name, default customer relationship, and status.',
-          columns: ['Sponsor Code', 'Name', 'Default Customer', 'Contact', 'Email', 'Status'],
-          rows,
-        },
       },
-      appliedFilters: {
-        search,
-        statuses,
-        contactFilter,
-        quickFilters,
+      meta: {
+        searchPlaceholder: 'Search sponsor code, name, default customer, contact, or status',
+        columns: ['Sponsor Code', 'Name', 'Default Customer', 'Contact', 'Email', 'Status'],
+        tableTitle: 'Scholarship Sponsor Register',
+        tableDescription: 'Sponsor records using sponsor code, name, default customer relationship, and status.',
       },
       pagination: {
         page: currentPage,
@@ -152,8 +165,14 @@ export async function GET(request: NextRequest) {
         hasNextPage: currentPage < totalPages,
       },
       totals: {
-        totalSponsors: allRows.length,
-        filteredSponsors: totalDocs,
+        totalRows: allRows.length,
+        filteredRows: totalDocs,
+      },
+      referenceData: {
+        customers: customersResult.docs.map((d) => {
+          const r = d as unknown as Record<string, unknown>
+          return { id: String(r.id), displayName: String(r.displayName || r.customerCode || ''), customerCode: String(r.customerCode || '') }
+        }),
       },
     })
   } catch (error) {
@@ -166,15 +185,32 @@ export async function POST(request: NextRequest) {
     const { payload, user } = await requireAccountingAdmin(request)
     const body = await request.json()
 
+    const toId = (v: unknown): number | null => {
+      if (v === null || v === undefined) return null
+      const n = Number(v)
+      return Number.isFinite(n) && n > 0 ? n : null
+    }
+
+    const data: Record<string, unknown> = {
+      sponsorCode: String(body.sponsorCode || '').trim() || undefined,
+      name: String(body.name || '').trim(),
+      contactName: String(body.contactName || '').trim() || undefined,
+      email: String(body.email || '').trim() || undefined,
+      phone: String(body.phone || '').trim() || undefined,
+      billingAddress: String(body.billingAddress || '').trim() || undefined,
+      status: String(body.status || 'active'),
+      notes: String(body.notes || '').trim() || undefined,
+      createdBy: user.id,
+      updatedBy: user.id,
+    }
+
+    if (body.defaultCustomer) data.defaultCustomer = toId(body.defaultCustomer)
+
     const record = await payload.create({
       collection: ACCOUNTING_COLLECTION_SLUGS.scholarshipSponsors,
       overrideAccess: true,
-      data: {
-        ...body,
-        createdBy: user.id,
-        updatedBy: user.id,
-      },
-      depth: 1,
+      data: data as never,
+      depth: 2,
     })
 
     return NextResponse.json(record, { status: 201 })

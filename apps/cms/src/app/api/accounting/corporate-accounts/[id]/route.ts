@@ -47,8 +47,23 @@ const buildDetailResponse = async (
   record: Record<string, unknown>,
 ) => {
   const usage = await computeAccountUsageSummary(payload, record.id as number | string)
+  const r = record as Record<string, unknown>
+  const cust = r.customer as unknown as Record<string, unknown> | undefined
   return {
-    ...record,
+    id: String(r.id),
+    accountCode: String(r.accountCode || ''),
+    name: String(r.name || ''),
+    customer: cust ? String(cust.id ?? cust) : '',
+    customerLabel: cust ? String(cust.displayName || cust.customerCode || `Customer #${cust.id}`) : '-',
+    billingContact: String(r.billingContact || ''),
+    email: String(r.email || ''),
+    phone: String(r.phone || ''),
+    creditTerms: String(r.creditTerms || ''),
+    paymentTerms: String(r.paymentTerms || ''),
+    status: String(r.status || 'active'),
+    notes: String(r.notes || ''),
+    createdAt: r.createdAt ? String(r.createdAt) : null,
+    updatedAt: r.updatedAt ? String(r.updatedAt) : null,
     usageSummary: {
       corporateBillingLinkCount: usage.corporateBillingLinkCount,
     },
@@ -79,15 +94,30 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const { id } = await context.params
     const body = await request.json()
 
+    const toId = (v: unknown): number | null => {
+      if (v === null || v === undefined) return null
+      const n = Number(v)
+      return Number.isFinite(n) && n > 0 ? n : null
+    }
+
+    const data: Record<string, unknown> = { updatedBy: user.id }
+    if (body.accountCode !== undefined) data.accountCode = String(body.accountCode || '').trim() || undefined
+    if (body.name !== undefined) data.name = String(body.name || '').trim()
+    if (body.billingContact !== undefined) data.billingContact = String(body.billingContact || '').trim() || undefined
+    if (body.email !== undefined) data.email = String(body.email || '').trim() || undefined
+    if (body.phone !== undefined) data.phone = String(body.phone || '').trim() || undefined
+    if (body.creditTerms !== undefined) data.creditTerms = String(body.creditTerms || '').trim() || undefined
+    if (body.paymentTerms !== undefined) data.paymentTerms = String(body.paymentTerms || '').trim() || undefined
+    if (body.status !== undefined) data.status = String(body.status || 'active')
+    if (body.notes !== undefined) data.notes = String(body.notes || '').trim() || undefined
+    if (body.customer !== undefined) data.customer = toId(body.customer)
+
     const record = await payload.update({
       collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
       id: parseNumberParam(id) || id,
-      depth: 1,
+      depth: 2,
       overrideAccess: true,
-      data: {
-        ...body,
-        updatedBy: user.id,
-      },
+      data: data as never,
     })
 
     return NextResponse.json(await buildDetailResponse(payload, record as unknown as Record<string, unknown>))

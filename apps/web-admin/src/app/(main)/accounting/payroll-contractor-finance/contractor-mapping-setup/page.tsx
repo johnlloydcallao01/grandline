@@ -1,160 +1,92 @@
-import {
-  PayrollContractorFinancePage,
-  type PayrollContractorFinanceTab,
-} from '../_components/PayrollContractorFinancePage';
+'use client';
 
-const tabs: PayrollContractorFinanceTab[] = [
-  {
-    id: 'instructor-payouts',
-    label: 'Instructor Payouts',
-    description:
-      'Review payout obligations and approvals for instructors using source reference, course, period dates, calculated amount, approved amount, and payout status.',
-    searchPlaceholder: 'Search instructor, course, period, source reference, approved amount, or payout status',
-    filters: ['Instructor Payouts', 'Draft', 'Approved', 'Current Period'],
-    actions: [
-      { label: 'Open Payout', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Payouts', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Payout Rows', value: '34', change: 'Instructor payout obligations tracked from LMS activity', trend: 'up' },
-      { label: 'Approved Amount', value: 'PHP 412K', change: 'Current approved payout value across visible rows', trend: 'up' },
-      { label: 'Draft Payouts', value: '9', change: 'Rows still waiting for payout review or approval', trend: 'neutral' },
-      { label: 'Courses Covered', value: '12', change: 'Courses represented in payout obligations', trend: 'up' },
-    ],
-    tableTitle: 'Instructor Payout Register',
-    tableDescription:
-      'Payout rows aligned to `accounting-instructor-payouts`, which is the actual contractor-adjacent payout surface in the backend today.',
-    columns: ['Instructor', 'Course', 'Period', 'Calculated Amount', 'Approved Amount', 'Status'],
-    rows: [
-      {
-        id: 'payout-1',
-        cells: [
-          { text: 'Joel Reyes', emphasis: true },
-          'Radar Observer Course',
-          '2026-05-01 to 2026-05-15',
-          { text: 'PHP 18,000', align: 'right' },
-          { text: 'PHP 18,000', align: 'right' },
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-      {
-        id: 'payout-2',
-        cells: [
-          { text: 'Marvin Dela Cruz', emphasis: true },
-          'Basic Safety Training',
-          '2026-05-16 to 2026-05-31',
-          { text: 'PHP 22,500', align: 'right' },
-          { text: 'PHP 21,000', align: 'right' },
-          { text: 'review', tone: 'blue' },
-        ],
-      },
-      {
-        id: 'payout-3',
-        cells: [
-          { text: 'Lani Mercado', emphasis: true },
-          'GMDSS General Operator',
-          '2026-05-16 to 2026-05-31',
-          { text: 'PHP 14,000', align: 'right' },
-          { text: 'PHP 0', align: 'right' },
-          { text: 'draft', tone: 'amber' },
-        ],
-      },
-      {
-        id: 'payout-4',
-        cells: [
-          { text: 'Eric Tiu', emphasis: true },
-          'Engine Room Resource Mgmt',
-          '2026-06-01 to 2026-06-15',
-          { text: 'PHP 19,200', align: 'right' },
-          { text: 'PHP 19,200', align: 'right' },
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'payroll-account-mapping',
-    label: 'Payroll Account Mapping',
-    description:
-      'Review how payroll entry rows map gross and net values into finance posting accounts using `expenseAccount` and `payableAccount` on payroll entries.',
-    searchPlaceholder: 'Search entry type, project, expense account, payable account, gross amount, or deduction amount',
-    filters: ['Payroll Mapping', 'Salary', 'Contractor', 'With Deductions'],
-    actions: [
-      { label: 'Open Mapping', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Mapping', icon: 'refresh', variant: 'secondary' },
-      { label: 'Export View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Mapped Payroll Rows', value: '126', change: 'Payroll entries carrying explicit expense and payable accounts', trend: 'up' },
-      { label: 'Salary Rows', value: '78', change: 'Entries using salary type in current mapped set', trend: 'up' },
-      { label: 'Contractor Rows', value: '18', change: 'Entries using contractor type in current mapped set', trend: 'up' },
-      { label: 'With Deductions', value: '63', change: 'Rows where net amount differs from gross because of deductions', trend: 'neutral' },
-    ],
-    tableTitle: 'Payroll Mapping Register',
-    tableDescription:
-      'Mapping view grounded in `accounting-payroll-entries`, where expense and payable account mapping actually lives today.',
-    columns: ['Entry Type', 'Person', 'Expense Account', 'Payable Account', 'Deduction Amount', 'Status'],
-    rows: [
-      {
-        id: 'mapping-1',
-        cells: [
-          { text: 'salary', tone: 'green' },
-          'Maria Santos',
-          '5010 Salaries Expense',
-          '2105 Payroll Payable',
-          { text: 'PHP 4,500', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'mapping-2',
-        cells: [
-          { text: 'contractor', tone: 'blue' },
-          'Instructor Joel Reyes',
-          '5035 Contractor Instruction Expense',
-          '2115 Contractor Payable',
-          { text: 'PHP 0', align: 'right' },
-          { text: 'posted', tone: 'green' },
-        ],
-      },
-      {
-        id: 'mapping-3',
-        cells: [
-          { text: 'reimbursement', tone: 'gray' },
-          'Ana Cruz',
-          '5050 Staff Reimbursements',
-          '2120 Employee Reimbursements Payable',
-          { text: 'PHP 0', align: 'right' },
-          { text: 'approved', tone: 'blue' },
-        ],
-      },
-      {
-        id: 'mapping-4',
-        cells: [
-          { text: 'adjustment', tone: 'amber' },
-          'Paolo Ramos',
-          '5065 Payroll Adjustments Expense',
-          '2105 Payroll Payable',
-          { text: 'PHP 1,250', align: 'right' },
-          { text: 'draft', tone: 'amber' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  Download,
+  FileText,
+  RefreshCw,
+} from '@/components/ui/IconWrapper';
+import { InstructorPayoutsClient } from './InstructorPayoutsClient';
+import { PayrollAccountMappingClient } from './PayrollAccountMappingClient';
+
+const tabs = [
+  { id: 'instructor-payouts', label: 'Instructor Payouts' },
+  { id: 'payroll-account-mapping', label: 'Payroll Account Mapping' },
 ];
 
 export default function ContractorMappingSetupPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const activeTab = (tabs.find((tab) => tab.id === rawTab)?.id) || 'instructor-payouts';
+
+  const handleTabChange = (tabId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tabId);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
-    <PayrollContractorFinancePage
-      eyebrow="Advanced Finance / Payroll & Contractor Finance"
-      title="Contractor & Mapping Setup"
-      description="Review the narrower contractor-related payout surface and the payroll account mappings that actually exist in the current backend."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'Export Setup View', icon: 'download', variant: 'ghost' },
-      ]}
-      tabs={tabs}
-    />
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue-600">Advanced Finance / Payroll & Contractor Finance</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+              <FileText className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Contractor & Mapping Setup</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600">
+                Review the narrower contractor-related payout surface and the payroll account mappings that actually exist in the current backend.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+            <RefreshCw className="h-4 w-4" />
+            Refresh Workspace
+          </button>
+          <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900">
+            <Download className="h-4 w-4" />
+            Export Setup View
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 px-6">
+          <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {activeTab === 'instructor-payouts' ? (
+            <InstructorPayoutsClient />
+          ) : (
+            <PayrollAccountMappingClient />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

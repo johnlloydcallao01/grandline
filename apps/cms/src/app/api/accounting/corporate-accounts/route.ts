@@ -35,37 +35,54 @@ export async function GET(request: NextRequest) {
     const creditFilter = searchParams.get('creditFilter') || ''
     const quickFilters = parseListParam(searchParams, 'quickFilter')
 
-    const result = await payload.find({
-      collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
-      limit: 10000,
-      sort: '-createdAt',
-      overrideAccess: true,
-      depth: 0,
-    })
+    const [result, customersResult] = await Promise.all([
+      payload.find({
+        collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
+        limit: 10000,
+        sort: '-createdAt',
+        overrideAccess: true,
+        depth: 2,
+      }),
+      payload.find({
+        collection: ACCOUNTING_COLLECTION_SLUGS.customers,
+        limit: 500,
+        sort: 'displayName',
+        overrideAccess: true,
+        depth: 0,
+      }),
+    ])
 
-    const allRows = result.docs.map((doc) => ({
-      id: doc.id,
-      accountCode: doc.accountCode || null,
-      name: doc.name || null,
-      customer: doc.customer || null,
-      billingContact: doc.billingContact || null,
-      email: doc.email || null,
-      phone: doc.phone || null,
-      creditTerms: doc.creditTerms || null,
-      paymentTerms: doc.paymentTerms || null,
-      status: doc.status || null,
-      statusLabel: doc.status ? (doc.status as string).charAt(0).toUpperCase() + (doc.status as string).slice(1) : null,
-      createdAt: doc.createdAt || null,
-      updatedAt: doc.updatedAt || null,
-      cells: [
-        doc.accountCode || '-',
-        doc.name || '-',
-        doc.customer ? `Customer #${doc.customer}` : '-',
-        doc.billingContact || '-',
-        doc.creditTerms || '-',
-        doc.status || '-',
-      ],
-    }))
+    const customerMap = new Map<string, string>()
+    for (const c of customersResult.docs) {
+      const cDoc = c as unknown as Record<string, unknown>
+      customerMap.set(String(c.id), String(cDoc.displayName || cDoc.customerCode || `Customer #${c.id}`))
+    }
+
+    const allRows = result.docs.map((doc) => {
+      const d = doc as unknown as Record<string, unknown>
+      const cust = d.customer as unknown as Record<string, unknown> | undefined
+      const customerId = cust ? String(cust.id ?? cust) : ''
+      const customerLabel = cust
+        ? String(cust.displayName || cust.customerCode || customerMap.get(customerId) || `Customer #${customerId}`)
+        : '-'
+      return {
+        id: String(d.id),
+        accountCode: String(d.accountCode || ''),
+        name: String(d.name || ''),
+        customer: customerId,
+        customerLabel,
+        billingContact: String(d.billingContact || ''),
+        email: String(d.email || ''),
+        phone: String(d.phone || ''),
+        creditTerms: String(d.creditTerms || ''),
+        paymentTerms: String(d.paymentTerms || ''),
+        status: String(d.status || 'active'),
+        statusLabel: String(d.status ? String(d.status).charAt(0).toUpperCase() + String(d.status).slice(1) : ''),
+        notes: String(d.notes || ''),
+        createdAt: d.createdAt ? String(d.createdAt) : null,
+        updatedAt: d.updatedAt ? String(d.updatedAt) : null,
+      }
+    })
 
     const normalizedSearch = search.trim().toLowerCase()
     let filteredRows = allRows.filter((row) => {
@@ -73,8 +90,11 @@ export async function GET(request: NextRequest) {
         const matchesSearch = [
           row.accountCode,
           row.name,
+          row.customerLabel,
           row.billingContact,
           row.email,
+          row.creditTerms,
+          row.paymentTerms,
           row.statusLabel,
           row.status,
         ].some((value) => normalizeSearch(value).includes(normalizedSearch))
@@ -109,41 +129,35 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
     const currentPage = Math.min(Math.max(page, 1), totalPages)
     const startIndex = (currentPage - 1) * limit
-    const rows = filteredRows.slice(startIndex, startIndex + limit)
+    const flatRows = filteredRows.slice(startIndex, startIndex + limit)
 
     const activeAccounts = allRows.filter((row) => row.status === 'active').length
     const inactiveAccounts = allRows.filter((row) => row.status === 'inactive').length
     const withCreditTerms = allRows.filter((row) => row.creditTerms).length
 
     return NextResponse.json({
-      section: {
-        id: 'corporate-accounts',
-        label: 'Corporate Accounts',
-        description: 'Manage corporate payer accounts linked to customers with contact data, credit terms, payment terms, and status.',
-        searchPlaceholder: 'Search account code, company name, customer, billing contact, or status',
-        filters: [
+      rows: flatRows,
+      metrics: [
+        { id: 'active-accounts', label: 'Active Accounts', value: activeAccounts, change: 'Available for company-billed training', trend: activeAccounts > 0 ? 'up' as const : 'neutral' as const },
+        { id: 'total-accounts', label: 'Total Accounts', value: allRows.length, change: 'All corporate account records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
+        { id: 'with-credit-terms', label: 'With Credit Terms', value: withCreditTerms, change: 'Accounts storing commercial credit terms', trend: withCreditTerms > 0 ? 'neutral' as const : 'down' as const },
+        { id: 'inactive-accounts', label: 'Inactive Accounts', value: inactiveAccounts, change: 'Retained for historical billing links', trend: inactiveAccounts > 0 ? 'down' as const : 'neutral' as const },
+      ],
+      filterOptions: {
+        statuses: [
           { label: 'Active', value: 'active' },
           { label: 'Inactive', value: 'inactive' },
+          { label: 'Archived', value: 'archived' },
+        ],
+        creditFilters: [
           { label: 'With Credit Terms', value: 'hasCredit' },
         ],
-        metrics: [
-          { label: 'Active Corporate Accounts', value: String(activeAccounts), change: 'Available for company-billed training', trend: 'up' as const },
-          { label: 'Total Accounts', value: String(totalDocs), change: 'All corporate account records', trend: 'neutral' as const },
-          { label: 'With Credit Terms', value: String(withCreditTerms), change: 'Accounts storing commercial credit terms', trend: 'neutral' as const },
-          { label: 'Inactive Accounts', value: String(inactiveAccounts), change: 'Retained for historical billing links', trend: 'down' as const },
-        ],
-        table: {
-          title: 'Corporate Account Register',
-          description: 'Corporate account records using account code, linked customer, billing contact, terms, and status.',
-          columns: ['Account Code', 'Name', 'Customer', 'Billing Contact', 'Credit Terms', 'Status'],
-          rows,
-        },
       },
-      appliedFilters: {
-        search,
-        statuses,
-        creditFilter,
-        quickFilters,
+      meta: {
+        searchPlaceholder: 'Search account code, company name, customer, billing contact, or status',
+        columns: ['Account Code', 'Name', 'Customer', 'Billing Contact', 'Credit Terms', 'Status'],
+        tableTitle: 'Corporate Account Register',
+        tableDescription: 'Corporate account records using account code, linked customer, billing contact, terms, and status.',
       },
       pagination: {
         page: currentPage,
@@ -154,8 +168,14 @@ export async function GET(request: NextRequest) {
         hasNextPage: currentPage < totalPages,
       },
       totals: {
-        totalAccounts: allRows.length,
-        filteredAccounts: totalDocs,
+        totalRows: allRows.length,
+        filteredRows: totalDocs,
+      },
+      referenceData: {
+        customers: customersResult.docs.map((d) => {
+          const r = d as unknown as Record<string, unknown>
+          return { id: String(r.id), displayName: String(r.displayName || r.customerCode || ''), customerCode: String(r.customerCode || '') }
+        }),
       },
     })
   } catch (error) {
@@ -168,15 +188,33 @@ export async function POST(request: NextRequest) {
     const { payload, user } = await requireAccountingAdmin(request)
     const body = await request.json()
 
+    const toId = (v: unknown): number | null => {
+      if (v === null || v === undefined) return null
+      const n = Number(v)
+      return Number.isFinite(n) && n > 0 ? n : null
+    }
+
+    const data: Record<string, unknown> = {
+      accountCode: String(body.accountCode || '').trim() || undefined,
+      name: String(body.name || '').trim(),
+      billingContact: String(body.billingContact || '').trim() || undefined,
+      email: String(body.email || '').trim() || undefined,
+      phone: String(body.phone || '').trim() || undefined,
+      creditTerms: String(body.creditTerms || '').trim() || undefined,
+      paymentTerms: String(body.paymentTerms || '').trim() || undefined,
+      status: String(body.status || 'active'),
+      notes: String(body.notes || '').trim() || undefined,
+      createdBy: user.id,
+      updatedBy: user.id,
+    }
+
+    if (body.customer) data.customer = toId(body.customer)
+
     const record = await payload.create({
       collection: ACCOUNTING_COLLECTION_SLUGS.corporateAccounts,
       overrideAccess: true,
-      data: {
-        ...body,
-        createdBy: user.id,
-        updatedBy: user.id,
-      },
-      depth: 1,
+      data: data as never,
+      depth: 2,
     })
 
     return NextResponse.json(record, { status: 201 })

@@ -57,6 +57,7 @@ export const ACCOUNTING_COLLECTION_SLUGS = {
   assetDisposals: 'accounting-asset-disposals',
   payrollRuns: 'accounting-payroll-runs',
   payrollEntries: 'accounting-payroll-entries',
+  payrollAccountMappings: 'accounting-payroll-account-mappings',
   approvalWorkflows: 'accounting-approval-workflows',
   approvalRequests: 'accounting-approval-requests',
   auditLogs: 'accounting-audit-logs',
