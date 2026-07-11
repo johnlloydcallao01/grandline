@@ -1,157 +1,78 @@
-import { LmsMonetizationSetupPage, type LmsMonetizationTab } from '../_components/LmsMonetizationSetupPage';
+'use client';
 
-const tabs: LmsMonetizationTab[] = [
-  {
-    id: 'instructor-payout-rules',
-    label: 'Instructor Payout Rules',
-    description:
-      'Review instructor payout-rule configuration by course, payout method, flat amount, revenue share, enrollment pay, completion bonus, and status.',
-    searchPlaceholder: 'Search instructor, course, payout method, flat amount, percent of revenue, or status',
-    filters: ['Active Rules', 'Flat', 'Revenue Share', 'Hybrid'],
-    actions: [
-      { label: 'New Payout Rule', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Rules', icon: 'refresh', variant: 'secondary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Payout Rules', value: '22', change: 'Rule records controlling instructor cost generation', trend: 'up' },
-      { label: 'Active Rules', value: '19', change: 'Rules currently eligible for payout calculation', trend: 'up' },
-      { label: 'Revenue Share Rules', value: '7', change: 'Rules using revenue-linked payout logic', trend: 'neutral' },
-      { label: 'Hybrid Rules', value: '5', change: 'Rules combining multiple payout drivers', trend: 'up' },
-    ],
-    tableTitle: 'Instructor Payout Rule Register',
-    tableDescription:
-      'Rule configuration aligned to `accounting-instructor-payout-rules`, including method-specific amount fields and rule status.',
-    columns: ['Instructor', 'Course', 'Method', 'Flat Amount', 'Revenue %', 'Status'],
-    rows: [
-      {
-        id: 'rule-1',
-        cells: [
-          { text: 'Capt. Ramon Cruz', emphasis: true },
-          'Basic Safety Training',
-          'flat',
-          { text: 'PHP 18,000', align: 'right' },
-          { text: '0%', align: 'right' },
-          { text: 'active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'rule-2',
-        cells: [
-          { text: 'Engr. Leo Navarro', emphasis: true },
-          'Engine Room Resource Mgmt',
-          'revenue_share',
-          { text: 'PHP 0', align: 'right' },
-          { text: '18%', align: 'right' },
-          { text: 'active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'rule-3',
-        cells: [
-          { text: 'Capt. Alicia Reyes', emphasis: true },
-          'Radar Observer Course',
-          'hybrid',
-          { text: 'PHP 8,000', align: 'right' },
-          { text: '10%', align: 'right' },
-          { text: 'active', tone: 'green' },
-        ],
-      },
-      {
-        id: 'rule-4',
-        cells: [
-          { text: 'Capt. Jon Delos Santos', emphasis: true },
-          'GMDSS General Operator',
-          'per_enrollment',
-          { text: 'PHP 0', align: 'right' },
-          { text: '0%', align: 'right' },
-          { text: 'inactive', tone: 'gray' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'payout-register',
-    label: 'Payout Register',
-    description:
-      'Review generated instructor payout obligations by instructor, course, period, calculated amount, approved amount, and payout status.',
-    searchPlaceholder: 'Search instructor, course, source reference, period, calculated amount, or payout status',
-    filters: ['Calculated', 'Approved', 'Paid', 'Draft'],
-    actions: [
-      { label: 'Generate Payout', icon: 'plus', variant: 'primary' },
-      { label: 'Refresh Register', icon: 'refresh', variant: 'secondary' },
-      { label: 'Download View', icon: 'download', variant: 'ghost' },
-    ],
-    metrics: [
-      { label: 'Generated Payouts', value: '31', change: 'Payout records created from course activity', trend: 'up' },
-      { label: 'Approved Amount', value: 'PHP 846K', change: 'Approved instructor obligations in current register', trend: 'up' },
-      { label: 'Calculated Only', value: '9', change: 'Payouts still awaiting approval or release', trend: 'neutral' },
-      { label: 'Paid Payouts', value: '14', change: 'Instructor payout records already settled', trend: 'up' },
-    ],
-    tableTitle: 'Instructor Payout Register',
-    tableDescription:
-      'Payout register aligned to `accounting-instructor-payouts`, including calculation period, calculated amount, approved amount, and payout status.',
-    columns: ['Instructor', 'Course', 'Period', 'Calculated', 'Approved', 'Status'],
-    rows: [
-      {
-        id: 'payout-1',
-        cells: [
-          { text: 'Capt. Ramon Cruz', emphasis: true },
-          'Basic Safety Training',
-          '2026-05-01 to 2026-05-31',
-          { text: 'PHP 18,000', align: 'right' },
-          { text: 'PHP 18,000', align: 'right' },
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-      {
-        id: 'payout-2',
-        cells: [
-          { text: 'Engr. Leo Navarro', emphasis: true },
-          'Engine Room Resource Mgmt',
-          '2026-05-01 to 2026-05-31',
-          { text: 'PHP 46,380', align: 'right' },
-          { text: 'PHP 46,380', align: 'right' },
-          { text: 'calculated', tone: 'blue' },
-        ],
-      },
-      {
-        id: 'payout-3',
-        cells: [
-          { text: 'Capt. Alicia Reyes', emphasis: true },
-          'Radar Observer Course',
-          '2026-05-01 to 2026-05-31',
-          { text: 'PHP 31,500', align: 'right' },
-          { text: 'PHP 29,000', align: 'right' },
-          { text: 'approved', tone: 'green' },
-        ],
-      },
-      {
-        id: 'payout-4',
-        cells: [
-          { text: 'Capt. Jon Delos Santos', emphasis: true },
-          'GMDSS General Operator',
-          '2026-04-01 to 2026-04-30',
-          { text: 'PHP 22,000', align: 'right' },
-          { text: 'PHP 22,000', align: 'right' },
-          { text: 'paid', tone: 'green' },
-        ],
-      },
-    ],
-  },
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { FileText } from '@/components/ui/IconWrapper';
+import { InstructorPayoutRulesClient } from './InstructorPayoutRulesClient';
+import { PayoutRegisterClient } from './PayoutRegisterClient';
+
+const tabs = [
+  { id: 'instructor-payout-rules', label: 'Instructor Payout Rules' },
+  { id: 'payout-register', label: 'Payout Register' },
 ];
 
 export default function InstructorPayoutSetupPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const activeTab = (tabs.find((tab) => tab.id === rawTab)?.id) || 'instructor-payout-rules';
+
+  const handleTabChange = (tabId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tabId);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
-    <LmsMonetizationSetupPage
-      eyebrow="LMS Finance / LMS Monetization Setup"
-      title="Instructor Payout Setup"
-      description="Review instructor payout rules and generated payout records derived from LMS monetization activity and course-based payout methods."
-      headerActions={[
-        { label: 'Refresh Workspace', icon: 'refresh', variant: 'secondary' },
-        { label: 'New Payout Rule', icon: 'plus', variant: 'primary' },
-      ]}
-      tabs={tabs}
-    />
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue-600">LMS Finance / LMS Monetization Setup</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+              <FileText className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Instructor Payout Setup</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600">Review instructor payout rules and generated payout records derived from LMS monetization activity and course-based payout methods.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3" />
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 px-6">
+          <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {activeTab === 'instructor-payout-rules' ? (
+            <InstructorPayoutRulesClient />
+          ) : (
+            <PayoutRegisterClient />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

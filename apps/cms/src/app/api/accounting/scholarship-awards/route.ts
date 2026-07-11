@@ -13,8 +13,10 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {}
     if (search.trim()) {
       (where as Record<string, unknown>).or = [
-        { awardType: { like: search } } as never,
-        { status: { like: search } } as never,
+        { 'enrollmentBillingLink.sourceReference': { like: search } } as never,
+        { 'scholarshipSponsor.name': { like: search } } as never,
+        { 'scholarshipSponsor.sponsorCode': { like: search } } as never,
+        { notes: { like: search } } as never,
       ]
     }
 
@@ -64,6 +66,11 @@ export async function GET(request: NextRequest) {
 
     const totalDocs = result.totalDocs
     const activeAwards = result.docs.filter((d) => d.status === 'active').length
+    const sponsoredCoverage = result.docs
+      .filter((d) => d.status === 'active')
+      .reduce((sum, d) => sum + (d.awardAmount ?? 0), 0)
+    const traineeShareTotal = result.docs
+      .reduce((sum, d) => sum + (d.traineeShareAmount ?? 0), 0)
 
     return NextResponse.json({
       section: {
@@ -77,8 +84,10 @@ export async function GET(request: NextRequest) {
           { label: 'Archived', value: 'archived' },
         ],
         metrics: [
-          { label: 'Active Awards', value: String(activeAwards), change: 'Awards currently active', trend: 'up' as const },
-          { label: 'Total Awards', value: String(totalDocs), change: 'All scholarship award records', trend: 'neutral' as const },
+          { id: 'active-awards', label: 'Active Awards', value: String(activeAwards), change: 'Awards currently contributing to charge reductions', trend: 'up' as const },
+          { id: 'total-awards', label: 'Total Awards', value: String(totalDocs), change: 'All scholarship award records', trend: 'neutral' as const },
+          { id: 'sponsored-coverage', label: 'Sponsored Coverage', value: `PHP ${sponsoredCoverage.toLocaleString()}`, change: 'Value of sponsor-funded coverage now active', trend: 'up' as const },
+          { id: 'trainee-share', label: 'Trainee Share', value: `PHP ${traineeShareTotal.toLocaleString()}`, change: 'Residual trainee share across award-backed enrollments', trend: 'neutral' as const },
         ],
         table: {
           title: 'Scholarship Award Register',

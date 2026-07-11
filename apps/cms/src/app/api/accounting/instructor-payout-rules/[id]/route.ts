@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
   ACCOUNTING_COLLECTION_SLUGS,
-  LMS_PAYOUT_STATUS_OPTIONS,
+  LMS_PAYOUT_METHOD_OPTIONS,
+  LMS_SPONSOR_STATUS_OPTIONS,
 } from '@/accounting/constants/accounting'
 import {
   AccountingApiError,
@@ -16,9 +17,10 @@ type RouteContext = {
   }>
 }
 
-const STATUS_LABELS = new Map<string, string>(LMS_PAYOUT_STATUS_OPTIONS.map((o) => [o.value, o.label]))
+const METHOD_LABELS = new Map<string, string>(LMS_PAYOUT_METHOD_OPTIONS.map((o) => [o.value, o.label]))
+const STATUS_LABELS = new Map<string, string>(LMS_SPONSOR_STATUS_OPTIONS.map((o) => [o.value, o.label]))
 
-const IMMUTABLE_STATUSES = new Set(['paid', 'voided'])
+const IMMUTABLE_STATUSES = new Set(['archived'])
 
 const formatCurrency = (value: number | null | undefined) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))
@@ -47,11 +49,6 @@ export const buildDetailResponse = async (
   record: Record<string, unknown>,
 ) => {
   const r = record as Record<string, unknown>
-  const ca = Number(r.calculatedAmount) || 0
-  const aa = Number(r.approvedAmount) || 0
-  const status = String(r.status || '')
-  const periodStart = r.periodStart ? String(r.periodStart).slice(0, 10) : null
-  const periodEnd = r.periodEnd ? String(r.periodEnd).slice(0, 10) : null
 
   return {
     id: String(r.id),
@@ -59,17 +56,18 @@ export const buildDetailResponse = async (
     instructorLabel: buildInstructorLabel(r.instructor),
     courseId: String((r.course as Record<string, unknown> | undefined)?.id ?? r.course ?? ''),
     courseLabel: buildCourseLabel(r.course),
-    periodStart,
-    periodEnd,
-    periodLabel: periodStart && periodEnd ? `${periodStart} to ${periodEnd}` : '-',
-    sourceType: String(r.sourceType || 'course_activity'),
-    sourceReference: String(r.sourceReference || ''),
-    calculatedAmount: ca,
-    calculatedAmountLabel: formatCurrency(ca),
-    approvedAmount: aa,
-    approvedAmountLabel: formatCurrency(aa),
-    status,
-    statusLabel: STATUS_LABELS.get(status) || 'Unknown',
+    payoutMethod: String(r.payoutMethod || ''),
+    payoutMethodLabel: METHOD_LABELS.get(String(r.payoutMethod || '')) || String(r.payoutMethod || '-'),
+    flatAmount: Number(r.flatAmount) || 0,
+    flatAmountLabel: formatCurrency(Number(r.flatAmount) || 0),
+    percentOfRevenue: Number(r.percentOfRevenue) || 0,
+    percentOfRevenueLabel: (Number(r.percentOfRevenue) || 0) > 0 ? `${Number(r.percentOfRevenue) || 0}%` : '0%',
+    perEnrollmentAmount: Number(r.perEnrollmentAmount) || 0,
+    perEnrollmentAmountLabel: formatCurrency(Number(r.perEnrollmentAmount) || 0),
+    completionBonusAmount: Number(r.completionBonusAmount) || 0,
+    completionBonusAmountLabel: formatCurrency(Number(r.completionBonusAmount) || 0),
+    status: String(r.status || ''),
+    statusLabel: STATUS_LABELS.get(String(r.status || '')) || String(r.status || 'Unknown'),
     notes: String(r.notes || ''),
     createdAt: r.createdAt ? String(r.createdAt) : null,
     updatedAt: r.updatedAt ? String(r.updatedAt) : null,
@@ -81,7 +79,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { payload } = await requireAccountingAdmin(request)
     const { id } = await context.params
     const record = await payload.findByID({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
       id: parseNumberParam(id) || id,
       depth: 2,
       overrideAccess: true,
@@ -100,34 +98,33 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = await request.json()
 
     const existing = await payload.findByID({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
       id: parseNumberParam(id) || id,
       depth: 0,
       overrideAccess: true,
     }) as unknown as Record<string, unknown> | undefined
 
-    if (!existing) throw new AccountingApiError('Instructor payout not found', 404)
+    if (!existing) throw new AccountingApiError('Instructor payout rule not found', 404)
 
     const existingStatus = String(existing.status || '')
     if (IMMUTABLE_STATUSES.has(existingStatus)) {
-      throw new AccountingApiError(`Cannot update a payout with status "${existingStatus}".`, 400)
+      throw new AccountingApiError(`Cannot update a rule with status "${existingStatus}".`, 400)
     }
 
     const data: Record<string, unknown> = {}
     if (body.instructor !== undefined) data.instructor = Number(body.instructor) || 0
     if (body.course !== undefined) data.course = Number(body.course) || 0
-    if (body.periodStart !== undefined) data.periodStart = String(body.periodStart)
-    if (body.periodEnd !== undefined) data.periodEnd = String(body.periodEnd)
-    if (body.sourceType !== undefined) data.sourceType = String(body.sourceType)
-    if (body.sourceReference !== undefined) data.sourceReference = String(body.sourceReference)
-    if (body.calculatedAmount !== undefined) data.calculatedAmount = Math.max(0, Number(body.calculatedAmount) || 0)
-    if (body.approvedAmount !== undefined) data.approvedAmount = Math.max(0, Number(body.approvedAmount) || 0)
-    if (body.status !== undefined) data.status = String(body.status || 'draft')
+    if (body.payoutMethod !== undefined) data.payoutMethod = String(body.payoutMethod || 'flat')
+    if (body.flatAmount !== undefined) data.flatAmount = Math.max(0, Number(body.flatAmount) || 0)
+    if (body.percentOfRevenue !== undefined) data.percentOfRevenue = Math.min(100, Math.max(0, Number(body.percentOfRevenue) || 0))
+    if (body.perEnrollmentAmount !== undefined) data.perEnrollmentAmount = Math.max(0, Number(body.perEnrollmentAmount) || 0)
+    if (body.completionBonusAmount !== undefined) data.completionBonusAmount = Math.max(0, Number(body.completionBonusAmount) || 0)
+    if (body.status !== undefined) data.status = String(body.status || 'active')
     if (body.notes !== undefined) data.notes = String(body.notes || '').trim() || null
     data.updatedBy = user.id
 
     const record = await payload.update({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
       id: parseNumberParam(id) || id,
       depth: 2,
       overrideAccess: true,
@@ -144,28 +141,28 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const { payload } = await requireAccountingAdmin(request)
     const { id } = await context.params
-    const payoutId = parseNumberParam(id) || id
+    const ruleId = parseNumberParam(id) || id
 
     const existing = await payload.findByID({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
-      id: payoutId,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
+      id: ruleId,
       depth: 0,
       overrideAccess: true,
     }) as unknown as Record<string, unknown> | undefined
 
-    if (!existing) throw new AccountingApiError('Instructor payout not found', 404)
+    if (!existing) throw new AccountingApiError('Instructor payout rule not found', 404)
 
     const existingStatus = String(existing.status || '')
     if (IMMUTABLE_STATUSES.has(existingStatus)) {
       throw new AccountingApiError(
-        `Cannot delete a payout with status "${existingStatus}".`,
+        `Cannot delete a rule with status "${existingStatus}".`,
         409,
       )
     }
 
     await payload.delete({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
-      id: payoutId,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
+      id: ruleId,
       overrideAccess: true,
     })
 

@@ -13,8 +13,11 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {}
     if (search.trim()) {
       where.or = [
-        { coverageType: { like: search } } as never,
-        { status: { like: search } } as never,
+        { 'corporateAccount.name': { like: search } } as never,
+        { 'corporateAccount.accountCode': { like: search } } as never,
+        { 'enrollmentBillingLink.sourceReference': { like: search } } as never,
+        { 'invoice.invoiceNumber': { like: search } } as never,
+        { notes: { like: search } } as never,
       ]
     }
 
@@ -58,6 +61,12 @@ export async function GET(request: NextRequest) {
 
     const totalDocs = result.totalDocs
     const activeLinks = result.docs.filter((d) => d.status === 'active').length
+    const corporateCoverage = result.docs
+      .filter((d) => d.status === 'active')
+      .reduce((sum, d) => sum + (d.coveredAmount ?? 0), 0)
+    const sharedCoverageLinks = result.docs
+      .filter((d) => (d.traineeShareAmount ?? 0) > 0)
+      .length
 
     return NextResponse.json({
       section: {
@@ -71,8 +80,10 @@ export async function GET(request: NextRequest) {
           { label: 'Archived', value: 'archived' },
         ],
         metrics: [
-          { label: 'Active Links', value: String(activeLinks), change: 'Links currently active', trend: 'up' as const },
-          { label: 'Total Links', value: String(totalDocs), change: 'All corporate billing link records', trend: 'neutral' as const },
+          { id: 'active-links', label: 'Active Links', value: String(activeLinks), change: 'Corporate coverage records currently in force', trend: 'up' as const },
+          { id: 'total-links', label: 'Total Links', value: String(totalDocs), change: 'All corporate billing link records', trend: 'neutral' as const },
+          { id: 'corporate-coverage', label: 'Corporate Coverage', value: `PHP ${corporateCoverage.toLocaleString()}`, change: 'Covered amount from company billing records', trend: 'up' as const },
+          { id: 'shared-coverage-links', label: 'Shared Coverage Links', value: String(sharedCoverageLinks), change: 'Links where trainee share remains after corporate pay', trend: 'neutral' as const },
         ],
         table: {
           title: 'Corporate Billing Link Register',

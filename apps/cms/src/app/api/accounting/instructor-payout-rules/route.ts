@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ACCOUNTING_COLLECTION_SLUGS, LMS_PAYOUT_STATUS_OPTIONS } from '@/accounting/constants/accounting'
+import { ACCOUNTING_COLLECTION_SLUGS, LMS_PAYOUT_METHOD_OPTIONS, LMS_SPONSOR_STATUS_OPTIONS } from '@/accounting/constants/accounting'
 import { findAllDocs } from '@/accounting/utils/findAllDocs'
 import { getRelationshipId } from '@/accounting/utils/accounting-audit'
 import { normalizeAmount } from '@/accounting/utils/amounts'
 import { handleAccountingApiError, requireAccountingAdmin } from '../_utils/auth'
 
-type PayoutDoc = {
+type RuleDoc = {
   id: number | string
   instructor?: {
     id?: number | string
@@ -13,12 +13,11 @@ type PayoutDoc = {
     specialization?: string | null
   } | number | string | null
   course?: { id?: number | string; title?: string | null; courseCode?: string | null } | number | string | null
-  periodStart?: string | null
-  periodEnd?: string | null
-  sourceType?: string | null
-  sourceReference?: string | null
-  calculatedAmount?: number | null
-  approvedAmount?: number | null
+  payoutMethod?: string | null
+  flatAmount?: number | null
+  percentOfRevenue?: number | null
+  perEnrollmentAmount?: number | null
+  completionBonusAmount?: number | null
   status?: string | null
   notes?: string | null
 }
@@ -33,24 +32,25 @@ type CourseDoc = {
   id: number | string
   title?: string | null
   courseCode?: string | null
+  instructor?: unknown
 }
 
 type Cell = string | { text: string; tone?: 'amber' | 'blue' | 'gray' | 'green' | 'red'; emphasis?: boolean; align?: 'left' | 'right' | 'center' }
 
-type PayoutRow = {
+type RuleRow = {
   id: string
   instructorId: string
   instructorLabel: string
   courseId: string
   courseLabel: string
-  periodStart: string | null
-  periodEnd: string | null
-  periodLabel: string
-  sourceReference: string
-  calculatedAmount: number
-  calculatedAmountLabel: string
-  approvedAmount: number
-  approvedAmountLabel: string
+  payoutMethod: string
+  payoutMethodLabel: string
+  flatAmount: number
+  flatAmountLabel: string
+  percentOfRevenue: number
+  percentOfRevenueLabel: string
+  perEnrollmentAmount: number
+  completionBonusAmount: number
   status: string
   statusLabel: string
   statusTone: 'amber' | 'blue' | 'gray' | 'green' | 'red'
@@ -59,7 +59,8 @@ type PayoutRow = {
   cells: Cell[]
 }
 
-const STATUS_LABELS = new Map<string, string>(LMS_PAYOUT_STATUS_OPTIONS.map((o) => [o.value, o.label]))
+const METHOD_LABELS = new Map<string, string>(LMS_PAYOUT_METHOD_OPTIONS.map((o) => [o.value, o.label]))
+const STATUS_LABELS = new Map<string, string>(LMS_SPONSOR_STATUS_OPTIONS.map((o) => [o.value, o.label]))
 
 const parseIntegerParam = (value: string | null, fallback: number) => {
   if (!value) return fallback
@@ -77,16 +78,14 @@ const formatCurrency = (value: number | null | undefined) =>
 
 const getStatusTone = (status: string | null | undefined): 'amber' | 'blue' | 'gray' | 'green' | 'red' => {
   switch (String(status || '')) {
-    case 'draft': return 'gray'
-    case 'calculated': return 'blue'
-    case 'approved': return 'amber'
-    case 'paid': return 'green'
-    case 'voided': return 'red'
+    case 'active': return 'green'
+    case 'inactive': return 'gray'
+    case 'archived': return 'red'
     default: return 'gray'
   }
 }
 
-const buildInstructorLabel = (instructor: PayoutDoc['instructor']) => {
+const buildInstructorLabel = (instructor: RuleDoc['instructor']) => {
   if (!instructor) return '-'
   if (typeof instructor === 'number' || typeof instructor === 'string') return String(instructor)
   const userObj = instructor.user
@@ -101,7 +100,7 @@ const buildInstructorLabel = (instructor: PayoutDoc['instructor']) => {
   return String(instructor.specialization || `Instructor ${instructor.id}`)
 }
 
-const buildCourseLabel = (course: PayoutDoc['course']) => {
+const buildCourseLabel = (course: RuleDoc['course']) => {
   if (!course) return '-'
   if (typeof course === 'number' || typeof course === 'string') return String(course)
   return String(course.title || course.courseCode || `Course ${course.id}`)
@@ -114,14 +113,15 @@ export async function GET(request: NextRequest) {
 
     const search = searchParams.get('search') || ''
     const statuses = parseListParam(searchParams, 'status')
+    const payoutMethods = parseListParam(searchParams, 'payoutMethod')
     const quickFilters = parseListParam(searchParams, 'quickFilter')
     const page = Math.max(1, parseIntegerParam(searchParams.get('page'), 1))
     const limit = Math.min(100, Math.max(1, parseIntegerParam(searchParams.get('limit'), 10)))
 
-    const [payouts, instructors, courses] = await Promise.all([
-      findAllDocs<PayoutDoc>({
+    const [rules, instructors, courses] = await Promise.all([
+      findAllDocs<RuleDoc>({
         payload,
-        collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
+        collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
         depth: 2,
         sort: '-createdAt',
       }),
@@ -139,40 +139,39 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
-    const allRows = payouts.map<PayoutRow>((payout) => {
-      const status = String(payout.status || '')
-      const instructorLabel = buildInstructorLabel(payout.instructor)
-      const courseLabel = buildCourseLabel(payout.course)
-      const ca = normalizeAmount(payout.calculatedAmount)
-      const aa = normalizeAmount(payout.approvedAmount)
-      const periodStart = payout.periodStart ? String(payout.periodStart).slice(0, 10) : null
-      const periodEnd = payout.periodEnd ? String(payout.periodEnd).slice(0, 10) : null
+    const allRows = rules.map<RuleRow>((rule) => {
+      const method = String(rule.payoutMethod || '')
+      const status = String(rule.status || '')
+      const instructorLabel = buildInstructorLabel(rule.instructor)
+      const courseLabel = buildCourseLabel(rule.course)
+      const flatAmount = normalizeAmount(rule.flatAmount)
+      const percentOfRevenue = Number(rule.percentOfRevenue) || 0
 
       return {
-        id: String(payout.id),
-        instructorId: String(getRelationshipId(payout.instructor) || ''),
+        id: String(rule.id),
+        instructorId: String(getRelationshipId(rule.instructor) || ''),
         instructorLabel,
-        courseId: String(getRelationshipId(payout.course) || ''),
+        courseId: String(getRelationshipId(rule.course) || ''),
         courseLabel,
-        periodStart,
-        periodEnd,
-        periodLabel: periodStart && periodEnd ? `${periodStart} to ${periodEnd}` : '-',
-        sourceReference: String(payout.sourceReference || ''),
-        calculatedAmount: ca,
-        calculatedAmountLabel: formatCurrency(ca),
-        approvedAmount: aa,
-        approvedAmountLabel: formatCurrency(aa),
+        payoutMethod: method,
+        payoutMethodLabel: METHOD_LABELS.get(method) || method || '-',
+        flatAmount,
+        flatAmountLabel: formatCurrency(flatAmount),
+        percentOfRevenue,
+        percentOfRevenueLabel: percentOfRevenue > 0 ? `${percentOfRevenue}%` : '0%',
+        perEnrollmentAmount: normalizeAmount(rule.perEnrollmentAmount),
+        completionBonusAmount: normalizeAmount(rule.completionBonusAmount),
         status,
         statusLabel: STATUS_LABELS.get(status) || 'Unknown',
         statusTone: getStatusTone(status),
-        notes: String(payout.notes || ''),
-        searchableText: [instructorLabel, courseLabel, payout.sourceReference, status, payout.notes].map((v) => normalizeSearch(v)).filter(Boolean).join(' '),
+        notes: String(rule.notes || ''),
+        searchableText: [instructorLabel, courseLabel, method, status, rule.notes].map((v) => normalizeSearch(v)).filter(Boolean).join(' '),
         cells: [
           { text: instructorLabel, emphasis: true },
           courseLabel,
-          periodStart && periodEnd ? `${periodStart} to ${periodEnd}` : '-',
-          { text: formatCurrency(ca), align: 'right' },
-          { text: formatCurrency(aa), align: 'right' },
+          METHOD_LABELS.get(method) || method || '-',
+          { text: formatCurrency(flatAmount), align: 'right' },
+          { text: percentOfRevenue > 0 ? `${percentOfRevenue}%` : '0%', align: 'right' },
           { text: STATUS_LABELS.get(status) || 'Unknown', tone: getStatusTone(status) },
         ],
       }
@@ -182,9 +181,14 @@ export async function GET(request: NextRequest) {
     const filteredRows = allRows.filter((row) => {
       if (normalizedSearch && !row.searchableText.includes(normalizedSearch)) return false
       if (statuses.length > 0 && !statuses.includes(row.status)) return false
+      if (payoutMethods.length > 0 && !payoutMethods.includes(row.payoutMethod)) return false
       if (quickFilters.length > 0) {
         const match = quickFilters.some((qf) => {
           if (qf.startsWith('status:')) return row.status === qf.slice(7)
+          if (qf === 'flat') return row.payoutMethod === 'flat'
+          if (qf === 'revenue_share') return row.payoutMethod === 'revenue_share'
+          if (qf === 'per_enrollment') return row.payoutMethod === 'per_enrollment'
+          if (qf === 'hybrid') return row.payoutMethod === 'hybrid'
           return false
         })
         if (!match) return false
@@ -196,42 +200,43 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
     const paginatedRows = filteredRows.slice((page - 1) * limit, page * limit)
 
-    const draftCount = allRows.filter((r) => r.status === 'draft').length
-    const calculatedCount = allRows.filter((r) => r.status === 'calculated').length
-    const paidCount = allRows.filter((r) => r.status === 'paid').length
-    const approvedTotal = allRows.filter((r) => r.status === 'approved').reduce((s, r) => s + r.approvedAmount, 0)
+    const activeCount = allRows.filter((r) => r.status === 'active').length
+    const revenueShareCount = allRows.filter((r) => r.payoutMethod === 'revenue_share').length
+    const hybridCount = allRows.filter((r) => r.payoutMethod === 'hybrid').length
 
     return NextResponse.json({
       section: {
-        id: 'payout-register',
-        label: 'Payout Register',
-        description: 'Review generated instructor payout obligations by instructor, course, period, calculated amount, approved amount, and payout status.',
-        searchPlaceholder: 'Search instructor, course, source reference, period, calculated amount, or payout status',
+        id: 'instructor-payout-rules',
+        label: 'Instructor Payout Rules',
+        description: 'Review instructor payout-rule configuration by course, payout method, flat amount, revenue share, enrollment pay, completion bonus, and status.',
+        searchPlaceholder: 'Search instructor, course, payout method, flat amount, percent of revenue, or status',
         filters: {
-          statuses: LMS_PAYOUT_STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
+          statuses: LMS_SPONSOR_STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
+          payoutMethods: LMS_PAYOUT_METHOD_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
           quickFilters: [
-            { label: 'Draft', value: 'status:draft' },
-            { label: 'Calculated', value: 'status:calculated' },
-            { label: 'Approved', value: 'status:approved' },
-            { label: 'Paid', value: 'status:paid' },
+            { label: 'Active Rules', value: 'status:active' },
+            { label: 'Flat', value: 'flat' },
+            { label: 'Revenue Share', value: 'revenue_share' },
+            { label: 'Hybrid', value: 'hybrid' },
           ],
         },
         metrics: [
-          { id: 'total-payouts', label: 'Generated Payouts', value: allRows.length, change: 'Payout records created from course activity', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
-          { id: 'approved-amount', label: 'Approved Amount', value: formatCurrency(approvedTotal), change: 'Approved instructor obligations in current register', trend: approvedTotal > 0 ? 'up' as const : 'neutral' as const },
-          { id: 'draft-calculated', label: 'Calculated Only', value: draftCount + calculatedCount, change: 'Payouts still awaiting approval or release', trend: draftCount + calculatedCount > 0 ? 'neutral' as const : 'down' as const },
-          { id: 'paid-payouts', label: 'Paid Payouts', value: paidCount, change: 'Instructor payout records already settled', trend: paidCount > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'total-rules', label: 'Payout Rules', value: allRows.length, change: 'Rule records controlling instructor cost generation', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'active-rules', label: 'Active Rules', value: activeCount, change: 'Rules currently eligible for payout calculation', trend: activeCount > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'revenue-share-rules', label: 'Revenue Share Rules', value: revenueShareCount, change: 'Rules using revenue-linked payout logic', trend: revenueShareCount > 0 ? 'neutral' as const : 'down' as const },
+          { id: 'hybrid-rules', label: 'Hybrid Rules', value: hybridCount, change: 'Rules combining multiple payout drivers', trend: hybridCount > 0 ? 'up' as const : 'neutral' as const },
         ],
         table: {
-          title: 'Instructor Payout Register',
-          description: 'Payout register aligned to `accounting-instructor-payouts`, including calculation period, calculated amount, approved amount, and payout status.',
-          columns: ['Instructor', 'Course', 'Period', { label: 'Calculated Amount', align: 'right' }, { label: 'Approved Amount', align: 'right' }, 'Status'],
+          title: 'Instructor Payout Rule Register',
+          description: 'Rule configuration aligned to `accounting-instructor-payout-rules`, including method-specific amount fields and rule status.',
+          columns: ['Instructor', 'Course', 'Method', { label: 'Flat Amount', align: 'right' }, { label: 'Revenue %', align: 'right' }, 'Status'],
           rows: paginatedRows,
         },
       },
       appliedFilters: {
         search,
         statuses,
+        payoutMethods,
         quickFilters,
       },
       pagination: {
@@ -270,22 +275,19 @@ export async function POST(request: NextRequest) {
 
     if (!body.instructor) throw new Error('Instructor is required.')
     if (!body.course) throw new Error('Course is required.')
-    if (!body.periodStart) throw new Error('Period start is required.')
-    if (!body.periodEnd) throw new Error('Period end is required.')
 
     const record = await payload.create({
-      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayouts,
+      collection: ACCOUNTING_COLLECTION_SLUGS.instructorPayoutRules,
       overrideAccess: true,
       data: {
         instructor: Number(body.instructor) || 0,
         course: Number(body.course) || 0,
-        periodStart: String(body.periodStart),
-        periodEnd: String(body.periodEnd),
-        sourceType: String(body.sourceType || 'course_activity'),
-        sourceReference: String(body.sourceReference || `PAYOUT-${Date.now()}`),
-        calculatedAmount: Math.max(0, Number(body.calculatedAmount) || 0),
-        approvedAmount: body.approvedAmount !== undefined && body.approvedAmount !== '' ? Math.max(0, Number(body.approvedAmount)) : undefined,
-        status: String(body.status || 'draft'),
+        payoutMethod: String(body.payoutMethod || 'flat'),
+        flatAmount: Math.max(0, Number(body.flatAmount) || 0),
+        percentOfRevenue: Math.min(100, Math.max(0, Number(body.percentOfRevenue) || 0)),
+        perEnrollmentAmount: Math.max(0, Number(body.perEnrollmentAmount) || 0),
+        completionBonusAmount: Math.max(0, Number(body.completionBonusAmount) || 0),
+        status: String(body.status || 'active'),
         notes: String(body.notes || '').trim() || null,
         createdBy: user.id,
         updatedBy: user.id,

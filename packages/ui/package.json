@@ -33,6 +33,7 @@
     "./faqs-page-content": "./src/faqs-page-content.tsx",
     "./privacy-content": "./src/privacy-content.ts",
     "./privacy-page-content": "./src/privacy-page-content.tsx",
+    "./revenue-chart": "./src/revenue-chart.tsx",
     "./table": "./src/table.tsx",
     "./sidebar": "./src/sidebar.tsx",
     "./stats-card": "./src/stats-card.tsx",

@@ -6,6 +6,7 @@ import {
   AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
+  CheckCircle2,
   Download,
   Edit,
   Eye,
@@ -14,45 +15,45 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Send,
   Trash2,
   X,
+  XCircle,
 } from 'lucide-react';
 import {
-  createSchedule,
-  deleteSchedule,
-  getScheduleDetail,
-  getSchedules,
-  updateSchedule,
-  type RecognitionScheduleCell,
-  type RecognitionScheduleDetail,
-  type RecognitionScheduleMetric,
-  type RecognitionScheduleMutationInput,
-  type RecognitionSchedulesResponse,
-} from './actions-recognition-schedules';
+  createPayout,
+  deletePayout,
+  getPayoutDetail,
+  getPayouts,
+  postPayoutAction,
+  updatePayout,
+  type PayoutRegisterCell,
+  type PayoutRegisterDetail,
+  type PayoutRegisterMetric,
+  type PayoutRegisterMutationInput,
+  type PayoutRegisterResponse,
+  type PayoutRegisterRow,
+} from './actions-instructor-payouts';
 
-type RecognitionScheduleFilterState = { statuses: string[]; recognitionMethods: string[] };
-type RecognitionScheduleActionTarget = {
+type PayoutFilterState = { statuses: string[] };
+type PayoutFormState = {
+  instructor: string;
+  course: string;
+  periodStart: string;
+  periodEnd: string;
+  sourceReference: string;
+  calculatedAmount: string;
+  approvedAmount: string;
+  status: string;
+  notes: string;
+};
+type PayoutActionTarget = {
   id: string;
   label: string;
+  action: 'calculate' | 'approve' | 'pay' | 'void';
 };
 
-const RECOGNITION_METHOD_OPTIONS = [
-  { label: 'On Activation', value: 'on_activation' },
-  { label: 'Straight Line', value: 'straight_line' },
-  { label: 'Completion Based', value: 'completion_based' },
-  { label: 'Certificate Based', value: 'certificate_based' },
-  { label: 'Manual', value: 'manual' },
-];
-
-const STATUS_OPTIONS = [
-  { label: 'Draft', value: 'draft' },
-  { label: 'Scheduled', value: 'scheduled' },
-  { label: 'Partially Recognized', value: 'partially_recognized' },
-  { label: 'Recognized', value: 'recognized' },
-  { label: 'Cancelled', value: 'cancelled' },
-];
-
-const MUTABLE_STATUSES = new Set(['draft', 'scheduled', 'partially_recognized']);
+const MUTABLE_STATUSES = new Set(['draft', 'calculated', 'approved']);
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
   if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
@@ -60,7 +61,7 @@ function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondar
   return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
 }
 
-function getMetricTone(trend: RecognitionScheduleMetric['trend']) {
+function getMetricTone(trend: PayoutRegisterMetric['trend']) {
   if (trend === 'down') return 'text-red-600 bg-red-50';
   if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
   return 'text-green-600 bg-green-50';
@@ -80,37 +81,19 @@ function toDateInputValue(value: string | null | undefined) {
   return value.slice(0, 10);
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value || 0);
-}
-
-function renderCell(cell: RecognitionScheduleCell, index: number) {
-  if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
-  }
-
-  const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
-  if (cell.tone) {
-    const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
-    };
-    return (
-      <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
-        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${toneMap[cell.tone] || toneMap.gray}`}>{cell.text}</span>
-      </td>
-    );
-  }
-
-  return <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>{cell.text}</td>;
+function createEmptyPayoutForm(): PayoutFormState {
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    instructor: '',
+    course: '',
+    periodStart: today,
+    periodEnd: today,
+    sourceReference: '',
+    calculatedAmount: '0',
+    approvedAmount: '',
+    status: 'draft',
+    notes: '',
+  };
 }
 
 function SlideOver({
@@ -289,7 +272,7 @@ function LoadingSkeleton() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {Array.from({ length: 8 }).map((_, index) => (
+                {Array.from({ length: 7 }).map((_, index) => (
                   <th key={index} className="px-4 py-3">
                     <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
                   </th>
@@ -299,7 +282,7 @@ function LoadingSkeleton() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
-                  <td colSpan={9} className="px-4 py-3">
+                  <td colSpan={7} className="px-4 py-3">
                     <div className="h-6 animate-pulse rounded bg-gray-100" />
                   </td>
                 </tr>
@@ -312,54 +295,57 @@ function LoadingSkeleton() {
   );
 }
 
-export function RecognitionSchedulesClient() {
-  const [data, setData] = useState<RecognitionSchedulesResponse | null>(null);
+function renderCell(cell: PayoutRegisterCell, index: number) {
+  if (typeof cell === 'string') {
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+  }
+
+  const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
+  if (cell.tone) {
+    const toneMap: Record<string, string> = {
+      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
+      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
+      green: 'bg-green-50 text-green-700 ring-green-200',
+      red: 'bg-red-50 text-red-700 ring-red-200',
+    };
+    return (
+      <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
+        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${toneMap[cell.tone] || toneMap.gray}`}>{cell.text}</span>
+      </td>
+    );
+  }
+
+  return <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>{cell.text}</td>;
+}
+
+export function PayoutRegisterClient() {
+  const [data, setData] = useState<PayoutRegisterResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<RecognitionScheduleFilterState>({ statuses: [], recognitionMethods: [] });
-  const [draftFilters, setDraftFilters] = useState<RecognitionScheduleFilterState>({ statuses: [], recognitionMethods: [] });
+  const [filters, setFilters] = useState<PayoutFilterState>({ statuses: [] });
+  const [draftFilters, setDraftFilters] = useState<PayoutFilterState>({ statuses: [] });
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [viewDetail, setViewDetail] = useState<RecognitionScheduleDetail | null>(null);
+  const [viewDetail, setViewDetail] = useState<PayoutRegisterDetail | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isViewLoading, setIsViewLoading] = useState(false);
-
-  const [formState, setFormState] = useState<{
-    invoice: string;
-    enrollmentBillingLink: string;
-    recognitionMethod: string;
-    startDate: string;
-    endDate: string;
-    totalDeferredAmount: string;
-    recognizedAmount: string;
-    remainingDeferredAmount: string;
-    status: string;
-    notes: string;
-  }>({
-    invoice: '',
-    enrollmentBillingLink: '',
-    recognitionMethod: 'on_activation',
-    startDate: new Date().toISOString().slice(0, 10),
-    endDate: new Date().toISOString().slice(0, 10),
-    totalDeferredAmount: '0',
-    recognizedAmount: '0',
-    remainingDeferredAmount: '0',
-    status: 'draft',
-    notes: '',
-  });
+  const [formState, setFormState] = useState<PayoutFormState>(createEmptyPayoutForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<RecognitionScheduleActionTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [actionTarget, setActionTarget] = useState<PayoutActionTarget | null>(null);
+  const [isActioning, setIsActioning] = useState(false);
 
-  const filterCount = filters.statuses.length + filters.recognitionMethods.length;
+  const filterCount = filters.statuses.length;
 
-  const fetchSchedules = useCallback(async ({
+  const fetchRegister = useCallback(async ({
     search,
     page,
     nextFilters,
@@ -367,84 +353,80 @@ export function RecognitionSchedulesClient() {
   }: {
     search: string;
     page: number;
-    nextFilters: RecognitionScheduleFilterState;
+    nextFilters: PayoutFilterState;
     nextQuickFilters: string[];
   }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getSchedules({
+      const response = await getPayouts({
         search,
         page,
         statuses: nextFilters.statuses,
-        recognitionMethods: nextFilters.recognitionMethods,
         quickFilters: nextQuickFilters,
       });
       setData(response);
     } catch (fetchError) {
-      setError(fetchError instanceof Error ? fetchError.message : 'Unable to load recognition schedules.');
+      setError(fetchError instanceof Error ? fetchError.message : 'Unable to load payout register.');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void fetchSchedules({
+    void fetchRegister({
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
       nextQuickFilters: quickFilters,
     });
-  }, [currentPage, fetchSchedules, filters, quickFilters, submittedSearch]);
+  }, [currentPage, fetchRegister, filters, quickFilters, submittedSearch]);
 
   const referenceData = data?.referenceData;
 
-  const invoiceOptions = useMemo(
+  const instructorOptions = useMemo(
     () => [
-      { label: 'Select an invoice', value: '' },
-      ...(referenceData?.invoices || []).map((inv) => ({
-        label: `${inv.invoiceNumber || `Invoice ${inv.id}`} • ${formatCurrency(inv.balanceDue)}`,
-        value: String(inv.id),
+      { label: 'Select an instructor', value: '' },
+      ...(referenceData?.instructors || []).map((inst) => ({
+        label: inst.label || `Instructor ${inst.id}`,
+        value: String(inst.id),
       })),
     ],
-    [referenceData?.invoices],
+    [referenceData?.instructors],
   );
 
-  const billingLinkOptions = useMemo(
+  const courseOptions = useMemo(
     () => [
-      { label: 'Select a billing link', value: '' },
-      ...(referenceData?.enrollmentBillingLinks || []).map((link) => ({
-        label: `${link.sourceReference || `Link ${link.id}`} • ${formatCurrency(link.finalChargeSnapshot)}`,
-        value: String(link.id),
+      { label: 'Select a course', value: '' },
+      ...(referenceData?.courses || []).map((c) => ({
+        label: c.title || c.courseCode || `Course ${c.id}`,
+        value: String(c.id),
       })),
     ],
-    [referenceData?.enrollmentBillingLinks],
+    [referenceData?.courses],
   );
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     setSubmittedSearch(searchInput);
     setCurrentPage(1);
-    void fetchSchedules({ search: searchInput, page: 1, nextFilters: filters, nextQuickFilters: quickFilters });
+    void fetchRegister({ search: searchInput, page: 1, nextFilters: filters, nextQuickFilters: quickFilters });
   };
 
   const handleRefresh = () => {
-    void fetchSchedules({ search: submittedSearch, page: currentPage, nextFilters: filters, nextQuickFilters: quickFilters });
+    void fetchRegister({ search: submittedSearch, page: currentPage, nextFilters: filters, nextQuickFilters: quickFilters });
   };
 
   const handleExport = () => {
     const rows = data?.section.table.rows || [];
     if (!rows.length) return;
-    const headers = ['Invoice', 'Billing Link', 'Method', 'Start Date', 'End Date', 'Total Deferred', 'Recognized', 'Remaining Deferred', 'Status'];
+    const headers = ['Instructor', 'Course', 'Period', 'Calculated Amount', 'Approved Amount', 'Status'];
     const csvRows = rows.map((row) => [
-      row.invoiceNumber,
-      row.enrollmentBillingLinkLabel,
-      row.recognitionMethodLabel,
-      row.startDateLabel,
-      row.endDateLabel,
-      row.totalDeferredLabel,
-      row.recognizedLabel,
-      row.remainingDeferredLabel,
+      row.instructorLabel,
+      row.courseLabel,
+      row.periodLabel,
+      row.calculatedAmountLabel,
+      row.approvedAmountLabel,
       row.statusLabel,
     ]);
     const csvContent = [headers, ...csvRows].map((row) => row.map((cell) => escapeCsvValue(cell)).join(',')).join('\n');
@@ -452,7 +434,7 @@ export function RecognitionSchedulesClient() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'recognition-schedules.csv';
+    link.download = 'instructor-payout-register.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -467,18 +449,7 @@ export function RecognitionSchedulesClient() {
   const handleOpenCreate = () => {
     setEditingId(null);
     setFormError(null);
-    setFormState({
-      invoice: '',
-      enrollmentBillingLink: '',
-      recognitionMethod: 'on_activation',
-      startDate: new Date().toISOString().slice(0, 10),
-      endDate: new Date().toISOString().slice(0, 10),
-      totalDeferredAmount: '0',
-      recognizedAmount: '0',
-      remainingDeferredAmount: '0',
-      status: 'draft',
-      notes: '',
-    });
+    setFormState(createEmptyPayoutForm());
     setIsFormOpen(true);
   };
 
@@ -487,10 +458,10 @@ export function RecognitionSchedulesClient() {
     setIsViewLoading(true);
     setViewDetail(null);
     try {
-      const detail = await getScheduleDetail(id);
+      const detail = await getPayoutDetail(id);
       setViewDetail(detail);
     } catch (detailError) {
-      setError(detailError instanceof Error ? detailError.message : 'Unable to load schedule detail.');
+      setError(detailError instanceof Error ? detailError.message : 'Unable to load payout detail.');
     } finally {
       setIsViewLoading(false);
     }
@@ -502,28 +473,39 @@ export function RecognitionSchedulesClient() {
     setIsFormOpen(true);
     setIsViewLoading(true);
     try {
-      const detail = await getScheduleDetail(id);
+      const detail = await getPayoutDetail(id);
       setFormState({
-        invoice: detail.invoiceId,
-        enrollmentBillingLink: detail.enrollmentBillingLinkId,
-        recognitionMethod: detail.recognitionMethod,
-        startDate: toDateInputValue(detail.startDate),
-        endDate: toDateInputValue(detail.endDate),
-        totalDeferredAmount: String(detail.totalDeferredAmount || 0),
-        recognizedAmount: String(detail.recognizedAmount || 0),
-        remainingDeferredAmount: String(detail.remainingDeferredAmount || 0),
+        instructor: detail.instructorId,
+        course: detail.courseId,
+        periodStart: toDateInputValue(detail.periodStart),
+        periodEnd: toDateInputValue(detail.periodEnd),
+        sourceReference: detail.sourceReference,
+        calculatedAmount: String(detail.calculatedAmount || 0),
+        approvedAmount: detail.approvedAmount ? String(detail.approvedAmount) : '',
         status: detail.status,
         notes: detail.notes || '',
       });
     } catch (detailError) {
-      setFormError(detailError instanceof Error ? detailError.message : 'Unable to load schedule detail.');
+      setFormError(detailError instanceof Error ? detailError.message : 'Unable to load payout detail.');
     } finally {
       setIsViewLoading(false);
     }
   };
 
+  const normalizeFormPayload = (): PayoutRegisterMutationInput => ({
+    instructor: formState.instructor,
+    course: formState.course,
+    periodStart: formState.periodStart,
+    periodEnd: formState.periodEnd,
+    sourceReference: formState.sourceReference.trim() || undefined,
+    calculatedAmount: Number(formState.calculatedAmount || 0),
+    approvedAmount: formState.approvedAmount ? Number(formState.approvedAmount) : undefined,
+    status: formState.status || 'draft',
+    notes: formState.notes.trim() || null,
+  });
+
   const refreshCurrentView = async () => {
-    await fetchSchedules({
+    await fetchRegister({
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
@@ -536,27 +518,16 @@ export function RecognitionSchedulesClient() {
     setIsSubmitting(true);
     setFormError(null);
     try {
-      const payload: RecognitionScheduleMutationInput = {
-        invoice: formState.invoice,
-        enrollmentBillingLink: formState.enrollmentBillingLink,
-        recognitionMethod: formState.recognitionMethod,
-        startDate: formState.startDate,
-        endDate: formState.endDate,
-        totalDeferredAmount: Number(formState.totalDeferredAmount || 0),
-        recognizedAmount: Number(formState.recognizedAmount || 0),
-        remainingDeferredAmount: Number(formState.remainingDeferredAmount || 0),
-        status: formState.status,
-        notes: formState.notes.trim() || null,
-      };
+      const payload = normalizeFormPayload();
       if (editingId) {
-        await updateSchedule(editingId, payload);
+        await updatePayout(editingId, payload);
       } else {
-        await createSchedule(payload);
+        await createPayout(payload);
       }
       setIsFormOpen(false);
       await refreshCurrentView();
     } catch (submitError) {
-      setFormError(submitError instanceof Error ? submitError.message : 'Unable to save recognition schedule.');
+      setFormError(submitError instanceof Error ? submitError.message : 'Unable to save payout.');
     } finally {
       setIsSubmitting(false);
     }
@@ -567,28 +538,98 @@ export function RecognitionSchedulesClient() {
     setIsDeleting(true);
     setError(null);
     try {
-      await deleteSchedule(deleteTarget.id);
+      await deletePayout(deleteTarget.id);
       setDeleteTarget(null);
       await refreshCurrentView();
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete recognition schedule.');
+      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete payout.');
     } finally {
       setIsDeleting(false);
     }
   };
 
+  const handleConfirmAction = async () => {
+    if (!actionTarget) return;
+    setIsActioning(true);
+    setError(null);
+    try {
+      await postPayoutAction(actionTarget.id, actionTarget.action);
+      setActionTarget(null);
+      await refreshCurrentView();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : `Unable to ${actionTarget.action} payout.`);
+    } finally {
+      setIsActioning(false);
+    }
+  };
+
+  const getRowActions = (row: PayoutRegisterRow) => {
+    const isMutable = MUTABLE_STATUSES.has(row.status);
+    const availableActions: { action: PayoutActionTarget['action']; label: string; icon: typeof Send }[] = [];
+    if (row.status === 'draft') availableActions.push({ action: 'calculate', label: 'Calculate', icon: Send });
+    if (row.status === 'calculated') availableActions.push({ action: 'approve', label: 'Approve', icon: CheckCircle2 });
+    if (row.status === 'approved') {
+      availableActions.push({ action: 'pay', label: 'Pay', icon: Send });
+      availableActions.push({ action: 'void', label: 'Void', icon: XCircle });
+    }
+    return { isMutable, availableActions };
+  };
+
+  const actionDialogConfig = useMemo(() => {
+    if (!actionTarget) return null;
+    const configs: Record<string, { title: string; description: string; icon: typeof AlertCircle; confirmLabel: string; iconBg: string; iconColor: string; confirmBg: string }> = {
+      calculate: {
+        title: 'Calculate Payout',
+        description: `Are you sure you want to calculate the payout for ${actionTarget.label}? This will mark it as calculated and move it forward in the workflow.`,
+        icon: AlertCircle,
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
+        confirmBg: 'bg-blue-600 hover:bg-blue-700',
+        confirmLabel: 'Calculate',
+      },
+      approve: {
+        title: 'Approve Payout',
+        description: `Are you sure you want to approve the payout for ${actionTarget.label}? This will set the approved amount equal to the calculated amount and advance it to approved status.`,
+        icon: AlertCircle,
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
+        confirmBg: 'bg-blue-600 hover:bg-blue-700',
+        confirmLabel: 'Approve',
+      },
+      pay: {
+        title: 'Pay Payout',
+        description: `Are you sure you want to mark the payout for ${actionTarget.label} as paid? This action cannot be undone.`,
+        icon: AlertCircle,
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
+        confirmBg: 'bg-blue-600 hover:bg-blue-700',
+        confirmLabel: 'Mark as Paid',
+      },
+      void: {
+        title: 'Void Payout',
+        description: `Are you sure you want to void the payout for ${actionTarget.label}? This action cannot be undone.`,
+        icon: AlertCircle,
+        iconBg: 'bg-red-100',
+        iconColor: 'text-red-600',
+        confirmBg: 'bg-red-600 hover:bg-red-700',
+        confirmLabel: 'Void Payout',
+      },
+    };
+    return configs[actionTarget.action];
+  }, [actionTarget]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{data?.section.label || 'Recognition Schedules'}</h2>
-          <p className="text-sm text-gray-600">{data?.section.description || 'Deferred revenue recognition schedules aligned to invoices and enrollment billing links used in LMS finance reporting.'}</p>
+          <h2 className="text-lg font-semibold text-gray-900">{data?.section.label || 'Payout Register'}</h2>
+          <p className="text-sm text-gray-600">{data?.section.description || 'Review generated instructor payout obligations by instructor, course, period, calculated amount, approved amount, and payout status.'}</p>
           <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
             <Plus className="h-4 w-4" />
-            Create Schedule
+            Create Payout
           </button>
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" />
@@ -596,7 +637,7 @@ export function RecognitionSchedulesClient() {
           </button>
           <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.section.table.rows.length}>
             <Download className="h-4 w-4" />
-            Export Register
+            Export View
           </button>
         </div>
       </div>
@@ -609,7 +650,7 @@ export function RecognitionSchedulesClient() {
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder={data?.section.searchPlaceholder || 'Search invoice, billing link, method, status, or amount'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <input type="text" placeholder={data?.section.searchPlaceholder || 'Search instructor, course, source reference, period, calculated amount, or payout status'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
               <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" />
@@ -640,7 +681,7 @@ export function RecognitionSchedulesClient() {
                   <p className="mt-1 text-sm text-gray-600">Select as many values as needed per group, then apply the filtered view.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], recognitionMethods: [] }); setFilters({ statuses: [], recognitionMethods: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button>
+                  <button type="button" onClick={() => { setDraftFilters({ statuses: [] }); setFilters({ statuses: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button>
                   <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
                   <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button>
                 </div>
@@ -655,23 +696,14 @@ export function RecognitionSchedulesClient() {
                     })}
                   </div>
                 </div>
-                <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Recognition Method</h5>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {(data?.section.filters.recognitionMethods || []).map((option) => {
-                      const selected = draftFilters.recognitionMethods.includes(option.value);
-                      return <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, recognitionMethods: toggleFilterValue(previous.recognitionMethods, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${selected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{option.label}</button>;
-                    })}
-                  </div>
-                </div>
               </div>
             </div>
           ) : null}
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Recognition Schedule Register'}</h3>
-              <p className="text-sm text-gray-600">{data?.section.table.description || 'Deferred revenue recognition schedules tied to enrollment monetization.'}</p>
+              <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Instructor Payout Register'}</h3>
+              <p className="text-sm text-gray-600">{data?.section.table.description || 'Payout register aligned to accounting-instructor-payouts, including calculation period, calculated amount, approved amount, and payout status.'}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
               <span>{data?.totals.filteredRows ?? 0} matching rows</span>
@@ -687,17 +719,18 @@ export function RecognitionSchedulesClient() {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        {['Invoice', 'Billing Link', 'Method', 'Start Date', 'End Date', { label: 'Total Deferred', align: 'right' }, { label: 'Remaining', align: 'right' }, 'Status'].map((column) => {
-                          const colLabel = typeof column === 'string' ? column : column.label;
-                          const colAlign = typeof column === 'string' ? 'text-left' : column.align === 'right' ? 'text-right' : 'text-left';
-                          return <th key={colLabel} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${colAlign}`}>{colLabel}</th>;
+                        {['Instructor', 'Course', 'Period', { label: 'Calculated Amount', align: 'right' }, { label: 'Approved Amount', align: 'right' }, 'Status'].map((column) => {
+                          const key = typeof column === 'string' ? column : column.label;
+                          const alignClass = typeof column === 'string' ? 'text-left' : column.align === 'right' ? 'text-right' : 'text-left';
+                          return <th key={key} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${alignClass}`}>{key}</th>;
                         })}
                         <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
                       {(data?.section.table.rows || []).length > 0 ? (data?.section.table.rows || []).map((row) => {
-                        const isMutable = MUTABLE_STATUSES.has(row.status);
+                        const { isMutable, availableActions } = getRowActions(row);
+                        const canDelete = row.status !== 'paid' && row.status !== 'voided';
                         return (
                           <tr key={row.id} className="hover:bg-gray-50">
                             {row.cells.map((cell, index) => renderCell(cell, index))}
@@ -706,10 +739,19 @@ export function RecognitionSchedulesClient() {
                                 <button type="button" onClick={() => handleView(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!isMutable} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40" title="Edit schedule">
+                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!isMutable} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40" title={isMutable ? 'Edit payout' : 'Cannot edit paid or voided payouts'}>
                                   <Edit className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => setDeleteTarget({ id: row.id, label: row.invoiceNumber })} disabled={!isMutable} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40" title="Delete schedule">
+                                {availableActions.map((available) => {
+                                  const Icon = available.icon;
+                                  const actionColor = available.action === 'void' ? 'text-red-500 hover:bg-red-50 hover:text-red-700' : 'text-blue-600 hover:bg-blue-50 hover:text-blue-700';
+                                  return (
+                                    <button key={available.action} type="button" onClick={() => setActionTarget({ id: row.id, label: row.instructorLabel, action: available.action })} className={`inline-flex items-center gap-1 rounded-lg p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${actionColor}`} title={available.label}>
+                                      <Icon className="h-4 w-4" />
+                                    </button>
+                                  );
+                                })}
+                                <button type="button" onClick={() => setDeleteTarget({ id: row.id, label: row.instructorLabel })} disabled={!canDelete} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40" title={canDelete ? 'Delete payout' : 'Cannot delete paid or voided payouts'}>
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
@@ -718,7 +760,7 @@ export function RecognitionSchedulesClient() {
                         );
                       }) : (
                         <tr>
-                          <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-500">No recognition schedule rows found.</td>
+                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">No payout rows found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -739,19 +781,18 @@ export function RecognitionSchedulesClient() {
         </div>
       </div>
 
-      <SlideOver isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Schedule Detail" description="Review recognition schedule header values, amounts, and journal linkage.">
+      <SlideOver isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Payout Detail" description="Review payout header values, instructor, course, period, amounts, and timestamps.">
         <div className="space-y-6">
           {isViewLoading ? <LoadingSkeleton /> : viewDetail ? (
             <>
               <div className="grid gap-4 md:grid-cols-2">
                 {[
-                  ['Invoice', viewDetail.invoiceNumber],
-                  ['Billing Link', viewDetail.enrollmentBillingLinkLabel || '-'],
-                  ['Recognition Method', viewDetail.recognitionMethodLabel],
+                  ['Instructor', viewDetail.instructorLabel],
+                  ['Course', viewDetail.courseLabel],
+                  ['Period', viewDetail.periodLabel],
+                  ['Source Reference', viewDetail.sourceReference],
+                  ['Source Type', viewDetail.sourceType],
                   ['Status', viewDetail.statusLabel],
-                  ['Start Date', viewDetail.startDateLabel],
-                  ['End Date', viewDetail.endDateLabel],
-                  ['Last Recognition At', viewDetail.lastRecognitionAtLabel || '-'],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
@@ -762,9 +803,8 @@ export function RecognitionSchedulesClient() {
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {[
-                  ['Total Deferred', viewDetail.totalDeferredLabel],
-                  ['Recognized Amount', viewDetail.recognizedLabel],
-                  ['Remaining Deferred', viewDetail.remainingDeferredLabel],
+                  ['Calculated Amount', viewDetail.calculatedAmountLabel],
+                  ['Approved Amount', viewDetail.approvedAmountLabel],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
@@ -779,6 +819,12 @@ export function RecognitionSchedulesClient() {
                   <p className="mt-2 text-sm text-gray-700">{viewDetail.notes}</p>
                 </div>
               ) : null}
+
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                <p className="font-medium text-gray-900">Timestamps</p>
+                <p className="mt-2">Created: {viewDetail.createdAt ? new Date(viewDetail.createdAt).toLocaleString() : '-'}</p>
+                <p>Updated: {viewDetail.updatedAt ? new Date(viewDetail.updatedAt).toLocaleString() : '-'}</p>
+              </div>
             </>
           ) : <p className="text-sm text-gray-500">No details available.</p>}
           <div className="flex justify-end pt-4">
@@ -787,36 +833,37 @@ export function RecognitionSchedulesClient() {
         </div>
       </SlideOver>
 
-      <SlideOver isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingId ? 'Edit Recognition Schedule' : 'Create Recognition Schedule'} description="Use guided selections for invoice, billing link, method, and dates. Amounts are tracked as controlled values.">
+      <SlideOver isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingId ? 'Edit Payout' : 'Create Payout'} description="Select instructor, course, period, and amounts. Fields marked with * are required.">
         <form onSubmit={handleSubmit} className="space-y-6">
           {formError ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{formError}</div> : null}
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Invoice" required>
-              <Select value={formState.invoice} onChange={(value) => setFormState((previous) => ({ ...previous, invoice: value }))} options={invoiceOptions} />
+            <FormField label="Instructor" required>
+              <Select value={formState.instructor} onChange={(value) => setFormState((previous) => ({ ...previous, instructor: value }))} options={instructorOptions} />
             </FormField>
-            <FormField label="Enrollment Billing Link" required>
-              <Select value={formState.enrollmentBillingLink} onChange={(value) => setFormState((previous) => ({ ...previous, enrollmentBillingLink: value }))} options={billingLinkOptions} />
+            <FormField label="Course" required>
+              <Select value={formState.course} onChange={(value) => setFormState((previous) => ({ ...previous, course: value }))} options={courseOptions} />
             </FormField>
-            <FormField label="Recognition Method" required>
-              <Select value={formState.recognitionMethod} onChange={(value) => setFormState((previous) => ({ ...previous, recognitionMethod: value }))} options={RECOGNITION_METHOD_OPTIONS} />
+            <FormField label="Period Start" required>
+              <Input type="date" value={formState.periodStart} onChange={(value) => setFormState((previous) => ({ ...previous, periodStart: value }))} required />
+            </FormField>
+            <FormField label="Period End" required>
+              <Input type="date" value={formState.periodEnd} onChange={(value) => setFormState((previous) => ({ ...previous, periodEnd: value }))} required />
+            </FormField>
+            <FormField label="Source Reference">
+              <Input value={formState.sourceReference} onChange={(value) => setFormState((previous) => ({ ...previous, sourceReference: value }))} placeholder="Auto-generated if left blank" />
+            </FormField>
+            <FormField label="Calculated Amount (PHP)" required>
+              <Input type="number" value={formState.calculatedAmount} onChange={(value) => setFormState((previous) => ({ ...previous, calculatedAmount: value }))} required />
+            </FormField>
+            <FormField label="Approved Amount (PHP)">
+              <Input type="number" value={formState.approvedAmount} onChange={(value) => setFormState((previous) => ({ ...previous, approvedAmount: value }))} placeholder="Set during approval" />
             </FormField>
             <FormField label="Status" required>
-              <Select value={formState.status} onChange={(value) => setFormState((previous) => ({ ...previous, status: value }))} options={STATUS_OPTIONS} />
-            </FormField>
-            <FormField label="Start Date" required>
-              <Input type="date" value={formState.startDate} onChange={(value) => setFormState((previous) => ({ ...previous, startDate: value }))} required />
-            </FormField>
-            <FormField label="End Date" required>
-              <Input type="date" value={formState.endDate} onChange={(value) => setFormState((previous) => ({ ...previous, endDate: value }))} required />
-            </FormField>
-            <FormField label="Total Deferred Amount (PHP)" required>
-              <Input type="number" value={formState.totalDeferredAmount} onChange={(value) => setFormState((previous) => ({ ...previous, totalDeferredAmount: value }))} required />
-            </FormField>
-            <FormField label="Recognized Amount (PHP)">
-              <Input type="number" value={formState.recognizedAmount} onChange={(value) => setFormState((previous) => ({ ...previous, recognizedAmount: value }))} />
-            </FormField>
-            <FormField label="Remaining Deferred (PHP)">
-              <Input type="number" value={formState.remainingDeferredAmount} onChange={(value) => setFormState((previous) => ({ ...previous, remainingDeferredAmount: value }))} />
+              <Select value={formState.status} onChange={(value) => setFormState((previous) => ({ ...previous, status: value }))} options={[
+                { label: 'Draft', value: 'draft' },
+                { label: 'Calculated', value: 'calculated' },
+                { label: 'Approved', value: 'approved' },
+              ]} />
             </FormField>
           </div>
 
@@ -829,11 +876,30 @@ export function RecognitionSchedulesClient() {
               Cancel
             </button>
             <button type="submit" disabled={isSubmitting} className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}>
-              {isSubmitting ? `${editingId ? 'Saving...' : 'Creating...'}` : editingId ? 'Save Changes' : 'Create Schedule'}
+              {isSubmitting ? `${editingId ? 'Saving...' : 'Creating...'}` : editingId ? 'Save Changes' : 'Create Payout'}
             </button>
           </div>
         </form>
       </SlideOver>
+
+      {actionTarget && actionDialogConfig ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setActionTarget(null)}>
+          <div className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className={`rounded-full p-2 ${actionDialogConfig.iconBg}`}>
+                <actionDialogConfig.icon className={`h-5 w-5 ${actionDialogConfig.iconColor}`} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{actionDialogConfig.title}</h3>
+            </div>
+            <p className="mt-4 text-sm text-gray-600">{actionDialogConfig.description}</p>
+            {isActioning ? <p className="mt-2 text-sm text-gray-500">Processing...</p> : null}
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setActionTarget(null)} disabled={isActioning} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">Cancel</button>
+              <button type="button" onClick={handleConfirmAction} disabled={isActioning} className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${actionDialogConfig.confirmBg}`}>{actionDialogConfig.confirmLabel}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeleteTarget(null)}>
@@ -842,10 +908,10 @@ export function RecognitionSchedulesClient() {
               <div className="rounded-full bg-red-100 p-2 text-red-600">
                 <AlertCircle className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Delete Recognition Schedule</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Delete Payout</h3>
             </div>
             <p className="mt-4 text-sm text-gray-600">
-              Are you sure you want to delete the schedule for invoice <strong>{deleteTarget.label}</strong>? This action cannot be undone.
+              Are you sure you want to delete the payout for <strong>{deleteTarget.label}</strong>? This action cannot be undone.
             </p>
             {isDeleting ? <p className="mt-2 text-sm text-gray-500">Deleting...</p> : null}
             <div className="mt-6 flex justify-end gap-3">
