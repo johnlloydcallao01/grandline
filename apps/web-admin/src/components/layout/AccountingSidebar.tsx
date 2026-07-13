@@ -3,6 +3,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import type { IconName, SidebarProps } from '@/types';
+import { useMediaQuery } from '@/hooks';
 import Link from '@/components/ui/LinkWrapper';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 
@@ -450,8 +451,10 @@ function renderSidebarNavItem(
   );
 }
 
-export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: SidebarProps) {
+export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = false, onCloseMobile }: SidebarProps & { mobileOpen?: boolean; onCloseMobile?: () => void }) {
   const pathname = usePathname();
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const expanded = isDesktop ? isOpen : true;
   const hasActiveSetupControlsChild = setupControlsMenuItems.some((item) => item.isActive(pathname));
   const hasActiveMasterRecordsChild = masterRecordsMenuItems.some((item) => item.isActive(pathname));
   const hasActiveJournalsLedgerChild = journalsLedgerMenuItems.some((item) => item.isActive(pathname));
@@ -610,12 +613,20 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
   }, [hasActivePayrollContractorFinanceChild]);
 
   return (
+    <>
+    {mobileOpen && (
+        <div
+            className="fixed inset-x-0 top-[56px] bottom-0 bg-black/50 z-40 lg:hidden"
+            onClick={onCloseMobile}
+            aria-hidden="true"
+        />
+    )}
     <aside
       data-sidebar="accounting"
-      className={`fixed left-0 top-16 z-40 hidden overflow-y-auto border-r border-gray-200 bg-white transition-all duration-300 lg:block ${isOpen ? 'w-60 translate-x-0' : 'w-20 translate-x-0'
-        }`}
+      className={`fixed left-0 top-[56px] lg:top-16 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
+        w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
       style={{
-        height: 'calc(100vh - 4rem)',
         scrollbarWidth: 'thin',
         scrollbarColor: '#cbd5e1 transparent',
       }}
@@ -624,30 +635,30 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
       <div className="p-3 pb-20">
         <nav className="space-y-4">
           <div className="space-y-1">
-            <SidebarSectionLabel isOpen={isOpen}>Navigation</SidebarSectionLabel>
+            <SidebarSectionLabel isOpen={expanded}>Navigation</SidebarSectionLabel>
             <Link
               href="/dashboard"
               className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
             >
-              {!isOpen ? <span className="mx-auto text-xs font-semibold">AD</span> : <span>Back To Admin</span>}
+              {!expanded ? <span className="mx-auto text-xs font-semibold">AD</span> : <span>Back To Admin</span>}
             </Link>
           </div>
 
-          {isOpen && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
-            <SidebarSectionLabel isOpen={isOpen}>Core</SidebarSectionLabel>
+            <SidebarSectionLabel isOpen={expanded}>Core</SidebarSectionLabel>
             <SidebarItem
               icon={coreMenuItems[0].icon}
               label={coreMenuItems[0].label}
               active={coreMenuItems[0].isActive(pathname)}
-              collapsed={!isOpen}
+              collapsed={!expanded}
               href={coreMenuItems[0].href}
             />
             <SidebarDropdownGroup
               icon="settings"
               label="Setup & Controls"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isSetupControlsExpanded}
               onToggle={() => setIsSetupControlsExpanded((current) => !current)}
               active={hasActiveSetupControlsChild}
@@ -657,7 +668,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="storage"
               label="Master Records"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isMasterRecordsExpanded}
               onToggle={() => setIsMasterRecordsExpanded((current) => !current)}
               active={hasActiveMasterRecordsChild}
@@ -667,7 +678,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="report"
               label="Journals & Ledger"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isJournalsLedgerExpanded}
               onToggle={() => setIsJournalsLedgerExpanded((current) => !current)}
               active={hasActiveJournalsLedgerChild}
@@ -677,7 +688,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="billing"
               label="Tax & Compliance"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isTaxComplianceExpanded}
               onToggle={() => setIsTaxComplianceExpanded((current) => !current)}
               active={hasActiveTaxComplianceChild}
@@ -687,24 +698,24 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="audit"
               label="Audit & History"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isAuditHistoryExpanded}
               onToggle={() => setIsAuditHistoryExpanded((current) => !current)}
               active={hasActiveAuditHistoryChild}
             >
               {auditHistoryMenuItems.map((item) => renderSidebarChildLink(item, pathname))}
             </SidebarDropdownGroup>
-            {coreMenuItems.slice(1).map((item) => renderSidebarNavItem(item, pathname, isOpen))}
+            {coreMenuItems.slice(1).map((item) => renderSidebarNavItem(item, pathname, expanded))}
           </div>
 
-          {isOpen && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
-            <SidebarSectionLabel isOpen={isOpen}>Operations</SidebarSectionLabel>
+            <SidebarSectionLabel isOpen={expanded}>Operations</SidebarSectionLabel>
             <SidebarDropdownGroup
               icon="invoice"
               label="Sales & Receivables"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isSalesReceivablesExpanded}
               onToggle={() => setIsSalesReceivablesExpanded((current) => !current)}
               active={hasActiveSalesReceivablesChild}
@@ -714,7 +725,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="billing"
               label="Purchases & Payables"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isPurchasesPayablesExpanded}
               onToggle={() => setIsPurchasesPayablesExpanded((current) => !current)}
               active={hasActivePurchasesPayablesChild}
@@ -724,7 +735,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="payments"
               label="Expenses"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isExpensesExpanded}
               onToggle={() => setIsExpensesExpanded((current) => !current)}
               active={hasActiveExpensesChild}
@@ -734,7 +745,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="bank"
               label="Banking & Cash"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isBankingCashExpanded}
               onToggle={() => setIsBankingCashExpanded((current) => !current)}
               active={hasActiveBankingCashChild}
@@ -744,7 +755,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="posts"
               label="Documents & Inbox"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isDocumentsInboxExpanded}
               onToggle={() => setIsDocumentsInboxExpanded((current) => !current)}
               active={hasActiveDocumentsInboxChild}
@@ -754,7 +765,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="analytics"
               label="Reports & Analytics"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isReportsAnalyticsExpanded}
               onToggle={() => setIsReportsAnalyticsExpanded((current) => !current)}
               active={hasActiveReportsAnalyticsChild}
@@ -764,7 +775,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="permissions"
               label="Approvals"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isApprovalsExpanded}
               onToggle={() => setIsApprovalsExpanded((current) => !current)}
               active={hasActiveApprovalsChild}
@@ -773,14 +784,14 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             </SidebarDropdownGroup>
           </div>
 
-          {isOpen && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
-            <SidebarSectionLabel isOpen={isOpen}>LMS Finance</SidebarSectionLabel>
+            <SidebarSectionLabel isOpen={expanded}>LMS Finance</SidebarSectionLabel>
             <SidebarDropdownGroup
               icon="pricing"
               label="LMS Monetization Setup"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isLmsMonetizationExpanded}
               onToggle={() => setIsLmsMonetizationExpanded((current) => !current)}
               active={hasActiveLmsMonetizationChild}
@@ -790,7 +801,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="billing"
               label="LMS Billing & Collections"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isLmsBillingCollectionsExpanded}
               onToggle={() => setIsLmsBillingCollectionsExpanded((current) => !current)}
               active={hasActiveLmsBillingCollectionsChild}
@@ -800,7 +811,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="analytics"
               label="LMS Finance Reporting"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isLmsFinanceReportingExpanded}
               onToggle={() => setIsLmsFinanceReportingExpanded((current) => !current)}
               active={hasActiveLmsFinanceReportingChild}
@@ -809,14 +820,14 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             </SidebarDropdownGroup>
           </div>
 
-          {isOpen && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200" />}
 
           <div className="space-y-1">
-            <SidebarSectionLabel isOpen={isOpen}>Advanced Finance</SidebarSectionLabel>
+            <SidebarSectionLabel isOpen={expanded}>Advanced Finance</SidebarSectionLabel>
             <SidebarDropdownGroup
               icon="team"
               label="Projects & Time"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isProjectsTimeExpanded}
               onToggle={() => setIsProjectsTimeExpanded((current) => !current)}
               active={hasActiveProjectsTimeChild}
@@ -826,7 +837,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="report"
               label="Budgets & Forecasts"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isBudgetsForecastsExpanded}
               onToggle={() => setIsBudgetsForecastsExpanded((current) => !current)}
               active={hasActiveBudgetsForecastsChild}
@@ -836,7 +847,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="bank"
               label="Fixed Assets"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isFixedAssetsExpanded}
               onToggle={() => setIsFixedAssetsExpanded((current) => !current)}
               active={hasActiveFixedAssetsChild}
@@ -846,7 +857,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
             <SidebarDropdownGroup
               icon="payout"
               label="Payroll & Contractor Finance"
-              isOpen={isOpen}
+              isOpen={expanded}
               isExpanded={isPayrollContractorFinanceExpanded}
               onToggle={() => setIsPayrollContractorFinanceExpanded((current) => !current)}
               active={hasActivePayrollContractorFinanceChild}
@@ -857,5 +868,6 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll }: Sid
         </nav>
       </div>
     </aside>
+    </>
   );
 }

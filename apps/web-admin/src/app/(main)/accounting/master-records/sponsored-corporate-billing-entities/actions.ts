@@ -6,7 +6,7 @@ import { env } from '@/lib/env';
 export type SponsorMetric = {
   id: string;
   label: string;
-  value: number;
+  value: number | string;
   change: string;
   trend: 'up' | 'down' | 'neutral';
 };
@@ -16,19 +16,28 @@ export type SponsorFilterOption = {
   value: string;
 };
 
-export type SponsorRegisterRow = {
-  id: number | string;
-  sponsorCode: string | null;
-  name: string | null;
-  defaultCustomer: string | number | null;
-  contactName: string | null;
-  email: string | null;
-  phone: string | null;
-  status: string | null;
-  statusLabel: string | null;
+export type SponsorCell = string | {
+  text: string;
+  tone?: 'amber' | 'blue' | 'gray' | 'green' | 'red';
+  emphasis?: boolean;
+  align?: 'left' | 'right' | 'center';
+};
+
+export type SponsorRow = {
+  id: string;
+  sponsorCode: string;
+  name: string;
+  defaultCustomerId: string;
+  defaultCustomerLabel: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  billingAddress: string;
+  status: string;
+  notes: string;
   createdAt: string | null;
   updatedAt: string | null;
-  cells: Array<string | null>;
+  cells: SponsorCell[];
 };
 
 export type SponsorRegisterResponse = {
@@ -37,13 +46,17 @@ export type SponsorRegisterResponse = {
     label: string;
     description: string;
     searchPlaceholder: string;
-    filters: SponsorFilterOption[];
+    filters: {
+      statuses: SponsorFilterOption[];
+      contactFilters: SponsorFilterOption[];
+      quickFilters: SponsorFilterOption[];
+    };
     metrics: SponsorMetric[];
     table: {
       title: string;
       description: string;
       columns: string[];
-      rows: SponsorRegisterRow[];
+      rows: SponsorRow[];
     };
   };
   appliedFilters: {
@@ -60,9 +73,12 @@ export type SponsorRegisterResponse = {
     hasPrevPage: boolean;
     hasNextPage: boolean;
   };
-  totals?: {
-    totalSponsors: number;
-    filteredSponsors: number;
+  totals: {
+    totalRows: number;
+    filteredRows: number;
+  };
+  referenceData?: {
+    customers: Array<{ id: string; displayName: string; customerCode: string }>;
   };
 };
 
@@ -112,21 +128,23 @@ export type UpdateSponsorInput = {
   notes?: string | null;
 };
 
-export type CorporateAccountRegisterRow = {
-  id: number | string;
-  accountCode: string | null;
-  name: string | null;
-  customer: string | number | null;
-  billingContact: string | null;
-  email: string | null;
-  phone: string | null;
-  creditTerms: string | null;
-  paymentTerms: string | null;
-  status: string | null;
-  statusLabel: string | null;
+export type CorporateAccountRow = {
+  id: string;
+  accountCode: string;
+  name: string;
+  customerLabel: string;
+  billingContact: string;
+  creditTerms: string;
+  paymentTerms: string;
+  creditTermsLabel: string;
+  status: string;
+  statusLabel: string;
+  email: string;
+  phone: string;
+  notes: string;
   createdAt: string | null;
   updatedAt: string | null;
-  cells: Array<string | null>;
+  cells: SponsorCell[];
 };
 
 export type CorporateAccountRegisterResponse = {
@@ -135,13 +153,17 @@ export type CorporateAccountRegisterResponse = {
     label: string;
     description: string;
     searchPlaceholder: string;
-    filters: SponsorFilterOption[];
+    filters: {
+      statuses: SponsorFilterOption[];
+      creditFilters: SponsorFilterOption[];
+      quickFilters: SponsorFilterOption[];
+    };
     metrics: SponsorMetric[];
     table: {
       title: string;
       description: string;
       columns: string[];
-      rows: CorporateAccountRegisterRow[];
+      rows: CorporateAccountRow[];
     };
   };
   appliedFilters: {
@@ -158,9 +180,12 @@ export type CorporateAccountRegisterResponse = {
     hasPrevPage: boolean;
     hasNextPage: boolean;
   };
-  totals?: {
-    totalAccounts: number;
-    filteredAccounts: number;
+  totals: {
+    totalRows: number;
+    filteredRows: number;
+  };
+  referenceData?: {
+    customers: Array<{ id: string; displayName: string; customerCode: string }>;
   };
 };
 
@@ -225,6 +250,7 @@ type SponsorRegisterQuery = {
 type CorporateAccountRegisterQuery = {
   search?: string;
   page?: number;
+  limit?: number;
   statuses?: string[];
   creditFilter?: string;
   quickFilters?: string[];
@@ -360,7 +386,7 @@ export async function getCorporateAccountRegister(
   }
 
   params.set('page', String(query.page || 1));
-  params.set('limit', '10');
+  params.set('limit', String(query.limit || 10));
 
   return fetchAccountingAdmin<CorporateAccountRegisterResponse>(
     `/accounting/corporate-accounts?${params.toString()}`,
@@ -432,10 +458,7 @@ export type CoverageLinkRow = {
   coveredAmount: number;
   traineeShareAmount: number;
   status: string;
-  cells: Array<
-    | string
-    | { text: string; emphasis?: boolean; align?: 'left' | 'right' | 'center'; tone?: 'green' | 'amber' | 'red' | 'gray' | 'blue' }
-  >;
+  cells: SponsorCell[];
 };
 
 export type CoverageLinkRegisterResponse = {
@@ -444,7 +467,9 @@ export type CoverageLinkRegisterResponse = {
     label: string;
     description: string;
     searchPlaceholder: string;
-    filters: SponsorFilterOption[];
+    filters: {
+      quickFilters: SponsorFilterOption[];
+    };
     metrics: SponsorMetric[];
     table: {
       title: string;
@@ -453,10 +478,51 @@ export type CoverageLinkRegisterResponse = {
       rows: CoverageLinkRow[];
     };
   };
+  appliedFilters: {
+    search: string;
+    statuses: string[];
+    quickFilters: string[];
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    totalDocs: number;
+    totalPages: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+  };
+  totals: {
+    totalRows: number;
+    filteredRows: number;
+  };
 };
 
-export async function getCoverageLinkRegister(): Promise<CoverageLinkRegisterResponse> {
-  return fetchAccountingAdmin<CoverageLinkRegisterResponse>(`/accounting/coverage-links`);
+type CoverageLinkRegisterQuery = {
+  search?: string;
+  page?: number;
+  limit?: number;
+  statuses?: string[];
+  quickFilters?: string[];
+};
+
+export async function getCoverageLinkRegister(
+  query: CoverageLinkRegisterQuery = {},
+): Promise<CoverageLinkRegisterResponse> {
+  const params = new URLSearchParams();
+  if (query.search?.trim()) {
+    params.set('search', query.search.trim());
+  }
+  for (const status of query.statuses || []) {
+    params.append('status', status);
+  }
+  for (const quickFilter of query.quickFilters || []) {
+    params.append('quickFilter', quickFilter);
+  }
+  params.set('page', String(query.page || 1));
+  params.set('limit', String(query.limit || 10));
+  return fetchAccountingAdmin<CoverageLinkRegisterResponse>(
+    `/accounting/coverage-links?${params.toString()}`,
+  );
 }
 
 export type CustomerChoice = {

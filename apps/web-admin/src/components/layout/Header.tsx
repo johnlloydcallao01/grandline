@@ -76,7 +76,7 @@ export function Header({
 
   return (
     <>
-      <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
+      <header className="sticky top-0 bg-white z-50">
         <div className="flex items-center justify-between px-3 py-2 sm:px-4 gap-2">
         {/* Left section */}
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">

@@ -52,6 +52,7 @@
     "seed:payment-allocations": "npx tsx scripts/seed-payment-allocations.ts",
     "seed:course-fee-profiles": "npx tsx src/seeders/accounting-course-fee-profiles.ts",
     "seed:coupon-codes": "npx tsx src/seeders/accounting-coupon-codes.ts",
+    "seed:coupon-redemptions": "npx tsx src/seeders/accounting-coupon-redemptions.ts",
     "seed:instructor-payout-rules": "npx tsx src/seeders/accounting-instructor-payout-rules.ts",
     "seed:billing-adjustments": "npx tsx src/seeders/accounting-billing-adjustments.ts",
     "seed:certificate-charges": "npx tsx src/seeders/accounting-certificate-charges.ts",

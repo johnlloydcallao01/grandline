@@ -163,12 +163,22 @@ export type AccountingRegisterRow = {
   postedJournalEntryId?: number | string | null
 }
 
+export type AccountingAgingBucketTotals = {
+  current: number
+  bucket1to30: number
+  bucket31to60: number
+  bucket61to90: number
+  bucketOver90: number
+}
+
 export type AccountingDashboardSummary = {
   totalReceivables: number
   totalPayables: number
   overdueInvoiceCount: number
   overdueBillCount: number
   totalCashAndBank: number
+  arAgingBuckets: AccountingAgingBucketTotals
+  apAgingBuckets: AccountingAgingBucketTotals
 }
 
 export type AccountingDashboardPaymentRow = {

@@ -104,6 +104,8 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
             <AccountingSidebar
               isOpen={sidebarOpen}
               onToggle={toggleSidebar}
+              mobileOpen={mobileSidebarOpen}
+              onCloseMobile={closeMobileSidebar}
             />
           ) : (
             <Sidebar

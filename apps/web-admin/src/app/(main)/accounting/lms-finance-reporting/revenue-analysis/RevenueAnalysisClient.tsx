@@ -371,7 +371,7 @@ function RevenueByCourseTab() {
             <h3 className="text-base font-semibold text-gray-900">Revenue Distribution</h3>
           </div>
           <div className="mt-3">
-            <RevenueChart type="bar" data={((data?.rows || []) as RevenueByCourseRow[]).map((r) => ({ name: r.courseTitle, value: r.billedRevenue }))} height={280} barDirection="horizontal" showLegend={false} emptyMessage="No course revenue data to chart." />
+            <RevenueChart type="bar" data={((data?.rows || []) as RevenueByCourseRow[]).map((r) => ({ name: r.courseTitle, value: r.billedRevenue }))} height={280} barDirection="horizontal" showLegend={false} emptyMessage="No course revenue data to chart." loading={isLoading} />
           </div>
         </div>
         <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -577,7 +577,7 @@ function RevenueByInstructorTab() {
             <h3 className="text-base font-semibold text-gray-900">Instructor Revenue Distribution</h3>
           </div>
           <div className="mt-3">
-            <RevenueChart type="bar" data={((data?.rows || []) as RevenueByInstructorRow[]).map((r) => ({ name: r.instructorName, value: r.billedRevenue }))} height={280} barDirection="horizontal" showLegend={false} emptyMessage="No instructor revenue data to chart." />
+            <RevenueChart type="bar" data={((data?.rows || []) as RevenueByInstructorRow[]).map((r) => ({ name: r.instructorName, value: r.billedRevenue }))} height={280} barDirection="horizontal" showLegend={false} emptyMessage="No instructor revenue data to chart." loading={isLoading} />
           </div>
         </div>
         <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -777,7 +777,7 @@ function RevenueByEnrollmentTypeTab() {
             <h3 className="text-base font-semibold text-gray-900">Enrollment Type Distribution</h3>
           </div>
           <div className="mt-3">
-            <RevenueChart type="pie" data={((data?.rows || []) as RevenueByEnrollmentTypeRow[]).map((r) => ({ name: r.enrollmentType, value: r.billedRevenue }))} height={300} showLegend={true} emptyMessage="No enrollment type revenue data to chart." />
+            <RevenueChart type="pie" data={((data?.rows || []) as RevenueByEnrollmentTypeRow[]).map((r) => ({ name: r.enrollmentType, value: r.billedRevenue }))} height={300} showLegend={true} emptyMessage="No enrollment type revenue data to chart." loading={isLoading} />
           </div>
         </div>
         <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">

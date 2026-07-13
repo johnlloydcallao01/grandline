@@ -116,21 +116,19 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
         {/* Mobile backdrop overlay - only visible on small screens when drawer is open */}
         {mobileOpen && (
             <div
-                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                className="fixed inset-x-0 top-[56px] bottom-0 bg-black/50 z-40 lg:hidden"
                 onClick={onCloseMobile}
                 aria-hidden="true"
             />
         )}
         <aside
             data-sidebar="admin"
-            className={`fixed left-0 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
-                // Mobile drawer: full-width, slides in/out
-                w-64 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+            className={`fixed left-0 top-[56px] lg:top-16 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
+                // Mobile drawer: full-width, slides in/out, starts right below header
+                w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 // Desktop: always visible, collapsible width
                 lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
             style={{
-                height: 'calc(100vh - 4rem)', // 4rem is header height
-                top: '4rem', // Position below header
                 scrollbarWidth: 'thin',
                 scrollbarColor: '#cbd5e1 transparent'
             }}

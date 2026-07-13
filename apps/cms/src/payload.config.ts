@@ -381,7 +381,7 @@ import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 import { getTraineeDashboardSummary } from './endpoints/getTraineeDashboardSummary'
 
 export default buildConfig({
-  sharp,
+  sharp: sharp as unknown as Parameters<typeof buildConfig>[0]['sharp'],
   admin: {
     user: Users.slug,
     importMap: {

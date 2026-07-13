@@ -23,6 +23,12 @@ const parseListParam = (searchParams: URLSearchParams, key: string): string[] =>
 const normalizeText = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
 const normalizeSearch = (value: unknown) => normalizeText(value).toLowerCase()
 
+function getStatusTone(status: string): 'green' | 'amber' | 'gray' {
+  if (status === 'active') return 'green';
+  if (status === 'inactive') return 'amber';
+  return 'gray';
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { payload } = await requireAccountingAdmin(request)
@@ -58,7 +64,25 @@ export async function GET(request: NextRequest) {
       customerMap.set(String(c.id), String(cDoc.displayName || cDoc.customerCode || `Customer #${c.id}`))
     }
 
-    const allRows = result.docs.map((doc) => {
+    type RowData = {
+      id: string;
+      accountCode: string;
+      name: string;
+      customer: string;
+      customerLabel: string;
+      billingContact: string;
+      email: string;
+      phone: string;
+      creditTerms: string;
+      paymentTerms: string;
+      status: string;
+      statusLabel: string;
+      notes: string;
+      createdAt: string | null;
+      updatedAt: string | null;
+    };
+
+    const allRows: RowData[] = result.docs.map((doc) => {
       const d = doc as unknown as Record<string, unknown>
       const cust = d.customer as unknown as Record<string, unknown> | undefined
       const customerId = cust ? String(cust.id ?? cust) : ''
@@ -136,28 +160,68 @@ export async function GET(request: NextRequest) {
     const withCreditTerms = allRows.filter((row) => row.creditTerms).length
 
     return NextResponse.json({
-      rows: flatRows,
-      metrics: [
-        { id: 'active-accounts', label: 'Active Accounts', value: activeAccounts, change: 'Available for company-billed training', trend: activeAccounts > 0 ? 'up' as const : 'neutral' as const },
-        { id: 'total-accounts', label: 'Total Accounts', value: allRows.length, change: 'All corporate account records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
-        { id: 'with-credit-terms', label: 'With Credit Terms', value: withCreditTerms, change: 'Accounts storing commercial credit terms', trend: withCreditTerms > 0 ? 'neutral' as const : 'down' as const },
-        { id: 'inactive-accounts', label: 'Inactive Accounts', value: inactiveAccounts, change: 'Retained for historical billing links', trend: inactiveAccounts > 0 ? 'down' as const : 'neutral' as const },
-      ],
-      filterOptions: {
-        statuses: [
-          { label: 'Active', value: 'active' },
-          { label: 'Inactive', value: 'inactive' },
-          { label: 'Archived', value: 'archived' },
-        ],
-        creditFilters: [
-          { label: 'With Credit Terms', value: 'hasCredit' },
-        ],
-      },
-      meta: {
+      section: {
+        id: 'corporate-accounts',
+        label: 'Corporate Accounts',
+        description: 'Create, review, and manage B2B training customer / corporate payer master records with credit terms, billing contact, and account status.',
         searchPlaceholder: 'Search account code, company name, customer, billing contact, or status',
-        columns: ['Account Code', 'Name', 'Customer', 'Billing Contact', 'Credit Terms', 'Status'],
-        tableTitle: 'Corporate Account Register',
-        tableDescription: 'Corporate account records using account code, linked customer, billing contact, terms, and status.',
+        filters: {
+          statuses: [
+            { label: 'Active', value: 'active' },
+            { label: 'Inactive', value: 'inactive' },
+            { label: 'Archived', value: 'archived' },
+          ],
+          creditFilters: [
+            { label: 'With Credit Terms', value: 'hasCredit' },
+          ],
+          quickFilters: [
+            { label: 'Active Accounts', value: 'active' },
+            { label: 'With Credit Terms', value: 'hasCredit' },
+            { label: 'Inactive Accounts', value: 'inactive' },
+          ],
+        },
+        metrics: [
+          { id: 'active-accounts', label: 'Active Accounts', value: activeAccounts, change: 'Available for company-billed training', trend: activeAccounts > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'total-accounts', label: 'Total Accounts', value: allRows.length, change: 'All corporate account records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'with-credit-terms', label: 'With Credit Terms', value: withCreditTerms, change: 'Accounts storing commercial credit terms', trend: withCreditTerms > 0 ? 'neutral' as const : 'down' as const },
+          { id: 'inactive-accounts', label: 'Inactive Accounts', value: inactiveAccounts, change: 'Retained for historical billing links', trend: inactiveAccounts > 0 ? 'down' as const : 'neutral' as const },
+        ],
+        table: {
+          title: 'Corporate Account Register',
+          description: 'Corporate account records using account code, linked customer, billing contact, terms, and status.',
+          columns: ['Account Code', 'Name', 'Customer', 'Billing Contact', 'Credit Terms', 'Status'],
+          rows: flatRows.map((row) => ({
+            id: row.id,
+            accountCode: row.accountCode,
+            name: row.name,
+            customerLabel: row.customerLabel,
+            billingContact: row.billingContact,
+            creditTerms: row.creditTerms,
+            paymentTerms: row.paymentTerms,
+            creditTermsLabel: row.creditTerms || row.paymentTerms || '-',
+            status: row.status,
+            statusLabel: row.statusLabel,
+            email: row.email,
+            phone: row.phone,
+            notes: row.notes,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            cells: [
+              row.accountCode || '-',
+              { text: row.name || '-', emphasis: true },
+              row.customerLabel || '-',
+              row.billingContact || '-',
+              row.creditTerms || row.paymentTerms || '-',
+              { text: row.statusLabel, tone: getStatusTone(row.status) },
+            ],
+          })),
+        },
+      },
+      appliedFilters: {
+        search,
+        statuses,
+        creditFilter,
+        quickFilters,
       },
       pagination: {
         page: currentPage,

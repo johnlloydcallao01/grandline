@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertCircle,
@@ -1194,23 +1195,10 @@ export function CoreAccountingMastersClient({
   };
 
   const handleOpenTcEditModal = async (taxCodeId: number | string) => {
-    handleCloseTaxCodeDetail();
     setEditingTcId(taxCodeId);
-    setTcEditForm({
-      code: '',
-      name: '',
-      scope: 'both',
-      rate: '0',
-      calculationMethod: 'exclusive',
-      purchaseAccount: '',
-      salesAccount: '',
-      isActive: true,
-      description: '',
-    });
     setTcEditError(null);
-    setIsTcEditSubmitting(false);
-    setIsTcEditLoading(true);
     setIsTcEditModalOpen(true);
+    setIsTcEditLoading(true);
 
     try {
       const payload = await getTaxCodeDetail(taxCodeId);
@@ -1506,14 +1494,13 @@ export function CoreAccountingMastersClient({
   };
 
   const handleOpenFyEditModal = async (fiscalYearId: number | string) => {
-    handleCloseFiscalYearDetail();
     setEditingFyId(fiscalYearId);
     setEditingFy(null);
     setFyEditForm(initialFiscalYearCreateFormState);
     setFyEditError(null);
     setIsFyEditSubmitting(false);
-    setIsFyEditLoading(true);
     setIsFyEditModalOpen(true);
+    setIsFyEditLoading(true);
 
     try {
       const payload = await getFiscalYearDetail(fiscalYearId);
@@ -1800,7 +1787,6 @@ export function CoreAccountingMastersClient({
   };
 
   const handleOpenPeriodEditModal = async (periodId: number | string) => {
-    handleClosePeriodDetail();
     setEditingPeriodId(periodId);
     setPeriodEditForm({
       label: '',
@@ -1814,8 +1800,8 @@ export function CoreAccountingMastersClient({
     });
     setPeriodEditError(null);
     setIsPeriodEditSubmitting(false);
-    setIsPeriodEditLoading(true);
     setIsPeriodEditModalOpen(true);
+    setIsPeriodEditLoading(true);
 
     try {
       const payload = await getPeriodDetail(periodId);
@@ -2075,14 +2061,13 @@ export function CoreAccountingMastersClient({
   };
 
   const handleOpenEditModal = async (accountId: number | string) => {
-    handleCloseAccountDetail();
     setEditingAccountId(accountId);
     setEditingAccount(null);
     setEditForm(initialCreateFormState);
     setEditError(null);
     setIsEditSubmitting(false);
-    setIsEditLoading(true);
     setIsEditModalOpen(true);
+    setIsEditLoading(true);
 
     try {
       const payload = await getChartOfAccountDetail(accountId);
@@ -2226,26 +2211,6 @@ export function CoreAccountingMastersClient({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={activeTab === 'chart-of-accounts' ? handleRefreshChart : activeTab === 'fiscal-years' ? handleFyRefresh : activeTab === 'accounting-periods' ? handlePeriodRefresh : activeTab === 'tax-codes' ? handleTcRefresh : undefined}
-            disabled={activeTab !== 'chart-of-accounts' && activeTab !== 'fiscal-years' && activeTab !== 'accounting-periods' && activeTab !== 'tax-codes'}
-            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${getActionClasses('secondary')}`}
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh Workspace
-          </button>
-          <button
-            type="button"
-            onClick={activeTab === 'chart-of-accounts' ? handleOpenCreateModal : activeTab === 'fiscal-years' ? handleOpenFyCreateModal : activeTab === 'accounting-periods' ? handleOpenPeriodCreateModal : activeTab === 'tax-codes' ? handleOpenTcCreateModal : undefined}
-            disabled={activeTab !== 'chart-of-accounts' && activeTab !== 'fiscal-years' && activeTab !== 'accounting-periods' && activeTab !== 'tax-codes'}
-            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${getActionClasses('primary')}`}
-          >
-            <Plus className="h-4 w-4" />
-            New Master Record
-          </button>
-        </div>
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -3745,26 +3710,13 @@ export function CoreAccountingMastersClient({
         </div>
       </div>
 
-      {isFyCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Fiscal Year</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Add a new fiscal year to the fiscal calendar.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseFyCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateFiscalYear} className="space-y-6 px-6 py-5">
+      <SlideOver
+        isOpen={isFyCreateModalOpen}
+        onClose={handleCloseFyCreateModal}
+        title="Create Fiscal Year"
+        description="Add a new fiscal year to the fiscal calendar."
+      >
+        <form onSubmit={handleCreateFiscalYear} className="space-y-6">
               {fyCreateError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {fyCreateError}
@@ -3887,30 +3839,15 @@ export function CoreAccountingMastersClient({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Account</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Add a ledger account to the Chart of Accounts collection.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateAccount} className="space-y-6 px-6 py-5">
+      <SlideOver
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+        title="Create Account"
+        description="Add a ledger account to the Chart of Accounts collection."
+      >
+        <form onSubmit={handleCreateAccount} className="space-y-6">
               {createError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {createError}
@@ -4129,37 +4066,14 @@ export function CoreAccountingMastersClient({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isFyEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Fiscal Year</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Update the selected fiscal year with safeguards applied.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseFyEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isFyEditLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
-                  ))}
-                </div>
-              ) : (
+      <SlideOver
+        isOpen={isFyEditModalOpen}
+        onClose={handleCloseFyEditModal}
+        title="Edit Fiscal Year"
+        description="Update the selected fiscal year with safeguards applied."
+      >
                 <form onSubmit={handleEditFiscalYear} className="space-y-6">
                   {fyEditError ? (
                     <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -4298,39 +4212,14 @@ export function CoreAccountingMastersClient({
                     </button>
                   </div>
                 </form>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Account</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Update the selected ledger account with accounting safeguards applied.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isEditLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
-                  ))}
-                </div>
-              ) : (
+      <SlideOver
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Edit Account"
+        description="Update the selected ledger account with accounting safeguards applied."
+      >
                 <form onSubmit={handleEditAccount} className="space-y-6">
                   {editError ? (
                     <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -4566,33 +4455,15 @@ export function CoreAccountingMastersClient({
                     </button>
                   </div>
                 </form>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isFyDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Fiscal Year</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingFyName}&rdquo; from the fiscal years list.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseFyDeleteModal}
-                disabled={isFyDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
+      <SlideOver
+        isOpen={isFyDeleteModalOpen}
+        onClose={handleCloseFyDeleteModal}
+        title="Delete Fiscal Year"
+        description={'Remove "' + deletingFyName + '" from the fiscal years list.'}
+        width="max-w-lg"
+      >
               {fyDeleteError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {fyDeleteError}
@@ -4653,30 +4524,16 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {selectedFyId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Fiscal Year Details</h2>
-                <p className="mt-1 text-sm text-gray-600">Review the selected fiscal year record.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseFiscalYearDetail}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isFyDetailLoading ? (
+      <SlideOver
+        isOpen={selectedFyId !== null}
+        onClose={handleCloseFiscalYearDetail}
+        title="Fiscal Year Details"
+        description="Review the selected fiscal year record."
+        width="max-w-2xl"
+      >
+        {isFyDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
@@ -4688,16 +4545,6 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : selectedFy ? (
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenFyEditModal(selectedFy.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Fiscal Year
-                    </button>
-                  </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
@@ -4764,55 +4611,31 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               ) : null}
-            </div>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={selectedAccountId !== null}
+        onClose={handleCloseAccountDetail}
+        title="Account Details"
+        description="Review the selected ledger account record."
+        width="max-w-2xl"
+      >
+        {isAccountDetailLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+            ))}
           </div>
-        </div>
-      ) : null}
-
-      {selectedAccountId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Account Details</h2>
-                <p className="mt-1 text-sm text-gray-600">Review the selected ledger account record.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseAccountDetail}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isAccountDetailLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
-                  ))}
-                </div>
-              ) : accountDetailError ? (
+        ) : accountDetailError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {accountDetailError}
                 </div>
               ) : selectedAccount ? (
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditModal(selectedAccount.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Account
-                    </button>
-                  </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
-                    <p className="mt-2 text-sm font-semibold text-gray-900">{selectedAccount.code || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedAccount.code || '-'}</p>
                   </div>
                   <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</p>
@@ -4888,31 +4711,15 @@ export function CoreAccountingMastersClient({
                 </div>
                 </div>
               ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isPeriodCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Period</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Add a new accounting period under a fiscal year.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleClosePeriodCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePeriod} className="space-y-6 px-6 py-5">
+      <SlideOver
+        isOpen={isPeriodCreateModalOpen}
+        onClose={handleClosePeriodCreateModal}
+        title="Create Period"
+        description="Add a new accounting period under a fiscal year."
+      >
+        <form onSubmit={handleCreatePeriod} className="space-y-6">
               {periodCreateError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {periodCreateError}
@@ -5043,37 +4850,14 @@ export function CoreAccountingMastersClient({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isPeriodEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Period</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Update the selected accounting period.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleClosePeriodEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isPeriodEditLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
-                  ))}
-                </div>
-              ) : (
+      <SlideOver
+        isOpen={isPeriodEditModalOpen}
+        onClose={handleClosePeriodEditModal}
+        title="Edit Period"
+        description="Update the selected accounting period."
+      >
                 <form onSubmit={handleEditPeriod} className="space-y-6">
                   {periodEditError ? (
                     <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -5205,33 +4989,15 @@ export function CoreAccountingMastersClient({
                     </button>
                   </div>
                 </form>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isPeriodDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Period</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingPeriodName}&rdquo; from the accounting periods list.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleClosePeriodDeleteModal}
-                disabled={isPeriodDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
+      <SlideOver
+        isOpen={isPeriodDeleteModalOpen}
+        onClose={handleClosePeriodDeleteModal}
+        title="Delete Period"
+        description={'Remove "' + deletingPeriodName + '" from the accounting periods list.'}
+        width="max-w-lg"
+      >
               {periodDeleteError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {periodDeleteError}
@@ -5292,30 +5058,16 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {selectedPeriodId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Period Details</h2>
-                <p className="mt-1 text-sm text-gray-600">Review the selected accounting period record.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleClosePeriodDetail}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isPeriodDetailLoading ? (
+      <SlideOver
+        isOpen={selectedPeriodId !== null}
+        onClose={handleClosePeriodDetail}
+        title="Period Details"
+        description="Review the selected accounting period record."
+        width="max-w-2xl"
+      >
+        {isPeriodDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
@@ -5327,16 +5079,6 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : selectedPeriod ? (
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenPeriodEditModal(selectedPeriod.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Period
-                    </button>
-                  </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Label</p>
@@ -5403,32 +5145,15 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Account</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingAccountName}&rdquo; from the Chart of Accounts.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseDeleteModal}
-                disabled={isDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
+      <SlideOver
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        title="Delete Account"
+        description={'Remove "' + deletingAccountName + '" from the Chart of Accounts.'}
+        width="max-w-lg"
+      >
               {deleteError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {deleteError}
@@ -5489,31 +5214,15 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isTcCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Tax Code</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Add a new tax code for transaction use.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseTcCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateTaxCode} className="space-y-6 px-6 py-5">
+      <SlideOver
+        isOpen={isTcCreateModalOpen}
+        onClose={handleCloseTcCreateModal}
+        title="Create Tax Code"
+        description="Add a new tax code for transaction use."
+      >
+        <form onSubmit={handleCreateTaxCode} className="space-y-6">
               {tcCreateError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {tcCreateError}
@@ -5662,37 +5371,14 @@ export function CoreAccountingMastersClient({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isTcEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Tax Code</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Update the selected tax code.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseTcEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isTcEditLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
-                  ))}
-                </div>
-              ) : (
+      <SlideOver
+        isOpen={isTcEditModalOpen}
+        onClose={handleCloseTcEditModal}
+        title="Edit Tax Code"
+        description="Update the selected tax code."
+      >
                 <form onSubmit={handleEditTaxCode} className="space-y-6">
                   {tcEditError ? (
                     <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -5842,33 +5528,15 @@ export function CoreAccountingMastersClient({
                     </button>
                   </div>
                 </form>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {isTcDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Tax Code</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingTcName}&rdquo; from the tax codes list.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseTcDeleteModal}
-                disabled={isTcDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
+      <SlideOver
+        isOpen={isTcDeleteModalOpen}
+        onClose={handleCloseTcDeleteModal}
+        title="Delete Tax Code"
+        description={'Remove "' + deletingTcName + '" from the tax codes list.'}
+        width="max-w-lg"
+      >
               {tcDeleteError ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                   {tcDeleteError}
@@ -5929,30 +5597,16 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
 
-      {selectedTcId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Tax Code Details</h2>
-                <p className="mt-1 text-sm text-gray-600">Review the selected tax code record.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseTaxCodeDetail}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {isTcDetailLoading ? (
+      <SlideOver
+        isOpen={selectedTcId !== null}
+        onClose={handleCloseTaxCodeDetail}
+        title="Tax Code Details"
+        description="Review the selected tax code record."
+        width="max-w-2xl"
+      >
+        {isTcDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
@@ -5964,16 +5618,6 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : selectedTc ? (
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenTcEditModal(selectedTc.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Tax Code
-                    </button>
-                  </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
@@ -6030,10 +5674,73 @@ export function CoreAccountingMastersClient({
                   </div>
                 </div>
               ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </SlideOver>
     </div>
+  );
+}
+
+function SlideOver({
+  isOpen,
+  onClose,
+  title,
+  description,
+  children,
+  width = 'max-w-4xl',
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  width?: string;
+}) {
+  const [mounted, setMounted] = useState(isOpen);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+      return undefined;
+    }
+    setAnimate(false);
+    const timer = setTimeout(() => setMounted(false), 300);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${
+        animate ? 'bg-black/50' : 'bg-transparent'
+      }`}
+      onClick={onClose}
+    >
+      <div
+        className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${
+          animate ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            {description ? (
+              <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">{children}</div>
+      </div>
+    </div>,
+    document.body,
   );
 }

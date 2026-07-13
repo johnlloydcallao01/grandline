@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ACCOUNTING_COLLECTION_SLUGS } from '@/accounting/constants/accounting'
+import { ACCOUNTING_COLLECTION_SLUGS, LMS_SPONSOR_STATUS_OPTIONS } from '@/accounting/constants/accounting'
 import { handleAccountingApiError, requireAccountingAdmin } from '../_utils/auth'
 
 const parseIntegerParam = (value: string | null, fallback: number) => {
@@ -22,6 +22,62 @@ const parseListParam = (searchParams: URLSearchParams, key: string): string[] =>
 
 const normalizeText = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
 const normalizeSearch = (value: unknown) => normalizeText(value).toLowerCase()
+
+function getStatusTone(status: string): 'green' | 'amber' | 'gray' {
+  if (status === 'active') return 'green'
+  if (status === 'inactive') return 'amber'
+  return 'gray'
+}
+
+type SponsorRow = {
+  id: string
+  sponsorCode: string
+  name: string
+  defaultCustomerId: string
+  defaultCustomerLabel: string
+  contactName: string
+  email: string
+  phone: string
+  billingAddress: string
+  status: string
+  notes: string
+  createdAt: string | null
+  updatedAt: string | null
+  searchableText: string
+  cells: unknown[]
+}
+
+function mapSponsorRow(doc: Record<string, unknown>, customerLabel: string, customerId: string): SponsorRow {
+  const status = String(doc.status || 'active')
+  const name = String(doc.name || '')
+  const sponsorCode = String(doc.sponsorCode || '')
+  const contactName = String(doc.contactName || '')
+  const email = String(doc.email || '')
+  return {
+    id: String(doc.id),
+    sponsorCode,
+    name,
+    defaultCustomerId: customerId,
+    defaultCustomerLabel: customerLabel,
+    contactName,
+    email,
+    phone: String(doc.phone || ''),
+    billingAddress: String(doc.billingAddress || ''),
+    status,
+    notes: String(doc.notes || ''),
+    createdAt: doc.createdAt ? String(doc.createdAt) : null,
+    updatedAt: doc.updatedAt ? String(doc.updatedAt) : null,
+    searchableText: [sponsorCode, name, customerLabel, contactName, email, status].map((v) => normalizeSearch(v)).filter(Boolean).join(' '),
+    cells: [
+      { text: sponsorCode, emphasis: true },
+      name,
+      customerLabel,
+      contactName || '-',
+      email || '-',
+      { text: status.charAt(0).toUpperCase() + status.slice(1), tone: getStatusTone(status) },
+    ],
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,59 +121,22 @@ export async function GET(request: NextRequest) {
       const customerLabel = cust
         ? String(cust.displayName || cust.customerCode || customerMap.get(customerId) || `Customer #${customerId}`)
         : '-'
-      return {
-        id: String(d.id),
-        sponsorCode: String(d.sponsorCode || ''),
-        name: String(d.name || ''),
-        defaultCustomer: customerId,
-        defaultCustomerLabel: customerLabel,
-        contactName: String(d.contactName || ''),
-        email: String(d.email || ''),
-        phone: String(d.phone || ''),
-        billingAddress: String(d.billingAddress || ''),
-        status: String(d.status || 'active'),
-        statusLabel: String(d.status ? String(d.status).charAt(0).toUpperCase() + String(d.status).slice(1) : ''),
-        notes: String(d.notes || ''),
-        createdAt: d.createdAt ? String(d.createdAt) : null,
-        updatedAt: d.updatedAt ? String(d.updatedAt) : null,
-      }
+      return mapSponsorRow(d, customerLabel, customerId)
     })
 
-    const normalizedSearch = search.trim().toLowerCase()
+    const normalizedSearch = normalizeSearch(search)
     let filteredRows = allRows.filter((row) => {
-      if (normalizedSearch) {
-        const matchesSearch = [
-          row.sponsorCode,
-          row.name,
-          row.defaultCustomerLabel,
-          row.contactName,
-          row.email,
-          row.statusLabel,
-          row.status,
-        ].some((value) => normalizeSearch(value).includes(normalizedSearch))
-
-        if (!matchesSearch) return false
-      }
-
-      if (statuses.length > 0 && (!row.status || !statuses.includes(row.status))) {
-        return false
-      }
-
-      if (contactFilter === 'hasContact' && !(row.contactName || row.email || row.phone)) {
-        return false
-      }
-
+      if (normalizedSearch && !row.searchableText.includes(normalizedSearch)) return false
+      if (statuses.length > 0 && !statuses.includes(row.status)) return false
+      if (contactFilter === 'hasContact' && !(row.contactName || row.email || row.phone)) return false
       return true
     })
 
     if (quickFilters.length > 0) {
       filteredRows = filteredRows.filter((row) =>
         quickFilters.some((filterValue) => {
-          if (filterValue === 'hasContact') {
-            return Boolean(row.contactName || row.email || row.phone)
-          }
-
-          return Boolean(row.status && row.status === filterValue)
+          if (filterValue === 'hasContact') return Boolean(row.contactName || row.email || row.phone)
+          return row.status === filterValue
         }),
       )
     }
@@ -126,35 +145,46 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
     const currentPage = Math.min(Math.max(page, 1), totalPages)
     const startIndex = (currentPage - 1) * limit
-    const flatRows = filteredRows.slice(startIndex, startIndex + limit)
+    const paginatedRows = filteredRows.slice(startIndex, startIndex + limit)
 
     const activeSponsors = allRows.filter((row) => row.status === 'active').length
     const inactiveSponsors = allRows.filter((row) => row.status === 'inactive').length
     const withContactInfo = allRows.filter((row) => row.contactName || row.email || row.phone).length
 
     return NextResponse.json({
-      rows: flatRows,
-      metrics: [
-        { id: 'active-sponsors', label: 'Active Sponsors', value: activeSponsors, change: 'Sponsors usable for scholarship billing', trend: activeSponsors > 0 ? 'up' as const : 'neutral' as const },
-        { id: 'total-sponsors', label: 'Total Sponsors', value: allRows.length, change: 'All sponsor master records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
-        { id: 'inactive-sponsors', label: 'Inactive Sponsors', value: inactiveSponsors, change: 'Retained for prior awards and billing links', trend: inactiveSponsors > 0 ? 'down' as const : 'neutral' as const },
-        { id: 'with-contact', label: 'With Contact Info', value: withContactInfo, change: 'Sponsors with operational contact details', trend: withContactInfo > 0 ? 'neutral' as const : 'down' as const },
-      ],
-      filterOptions: {
-        statuses: [
-          { label: 'Active', value: 'active' },
-          { label: 'Inactive', value: 'inactive' },
-          { label: 'Archived', value: 'archived' },
-        ],
-        contactFilters: [
-          { label: 'With Contact Info', value: 'hasContact' },
-        ],
-      },
-      meta: {
+      section: {
+        id: 'scholarship-sponsors',
+        label: 'Scholarship Sponsors',
+        description: 'Scholarship, grant, and sponsorship master records mapped to accounting customers.',
         searchPlaceholder: 'Search sponsor code, name, default customer, contact, or status',
-        columns: ['Sponsor Code', 'Name', 'Default Customer', 'Contact', 'Email', 'Status'],
-        tableTitle: 'Scholarship Sponsor Register',
-        tableDescription: 'Sponsor records using sponsor code, name, default customer relationship, and status.',
+        filters: {
+          statuses: LMS_SPONSOR_STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
+          contactFilters: [{ label: 'With Contact Info', value: 'hasContact' }],
+          quickFilters: [
+            { label: 'Active', value: 'active' },
+            { label: 'Inactive', value: 'inactive' },
+            { label: 'Archived', value: 'archived' },
+            { label: 'With Contact Info', value: 'hasContact' },
+          ],
+        },
+        metrics: [
+          { id: 'active-sponsors', label: 'Active Sponsors', value: activeSponsors, change: 'Sponsors usable for scholarship billing', trend: activeSponsors > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'total-sponsors', label: 'Total Sponsors', value: allRows.length, change: 'All sponsor master records', trend: allRows.length > 0 ? 'up' as const : 'neutral' as const },
+          { id: 'inactive-sponsors', label: 'Inactive Sponsors', value: inactiveSponsors, change: 'Retained for prior awards and billing links', trend: inactiveSponsors > 0 ? 'down' as const : 'neutral' as const },
+          { id: 'with-contact', label: 'With Contact Info', value: withContactInfo, change: 'Sponsors with operational contact details', trend: withContactInfo > 0 ? 'neutral' as const : 'down' as const },
+        ],
+        table: {
+          title: 'Scholarship Sponsor Register',
+          description: 'Sponsor records using sponsor code, name, default customer relationship, and status.',
+          columns: ['Sponsor Code', 'Name', 'Default Customer', 'Contact', 'Email', 'Status'],
+          rows: paginatedRows,
+        },
+      },
+      appliedFilters: {
+        search,
+        statuses,
+        contactFilter,
+        quickFilters,
       },
       pagination: {
         page: currentPage,

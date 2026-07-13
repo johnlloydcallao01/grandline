@@ -59,6 +59,14 @@ export class AccountingDashboardService {
     const overdueInvoiceCount = receivables.filter((row) => row.daysOverdue > 0).length
     const overdueBillCount = payables.filter((row) => row.daysOverdue > 0).length
 
+    const sumBuckets = (rows: typeof receivables) => ({
+      current: normalizeAmount(rows.reduce((t, r) => t + normalizeAmount(r.currentAmount), 0)),
+      bucket1to30: normalizeAmount(rows.reduce((t, r) => t + normalizeAmount(r.bucket1to30), 0)),
+      bucket31to60: normalizeAmount(rows.reduce((t, r) => t + normalizeAmount(r.bucket31to60), 0)),
+      bucket61to90: normalizeAmount(rows.reduce((t, r) => t + normalizeAmount(r.bucket61to90), 0)),
+      bucketOver90: normalizeAmount(rows.reduce((t, r) => t + normalizeAmount(r.bucketOver90), 0)),
+    })
+
     const cashBalances = await Promise.all(
       bankAccounts.map(async (bankAccount) => ({
         bankAccountId: bankAccount.id,
@@ -84,6 +92,8 @@ export class AccountingDashboardService {
         overdueInvoiceCount,
         overdueBillCount,
         totalCashAndBank,
+        arAgingBuckets: sumBuckets(receivables),
+        apAgingBuckets: sumBuckets(payables),
       },
       recentInvoices: sortByNewestDate<AccountingRegisterRow>(recentInvoices).slice(0, 10),
       recentBills: sortByNewestDate<AccountingRegisterRow>(recentBills).slice(0, 10),

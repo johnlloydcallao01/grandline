@@ -25,6 +25,8 @@ export type RevenueChartProps = {
   showValueLabel?: boolean;
   emptyMessage?: string;
   className?: string;
+  loading?: boolean;
+  skeletonBarCount?: number;
 };
 
 function formatCurrency(value: number) {
@@ -46,6 +48,40 @@ function formatShortNumber(value: number) {
   return String(value);
 }
 
+function ChartSkeleton({ type, height, barDirection, barCount = 5 }: { type: 'bar' | 'pie'; height: number; barDirection?: string; barCount?: number }) {
+  if (type === 'pie') {
+    return (
+      <div className="flex items-center justify-center" style={{ height }}>
+        <div className="relative h-48 w-48">
+          <div className="h-full w-full animate-pulse rounded-full bg-gray-200" />
+          <div className="absolute inset-6 rounded-full bg-white" />
+        </div>
+      </div>
+    );
+  }
+
+  const isHorizontal = barDirection === 'horizontal';
+  const widths = [85, 72, 58, 43, 31, 68, 55, 40, 26, 18].slice(0, barCount);
+
+  return (
+    <div className={`flex ${isHorizontal ? 'flex-col justify-center gap-3' : 'items-end gap-3'} px-2`} style={{ height }}>
+      {isHorizontal
+        ? widths.map((w, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+              <div className="h-3 animate-pulse rounded bg-gray-200" style={{ width: `${w}%` }} />
+            </div>
+          ))
+        : widths.map((w, i) => (
+            <div key={i} className="flex flex-1 flex-col items-center gap-1">
+              <div className="w-full animate-pulse rounded-t bg-gray-200" style={{ height: `${w}%` }} />
+              <div className="mt-1 h-3 w-full animate-pulse rounded bg-gray-200" />
+            </div>
+          ))}
+    </div>
+  );
+}
+
 export function RevenueChart({
   type,
   data,
@@ -56,6 +92,8 @@ export function RevenueChart({
   showValueLabel = true,
   emptyMessage = 'No data available',
   className = '',
+  loading = false,
+  skeletonBarCount = 5,
 }: RevenueChartProps) {
   const option = useMemo(() => {
     if (!data || data.length === 0) return null;
@@ -182,6 +220,10 @@ export function RevenueChart({
         : undefined,
     };
   }, [data, type, barDirection, showLegend, showValueLabel, title]);
+
+  if (loading) {
+    return <div className={className} style={{ height }}><ChartSkeleton type={type} height={height} barDirection={barDirection} barCount={skeletonBarCount} /></div>;
+  }
 
   if (!data || data.length === 0) {
     return (

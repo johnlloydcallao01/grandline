@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertCircle,
@@ -1974,36 +1975,7 @@ export function BusinessPartiesClient({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={
-              activeTab === 'customers'
-                ? handleRefreshCustomers
-                : activeTab === 'vendors'
-                  ? handleRefreshVendors
-                  : handleRefreshBankAccounts
-            }
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${
-                activeTab === 'customers'
-                  ? isCustomerLoading
-                    ? 'animate-spin'
-                    : ''
-                  : activeTab === 'vendors'
-                    ? isVendorLoading
-                      ? 'animate-spin'
-                      : ''
-                    : isBankAccountLoading
-                      ? 'animate-spin'
-                      : ''
-              }`}
-            />
-            Refresh Workspace
-          </button>
-        </div>
+
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -3264,1930 +3236,1771 @@ export function BusinessPartiesClient({
         ) : null}
       </div>
 
-      {isCustomerCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Customer</h2>
-                <p className="mt-1 text-sm text-gray-600">Add a new customer master record from the live CMS.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseCustomerCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
+      <SlideOver
+        isOpen={isCustomerCreateModalOpen}
+        onClose={handleCloseCustomerCreateModal}
+        title="Create Customer"
+        description="Add a new customer master record from the live CMS."
+      >
+        <form onSubmit={handleCreateCustomer} className="space-y-6">
+          {customerCreateError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {customerCreateError}
             </div>
-            <form onSubmit={handleCreateCustomer} className="space-y-6 px-6 py-5">
-              {customerCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {customerCreateError}
-                </div>
-              ) : null}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Customer Code</span>
-                  <input
-                    value={customerCreateForm.customerCode}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({
-                        ...previous,
-                        customerCode: event.target.value.toUpperCase(),
-                      }))
-                    }
-                    placeholder="Auto-generate if blank"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Display Name</span>
-                  <input
-                    required
-                    value={customerCreateForm.displayName}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Legal Name</span>
-                  <input
-                    value={customerCreateForm.legalName}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Customer Type</span>
-                  <select
-                    value={customerCreateForm.customerType}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, customerType: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    {(customerData?.section.filters.customerTypes || []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Currency</span>
-                  <select
-                    required
-                    value={customerCreateForm.currencyReference}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select currency</option>
-                    {(customerData?.referenceData.currencies || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.code ? `${option.code} ` : ''}
-                        {option.name || 'Unnamed currency'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Payment Terms</span>
-                  <select
-                    required
-                    value={customerCreateForm.paymentTermReference}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({
-                        ...previous,
-                        paymentTermReference: event.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select payment terms</option>
-                    {(customerData?.referenceData.paymentTerms || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.name || option.code || 'Unnamed term'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Status</span>
-                  <select
-                    value={customerCreateForm.status}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, status: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    {(customerData?.section.filters.statuses || []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Credit Limit</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={customerCreateForm.creditLimit}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, creditLimit: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Email</span>
-                  <input
-                    type="email"
-                    value={customerCreateForm.email}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, email: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Phone</span>
-                  <input
-                    value={customerCreateForm.phone}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, phone: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Tax ID</span>
-                  <input
-                    value={customerCreateForm.taxId}
-                    onChange={(event) =>
-                      setCustomerCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-              </div>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Billing Address</span>
-                <textarea
-                  rows={3}
-                  value={customerCreateForm.billingAddress}
-                  onChange={(event) =>
-                    setCustomerCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Shipping Address</span>
-                <textarea
-                  rows={3}
-                  value={customerCreateForm.shippingAddress}
-                  onChange={(event) =>
-                    setCustomerCreateForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Notes</span>
-                <textarea
-                  rows={4}
-                  value={customerCreateForm.notes}
-                  onChange={(event) =>
-                    setCustomerCreateForm((previous) => ({ ...previous, notes: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseCustomerCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCustomerCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isCustomerCreateSubmitting ? 'Creating...' : 'Create Customer'}
-                </button>
-              </div>
-            </form>
+          ) : null}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Customer Code</span>
+              <input
+                value={customerCreateForm.customerCode}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({
+                    ...previous,
+                    customerCode: event.target.value.toUpperCase(),
+                  }))
+                }
+                placeholder="Auto-generate if blank"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Display Name</span>
+              <input
+                required
+                value={customerCreateForm.displayName}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Legal Name</span>
+              <input
+                value={customerCreateForm.legalName}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Customer Type</span>
+              <select
+                value={customerCreateForm.customerType}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, customerType: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {(customerData?.section.filters.customerTypes || []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Currency</span>
+              <select
+                required
+                value={customerCreateForm.currencyReference}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select currency</option>
+                {(customerData?.referenceData.currencies || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.code ? `${option.code} ` : ''}
+                    {option.name || 'Unnamed currency'}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Payment Terms</span>
+              <select
+                required
+                value={customerCreateForm.paymentTermReference}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({
+                    ...previous,
+                    paymentTermReference: event.target.value,
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select payment terms</option>
+                {(customerData?.referenceData.paymentTerms || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.name || option.code || 'Unnamed term'}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Status</span>
+              <select
+                value={customerCreateForm.status}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, status: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {(customerData?.section.filters.statuses || []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Credit Limit</span>
+              <input
+                type="number"
+                min="0"
+                value={customerCreateForm.creditLimit}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, creditLimit: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Email</span>
+              <input
+                type="email"
+                value={customerCreateForm.email}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, email: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Phone</span>
+              <input
+                value={customerCreateForm.phone}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, phone: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Tax ID</span>
+              <input
+                value={customerCreateForm.taxId}
+                onChange={(event) =>
+                  setCustomerCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
           </div>
-        </div>
-      ) : null}
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Billing Address</span>
+            <textarea
+              rows={3}
+              value={customerCreateForm.billingAddress}
+              onChange={(event) =>
+                setCustomerCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Shipping Address</span>
+            <textarea
+              rows={3}
+              value={customerCreateForm.shippingAddress}
+              onChange={(event) =>
+                setCustomerCreateForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Notes</span>
+            <textarea
+              rows={4}
+              value={customerCreateForm.notes}
+              onChange={(event) =>
+                setCustomerCreateForm((previous) => ({ ...previous, notes: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseCustomerCreateModal}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isCustomerCreateSubmitting}
+              className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isCustomerCreateSubmitting ? 'Creating...' : 'Create Customer'}
+            </button>
+          </div>
+        </form>
+      </SlideOver>
 
-      {isCustomerEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Customer</h2>
-                <p className="mt-1 text-sm text-gray-600">Update an existing customer master record.</p>
+      <SlideOver
+        isOpen={isCustomerEditModalOpen}
+        onClose={handleCloseCustomerEditModal}
+        title="Edit Customer"
+        description="Update an existing customer master record."
+      >
+        {isCustomerEditLoading ? (
+          <DetailSkeleton />
+        ) : (
+          <form onSubmit={handleEditCustomer} className="space-y-6">
+            {customerEditError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {customerEditError}
               </div>
+            ) : null}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Customer Code</span>
+                <input
+                  value={customerEditForm.customerCode}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({
+                      ...previous,
+                      customerCode: event.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder="Auto-generate if blank"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Display Name</span>
+                <input
+                  required
+                  value={customerEditForm.displayName}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, displayName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Legal Name</span>
+                <input
+                  value={customerEditForm.legalName}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, legalName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Customer Type</span>
+                <select
+                  value={customerEditForm.customerType}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, customerType: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {(customerData?.section.filters.customerTypes || []).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Currency</span>
+                <select
+                  required
+                  value={customerEditForm.currencyReference}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select currency</option>
+                  {(customerData?.referenceData.currencies || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.code ? `${option.code} ` : ''}
+                      {option.name || 'Unnamed currency'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Payment Terms</span>
+                <select
+                  required
+                  value={customerEditForm.paymentTermReference}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({
+                      ...previous,
+                      paymentTermReference: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select payment terms</option>
+                  {(customerData?.referenceData.paymentTerms || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.name || option.code || 'Unnamed term'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Status</span>
+                <select
+                  value={customerEditForm.status}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, status: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {(customerData?.section.filters.statuses || []).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Credit Limit</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={customerEditForm.creditLimit}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, creditLimit: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Email</span>
+                <input
+                  type="email"
+                  value={customerEditForm.email}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, email: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Phone</span>
+                <input
+                  value={customerEditForm.phone}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, phone: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Tax ID</span>
+                <input
+                  value={customerEditForm.taxId}
+                  onChange={(event) =>
+                    setCustomerEditForm((previous) => ({ ...previous, taxId: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+            </div>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Billing Address</span>
+              <textarea
+                rows={3}
+                value={customerEditForm.billingAddress}
+                onChange={(event) =>
+                  setCustomerEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Shipping Address</span>
+              <textarea
+                rows={3}
+                value={customerEditForm.shippingAddress}
+                onChange={(event) =>
+                  setCustomerEditForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Notes</span>
+              <textarea
+                rows={4}
+                value={customerEditForm.notes}
+                onChange={(event) =>
+                  setCustomerEditForm((previous) => ({ ...previous, notes: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
               <button
                 type="button"
                 onClick={handleCloseCustomerEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
-                <X className="h-4 w-4" />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isCustomerEditSubmitting}
+                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isCustomerEditSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
-            {isCustomerEditLoading ? (
-              <div className="p-6">
-                <DetailSkeleton />
-              </div>
-            ) : (
-              <form onSubmit={handleEditCustomer} className="space-y-6 px-6 py-5">
-                {customerEditError ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {customerEditError}
-                  </div>
-                ) : null}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Customer Code</span>
-                    <input
-                      value={customerEditForm.customerCode}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({
-                          ...previous,
-                          customerCode: event.target.value.toUpperCase(),
-                        }))
-                      }
-                      placeholder="Auto-generate if blank"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Display Name</span>
-                    <input
-                      required
-                      value={customerEditForm.displayName}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, displayName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Legal Name</span>
-                    <input
-                      value={customerEditForm.legalName}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, legalName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Customer Type</span>
-                    <select
-                      value={customerEditForm.customerType}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, customerType: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      {(customerData?.section.filters.customerTypes || []).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Currency</span>
-                    <select
-                      required
-                      value={customerEditForm.currencyReference}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select currency</option>
-                      {(customerData?.referenceData.currencies || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.code ? `${option.code} ` : ''}
-                          {option.name || 'Unnamed currency'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Payment Terms</span>
-                    <select
-                      required
-                      value={customerEditForm.paymentTermReference}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({
-                          ...previous,
-                          paymentTermReference: event.target.value,
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select payment terms</option>
-                      {(customerData?.referenceData.paymentTerms || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.name || option.code || 'Unnamed term'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Status</span>
-                    <select
-                      value={customerEditForm.status}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, status: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      {(customerData?.section.filters.statuses || []).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Credit Limit</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={customerEditForm.creditLimit}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, creditLimit: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Email</span>
-                    <input
-                      type="email"
-                      value={customerEditForm.email}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, email: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Phone</span>
-                    <input
-                      value={customerEditForm.phone}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, phone: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Tax ID</span>
-                    <input
-                      value={customerEditForm.taxId}
-                      onChange={(event) =>
-                        setCustomerEditForm((previous) => ({ ...previous, taxId: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                </div>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Billing Address</span>
-                  <textarea
-                    rows={3}
-                    value={customerEditForm.billingAddress}
-                    onChange={(event) =>
-                      setCustomerEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Shipping Address</span>
-                  <textarea
-                    rows={3}
-                    value={customerEditForm.shippingAddress}
-                    onChange={(event) =>
-                      setCustomerEditForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Notes</span>
-                  <textarea
-                    rows={4}
-                    value={customerEditForm.notes}
-                    onChange={(event) =>
-                      setCustomerEditForm((previous) => ({ ...previous, notes: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseCustomerEditModal}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isCustomerEditSubmitting}
-                    className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isCustomerEditSubmitting ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      ) : null}
+          </form>
+        )}
+      </SlideOver>
 
-      {isVendorCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Vendor</h2>
-                <p className="mt-1 text-sm text-gray-600">Add a new vendor master record from the live CMS.</p>
-              </div>
+      <SlideOver
+        isOpen={isVendorCreateModalOpen}
+        onClose={handleCloseVendorCreateModal}
+        title="Create Vendor"
+        description="Add a new vendor master record from the live CMS."
+      >
+        <form onSubmit={handleCreateVendor} className="space-y-6">
+          {vendorCreateError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {vendorCreateError}
+            </div>
+          ) : null}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Vendor Code</span>
+              <input
+                value={vendorCreateForm.vendorCode}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({
+                    ...previous,
+                    vendorCode: event.target.value.toUpperCase(),
+                  }))
+                }
+                placeholder="Auto-generate if blank"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Display Name</span>
+              <input
+                required
+                value={vendorCreateForm.displayName}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Legal Name</span>
+              <input
+                value={vendorCreateForm.legalName}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Vendor Type</span>
+              <select
+                value={vendorCreateForm.vendorType}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, vendorType: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {(vendorData?.section.filters.vendorTypes || []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Currency</span>
+              <select
+                required
+                value={vendorCreateForm.currencyReference}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select currency</option>
+                {(vendorData?.referenceData.currencies || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.code ? `${option.code} ` : ''}
+                    {option.name || 'Unnamed currency'}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Payment Terms</span>
+              <select
+                required
+                value={vendorCreateForm.paymentTermReference}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({
+                    ...previous,
+                    paymentTermReference: event.target.value,
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select payment terms</option>
+                {(vendorData?.referenceData.paymentTerms || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.name || option.code || 'Unnamed term'}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Status</span>
+              <select
+                value={vendorCreateForm.status}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, status: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {(vendorData?.section.filters.statuses || []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Email</span>
+              <input
+                type="email"
+                value={vendorCreateForm.email}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, email: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Phone</span>
+              <input
+                value={vendorCreateForm.phone}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, phone: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Tax ID</span>
+              <input
+                value={vendorCreateForm.taxId}
+                onChange={(event) =>
+                  setVendorCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+          </div>
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Billing Address</span>
+            <textarea
+              rows={3}
+              value={vendorCreateForm.billingAddress}
+              onChange={(event) =>
+                setVendorCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Notes</span>
+            <textarea
+              rows={4}
+              value={vendorCreateForm.notes}
+              onChange={(event) =>
+                setVendorCreateForm((previous) => ({ ...previous, notes: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseVendorCreateModal}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isVendorCreateSubmitting}
+              className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isVendorCreateSubmitting ? 'Creating...' : 'Create Vendor'}
+            </button>
+          </div>
+        </form>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={isBankAccountCreateModalOpen}
+        onClose={handleCloseBankAccountCreateModal}
+        title="Create Bank Account"
+        description="Add a new treasury account using the live CMS backend."
+      >
+        <form onSubmit={handleCreateBankAccount} className="space-y-6">
+          {bankAccountCreateError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {bankAccountCreateError}
+            </div>
+          ) : null}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Account Name</span>
+              <input
+                required
+                value={bankAccountCreateForm.accountName}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({ ...previous, accountName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Account Number</span>
+              <input
+                value={bankAccountCreateForm.accountNumberMasked}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({
+                    ...previous,
+                    accountNumberMasked: event.target.value,
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Bank Name</span>
+              <input
+                value={bankAccountCreateForm.bankName}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({ ...previous, bankName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Branch Name</span>
+              <input
+                value={bankAccountCreateForm.branchName}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({ ...previous, branchName: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Account Type</span>
+              <select
+                value={bankAccountCreateForm.accountType}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({ ...previous, accountType: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Currency</span>
+              <select
+                required
+                value={bankAccountCreateForm.currencyReference}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({
+                    ...previous,
+                    currencyReference: event.target.value,
+                  }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select currency</option>
+                {(bankAccountData?.referenceData.currencies || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.code ? `${option.code} ` : ''}
+                    {option.name || 'Unnamed currency'}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Ledger Account</span>
+              <select
+                required
+                value={bankAccountCreateForm.ledgerAccount}
+                onChange={(event) =>
+                  setBankAccountCreateForm((previous) => ({ ...previous, ledgerAccount: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">Select ledger account</option>
+                {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
+                  <option key={option.id} value={String(option.id)}>
+                    {option.code ? `${option.code} ` : ''}
+                    {option.name || 'Unnamed ledger account'}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={bankAccountCreateForm.isDefaultReceiptAccount}
+                onChange={() =>
+                  setBankAccountCreateForm((previous) => ({
+                    ...previous,
+                    isDefaultReceiptAccount: !previous.isDefaultReceiptAccount,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Default Receipt
+            </label>
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={bankAccountCreateForm.isDefaultDisbursementAccount}
+                onChange={() =>
+                  setBankAccountCreateForm((previous) => ({
+                    ...previous,
+                    isDefaultDisbursementAccount: !previous.isDefaultDisbursementAccount,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Default Disbursement
+            </label>
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={bankAccountCreateForm.isActive}
+                onChange={() =>
+                  setBankAccountCreateForm((previous) => ({
+                    ...previous,
+                    isActive: !previous.isActive,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Active Account
+            </label>
+          </div>
+          <label className="block space-y-2 text-sm text-gray-700">
+            <span className="font-medium">Notes</span>
+            <textarea
+              rows={4}
+              value={bankAccountCreateForm.notes}
+              onChange={(event) =>
+                setBankAccountCreateForm((previous) => ({ ...previous, notes: event.target.value }))
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </label>
+          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseBankAccountCreateModal}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isBankAccountCreateSubmitting}
+              className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isBankAccountCreateSubmitting ? 'Creating...' : 'Create Bank Account'}
+            </button>
+          </div>
+        </form>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={isCustomerDeleteModalOpen}
+        onClose={handleCloseCustomerDeleteModal}
+        title="Delete Customer"
+        description={'Remove "' + deletingCustomerName + '" from the customers list.'}
+        width="max-w-lg"
+      >
+        {customerDeleteError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {customerDeleteError}
+          </div>
+        ) : null}
+
+        {customerDeleteBlockers.length > 0 ? (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p className="font-medium">Cannot delete this customer</p>
+              <p className="mt-1">
+                This customer cannot be deleted because the following dependencies exist:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                {customerDeleteBlockers.map((blocker, index) => (
+                  <li key={index}>{blocker}</li>
+                ))}
+              </ul>
+              <p className="mt-2">
+                Remove all dependencies before attempting to delete this customer.
+              </p>
+            </div>
+            <div className="flex justify-end">
               <button
                 type="button"
-                onClick={handleCloseVendorCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                onClick={handleCloseCustomerDeleteModal}
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
-                <X className="h-4 w-4" />
+                Close
               </button>
             </div>
-            <form onSubmit={handleCreateVendor} className="space-y-6 px-6 py-5">
-              {vendorCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {vendorCreateError}
-                </div>
-              ) : null}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Vendor Code</span>
-                  <input
-                    value={vendorCreateForm.vendorCode}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({
-                        ...previous,
-                        vendorCode: event.target.value.toUpperCase(),
-                      }))
-                    }
-                    placeholder="Auto-generate if blank"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Display Name</span>
-                  <input
-                    required
-                    value={vendorCreateForm.displayName}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Legal Name</span>
-                  <input
-                    value={vendorCreateForm.legalName}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Vendor Type</span>
-                  <select
-                    value={vendorCreateForm.vendorType}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, vendorType: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    {(vendorData?.section.filters.vendorTypes || []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Currency</span>
-                  <select
-                    required
-                    value={vendorCreateForm.currencyReference}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select currency</option>
-                    {(vendorData?.referenceData.currencies || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.code ? `${option.code} ` : ''}
-                        {option.name || 'Unnamed currency'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Payment Terms</span>
-                  <select
-                    required
-                    value={vendorCreateForm.paymentTermReference}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({
-                        ...previous,
-                        paymentTermReference: event.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select payment terms</option>
-                    {(vendorData?.referenceData.paymentTerms || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.name || option.code || 'Unnamed term'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Status</span>
-                  <select
-                    value={vendorCreateForm.status}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, status: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    {(vendorData?.section.filters.statuses || []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Email</span>
-                  <input
-                    type="email"
-                    value={vendorCreateForm.email}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, email: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Phone</span>
-                  <input
-                    value={vendorCreateForm.phone}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, phone: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Tax ID</span>
-                  <input
-                    value={vendorCreateForm.taxId}
-                    onChange={(event) =>
-                      setVendorCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-              </div>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Billing Address</span>
-                <textarea
-                  rows={3}
-                  value={vendorCreateForm.billingAddress}
-                  onChange={(event) =>
-                    setVendorCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Notes</span>
-                <textarea
-                  rows={4}
-                  value={vendorCreateForm.notes}
-                  onChange={(event) =>
-                    setVendorCreateForm((previous) => ({ ...previous, notes: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseVendorCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isVendorCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isVendorCreateSubmitting ? 'Creating...' : 'Create Vendor'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      ) : null}
-
-      {isBankAccountCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Create Bank Account</h2>
-                <p className="mt-1 text-sm text-gray-600">Add a new treasury account using the live CMS backend.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseBankAccountCreateModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-medium">Are you sure?</p>
+              <p className="mt-1">
+                This action cannot be undone. The customer &ldquo;{deletingCustomerName}&rdquo; will be permanently removed.
+              </p>
             </div>
-            <form onSubmit={handleCreateBankAccount} className="space-y-6 px-6 py-5">
-              {bankAccountCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {bankAccountCreateError}
-                </div>
-              ) : null}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Account Name</span>
-                  <input
-                    required
-                    value={bankAccountCreateForm.accountName}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({ ...previous, accountName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Account Number</span>
-                  <input
-                    value={bankAccountCreateForm.accountNumberMasked}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({
-                        ...previous,
-                        accountNumberMasked: event.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Bank Name</span>
-                  <input
-                    value={bankAccountCreateForm.bankName}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({ ...previous, bankName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Branch Name</span>
-                  <input
-                    value={bankAccountCreateForm.branchName}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({ ...previous, branchName: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Account Type</span>
-                  <select
-                    value={bankAccountCreateForm.accountType}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({ ...previous, accountType: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Currency</span>
-                  <select
-                    required
-                    value={bankAccountCreateForm.currencyReference}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({
-                        ...previous,
-                        currencyReference: event.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select currency</option>
-                    {(bankAccountData?.referenceData.currencies || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.code ? `${option.code} ` : ''}
-                        {option.name || 'Unnamed currency'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Ledger Account</span>
-                  <select
-                    required
-                    value={bankAccountCreateForm.ledgerAccount}
-                    onChange={(event) =>
-                      setBankAccountCreateForm((previous) => ({ ...previous, ledgerAccount: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">Select ledger account</option>
-                    {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
-                      <option key={option.id} value={String(option.id)}>
-                        {option.code ? `${option.code} ` : ''}
-                        {option.name || 'Unnamed ledger account'}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={bankAccountCreateForm.isDefaultReceiptAccount}
-                    onChange={() =>
-                      setBankAccountCreateForm((previous) => ({
-                        ...previous,
-                        isDefaultReceiptAccount: !previous.isDefaultReceiptAccount,
-                      }))
-                    }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  Default Receipt
-                </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={bankAccountCreateForm.isDefaultDisbursementAccount}
-                    onChange={() =>
-                      setBankAccountCreateForm((previous) => ({
-                        ...previous,
-                        isDefaultDisbursementAccount: !previous.isDefaultDisbursementAccount,
-                      }))
-                    }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  Default Disbursement
-                </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={bankAccountCreateForm.isActive}
-                    onChange={() =>
-                      setBankAccountCreateForm((previous) => ({
-                        ...previous,
-                        isActive: !previous.isActive,
-                      }))
-                    }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  Active Account
-                </label>
-              </div>
-              <label className="block space-y-2 text-sm text-gray-700">
-                <span className="font-medium">Notes</span>
-                <textarea
-                  rows={4}
-                  value={bankAccountCreateForm.notes}
-                  onChange={(event) =>
-                    setBankAccountCreateForm((previous) => ({ ...previous, notes: event.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-              <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseBankAccountCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isBankAccountCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isBankAccountCreateSubmitting ? 'Creating...' : 'Create Bank Account'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
-
-      {isCustomerDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Customer</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingCustomerName}&rdquo; from the customers list.
-                </p>
-              </div>
+            <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCloseCustomerDeleteModal}
                 disabled={isCustomerDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
               >
-                <X className="h-5 w-5" />
+                Cancel
               </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {customerDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {customerDeleteError}
-                </div>
-              ) : null}
-
-              {customerDeleteBlockers.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                    <p className="font-medium">Cannot delete this customer</p>
-                    <p className="mt-1">
-                      This customer cannot be deleted because the following dependencies exist:
-                    </p>
-                    <ul className="mt-2 list-inside list-disc space-y-1">
-                      {customerDeleteBlockers.map((blocker, index) => (
-                        <li key={index}>{blocker}</li>
-                      ))}
-                    </ul>
-                    <p className="mt-2">
-                      Remove all dependencies before attempting to delete this customer.
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleCloseCustomerDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    <p className="font-medium">Are you sure?</p>
-                    <p className="mt-1">
-                      This action cannot be undone. The customer &ldquo;{deletingCustomerName}&rdquo; will be permanently removed.
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={handleCloseCustomerDeleteModal}
-                      disabled={isCustomerDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleConfirmCustomerDelete}
-                      disabled={isCustomerDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {isCustomerDeleteSubmitting ? 'Deleting...' : 'Delete Customer'}
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={handleConfirmCustomerDelete}
+                disabled={isCustomerDeleteSubmitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {isCustomerDeleteSubmitting ? 'Deleting...' : 'Delete Customer'}
+              </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        )}
+      </SlideOver>
 
-      {selectedCustomerId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Customer Record</h2>
-                <p className="mt-1 text-sm text-gray-500">Review the full master record returned by the CMS.</p>
+      <SlideOver
+        isOpen={selectedCustomerId !== null}
+        onClose={closeDetailModal}
+        title="Customer Record"
+        description="Review the full master record returned by the CMS."
+        width="max-w-2xl"
+      >
+        <div className="space-y-4">
+          {isCustomerDetailLoading ? (
+            <DetailSkeleton />
+          ) : customerDetailError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {customerDetailError}
+            </div>
+          ) : selectedCustomer ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer Code</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900">{selectedCustomer.customerCode || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.status || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.displayName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.legalName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {formatPartyTypeLabel(selectedCustomer.customerType)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Credit Limit</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.creditLimit ?? 0}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedCustomer.currencyReference?.code || selectedCustomer.currencyReference?.name || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedCustomer.paymentTermReference?.name || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.email || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.phone || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.billingAddress || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.notes || '-'}</p>
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.createdAt)}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={selectedVendorId !== null}
+        onClose={closeVendorDetailModal}
+        title="Vendor Record"
+        description="Review the full master record returned by the CMS."
+        width="max-w-2xl"
+      >
+        <div className="space-y-4">
+          {isVendorDetailLoading ? (
+            <DetailSkeleton />
+          ) : vendorDetailError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {vendorDetailError}
+            </div>
+          ) : selectedVendor ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor Code</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900">{selectedVendor.vendorCode || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.status || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.displayName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.legalName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {formatPartyTypeLabel(selectedVendor.vendorType)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Tax ID</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.taxId || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedVendor.currencyReference?.code || selectedVendor.currencyReference?.name || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedVendor.paymentTermReference?.name || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.email || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.phone || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.billingAddress || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.notes || '-'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.createdAt)}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={isVendorDeleteModalOpen}
+        onClose={handleCloseVendorDeleteModal}
+        title="Delete Vendor"
+        description={'Remove "' + deletingVendorName + '" from the vendors list.'}
+        width="max-w-lg"
+      >
+        {vendorDeleteError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {vendorDeleteError}
+          </div>
+        ) : null}
+
+        {vendorDeleteBlockers.length > 0 ? (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p className="font-medium">Cannot delete this vendor</p>
+              <p className="mt-1">
+                This vendor cannot be deleted because the following dependencies exist:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                {vendorDeleteBlockers.map((blocker, index) => (
+                  <li key={index}>{blocker}</li>
+                ))}
+              </ul>
+              <p className="mt-2">
+                Remove all dependencies before attempting to delete this vendor.
+              </p>
+            </div>
+            <div className="flex justify-end">
               <button
                 type="button"
-                onClick={closeDetailModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-4 overflow-y-auto px-6 py-5">
-              {isCustomerDetailLoading ? (
-                <DetailSkeleton />
-              ) : customerDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {customerDetailError}
-                </div>
-              ) : selectedCustomer ? (
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => void handleOpenCustomerEditModal(selectedCustomer.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Customer
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer Code</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedCustomer.customerCode || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.status || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.displayName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.legalName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {formatPartyTypeLabel(selectedCustomer.customerType)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Credit Limit</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.creditLimit ?? 0}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedCustomer.currencyReference?.code || selectedCustomer.currencyReference?.name || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedCustomer.paymentTermReference?.name || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.email || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.phone || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.billingAddress || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedCustomer.notes || '-'}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.createdAt)}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.updatedAt)}</p>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
-              <button
-                type="button"
-                onClick={closeDetailModal}
-                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                onClick={handleCloseVendorDeleteModal}
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
                 Close
               </button>
             </div>
           </div>
-        </div>
-      ) : null}
-
-      {selectedVendorId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Vendor Record</h2>
-                <p className="mt-1 text-sm text-gray-500">Review the full master record returned by the CMS.</p>
-              </div>
-              <button
-                type="button"
-                onClick={closeVendorDetailModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-medium">Are you sure?</p>
+              <p className="mt-1">
+                This action cannot be undone. The vendor &ldquo;{deletingVendorName}&rdquo; will be permanently removed.
+              </p>
             </div>
-
-            <div className="space-y-4 overflow-y-auto px-6 py-5">
-              {isVendorDetailLoading ? (
-                <DetailSkeleton />
-              ) : vendorDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {vendorDetailError}
-                </div>
-              ) : selectedVendor ? (
-                <>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => void handleOpenVendorEditModal(selectedVendor.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Vendor
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor Code</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedVendor.vendorCode || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.status || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.displayName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.legalName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {formatPartyTypeLabel(selectedVendor.vendorType)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Tax ID</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.taxId || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedVendor.currencyReference?.code || selectedVendor.currencyReference?.name || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedVendor.paymentTermReference?.name || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.email || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.phone || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.billingAddress || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedVendor.notes || '-'}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.createdAt)}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.updatedAt)}</p>
-                    </div>
-                  </div>
-                </>
-              ) : null}
-            </div>
-
-            <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
-              <button
-                type="button"
-                onClick={closeVendorDetailModal}
-                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {isVendorDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Vendor</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingVendorName}&rdquo; from the vendors list.
-                </p>
-              </div>
+            <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCloseVendorDeleteModal}
                 disabled={isVendorDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
               >
-                <X className="h-5 w-5" />
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmVendorDelete}
+                disabled={isVendorDeleteSubmitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {isVendorDeleteSubmitting ? 'Deleting...' : 'Delete Vendor'}
               </button>
             </div>
-
-            <div className="px-6 py-5">
-              {vendorDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {vendorDeleteError}
-                </div>
-              ) : null}
-
-              {vendorDeleteBlockers.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                    <p className="font-medium">Cannot delete this vendor</p>
-                    <p className="mt-1">
-                      This vendor cannot be deleted because the following dependencies exist:
-                    </p>
-                    <ul className="mt-2 list-inside list-disc space-y-1">
-                      {vendorDeleteBlockers.map((blocker, index) => (
-                        <li key={index}>{blocker}</li>
-                      ))}
-                    </ul>
-                    <p className="mt-2">
-                      Remove all dependencies before attempting to delete this vendor.
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleCloseVendorDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    <p className="font-medium">Are you sure?</p>
-                    <p className="mt-1">
-                      This action cannot be undone. The vendor &ldquo;{deletingVendorName}&rdquo; will be permanently removed.
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={handleCloseVendorDeleteModal}
-                      disabled={isVendorDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleConfirmVendorDelete}
-                      disabled={isVendorDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {isVendorDeleteSubmitting ? 'Deleting...' : 'Delete Vendor'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
-        </div>
-      ) : null}
+        )}
+      </SlideOver>
 
-      {isVendorEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Vendor</h2>
-                <p className="mt-1 text-sm text-gray-600">Update an existing vendor master record.</p>
+      <SlideOver
+        isOpen={isVendorEditModalOpen}
+        onClose={handleCloseVendorEditModal}
+        title="Edit Vendor"
+        description="Update an existing vendor master record."
+      >
+        {isVendorEditLoading ? (
+          <DetailSkeleton />
+        ) : (
+          <form onSubmit={handleEditVendor} className="space-y-6">
+            {vendorEditError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {vendorEditError}
               </div>
+            ) : null}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Vendor Code</span>
+                <input
+                  value={vendorEditForm.vendorCode}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({
+                      ...previous,
+                      vendorCode: event.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder="Auto-generate if blank"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Display Name</span>
+                <input
+                  required
+                  value={vendorEditForm.displayName}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, displayName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Legal Name</span>
+                <input
+                  value={vendorEditForm.legalName}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, legalName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Vendor Type</span>
+                <select
+                  value={vendorEditForm.vendorType}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, vendorType: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {(vendorData?.section.filters.vendorTypes || []).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Currency</span>
+                <select
+                  required
+                  value={vendorEditForm.currencyReference}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select currency</option>
+                  {(vendorData?.referenceData.currencies || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.code ? `${option.code} ` : ''}
+                      {option.name || 'Unnamed currency'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Payment Terms</span>
+                <select
+                  required
+                  value={vendorEditForm.paymentTermReference}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({
+                      ...previous,
+                      paymentTermReference: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select payment terms</option>
+                  {(vendorData?.referenceData.paymentTerms || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.name || option.code || 'Unnamed term'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Status</span>
+                <select
+                  value={vendorEditForm.status}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, status: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {(vendorData?.section.filters.statuses || []).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Email</span>
+                <input
+                  type="email"
+                  value={vendorEditForm.email}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, email: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Phone</span>
+                <input
+                  value={vendorEditForm.phone}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, phone: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Tax ID</span>
+                <input
+                  value={vendorEditForm.taxId}
+                  onChange={(event) =>
+                    setVendorEditForm((previous) => ({ ...previous, taxId: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+            </div>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Billing Address</span>
+              <textarea
+                rows={3}
+                value={vendorEditForm.billingAddress}
+                onChange={(event) =>
+                  setVendorEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Notes</span>
+              <textarea
+                rows={4}
+                value={vendorEditForm.notes}
+                onChange={(event) =>
+                  setVendorEditForm((previous) => ({ ...previous, notes: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
               <button
                 type="button"
                 onClick={handleCloseVendorEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
-                <X className="h-4 w-4" />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isVendorEditSubmitting}
+                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isVendorEditSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
-            {isVendorEditLoading ? (
-              <div className="p-6">
-                <DetailSkeleton />
-              </div>
-            ) : (
-              <form onSubmit={handleEditVendor} className="space-y-6 px-6 py-5">
-                {vendorEditError ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {vendorEditError}
-                  </div>
-                ) : null}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Vendor Code</span>
-                    <input
-                      value={vendorEditForm.vendorCode}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({
-                          ...previous,
-                          vendorCode: event.target.value.toUpperCase(),
-                        }))
-                      }
-                      placeholder="Auto-generate if blank"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Display Name</span>
-                    <input
-                      required
-                      value={vendorEditForm.displayName}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, displayName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Legal Name</span>
-                    <input
-                      value={vendorEditForm.legalName}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, legalName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Vendor Type</span>
-                    <select
-                      value={vendorEditForm.vendorType}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, vendorType: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      {(vendorData?.section.filters.vendorTypes || []).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Currency</span>
-                    <select
-                      required
-                      value={vendorEditForm.currencyReference}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select currency</option>
-                      {(vendorData?.referenceData.currencies || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.code ? `${option.code} ` : ''}
-                          {option.name || 'Unnamed currency'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Payment Terms</span>
-                    <select
-                      required
-                      value={vendorEditForm.paymentTermReference}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({
-                          ...previous,
-                          paymentTermReference: event.target.value,
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select payment terms</option>
-                      {(vendorData?.referenceData.paymentTerms || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.name || option.code || 'Unnamed term'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Status</span>
-                    <select
-                      value={vendorEditForm.status}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, status: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      {(vendorData?.section.filters.statuses || []).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Email</span>
-                    <input
-                      type="email"
-                      value={vendorEditForm.email}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, email: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Phone</span>
-                    <input
-                      value={vendorEditForm.phone}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, phone: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Tax ID</span>
-                    <input
-                      value={vendorEditForm.taxId}
-                      onChange={(event) =>
-                        setVendorEditForm((previous) => ({ ...previous, taxId: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                </div>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Billing Address</span>
-                  <textarea
-                    rows={3}
-                    value={vendorEditForm.billingAddress}
-                    onChange={(event) =>
-                      setVendorEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Notes</span>
-                  <textarea
-                    rows={4}
-                    value={vendorEditForm.notes}
-                    onChange={(event) =>
-                      setVendorEditForm((previous) => ({ ...previous, notes: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseVendorEditModal}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isVendorEditSubmitting}
-                    className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isVendorEditSubmitting ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      ) : null}
+          </form>
+        )}
+      </SlideOver>
 
-      {isBankAccountDeleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Delete Bank Account</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Remove &ldquo;{deletingBankAccountName}&rdquo; from the bank accounts list.
-                </p>
-              </div>
+      <SlideOver
+        isOpen={isBankAccountDeleteModalOpen}
+        onClose={handleCloseBankAccountDeleteModal}
+        title="Delete Bank Account"
+        description={'Remove "' + deletingBankAccountName + '" from the bank accounts list.'}
+        width="max-w-lg"
+      >
+        {bankAccountDeleteError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {bankAccountDeleteError}
+          </div>
+        ) : null}
+
+        {bankAccountDeleteBlockers.length > 0 ? (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p className="font-medium">Cannot delete this bank account</p>
+              <p className="mt-1">
+                This bank account cannot be deleted because the following dependencies exist:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                {bankAccountDeleteBlockers.map((blocker, index) => (
+                  <li key={index}>{blocker}</li>
+                ))}
+              </ul>
+              <p className="mt-2">
+                Remove all dependencies before attempting to delete this bank account.
+              </p>
+            </div>
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={handleCloseBankAccountDeleteModal}
-                disabled={isBankAccountDeleteSubmitting}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5">
-              {bankAccountDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {bankAccountDeleteError}
-                </div>
-              ) : null}
-
-              {bankAccountDeleteBlockers.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                    <p className="font-medium">Cannot delete this bank account</p>
-                    <p className="mt-1">
-                      This bank account cannot be deleted because the following dependencies exist:
-                    </p>
-                    <ul className="mt-2 list-inside list-disc space-y-1">
-                      {bankAccountDeleteBlockers.map((blocker, index) => (
-                        <li key={index}>{blocker}</li>
-                      ))}
-                    </ul>
-                    <p className="mt-2">
-                      Remove all dependencies before attempting to delete this bank account.
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleCloseBankAccountDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    <p className="font-medium">Are you sure?</p>
-                    <p className="mt-1">
-                      This action cannot be undone. The bank account &ldquo;{deletingBankAccountName}&rdquo; will be permanently removed.
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={handleCloseBankAccountDeleteModal}
-                      disabled={isBankAccountDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleConfirmBankAccountDelete}
-                      disabled={isBankAccountDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {isBankAccountDeleteSubmitting ? 'Deleting...' : 'Delete Bank Account'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {isBankAccountEditModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Edit Bank Account</h2>
-                <p className="mt-1 text-sm text-gray-600">Update an existing bank account master record.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseBankAccountEditModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            {isBankAccountEditLoading ? (
-              <div className="p-6">
-                <DetailSkeleton />
-              </div>
-            ) : (
-              <form onSubmit={handleEditBankAccount} className="space-y-6 px-6 py-5">
-                {bankAccountEditError ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {bankAccountEditError}
-                  </div>
-                ) : null}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Account Name</span>
-                    <input
-                      required
-                      value={bankAccountEditForm.accountName}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({ ...previous, accountName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Account Number</span>
-                    <input
-                      value={bankAccountEditForm.accountNumberMasked}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          accountNumberMasked: event.target.value,
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Bank Name</span>
-                    <input
-                      value={bankAccountEditForm.bankName}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({ ...previous, bankName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Branch Name</span>
-                    <input
-                      value={bankAccountEditForm.branchName}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({ ...previous, branchName: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Account Type</span>
-                    <select
-                      value={bankAccountEditForm.accountType}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({ ...previous, accountType: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Currency</span>
-                    <select
-                      required
-                      value={bankAccountEditForm.currencyReference}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          currencyReference: event.target.value,
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select currency</option>
-                      {(bankAccountData?.referenceData.currencies || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.code ? `${option.code} ` : ''}
-                          {option.name || 'Unnamed currency'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Ledger Account</span>
-                    <select
-                      required
-                      value={bankAccountEditForm.ledgerAccount}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          ledgerAccount: event.target.value,
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select ledger account</option>
-                      {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
-                        <option key={option.id} value={String(option.id)}>
-                          {option.code ? `${option.code} ` : ''}
-                          {option.name || 'Unnamed ledger'}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Status</span>
-                    <select
-                      value={bankAccountEditForm.isActive ? 'true' : 'false'}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          isActive: event.target.value === 'true',
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Default Receipt Account</span>
-                    <select
-                      value={bankAccountEditForm.isDefaultReceiptAccount ? 'true' : 'false'}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          isDefaultReceiptAccount: event.target.value === 'true',
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </select>
-                  </label>
-                  <label className="space-y-2 text-sm text-gray-700">
-                    <span className="font-medium">Default Disbursement Account</span>
-                    <select
-                      value={bankAccountEditForm.isDefaultDisbursementAccount ? 'true' : 'false'}
-                      onChange={(event) =>
-                        setBankAccountEditForm((previous) => ({
-                          ...previous,
-                          isDefaultDisbursementAccount: event.target.value === 'true',
-                        }))
-                      }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </select>
-                  </label>
-                </div>
-                <label className="block space-y-2 text-sm text-gray-700">
-                  <span className="font-medium">Notes</span>
-                  <textarea
-                    rows={4}
-                    value={bankAccountEditForm.notes}
-                    onChange={(event) =>
-                      setBankAccountEditForm((previous) => ({ ...previous, notes: event.target.value }))
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseBankAccountEditModal}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isBankAccountEditSubmitting}
-                    className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isBankAccountEditSubmitting ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      ) : null}
-
-      {selectedBankAccountId !== null ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Bank Account Record</h2>
-                <p className="mt-1 text-sm text-gray-500">Review the full master record returned by the CMS.</p>
-              </div>
-              <button
-                type="button"
-                onClick={closeBankAccountDetailModal}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-4 overflow-y-auto px-6 py-5">
-              {isBankAccountDetailLoading ? (
-                <DetailSkeleton />
-              ) : bankAccountDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {bankAccountDetailError}
-                </div>
-              ) : selectedBankAccount ? (
-                <>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => void handleOpenBankAccountEditModal(selectedBankAccount.id)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit Bank Account
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Name</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">
-                        {selectedBankAccount.accountName || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {getBankAccountStatus(selectedBankAccount.isActive)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Bank Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.bankName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Branch Name</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.branchName || '-'}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Type</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {formatPartyTypeLabel(selectedBankAccount.accountType)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Number</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedBankAccount.accountNumberMasked || '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedBankAccount.currencyReference?.code ||
-                          selectedBankAccount.currencyReference?.name ||
-                          '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Ledger Account</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedBankAccount.ledgerAccount?.code && selectedBankAccount.ledgerAccount?.name
-                          ? `${selectedBankAccount.ledgerAccount.code} ${selectedBankAccount.ledgerAccount.name}`
-                          : selectedBankAccount.ledgerAccount?.code ||
-                            selectedBankAccount.ledgerAccount?.name ||
-                            '-'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Default Receipt</p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedBankAccount.isDefaultReceiptAccount ? 'Yes' : 'No'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Default Disbursement
-                      </p>
-                      <p className="mt-2 text-sm text-gray-900">
-                        {selectedBankAccount.isDefaultDisbursementAccount ? 'Yes' : 'No'}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                      <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.notes || '-'}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.createdAt)}</p>
-                    </div>
-                    <div className="rounded-xl border border-gray-200 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                      <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.updatedAt)}</p>
-                    </div>
-                  </div>
-                </>
-              ) : null}
-            </div>
-
-            <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
-              <button
-                type="button"
-                onClick={closeBankAccountDetailModal}
-                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
                 Close
               </button>
             </div>
           </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-medium">Are you sure?</p>
+              <p className="mt-1">
+                This action cannot be undone. The bank account &ldquo;{deletingBankAccountName}&rdquo; will be permanently removed.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={handleCloseBankAccountDeleteModal}
+                disabled={isBankAccountDeleteSubmitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBankAccountDelete}
+                disabled={isBankAccountDeleteSubmitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {isBankAccountDeleteSubmitting ? 'Deleting...' : 'Delete Bank Account'}
+              </button>
+            </div>
+          </div>
+        )}
+      </SlideOver>
+
+      <SlideOver
+        isOpen={isBankAccountEditModalOpen}
+        onClose={handleCloseBankAccountEditModal}
+        title="Edit Bank Account"
+        description="Update an existing bank account master record."
+      >
+        {isBankAccountEditLoading ? (
+          <DetailSkeleton />
+        ) : (
+          <form onSubmit={handleEditBankAccount} className="space-y-6">
+            {bankAccountEditError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {bankAccountEditError}
+              </div>
+            ) : null}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Account Name</span>
+                <input
+                  required
+                  value={bankAccountEditForm.accountName}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({ ...previous, accountName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Account Number</span>
+                <input
+                  value={bankAccountEditForm.accountNumberMasked}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      accountNumberMasked: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Bank Name</span>
+                <input
+                  value={bankAccountEditForm.bankName}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({ ...previous, bankName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Branch Name</span>
+                <input
+                  value={bankAccountEditForm.branchName}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({ ...previous, branchName: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Account Type</span>
+                <select
+                  value={bankAccountEditForm.accountType}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({ ...previous, accountType: event.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Currency</span>
+                <select
+                  required
+                  value={bankAccountEditForm.currencyReference}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      currencyReference: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select currency</option>
+                  {(bankAccountData?.referenceData.currencies || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.code ? `${option.code} ` : ''}
+                      {option.name || 'Unnamed currency'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Ledger Account</span>
+                <select
+                  required
+                  value={bankAccountEditForm.ledgerAccount}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      ledgerAccount: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Select ledger account</option>
+                  {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
+                    <option key={option.id} value={String(option.id)}>
+                      {option.code ? `${option.code} ` : ''}
+                      {option.name || 'Unnamed ledger'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Status</span>
+                <select
+                  value={bankAccountEditForm.isActive ? 'true' : 'false'}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      isActive: event.target.value === 'true',
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Default Receipt Account</span>
+                <select
+                  value={bankAccountEditForm.isDefaultReceiptAccount ? 'true' : 'false'}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      isDefaultReceiptAccount: event.target.value === 'true',
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </label>
+              <label className="space-y-2 text-sm text-gray-700">
+                <span className="font-medium">Default Disbursement Account</span>
+                <select
+                  value={bankAccountEditForm.isDefaultDisbursementAccount ? 'true' : 'false'}
+                  onChange={(event) =>
+                    setBankAccountEditForm((previous) => ({
+                      ...previous,
+                      isDefaultDisbursementAccount: event.target.value === 'true',
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </label>
+            </div>
+            <label className="block space-y-2 text-sm text-gray-700">
+              <span className="font-medium">Notes</span>
+              <textarea
+                rows={4}
+                value={bankAccountEditForm.notes}
+                onChange={(event) =>
+                  setBankAccountEditForm((previous) => ({ ...previous, notes: event.target.value }))
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+              <button
+                type="button"
+                onClick={handleCloseBankAccountEditModal}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isBankAccountEditSubmitting}
+                className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isBankAccountEditSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        )}
+      </SlideOver>
+
+      <SlideOver
+        isOpen={selectedBankAccountId !== null}
+        onClose={closeBankAccountDetailModal}
+        title="Bank Account Record"
+        description="Review the full master record returned by the CMS."
+        width="max-w-2xl"
+      >
+        <div className="space-y-4">
+          {isBankAccountDetailLoading ? (
+            <DetailSkeleton />
+          ) : bankAccountDetailError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {bankAccountDetailError}
+            </div>
+          ) : selectedBankAccount ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Name</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900">
+                    {selectedBankAccount.accountName || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {getBankAccountStatus(selectedBankAccount.isActive)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Bank Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.bankName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Branch Name</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.branchName || '-'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Type</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {formatPartyTypeLabel(selectedBankAccount.accountType)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Number</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedBankAccount.accountNumberMasked || '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedBankAccount.currencyReference?.code ||
+                      selectedBankAccount.currencyReference?.name ||
+                      '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Ledger Account</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedBankAccount.ledgerAccount?.code && selectedBankAccount.ledgerAccount?.name
+                      ? `${selectedBankAccount.ledgerAccount.code} ${selectedBankAccount.ledgerAccount.name}`
+                      : selectedBankAccount.ledgerAccount?.code ||
+                        selectedBankAccount.ledgerAccount?.name ||
+                        '-'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Default Receipt</p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedBankAccount.isDefaultReceiptAccount ? 'Yes' : 'No'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Default Disbursement
+                  </p>
+                  <p className="mt-2 text-sm text-gray-900">
+                    {selectedBankAccount.isDefaultDisbursementAccount ? 'Yes' : 'No'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.notes || '-'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.createdAt)}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </SlideOver>
     </div>
+  );
+}
+
+function SlideOver({
+  isOpen,
+  onClose,
+  title,
+  description,
+  children,
+  width = 'max-w-4xl',
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  width?: string;
+}) {
+  const [mounted, setMounted] = useState(isOpen);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+      return undefined;
+    }
+    setAnimate(false);
+    const timer = setTimeout(() => setMounted(false), 300);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${
+        animate ? 'bg-black/50' : 'bg-transparent'
+      }`}
+      onClick={onClose}
+    >
+      <div
+        className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${
+          animate ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            {description ? (
+              <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">{children}</div>
+      </div>
+    </div>,
+    document.body,
   );
 }
