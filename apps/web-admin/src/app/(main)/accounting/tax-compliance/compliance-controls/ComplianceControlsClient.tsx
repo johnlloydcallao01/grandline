@@ -287,7 +287,7 @@ export function ComplianceControlsClient() {
   const handleViewAuditDetail = (row: TaxAuditHistoryRow) => { setAuditViewDetail(row); setIsAuditViewOpen(true); };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Core / Tax & Compliance</p>
@@ -341,7 +341,7 @@ export function ComplianceControlsClient() {
                 </div>
               </div>
 
-              <div className="space-y-4 p-5">
+              <div className="space-y-4 p-[10px] sm:p-5">
                 {isFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setDraftFilters({ status: [], mapping: [] }); setFilters({ status: [], mapping: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div>
                   <div className="mt-6 grid gap-6 md:grid-cols-2">
                     <div>
@@ -533,7 +533,7 @@ export function ComplianceControlsClient() {
                 </div>
               </div>
 
-              <div className="space-y-4 p-5">
+              <div className="space-y-4 p-[10px] sm:p-5">
                 {isAuditFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setAuditDraftFilters({ actionTypes: [], sources: [] }); setAuditFilters({ actionTypes: [], sources: [] }); setAuditCurrentPage(1); setIsAuditFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setAuditDraftFilters({ ...auditFilters }); setIsAuditFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setAuditFilters({ ...auditDraftFilters }); setAuditCurrentPage(1); setIsAuditFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div>
                   <div className="mt-6 grid gap-6 md:grid-cols-2">
                     <div>

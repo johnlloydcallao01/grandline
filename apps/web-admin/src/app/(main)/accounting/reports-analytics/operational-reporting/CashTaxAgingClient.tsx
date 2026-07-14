@@ -74,7 +74,7 @@ export function CashTaxAgingClient() {
   const handleViewRow = (row: CashTaxAgingRow) => { setViewRow(row); setIsViewOpen(true); };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">Cash, Tax & Aging</h2>
@@ -101,7 +101,7 @@ export function CashTaxAgingClient() {
           <div className="flex flex-wrap gap-2">{(() => { const qf = data?.section?.filters?.quickFilters; if (qf && qf.length > 0) return qf.map((f) => <button key={f.value} type="button" onClick={() => handleToggleQuickFilter(f.value)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(f.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{f.label}</button>); return null; })()}</div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setDraftFilters([]); setFilters([]); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setDraftFilters([...filters]); setIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setFilters([...draftFilters]); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-6"><h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Report Type</h5><div className="mt-3 flex flex-wrap gap-2">{(data?.section?.filters?.types || []).map((opt) => { const isSelected = draftFilters.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setDraftFilters((p) => toggleFilterValue(p, opt.value))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div></div>)}
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"><div className="space-y-2"><h3 className="text-base font-semibold text-gray-900">Cash / Tax / Aging Snapshot</h3><p className="text-sm text-gray-600">Mixed operational report snapshot aligned to cash-activity, tax-summary, and aging-report support in apps/cms.</p></div><div className="flex flex-wrap items-center gap-3 text-sm text-gray-500"><span>{data?.totals.filteredRows ?? 0} matching rows</span></div></div>

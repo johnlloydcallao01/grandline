@@ -302,7 +302,7 @@ function CompletionToRevenueTab() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Completion To Revenue Register'}</h3>
@@ -525,7 +525,7 @@ function CertificateRevenueTab() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Certificate Revenue Register'}</h3>
@@ -649,7 +649,7 @@ export function RecognitionCertificateReportingClient() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">LMS Finance / LMS Finance Reporting</p>

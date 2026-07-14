@@ -778,7 +778,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
   // ===== RENDER =====
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       {/* Header */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
@@ -811,7 +811,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
         </div>
 
         {/* Tab content */}
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-[10px]">
 
       {activeTab === 'journal-source-types' ? (
         <>
@@ -860,7 +860,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
           {/* Source types table card */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">Source-Type Journal View</h3>
@@ -951,7 +951,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             )}
 
             {/* Source types table */}
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               {stError && (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                   <AlertCircle className="h-4 w-4 shrink-0" />
@@ -1079,7 +1079,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
           {/* Lines table card */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">Journal Line Detail Register</h3>
@@ -1175,7 +1175,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             )}
 
             {/* Lines table */}
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               {lineError && (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                   <AlertCircle className="h-4 w-4 shrink-0" />
@@ -1291,7 +1291,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
           {/* Table card */}
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Journal Entry Register'}</h3>
@@ -1388,7 +1388,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             )}
 
             {/* Table */}
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-[10px] sm:p-5">
               {error && (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                   <AlertCircle className="h-4 w-4 shrink-0" />

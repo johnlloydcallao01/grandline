@@ -371,7 +371,7 @@ function AccountsPayableAgingPanel({ tab }: { tab: (typeof TABS)[number] }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -657,10 +657,10 @@ export function ApMonitoringClient() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
+          <p className="text-sm font-medium text-blue-600">Operations / Purchases &amp; Payables</p>
           <h1 className="mt-1 text-2xl font-bold text-gray-900">AP Monitoring</h1>
           <p className="mt-1 text-base text-gray-600">
             Monitor payable aging and open-bill due dates so AP exposure and settlement timing stay visible.

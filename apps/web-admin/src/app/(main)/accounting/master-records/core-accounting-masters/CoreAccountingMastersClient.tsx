@@ -2196,7 +2196,7 @@ export function CoreAccountingMastersClient({
   const isParentAccountEditDisabled = editPermissions?.canEditParentAccount === false;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Core / Master Records</p>
@@ -2237,7 +2237,7 @@ export function CoreAccountingMastersClient({
           </nav>
         </div>
 
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-[10px]">
           {activeTab === 'chart-of-accounts' ? (
             <>
               <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">

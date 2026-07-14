@@ -578,7 +578,7 @@ export function RecognitionSchedulesClient() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">{data?.section.label || 'Recognition Schedules'}</h2>
@@ -631,7 +631,7 @@ export function RecognitionSchedulesClient() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

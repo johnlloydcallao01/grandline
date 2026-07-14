@@ -687,7 +687,7 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <h3 className="text-base font-semibold text-gray-900">{tab.tableTitle}</h3>
@@ -1611,7 +1611,7 @@ function BillsPanel({ tab }: { tab: (typeof TABS)[number] }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -2287,7 +2287,7 @@ function BillDetailPanel({ tab }: { tab: (typeof TABS)[number] }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -2947,7 +2947,7 @@ function VendorCreditsPanel({ tab }: { tab: (typeof TABS)[number] }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -3151,10 +3151,10 @@ export function PurchaseDocumentsClient() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
+          <p className="text-sm font-medium text-blue-600">Operations / Purchases &amp; Payables</p>
           <h1 className="mt-1 text-2xl font-bold text-gray-900">Purchase Documents</h1>
           <p className="mt-1 text-base text-gray-600">Manage vendor bills, bill detail records, and vendor credits across the payables document workflow.</p>
         </div>

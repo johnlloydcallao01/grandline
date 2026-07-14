@@ -309,7 +309,7 @@ function PendingEnrollmentBillingTab() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
@@ -520,7 +520,7 @@ function CorporateReceivablesTab() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
@@ -729,7 +729,7 @@ function TraineeCollectionsTab() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
@@ -845,7 +845,7 @@ export function BillingPipelineMonitoringClient() {
   const selectedTab = STATIC_TABS.find((tab) => tab.id === activeTab) ?? STATIC_TABS[0];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">LMS Finance / LMS Finance Reporting</p>

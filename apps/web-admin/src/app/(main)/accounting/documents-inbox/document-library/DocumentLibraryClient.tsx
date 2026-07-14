@@ -318,7 +318,7 @@ function StaticTabPanel({ tab }: { tab: TabConfig }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold text-gray-900">{tab.tableTitle}</h3>
@@ -385,7 +385,7 @@ export function DocumentLibraryClient() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Operations / Documents & Inbox</p>

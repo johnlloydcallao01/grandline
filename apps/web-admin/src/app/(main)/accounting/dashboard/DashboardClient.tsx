@@ -202,7 +202,7 @@ function FinancialPositionChart({
   }), [receivables, payables, cashBank, workingCapital, isMobile])
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
         <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Financial Position Overview</h3>
         <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500">Comparison of key financial metrics</p>
@@ -296,7 +296,7 @@ function AgingDonutChart({
   }), [buckets, totalLabel, totalValue, isMobile])
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
         <h3 className="text-xs sm:text-sm font-semibold text-gray-900">{title}</h3>
         <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500">{formatCurrencyShort(total)} total outstanding</p>
@@ -427,7 +427,7 @@ export function DashboardClient() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-6 p-[10px]">
       <div className="flex flex-col gap-3 sm:gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           <p className="text-xs sm:text-sm font-medium text-blue-600">Accounting / Dashboard</p>
@@ -501,7 +501,7 @@ export function DashboardClient() {
             isMobile={isMobile}
           />
 
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2 min-w-0">
             <AgingDonutChart
               buckets={data.chartData.arAgingBuckets}
               title="AR Aging Distribution"
@@ -518,7 +518,7 @@ export function DashboardClient() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3 min-w-0">
             <TransactionMiniList
               title="Recent Invoices"
               icon={FileText}
@@ -552,7 +552,7 @@ export function DashboardClient() {
                 Key system configuration status. Items needing attention are highlighted.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-px bg-gray-100 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-px bg-gray-100 sm:grid-cols-2 lg:grid-cols-3 min-w-0">
               {data.systemHealth.map((item) => {
                 const Container = item.linkTo ? 'a' : 'div'
                 const containerProps = item.linkTo

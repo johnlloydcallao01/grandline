@@ -459,7 +459,7 @@ export default function PayrollRunsClient() {
   const quickFilterOptions = data?.filterOptions.quickFilters || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-[10px]">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -530,7 +530,7 @@ export default function PayrollRunsClient() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <h3 className="text-base font-semibold text-gray-900">{META.tableTitle}</h3>

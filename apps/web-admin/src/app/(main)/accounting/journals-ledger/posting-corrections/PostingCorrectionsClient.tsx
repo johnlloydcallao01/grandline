@@ -238,7 +238,7 @@ export default function PostingCorrectionsClient({ initialData }: Props) {
   const currentTab = STATIC_TABS.find((t) => t.id === activeTab) || STATIC_TABS[0];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Core / Journals &amp; Ledger</p>
@@ -255,7 +255,7 @@ export default function PostingCorrectionsClient({ initialData }: Props) {
             {STATIC_TABS.map((tab) => (<button key={tab.id} type="button" onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${activeTab === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>))}
           </nav>
         </div>
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-[10px]">
           {activeTab === 'opening-balance-journals' && (
             <div className="space-y-6">
               <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -291,7 +291,7 @@ export default function PostingCorrectionsClient({ initialData }: Props) {
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {obIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setObDraftFilters({ statuses: [], balancedFilters: [] }); setObFilters({ statuses: [], balancedFilters: [] }); setObCurrentPage(1); setObIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setObFilters({ ...obDraftFilters }); setObCurrentPage(1); setObIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setObFilters({ ...obDraftFilters }); setObCurrentPage(1); setObIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{obData?.section?.filters?.statuses?.map((opt) => { const isSelected = obDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setObDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -350,7 +350,7 @@ export default function PostingCorrectionsClient({ initialData }: Props) {
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {adjIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setAdjDraftFilters({ statuses: [], balancedFilters: [] }); setAdjFilters({ statuses: [], balancedFilters: [] }); setAdjCurrentPage(1); setAdjIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setAdjFilters({ ...adjDraftFilters }); setAdjCurrentPage(1); setAdjIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setAdjFilters({ ...adjDraftFilters }); setAdjCurrentPage(1); setAdjIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{adjData?.section?.filters?.statuses?.map((opt) => { const isSelected = adjDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setAdjDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -409,7 +409,7 @@ export default function PostingCorrectionsClient({ initialData }: Props) {
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {revIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setRevDraftFilters({ statuses: [] }); setRevFilters({ statuses: [] }); setRevCurrentPage(1); setRevIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setRevFilters({ ...revDraftFilters }); setRevCurrentPage(1); setRevIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setRevFilters({ ...revDraftFilters }); setRevCurrentPage(1); setRevIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{revData?.section?.filters?.statuses?.map((opt) => { const isSelected = revDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setRevDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">

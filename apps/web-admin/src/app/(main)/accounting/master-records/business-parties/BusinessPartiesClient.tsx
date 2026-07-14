@@ -1960,7 +1960,7 @@ export function BusinessPartiesClient({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Core / Master Records</p>
@@ -2005,7 +2005,7 @@ export function BusinessPartiesClient({
         </div>
 
         {activeTab === 'customers' ? (
-          <div className="space-y-6 p-6">
+          <div className="space-y-6 p-[10px]">
             <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -2161,7 +2161,7 @@ export function BusinessPartiesClient({
                 </div>
               </div>
 
-              <div className="space-y-4 p-5">
+              <div className="space-y-4 p-[10px] sm:p-5">
                 {isCustomerFilterPanelOpen ? (
                   <div
                     id="customer-filter-panel"
@@ -2414,7 +2414,7 @@ export function BusinessPartiesClient({
             )}
           </div>
         ) : activeTab === 'vendors' ? (
-          <div className="space-y-6 p-6">
+          <div className="space-y-6 p-[10px]">
             <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{vendorData?.section.label || 'Vendors'}</h2>
@@ -2568,7 +2568,7 @@ export function BusinessPartiesClient({
                     </div>
                   </div>
 
-                  <div className="space-y-4 p-5">
+                  <div className="space-y-4 p-[10px] sm:p-5">
                     {isVendorFilterPanelOpen ? (
                       <div id="vendor-filter-panel" className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -2805,7 +2805,7 @@ export function BusinessPartiesClient({
             )}
           </div>
         ) : activeTab === 'bank-accounts' ? (
-          <div className="space-y-6 p-6">
+          <div className="space-y-6 p-[10px]">
             <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -2961,7 +2961,7 @@ export function BusinessPartiesClient({
                     </div>
                   </div>
 
-                  <div className="space-y-4 p-5">
+                  <div className="space-y-4 p-[10px] sm:p-5">
                     {isBankAccountFilterPanelOpen ? (
                       <div
                         id="bank-account-filter-panel"

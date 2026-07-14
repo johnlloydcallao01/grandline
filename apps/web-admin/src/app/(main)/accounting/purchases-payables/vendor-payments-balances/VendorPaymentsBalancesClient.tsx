@@ -1175,7 +1175,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -1986,7 +1986,7 @@ export function VendorPaymentsBalancesClient() {
 
   if (activeTab === 'vendor-balances') {
     return (
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-[10px]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
@@ -2032,7 +2032,7 @@ export function VendorPaymentsBalancesClient() {
   const tableDescription = data?.meta.tableDescription || TABS[0].tableDescription;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
@@ -2169,7 +2169,7 @@ export function VendorPaymentsBalancesClient() {
             </div>
           </div>
 
-          <div className="space-y-4 p-5">
+          <div className="space-y-4 p-[10px] sm:p-5">
             {isFilterPanelOpen ? (
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

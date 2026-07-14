@@ -182,7 +182,7 @@ export default function LedgerReportingClient({ initialData }: { initialData: Ge
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Core / Journals &amp; Ledger</p>
@@ -199,7 +199,7 @@ export default function LedgerReportingClient({ initialData }: { initialData: Ge
             {STATIC_TABS.map((tab) => (<button key={tab.id} type="button" onClick={() => handleTabChange(tab.id)} className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${activeTab === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>{tab.label}</button>))}
           </nav>
         </div>
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-[10px]">
           {activeTab === 'general-ledger' && (
             <div className="space-y-6">
               <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -234,7 +234,7 @@ export default function LedgerReportingClient({ initialData }: { initialData: Ge
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {glIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setGlDraftFilters({ statuses: [] }); setGlFilters({ statuses: [] }); setGlCurrentPage(1); setGlIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setGlFilters({ ...glDraftFilters }); setGlCurrentPage(1); setGlIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setGlFilters({ ...glDraftFilters }); setGlCurrentPage(1); setGlIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{glData?.section?.filters?.statuses?.map((opt) => { const isSelected = glDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setGlDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -295,7 +295,7 @@ export default function LedgerReportingClient({ initialData }: { initialData: Ge
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {tbIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setTbDraftFilters({ statuses: [] }); setTbFilters({ statuses: [] }); setTbCurrentPage(1); setTbIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setTbFilters({ ...tbDraftFilters }); setTbCurrentPage(1); setTbIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setTbFilters({ ...tbDraftFilters }); setTbCurrentPage(1); setTbIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{tbData?.section?.filters?.statuses?.map((opt) => { const isSelected = tbDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setTbDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -356,7 +356,7 @@ export default function LedgerReportingClient({ initialData }: { initialData: Ge
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5">
+                <div className="space-y-4 p-[10px] sm:p-5">
                   {jrIsFilterPanelOpen && (<div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h4 className="text-sm font-semibold text-gray-900">Filters</h4><p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { setJrDraftFilters({ statuses: [] }); setJrFilters({ statuses: [] }); setJrCurrentPage(1); setJrIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button><button type="button" onClick={() => { setJrFilters({ ...jrDraftFilters }); setJrCurrentPage(1); setJrIsFilterPanelOpen(false); }} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button type="button" onClick={() => { setJrFilters({ ...jrDraftFilters }); setJrCurrentPage(1); setJrIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button></div></div><div className="mt-4 flex flex-wrap gap-2">{jrData?.section?.filters?.statuses?.map((opt) => { const isSelected = jrDraftFilters.statuses.includes(opt.value); return <button key={opt.value} type="button" onClick={() => setJrDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{opt.label}</button>; })}</div></div>)}
 
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">

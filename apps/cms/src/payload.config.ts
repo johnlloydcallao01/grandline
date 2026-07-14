@@ -362,10 +362,12 @@ const allowedCorsOrigins = Array.from(
     [
       process.env.ADMIN_PROD_URL,
       process.env.ADMIN_LOCAL_URL,
+      process.env.ADMIN_DEV_URL,
       process.env.WEB_PROD_URL,
       process.env.WEB_LOCAL_URL,
       process.env.CMS_PROD_URL,
       process.env.CMS_LOCAL_URL,
+      process.env.CMS_DEV_URL,
       process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
       'https://www.grandlinemaritime.com',
       process.env.WEB_LANDING_LOCAL_URL || 'http://localhost:3003',

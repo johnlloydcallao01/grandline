@@ -6,6 +6,7 @@ import type { NextConfig } from "next";
 // 3. .env (always loaded)
 // No need for manual dotenv configuration
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['admin-dev.grandlinemaritime.com'],
   transpilePackages: [
     "@encreasl/ui",
     "@encreasl/auth",

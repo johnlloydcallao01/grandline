@@ -2,6 +2,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ['cms-dev.grandlinemaritime.com'],
   output: 'standalone',
   serverExternalPackages: ['@react-pdf/renderer', '@payloadcms/db-postgres'],
   // Redirect root path to admin

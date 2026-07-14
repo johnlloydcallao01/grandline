@@ -1312,7 +1312,7 @@ export function DueDateQueuePanel({
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

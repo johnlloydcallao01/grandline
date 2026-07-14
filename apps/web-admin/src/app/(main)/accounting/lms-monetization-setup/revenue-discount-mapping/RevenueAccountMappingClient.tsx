@@ -484,7 +484,7 @@ export function RevenueAccountMappingClient() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">Revenue Account Mapping</h2>
@@ -532,7 +532,7 @@ export function RevenueAccountMappingClient() {
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'LMS Revenue Mapping Register'}</h3>

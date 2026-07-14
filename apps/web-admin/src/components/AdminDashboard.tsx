@@ -117,7 +117,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
           )
         )}
         <main className={`transition-all duration-300 ${!isBuilderPage && sidebarOpen ? 'lg:ml-60' : !isBuilderPage ? 'lg:ml-20' : ''}`}>
-          <div className={`min-h-full ${!isBuilderPage ? 'px-3 py-4 sm:px-[10px] sm:py-0' : ''}`}>
+          <div className={`min-h-full ${!isBuilderPage ? (isAccountingPage ? 'overflow-x-hidden' : 'px-3 py-4 sm:px-[10px] sm:py-0') : ''}`}>
             {children || <DefaultDashboardContent />}
           </div>
         </main>

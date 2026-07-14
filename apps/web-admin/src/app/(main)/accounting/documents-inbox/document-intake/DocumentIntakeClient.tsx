@@ -20,7 +20,7 @@ const ACCOUNTING_INBOX_TAB = {
 
 export function DocumentIntakeClient() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Operations / Documents & Inbox</p>
