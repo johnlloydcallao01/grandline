@@ -145,7 +145,34 @@ export async function getInstructorPayouts(
   params.set('page', String(query.page || 1));
   params.set('limit', '10');
 
-  return fetchAccountingAdmin<InstructorPayoutsRegisterResponse>(`/accounting/instructor-payouts?${params.toString()}`);
+  type SectionResponse = {
+    section: {
+      metrics: InstructorPayoutsMetric[];
+      searchPlaceholder: string;
+      filters: { statuses: InstructorPayoutsFilterOption[]; quickFilters: InstructorPayoutsFilterOption[] };
+      table: { title: string; description: string; rows: InstructorPayoutRow[] };
+    };
+    pagination: InstructorPayoutsRegisterResponse['pagination'];
+    totals: InstructorPayoutsRegisterResponse['totals'];
+    referenceData: InstructorPayoutsRegisterResponse['referenceData'];
+  };
+
+  const raw = await fetchAccountingAdmin<SectionResponse>(`/accounting/instructor-payouts?${params.toString()}`);
+
+  return {
+    rows: raw.section.table.rows,
+    metrics: raw.section.metrics,
+    filterOptions: raw.section.filters,
+    meta: {
+      searchPlaceholder: raw.section.searchPlaceholder,
+      columns: raw.section.table.title ? ['Instructor', 'Course', 'Period', 'Calculated Amount', 'Approved Amount', 'Status'] : [],
+      tableTitle: raw.section.table.title,
+      tableDescription: raw.section.table.description,
+    },
+    pagination: raw.pagination,
+    totals: raw.totals,
+    referenceData: raw.referenceData,
+  };
 }
 
 export async function getInstructorPayoutDetail(id: string | number): Promise<InstructorPayoutDetail> {

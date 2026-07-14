@@ -316,6 +316,7 @@ export function CorporateAccountsClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<CorpAccountsFilterState>({ statuses: [] });
   const [draftFilters, setDraftFilters] = useState<CorpAccountsFilterState>({ statuses: [] });
+  const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [viewDetail, setViewDetail] = useState<CorporateAccountDetail | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -334,10 +335,12 @@ export function CorporateAccountsClient() {
     search,
     page,
     nextFilters,
+    nextQuickFilters,
   }: {
     search: string;
     page: number;
     nextFilters: CorpAccountsFilterState;
+    nextQuickFilters: string[];
   }) => {
     setIsLoading(true);
     setError(null);
@@ -346,6 +349,7 @@ export function CorporateAccountsClient() {
         search,
         page,
         statuses: nextFilters.statuses,
+        quickFilters: nextQuickFilters,
       });
       setData(response);
     } catch (fetchError) {
@@ -360,8 +364,9 @@ export function CorporateAccountsClient() {
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
+      nextQuickFilters: quickFilters,
     });
-  }, [currentPage, fetchAccounts, filters, submittedSearch]);
+  }, [currentPage, fetchAccounts, filters, quickFilters, submittedSearch]);
 
   const referenceData = data?.referenceData;
 
@@ -386,11 +391,15 @@ export function CorporateAccountsClient() {
     event.preventDefault();
     setSubmittedSearch(searchInput);
     setCurrentPage(1);
-    void fetchAccounts({ search: searchInput, page: 1, nextFilters: filters });
+    void fetchAccounts({ search: searchInput, page: 1, nextFilters: filters, nextQuickFilters: quickFilters });
   };
 
   const handleRefresh = () => {
-    void fetchAccounts({ search: submittedSearch, page: currentPage, nextFilters: filters });
+    void fetchAccounts({ search: submittedSearch, page: currentPage, nextFilters: filters, nextQuickFilters: quickFilters });
+  };
+
+  const handleToggleQuickFilter = (value: string) => {
+    setQuickFilters((previous) => toggleFilterValue(previous, value));
   };
 
   const handleExport = () => {
@@ -482,6 +491,7 @@ export function CorporateAccountsClient() {
       search: submittedSearch,
       page: currentPage,
       nextFilters: filters,
+      nextQuickFilters: quickFilters,
     });
   };
 
@@ -526,7 +536,7 @@ export function CorporateAccountsClient() {
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">Corporate Accounts</h2>
           <p className="text-sm text-gray-600">Manage corporate payer accounts linked to customers with contact data, credit terms, payment terms, and status.</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <p className="text-sm text-gray-500">{data?.totals?.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
@@ -537,7 +547,7 @@ export function CorporateAccountsClient() {
             <RefreshCw className="h-4 w-4" />
             Refresh Accounts
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
             <Download className="h-4 w-4" />
             Download View
           </button>
@@ -552,7 +562,7 @@ export function CorporateAccountsClient() {
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder={data?.meta.searchPlaceholder || 'Search account code, company name, customer, billing contact, or status'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <input type="text" placeholder={data?.meta?.searchPlaceholder || 'Search account code, company name, customer, billing contact, or status'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
               <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" />
@@ -565,6 +575,13 @@ export function CorporateAccountsClient() {
               {filterCount > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">{filterCount}</span> : null}
             </button>
           </div>
+          <div className="flex flex-wrap gap-2">
+            {(data?.filterOptions?.quickFilters || []).map((filter) => (
+              <button key={filter.value} type="button" onClick={() => handleToggleQuickFilter(filter.value)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                {filter.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-4 p-[10px] sm:p-5">
@@ -576,7 +593,7 @@ export function CorporateAccountsClient() {
                   <p className="mt-1 text-sm text-gray-600">Select as many values as needed per group, then apply the filtered view.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => { setDraftFilters({ statuses: [] }); setFilters({ statuses: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button>
+                  <button type="button" onClick={() => { setDraftFilters({ statuses: [] }); setFilters({ statuses: [] }); setQuickFilters([]); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">Clear all</button>
                   <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
                   <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Apply Filters</button>
                 </div>
@@ -585,7 +602,7 @@ export function CorporateAccountsClient() {
                 <div>
                   <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {(data?.filterOptions.statuses || []).map((option) => {
+                    {(data?.filterOptions?.statuses || []).map((option) => {
                       const selected = draftFilters.statuses.includes(option.value);
                       return <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, statuses: toggleFilterValue(previous.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${selected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{option.label}</button>;
                     })}
@@ -597,11 +614,11 @@ export function CorporateAccountsClient() {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'Corporate Account Register'}</h3>
-              <p className="text-sm text-gray-600">{data?.meta.tableDescription || 'Corporate account records using account code, linked customer, billing contact, terms, and status.'}</p>
+              <h3 className="text-base font-semibold text-gray-900">{data?.meta?.tableTitle || 'Corporate Account Register'}</h3>
+              <p className="text-sm text-gray-600">{data?.meta?.tableDescription || 'Corporate account records using account code, linked customer, billing contact, terms, and status.'}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span>{data?.totals.filteredRows ?? 0} matching rows</span>
+              <span>{data?.totals?.filteredRows ?? 0} matching rows</span>
             </div>
           </div>
 

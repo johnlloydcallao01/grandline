@@ -17,7 +17,7 @@ export default function ProjectOperationsPage() {
   const handleTabChange = (tabId: TabId) => { const p = new URLSearchParams(searchParams.toString()); p.set('tab', tabId); router.push(`${pathname}?${p.toString()}`); };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div><p className="text-sm font-medium text-blue-600">Advanced Finance / Projects &#38; Time</p><div className="mt-2 flex items-center gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div><div><h1 className="text-2xl font-bold text-gray-900">Project Operations</h1><p className="mt-1 max-w-3xl text-sm text-gray-600">Review project headers and project tasks that support operational tracking, costing context, and downstream profitability reporting.</p></div></div></div>
       </div>

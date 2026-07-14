@@ -30,7 +30,7 @@ export default function RevenueDiscountMappingPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">LMS Finance / LMS Monetization Setup</p>
@@ -47,7 +47,7 @@ export default function RevenueDiscountMappingPage() {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+        <div className="border-b border-gray-200 px-[10px]">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -68,7 +68,7 @@ export default function RevenueDiscountMappingPage() {
             })}
           </nav>
         </div>
-        <div className="p-6">
+        <div className="p-[10px]">
           {activeTab === 'revenue-account-mapping' ? <RevenueAccountMappingClient /> : null}
           {activeTab === 'coupon-discount-mapping' ? <CouponDiscountMappingClient /> : null}
           {activeTab === 'recognition-schedules' ? <RecognitionSchedulesClient /> : null}

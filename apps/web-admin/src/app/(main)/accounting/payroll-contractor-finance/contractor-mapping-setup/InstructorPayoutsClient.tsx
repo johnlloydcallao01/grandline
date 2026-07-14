@@ -573,12 +573,12 @@ export function InstructorPayoutsClient() {
   };
 
   return (
-    <div className="space-y-6 p-[10px]">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-gray-900">Instructor Payouts</h2>
           <p className="text-sm text-gray-600">Review payout obligations and approvals for instructors using source reference, course, period dates, calculated amount, approved amount, and payout status.</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <p className="text-sm text-gray-500">{data?.totals?.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
@@ -589,7 +589,7 @@ export function InstructorPayoutsClient() {
             <RefreshCw className="h-4 w-4" />
             Refresh Payouts
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
             <Download className="h-4 w-4" />
             Export Payouts
           </button>
@@ -604,7 +604,7 @@ export function InstructorPayoutsClient() {
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder={data?.meta.searchPlaceholder || 'Search instructor, course, period, source reference, approved amount, or payout status'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <input type="text" placeholder={data?.meta?.searchPlaceholder || 'Search instructor, course, period, source reference, approved amount, or payout status'} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
               <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" />
@@ -618,7 +618,7 @@ export function InstructorPayoutsClient() {
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(data?.filterOptions.quickFilters || []).map((filter) => (
+            {(data?.filterOptions?.quickFilters || []).map((filter) => (
               <button key={filter.value} type="button" onClick={() => handleToggleQuickFilter(filter.value)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                 {filter.label}
               </button>
@@ -644,7 +644,7 @@ export function InstructorPayoutsClient() {
                 <div>
                   <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {(data?.filterOptions.statuses || []).map((option) => {
+                    {(data?.filterOptions?.statuses || []).map((option) => {
                       const selected = draftFilters.statuses.includes(option.value);
                       return <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, statuses: toggleFilterValue(previous.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${selected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>{option.label}</button>;
                     })}
@@ -656,11 +656,11 @@ export function InstructorPayoutsClient() {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'Instructor Payout Register'}</h3>
-              <p className="text-sm text-gray-600">{data?.meta.tableDescription || 'Payout rows aligned to accounting-instructor-payouts, which is the actual contractor-adjacent payout surface in the backend today.'}</p>
+              <h3 className="text-base font-semibold text-gray-900">{data?.meta?.tableTitle || 'Instructor Payout Register'}</h3>
+              <p className="text-sm text-gray-600">{data?.meta?.tableDescription || 'Payout rows aligned to accounting-instructor-payouts, which is the actual contractor-adjacent payout surface in the backend today.'}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span>{data?.totals.filteredRows ?? 0} matching rows</span>
+              <span>{data?.totals?.filteredRows ?? 0} matching rows</span>
             </div>
           </div>
 

@@ -422,7 +422,7 @@ export function DashboardClient() {
 
   const handleRefresh = () => {
     setIsRefreshing(true)
-    void load(true)
+    void load()
     addToast({ title: 'Refreshing', message: 'Dashboard data is being refreshed.', type: 'info' })
   }
 

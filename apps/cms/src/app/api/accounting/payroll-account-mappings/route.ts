@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const search = normalizeText(sp.get('search'))
     const statuses = parseListParam(sp, 'status')
     const entryTypes = parseListParam(sp, 'entryType')
+    const quickFilters = parseListParam(sp, 'quickFilter')
     const page = Math.max(1, Number(sp.get('page')) || 1)
     const limit = Math.min(100, Math.max(1, Number(sp.get('limit')) || 10))
 
@@ -57,6 +58,15 @@ export async function GET(request: NextRequest) {
     if (entryTypes.length > 0) {
       filtered = filtered.filter((r) => entryTypes.includes(r.entryType))
     }
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((r) =>
+        quickFilters.some((qf) => {
+          if (qf.startsWith('entryType:')) return r.entryType === qf.slice(10)
+          if (qf.startsWith('hasDeductions:')) return qf.slice(14) === 'true' ? r.deductionAmount > 0 : r.deductionAmount === 0
+          return false
+        }),
+      )
+    }
 
     const totalDocs = filtered.length
     const totalPages = Math.max(1, Math.ceil(totalDocs / limit))
@@ -98,6 +108,8 @@ export async function GET(request: NextRequest) {
         quickFilters: [
           { label: 'Salary', value: 'entryType:salary' },
           { label: 'Contractor', value: 'entryType:contractor' },
+          { label: 'Reimbursement', value: 'entryType:reimbursement' },
+          { label: 'Adjustment', value: 'entryType:adjustment' },
           { label: 'With Deductions', value: 'hasDeductions:true' },
         ],
       },

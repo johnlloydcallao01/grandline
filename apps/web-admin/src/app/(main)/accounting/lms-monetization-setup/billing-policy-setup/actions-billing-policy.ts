@@ -68,6 +68,7 @@ export type SponsorsRegisterResponse = {
   filterOptions: {
     statuses: Array<{ label: string; value: string }>;
     contactFilters: Array<{ label: string; value: string }>;
+    quickFilters: Array<{ label: string; value: string }>;
   };
   meta: {
     searchPlaceholder: string;
@@ -138,7 +139,34 @@ export async function getSponsors(
   params.set('page', String(query.page || 1));
   params.set('limit', '100');
 
-  return fetchAccountingAdmin<SponsorsRegisterResponse>(`/accounting/scholarship-sponsors?${params.toString()}`);
+  type SectionResponse = {
+    section: {
+      metrics: BillingPolicyMetric[];
+      searchPlaceholder: string;
+      filters: { statuses: Array<{ label: string; value: string }>; contactFilters: Array<{ label: string; value: string }>; quickFilters: Array<{ label: string; value: string }> };
+      table: { title: string; description: string; rows: SponsorRow[] };
+    };
+    pagination: SponsorsRegisterResponse['pagination'];
+    totals: SponsorsRegisterResponse['totals'];
+    referenceData: SponsorsRegisterResponse['referenceData'];
+  };
+
+  const raw = await fetchAccountingAdmin<SectionResponse>(`/accounting/scholarship-sponsors?${params.toString()}`);
+
+  return {
+    rows: raw.section.table.rows,
+    metrics: raw.section.metrics,
+    filterOptions: raw.section.filters,
+    meta: {
+      searchPlaceholder: raw.section.searchPlaceholder,
+      columns: raw.section.table.title ? ['Sponsor Code', 'Name', 'Default Customer', 'Contact', 'Email', 'Status'] : [],
+      tableTitle: raw.section.table.title,
+      tableDescription: raw.section.table.description,
+    },
+    pagination: raw.pagination,
+    totals: raw.totals,
+    referenceData: raw.referenceData,
+  };
 }
 
 export async function getSponsorDetail(id: string | number): Promise<SponsorDetail> {
@@ -192,6 +220,7 @@ export type CorporateAccountsRegisterResponse = {
   filterOptions: {
     statuses: Array<{ label: string; value: string }>;
     creditFilters: Array<{ label: string; value: string }>;
+    quickFilters: Array<{ label: string; value: string }>;
   };
   meta: {
     searchPlaceholder: string;
@@ -264,7 +293,34 @@ export async function getCorporateAccounts(
   params.set('page', String(query.page || 1));
   params.set('limit', '100');
 
-  return fetchAccountingAdmin<CorporateAccountsRegisterResponse>(`/accounting/corporate-accounts?${params.toString()}`);
+  type SectionResponse = {
+    section: {
+      metrics: BillingPolicyMetric[];
+      searchPlaceholder: string;
+      filters: { statuses: Array<{ label: string; value: string }>; creditFilters: Array<{ label: string; value: string }>; quickFilters: Array<{ label: string; value: string }> };
+      table: { title: string; description: string; rows: CorporateAccountRow[] };
+    };
+    pagination: CorporateAccountsRegisterResponse['pagination'];
+    totals: CorporateAccountsRegisterResponse['totals'];
+    referenceData: CorporateAccountsRegisterResponse['referenceData'];
+  };
+
+  const raw = await fetchAccountingAdmin<SectionResponse>(`/accounting/corporate-accounts?${params.toString()}`);
+
+  return {
+    rows: raw.section.table.rows,
+    metrics: raw.section.metrics,
+    filterOptions: raw.section.filters,
+    meta: {
+      searchPlaceholder: raw.section.searchPlaceholder,
+      columns: raw.section.table.title ? ['Account Code', 'Name', 'Customer', 'Billing Contact', 'Credit Terms', 'Status'] : [],
+      tableTitle: raw.section.table.title,
+      tableDescription: raw.section.table.description,
+    },
+    pagination: raw.pagination,
+    totals: raw.totals,
+    referenceData: raw.referenceData,
+  };
 }
 
 export async function getCorporateAccountDetail(id: string | number): Promise<CorporateAccountDetail> {

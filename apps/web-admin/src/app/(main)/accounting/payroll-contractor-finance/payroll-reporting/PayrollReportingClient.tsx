@@ -7,7 +7,6 @@ import {
   AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
-  Download,
   Edit,
   Eye,
   FileText,
@@ -96,11 +95,6 @@ function getMetricTone(trend: PayrollPostingReportMetric['trend']) {
   if (trend === 'down') return 'text-red-600 bg-red-50';
   if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
   return 'text-green-600 bg-green-50';
-}
-
-function escapeCsvValue(value: string | number | boolean | null | undefined) {
-  const stringValue = String(value ?? '');
-  return /[",\n]/.test(stringValue) ? `"${stringValue.replace(/"/g, '""')}"` : stringValue;
 }
 
 function toggleFilterValue(values: string[], value: string) {
@@ -533,30 +527,6 @@ function PayrollReportingClient() {
     setCurrentPage(1);
   };
 
-  const handleExportCsv = () => {
-    if (!reportData) return;
-    const headers = reportData.meta.columns;
-    const rows = reportData.rows.map((row) => [
-      row.payrollCode,
-      row.paymentDate || '',
-      row.grossAmountLabel,
-      row.deductionAmountLabel,
-      row.netAmountLabel,
-      row.statusLabel,
-      String(row.entryCount),
-      row.postedJournalEntryId || '',
-      row.postingStateLabel,
-    ].map(escapeCsvValue).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `payroll-posting-report-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleOpenCreate = () => {
     setFormState(createEmptyForm());
     setEditingPayrollRunId(null);
@@ -719,16 +689,6 @@ function PayrollReportingClient() {
           <p className="text-sm font-medium text-blue-600">Advanced Finance / Payroll & Contractor Finance</p>
           <h1 className="mt-1 text-2xl font-bold text-gray-900">Payroll Reporting</h1>
           <p className="mt-1 text-base text-gray-600">Review payroll posting summaries, run status, deduction rollups, net payable totals, and journal linkage before and after General Ledger posting.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
-            <RefreshCw className="h-4 w-4" />
-            Refresh Workspace
-          </button>
-          <button type="button" onClick={handleExportCsv} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('ghost')}`}>
-            <Download className="h-4 w-4" />
-            Export Report
-          </button>
         </div>
       </div>
 

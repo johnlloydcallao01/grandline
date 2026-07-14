@@ -69,7 +69,7 @@ export function ProjectProfitabilityClient() {
   const handleViewRow = (row: ProjectProfitabilityRow) => { setViewRow(row); setIsViewOpen(true); };
 
   return (
-    <div className="space-y-6 p-[10px]">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1"><h2 className="text-lg font-semibold text-gray-900">Project Profitability</h2><p className="text-sm text-gray-600">Review project profitability output using project revenue, expenses, payroll cost, time cost, and gross margin.</p><p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p></div>
         <div className="flex flex-wrap items-center gap-2"><button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}><RefreshCw className="h-4 w-4" /> Refresh Projects</button><button type="button" onClick={handleExport} disabled={!(data?.section.table.rows.length)} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${getActionClasses('secondary')}`}><Download className="h-4 w-4" /> Download View</button></div>

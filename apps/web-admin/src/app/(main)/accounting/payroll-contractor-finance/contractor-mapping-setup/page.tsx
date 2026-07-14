@@ -1,11 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  Download,
-  FileText,
-  RefreshCw,
-} from '@/components/ui/IconWrapper';
+import { FileText } from '@/components/ui/IconWrapper';
 import { InstructorPayoutsClient } from './InstructorPayoutsClient';
 import { PayrollAccountMappingClient } from './PayrollAccountMappingClient';
 
@@ -28,7 +24,7 @@ export default function ContractorMappingSetupPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-medium text-blue-600">Advanced Finance / Payroll & Contractor Finance</p>
@@ -44,20 +40,11 @@ export default function ContractorMappingSetupPage() {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
-            <RefreshCw className="h-4 w-4" />
-            Refresh Workspace
-          </button>
-          <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900">
-            <Download className="h-4 w-4" />
-            Export Setup View
-          </button>
-        </div>
+
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+        <div className="border-b border-gray-200 px-[10px]">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -79,7 +66,7 @@ export default function ContractorMappingSetupPage() {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-[10px]">
           {activeTab === 'instructor-payouts' ? (
             <InstructorPayoutsClient />
           ) : (

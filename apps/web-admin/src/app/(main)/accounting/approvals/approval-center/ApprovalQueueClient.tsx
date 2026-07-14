@@ -134,7 +134,7 @@ export function ApprovalQueueClient() {
   };
 
   return (
-    <div className="space-y-6 p-[10px]">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1"><h2 className="text-lg font-semibold text-gray-900">Approval Queue</h2><p className="text-sm text-gray-600">Review pending approval items with create, approve, and reject capabilities.</p><p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p></div>
         <div className="flex flex-wrap items-center gap-2">

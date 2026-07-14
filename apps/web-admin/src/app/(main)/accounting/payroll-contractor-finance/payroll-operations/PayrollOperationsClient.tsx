@@ -2,11 +2,7 @@
 
 import React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  Download,
-  FileText,
-  RefreshCw,
-} from 'lucide-react';
+import { FileText } from 'lucide-react';
 import PayrollRunsClient from './PayrollRunsClient';
 import PayrollEntriesClient from './PayrollEntriesClient';
 import PayrollPostingClient from './PayrollPostingClient';
@@ -48,16 +44,7 @@ export default function PayrollOperationsClient() {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={() => {}} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
-            <RefreshCw className="h-4 w-4" />
-            Refresh Workspace
-          </button>
-          <button type="button" onClick={() => {}} className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900">
-            <Download className="h-4 w-4" />
-            Export View
-          </button>
-        </div>
+
       </div>
 
       <div className="border-b border-gray-200">

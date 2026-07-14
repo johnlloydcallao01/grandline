@@ -702,7 +702,7 @@ export function DiscountScholarshipAnalyticsClient() {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+        <div className="border-b border-gray-200 px-[10px]">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {STATIC_TABS.map((tab) => {
               const isActive = selectedTab.id === tab.id;
@@ -724,7 +724,7 @@ export function DiscountScholarshipAnalyticsClient() {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-[10px]">
           {activeTab === 'coupon-revenue-impact' && <CouponRevenueImpactTab />}
           {activeTab === 'scholarship-utilization' && <ScholarshipUtilizationTab />}
         </div>

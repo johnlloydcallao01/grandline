@@ -22,7 +22,7 @@ export default function ApprovalCenterPage() {
   const handleTabChange = (tabId: TabId) => { const params = new URLSearchParams(searchParams.toString()); params.set('tab', tabId); router.push(`${pathname}?${params.toString()}`); };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div><p className="text-sm font-medium text-blue-600">Operations / Approvals</p><div className="mt-2 flex items-center gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div><div><h1 className="text-2xl font-bold text-gray-900">Approval Center</h1><p className="mt-1 max-w-3xl text-sm text-gray-600">Review the live approval queue, request register, and resolution trail supported by the accounting approval service.</p></div></div></div>
       </div>

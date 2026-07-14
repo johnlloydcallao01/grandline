@@ -49,7 +49,7 @@ export function ResolutionTrailClient() {
   const handleViewRow = (row: ResolutionTrailRow) => { setViewRow(row); setIsViewOpen(true); };
 
   return (
-    <div className="space-y-6 p-[10px]">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between"><div className="flex flex-col gap-1"><h2 className="text-lg font-semibold text-gray-900">Resolution Trail</h2><p className="text-sm text-gray-600">Trace approval-trail decisions by step number, approver, decision, notes, and action timestamp.</p><p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p></div><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}><RefreshCw className="h-4 w-4" /> Refresh Trail</button><button type="button" onClick={handleExport} disabled={!(data?.section.table.rows.length)} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${getActionClasses('secondary')}`}><Download className="h-4 w-4" /> Download Trail</button></div></div>
 
       {data?.section.metrics && data.section.metrics.length > 0 ? (<div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">{data.section.metrics.map((m) => (<div key={m.id}><MetricCard label={m.label} value={m.value} change={m.change} trend={m.trend} /></div>))}</div>) : null}
