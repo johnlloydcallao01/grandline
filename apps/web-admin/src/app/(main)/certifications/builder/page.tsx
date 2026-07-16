@@ -18,9 +18,8 @@ import {
     type SharedMediaItem,
     mapPayloadMediaDocsToSharedMediaItems,
 } from '@encreasl/ui/lexical-course-editor';
-import { env } from '@/lib/env';
 import { useToast } from '@/components/ui/Toast';
-import { getCertificateTemplateById, updateCertificateTemplate } from '../templates/actions';
+import { getCertificateTemplateById, updateCertificateTemplate, getLmsMedia } from '../templates/actions';
 import { CertificatePreviewModal } from '../components/CertificatePreviewModal';
 
 // --- Types ---
@@ -61,6 +60,7 @@ const AVAILABLE_VARIABLES = [
     { label: 'Completion Date', field: 'completion_date' },
     { label: 'Instructor Name', field: 'instructor_name' },
     { label: 'Certificate ID', field: 'certificate_id' },
+    { label: 'QR Code (Verification)', field: 'qr_code' },
 ];
 
 const FONT_FAMILIES = [
@@ -72,34 +72,34 @@ const FONT_FAMILIES = [
 ];
 
 async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
-    const base = (env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-    const url = base ? `${base}/media?limit=60` : '/api/media?limit=60';
+    const data = await getLmsMedia(60);
+    return mapPayloadMediaDocsToSharedMediaItems(data?.docs);
+}
 
-    const getPayloadToken = () => {
-        if (typeof localStorage !== 'undefined') {
-            return localStorage.getItem('grandline_auth_token_admin');
-        }
-        return null;
-    };
+async function uploadWebAdminMedia(file: File): Promise<SharedMediaItem> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('alt', file.name);
 
-    const payloadToken = getPayloadToken();
-
-    const headers: Record<string, string> = {};
-    if (payloadToken) {
-        headers.Authorization = `JWT ${payloadToken}`;
-    }
-
-    const res = await fetch(url, {
-        credentials: 'include',
-        headers,
+    const res = await fetch('/api/upload-media', {
+        method: 'POST',
+        body: formData,
     });
 
     if (!res.ok) {
-        throw new Error(`Failed to load media: ${res.status}`);
+        const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(err.error || `Upload failed: ${res.status}`);
     }
 
     const json = await res.json();
-    return mapPayloadMediaDocsToSharedMediaItems(json?.docs);
+    const doc = json.doc || json;
+    return {
+        id: String(doc.id),
+        url: doc.cloudinaryURL || doc.url,
+        alt: doc.alt || doc.filename,
+        mimeType: doc.mimeType,
+        filename: doc.filename,
+    };
 }
 
 function CertificateBuilderContent() {
@@ -112,7 +112,10 @@ function CertificateBuilderContent() {
     const [elements, setElements] = useState<CanvasElement[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [canvasScale, setCanvasScale] = useState(1.0); // Zoom level for the editor
+    const [canvasScale, setCanvasScale] = useState(1.0); // Zoom multiplier (user-controlled, 0.2–2.0)
+    const [fitScale, setFitScale] = useState(1); // Auto scale so canvas fits viewport at 100%
+
+    const displayScale = fitScale * canvasScale;
 
     // --- History State (Undo/Redo) ---
     const [history, setHistory] = useState<CanvasElement[][]>([]);
@@ -153,6 +156,27 @@ function CertificateBuilderContent() {
     const [isLoading, setIsLoading] = useState(false);
 
     const canvasRef = useRef<HTMLDivElement>(null);
+    const canvasAreaRef = useRef<HTMLDivElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+
+    // --- Fit-to-View: calculate the base scale so canvas fits in the viewport at 100% ---
+    useEffect(() => {
+        const el = canvasAreaRef.current;
+        if (!el) return;
+
+        const recalc = () => {
+            const gutter = 32;
+            const w = el.clientWidth - gutter * 2;
+            const h = el.clientHeight - gutter * 2;
+            if (w <= 0 || h <= 0) return;
+            setFitScale(Math.min(w / canvasWidth, h / canvasHeight));
+        };
+
+        recalc();
+        const ro = new ResizeObserver(recalc);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [canvasWidth, canvasHeight]);
 
     // --- Load Template ---
     useEffect(() => {
@@ -171,38 +195,9 @@ function CertificateBuilderContent() {
                     const bgObj = typeof data.backgroundImage === 'object' ? data.backgroundImage : null;
                     const bgId = (bgObj ? bgObj.id : data.backgroundImage) as string | number;
 
-                    // Set ID state
                     setBackgroundMediaId(bgId);
 
-                    // Try to get URL from existing object (prioritize Cloudinary)
-                    let bgUrl = bgObj ? (bgObj.cloudinaryURL || bgObj.url) : null;
-
-                    // If we don't have a URL yet, fetch it using the ID
-                    if (!bgUrl && bgId) {
-                        try {
-                            const base = (env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
-                            const mediaUrl = base ? `${base}/media/${bgId}` : `/api/media/${bgId}`;
-                            
-                            const getPayloadToken = () => {
-                                if (typeof localStorage !== 'undefined') {
-                                    return localStorage.getItem('grandline_auth_token_admin');
-                                }
-                                return null;
-                            };
-
-                            const headers: Record<string, string> = {};
-                            const token = getPayloadToken();
-                            if (token) headers.Authorization = `JWT ${token}`;
-
-                            const mediaRes = await fetch(mediaUrl, { headers, credentials: 'include' });
-                            if (mediaRes.ok) {
-                                const mediaData = await mediaRes.json();
-                                bgUrl = mediaData.cloudinaryURL || mediaData.url;
-                            }
-                        } catch (e) {
-                            console.error('Failed to fetch background media details', e);
-                        }
-                    }
+                    const bgUrl = bgObj ? (bgObj.cloudinaryURL || bgObj.url) : null;
 
                     if (bgUrl) {
                         setBackgroundImage(bgUrl);
@@ -333,14 +328,14 @@ function CertificateBuilderContent() {
 
     // --- Actions ---
 
-    const addElement = (type: CanvasElement['type'], field?: string, label?: string) => {
+    const addElement = (type: CanvasElement['type'], field?: string, label?: string, dropX?: number, dropY?: number) => {
         const newElement: CanvasElement = {
             id: `el_${Date.now()}`,
             type,
             field,
             label: label || 'New Text',
-            x: 100, // Default position
-            y: 100,
+            x: dropX ?? 100,
+            y: dropY ?? 100,
             width: type === 'image' ? 300 : 'auto', // Default width
             height: type === 'image' ? 300 : 'auto', // Default height
             style: {
@@ -630,6 +625,42 @@ function CertificateBuilderContent() {
         setIsMediaLibraryOpen(true);
     };
 
+    // --- Drag & Drop from Sidebar ---
+
+    const handleSidebarDragStart = (e: React.DragEvent, type: CanvasElement['type'], field?: string, label?: string) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ type, field, label }));
+        e.dataTransfer.effectAllowed = 'copy';
+    };
+
+    const handleCanvasDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        if (!isDragOver) setIsDragOver(true);
+    };
+
+    const handleCanvasDragLeave = (e: React.DragEvent) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+        setIsDragOver(false);
+    };
+
+    const handleCanvasDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
+
+        const raw = e.dataTransfer.getData('text/plain');
+        if (!raw) return;
+
+        const { type, field, label } = JSON.parse(raw);
+
+        const canvasRect = canvasRef.current?.getBoundingClientRect();
+        if (!canvasRect) return;
+
+        const x = Math.max(0, (e.clientX - canvasRect.left) / displayScale);
+        const y = Math.max(0, (e.clientY - canvasRect.top) / displayScale);
+
+        addElement(type, field, label, x, y);
+    };
+
     // --- Computed ---
     const selectedElement = elements.find(el => el.id === selectedId);
 
@@ -666,30 +697,30 @@ function CertificateBuilderContent() {
     }
 
     return (
-        <div className="h-[calc(100vh-4rem)] flex flex-col bg-gray-50">
+        <div className="h-screen flex flex-col bg-gray-50">
             {/* Header */}
-            <div className="px-6 py-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0 shadow-sm z-10">
-                <div className="flex items-center gap-4">
+            <div className="px-6 py-[13px] flex justify-between items-center shrink-0 z-10" style={{ background: 'linear-gradient(135deg, #201a7c 0%, #ab3b43 100%)' }}>
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => router.back()}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
+                        className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white"
                         title="Go Back"
                     >
-                        <ArrowLeft className="h-5 w-5" />
+                        <ArrowLeft className="h-4 w-4" />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">Certificate Builder</h1>
-                        <div className="flex items-center gap-2 text-gray-500 text-sm">
+                        <h1 className="text-base font-bold text-white leading-tight">Certificate Builder</h1>
+                        <div className="flex items-center gap-2 text-blue-100 text-xs leading-tight">
                             <span>{templateName}</span>
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center">
                     <div className="relative">
                         <select
                             value={templateStatus}
                             onChange={(e) => setTemplateStatus(e.target.value as 'draft' | 'published' | 'archived')}
-                            className={`appearance-none pl-3 pr-8 py-2 rounded-lg text-sm font-bold border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${templateStatus === 'published'
+                            className={`appearance-none pl-2.5 pr-7 py-1.5 rounded-lg text-xs font-bold border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${templateStatus === 'published'
                                 ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
                                 : templateStatus === 'archived'
                                     ? 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
@@ -700,32 +731,32 @@ function CertificateBuilderContent() {
                             <option value="published">Published</option>
                             <option value="archived">Archived</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                            <svg className="h-4 w-4 fill-current opacity-70" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-gray-500">
+                            <svg className="h-3 w-3 fill-current opacity-70" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
                         </div>
                     </div>
 
                     <button
                         onClick={() => setIsPreviewOpen(true)}
-                        className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-colors"
+                        className="flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-xs font-medium shadow-sm transition-colors"
                     >
-                        <Eye className="h-4 w-4 mr-2" />
+                        <Eye className="h-3.5 w-3.5 mr-1.5" />
                         Preview
                     </button>
                     <button
                         onClick={() => setIsSettingsOpen(true)}
-                        className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-colors"
+                        className="flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-xs font-medium shadow-sm transition-colors"
                     >
-                        <Settings className="h-4 w-4 mr-2" />
+                        <Settings className="h-3.5 w-3.5 mr-1.5" />
                         Settings
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-xs shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                        {isSaving ? 'Saving...' : templateId ? 'Update' : 'Save Template'}
+                        {isSaving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+                        {isSaving ? 'Saving...' : templateId ? 'Update' : 'Save'}
                     </button>
                 </div>
             </div>
@@ -743,8 +774,10 @@ function CertificateBuilderContent() {
                             {AVAILABLE_VARIABLES.map((v) => (
                                 <button
                                     key={v.field}
+                                    draggable
                                     onClick={() => addElement('variable', v.field, v.label)}
-                                    className="w-full flex items-center p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm transition-all group text-left"
+                                    onDragStart={(e) => handleSidebarDragStart(e, 'variable', v.field, v.label)}
+                                    className="w-full flex items-center p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm transition-all group text-left cursor-grab active:cursor-grabbing"
                                 >
                                     <Plus className="h-4 w-4 text-blue-600 mr-3" />
                                     <span className="text-sm text-gray-900 font-medium">{v.label}</span>
@@ -755,8 +788,10 @@ function CertificateBuilderContent() {
                         <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mt-6 mb-4">Static Elements</h3>
                         <div className="grid grid-cols-2 gap-3">
                             <button
+                                draggable
                                 onClick={() => addElement('text')}
-                                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                onDragStart={(e) => handleSidebarDragStart(e, 'text')}
+                                className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all cursor-grab active:cursor-grabbing"
                             >
                                 <Type className="h-6 w-6 text-gray-900 mb-2" />
                                 <span className="text-xs font-bold text-gray-900">Text Box</span>
@@ -930,37 +965,72 @@ function CertificateBuilderContent() {
 
                 {/* Center Canvas Area */}
                 <div
-                    className="flex-1 bg-gray-200 overflow-auto flex items-center justify-center p-8 relative"
+                    ref={canvasAreaRef}
+                    className={`flex-1 flex items-center justify-center p-8 relative transition-colors ${isDragOver ? 'bg-blue-100' : 'bg-gray-200'}`}
+                    style={{ overflow: canvasScale > 1 ? 'auto' : 'hidden' }}
                     onClick={() => {
                         setSelectedId(null);
                         setEditingId(null);
                     }}
+                    onDragOver={handleCanvasDragOver}
+                    onDragLeave={handleCanvasDragLeave}
                 >
 
                     {/* Zoom Controls */}
-                    <div className="absolute bottom-8 right-8 bg-white rounded-lg shadow-md flex items-center gap-2 px-3 py-2 z-20 border border-gray-200">
-                        <button onClick={() => setCanvasScale(s => Math.max(0.2, s - 0.1))} className="text-gray-900 hover:text-blue-600 font-bold px-2 text-lg">-</button>
-                        <span className="text-xs font-bold w-12 text-center text-gray-900">{Math.round(canvasScale * 100)}%</span>
-                        <button onClick={() => setCanvasScale(s => Math.min(2, s + 0.1))} className="text-gray-900 hover:text-blue-600 font-bold px-2 text-lg">+</button>
+                    <div className="absolute bottom-8 right-8 bg-white rounded-lg shadow-md flex items-center gap-3 px-4 py-2.5 z-20 border border-gray-200">
+                        <button onClick={() => setCanvasScale(s => Math.max(0.2, s - 0.1))} className="text-gray-900 hover:text-blue-600 font-bold px-1 text-lg leading-none select-none">−</button>
+                        <div className="relative flex items-center">
+                            <input
+                                type="range"
+                                min={20}
+                                max={200}
+                                value={Math.round(canvasScale * 100)}
+                                onChange={(e) => setCanvasScale(Number(e.target.value) / 100)}
+                                className="w-24 h-1 bg-gray-300 rounded-full appearance-none cursor-pointer
+                                    [&::-webkit-slider-thumb]:appearance-none
+                                    [&::-webkit-slider-thumb]:w-3.5
+                                    [&::-webkit-slider-thumb]:h-3.5
+                                    [&::-webkit-slider-thumb]:rounded-full
+                                    [&::-webkit-slider-thumb]:bg-blue-600
+                                    [&::-webkit-slider-thumb]:shadow-sm
+                                    [&::-webkit-slider-thumb]:border-2
+                                    [&::-webkit-slider-thumb]:border-white
+                                    [&::-webkit-slider-thumb]:cursor-grab
+                                    [&::-webkit-slider-thumb]:active:cursor-grabbing
+                                    [&::-moz-range-thumb]:w-3.5
+                                    [&::-moz-range-thumb]:h-3.5
+                                    [&::-moz-range-thumb]:rounded-full
+                                    [&::-moz-range-thumb]:bg-blue-600
+                                    [&::-moz-range-thumb]:shadow-sm
+                                    [&::-moz-range-thumb]:border-2
+                                    [&::-moz-range-thumb]:border-white
+                                    [&::-moz-range-thumb]:cursor-grab
+                                    [&::-moz-range-thumb]:active:cursor-grabbing"
+                            />
+                        </div>
+                        <span className="text-xs font-bold w-10 text-center text-gray-900 select-none tabular-nums">{Math.round(canvasScale * 100)}%</span>
+                        <button onClick={() => setCanvasScale(s => Math.min(2, s + 0.1))} className="text-gray-900 hover:text-blue-600 font-bold px-1 text-lg leading-none select-none">+</button>
                     </div>
 
                     {/* The "Fake Canvas" */}
                     <div
                         ref={canvasRef}
-                        className="bg-white shadow-2xl relative transition-transform origin-center overflow-hidden"
+                        className={`bg-white shadow-2xl relative transition-transform origin-center overflow-hidden ${isDragOver ? 'ring-2 ring-blue-400 ring-inset' : ''}`}
                         onClick={(e) => {
-                            // Stop propagation if clicking on canvas background, but still deselect elements
                             e.stopPropagation();
                             setSelectedId(null);
                             setEditingId(null);
                             setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
                         }}
                         onContextMenu={(e) => handleContextMenu(e, null)}
+                        onDrop={handleCanvasDrop}
+                        onDragOver={handleCanvasDragOver}
+                        onDragLeave={handleCanvasDragLeave}
                         style={{
                             width: canvasWidth,
                             height: canvasHeight,
-                            transform: `scale(${canvasScale})`,
-                            // Ensure the canvas takes up space even when scaled down
+                            transform: `scale(${displayScale})`,
+                            transformOrigin: 'center center',
                             flexShrink: 0
                         }}
                     >
@@ -995,7 +1065,7 @@ function CertificateBuilderContent() {
                                     position={{ x: el.x, y: el.y }}
                                     onDrag={(e, d) => handleDrag(el.id, e, d)}
                                     onStop={(e, d) => handleDragStop(el.id, e, d)}
-                                    scale={canvasScale}
+                                    scale={displayScale}
                                     cancel=".nodrag"
                                     nodeRef={el.nodeRef as React.RefObject<HTMLDivElement>}
                                 >
@@ -1086,9 +1156,55 @@ function CertificateBuilderContent() {
                                             >
                                                 {/* Render Content */}
                                                 {el.type === 'variable' ? (
-                                                    <span className="opacity-80 border border-dashed border-gray-400 px-1 bg-yellow-50/50 whitespace-nowrap">
-                                                        {`{{ ${el.label} }}`}
-                                                    </span>
+                                                    el.field === 'qr_code' ? (
+                                                        <div
+                                                            className="relative flex items-center justify-center border-2 border-dashed border-gray-300 bg-gray-50"
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                minWidth: '60px',
+                                                                minHeight: '60px',
+                                                                fontSize: Math.max(6, Math.min(el.width as number, el.height as number) / 18) + 'px',
+                                                            }}
+                                                        >
+                                                            {/* QR Code placeholder - scales with container */}
+                                                            <div
+                                                                className="font-mono leading-none text-gray-600 select-none"
+                                                                style={{
+                                                                    letterSpacing: '0.5px',
+                                                                    lineHeight: '1',
+                                                                    transform: 'scale(0.9)',
+                                                                    transformOrigin: 'center',
+                                                                }}
+                                                            >
+                                                                <div>███████████████████████████████</div>
+                                                                <div>█ ▄▄▄▄▄ █▀▄ █ ▄█ ▀▄█ █ ▄▄▄▄▄ █</div>
+                                                                <div>█ █   █ █▀▄▀▄▀▀ ▀▄▀ █ █   █ █</div>
+                                                                <div>█ █▄▄▄█ █▀ ▀ ▄▄█▄▄▄█ █▄▄▄█ █</div>
+                                                                <div>█▄▄▄▄▄▄▄█▄▀▄▀▄█▄█▄▀▀█▄▄▄▄▄▄▄█</div>
+                                                                <div>▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀</div>
+                                                                <div>▀▄▄ ▀▄▀▄ ▀ ▀▄▄▄█▄ ▄▄█▄▄▀▄▀▀ ▀▀▀</div>
+                                                                <div>▀▄██▄▄▀▄▀▀█ ▄▀█ ▄▀▀▄█▀▄▄▀█▄ ▀▀</div>
+                                                                <div>▀▄▀▄▀ ▄▄ ▄▄▄▀▀ ▀▀ ▄██ ▄▀ ▀▀▀▄▀▀</div>
+                                                                <div>███████████████████████████████</div>
+                                                                <div>█ ▄▄▄▄▄ █▄▄▄█ ▄█▄ ▄▀█▄█▄ ▀█ ███</div>
+                                                                <div>█ █   █ █ ▄██▀▀▄▀██▄ ▄█▀ █▄ ███</div>
+                                                                <div>█ █▄▄▄█ █▄█▄▀▄█▄█▀▄█ ▀▀██ █▀███</div>
+                                                                <div>█▄▄▄▄▄▄▄█▄█▄█▄█▄▄▄▄▄▄▄█▄▄▄█▄███</div>
+                                                                <div>▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀</div>
+                                                                <div>▄█ ▄█▄▄▀▀ ▄▀█▄█ ▀▀▄▄▄▀▀ ▄█▀ ▄▄▀▀█▄</div>
+                                                                <div>▄▀█ ▄█▄▄▀▀▄▄▄▄▄▀█ ▄▄▄█ ▀█▄█ ▀▀▄</div>
+                                                                <div>▄▄█▄▄▀█ ▀██ ▄▄█▀██ ▀▄▄█▀█ ▀█▄█▄</div>
+                                                            </div>
+                                                            {/* Quiet zone indicator */}
+                                                            <div className="absolute inset-0 border border-dashed border-gray-300 pointer-events-none" />
+                                                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 font-medium">QR Code (Verification)</div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="opacity-80 border border-dashed border-gray-400 px-1 bg-yellow-50/50 whitespace-nowrap">
+                                                            {`{{ ${el.label} }}`}
+                                                        </span>
+                                                    )
                                                 ) : el.type === 'image' ? (
                                                     <img
                                                         src={el.content || '/placeholder-image.jpg'}
@@ -1144,6 +1260,10 @@ function CertificateBuilderContent() {
 
                     </div>
                 </div>
+            </div>
+
+            {/* Footer */}
+            <div className="shrink-0 bg-white border-t border-gray-200 px-6 flex items-center" style={{ height: '50px' }}>
             </div>
 
             {/* Context Menu */}
@@ -1290,8 +1410,8 @@ function CertificateBuilderContent() {
                                 // We need to convert screen coordinates (contextMenu.x/y) to canvas coordinates
                                 const canvasRect = canvasRef.current?.getBoundingClientRect();
                                 if (canvasRect) {
-                                    const relativeX = (contextMenu.x - canvasRect.left) / canvasScale;
-                                    const relativeY = (contextMenu.y - canvasRect.top) / canvasScale;
+                                    const relativeX = (contextMenu.x - canvasRect.left) / displayScale;
+                                    const relativeY = (contextMenu.y - canvasRect.top) / displayScale;
                                     pasteElement({ x: relativeX, y: relativeY });
                                 } else {
                                     pasteElement();
@@ -1314,6 +1434,7 @@ function CertificateBuilderContent() {
                 onClose={() => setIsMediaLibraryOpen(false)}
                 onSelect={handleMediaSelect}
                 loadMedia={loadWebAdminMedia}
+                uploadMedia={uploadWebAdminMedia}
                 title={mediaLibraryMode === 'background' ? "Select Background Image" : "Select Image Element"}
                 zIndex={9999}
             />

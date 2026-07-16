@@ -12,13 +12,16 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Missing API configuration' }), { status: 500 })
     }
 
+    // Get the base URL from the request origin (e.g., https://admin-dev.grandlinemaritime.com)
+    const baseUrl = req.headers.get('origin') || req.headers.get('referer') || process.env.NEXT_PUBLIC_APP_URL
+
     const cmsRes = await fetch(`${apiUrl}/generate-certificate`, {
       method: 'POST',
       headers: {
         Authorization: `users API-Key ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ enrollmentId }),
+      body: JSON.stringify({ enrollmentId, baseUrl }),
     })
 
     if (!cmsRes.ok || !cmsRes.body) {

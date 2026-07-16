@@ -4,6 +4,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import { CertificatePDF } from '../components/CertificatePDF';
 import { randomBytes } from 'crypto';
 import { getCmsServerUrl } from '../utils/cms-url';
+import QRCode from 'qrcode';
 import {
   AccountingCertificateMonetizationService,
   CERTIFICATE_ACCOUNTING_CONTEXT_KEY,
@@ -108,6 +109,23 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
       const rand = randomBytes(4).toString('hex').toUpperCase();
       const certificateCode = `CERT-${year}-${rand}`;
 
+      // Generate Verification URL and QR Code
+      // Use baseUrl from request (passed by web-admin proxy) or fallback to env
+      const appUrl = body.baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://grandlinemaritime.com';
+      const verificationUrl = `${appUrl}/certifications/verification/${certificateCode}`;
+      let qrCodeDataUrl = '';
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
+          type: 'image/png',
+          width: 300,
+          margin: 1,
+          color: { dark: '#000000', light: '#FFFFFF' },
+          errorCorrectionLevel: 'M',
+        });
+      } catch (qrError) {
+        console.error('QR code generation failed:', qrError);
+      }
+
       // 3. Prepare PDF Generation
       let backgroundUrl = '';
       if (template.backgroundImage && typeof template.backgroundImage === 'object') {
@@ -183,7 +201,9 @@ export const generateCertificateEndpoint = async (req: PayloadRequest) => {
                   courseTitle: course.title,
                   completionDate,
                   instructorName,
-                  certificateId: certificateCode
+                  certificateId: certificateCode,
+                  qrCodeDataUrl,
+                  verificationUrl
               }}
           />
       );

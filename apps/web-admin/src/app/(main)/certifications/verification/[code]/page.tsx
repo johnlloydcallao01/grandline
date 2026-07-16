@@ -6,7 +6,7 @@ import {
     Search, FileCheck, CheckCircle, AlertCircle,
     Calendar, User, XCircle, Clock, Link as LinkIcon
 } from '@/components/ui/IconWrapper';
-import { verifyCertificate, type VerificationResult } from './actions';
+import { verifyCertificate, type VerificationResult } from '../actions';
 import Image from 'next/image';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
@@ -28,12 +28,8 @@ export default function CertificateVerificationPage() {
         const code = codeFromUrl || codeFromQuery;
         if (code && !result && !loading) {
             verifyCode(code);
-            // Clean up URL to use the path parameter if we came from query param
-            if (codeFromQuery && !codeFromUrl) {
-                router.replace(`/certifications/verification/${encodeURIComponent(code)}`);
-            }
         }
-    }, [codeFromUrl, codeFromQuery, router]);
+    }, [codeFromUrl, codeFromQuery, result, loading]);
 
     const verifyCode = async (code: string) => {
         setLoading(true);
@@ -41,8 +37,8 @@ export default function CertificateVerificationPage() {
         try {
             const data = await verifyCertificate(code);
             setResult(data);
-            // Update URL to shareable path without reload if we verified from search
-            if (!codeFromUrl && !codeFromQuery && data.verified) {
+            // Update URL to clean verification URL if we came from query param
+            if (codeFromQuery && !codeFromUrl) {
                 router.replace(`/certifications/verification/${encodeURIComponent(code)}`);
             }
         } catch {
@@ -52,22 +48,11 @@ export default function CertificateVerificationPage() {
         }
     };
 
-const handleSearch = async (e: React.FormEvent) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!searchQuery.trim()) return;
         await verifyCode(searchQuery.trim());
     };
-
-    const currentCode = codeFromUrl || codeFromQuery || searchQuery;
-    const [shareUrl, setShareUrl] = useState('');
-
-    useEffect(() => {
-        if (currentCode) {
-            setShareUrl(`${window.location.origin}/certifications/verification/${encodeURIComponent(currentCode)}`);
-        } else {
-            setShareUrl('');
-        }
-    }, [currentCode]);
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -106,11 +91,16 @@ const handleSearch = async (e: React.FormEvent) => {
         });
     };
 
-    const copyToClipboard = () => {
-        if (shareUrl) {
-            navigator.clipboard.writeText(shareUrl);
+    const currentCode = codeFromUrl || codeFromQuery || searchQuery;
+    const [shareUrl, setShareUrl] = useState('');
+
+    useEffect(() => {
+        if (currentCode) {
+            setShareUrl(`${window.location.origin}/certifications/verification/${encodeURIComponent(currentCode)}`);
+        } else {
+            setShareUrl('');
         }
-    };
+    }, [currentCode]);
 
     return (
         <div className="p-6 space-y-6 max-w-4xl mx-auto">
@@ -132,8 +122,8 @@ const handleSearch = async (e: React.FormEvent) => {
                 </p>
             </div>
 
-            {/* Search Box - only show if no verified result yet */}
-            {!result?.verified && (
+            {/* Search Box */}
+            {!currentCode || !result?.verified ? (
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                     <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative">
@@ -173,7 +163,7 @@ const handleSearch = async (e: React.FormEvent) => {
                         </button>
                     </form>
                 </div>
-            )}
+            ) : null}
 
             {/* Results */}
             {result && result.verified && result.certificate && (
@@ -263,24 +253,26 @@ const handleSearch = async (e: React.FormEvent) => {
                         {/* Share/QR Section */}
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Share Verification</p>
-                            {shareUrl && (
-                                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-3 flex-1">
-                                    <LinkIcon className="h-5 w-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        readOnly
-                                        value={shareUrl}
-                                        className="bg-transparent border-none outline-none text-sm text-gray-700 font-mono flex-1"
-                                        aria-label="Verification URL"
-                                    />
-                                    <button
-                                        onClick={copyToClipboard}
-                                        className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 rounded hover:bg-blue-50 transition-colors"
-                                    >
-                                        Copy Link
-                                    </button>
-                                </div>
-                            )}
+                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                {shareUrl && (
+                                    <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-3 flex-1">
+                                        <LinkIcon className="h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={shareUrl}
+                                            className="bg-transparent border-none outline-none text-sm text-gray-700 font-mono flex-1"
+                                            aria-label="Verification URL"
+                                        />
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(shareUrl)}
+                                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                        >
+                                            Copy
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -293,7 +285,7 @@ const handleSearch = async (e: React.FormEvent) => {
                     <p className="text-red-600 mt-2 max-w-md">
                         {result.error || `We could not find a valid certificate with the ID "${currentCode}".`}
                     </p>
-                    <p className="text-red-500 text-sm mt-4 max-w-md">
+                    <p className="text-red-500 mt-4 text-sm">
                         Please double-check the ID and try again, or contact support if you believe this is an error.
                     </p>
                 </div>

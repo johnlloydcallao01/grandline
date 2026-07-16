@@ -17,7 +17,7 @@ interface BuilderElementStyle {
 interface BuilderElement {
     id: string;
     type: 'text' | 'image' | 'variable' | 'date';
-    field?: string; // e.g. 'student_name'
+    field?: string; // e.g. 'student_name', 'qr_code'
     label?: string;
     content?: string;
     x: number;
@@ -33,6 +33,8 @@ export interface CertificateData {
     completionDate: string;
     instructorName: string;
     certificateId: string;
+    qrCodeDataUrl?: string;
+    verificationUrl?: string;
 }
 
 interface CertificatePDFProps {
@@ -122,6 +124,38 @@ export const CertificatePDF = ({
                 {/* Elements */}
                 {elements.map((el, index) => {
                     if (!el) return null;
+
+                    // Check if this is a QR code variable (special case: variable type with qr_code field)
+                    const isQrCode = el.type === 'variable' && el.field === 'qr_code';
+
+                    // Handle QR Code Elements (variable type with qr_code field)
+                    if (isQrCode) {
+                        const parseNumQr = (val: any) => {
+                            if (val === undefined || val === null || val === 'undefined' || val === 'auto' || val === '') return undefined;
+                            const n = parseFloat(String(val));
+                            return isNaN(n) ? undefined : n;
+                        };
+
+                        const qrSize = parseNumQr(el.width) || parseNumQr(el.height) || 120;
+                        const qrDataUrl = data.qrCodeDataUrl;
+
+                        if (!qrDataUrl) return null;
+
+                        return (
+                            <View
+                                key={el.id || index}
+                                style={{
+                                    position: 'absolute',
+                                    left: Number(el.x) || 0,
+                                    top: Number(el.y) || 0,
+                                    width: qrSize,
+                                    height: qrSize,
+                                }}
+                            >
+                                <Image src={qrDataUrl} style={{ width: qrSize, height: qrSize }} />
+                            </View>
+                        );
+                    }
 
                     // Handle Text, Variable, and Date Elements
                     if (el.type === 'text' || el.type === 'variable' || el.type === 'date' || !el.type) {
