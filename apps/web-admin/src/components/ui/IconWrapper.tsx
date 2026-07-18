@@ -117,6 +117,8 @@ export const PenTool = createIconWrapper(LucideIcons.PenTool);
 export const Key = createIconWrapper(LucideIcons.Key);
 export const Server = createIconWrapper(LucideIcons.Server);
 export const Database = createIconWrapper(LucideIcons.Database);
+export const GraduationCap = createIconWrapper(LucideIcons.GraduationCap);
+export const UserCheck = createIconWrapper(LucideIcons.UserCheck);
 
 // Type for icon components
 export type LucideIcon = React.ComponentType<IconProps>;

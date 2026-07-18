@@ -45,6 +45,49 @@ async function loadWebAdminMedia(): Promise<SharedMediaItem[]> {
   return mapPayloadMediaDocsToSharedMediaItems(json?.docs);
 }
 
+async function uploadWebAdminMedia(file: File): Promise<SharedMediaItem> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('alt', file.name);
+
+  const getPayloadToken = () => {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem('grandline_auth_token_admin');
+    }
+    return null;
+  };
+
+  const payloadToken = getPayloadToken();
+  const base = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+  const url = base ? `${base}/media` : '/api/media';
+
+  const headers: Record<string, string> = {};
+  if (payloadToken) {
+    headers.Authorization = `JWT ${payloadToken}`;
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+    headers,
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to upload media: ${res.status}`);
+  }
+
+  const json = await res.json();
+  const doc = json.doc || json;
+  return {
+    id: String(doc.id),
+    url: doc.cloudinaryURL || doc.url,
+    alt: doc.alt || doc.filename,
+    mimeType: doc.mimeType,
+    filename: doc.filename,
+  };
+}
+
 export function RichTextEditor({
   value,
   onChange,
@@ -58,6 +101,7 @@ export function RichTextEditor({
       placeholder={placeholder}
       className={className}
       loadMedia={loadWebAdminMedia}
+      uploadMedia={uploadWebAdminMedia}
     />
   );
 }

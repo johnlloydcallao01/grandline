@@ -1,0 +1,151 @@
+'use client'
+
+import React, { useMemo } from 'react'
+import ReactEChartsCore from 'echarts-for-react/lib/core'
+import * as echarts from 'echarts'
+import type { MonthlyTrend } from '../actions'
+
+interface EnrollmentTrendChartProps {
+  enrollments: MonthlyTrend[]
+  completions: MonthlyTrend[]
+  loading?: boolean
+}
+
+function ChartSkeleton() {
+  return (
+    <div className="animate-pulse space-y-3 p-4">
+      <div className="h-4 bg-gray-100 rounded w-48" />
+      <div className="flex items-end gap-3 h-48">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${30 + Math.random() * 70}%` }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function EnrollmentTrendChart({ enrollments, completions, loading }: EnrollmentTrendChartProps) {
+  const option = useMemo(() => {
+    if (!enrollments?.length && !completions?.length) return null
+
+    const allMonths = new Set<string>()
+    enrollments?.forEach(e => allMonths.add(e.month))
+    completions?.forEach(c => allMonths.add(c.month))
+    const months = Array.from(allMonths).sort()
+
+    const enrollMap = new Map(enrollments?.map(e => [e.month, e.count]) || [])
+    const completeMap = new Map(completions?.map(c => [c.month, c.count]) || [])
+
+    const enrollData = months.map(m => enrollMap.get(m) || 0)
+    const completeData = months.map(m => completeMap.get(m) || 0)
+
+    const labels = months.map(m => {
+      const [year, month] = m.split('-')
+      const date = new Date(parseInt(year), parseInt(month) - 1)
+      return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+    })
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+      },
+      legend: {
+        data: ['Enrollments', 'Completions'],
+        bottom: 0,
+        left: 'center',
+        itemWidth: 12,
+        itemHeight: 12,
+        textStyle: { fontSize: 12, color: '#6b7280' },
+      },
+      grid: {
+        left: 50,
+        right: 20,
+        top: 20,
+        bottom: 50,
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLabel: { fontSize: 11, color: '#9ca3af' },
+        axisLine: { lineStyle: { color: '#e5e7eb' } },
+        axisTick: { alignWithLabel: true },
+      },
+      yAxis: {
+        type: 'value',
+        minInterval: 1,
+        axisLabel: { fontSize: 11, color: '#9ca3af' },
+        splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' as const } },
+      },
+      series: [
+        {
+          name: 'Enrollments',
+          type: 'bar',
+          barWidth: '28%',
+          barGap: '15%',
+          data: enrollData.map(v => ({
+            value: v,
+            itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] },
+          })),
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (p: { value: number }) => p.value > 0 ? String(p.value) : '',
+            fontSize: 10,
+            color: '#6b7280',
+          },
+          animationDuration: 800,
+          animationEasing: 'cubicOut' as const,
+        },
+        {
+          name: 'Completions',
+          type: 'bar',
+          barWidth: '28%',
+          data: completeData.map(v => ({
+            value: v,
+            itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] },
+          })),
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (p: { value: number }) => p.value > 0 ? String(p.value) : '',
+            fontSize: 10,
+            color: '#6b7280',
+          },
+          animationDuration: 800,
+          animationEasing: 'cubicOut' as const,
+          animationDelay: (idx: number) => idx * 80,
+        },
+      ],
+      color: ['#2563eb', '#22c55e'],
+    }
+  }, [enrollments, completions])
+
+  if (loading) {
+    return <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><ChartSkeleton /></div>
+  }
+
+  if (!option) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center h-64">
+        <p className="text-sm text-gray-400">No enrollment trend data available</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-gray-900">Enrollment Trends</h3>
+        <span className="text-xs text-gray-400">Monthly</span>
+      </div>
+      <ReactEChartsCore
+        echarts={echarts}
+        option={option}
+        notMerge
+        lazyUpdate
+        style={{ height: 280, width: '100%' }}
+      />
+    </div>
+  )
+}

@@ -90,6 +90,10 @@ export const statusField: Field = {
       label: 'Published',
       value: 'published',
     },
+    {
+      label: 'Archived',
+      value: 'archived',
+    },
   ],
   defaultValue: 'draft',
   required: true,

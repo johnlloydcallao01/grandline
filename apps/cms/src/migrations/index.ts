@@ -115,6 +115,7 @@ import * as migration_20260621_094044 from './20260621_094044';
 import * as migration_20260621_160500_bank_feeds from './20260621_160500_bank_feeds';
 import * as migration_20260621_190000_bounced_payments from './20260621_190000_bounced_payments';
 import * as migration_20260709_add_acct_payroll_account_mappings from './20260709_add_acct_payroll_account_mappings';
+import * as migration_20260718_add_archived_status_to_courses from './20260718_add_archived_status_to_courses';
 
 export const migrations = [
   {
@@ -701,5 +702,10 @@ export const migrations = [
     up: migration_20260709_add_acct_payroll_account_mappings.up,
     down: migration_20260709_add_acct_payroll_account_mappings.down,
     name: '20260709_add_acct_payroll_account_mappings',
+  },
+  {
+    up: migration_20260718_add_archived_status_to_courses.up,
+    down: migration_20260718_add_archived_status_to_courses.down,
+    name: '20260718_add_archived_status_to_courses',
   },
 ];

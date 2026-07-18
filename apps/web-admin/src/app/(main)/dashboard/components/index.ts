@@ -1,0 +1,6 @@
+export { StatCard } from './StatCard'
+export { EnrollmentTrendChart } from './EnrollmentTrendChart'
+export { CategoryDistributionChart } from './CategoryDistributionChart'
+export { RecentEnrollmentsTable } from './RecentEnrollmentsTable'
+export { PopularCoursesTable } from './PopularCoursesTable'
+export { RecentActivityFeed } from './RecentActivityFeed'

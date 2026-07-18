@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Shield,
 } from 'lucide-react'
-import { useToast } from '@/components/ui/Toast'
+
 import {
   fetchDashboardData,
   type DashboardResponse,
@@ -387,7 +387,7 @@ export function DashboardClient() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdatedDisplay, setLastUpdatedDisplay] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { addToast } = useToast()
+
   const { isMobile } = useResponsive()
 
   const load = useCallback(async (silent?: boolean) => {
@@ -423,7 +423,6 @@ export function DashboardClient() {
   const handleRefresh = () => {
     setIsRefreshing(true)
     void load()
-    addToast({ title: 'Refreshing', message: 'Dashboard data is being refreshed.', type: 'info' })
   }
 
   return (

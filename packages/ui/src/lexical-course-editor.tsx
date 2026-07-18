@@ -227,15 +227,32 @@ const SlashPopupPlugin: React.FC<{
   const [editor] = useLexicalComposerContext();
   const [open, setOpen] = React.useState(false);
   const [openLibrary, setOpenLibrary] = React.useState(false);
+  const [menuPosition, setMenuPosition] = React.useState<{ top: number; left: number } | null>(null);
   const menuRef = React.useRef<globalThis.HTMLDivElement | null>(null);
   const isDark = useSystemTheme();
 
+  const updateMenuPosition = React.useCallback(() => {
+    // Fixed position: 50px from top, centered horizontally via CSS transform
+    setMenuPosition({ top: 50, left: 0 });
+  }, []);
+
   React.useEffect(() => {
+    // Guard: editor might not be ready during initial render
+    if (!editor) return;
     const unregister = editor.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
         if (event.key === '/') {
-          setOpen(true);
+          // Only trigger at start of paragraph (offset 0) or after newline
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const anchorNode = selection.anchor.getNode();
+            const offset = selection.anchor.offset;
+            if (offset === 0) {
+              setOpen(true);
+              setTimeout(updateMenuPosition, 0);
+            }
+          }
         } else if (event.key === 'Escape') {
           if (openLibrary) {
             setOpenLibrary(false);
@@ -259,7 +276,7 @@ const SlashPopupPlugin: React.FC<{
       unregister();
       document.removeEventListener('mousedown', onDown);
     };
-  }, [editor, openLibrary]);
+  }, [editor, openLibrary, updateMenuPosition]);
 
   const onSelectMedia = (item: SharedMediaItem) => {
     editor.update(() => {
@@ -287,14 +304,14 @@ const SlashPopupPlugin: React.FC<{
     setOpenLibrary(false);
   };
 
-  const slashMenu = open
+  const slashMenu = open && menuPosition
     ? React.createElement('div', {
       ref: menuRef,
       style: {
         position: 'fixed',
-        top: '50%',
+        top: 50,
         left: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: 'translateX(-50%)',
         width: 260,
         border: '1px solid #e5e7eb',
         borderRadius: 8,

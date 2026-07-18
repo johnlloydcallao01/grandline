@@ -103,7 +103,7 @@ export default function CertificateVerificationPage() {
     }, [currentCode]);
 
     return (
-        <div className="p-6 space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-4xl mx-auto">
             <div className="text-center mb-10">
                 <div className="relative w-24 h-24 mx-auto mb-6">
                     <Image

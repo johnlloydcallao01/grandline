@@ -1,0 +1,97 @@
+'use client'
+
+import React from 'react'
+
+interface StatCardProps {
+  title: string
+  value: number | string
+  subtitle?: string
+  icon?: React.ReactNode
+  trend?: {
+    direction: 'up' | 'down' | 'neutral'
+    value: string
+  }
+  color?: 'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'teal'
+  formatter?: (value: number) => string
+  loading?: boolean
+}
+
+const colorMap = {
+  blue: { bg: 'bg-blue-50', iconBg: 'bg-blue-100', iconColor: 'text-blue-600', accent: 'bg-blue-500' },
+  green: { bg: 'bg-emerald-50', iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600', accent: 'bg-emerald-500' },
+  purple: { bg: 'bg-purple-50', iconBg: 'bg-purple-100', iconColor: 'text-purple-600', accent: 'bg-purple-500' },
+  orange: { bg: 'bg-orange-50', iconBg: 'bg-orange-100', iconColor: 'text-orange-600', accent: 'bg-orange-500' },
+  pink: { bg: 'bg-pink-50', iconBg: 'bg-pink-100', iconColor: 'text-pink-600', accent: 'bg-pink-500' },
+  teal: { bg: 'bg-teal-50', iconBg: 'bg-teal-100', iconColor: 'text-teal-600', accent: 'bg-teal-500' },
+}
+
+const trendStyles = {
+  up: 'text-emerald-600 bg-emerald-50',
+  down: 'text-red-600 bg-red-50',
+  neutral: 'text-gray-600 bg-gray-50',
+}
+
+const trendIcons = {
+  up: (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+  ),
+  down: (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+    </svg>
+  ),
+  neutral: (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14" />
+    </svg>
+  ),
+}
+
+export function StatCard({ title, value, subtitle, icon, trend, color = 'blue', formatter, loading }: StatCardProps) {
+  const c = colorMap[color]
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
+        <div className="flex items-start justify-between">
+          <div className="space-y-3 flex-1">
+            <div className="h-4 bg-gray-100 rounded w-24" />
+            <div className="h-8 bg-gray-100 rounded w-16" />
+            <div className="h-3 bg-gray-100 rounded w-28" />
+          </div>
+          <div className="h-10 w-10 rounded-lg bg-gray-100" />
+        </div>
+      </div>
+    )
+  }
+
+  const displayValue = typeof value === 'number' && formatter ? formatter(value) : value
+
+  return (
+    <div className="group relative bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
+      <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-xl ${c.accent} opacity-0 group-hover:opacity-100 transition-opacity`} />
+      <div className="flex items-start justify-between">
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 tabular-nums tracking-tight">{displayValue}</p>
+          {subtitle && (
+            <p className="text-xs text-gray-400">{subtitle}</p>
+          )}
+          {trend && (
+            <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${trendStyles[trend.direction]}`}>
+              {trendIcons[trend.direction]}
+              <span>{trend.value}</span>
+            </div>
+          )}
+        </div>
+        {icon && (
+          <div className={`p-2.5 rounded-lg ${c.iconBg} shrink-0 ring-1 ring-black/5`}>
+            <div className={`w-5 h-5 ${c.iconColor}`}>{icon}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

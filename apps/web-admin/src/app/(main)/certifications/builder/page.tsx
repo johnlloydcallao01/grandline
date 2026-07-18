@@ -663,6 +663,7 @@ function CertificateBuilderContent() {
 
     // --- Computed ---
     const selectedElement = elements.find(el => el.id === selectedId);
+    const isQrCodeSelected = selectedElement?.type === 'variable' && selectedElement?.field === 'qr_code';
 
     // --- Dimension Conversion Helpers ---
     const toPx = (val: number, unit: 'px' | 'in' | 'mm') => {
@@ -822,13 +823,52 @@ function CertificateBuilderContent() {
 
                             <div className="space-y-4">
                                 {/* Position Info */}
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-900 font-medium mb-2">
-                                    <div>X: {Math.round(selectedElement.x)}px</div>
-                                    <div>Y: {Math.round(selectedElement.y)}px</div>
-                                </div>
+                                {!isQrCodeSelected && (
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-900 mb-1">X</label>
+                                            <input
+                                                type="number"
+                                                value={Math.round(selectedElement.x)}
+                                                onChange={(e) => updateElement(selectedElement.id, { x: parseInt(e.target.value) || 0 })}
+                                                onBlur={() => updateElement(selectedElement.id, {}, true)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 font-medium focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-900 mb-1">Y</label>
+                                            <input
+                                                type="number"
+                                                value={Math.round(selectedElement.y)}
+                                                onChange={(e) => updateElement(selectedElement.id, { y: parseInt(e.target.value) || 0 })}
+                                                onBlur={() => updateElement(selectedElement.id, {}, true)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 font-medium focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
 
-                                {/* Font Size */}
-                                {selectedElement.type !== 'image' && (
+                                {/* QR Code Size Controls */}
+                                {isQrCodeSelected && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-900 mb-1">Size: {typeof selectedElement.width === 'number' ? selectedElement.width : 'Auto'}px</label>
+                                        <input
+                                            type="range"
+                                            min="50"
+                                            max="800"
+                                            value={typeof selectedElement.width === 'number' ? selectedElement.width : 200}
+                                            onChange={(e) => {
+                                                const v = parseInt(e.target.value);
+                                                updateElement(selectedElement.id, { width: v, height: v });
+                                            }}
+                                            onMouseUp={() => updateElement(selectedElement.id, {}, true)}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                )}
+
+                                                {/* Font Size */}
+                                                {selectedElement.type !== 'image' && !isQrCodeSelected && (
                                     <>
                                         <div>
                                             <label className="block text-xs font-bold text-gray-900 mb-1">Font Size</label>
@@ -1093,8 +1133,8 @@ function CertificateBuilderContent() {
                                                 height: el.height === 'auto' ? 'auto' : el.height
                                             }}
                                             onResizeStop={(e, direction, ref, d) => {
-                                                const newWidth = (el.width === 'auto' ? ref.offsetWidth : el.width as number) + d.width;
-                                                const newHeight = (el.height === 'auto' ? ref.offsetHeight : el.height as number) + d.height;
+                                                const newWidth = ref.offsetWidth;
+                                                const newHeight = ref.offsetHeight;
 
                                                 // Calculate font size scaling if resizing from corner (bottomRight)
                                                 let newFontSize = el.style.fontSize;
@@ -1164,7 +1204,7 @@ function CertificateBuilderContent() {
                                                                 height: '100%',
                                                                 minWidth: '60px',
                                                                 minHeight: '60px',
-                                                                fontSize: Math.max(6, Math.min(el.width as number, el.height as number) / 18) + 'px',
+                                                                fontSize: Math.max(6, Math.min(typeof el.width === 'number' ? el.width : 100, typeof el.height === 'number' ? el.height : 100) / 18) + 'px',
                                                             }}
                                                         >
                                                             {/* QR Code placeholder - scales with container */}

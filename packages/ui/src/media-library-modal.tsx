@@ -161,8 +161,9 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
         background: 'rgba(0,0,0,0.35)',
         zIndex: zIndex,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
+        paddingTop: 50,
       }}
     >
       <div
