@@ -26,8 +26,8 @@ export function SidebarDropdownGroup({
 }: SidebarDropdownGroupProps) {
   const baseClasses = 'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors';
   const activeClasses = active
-    ? 'bg-gray-100 text-gray-900'
-    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
+    ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100';
 
   return (
     <div className="space-y-1">
@@ -41,14 +41,14 @@ export function SidebarDropdownGroup({
         {!isOpen ? null : (
           <>
             <span className="ml-3 flex-1 truncate text-left">{label}</span>
-            <ChevronDown
-              className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            />
+              <ChevronDown
+                className={`h-4 w-4 text-gray-400 transition-transform dark:text-gray-500 ${isExpanded ? 'rotate-180' : ''}`}
+              />
           </>
         )}
       </button>
 
-      {isOpen && isExpanded ? <div className="ml-4 space-y-1 border-l border-gray-200 pl-3">{children}</div> : null}
+      {isOpen && isExpanded ? <div className="ml-4 space-y-1 border-l border-[var(--card-border)] pl-3">{children}</div> : null}
     </div>
   );
 }

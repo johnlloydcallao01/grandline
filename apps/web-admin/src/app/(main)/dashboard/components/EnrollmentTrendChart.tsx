@@ -14,10 +14,10 @@ interface EnrollmentTrendChartProps {
 function ChartSkeleton() {
   return (
     <div className="animate-pulse space-y-3 p-4">
-      <div className="h-4 bg-gray-100 rounded w-48" />
+      <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-48" />
       <div className="flex items-end gap-3 h-48">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${30 + Math.random() * 70}%` }} />
+          <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${30 + Math.random() * 70}%` }} />
         ))}
       </div>
     </div>
@@ -41,8 +41,8 @@ export function EnrollmentTrendChart({ enrollments, completions, loading }: Enro
 
     const labels = months.map(m => {
       const [year, month] = m.split('-')
-      const date = new Date(parseInt(year), parseInt(month) - 1)
-      return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     })
 
     return {
@@ -122,22 +122,22 @@ export function EnrollmentTrendChart({ enrollments, completions, loading }: Enro
   }, [enrollments, completions])
 
   if (loading) {
-    return <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><ChartSkeleton /></div>
+    return <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><ChartSkeleton /></div>
   }
 
   if (!option) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No enrollment trend data available</p>
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm flex items-center justify-center h-64">
+        <p className="text-sm text-gray-400 dark:text-gray-500">No enrollment trend data available</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-900">Enrollment Trends</h3>
-        <span className="text-xs text-gray-400">Monthly</span>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enrollment Trends</h3>
+        <span className="text-xs text-gray-400 dark:text-gray-500">Monthly</span>
       </div>
       <ReactEChartsCore
         echarts={echarts}

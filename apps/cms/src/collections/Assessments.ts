@@ -19,15 +19,15 @@ export const Assessments: CollectionConfig = {
     },
     create: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
     update: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
     delete: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
   },
   fields: [

@@ -19,8 +19,8 @@ function ChartSkeleton() {
   return (
     <div className="animate-pulse flex items-center justify-center h-64">
       <div className="relative h-40 w-40">
-        <div className="h-full w-full rounded-full bg-gray-100" />
-        <div className="absolute inset-5 rounded-full bg-white" />
+        <div className="h-full w-full rounded-full bg-gray-100 dark:bg-gray-800" />
+        <div className="absolute inset-5 rounded-full bg-white dark:bg-[var(--card-background)]" />
       </div>
     </div>
   )
@@ -92,22 +92,22 @@ export function CategoryDistributionChart({ data, loading }: CategoryDistributio
   }, [data])
 
   if (loading) {
-    return <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><ChartSkeleton /></div>
+    return <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><ChartSkeleton /></div>
   }
 
   if (!option) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center h-72">
-        <p className="text-sm text-gray-400">No category data available</p>
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm flex items-center justify-center h-72">
+        <p className="text-sm text-gray-400 dark:text-gray-500">No category data available</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-900">Course Categories</h3>
-        <span className="text-xs text-gray-400">Distribution</span>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Course Categories</h3>
+        <span className="text-xs text-gray-400 dark:text-gray-500">Distribution</span>
       </div>
       <ReactEChartsCore
         echarts={echarts}

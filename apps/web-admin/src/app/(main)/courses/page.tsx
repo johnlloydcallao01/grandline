@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
-    Plus, Search, BookOpen, Users, Clock, Edit, Trash2, Eye,
+    Search, BookOpen, Users, Clock, Edit, Trash2, Eye,
     DollarSign, Loader2, X
 } from '@/components/ui/IconWrapper';
-import { getCourses, deleteCourse, updateCourse, createCourse, getCategories, searchInstructors, type CourseDoc, type CategoryOption, type InstructorRef } from './actions';
+import { getCourses, deleteCourse, updateCourse, type CourseDoc } from './actions';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -47,13 +47,6 @@ export default function CoursesPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
-
-    // Create modal state
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [createForm, setCreateForm] = useState({ title: '', courseCode: '', instructor: '', instructorSearch: '', category: [] as string[], status: 'draft' as string, price: 0, excerpt: '' });
-    const [instructorOptions, setInstructorOptions] = useState<InstructorRef[]>([]);
-    const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
 
     // Delete confirmation state
     const [deleteTarget, setDeleteTarget] = useState<CourseDoc | null>(null);
@@ -96,26 +89,6 @@ export default function CoursesPage() {
         return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
     }, [searchTerm]);
 
-    useEffect(() => {
-        if (isCreateOpen) {
-            getCategories().then(setCategoryOptions).catch(() => {});
-        }
-    }, [isCreateOpen]);
-
-    useEffect(() => {
-        if (createForm.instructorSearch.length < 1) {
-            setInstructorOptions([]);
-            return;
-        }
-        const timer = setTimeout(async () => {
-            try {
-                const results = await searchInstructors(createForm.instructorSearch);
-                setInstructorOptions(results);
-            } catch { setInstructorOptions([]); }
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [createForm.instructorSearch]);
-
     const handleStatusChange = async (course: CourseDoc, newStatus: string) => {
         try {
             await updateCourse(course.id, { status: newStatus as any });
@@ -137,30 +110,6 @@ export default function CoursesPage() {
             console.error(err);
         } finally {
             setIsDeleting(false);
-        }
-    };
-
-    const handleCreate = async () => {
-        if (!createForm.title.trim() || !createForm.courseCode.trim() || !createForm.instructor) return;
-        try {
-            setIsSaving(true);
-            const created = await createCourse({
-                title: createForm.title,
-                courseCode: createForm.courseCode,
-                instructor: createForm.instructor,
-                category: createForm.category.length > 0 ? createForm.category : undefined,
-                status: createForm.status,
-                price: createForm.price,
-                excerpt: createForm.excerpt || undefined,
-            });
-            setCourses(prev => [created, ...prev]);
-            setTotalDocs(prev => prev + 1);
-            setIsCreateOpen(false);
-            setCreateForm({ title: '', courseCode: '', instructor: '', instructorSearch: '', category: [], status: 'draft', price: 0, excerpt: '' });
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -242,30 +191,59 @@ export default function CoursesPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
                     <p className="text-gray-500 mt-1">Manage all courses across the platform</p>
                 </div>
-                <button
-                    onClick={() => setIsCreateOpen(true)}
+                <Link
+                    href="/courses/create"
                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
                 >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                     Create Course
-                </button>
+                </Link>
             </div>
 
             {/* Metric Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {metricCards.map((card) => (
-                    <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-lg ${card.bg}`}>
-                                <card.icon className={`h-5 w-5 ${card.color}`} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                                <p className="text-xs text-gray-500">{card.label}</p>
+                {isLoading ? (
+                    <>
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-lg bg-blue-50"><div className="h-5 w-5 bg-blue-200 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-24 bg-gray-100 rounded" /></div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-lg bg-green-50"><div className="h-5 w-5 bg-green-200 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 rounded" /></div>
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-lg bg-yellow-50"><div className="h-5 w-5 bg-yellow-200 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 rounded" /></div>
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-lg bg-gray-50"><div className="h-5 w-5 bg-gray-200 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 rounded" /></div>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    metricCards.map((card) => (
+                        <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className={`p-2.5 rounded-lg ${card.bg}`}>
+                                    <card.icon className={`h-5 w-5 ${card.color}`} />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                                    <p className="text-xs text-gray-500">{card.label}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Search & Filters */}
@@ -338,13 +316,13 @@ export default function CoursesPage() {
                             : 'Get started by creating your first course.'}
                     </p>
                     {!debouncedSearch && statusFilter === 'all' && (
-                        <button
-                            onClick={() => setIsCreateOpen(true)}
+                        <Link
+                            href="/courses/create"
                             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
                         >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                             Create Course
-                        </button>
+                        </Link>
                     )}
                 </div>
             ) : (
@@ -511,143 +489,6 @@ export default function CoursesPage() {
                         </div>
                     )}
                 </>
-            )}
-
-            {/* Create Course Modal */}
-            {isCreateOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => !isSaving && setIsCreateOpen(false)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h2 className="text-lg font-bold text-gray-900">Create New Course</h2>
-                            <button onClick={() => setIsCreateOpen(false)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                                <input
-                                    type="text"
-                                    value={createForm.title}
-                                    onChange={e => setCreateForm(f => ({ ...f, title: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                    placeholder="e.g. React Fundamentals"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Course Code *</label>
-                                <input
-                                    type="text"
-                                    value={createForm.courseCode}
-                                    onChange={e => setCreateForm(f => ({ ...f, courseCode: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                    placeholder="e.g. CS101"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Instructor *</label>
-                                <input
-                                    type="text"
-                                    value={createForm.instructorSearch}
-                                    onChange={e => setCreateForm(f => ({ ...f, instructorSearch: e.target.value, instructor: '' }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                    placeholder="Search instructors..."
-                                />
-                                {instructorOptions.length > 0 && (
-                                    <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto">
-                                        {instructorOptions.map(inst => (
-                                            <button
-                                                key={inst.id}
-                                                onClick={() => {
-                                                    setCreateForm(f => ({
-                                                        ...f,
-                                                        instructor: inst.id,
-                                                        instructorSearch: inst.user ? `${inst.user.firstName} ${inst.user.lastName}`.trim() || inst.id : inst.id,
-                                                    }));
-                                                    setInstructorOptions([]);
-                                                }}
-                                                className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-50"
-                                            >
-                                                {inst.user ? `${inst.user.firstName} ${inst.user.lastName}`.trim() || `Instructor #${inst.id}` : `Instructor #${inst.id}`}
-                                                {inst.user?.email && <span className="text-gray-400 ml-1">({inst.user.email})</span>}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {categoryOptions.map(cat => (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => setCreateForm(f => ({
-                                                ...f,
-                                                category: f.category.includes(cat.id)
-                                                    ? f.category.filter(id => id !== cat.id)
-                                                    : [...f.category, cat.id],
-                                            }))}
-                                            className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                                                createForm.category.includes(cat.id)
-                                                    ? 'bg-blue-100 text-blue-700 border-blue-300'
-                                                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                                            }`}
-                                        >
-                                            {cat.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        value={createForm.price}
-                                        onChange={e => setCreateForm(f => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select
-                                        value={createForm.status}
-                                        onChange={e => setCreateForm(f => ({ ...f, status: e.target.value }))}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-                                    >
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Published</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
-                                <textarea
-                                    value={createForm.excerpt}
-                                    onChange={e => setCreateForm(f => ({ ...f, excerpt: e.target.value }))}
-                                    rows={3}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                                    placeholder="Brief description of the course..."
-                                />
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-                            <button onClick={() => setIsCreateOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleCreate}
-                                disabled={isSaving || !createForm.title.trim() || !createForm.courseCode.trim() || !createForm.instructor}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Creating...' : 'Create Course'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
             )}
 
             {/* Delete Confirmation */}

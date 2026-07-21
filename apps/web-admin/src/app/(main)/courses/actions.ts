@@ -139,6 +139,22 @@ export async function createCourse(data: {
   status?: string
   price?: number
   excerpt?: string
+  description?: any
+  difficultyLevel?: string
+  language?: string
+  passingGrade?: number
+  evaluationMode?: string
+  isFeatured?: boolean
+  discountedPrice?: number
+  estimatedDuration?: number
+  estimatedDurationUnit?: string
+  maxStudents?: number
+  coInstructors?: string[]
+  modules?: string[]
+  thumbnailUrl?: string
+  bannerImageUrl?: string
+  learningObjectives?: { objective: string }[]
+  prerequisites?: { prerequisite: string }[]
 }): Promise<CourseDoc> {
   const res = await fetch(apiUrl('/courses'), {
     method: 'POST',

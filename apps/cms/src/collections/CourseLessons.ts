@@ -12,22 +12,19 @@ export const CourseLessons: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (!user) return false
-      if (user.role === 'service' || user.role === 'admin' || user.role === 'instructor') {
-        return true
-      }
-      return false
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
     create: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
     update: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
     delete: ({ req: { user } }) => {
       if (!user) return false
-      return user.role === 'admin' || user.role === 'instructor'
+      return user.role === 'service' || user.role === 'admin' || user.role === 'instructor'
     },
   },
   fields: [

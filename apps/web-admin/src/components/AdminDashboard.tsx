@@ -90,7 +90,7 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
 
   return (
     <DashboardContext.Provider value={dashboardValue}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--background)]">
         {!isBuilderPage && (
           <Header
             sidebarOpen={sidebarOpen}
@@ -134,30 +134,30 @@ function DefaultDashboardContent() {
     <div className="p-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500">Total Contacts</h3>
-          <p className="text-2xl font-bold text-gray-900">42</p>
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-lg shadow p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Contacts</h3>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">42</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500">New Contacts</h3>
-          <p className="text-2xl font-bold text-blue-600">7</p>
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-lg shadow p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">New Contacts</h3>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">7</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500">Total Subscribers</h3>
-          <p className="text-2xl font-bold text-gray-900">156</p>
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-lg shadow p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Subscribers</h3>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">156</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-sm font-medium text-gray-500">Active Subscribers</h3>
-          <p className="text-2xl font-bold text-green-600">134</p>
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-lg shadow p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Subscribers</h3>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">134</p>
         </div>
       </div>
 
       {/* Welcome Message */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-lg shadow p-6">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
           Welcome to Admin Dashboard
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           Access your admin control panel and manage your content.
         </p>
       </div>

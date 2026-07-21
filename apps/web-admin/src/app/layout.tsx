@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
+import Script from "next/script";
 import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { cmsConfig, getCMSImageUrl } from "@/lib/cms";
 import { getServerUser, getServerToken } from "@/app/actions/auth";
 import "./globals.css";
@@ -92,6 +94,18 @@ export default async function RootLayout({ children }: LayoutProps) {
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            (function() {
+              var theme = localStorage.getItem('grandline-admin-theme-preference') || 'system';
+              var resolved = theme === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : theme;
+              document.documentElement.classList.add(resolved);
+              document.documentElement.setAttribute('data-theme', resolved);
+            })();
+          `}
+        </Script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -153,11 +167,13 @@ export default async function RootLayout({ children }: LayoutProps) {
 
         <AuthErrorBoundary>
           <AuthProvider initialUser={initialUser} initialToken={initialToken}>
-            <ToastProvider>
-              <LoadingScreenWrapper>
-                {children}
-              </LoadingScreenWrapper>
-            </ToastProvider>
+            <ThemeProvider>
+              <ToastProvider>
+                <LoadingScreenWrapper>
+                  {children}
+                </LoadingScreenWrapper>
+              </ToastProvider>
+            </ThemeProvider>
           </AuthProvider>
         </AuthErrorBoundary>
       </body>

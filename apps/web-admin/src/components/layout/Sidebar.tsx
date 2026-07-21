@@ -32,8 +32,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
 
     const hasActiveCourseManagerChild =
         pathname?.startsWith('/courses') ||
-        pathname?.startsWith('/assessments') ||
-        pathname?.startsWith('/question-bank') ||
         pathname?.startsWith('/categories');
 
     const [isCourseManagerExpanded, setIsCourseManagerExpanded] = React.useState(hasActiveCourseManagerChild);
@@ -123,15 +121,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
         )}
         <aside
             data-sidebar="admin"
-            className={`fixed left-0 top-[56px] lg:top-16 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
+            className={`fixed left-0 top-[56px] lg:top-16 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
                 // Mobile drawer: full-width, slides in/out, starts right below header
                 w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 // Desktop: always visible, collapsible width
                 lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
-            style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#cbd5e1 transparent'
-            }}
             onScroll={onScroll}
         >
             <div className="p-3 pb-20"> {/* pb-20 for extra scroll space */}
@@ -139,7 +133,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
 
                     {/* 1. DASHBOARD & ANALYTICS */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard & Analytics</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">Dashboard & Analytics</div>}
                         <SidebarItem
                             icon="overview"
                             label="Overview"
@@ -156,11 +150,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         />
                     </div>
 
-                    {expanded && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
                     {/* 2. COURSE MANAGEMENT */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core LMS</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">Core LMS</div>}
                         <SidebarDropdownGroup
                             icon="team"
                             label="Enrollments"
@@ -172,8 +166,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/enrollments/assign-unassign"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/assign-unassign')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Assign / Unassign</span>
@@ -181,8 +175,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/enrollments/reset-course-data"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/reset-course-data')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Reset Course Data</span>
@@ -198,9 +192,9 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         >
                             <Link
                                 href="/courses"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assignments') && !pathname?.startsWith('/courses/tags'))
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assessments') && !pathname?.startsWith('/courses/questions') && !pathname?.startsWith('/courses/assignments') && !pathname?.startsWith('/courses/tags'))
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Courses</span>
@@ -208,26 +202,26 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/courses/lessons"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/lessons')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Lessons</span>
                             </Link>
                             <Link
-                                href="/assessments"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/assessments')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                href="/courses/assessments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/assessments')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Assessments</span>
                             </Link>
                             <Link
-                                href="/question-bank"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/question-bank')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                href="/courses/questions"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/questions')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Questions</span>
@@ -235,8 +229,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/courses/assignments"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/assignments')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Assignments</span>
@@ -244,8 +238,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/categories"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/categories')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Categories</span>
@@ -253,8 +247,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/courses/tags"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/tags')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Tags</span>
@@ -271,8 +265,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/grades/recent-activity"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/grades/recent-activity')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Recent Activity</span>
@@ -280,8 +274,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/trainees/accounts"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/trainees/accounts')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Student Overview</span>
@@ -298,8 +292,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/certifications/templates"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/templates') || pathname?.startsWith('/certifications/builder')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Templates</span>
@@ -307,8 +301,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/certifications/issuance"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/issuance')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Issuance</span>
@@ -316,8 +310,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/certifications/verification"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/certifications/verification')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Verification</span>
@@ -341,8 +335,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/users/trainees"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/trainees')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Trainees</span>
@@ -350,8 +344,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/instructors"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/instructors'
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Instructors</span>
@@ -359,8 +353,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/users/admins"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/admins')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Admins</span>
@@ -368,11 +362,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         </SidebarDropdownGroup>
                     </div>
 
-                    {expanded && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
                     {/* 3. CMS */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">CMS</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">CMS</div>}
                         <SidebarDropdownGroup
                             icon="media"
                             label="Media Files"
@@ -384,8 +378,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/media"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/cms/media'
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Library</span>
@@ -393,8 +387,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/media/add"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/media/add')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Add Media File</span>
@@ -411,8 +405,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/posts"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/cms/posts'
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">All Posts</span>
@@ -420,8 +414,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/posts/add"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/add')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Add Posts</span>
@@ -429,8 +423,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/posts/categories"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/categories')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Categories</span>
@@ -438,8 +432,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             <Link
                                 href="/cms/posts/tags"
                                 className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/tags')
-                                    ? 'bg-gray-100 font-medium text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Tags</span>
@@ -454,11 +448,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         />
                     </div>
 
-                    {expanded && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
                     {/* 5. COMMUNICATIONS */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Communications</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">Communications</div>}
                         <SidebarItem
                             icon="notifications"
                             label="Notifications"
@@ -475,11 +469,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         />
                     </div>
 
-                    {expanded && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
                     {/* 9. MARKETING */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Business</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">Business</div>}
                         <SidebarItem
                             icon="promotion"
                             label="Coupons"
@@ -503,11 +497,11 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         />
                     </div>
 
-                    {expanded && <hr className="border-gray-200" />}
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
                     {/* 10. SYSTEM SETTINGS */}
                     <div className="space-y-1">
-                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System Settings</div>}
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">System Settings</div>}
                         <SidebarItem
                             icon="settings"
                             label="General Settings"

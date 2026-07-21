@@ -1,28 +1,68 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-background: #ffffff;
+  --card-border: #e5e7eb;
+  --muted-text: #6b7280;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #171717;
+  --card-border: #262626;
+  --muted-text: #a1a1aa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card-background);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+aside[data-sidebar="admin"] {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+aside[data-sidebar="admin"]::-webkit-scrollbar {
+  width: 5px;
+}
+aside[data-sidebar="admin"]::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+aside[data-sidebar="admin"]::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.dark aside[data-sidebar="admin"] {
+  scrollbar-color: #777 transparent;
+}
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb {
+  background: #777;
+}
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
 
 main {
