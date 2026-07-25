@@ -25,8 +25,8 @@ function PieSkeleton() {
   return (
     <div className="animate-pulse flex items-center justify-center h-64">
       <div className="relative h-40 w-40">
-        <div className="h-full w-full rounded-full bg-gray-100" />
-        <div className="absolute inset-5 rounded-full bg-white" />
+        <div className="h-full w-full rounded-full bg-gray-100 dark:bg-gray-800" />
+        <div className="absolute inset-5 rounded-full bg-white dark:bg-[var(--card-background)]" />
       </div>
     </div>
   )
@@ -36,7 +36,7 @@ function BarSkeleton() {
   return (
     <div className="animate-pulse flex items-end gap-3 h-48 p-4">
       {[55, 70, 40, 85, 50].map((h, i) => (
-        <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+        <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${h}%` }} />
       ))}
     </div>
   )
@@ -254,20 +254,20 @@ export function LearnersTab({ data, loading }: LearnersTabProps) {
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
+            <div key={i} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm animate-pulse">
               <div className="space-y-3">
-                <div className="h-3 bg-gray-100 rounded w-20" />
-                <div className="h-7 bg-gray-100 rounded w-12" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+                <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded w-12" />
               </div>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><PieSkeleton /></div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><PieSkeleton /></div>
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><PieSkeleton /></div>
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><PieSkeleton /></div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="px-4 py-3 border-b border-gray-100"><div className="h-4 bg-gray-100 rounded w-32" /></div>
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-[var(--card-border)]"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-32" /></div>
           <div className="p-4"><BarSkeleton /></div>
         </div>
       </div>
@@ -277,7 +277,7 @@ export function LearnersTab({ data, loading }: LearnersTabProps) {
   if (!learners) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No learner data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No learner data available</p>
       </div>
     )
   }
@@ -285,57 +285,57 @@ export function LearnersTab({ data, loading }: LearnersTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Trainees</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(learners.totalTrainees)}</p>
-            <p className="text-xs text-gray-400">Registered users</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Trainees</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(learners.totalTrainees)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Registered users</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Learners</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(learners.activeTrainees)}</p>
-            <p className="text-xs text-gray-400">Currently enrolled</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active Learners</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(learners.activeTrainees)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Currently enrolled</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">New This Month</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(learners.newTraineesThisMonth)}</p>
-            <p className="text-xs text-gray-400">New enrollments</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">New This Month</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(learners.newTraineesThisMonth)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">New enrollments</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Enrollment Types</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{learners.enrollmentTypeDistribution.length}</p>
-            <p className="text-xs text-gray-400">Distinct types</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enrollment Types</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{learners.enrollmentTypeDistribution.length}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Distinct types</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Enrollment Status</h3>
-            <span className="text-xs text-gray-400">Distribution</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enrollment Status</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Distribution</span>
           </div>
           <StatusPieChart data={learners.enrollmentStatusDistribution} />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Enrollment Type</h3>
-            <span className="text-xs text-gray-400">By type</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enrollment Type</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">By type</span>
           </div>
           <TypePieChart data={learners.enrollmentTypeDistribution} />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-900">Grade Distribution</h3>
-          <span className="text-xs text-gray-400">Student grades</span>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Grade Distribution</h3>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Student grades</span>
         </div>
         <GradeBarChart data={learners.gradeDistribution} />
       </div>

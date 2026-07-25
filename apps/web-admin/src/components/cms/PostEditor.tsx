@@ -354,8 +354,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading post...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading post...</p>
         </div>
       </div>
     );
@@ -366,10 +366,10 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {postId ? 'Edit Post' : 'Create New Post'}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {postId ? 'Update your blog post' : 'Write and publish a new blog post'}
           </p>
         </div>
@@ -378,7 +378,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[var(--card-background)] hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Eye className="w-4 h-4 mr-2" />
             {showPreview ? 'Edit' : 'Preview'}
@@ -388,7 +388,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[var(--card-background)] hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel
@@ -399,8 +399,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800">{error}</p>
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+          <p className="text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
@@ -410,7 +410,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Title *
               </label>
               <Controller
@@ -421,20 +421,19 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                   <input
                     {...field}
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                     placeholder="Enter post title..."
-                    style={{ caretColor: '#1f2937' }}
                   />
                 )}
               />
               {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
               )}
             </div>
 
             {/* Slug */}
             <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 URL Slug *
               </label>
               <Controller
@@ -445,20 +444,19 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                   <input
                     {...field}
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                     placeholder="url-friendly-slug"
-                    style={{ caretColor: '#1f2937' }}
                   />
                 )}
               />
               {errors.slug && (
-                <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.slug.message}</p>
               )}
             </div>
 
             {/* Content Editor */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Content *
               </label>
               <RichTextEditor
@@ -470,13 +468,13 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                 placeholder="Start writing your post..."
               />
               {errors.content && (
-                <p className="mt-1 text-sm text-red-600">Content is required</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">Content is required</p>
               )}
             </div>
 
             {/* Excerpt */}
             <div>
-              <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Excerpt
               </label>
               <Controller
@@ -486,9 +484,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                   <textarea
                     {...field}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                     placeholder="Brief description for previews and SEO..."
-                    style={{ caretColor: '#1f2937' }}
                   />
                 )}
               />
@@ -498,12 +495,12 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Publish Actions */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Publish</h3>
+            <div className="bg-white dark:bg-[var(--card-background)] border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Publish</h3>
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
                   </label>
                   <Controller
@@ -512,7 +509,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                     render={({ field }) => (
                       <select
                         {...field}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
                       >
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
@@ -523,10 +520,10 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
                 {/* Author Field */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Author
                   </label>
-                  <div className="text-sm text-gray-600 px-2 py-1 bg-gray-50 border border-gray-200 rounded">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded">
                     {_currentUser ? (
                       <span>
                         {(() => {
@@ -535,42 +532,38 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                           const lastName = user.lastName || user.last_name || '';
                           const email = user.email || '';
 
-                          // If we have first/last name, show them
                           if (firstName || lastName) {
                             return (
                               <>
                                 {firstName} {lastName}
-                                {email && <span className="text-gray-400 ml-1">({email})</span>}
+                                {email && <span className="text-gray-400 dark:text-gray-500 ml-1">({email})</span>}
                                 {user.id === 1 && email === 'admin@example.com' && (
-                                  <span className="text-orange-500 text-xs ml-2">(Fallback)</span>
+                                  <span className="text-orange-500 dark:text-orange-400 text-xs ml-2">(Fallback)</span>
                                 )}
                               </>
                             );
                           }
 
-                          // If no name, just show email
                           if (email) {
                             return (
                               <span>
                                 {email}
                                 {user.id === 1 && email === 'admin@example.com' && (
-                                  <span className="text-orange-500 text-xs ml-2">(Fallback)</span>
+                                  <span className="text-orange-500 dark:text-orange-400 text-xs ml-2">(Fallback)</span>
                                 )}
                               </span>
                             );
                           }
 
-                          // Fallback to user ID
                           return <span>User #{user.id}</span>;
                         })()}
                       </span>
                     ) : (
-                      <span className="text-gray-400">
+                      <span className="text-gray-400 dark:text-gray-500">
                         {watchedAuthor && watchedAuthor > 0 ? `Author ID: ${watchedAuthor}` : 'Loading user...'}
                       </span>
                     )}
                   </div>
-                  {/* Hidden field for form submission */}
                   <Controller
                     name="author"
                     control={control}
@@ -582,22 +575,19 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
 
                 {watchedStatus === 'published' && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Publish Date
                     </label>
                     <Controller
                       name="publishedAt"
                       control={control}
                       render={({ field }) => {
-                        // Convert ISO string to datetime-local format
                         const formatForDateTimeLocal = (value: string) => {
                           if (!value) return '';
                           try {
-                            // If it's already in the correct format, return as is
                             if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
                               return value;
                             }
-                            // Convert ISO string to datetime-local format
                             const date = new Date(value);
                             const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
                               .toISOString()
@@ -614,7 +604,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                             value={formatForDateTimeLocal(field.value || '')}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
                             type="datetime-local"
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                            className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
                           />
                         );
                       }}
@@ -627,7 +617,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={isSaving || !watchedAuthor || watchedAuthor <= 0}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[var(--card-background)] hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
                   >
                     <Save className="w-4 h-4 mr-1" />
                     {isSaving ? 'Saving...' : (!watchedAuthor || watchedAuthor <= 0) ? 'Loading user...' : 'Save Draft'}
@@ -637,7 +627,7 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                     type="button"
                     onClick={handlePublish}
                     disabled={isSaving || !watchedAuthor || watchedAuthor <= 0}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 dark:bg-blue-500 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
                   >
                     {isSaving ? 'Publishing...' : (!watchedAuthor || watchedAuthor <= 0) ? 'Loading user...' : 'Publish'}
                   </button>
@@ -646,8 +636,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
             </div>
 
             {/* Featured Image */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Featured Image</h3>
+            <div className="bg-white dark:bg-[var(--card-background)] border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Featured Image</h3>
               <Controller
                 name="featuredImage"
                 control={control}
@@ -661,8 +651,8 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
             </div>
 
             {/* Tags */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Tags</h3>
+            <div className="bg-white dark:bg-[var(--card-background)] border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Tags</h3>
               <Controller
                 name="tags"
                 control={control}
@@ -676,12 +666,12 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
             </div>
 
             {/* SEO */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">SEO</h3>
+            <div className="bg-white dark:bg-[var(--card-background)] border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">SEO</h3>
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     SEO Title
                   </label>
                   <Controller
@@ -691,16 +681,15 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                       <input
                         {...field}
                         type="text"
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                         placeholder="Leave empty to use post title"
-                        style={{ caretColor: '#1f2937' }}
                       />
                     )}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     SEO Description
                   </label>
                   <Controller
@@ -710,16 +699,15 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                       <textarea
                         {...field}
                         rows={2}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                         placeholder="Leave empty to use excerpt"
-                        style={{ caretColor: '#1f2937' }}
                       />
                     )}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Focus Keyword
                   </label>
                   <Controller
@@ -729,13 +717,12 @@ export function PostEditor({ postId, onSave, onCancel }: PostEditorProps) {
                       <input
                         {...field}
                         type="text"
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--card-background)]"
                         placeholder="Primary keyword for ranking"
-                        style={{ caretColor: '#1f2937' }}
                       />
                     )}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     The main keyword you want this post to rank for in search engines
                   </p>
                 </div>

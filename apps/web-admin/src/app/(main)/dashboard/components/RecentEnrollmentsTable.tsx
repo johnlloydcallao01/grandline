@@ -105,7 +105,7 @@ export function RecentEnrollmentsTable({ data, loading }: RecentEnrollmentsTable
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {formatted.map((enrollment) => (
-              <tr key={enrollment.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <tr key={enrollment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <td className="px-4 py-3">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{enrollment.traineeName}</span>
                 </td>

@@ -240,7 +240,7 @@ export default function DashboardPage() {
         <StatCard
           title="Certificates"
           value={overview?.totalCertificates ?? 0}
-          subtitle={`${overview?.completedEnrollments ?? 0} completions`}
+          subtitle={`${overview?.completedEnrollments ?? 0} completed enrollments`}
           formatter={formatNumber}
           color="pink"
           icon={<Award className="w-5 h-5" />}

@@ -374,7 +374,7 @@ export function MediaUploader({
     <div className={`space-y-3 ${className}`}>
       {selectedMedia ? (
         // Show selected media
-        <div className="relative border border-gray-200 rounded-lg p-3">
+        <div className="relative border border-gray-200 dark:border-[var(--card-border)] rounded-lg p-3">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               {isImage ? (
@@ -384,21 +384,21 @@ export function MediaUploader({
                   className="w-16 h-16 object-cover rounded"
                 />
               ) : (
-                <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                  <FileIcon className="w-8 h-8 text-gray-400" />
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                  <FileIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                 </div>
               )}
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                 {selectedMedia.filename}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {formatFileSize(selectedMedia.filesize)}
               </p>
               {selectedMedia.alt && (
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   Alt: {selectedMedia.alt}
                 </p>
               )}
@@ -407,7 +407,7 @@ export function MediaUploader({
             <button
               type="button"
               onClick={handleRemove}
-              className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600"
+              className="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               <X className="w-4 h-4" />
             </button>
@@ -418,45 +418,45 @@ export function MediaUploader({
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isUploading ? 'border-blue-400 bg-blue-50/40' : 'border-gray-300 hover:border-gray-400'}`}
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isUploading ? 'border-blue-400 dark:border-blue-500 bg-blue-50/40 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'}`}
         >
           {isUploading ? (
             <div className="space-y-3">
               <div className="relative mx-auto flex h-12 w-12 items-center justify-center">
-                <div className="absolute inset-0 animate-ping rounded-full bg-blue-100"></div>
-                <div className="relative rounded-full bg-blue-600 p-3 text-white shadow-sm">
+                <div className="absolute inset-0 animate-ping rounded-full bg-blue-100 dark:bg-blue-900/50"></div>
+                <div className="relative rounded-full bg-blue-600 dark:bg-blue-500 p-3 text-white shadow-sm">
                   <Upload className="h-6 w-6 animate-bounce" />
                 </div>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-blue-700">Uploading file...</p>
-                <p className="text-xs text-blue-600">{uploadProgress}% complete</p>
+                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Uploading file...</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">{uploadProgress}% complete</p>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              <Upload className="w-8 h-8 text-gray-900 mx-auto" />
+              <Upload className="w-8 h-8 text-gray-900 dark:text-gray-100 mx-auto" />
               <div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   Click to upload
                 </button>
-                <span className="text-gray-900"> or drag and drop</span>
+                <span className="text-gray-900 dark:text-gray-100"> or drag and drop</span>
               </div>
-              <p className="text-xs text-gray-900">
+              <p className="text-xs text-gray-900 dark:text-gray-100">
                 {accept.includes('image') ? 'Images' : 'Files'} up to {maxSize}MB
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Supported: {formatAcceptedTypes(accept)}
               </p>
             </div>
@@ -466,8 +466,8 @@ export function MediaUploader({
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
@@ -488,7 +488,7 @@ export function MediaUploader({
           setIsLibraryOpen(true);
         }}
         disabled={isUploading}
-        className="w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Choose from Media Library
       </button>

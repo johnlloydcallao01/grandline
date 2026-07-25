@@ -20,7 +20,7 @@ function BarSkeleton() {
   return (
     <div className="animate-pulse flex items-end gap-3 h-48 p-4">
       {[55, 70, 40, 85, 50, 65].map((h, i) => (
-        <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+        <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${h}%` }} />
       ))}
     </div>
   )
@@ -77,7 +77,7 @@ function ScoreBarChart({ data }: { data: { range: string; count: number }[] }) {
   if (!option) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No score data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No score data available</p>
       </div>
     )
   }
@@ -150,7 +150,7 @@ function MonthlySubmissionsChart({ data }: { data: { month: string; count: numbe
   if (!option) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No submission data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No submission data available</p>
       </div>
     )
   }
@@ -213,7 +213,7 @@ function PassFailPieChart({ data }: { data: { status: string; count: number }[] 
   if (!option) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No pass/fail data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No pass/fail data available</p>
       </div>
     )
   }
@@ -237,18 +237,18 @@ export function AssessmentsTab({ data, loading }: AssessmentsTabProps) {
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
+            <div key={i} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm animate-pulse">
               <div className="space-y-3">
-                <div className="h-3 bg-gray-100 rounded w-20" />
-                <div className="h-7 bg-gray-100 rounded w-12" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+                <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded w-12" />
               </div>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm"><BarSkeleton /></div>
-          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm"><BarSkeleton /></div>
-          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm"><BarSkeleton /></div>
+          <div className="lg:col-span-1 bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><BarSkeleton /></div>
+          <div className="lg:col-span-1 bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><BarSkeleton /></div>
+          <div className="lg:col-span-1 bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><BarSkeleton /></div>
         </div>
       </div>
     )
@@ -257,7 +257,7 @@ export function AssessmentsTab({ data, loading }: AssessmentsTabProps) {
   if (!assessments) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No assessment data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No assessment data available</p>
       </div>
     )
   }
@@ -265,62 +265,62 @@ export function AssessmentsTab({ data, loading }: AssessmentsTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Submissions</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(assessments.totalSubmissions)}</p>
-            <p className="text-xs text-gray-400">Total submissions</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submissions</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(assessments.totalSubmissions)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Total submissions</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Assessments</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(assessments.totalAssessments)}</p>
-            <p className="text-xs text-gray-400">Total quizzes/exams</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assessments</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(assessments.totalAssessments)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Total quizzes/exams</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pass Rate</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{assessments.passRate}%</p>
-            <p className="text-xs text-gray-400">Overall pass rate</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pass Rate</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{assessments.passRate}%</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Overall pass rate</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Score</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{assessments.avgScore}%</p>
-            <p className="text-xs text-gray-400">Average score</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Score</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{assessments.avgScore}%</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Average score</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Attempts</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{assessments.avgAttempts}</p>
-            <p className="text-xs text-gray-400">Per submission</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Attempts</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{assessments.avgAttempts}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Per submission</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Score Distribution</h3>
-            <span className="text-xs text-gray-400">By range</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Score Distribution</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">By range</span>
           </div>
           <ScoreBarChart data={assessments.scoreDistribution} />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Monthly Submissions</h3>
-            <span className="text-xs text-gray-400">Trend</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Monthly Submissions</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Trend</span>
           </div>
           <MonthlySubmissionsChart data={assessments.monthlySubmissions} />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Pass / Fail Breakdown</h3>
-            <span className="text-xs text-gray-400">Results</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pass / Fail Breakdown</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Results</span>
           </div>
           <PassFailPieChart data={assessments.passFailDistribution} />
         </div>

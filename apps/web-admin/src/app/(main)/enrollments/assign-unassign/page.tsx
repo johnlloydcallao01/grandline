@@ -25,19 +25,19 @@ function getStatusBadge(status: string) {
   const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium'
   switch (status) {
     case 'active':
-      return <span className={`${base} bg-green-50 text-green-700 ring-1 ring-inset ring-green-200`}><CheckCircle className="h-3 w-3" />Active</span>
+      return <span className={`${base} bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-200 dark:ring-green-700/50`}><CheckCircle className="h-3 w-3" />Active</span>
     case 'completed':
-      return <span className={`${base} bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200`}><CheckCircle className="h-3 w-3" />Completed</span>
+      return <span className={`${base} bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-200 dark:ring-blue-700/50`}><CheckCircle className="h-3 w-3" />Completed</span>
     case 'pending':
-      return <span className={`${base} bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200`}><Clock className="h-3 w-3" />Pending</span>
+      return <span className={`${base} bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-200 dark:ring-amber-700/50`}><Clock className="h-3 w-3" />Pending</span>
     case 'suspended':
-      return <span className={`${base} bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200`}><AlertTriangle className="h-3 w-3" />Suspended</span>
+      return <span className={`${base} bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-200 dark:ring-orange-700/50`}><AlertTriangle className="h-3 w-3" />Suspended</span>
     case 'dropped':
-      return <span className={`${base} bg-red-50 text-red-700 ring-1 ring-inset ring-red-200`}><X className="h-3 w-3" />Dropped</span>
+      return <span className={`${base} bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-200 dark:ring-red-700/50`}><X className="h-3 w-3" />Dropped</span>
     case 'expired':
-      return <span className={`${base} bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-200`}><Clock className="h-3 w-3" />Expired</span>
+      return <span className={`${base} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-200 dark:ring-gray-700`}><Clock className="h-3 w-3" />Expired</span>
     default:
-      return <span className={`${base} bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-200`}>{status}</span>
+      return <span className={`${base} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-200 dark:ring-gray-700`}>{status}</span>
   }
 }
 
@@ -55,8 +55,8 @@ function getStatusRowAccent(status: string): string {
 
 function getProgressBarColor(pct: number): string {
   if (pct >= 100) return 'bg-green-500'
-  if (pct > 0) return 'bg-blue-500'
-  return 'bg-gray-200'
+  if (pct > 0) return 'bg-blue-500 dark:bg-blue-400'
+  return 'bg-gray-200 dark:bg-gray-700'
 }
 
 function getEnrollmentTypeTag(type: string): string | null {
@@ -446,21 +446,21 @@ export default function AssignUnassignPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Course Enrollments</h1>
-          <p className="text-gray-600 mt-1">Manage access and enrollment rules</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Course Enrollments</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage access and enrollment rules</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => downloadCSV(enrollments)}
             disabled={enrollments.length === 0}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="h-4 w-4" />
             Export
           </button>
           <button
             onClick={openAssign}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Assign Enrollment
@@ -471,47 +471,47 @@ export default function AssignUnassignPage() {
       {/* Metric Cards */}
       {!isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.total}</p>
-                <p className="text-xs text-gray-500">Total Enrollments</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.total}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Enrollments</p>
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/30">
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.active}</p>
-                <p className="text-xs text-gray-500">Active</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.active}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                <BookOpen className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.completed}</p>
-                <p className="text-xs text-gray-500">Completed</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.completed}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
-                <Clock className="h-5 w-5 text-amber-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.pending}</p>
-                <p className="text-xs text-gray-500">Pending</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.pending}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>
               </div>
             </div>
           </div>
@@ -521,19 +521,19 @@ export default function AssignUnassignPage() {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search by student name, email, or course..."
-            className="w-full rounded-lg border border-gray-300 pl-10 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-[#201a7c] focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 outline-none bg-white dark:bg-[var(--card-background)]"
           />
         </div>
         {(search || statusFilter) && (
           <button
             onClick={() => { setSearch(''); setStatusFilter(''); setCurrentPage(1) }}
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <X className="h-4 w-4" />
             Clear
@@ -548,12 +548,12 @@ export default function AssignUnassignPage() {
             onClick={() => handleStatusFilter('')}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               !statusFilter
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
             All
-            <span className={`tabular-nums ${!statusFilter ? 'text-blue-200' : 'text-gray-400'}`}>
+            <span className={`tabular-nums ${!statusFilter ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
               {enrollments.length}
             </span>
           </button>
@@ -565,12 +565,12 @@ export default function AssignUnassignPage() {
                 onClick={() => handleStatusFilter(s)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   statusFilter === s
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
-                <span className={`tabular-nums ${statusFilter === s ? 'text-blue-200' : 'text-gray-400'}`}>
+                <span className={`tabular-nums ${statusFilter === s ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
                   {statusCounts[s] || 0}
                 </span>
               </button>
@@ -580,24 +580,24 @@ export default function AssignUnassignPage() {
 
       {/* Error banner */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+        <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
-          <button onClick={fetchEnrollments} className="ml-auto text-red-700 underline hover:no-underline">Retry</button>
+          <button onClick={fetchEnrollments} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Retry</button>
         </div>
       )}
 
       {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-400 mr-2" />
-          <span className="text-gray-500">Loading enrollments...</span>
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500 mr-2" />
+          <span className="text-gray-500 dark:text-gray-400">Loading enrollments...</span>
         </div>
       ) : enrollments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <BookOpen className="h-12 w-12 text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">No enrollments found</h3>
-          <p className="text-sm text-gray-500 mt-1 max-w-sm">
+          <BookOpen className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No enrollments found</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">
             {search || statusFilter
               ? 'No enrollments match your current filters. Try adjusting your search or status filter.'
               : 'Get started by assigning a trainee to a course.'}
@@ -605,7 +605,7 @@ export default function AssignUnassignPage() {
           {!search && !statusFilter && (
             <button
               onClick={openAssign}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Assign Enrollment
@@ -615,65 +615,65 @@ export default function AssignUnassignPage() {
       ) : (
         <>
           {/* Table */}
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)]">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
                   <th className="px-4 py-3 text-left"><SortHeader sortKey="student" label="Student" /></th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
                   <th className="px-4 py-3 text-left"><SortHeader sortKey="course" label="Course" /></th>
                   <th className="px-4 py-3 text-left"><SortHeader sortKey="status" label="Status" /></th>
                   <th className="px-4 py-3 text-left"><SortHeader sortKey="enrolledAt" label="Enrolled" /></th>
                   <th className="px-4 py-3 text-left"><SortHeader sortKey="progressPercentage" label="Progress" /></th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {sortedEnrollments.map((enrollment) => {
                   const pct = enrollment.progressPercentage || 0
                   const typeTag = getEnrollmentTypeTag(enrollment.enrollmentType)
                   return (
                     <tr
                       key={enrollment.id}
-                      className={`hover:bg-gray-50 transition-colors border-l-[3px] ${getStatusRowAccent(enrollment.status)}`}
+                      className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-l-[3px] ${getStatusRowAccent(enrollment.status)}`}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                            <User className="h-4 w-4 text-blue-600" />
+                          <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           </div>
-                          <span className="text-sm font-medium text-gray-900">{getStudentName(enrollment)}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{getStudentName(enrollment)}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{getStudentEmail(enrollment)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getStudentEmail(enrollment)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-900 font-medium">{getCourseTitle(enrollment)}</span>
+                          <span className="text-sm text-gray-900 dark:text-gray-100 font-medium">{getCourseTitle(enrollment)}</span>
                           {typeTag && (
-                            <span className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 uppercase">
+                            <span className="inline-flex items-center rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">
                               {typeTag}
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(enrollment.enrolledAt)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{formatDate(enrollment.enrolledAt)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-2 w-20 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-2 w-20 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all ${getProgressBarColor(pct)}`}
                               style={{ width: `${Math.min(pct, 100)}%` }}
                             />
                           </div>
-                          <span className="text-xs text-gray-500 tabular-nums">{pct}%</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">{pct}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => openEdit(enrollment)}
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             title="Edit enrollment"
                           >
                             <Edit className="h-3.5 w-3.5" />
@@ -682,7 +682,7 @@ export default function AssignUnassignPage() {
                           {enrollment.status === 'dropped' ? (
                             <button
                               onClick={() => setDeleteTarget(enrollment)}
-                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                               title="Delete enrollment"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -690,7 +690,7 @@ export default function AssignUnassignPage() {
                           ) : (
                             <button
                               onClick={() => setUnassignTarget(enrollment)}
-                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                               title="Unassign enrollment"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -707,14 +707,14 @@ export default function AssignUnassignPage() {
 
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Showing {((currentPage - 1) * 10) + 1}{'\u2013'}{Math.min(currentPage * 10, totalDocs)} of {totalDocs} enrollments
               </p>
               <div className="flex items-center gap-1 flex-wrap">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage <= 1}
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white dark:bg-[var(--card-background)]"
                 >
                   Previous
                 </button>
@@ -728,8 +728,8 @@ export default function AssignUnassignPage() {
                       onClick={() => handlePageChange(pageNum)}
                       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                         pageNum === currentPage
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                          : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-[var(--card-background)]'
                       }`}
                     >
                       {pageNum}
@@ -739,7 +739,7 @@ export default function AssignUnassignPage() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage >= totalPages}
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white dark:bg-[var(--card-background)]"
                 >
                   Next
                 </button>
@@ -751,146 +751,146 @@ export default function AssignUnassignPage() {
       {/* Assign SlideOver */}
       {assignMounted && createPortal(
         <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animateAssign ? 'bg-black/50' : 'bg-transparent'}`} onClick={closeAssign}>
-          <div className={`flex w-full max-w-lg flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animateAssign ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
-            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div className={`flex w-full max-w-lg flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animateAssign ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Assign Enrollment</h3>
-                <p className="mt-0.5 text-sm text-gray-500">Enroll a trainee in a course</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Assign Enrollment</h3>
+                <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Enroll a trainee in a course</p>
               </div>
-              <button type="button" onClick={closeAssign} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <button type="button" onClick={closeAssign} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <form onSubmit={handleAssignSubmit} className="space-y-5">
                 {assignError && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+                  <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     {assignError}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Trainee <span className="text-red-500">*</span>
                   </label>
                   {selectedTrainee ? (
-                    <div className="flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center">
-                          <User className="h-3.5 w-3.5 text-blue-600" />
+                        <div className="h-7 w-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                          <User className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             {selectedTrainee.user.firstName} {selectedTrainee.user.lastName}
                           </p>
-                          <p className="text-xs text-gray-500">{selectedTrainee.user.email}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{selectedTrainee.user.email}</p>
                         </div>
                       </div>
-                      <button type="button" onClick={() => setSelectedTrainee(null)} className="text-gray-400 hover:text-gray-600">
+                      <button type="button" onClick={() => setSelectedTrainee(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   ) : (
                     <>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <input type="text" value={traineeSearch} onChange={(e) => handleTraineeSearch(e.target.value)} placeholder="Search by name or email..." className="w-full rounded-lg border border-gray-300 pl-10 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <input type="text" value={traineeSearch} onChange={(e) => handleTraineeSearch(e.target.value)} placeholder="Search by name or email..." className="w-full rounded-lg border border-gray-300 dark:border-gray-600 pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]" />
                         {isSearchingTrainees && (
-                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 dark:text-gray-500" />
                         )}
                       </div>
                       {traineeResults.length > 0 && (
-                        <div className="mt-2 rounded-lg border border-gray-200 bg-white shadow-sm max-h-48 overflow-y-auto">
+                        <div className="mt-2 rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm max-h-48 overflow-y-auto">
                           {traineeResults.map((trainee) => (
-                            <button key={trainee.id} type="button" onClick={() => { setSelectedTrainee(trainee); setTraineeSearch(''); setTraineeResults([]) }} className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                              <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                <User className="h-3.5 w-3.5 text-blue-600" />
+                            <button key={trainee.id} type="button" onClick={() => { setSelectedTrainee(trainee); setTraineeSearch(''); setTraineeResults([]) }} className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+                              <div className="h-7 w-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+                                <User className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">{trainee.user.firstName} {trainee.user.lastName}</p>
-                                <p className="text-xs text-gray-500 truncate">{trainee.user.email}{trainee.srn ? ` \u2022 ${trainee.srn}` : ''}</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{trainee.user.firstName} {trainee.user.lastName}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{trainee.user.email}{trainee.srn ? ` \u2022 ${trainee.srn}` : ''}</p>
                               </div>
                             </button>
                           ))}
                         </div>
                       )}
                       {traineeSearch.length >= 1 && !isSearchingTrainees && traineeResults.length === 0 && (
-                        <p className="mt-1.5 text-xs text-gray-500">No trainees found matching &quot;{traineeSearch}&quot;</p>
+                        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">No trainees found matching &quot;{traineeSearch}&quot;</p>
                       )}
                     </>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Course <span className="text-red-500">*</span>
                   </label>
                   {selectedCourse ? (
-                    <div className="flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center">
-                          <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                        <div className="h-7 w-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                          <BookOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{selectedCourse.title}</p>
-                          <p className="text-xs text-gray-500">{selectedCourse.courseCode}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedCourse.title}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{selectedCourse.courseCode}</p>
                         </div>
                       </div>
-                      <button type="button" onClick={() => { setSelectedCourse(null); setCourseSearch(''); setCourseResults([]) }} className="text-gray-400 hover:text-gray-600">
+                      <button type="button" onClick={() => { setSelectedCourse(null); setCourseSearch(''); setCourseResults([]) }} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   ) : (
                     <>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                         <input
                           type="text"
                           value={courseSearch}
                           onChange={(e) => handleCourseSearch(e.target.value)}
                           placeholder="Search by course title or code..."
-                          className="w-full rounded-lg border border-gray-300 pl-10 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]"
                         />
                         {isSearchingCourses && (
-                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 dark:text-gray-500" />
                         )}
                       </div>
                       {courseResults.length > 0 && (
-                        <div className="mt-2 rounded-lg border border-gray-200 bg-white shadow-sm max-h-48 overflow-y-auto">
+                        <div className="mt-2 rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm max-h-48 overflow-y-auto">
                           {courseResults.map((course) => (
                             <button
                               key={course.id}
                               type="button"
                               onClick={() => { setSelectedCourse(course); setCourseSearch(''); setCourseResults([]) }}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0"
                             >
-                              <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                              <div className="h-7 w-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+                                <BookOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">{course.title}</p>
-                                <p className="text-xs text-gray-500 truncate">{course.courseCode || 'No code'}</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{course.title}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{course.courseCode || 'No code'}</p>
                               </div>
                             </button>
                           ))}
                         </div>
                       )}
                       {courseSearch.length >= 1 && !isSearchingCourses && courseResults.length === 0 && (
-                        <p className="mt-1.5 text-xs text-gray-500">No courses found matching &quot;{courseSearch}&quot;</p>
+                        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">No courses found matching &quot;{courseSearch}&quot;</p>
                       )}
                     </>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label>
-                  <textarea value={assignNotes} onChange={(e) => setAssignNotes(e.target.value)} rows={3} placeholder="Optional admin notes..." className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none" />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notes</label>
+                  <textarea value={assignNotes} onChange={(e) => setAssignNotes(e.target.value)} rows={3} placeholder="Optional admin notes..." className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none resize-none bg-white dark:bg-[var(--card-background)]" />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
-                  <button type="button" onClick={closeAssign} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                  <button type="submit" disabled={isAssignSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
+                  <button type="button" onClick={closeAssign} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
+                  <button type="submit" disabled={isAssignSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     {isAssignSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Enrolling...</>) : (<><Plus className="h-4 w-4" /> Enroll Trainee</>)}
                   </button>
                 </div>
@@ -904,51 +904,51 @@ export default function AssignUnassignPage() {
       {/* Edit SlideOver */}
       {editTarget && createPortal(
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={() => setEditTarget(null)}>
-          <div className="flex w-full max-w-lg flex-col bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div className="flex w-full max-w-lg flex-col bg-white dark:bg-[var(--card-background)] shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Edit Enrollment</h3>
-                <p className="mt-0.5 text-sm text-gray-500">{getStudentName(editTarget)} \u2014 {getCourseTitle(editTarget)}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Enrollment</h3>
+                <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{getStudentName(editTarget)} \u2014 {getCourseTitle(editTarget)}</p>
               </div>
-              <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="space-y-5">
                 {editError && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+                  <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     {editError}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
                   <div className="relative">
                     <select
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value)}
-                      className="w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                      className="w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]"
                     >
                       {['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'].map((s) => (
                         <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-500 space-y-1">
-                  <div className="flex justify-between"><span>Student</span><span className="font-medium text-gray-700">{getStudentName(editTarget)}</span></div>
-                  <div className="flex justify-between"><span>Email</span><span className="font-medium text-gray-700">{getStudentEmail(editTarget)}</span></div>
-                  <div className="flex justify-between"><span>Course</span><span className="font-medium text-gray-700">{getCourseTitle(editTarget)}</span></div>
-                  <div className="flex justify-between"><span>Enrolled</span><span className="font-medium text-gray-700">{formatDate(editTarget.enrolledAt)}</span></div>
+                <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                  <div className="flex justify-between"><span>Student</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentName(editTarget)}</span></div>
+                  <div className="flex justify-between"><span>Email</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentEmail(editTarget)}</span></div>
+                  <div className="flex justify-between"><span>Course</span><span className="font-medium text-gray-700 dark:text-gray-200">{getCourseTitle(editTarget)}</span></div>
+                  <div className="flex justify-between"><span>Enrolled</span><span className="font-medium text-gray-700 dark:text-gray-200">{formatDate(editTarget.enrolledAt)}</span></div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
-                  <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                  <button type="button" onClick={handleEditSave} disabled={isEditSubmitting || editStatus === editTarget.status} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
+                  <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
+                  <button type="button" onClick={handleEditSave} disabled={isEditSubmitting || editStatus === editTarget.status} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     {isEditSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>) : (<>Save Changes</>)}
                   </button>
                 </div>
@@ -962,19 +962,19 @@ export default function AssignUnassignPage() {
       {/* Unassign Modal — sets status to dropped */}
       {unassignTarget && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => { setUnassignTarget(null); setUnassignError(null) }}>
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-900">Unassign Enrollment</h2>
-              <button onClick={() => { setUnassignTarget(null); setUnassignError(null) }} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--card-background)] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Unassign Enrollment</h2>
+              <button onClick={() => { setUnassignTarget(null); setUnassignError(null) }} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4">
-              {unassignError && (<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{unassignError}</div>)}
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"><p className="font-medium">Unassign student?</p><p className="mt-1">This will unassign <strong>{getStudentName(unassignTarget)}</strong> from <strong>{getCourseTitle(unassignTarget)}</strong>. The enrollment status will be marked as <strong>Dropped</strong>. Progress data will be preserved and the record will remain visible.</p></div>
+              {unassignError && (<div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{unassignError}</div>)}
+              <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4 text-sm text-amber-700 dark:text-amber-400"><p className="font-medium">Unassign student?</p><p className="mt-1">This will unassign <strong>{getStudentName(unassignTarget)}</strong> from <strong>{getCourseTitle(unassignTarget)}</strong>. The enrollment status will be marked as <strong>Dropped</strong>. Progress data will be preserved and the record will remain visible.</p></div>
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={() => { setUnassignTarget(null); setUnassignError(null) }} disabled={isUnassignSubmitting} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors">Cancel</button>
-                <button onClick={handleUnassign} disabled={isUnassignSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                <button onClick={() => { setUnassignTarget(null); setUnassignError(null) }} disabled={isUnassignSubmitting} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
+                <button onClick={handleUnassign} disabled={isUnassignSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-amber-600 dark:bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 dark:hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                   {isUnassignSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Unassigning...</>) : (<>Unassign</>)}
                 </button>
               </div>
@@ -987,19 +987,19 @@ export default function AssignUnassignPage() {
       {/* Delete Modal — archives the record */}
       {deleteTarget && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => { setDeleteTarget(null); setDeleteError(null) }}>
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-900">Delete Enrollment</h2>
-              <button onClick={() => { setDeleteTarget(null); setDeleteError(null) }} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--card-background)] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Enrollment</h2>
+              <button onClick={() => { setDeleteTarget(null); setDeleteError(null) }} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4">
-              {deleteError && (<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{deleteError}</div>)}
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><p className="font-medium">Are you sure?</p><p className="mt-1">This will permanently remove <strong>{getStudentName(deleteTarget)}</strong> from <strong>{getCourseTitle(deleteTarget)}</strong> from the active view. The record will be archived in the database.</p></div>
+              {deleteError && (<div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{deleteError}</div>)}
+              <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-4 text-sm text-red-700 dark:text-red-400"><p className="font-medium">Are you sure?</p><p className="mt-1">This will permanently remove <strong>{getStudentName(deleteTarget)}</strong> from <strong>{getCourseTitle(deleteTarget)}</strong> from the active view. The record will be archived in the database.</p></div>
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={() => { setDeleteTarget(null); setDeleteError(null) }} disabled={isDeleteSubmitting} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors">Cancel</button>
-                <button onClick={handleArchive} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                <button onClick={() => { setDeleteTarget(null); setDeleteError(null) }} disabled={isDeleteSubmitting} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
+                <button onClick={handleArchive} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                   {isDeleteSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Deleting...</>) : (<><Trash2 className="h-4 w-4" /> Delete</>)}
                 </button>
               </div>

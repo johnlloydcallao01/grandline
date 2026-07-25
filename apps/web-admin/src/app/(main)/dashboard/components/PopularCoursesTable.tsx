@@ -69,7 +69,7 @@ export function PopularCoursesTable({ data, loading }: PopularCoursesTableProps)
         {data.map((course, index) => {
           const barWidth = maxEnrollments > 0 ? (course.enrollmentCount / maxEnrollments) * 100 : 0
           return (
-            <div key={course.id} className="px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+            <div key={course.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
               <div className="flex items-center gap-3 mb-1.5">
                 <span className={`text-xs font-bold w-4 text-center ${getRankIcon(index)}`}>
                   {index + 1}

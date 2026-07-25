@@ -34,6 +34,7 @@ export const Posts: CollectionConfig = {
         description: 'Post category for organization',
       },
     },
+
   ],
   versions: {
     drafts: true,

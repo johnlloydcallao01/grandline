@@ -20,9 +20,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-    quiz: 'bg-blue-100 text-blue-700',
-    exam: 'bg-orange-100 text-orange-700',
-    final_exam: 'bg-purple-100 text-purple-700',
+    quiz: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    exam: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+    final_exam: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
 };
 
 const TYPE_OPTIONS = [
@@ -138,22 +138,22 @@ export default function AssessmentsPage() {
     };
 
     const metricCards = [
-        { label: 'Total Assessments', value: totalDocs, color: 'text-blue-600', bg: 'bg-blue-50', icon: BookOpen },
-        { label: 'Quizzes', value: typeCounts.quiz, color: 'text-blue-600', bg: 'bg-blue-50', icon: FileText },
-        { label: 'Exams', value: typeCounts.exam, color: 'text-orange-600', bg: 'bg-orange-50', icon: FileText },
-        { label: 'Final Exams', value: typeCounts.final_exam, color: 'text-purple-600', bg: 'bg-purple-50', icon: FileText },
+        { label: 'Total Assessments', value: totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookOpen },
+        { label: 'Quizzes', value: typeCounts.quiz, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: FileText },
+        { label: 'Exams', value: typeCounts.exam, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30', icon: FileText },
+        { label: 'Final Exams', value: typeCounts.final_exam, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30', icon: FileText },
     ];
 
     if (error) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
-                    <div className="text-red-500 mb-4">
+                    <div className="text-red-500 dark:text-red-400 mb-4">
                         <BookOpen className="h-12 w-12 mx-auto" />
                     </div>
-                    <p className="text-gray-900 font-medium mb-2">Failed to load assessments</p>
-                    <p className="text-gray-500 text-sm mb-4">{error}</p>
-                    <button onClick={loadAssessments} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                    <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">Failed to load assessments</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{error}</p>
+                    <button onClick={loadAssessments} className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
                         Retry
                     </button>
                 </div>
@@ -166,12 +166,12 @@ export default function AssessmentsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Assessments</h1>
-                    <p className="text-gray-500 mt-1">Create and manage quizzes, exams, and assessments</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Assessments</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Create and manage quizzes, exams, and assessments</p>
                 </div>
                 <Link
                     href="/courses/assessments/create"
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
+                    className="flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm font-medium"
                 >
                     <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                     Create Assessment
@@ -182,41 +182,41 @@ export default function AssessmentsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {isLoading ? (
                     <>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-blue-50"><div className="h-5 w-5 bg-blue-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-24 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30"><div className="h-5 w-5 bg-blue-200 dark:bg-blue-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-24 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-blue-50"><div className="h-5 w-5 bg-blue-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30"><div className="h-5 w-5 bg-blue-200 dark:bg-blue-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-orange-50"><div className="h-5 w-5 bg-orange-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-orange-50 dark:bg-orange-950/30"><div className="h-5 w-5 bg-orange-200 dark:bg-orange-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-purple-50"><div className="h-5 w-5 bg-purple-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/30"><div className="h-5 w-5 bg-purple-200 dark:bg-purple-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
                     </>
                 ) : (
                     metricCards.map((card) => (
-                        <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div key={card.label} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2.5 rounded-lg ${card.bg}`}>
                                     <card.icon className={`h-5 w-5 ${card.color}`} />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                                    <p className="text-xs text-gray-500">{card.label}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{card.label}</p>
                                 </div>
                             </div>
                         </div>
@@ -225,13 +225,13 @@ export default function AssessmentsPage() {
             </div>
 
             {/* Search & Filters */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-3">
+            <div className="bg-white dark:bg-[var(--card-background)] p-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search by title..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-[var(--card-background)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -243,8 +243,8 @@ export default function AssessmentsPage() {
                             onClick={() => { setTypeFilter(opt.value); setCurrentPage(1); }}
                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 typeFilter === opt.value
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                         >
                             {opt.label}
@@ -255,39 +255,39 @@ export default function AssessmentsPage() {
 
             {/* Loading State */}
             {isLoading ? (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
                             <tr>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assessment</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Module / Course</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Questions</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Passing</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assessment</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Module / Course</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Questions</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Passing</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-48" /></td>
-                                    <td className="px-4 py-4"><div className="h-5 bg-gray-100 rounded w-16" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-28" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-12" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-12" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-20 ml-auto" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-48" /></td>
+                                    <td className="px-4 py-4"><div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-16" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-28" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-12" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-12" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-20 ml-auto" /></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             ) : assessments.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-                    <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FileText className="h-8 w-8 text-gray-400" />
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-12 text-center">
+                    <div className="h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">No assessments found</h3>
-                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No assessments found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                         {debouncedSearch || typeFilter !== 'all'
                             ? 'No assessments match your search criteria. Try adjusting the filters.'
                             : 'Get started by creating your first assessment.'}
@@ -295,7 +295,7 @@ export default function AssessmentsPage() {
                     {!debouncedSearch && typeFilter === 'all' && (
                         <Link
                             href="/courses/assessments/create"
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium"
                         >
                             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                             Create Assessment
@@ -305,70 +305,70 @@ export default function AssessmentsPage() {
             ) : (
                 <>
                     {/* Assessments Table */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50/50">
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assessment</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Module / Course</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Questions</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Passing</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <tr className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50/50 dark:bg-gray-800/50">
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assessment</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Module / Course</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Questions</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Passing</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {assessments.map((assessment) => (
-                                    <tr key={assessment.id} className="hover:bg-gray-50/50 transition-colors group">
+                                    <tr key={assessment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shrink-0">
-                                                    <FileText className="h-5 w-5 text-blue-500" />
+                                                <div className="h-10 w-10 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 flex items-center justify-center overflow-hidden shrink-0">
+                                                    <FileText className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <span className="text-sm font-medium text-gray-900 truncate block">
+                                                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate block">
                                                         {assessment.title}
                                                     </span>
-                                                    <p className="text-xs text-gray-400 font-mono">#{String(assessment.id).slice(0, 8)}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">#{String(assessment.id).slice(0, 8)}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[assessment.assessmentType] || 'bg-gray-100 text-gray-600'}`}>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[assessment.assessmentType] || 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
                                                 {TYPE_LABELS[assessment.assessmentType] || assessment.assessmentType}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                                <Folder className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                            <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                                                <Folder className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
                                                 <span className="truncate">{getModuleName(assessment)}</span>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className="text-sm text-gray-600">{getItemsCount(assessment)}</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">{getItemsCount(assessment)}</span>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className="text-sm text-gray-600">{assessment.passingScore ?? 70}%</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">{assessment.passingScore ?? 70}%</span>
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => openDetail(assessment)}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                     title="View Details"
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                 </button>
                                                 <Link
                                                     href={`/courses/assessments/${assessment.id}/edit`}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                     title="Edit Assessment"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Link>
                                                 <button
                                                     onClick={() => setDeleteTarget(assessment)}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -383,15 +383,15 @@ export default function AssessmentsPage() {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3">
-                            <p className="text-sm text-gray-500">
+                        <div className="flex items-center justify-between bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm px-4 py-3">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}&ndash;{Math.min(currentPage * ITEMS_PER_PAGE, totalDocs)} of {totalDocs}
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage <= 1}
-                                    className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]"
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                                 </button>
@@ -403,14 +403,14 @@ export default function AssessmentsPage() {
                                     else pageNum = currentPage - 2 + i;
                                     return (
                                         <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
-                                            className={`w-8 h-8 rounded-lg text-sm font-medium ${currentPage === pageNum ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                            className={`w-8 h-8 rounded-lg text-sm font-medium ${currentPage === pageNum ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
                                             {pageNum}
                                         </button>
                                     );
                                 })}
                                 <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage >= totalPages}
-                                    className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]">
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
                                 </button>
                             </div>
@@ -422,20 +422,20 @@ export default function AssessmentsPage() {
             {/* Delete Confirmation */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => !isDeleting && setDeleteTarget(null)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
                         <div className="text-center">
-                            <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Trash2 className="h-6 w-6 text-red-600" />
+                            <div className="h-12 w-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Assessment</h3>
-                            <p className="text-sm text-gray-500 mb-6">
-                                Are you sure you want to delete <span className="font-semibold text-gray-700">{deleteTarget.title}</span>? This action cannot be undone.
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Delete Assessment</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                Are you sure you want to delete <span className="font-semibold text-gray-700 dark:text-gray-200">{deleteTarget.title}</span>? This action cannot be undone.
                             </p>
                             <div className="flex gap-3 justify-center">
                                 <button onClick={() => setDeleteTarget(null)} disabled={isDeleting}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
                                 <button onClick={handleDelete} disabled={isDeleting}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2">
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50 flex items-center gap-2">
                                     {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {isDeleting ? 'Deleting...' : 'Delete'}
                                 </button>
@@ -449,88 +449,88 @@ export default function AssessmentsPage() {
             {detailAssessment && (
                 <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailAssessment(null)}>
                     <div className="absolute inset-0 bg-black/30" />
-                    <div className="relative w-full max-w-lg bg-white shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                            <h2 className="text-lg font-bold text-gray-900 truncate pr-4">{detailAssessment.title}</h2>
-                            <button onClick={() => setDetailAssessment(null)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 shrink-0">
+                    <div className="relative w-full max-w-lg bg-white dark:bg-[var(--card-background)] shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white dark:bg-[var(--card-background)] border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4 flex items-center justify-between z-10">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate pr-4">{detailAssessment.title}</h2>
+                            <button onClick={() => setDetailAssessment(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 shrink-0">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
                         <div className="p-6 space-y-6">
                             {isDetailLoading ? (
                                 <div className="space-y-4 animate-pulse">
-                                    <div className="h-4 bg-gray-100 rounded w-3/4" />
-                                    <div className="h-4 bg-gray-100 rounded w-1/2" />
-                                    <div className="h-20 bg-gray-100 rounded w-full" />
+                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
+                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
+                                    <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded w-full" />
                                 </div>
                             ) : (
                                 <>
                                     <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[detailAssessment.assessmentType] || 'bg-gray-100 text-gray-600'}`}>
+                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[detailAssessment.assessmentType] || 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
                                             {TYPE_LABELS[detailAssessment.assessmentType] || detailAssessment.assessmentType}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <span className="text-gray-500">Assessment ID</span>
-                                            <p className="font-medium text-gray-900 font-mono text-xs mt-1">#{detailAssessment.id}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Assessment ID</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">#{detailAssessment.id}</p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">{detailAssessment.assessmentType === 'final_exam' ? 'Course' : 'Module'}</span>
-                                            <p className="font-medium text-gray-900 flex items-center gap-1.5 mt-1">
-                                                <Folder className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                            <span className="text-gray-500 dark:text-gray-400">{detailAssessment.assessmentType === 'final_exam' ? 'Course' : 'Module'}</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1.5 mt-1">
+                                                <Folder className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
                                                 {getModuleName(detailAssessment)}
                                             </p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Questions</span>
-                                            <p className="font-medium text-gray-900 mt-1">{getItemsCount(detailAssessment)}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Questions</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{getItemsCount(detailAssessment)}</p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Passing Score</span>
-                                            <p className="font-medium text-gray-900 mt-1">{detailAssessment.passingScore ?? 70}%</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Passing Score</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailAssessment.passingScore ?? 70}%</p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Max Attempts</span>
-                                            <p className="font-medium text-gray-900 mt-1">{detailAssessment.maxAttempts ?? 1}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Max Attempts</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailAssessment.maxAttempts ?? 1}</p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Time Limit</span>
-                                            <p className="font-medium text-gray-900 mt-1">
+                                            <span className="text-gray-500 dark:text-gray-400">Time Limit</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">
                                                 {detailAssessment.timeLimitMinutes ? `${detailAssessment.timeLimitMinutes} min` : 'No limit'}
                                             </p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Show Correct Answer</span>
-                                            <p className="font-medium text-gray-900 mt-1">{detailAssessment.showCorrectAnswer ? 'Yes' : 'No'}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Show Correct Answer</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailAssessment.showCorrectAnswer ? 'Yes' : 'No'}</p>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500">Last Updated</span>
-                                            <p className="font-medium text-gray-900 mt-1">{new Date(detailAssessment.updatedAt).toLocaleDateString()}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{new Date(detailAssessment.updatedAt).toLocaleDateString()}</p>
                                         </div>
                                     </div>
 
                                     {detailAssessment.description ? (
                                         <div>
-                                            <span className="text-sm text-gray-500">Description</span>
-                                            <div className="mt-2 prose prose-sm max-w-none text-gray-900">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
+                                            <div className="mt-2 prose prose-sm max-w-none text-gray-900 dark:text-gray-100">
                                                 {typeof detailAssessment.description === 'object' ? (
-                                                    <p className="text-sm text-gray-600">Rich content available</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Rich content available</p>
                                                 ) : (
-                                                    <p className="text-sm text-gray-900">{String(detailAssessment.description)}</p>
+                                                    <p className="text-sm text-gray-900 dark:text-gray-100">{String(detailAssessment.description)}</p>
                                                 )}
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <FileText className="h-10 w-10 text-gray-200 mx-auto mb-2" />
-                                            <p className="text-sm text-gray-400">No description</p>
+                                            <FileText className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" />
+                                            <p className="text-sm text-gray-400 dark:text-gray-500">No description</p>
                                         </div>
                                     )}
 
-                                    <div className="flex gap-3 pt-4 border-t border-gray-200">
+                                    <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
                                         <Link href={`/courses/assessments/${detailAssessment.id}/edit`}
-                                            className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                                            className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
                                             <Edit className="h-4 w-4 mr-2" />
                                             Edit Assessment
                                         </Link>

@@ -1,23 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: #ffffff;
+  --foreground: #171717;
+  --card-background: #ffffff;
+  --card-border: #e5e7eb;
+  --muted: #6b7280;
+  --accent: #3127a4;
   --primary: #3127a4;
   --primary-foreground: #ffffff;
-  --surface: rgba(255, 255, 255, 0.08);
-  --surface-border: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card-background);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
   --font-sans: var(--font-inter);
   --font-display: var(--font-poppins);
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 body {
@@ -52,8 +54,8 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface);
+  border: 1px solid var(--card-border);
+  background: var(--card-background);
   color: var(--foreground);
   padding: 0.85rem 1.35rem;
   font-weight: 600;
@@ -62,5 +64,17 @@ a {
 
 .btn-secondary:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: var(--accent);
+}
+
+@media (max-width: 1023px) {
+  [data-sidebar="instructor"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }

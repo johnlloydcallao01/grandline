@@ -24,8 +24,10 @@ import { EmergencyContacts } from './collections/EmergencyContacts'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { PostCategories } from './collections/PostCategories'
+import { PostTags } from './collections/PostTags'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
+import { CourseTags } from './collections/CourseTags'
 import { CouponCodes } from './collections/CouponCodes'
 import { CouponRedemptions } from './collections/CouponRedemptions'
 import { CourseEnrollments } from './collections/CourseEnrollments'
@@ -174,6 +176,7 @@ const rawCmsCollections: CollectionConfig[] = [
   Media,
   Posts,
   PostCategories,
+  PostTags,
   AccountingChartOfAccounts,
   AccountingFiscalYears,
   AccountingPeriods,
@@ -236,6 +239,7 @@ const rawCmsCollections: CollectionConfig[] = [
   AccountingAuditLogs,
   Courses,
   CourseCategories,
+  CourseTags,
   CouponCodes,
   CouponRedemptions,
   CourseEnrollments,
@@ -274,6 +278,7 @@ const rawCmsCollections: CollectionConfig[] = [
 const lockDocumentAllowList = new Set<string>([
   Posts.slug,
   PostCategories.slug,
+  PostTags.slug,
   Courses.slug,
   CourseCategories.slug,
   CourseModules.slug,
@@ -297,6 +302,7 @@ const cacheInvalidationSlugs = new Set<string>([
   'course-categories',
   'posts',
   'post-categories',
+  'post-tags',
   'course-modules',
   'course-lessons',
   'materials',

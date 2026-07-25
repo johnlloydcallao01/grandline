@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
-import { InstantLoadingController, LoadingScreenWrapper } from "@/components/loading";
+import { LoadingScreenWrapper } from "@/components/loading";
 import { getServerToken, getServerUser } from "@/app/actions/auth";
+import { getSiteSettingsFavicon } from "@/server/siteSettings";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,10 +18,24 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Grandline Instructor Portal",
   description: "A simple instructor-facing Next.js workspace for Grandline.",
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { faviconUrl } = await getSiteSettingsFavicon();
+  const iconUrl = faviconUrl || "/grandline-logo.png";
+
+  return {
+    ...defaultMetadata,
+    icons: {
+      icon: iconUrl,
+      shortcut: iconUrl,
+      apple: iconUrl,
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -36,8 +51,16 @@ export default async function RootLayout({
       className={`${inter.variable} ${poppins.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
       <body className="min-h-full font-sans">
-        <InstantLoadingController />
         <AuthErrorBoundary>
           <AuthProvider initialUser={initialUser} initialToken={initialToken}>
             <LoadingScreenWrapper>{children}</LoadingScreenWrapper>

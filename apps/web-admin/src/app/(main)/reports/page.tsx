@@ -29,41 +29,41 @@ function ReportsSkeleton() {
     <div className="py-4 sm:py-6 space-y-6 animate-pulse">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-7 bg-gray-100 rounded w-36" />
-          <div className="h-4 bg-gray-100 rounded w-56" />
+          <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded w-36" />
+          <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-56" />
         </div>
-        <div className="h-8 bg-gray-100 rounded w-32" />
+        <div className="h-8 bg-gray-100 dark:bg-gray-800 rounded w-32" />
       </div>
-      <div className="flex gap-1 border-b border-gray-200 pb-1">
+      <div className="flex gap-1 border-b border-gray-200 dark:border-[var(--card-border)] pb-1">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-9 bg-gray-100 rounded w-28" />
+          <div key={i} className="h-9 bg-gray-100 dark:bg-gray-800 rounded w-28" />
         ))}
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+          <div key={i} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
             <div className="space-y-3">
-              <div className="h-3 bg-gray-100 rounded w-20" />
-              <div className="h-7 bg-gray-100 rounded w-12" />
-              <div className="h-3 bg-gray-100 rounded w-24" />
+              <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+              <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded w-12" />
+              <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-24" />
             </div>
           </div>
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-72">
-          <div className="h-4 bg-gray-100 rounded w-36 mb-4" />
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4 h-72">
+          <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-36 mb-4" />
           <div className="flex items-end gap-3 h-56">
             {[55, 70, 40, 85, 50, 65, 45, 75].map((h, i) => (
-              <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+              <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${h}%` }} />
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-72">
-          <div className="h-4 bg-gray-100 rounded w-36 mb-4" />
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4 h-72">
+          <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-36 mb-4" />
           <div className="flex items-end gap-3 h-56">
             {[35, 60, 50, 75, 45, 55, 70, 40].map((h, i) => (
-              <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+              <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${h}%` }} />
             ))}
           </div>
         </div>
@@ -76,14 +76,14 @@ function ReportsError({ message, onRetry }: { message: string; onRetry: () => vo
   return (
     <div className="flex items-center justify-center min-h-[500px]">
       <div className="text-center max-w-md">
-        <div className="h-14 w-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="h-7 w-7 text-red-500" />
+        <div className="h-14 w-14 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="h-7 w-7 text-red-500 dark:text-red-400" />
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Failed to load reports</h2>
-        <p className="text-sm text-gray-500 mb-6">{message}</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Failed to load reports</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{message}</p>
         <button
           onClick={onRetry}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Retry
@@ -159,11 +159,11 @@ export default function ReportsPage() {
     <div className="py-4 sm:py-6 space-y-6">
       <div className="flex flex-col gap-3 sm:gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight">Reports</h1>
-          <p className="mt-0.5 sm:mt-1 text-sm sm:text-base text-gray-500">
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Reports</h1>
+          <p className="mt-0.5 sm:mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-400">
             Enterprise LMS analytics and performance reports
             {lastRefreshed && (
-              <span className="ml-2 text-gray-400">
+              <span className="ml-2 text-gray-400 dark:text-gray-500">
                 &middot; Updated {lastRefreshed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -174,7 +174,7 @@ export default function ReportsPage() {
             type="button"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-gray-300 bg-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 sm:h-4 w-3.5 sm:w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="sr-only sm:not-sr-only">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -182,7 +182,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-[var(--card-border)]">
         <nav className="flex gap-0 -mb-px overflow-x-auto" role="tablist">
           {TABS.map((tab) => (
             <button
@@ -194,8 +194,8 @@ export default function ReportsPage() {
               className={
                 "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2 whitespace-nowrap shrink-0 " +
                 (activeTab === tab.id
-                  ? "border-blue-600 text-blue-600 bg-blue-50/50"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50/50")
+                  ? "border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-950/20"
+                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50")
               }
             >
               {tab.icon}

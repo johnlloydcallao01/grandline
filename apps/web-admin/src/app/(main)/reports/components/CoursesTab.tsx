@@ -25,8 +25,8 @@ function PieSkeleton() {
   return (
     <div className="animate-pulse flex items-center justify-center h-64">
       <div className="relative h-40 w-40">
-        <div className="h-full w-full rounded-full bg-gray-100" />
-        <div className="absolute inset-5 rounded-full bg-white" />
+        <div className="h-full w-full rounded-full bg-gray-100 dark:bg-gray-800" />
+        <div className="absolute inset-5 rounded-full bg-white dark:bg-[var(--card-background)]" />
       </div>
     </div>
   )
@@ -36,7 +36,7 @@ function BarSkeleton() {
   return (
     <div className="animate-pulse flex items-end gap-3 h-48 p-4">
       {[55, 70, 40, 85, 50].map((h, i) => (
-        <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+        <div key={i} className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-t" style={{ height: `${h}%` }} />
       ))}
     </div>
   )
@@ -93,7 +93,7 @@ function PieChartCard({ title: _title, data }: { title: string; data: { name?: s
   if (!option) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No data available</p>
       </div>
     )
   }
@@ -113,7 +113,7 @@ function TopCoursesTable({ data }: { data: ReportsData['courses']['topCourses'] 
   if (!data?.length) {
     return (
       <div className="flex items-center justify-center h-48">
-        <p className="text-sm text-gray-400">No course data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No course data available</p>
       </div>
     )
   }
@@ -122,33 +122,33 @@ function TopCoursesTable({ data }: { data: ReportsData['courses']['topCourses'] 
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
-            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Enrollments</th>
-            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Completion</th>
-            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Grade</th>
-            <th className="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+          <tr className="border-b border-gray-100 dark:border-[var(--card-border)]">
+            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Course</th>
+            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enrollments</th>
+            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completion</th>
+            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Grade</th>
+            <th className="text-center py-3 px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
           {data.map((course) => (
-            <tr key={course.id} className="hover:bg-gray-50 transition-colors">
+            <tr key={course.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
               <td className="py-3 px-4">
-                <span className="font-medium text-gray-900">{course.title}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{course.title}</span>
               </td>
-              <td className="py-3 px-4 text-right text-gray-700 tabular-nums">{formatNumber(course.enrollmentCount)}</td>
+              <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-200 tabular-nums">{formatNumber(course.enrollmentCount)}</td>
               <td className="py-3 px-4 text-right tabular-nums">
-                <span className={course.completionRate >= 50 ? 'text-emerald-600 font-medium' : 'text-gray-700'}>
+                <span className={course.completionRate >= 50 ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-gray-700 dark:text-gray-300'}>
                   {course.completionRate}%
                 </span>
               </td>
               <td className="py-3 px-4 text-right tabular-nums">
-                <span className={course.avgGrade >= 70 ? 'text-emerald-600 font-medium' : course.avgGrade >= 50 ? 'text-amber-600 font-medium' : 'text-red-600 font-medium'}>
+                <span className={course.avgGrade >= 70 ? 'text-emerald-600 dark:text-emerald-400 font-medium' : course.avgGrade >= 50 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-red-600 dark:text-red-400 font-medium'}>
                   {course.avgGrade}%
                 </span>
               </td>
               <td className="py-3 px-4 text-center">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${course.status === 'published' ? 'bg-emerald-50 text-emerald-700' : course.status === 'draft' ? 'bg-gray-100 text-gray-600' : 'bg-red-50 text-red-700'}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${course.status === 'published' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : course.status === 'draft' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
                   {course.status}
                 </span>
               </td>
@@ -168,26 +168,26 @@ export function CoursesTab({ data, loading }: CoursesTabProps) {
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
+            <div key={i} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm animate-pulse">
               <div className="space-y-3">
-                <div className="h-3 bg-gray-100 rounded w-20" />
-                <div className="h-7 bg-gray-100 rounded w-12" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+                <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded w-12" />
               </div>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><PieSkeleton /></div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><PieSkeleton /></div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm"><BarSkeleton /></div>
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><PieSkeleton /></div>
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><PieSkeleton /></div>
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm"><BarSkeleton /></div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100"><div className="h-4 bg-gray-100 rounded w-32" /></div>
-          <div className="divide-y divide-gray-50">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-[var(--card-border)]"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-32" /></div>
+          <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
-                <div className="flex-1"><div className="h-3 bg-gray-100 rounded w-3/4" /></div>
-                <div className="h-3 bg-gray-100 rounded w-12" />
+                <div className="flex-1"><div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" /></div>
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-12" />
               </div>
             ))}
           </div>
@@ -199,7 +199,7 @@ export function CoursesTab({ data, loading }: CoursesTabProps) {
   if (!courses) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-gray-400">No course data available</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No course data available</p>
       </div>
     )
   }
@@ -207,63 +207,63 @@ export function CoursesTab({ data, loading }: CoursesTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Courses</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(courses.totalCourses)}</p>
-            <p className="text-xs text-gray-400">On platform</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Courses</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(courses.totalCourses)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">On platform</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Completion</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{courses.avgCompletionRate}%</p>
-            <p className="text-xs text-gray-400">Per course</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Completion</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{courses.avgCompletionRate}%</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Per course</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Enrollments</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatNumber(courses.avgEnrollmentPerCourse)}</p>
-            <p className="text-xs text-gray-400">Per course</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Enrollments</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{formatNumber(courses.avgEnrollmentPerCourse)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Per course</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-5 shadow-sm">
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Categories</p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{courses.categoryDistribution.length}</p>
-            <p className="text-xs text-gray-400">Course categories</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categories</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{courses.categoryDistribution.length}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Course categories</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Course Status</h3>
-            <span className="text-xs text-gray-400">Distribution</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Course Status</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Distribution</span>
           </div>
           <PieChartCard title="Course Status" data={courses.courseStatusDistribution.map(d => ({ status: d.status, count: d.count }))} />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Categories</h3>
-            <span className="text-xs text-gray-400">Distribution</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Categories</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Distribution</span>
           </div>
           <PieChartCard title="Categories" data={courses.categoryDistribution.map(d => ({ name: d.name, count: d.count }))} />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Difficulty</h3>
-            <span className="text-xs text-gray-400">Levels</span>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Difficulty</h3>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Levels</span>
           </div>
           <PieChartCard title="Difficulty" data={courses.difficultyDistribution.map(d => ({ level: d.level, count: d.count }))} />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">Top Courses by Enrollment</h3>
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-[var(--card-border)]">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Top Courses by Enrollment</h3>
         </div>
         <TopCoursesTable data={courses.topCourses} />
       </div>

@@ -7,6 +7,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 interface CoursesGridProps {
   courses: Course[];
   isLoading?: boolean;
+  isLoadingMore?: boolean;
   skeletonCount?: number;
   title?: string;
   paddingClass?: string;
@@ -32,7 +33,7 @@ function CourseCardSkeleton() {
   );
 }
 
-export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink, keyPrefix, ribbonMap, cardImageClassName }: CoursesGridProps) {
+export function CoursesGrid({ courses, isLoading = false, isLoadingMore = false, skeletonCount = 8, title = 'Available Courses', paddingClass = 'p-6', viewAllLink, keyPrefix, ribbonMap, cardImageClassName }: CoursesGridProps) {
   const { wishlistMap, toggleWishlist } = useWishlist();
 
   if (isLoading && (!courses || courses.length === 0)) {
@@ -55,8 +56,8 @@ export function CoursesGrid({ courses, isLoading = false, skeletonCount = 8, tit
     );
   }
 
-  // Show message if no courses
-  if (!courses || courses.length === 0) {
+  // Show message if no courses (only when not loading)
+  if (!isLoading && !isLoadingMore && (!courses || courses.length === 0)) {
     return (
       <div className={paddingClass}>
         <div className="mb-[10px] flex items-center justify-between">

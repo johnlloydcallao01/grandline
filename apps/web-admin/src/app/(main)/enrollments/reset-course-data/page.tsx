@@ -200,57 +200,57 @@ export default function ResetCourseDataPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Reset Course Data</h1>
-        <p className="text-gray-600 mt-1">Clear all progress, submissions, and grades for an enrollment</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reset Course Data</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Clear all progress, submissions, and grades for an enrollment</p>
       </div>
 
       {errorMsg && (
-        <div className="max-w-2xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+        <div className="max-w-2xl rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {errorMsg}
-          <button onClick={() => setErrorMsg(null)} className="ml-auto text-red-700 underline hover:no-underline">Dismiss</button>
+          <button onClick={() => setErrorMsg(null)} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Dismiss</button>
         </div>
       )}
 
       {phase === 'search' && (
         <div className="max-w-2xl space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">Find Enrollment</h2>
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Find Enrollment</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search by student name, email, or course title..."
-                className="w-full rounded-lg border border-gray-300 pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-[#201a7c] focus:ring-1 focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 outline-none bg-white dark:bg-[var(--card-background)]"
               />
               {isSearching && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 dark:text-gray-500" />
               )}
             </div>
 
             {results.length > 0 && (
-              <div className="mt-3 rounded-lg border border-gray-200 bg-white shadow-sm max-h-80 overflow-y-auto">
+              <div className="mt-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm max-h-80 overflow-y-auto">
                 {results.map((enrollment) => (
                   <button
                     key={enrollment.id}
                     onClick={() => handleSelect(enrollment)}
-                    className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0"
                   >
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                      <User className="h-5 w-5 text-blue-600" />
+                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+                      <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{getStudentName(enrollment)}</p>
-                      <p className="text-xs text-gray-500 truncate">{getStudentEmail(enrollment)}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{getStudentName(enrollment)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{getStudentEmail(enrollment)}</p>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-900 truncate">{getCourseTitle(enrollment)}</p>
-                      <p className="text-xs text-gray-500">{formatDate(enrollment.enrolledAt)}</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100 truncate">{getCourseTitle(enrollment)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(enrollment.enrolledAt)}</p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 capitalize">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-400 capitalize">
                         {enrollment.status}
                       </span>
                     </div>
@@ -260,7 +260,7 @@ export default function ResetCourseDataPage() {
             )}
 
             {search.length >= 1 && !isSearching && results.length === 0 && (
-              <p className="mt-3 text-sm text-gray-500">No enrollments found matching &quot;{search}&quot;</p>
+              <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">No enrollments found matching &quot;{search}&quot;</p>
             )}
           </div>
         </div>
@@ -268,55 +268,55 @@ export default function ResetCourseDataPage() {
 
       {phase === 'confirm' && selected && (
         <div className="max-w-2xl space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900 mb-2">Confirm Reset</h2>
-            <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 mb-6">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                <User className="h-5 w-5 text-blue-600" />
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">Confirm Reset</h2>
+            <div className="flex items-center gap-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 px-4 py-3 mb-6">
+              <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+                <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900">{getStudentName(selected)}</p>
-                <p className="text-xs text-gray-500">{getStudentEmail(selected)}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{getStudentName(selected)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{getStudentEmail(selected)}</p>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-gray-900">{getCourseTitle(selected)}</p>
-                <p className="text-xs text-gray-500">Enrolled {formatDate(selected.enrolledAt)}{computedProgress ? ` \u00b7 ${computedProgress.progressPercentage}% progress` : ''}</p>
+                <p className="text-sm text-gray-900 dark:text-gray-100">{getCourseTitle(selected)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Enrolled {formatDate(selected.enrolledAt)}{computedProgress ? ` \u00b7 ${computedProgress.progressPercentage}% progress` : ''}</p>
               </div>
             </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-6">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4 mb-6">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800 dark:text-amber-300">
                   <p className="font-medium">This action cannot be undone</p>
                   <p className="mt-1">All progress, submissions, grades, and certificates for this enrollment will be permanently deleted. The enrollment will be reset to active with 0% progress.</p>
                 </div>
               </div>
             </div>
 
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">The following will be cleared:</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">The following will be cleared:</h3>
             <div className="space-y-2">
               {resetSummaryItems.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
-                  <item.icon className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-3 py-2.5">
+                  <item.icon className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">{item.label}</p>
-                    <p className="text-xs text-gray-500">{item.description}</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
               <button
                 onClick={() => { setSelected(null); setPhase('search') }}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReset}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
               >
                 Reset Course Data
               </button>
@@ -327,17 +327,17 @@ export default function ResetCourseDataPage() {
 
       {phase === 'executing' && (
         <div className="max-w-2xl">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900 mb-6">Resetting Course Data</h2>
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-6">Resetting Course Data</h2>
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">{currentLabel}</span>
-                <span className="text-sm font-semibold text-blue-600 tabular-nums">{progress}%</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{currentLabel}</span>
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 tabular-nums">{progress}%</span>
               </div>
-              <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden">
+              <div className="h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-blue-500 transition-all duration-300 ease-out"
+                  className="h-full rounded-full bg-blue-500 dark:bg-blue-400 transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -354,24 +354,24 @@ export default function ResetCourseDataPage() {
                   <div
                     key={s.key}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
-                      isComplete ? 'bg-green-50' : isActive ? 'bg-blue-50' : 'bg-gray-50'
+                      isComplete ? 'bg-green-50 dark:bg-green-950/20' : isActive ? 'bg-blue-50 dark:bg-blue-950/20' : 'bg-gray-50 dark:bg-gray-800/50'
                     }`}
                   >
                     {isComplete ? (
-                      <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                      <div className="h-5 w-5 rounded-full bg-green-500 dark:bg-green-400 flex items-center justify-center shrink-0">
                         <CheckCircle className="h-3.5 w-3.5 text-white" />
                       </div>
                     ) : isActive ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-blue-500 shrink-0" />
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-500 dark:text-blue-400 shrink-0" />
                     ) : (
-                      <div className="h-5 w-5 rounded-full border-2 border-gray-300 shrink-0" />
+                      <div className="h-5 w-5 rounded-full border-2 border-gray-300 dark:border-gray-600 shrink-0" />
                     )}
-                    <s.icon className={`h-4 w-4 shrink-0 ${isComplete ? 'text-green-600' : isActive ? 'text-blue-500' : 'text-gray-400'}`} />
-                    <span className={`text-sm flex-1 ${isComplete ? 'text-green-700 font-medium' : isActive ? 'text-blue-700 font-medium' : 'text-gray-500'}`}>
+                    <s.icon className={`h-4 w-4 shrink-0 ${isComplete ? 'text-green-600 dark:text-green-400' : isActive ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                    <span className={`text-sm flex-1 ${isComplete ? 'text-green-700 dark:text-green-300 font-medium' : isActive ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
                       {s.label}
                     </span>
                     {sp && (
-                      <span className="text-xs text-gray-400 tabular-nums">
+                      <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
                         {sp.current}/{sp.total}
                       </span>
                     )}
@@ -385,25 +385,25 @@ export default function ResetCourseDataPage() {
 
       {phase === 'done' && selected && (
         <div className="max-w-2xl space-y-6">
-          <div className="rounded-xl border border-green-200 bg-green-50 p-6 shadow-sm">
+          <div className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/20 p-6 shadow-sm">
             <div className="flex flex-col items-center text-center">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mb-4">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-lg font-semibold text-green-900">Reset Complete</h3>
-              <p className="text-sm text-green-700 mt-1">
+              <h3 className="text-lg font-semibold text-green-900 dark:text-green-300">Reset Complete</h3>
+              <p className="text-sm text-green-700 dark:text-green-400 mt-1">
                 Successfully deleted {deletedCount} progress record{deletedCount !== 1 ? 's' : ''} and reset the enrollment.
               </p>
-              <div className="mt-4 rounded-lg bg-white border border-green-200 px-4 py-3 text-left w-full max-w-sm">
-                <p className="text-sm font-medium text-gray-900">{getStudentName(selected)}</p>
-                <p className="text-xs text-gray-500">{getCourseTitle(selected)}</p>
-                <p className="text-xs text-green-600 mt-1">Status: Active &middot; Progress: 0%</p>
+              <div className="mt-4 rounded-lg bg-white dark:bg-[var(--card-background)] border border-green-200 dark:border-green-900/50 px-4 py-3 text-left w-full max-w-sm">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{getStudentName(selected)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{getCourseTitle(selected)}</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">Status: Active &middot; Progress: 0%</p>
               </div>
             </div>
             <div className="flex justify-center mt-6">
               <button
                 onClick={handleNewReset}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
               >
                 Reset Another Enrollment
               </button>

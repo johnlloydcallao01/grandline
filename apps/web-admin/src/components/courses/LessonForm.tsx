@@ -82,40 +82,40 @@ export default function LessonForm({
             {/* === MAIN CONTENT === */}
             <div className="lg:col-span-2 space-y-6">
                 {/* Basic Information */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Basic Information</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Basic Information</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
                         <input type="text" value={form.title} onChange={e => updateField('title', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Module *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Module *</label>
                         <input type="text" value={form.moduleSearch}
                             onChange={e => { updateField('moduleSearch', e.target.value); if (e.target.value !== form.moduleLabel) updateField('module', ''); }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="Search modules..." />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="Search modules..." />
                         {form.moduleSearch !== form.moduleLabel && filteredModules.length > 0 && (
-                            <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto bg-white shadow-sm">
+                            <div className="mt-1 border border-gray-200 dark:border-[var(--card-border)] rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-[var(--card-background)] shadow-sm">
                                 {filteredModules.map(mod => (
                                     <button key={mod.id}
                                         onClick={() => { updateField('module', mod.id); updateField('moduleSearch', mod.title); updateField('moduleLabel', mod.title); }}
-                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-50">
+                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                         {mod.title}
                                     </button>
                                 ))}
                             </div>
                         )}
                         {!form.moduleSearch && (
-                            <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto bg-white shadow-sm">
+                            <div className="mt-1 border border-gray-200 dark:border-[var(--card-border)] rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-[var(--card-background)] shadow-sm">
                                 {moduleOptions.map(mod => (
                                     <button key={mod.id}
                                         onClick={() => { updateField('module', mod.id); updateField('moduleSearch', mod.title); updateField('moduleLabel', mod.title); }}
-                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-50 border-b border-gray-50 last:border-0">
+                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-b border-gray-50 dark:border-gray-800 last:border-0">
                                         {mod.title}
                                     </button>
                                 ))}
                                 {moduleOptions.length === 0 && (
-                                    <p className="px-3 py-2 text-sm text-gray-400">No modules available</p>
+                                    <p className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">No modules available</p>
                                 )}
                             </div>
                         )}
@@ -123,8 +123,8 @@ export default function LessonForm({
                 </div>
 
                 {/* Description */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                    <h2 className="text-base font-bold text-gray-900">Description</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Description</h2>
                     <RichTextEditor
                         value={form.description}
                         onChange={(json) => updateField('description', json)}
@@ -132,12 +132,12 @@ export default function LessonForm({
                 </div>
 
                 {/* Settings */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Settings</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Settings</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Duration (minutes)</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimated Duration (minutes)</label>
                         <input type="number" min="0" value={form.estimatedDuration || ''} onChange={e => updateField('estimatedDuration', parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="e.g. 30" />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="e.g. 30" />
                     </div>
                 </div>
             </div>
@@ -146,46 +146,46 @@ export default function LessonForm({
             <div className="space-y-6">
                 {/* Summary (create mode) */}
                 {mode === 'create' && (
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3">
-                        <h2 className="text-sm font-bold text-gray-900">Summary</h2>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-3">
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Summary</h2>
                         <div>
-                            <span className="text-xs text-gray-500">Module</span>
-                            <p className="text-sm text-gray-900 font-medium mt-1">{form.moduleLabel || 'Not selected'}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Module</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium mt-1">{form.moduleLabel || 'Not selected'}</p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Duration</span>
-                            <p className="text-sm text-gray-900 font-medium mt-1">{form.estimatedDuration ? `${form.estimatedDuration} min` : 'Not set'}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Duration</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium mt-1">{form.estimatedDuration ? `${form.estimatedDuration} min` : 'Not set'}</p>
                         </div>
                     </div>
                 )}
 
                 {/* Module Info (edit mode) */}
                 {mode === 'edit' && form.module && (
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3">
-                        <h2 className="text-sm font-bold text-gray-900">Module</h2>
-                        <p className="text-sm text-gray-900 font-medium">{form.moduleLabel || `#${form.module}`}</p>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-3">
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Module</h2>
+                        <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{form.moduleLabel || `#${form.module}`}</p>
                     </div>
                 )}
 
                 {/* Publishing (edit mode only) */}
                 {mode === 'edit' && lesson && (
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3">
-                        <h2 className="text-sm font-bold text-gray-900">Publishing</h2>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-3">
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Publishing</h2>
                         <div>
-                            <span className="text-xs text-gray-500">Last Updated</span>
-                            <p className="text-sm text-gray-900 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Last Updated</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                 {lesson.updatedAt ? new Date(lesson.updatedAt).toLocaleString() : '-'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Created At</span>
-                            <p className="text-sm text-gray-900 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Created At</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                 {lesson.createdAt ? new Date(lesson.createdAt).toLocaleString() : '-'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Lesson ID</span>
-                            <p className="text-xs text-gray-400 font-mono break-all bg-gray-50 p-2 rounded mt-1">{lessonId}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Lesson ID</span>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono break-all bg-gray-50 dark:bg-gray-800 p-2 rounded mt-1">{lessonId}</p>
                         </div>
                     </div>
                 )}

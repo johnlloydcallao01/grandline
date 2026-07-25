@@ -11,9 +11,9 @@ import { getCourses, deleteCourse, updateCourse, type CourseDoc } from './action
 const ITEMS_PER_PAGE = 12;
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-    standard: 'bg-blue-100 text-blue-700',
-    intermediate: 'bg-orange-100 text-orange-700',
-    advanced: 'bg-red-100 text-red-700',
+    standard: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    intermediate: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+    advanced: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
 };
 
 const DIFFICULTY_LABELS: Record<string, string> = {
@@ -143,10 +143,10 @@ export default function CoursesPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'published': return 'bg-green-100 text-green-700';
-            case 'draft': return 'bg-yellow-100 text-yellow-700';
-            case 'archived': return 'bg-gray-100 text-gray-600';
-            default: return 'bg-gray-100 text-gray-600';
+            case 'published': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+            case 'draft': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+            case 'archived': return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
+            default: return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
         }
     };
 
@@ -160,22 +160,22 @@ export default function CoursesPage() {
     };
 
     const metricCards = [
-        { label: 'Total Courses', value: totalDocs, color: 'text-blue-600', bg: 'bg-blue-50', icon: BookOpen },
-        { label: 'Published', value: courses.filter(c => c.status === 'published').length, color: 'text-green-600', bg: 'bg-green-50', icon: Eye },
-        { label: 'Draft', value: courses.filter(c => c.status === 'draft').length, color: 'text-yellow-600', bg: 'bg-yellow-50', icon: Clock },
-        { label: 'Archived', value: courses.filter(c => c.status === 'archived').length, color: 'text-gray-600', bg: 'bg-gray-50', icon: ArchiveIcon },
+        { label: 'Total Courses', value: totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookOpen },
+        { label: 'Published', value: courses.filter(c => c.status === 'published').length, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: Eye },
+        { label: 'Draft', value: courses.filter(c => c.status === 'draft').length, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30', icon: Clock },
+        { label: 'Archived', value: courses.filter(c => c.status === 'archived').length, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800', icon: ArchiveIcon },
     ];
 
     if (error) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
-                    <div className="text-red-500 mb-4">
+                    <div className="text-red-500 dark:text-red-400 mb-4">
                         <BookOpen className="h-12 w-12 mx-auto" />
                     </div>
-                    <p className="text-gray-900 font-medium mb-2">Failed to load courses</p>
-                    <p className="text-gray-500 text-sm mb-4">{error}</p>
-                    <button onClick={loadCourses} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                    <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">Failed to load courses</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{error}</p>
+                    <button onClick={loadCourses} className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
                         Retry
                     </button>
                 </div>
@@ -188,12 +188,12 @@ export default function CoursesPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
-                    <p className="text-gray-500 mt-1">Manage all courses across the platform</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Courses</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Manage all courses across the platform</p>
                 </div>
                 <Link
                     href="/courses/create"
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
+                    className="flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm font-medium"
                 >
                     <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                     Create Course
@@ -204,41 +204,41 @@ export default function CoursesPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {isLoading ? (
                     <>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-blue-50"><div className="h-5 w-5 bg-blue-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-24 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30"><div className="h-5 w-5 bg-blue-200 dark:bg-blue-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-24 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-green-50"><div className="h-5 w-5 bg-green-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-green-50 dark:bg-green-950/30"><div className="h-5 w-5 bg-green-200 dark:bg-green-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-yellow-50"><div className="h-5 w-5 bg-yellow-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-yellow-50 dark:bg-yellow-950/30"><div className="h-5 w-5 bg-yellow-200 dark:bg-yellow-800 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-16 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-pulse">
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-gray-50"><div className="h-5 w-5 bg-gray-200 rounded" /></div>
-                                <div><div className="h-7 w-12 bg-gray-100 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 rounded" /></div>
+                                <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800"><div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded" /></div>
+                                <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 dark:bg-gray-800 rounded" /></div>
                             </div>
                         </div>
                     </>
                 ) : (
                     metricCards.map((card) => (
-                        <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div key={card.label} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2.5 rounded-lg ${card.bg}`}>
+                                <div className={`p-2.5 rounded-lg ${card.bg}${card.bg.includes('bg-') ? '' : ''}`}>
                                     <card.icon className={`h-5 w-5 ${card.color}`} />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                                    <p className="text-xs text-gray-500">{card.label}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{card.label}</p>
                                 </div>
                             </div>
                         </div>
@@ -247,13 +247,13 @@ export default function CoursesPage() {
             </div>
 
             {/* Search & Filters */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-3">
+            <div className="bg-white dark:bg-[var(--card-background)] p-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search by title or course code..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-[var(--card-background)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -265,8 +265,8 @@ export default function CoursesPage() {
                             onClick={() => { setStatusFilter(opt.value); setCurrentPage(1); }}
                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 statusFilter === opt.value
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                         >
                             {opt.label}
@@ -277,27 +277,27 @@ export default function CoursesPage() {
 
             {/* Loading State */}
             {isLoading ? (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
                             <tr>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Course</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Instructor</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-48" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-28" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-20" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-16" /></td>
-                                    <td className="px-4 py-4"><div className="h-5 bg-gray-100 rounded w-16" /></td>
-                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 rounded w-20 ml-auto" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-48" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-28" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-20" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-16" /></td>
+                                    <td className="px-4 py-4"><div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-16" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-20 ml-auto" /></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -305,12 +305,12 @@ export default function CoursesPage() {
                 </div>
             ) : courses.length === 0 ? (
                 /* Empty State */
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-                    <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <BookOpen className="h-8 w-8 text-gray-400" />
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-12 text-center">
+                    <div className="h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">No courses found</h3>
-                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No courses found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                         {debouncedSearch || statusFilter !== 'all'
                             ? 'No courses match your search criteria. Try adjusting the filters.'
                             : 'Get started by creating your first course.'}
@@ -318,7 +318,7 @@ export default function CoursesPage() {
                     {!debouncedSearch && statusFilter === 'all' && (
                         <Link
                             href="/courses/create"
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium"
                         >
                             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                             Create Course
@@ -328,57 +328,57 @@ export default function CoursesPage() {
             ) : (
                 <>
                     {/* Course Table */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50/50">
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <tr className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50/50 dark:bg-gray-800/50">
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Course</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Instructor</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {courses.map((course) => {
                                     const imageUrl = getImageUrl(course);
                                     const instructorName = getInstructorName(course);
                                     const categoryNames = getCategoryNames(course);
                                     return (
-                                        <tr key={course.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <tr key={course.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-14 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                                                    <div className="h-10 w-14 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden shrink-0">
                                                         {imageUrl ? (
                                                             <img src={imageUrl} alt="" className="h-full w-full object-cover" />
                                                         ) : (
-                                                            <BookOpen className="h-5 w-5 text-gray-300" />
+                                                            <BookOpen className="h-5 w-5 text-gray-300 dark:text-gray-600" />
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <Link href={`/courses/${course.id}/edit`} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors truncate block">
+                                                        <Link href={`/courses/${course.id}/edit`} className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate block">
                                                             {course.title}
                                                         </Link>
-                                                        <p className="text-xs text-gray-400 font-mono">{course.courseCode}</p>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{course.courseCode}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                                    <Users className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                                <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                                                    <Users className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
                                                     <span className="truncate">{instructorName}</span>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     {categoryNames.slice(0, 2).map((name, i) => (
-                                                        <span key={i} className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                                        <span key={i} className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
                                                             {name}
                                                         </span>
                                                     ))}
                                                     {course.difficultyLevel && (
-                                                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${DIFFICULTY_COLORS[course.difficultyLevel] || 'bg-gray-100 text-gray-600'}`}>
+                                                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${DIFFICULTY_COLORS[course.difficultyLevel] || 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
                                                             {DIFFICULTY_LABELS[course.difficultyLevel] || course.difficultyLevel}
                                                         </span>
                                                     )}
@@ -386,12 +386,12 @@ export default function CoursesPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-1">
-                                                    <DollarSign className="h-3.5 w-3.5 text-gray-400" />
-                                                    <span className="text-sm font-semibold text-gray-900">
+                                                    <DollarSign className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                                         {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
                                                     </span>
                                                     {course.discountedPrice && course.discountedPrice < course.price && (
-                                                        <span className="text-xs text-gray-400 line-through ml-1">${course.discountedPrice.toFixed(2)}</span>
+                                                        <span className="text-xs text-gray-400 dark:text-gray-500 line-through ml-1">${course.discountedPrice.toFixed(2)}</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -401,7 +401,7 @@ export default function CoursesPage() {
                                                         {getStatusLabel(course.status)}
                                                     </span>
                                                     {course.isFeatured && (
-                                                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
                                                             Featured
                                                         </span>
                                                     )}
@@ -411,21 +411,21 @@ export default function CoursesPage() {
                                                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={() => setDetailCourse(course)}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                        className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                         title="View Details"
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </button>
                                                     <Link
                                                         href={`/courses/${course.id}/edit`}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                        className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                         title="Edit Course"
                                                     >
                                                         <Edit className="h-4 w-4" />
                                                     </Link>
                                                     <button
                                                         onClick={() => setDeleteTarget(course)}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                        className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                         title="Delete"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -441,15 +441,15 @@ export default function CoursesPage() {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3">
-                            <p className="text-sm text-gray-500">
+                        <div className="flex items-center justify-between bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm px-4 py-3">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, totalDocs)} of {totalDocs}
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage <= 1}
-                                    className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]"
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                                 </button>
@@ -470,8 +470,8 @@ export default function CoursesPage() {
                                             onClick={() => setCurrentPage(pageNum)}
                                             className={`w-8 h-8 rounded-lg text-sm font-medium ${
                                                 currentPage === pageNum
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'text-gray-600 hover:bg-gray-100'
+                                                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                             }`}
                                         >
                                             {pageNum}
@@ -481,7 +481,7 @@ export default function CoursesPage() {
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage >= totalPages}
-                                    className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]"
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
                                 </button>
@@ -494,27 +494,27 @@ export default function CoursesPage() {
             {/* Delete Confirmation */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => !isDeleting && setDeleteTarget(null)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
                         <div className="text-center">
-                            <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Trash2 className="h-6 w-6 text-red-600" />
+                            <div className="h-12 w-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Course</h3>
-                            <p className="text-sm text-gray-500 mb-6">
-                                Are you sure you want to delete <span className="font-semibold text-gray-700">{deleteTarget.title}</span>? This action cannot be undone.
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Delete Course</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                Are you sure you want to delete <span className="font-semibold text-gray-700 dark:text-gray-200">{deleteTarget.title}</span>? This action cannot be undone.
                             </p>
                             <div className="flex gap-3 justify-center">
                                 <button
                                     onClick={() => setDeleteTarget(null)}
                                     disabled={isDeleting}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleDelete}
                                     disabled={isDeleting}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50 flex items-center gap-2"
                                 >
                                     {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {isDeleting ? 'Deleting...' : 'Delete'}
@@ -529,68 +529,68 @@ export default function CoursesPage() {
             {detailCourse && (
                 <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailCourse(null)}>
                     <div className="absolute inset-0 bg-black/30" />
-                    <div className="relative w-full max-w-lg bg-white shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                            <h2 className="text-lg font-bold text-gray-900 truncate pr-4">{detailCourse.title}</h2>
-                            <button onClick={() => setDetailCourse(null)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 shrink-0">
+                    <div className="relative w-full max-w-lg bg-white dark:bg-[var(--card-background)] shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white dark:bg-[var(--card-background)] border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4 flex items-center justify-between z-10">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate pr-4">{detailCourse.title}</h2>
+                            <button onClick={() => setDetailCourse(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 shrink-0">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
                         <div className="p-6 space-y-6">
                             {/* Thumbnail */}
                             {getImageUrl(detailCourse) && (
-                                <img src={getImageUrl(detailCourse)!} alt={detailCourse.title} className="w-full rounded-xl border border-gray-200" />
+                                <img src={getImageUrl(detailCourse)!} alt={detailCourse.title} className="w-full rounded-xl border border-gray-200 dark:border-[var(--card-border)]" />
                             )}
 
                             {/* Info Grid */}
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span className="text-gray-500">Course Code</span>
-                                    <p className="font-medium text-gray-900 font-mono">{detailCourse.courseCode}</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Course Code</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100 font-mono">{detailCourse.courseCode}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">Status</span>
+                                    <span className="text-gray-500 dark:text-gray-400">Status</span>
                                     <p className={`font-medium ${getStatusColor(detailCourse.status)} inline-block px-2 py-0.5 rounded text-xs mt-1`}>
                                         {getStatusLabel(detailCourse.status)}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">Instructor</span>
-                                    <p className="font-medium text-gray-900">{getInstructorName(detailCourse)}</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Instructor</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{getInstructorName(detailCourse)}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">Difficulty</span>
-                                    <p className="font-medium text-gray-900">{DIFFICULTY_LABELS[detailCourse.difficultyLevel] || detailCourse.difficultyLevel}</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Difficulty</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{DIFFICULTY_LABELS[detailCourse.difficultyLevel] || detailCourse.difficultyLevel}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">Price</span>
-                                    <p className="font-medium text-gray-900">{detailCourse.price === 0 ? 'Free' : `$${detailCourse.price.toFixed(2)}`}</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Price</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{detailCourse.price === 0 ? 'Free' : `$${detailCourse.price.toFixed(2)}`}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">Language</span>
-                                    <p className="font-medium text-gray-900">{detailCourse.language?.toUpperCase() || 'EN'}</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Language</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{detailCourse.language?.toUpperCase() || 'EN'}</p>
                                 </div>
                                 {detailCourse.estimatedDuration && (
                                     <div>
-                                        <span className="text-gray-500">Duration</span>
-                                        <p className="font-medium text-gray-900">
+                                        <span className="text-gray-500 dark:text-gray-400">Duration</span>
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">
                                             {detailCourse.estimatedDuration} {DURATION_LABELS[detailCourse.estimatedDurationUnit || 'hours'] || 'hrs'}
                                         </p>
                                     </div>
                                 )}
                                 <div>
-                                    <span className="text-gray-500">Passing Grade</span>
-                                    <p className="font-medium text-gray-900">{detailCourse.passingGrade}%</p>
+                                    <span className="text-gray-500 dark:text-gray-400">Passing Grade</span>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{detailCourse.passingGrade}%</p>
                                 </div>
                             </div>
 
                             {/* Categories */}
                             {getCategoryNames(detailCourse).length > 0 && (
                                 <div>
-                                    <span className="text-sm text-gray-500">Categories</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">Categories</span>
                                     <div className="flex flex-wrap gap-2 mt-1">
                                         {getCategoryNames(detailCourse).map((name, i) => (
-                                            <span key={i} className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">{name}</span>
+                                            <span key={i} className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">{name}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -599,16 +599,16 @@ export default function CoursesPage() {
                             {/* Excerpt */}
                             {detailCourse.excerpt && (
                                 <div>
-                                    <span className="text-sm text-gray-500">Description</span>
-                                    <p className="text-sm text-gray-900 mt-1 leading-relaxed">{detailCourse.excerpt}</p>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
+                                    <p className="text-sm text-gray-900 dark:text-gray-100 mt-1 leading-relaxed">{detailCourse.excerpt}</p>
                                 </div>
                             )}
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
                                                 <Link
                                                     href={`/courses/${detailCourse.id}/edit`}
-                                                    className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                                                    className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium"
                                                 >
                                                     <Edit className="h-4 w-4 mr-2" />
                                                     Edit Course
@@ -620,7 +620,7 @@ export default function CoursesPage() {
                                             handleStatusChange(detailCourse, newStatus);
                                             setDetailCourse(prev => prev ? { ...prev, status: newStatus as any } : null);
                                         }}
-                                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
+                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium bg-white dark:bg-[var(--card-background)]"
                                     >
                                         {detailCourse.status === 'published' ? 'Unpublish' : 'Publish'}
                                     </button>

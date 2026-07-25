@@ -30,9 +30,12 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
         pathname?.startsWith('/enrollments') ?? false
     );
 
+    const [isSubmissionsExpanded, setIsSubmissionsExpanded] = React.useState(
+        pathname?.startsWith('/submissions') ?? false
+    );
+
     const hasActiveCourseManagerChild =
-        pathname?.startsWith('/courses') ||
-        pathname?.startsWith('/categories');
+        pathname?.startsWith('/courses');
 
     const [isCourseManagerExpanded, setIsCourseManagerExpanded] = React.useState(hasActiveCourseManagerChild);
 
@@ -49,18 +52,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
         pathname?.startsWith('/certifications/verification');
 
     const [isCertificationExpanded, setIsCertificationExpanded] = React.useState(hasActiveCertificationChild);
-
-    const hasActiveUsersChild =
-        pathname?.startsWith('/users/trainees') ||
-        pathname === '/instructors' ||
-        pathname?.startsWith('/users/admins');
-
-    const [isUsersExpanded, setIsUsersExpanded] = React.useState(hasActiveUsersChild);
-
-    const hasActiveCmsMediaChild =
-        pathname?.startsWith('/cms/media');
-
-    const [isCmsMediaExpanded, setIsCmsMediaExpanded] = React.useState(hasActiveCmsMediaChild);
 
     const hasActiveCmsBlogPostsChild =
         pathname?.startsWith('/cms/posts');
@@ -90,18 +81,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
             setIsCertificationExpanded(true);
         }
     }, [hasActiveCertificationChild]);
-
-    React.useEffect(() => {
-        if (hasActiveUsersChild) {
-            setIsUsersExpanded(true);
-        }
-    }, [hasActiveUsersChild]);
-
-    React.useEffect(() => {
-        if (hasActiveCmsMediaChild) {
-            setIsCmsMediaExpanded(true);
-        }
-    }, [hasActiveCmsMediaChild]);
 
     React.useEffect(() => {
         if (hasActiveCmsBlogPostsChild) {
@@ -183,6 +162,42 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             </Link>
                         </SidebarDropdownGroup>
                         <SidebarDropdownGroup
+                            icon="grade"
+                            label="Submissions"
+                            isOpen={expanded}
+                            isExpanded={isSubmissionsExpanded}
+                            onToggle={() => setIsSubmissionsExpanded((current) => !current)}
+                            active={pathname?.startsWith('/submissions') ?? false}
+                        >
+                            <Link
+                                href="/submissions/assessments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/assessments')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Assessments</span>
+                            </Link>
+                            <Link
+                                href="/submissions/assignments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/assignments')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Assignments</span>
+                            </Link>
+                            <Link
+                                href="/submissions/feedbacks"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/feedbacks')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Feedbacks</span>
+                            </Link>
+                        </SidebarDropdownGroup>
+                        <SidebarDropdownGroup
                             icon="products"
                             label="Course Manager"
                             isOpen={expanded}
@@ -236,8 +251,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                                 <span className="truncate">Assignments</span>
                             </Link>
                             <Link
-                                href="/categories"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/categories')
+                                href="/courses/categories"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/categories')
                                     ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
                                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
@@ -324,42 +339,14 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             collapsed={!expanded}
                             href="/reviews"
                         />
-                        <SidebarDropdownGroup
+                        <SidebarItem
                             icon="users"
                             label="Users"
-                            isOpen={expanded}
-                            isExpanded={isUsersExpanded}
-                            onToggle={() => setIsUsersExpanded((current) => !current)}
-                            active={hasActiveUsersChild}
-                        >
-                            <Link
-                                href="/users/trainees"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/trainees')
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Trainees</span>
-                            </Link>
-                            <Link
-                                href="/instructors"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/instructors'
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Instructors</span>
-                            </Link>
-                            <Link
-                                href="/users/admins"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/users/admins')
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Admins</span>
-                            </Link>
-                        </SidebarDropdownGroup>
+                            active={pathname?.startsWith('/users')}
+                            collapsed={!expanded}
+                            href="/users"
+                        />
+
                     </div>
 
                     {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
@@ -367,33 +354,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                     {/* 3. CMS */}
                     <div className="space-y-1">
                         {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">CMS</div>}
-                        <SidebarDropdownGroup
+                        <SidebarItem
                             icon="media"
-                            label="Media Files"
-                            isOpen={expanded}
-                            isExpanded={isCmsMediaExpanded}
-                            onToggle={() => setIsCmsMediaExpanded((current) => !current)}
-                            active={hasActiveCmsMediaChild}
-                        >
-                            <Link
-                                href="/cms/media"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/cms/media'
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Library</span>
-                            </Link>
-                            <Link
-                                href="/cms/media/add"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/media/add')
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Add Media File</span>
-                            </Link>
-                        </SidebarDropdownGroup>
+                            label="Media Library"
+                            active={pathname?.startsWith('/cms/media')}
+                            collapsed={!expanded}
+                            href="/cms/media"
+                        />
                         <SidebarDropdownGroup
                             icon="posts"
                             label="Blog Posts"
@@ -410,15 +377,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                                     }`}
                             >
                                 <span className="truncate">All Posts</span>
-                            </Link>
-                            <Link
-                                href="/cms/posts/add"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/posts/add')
-                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
-                                    }`}
-                            >
-                                <span className="truncate">Add Posts</span>
                             </Link>
                             <Link
                                 href="/cms/posts/categories"
@@ -508,13 +466,6 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             active={pathname === '/settings'}
                             collapsed={!expanded}
                             href="/settings"
-                        />
-                        <SidebarItem
-                            icon="users"
-                            label="Users"
-                            active={pathname?.startsWith('/users')}
-                            collapsed={!expanded}
-                            href="/users"
                         />
                         <SidebarItem
                             icon="security"
