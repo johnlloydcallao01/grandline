@@ -11,11 +11,14 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "echarts": "6.1.0",
+    "echarts-for-react": "3.0.6",
     "next": "^16.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
+    "@encreasl/cms-types": "workspace:*",
     "@encreasl/env": "workspace:*",
     "@encreasl/eslint-config": "workspace:*",
     "@encreasl/typescript-config": "workspace:*",

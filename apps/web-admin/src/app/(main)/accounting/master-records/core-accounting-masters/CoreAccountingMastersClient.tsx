@@ -203,44 +203,44 @@ function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondar
     return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
   }
   if (variant === 'ghost') {
-    return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+    return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200';
   }
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: CoreAccountingMetric['trend']) {
   if (trend === 'down') {
-    return 'text-red-600 bg-red-50';
+    return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30';
   }
 
   if (trend === 'neutral') {
-    return 'text-gray-600 bg-gray-100';
+    return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
   }
 
-  return 'text-green-600 bg-green-50';
+  return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30';
 }
 
 function getStatusBadgeClasses(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
     case 'active':
-      return 'bg-green-50 text-green-700 ring-green-200';
+      return 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800';
     case 'inactive':
-      return 'bg-amber-50 text-amber-700 ring-amber-200';
+      return 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800';
     default:
-      return 'bg-gray-100 text-gray-700 ring-gray-200';
+      return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700';
   }
 }
 
 function getFyStatusBadgeClasses(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
     case 'open':
-      return 'bg-blue-50 text-blue-700 ring-blue-200';
+      return 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800';
     case 'closed':
-      return 'bg-green-50 text-green-700 ring-green-200';
+      return 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800';
     case 'draft':
-      return 'bg-amber-50 text-amber-700 ring-amber-200';
+      return 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800';
     default:
-      return 'bg-gray-100 text-gray-700 ring-gray-200';
+      return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700';
   }
 }
 
@@ -327,19 +327,19 @@ function MetricCard({
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2">
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 bg-gray-100'}`}
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800'}`}
         >
           <TrendIcon className="h-3.5 w-3.5" />
           {change}
@@ -354,25 +354,25 @@ function LoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200" />
+          <div key={index} className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-5 shadow-sm">
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           <div className="flex gap-2">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-8 w-28 animate-pulse rounded-full bg-gray-200" />
+              <div key={index} className="h-8 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
             ))}
           </div>
         </div>
         <div className="mt-6 space-y-3">
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+            <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800 dark:bg-gray-800" />
           ))}
         </div>
       </div>
@@ -2199,22 +2199,22 @@ export function CoreAccountingMastersClient({
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Master Records</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Master Records</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{PAGE_TITLE}</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">{PAGE_DESCRIPTION}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{PAGE_TITLE}</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">{PAGE_DESCRIPTION}</p>
             </div>
           </div>
         </div>
 
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+      <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {staticTabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -2227,7 +2227,7 @@ export function CoreAccountingMastersClient({
                   className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                     isActive
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab.label}
@@ -2240,10 +2240,10 @@ export function CoreAccountingMastersClient({
         <div className="space-y-6 p-[10px]">
           {activeTab === 'chart-of-accounts' ? (
             <>
-              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{chartSection.label}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{chartSection.description}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{chartSection.label}</h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{chartSection.description}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -2274,7 +2274,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {chartError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -2302,21 +2302,21 @@ export function CoreAccountingMastersClient({
                     ))}
                   </div>
 
-                  <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 px-5 py-4">
+                  <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                    <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <form
                           onSubmit={handleChartSearchSubmit}
                           className="flex min-w-0 flex-1 flex-col gap-3 lg:flex-row lg:items-center"
                         >
                           <div className="relative min-w-0 flex-1 max-w-xl">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                               type="text"
                               value={chartSearchInput}
                               onChange={(event) => setChartSearchInput(event.target.value)}
                               placeholder={chartSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                             />
                           </div>
                           <div className="flex items-center gap-2">
@@ -2329,12 +2329,12 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               <Filter className="h-4 w-4" />
                               Filters
                               {chartFilterCount ? (
-                                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-400">
                                   {chartFilterCount}
                                 </span>
                               ) : null}
@@ -2368,8 +2368,8 @@ export function CoreAccountingMastersClient({
                                 onClick={() => handleToggleQuickFilter(quickFilterKey)}
                                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 {filter.label}
@@ -2380,14 +2380,14 @@ export function CoreAccountingMastersClient({
                       </div>
 
                       {isFilterPanelOpen ? (
-                        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="mt-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Status
                               </p>
                               {chartSection.filters.statuses.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftChartFilters.statuses.includes(option.value)}
@@ -2397,18 +2397,18 @@ export function CoreAccountingMastersClient({
                                         statuses: toggleFilterValue(previous.statuses, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
                               ))}
                             </div>
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Account Type
                               </p>
                               {chartSection.filters.accountTypes.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftChartFilters.accountTypes.includes(option.value)}
@@ -2418,7 +2418,7 @@ export function CoreAccountingMastersClient({
                                         accountTypes: toggleFilterValue(previous.accountTypes, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
@@ -2427,12 +2427,12 @@ export function CoreAccountingMastersClient({
                           </div>
 
                           <div className="mt-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                               Account Subtype
                             </p>
                             <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                               {chartSection.filters.accountSubTypes.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftChartFilters.accountSubTypes.includes(option.value)}
@@ -2442,7 +2442,7 @@ export function CoreAccountingMastersClient({
                                         accountSubTypes: toggleFilterValue(previous.accountSubTypes, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
@@ -2451,7 +2451,7 @@ export function CoreAccountingMastersClient({
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <label className="flex items-center gap-3 text-sm text-gray-700">
+                            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftChartFilters.controlAccountsOnly}
@@ -2461,11 +2461,11 @@ export function CoreAccountingMastersClient({
                                     controlAccountsOnly: !previous.controlAccountsOnly,
                                   }))
                                 }
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                               />
                               Control Accounts Only
                             </label>
-                            <label className="flex items-center gap-3 text-sm text-gray-700">
+                            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftChartFilters.manualEntriesOnly}
@@ -2475,11 +2475,11 @@ export function CoreAccountingMastersClient({
                                     manualEntriesOnly: !previous.manualEntriesOnly,
                                   }))
                                 }
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                               />
                               Manual Entries Only
                             </label>
-                            <label className="flex items-center gap-3 text-sm text-gray-700">
+                            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftChartFilters.retainedEarningsOnly}
@@ -2489,11 +2489,11 @@ export function CoreAccountingMastersClient({
                                     retainedEarningsOnly: !previous.retainedEarningsOnly,
                                   }))
                                 }
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                               />
                               Retained Earnings Only
                             </label>
-                            <label className="flex items-center gap-3 text-sm text-gray-700">
+                            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftChartFilters.parentAccountsOnly}
@@ -2503,7 +2503,7 @@ export function CoreAccountingMastersClient({
                                     parentAccountsOnly: !previous.parentAccountsOnly,
                                   }))
                                 }
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                               />
                               Parent Accounts Only
                             </label>
@@ -2520,7 +2520,7 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={handleResetFilters}
-                              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               Reset Filters
                             </button>
@@ -2532,15 +2532,15 @@ export function CoreAccountingMastersClient({
                     <div className="space-y-4 p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-base font-semibold text-gray-900">{chartSection.table.title}</h3>
-                          <p className="mt-1 text-sm text-gray-600">{chartSection.table.description}</p>
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{chartSection.table.title}</h3>
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{chartSection.table.description}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span>{chartData?.totals.filteredAccounts ?? 0} matching accounts</span>
                           <button
                             type="button"
                             onClick={handleExportChart}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             <Download className="h-4 w-4" />
                             Export View
@@ -2548,46 +2548,46 @@ export function CoreAccountingMastersClient({
                         </div>
                       </div>
 
-                      <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                         <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                            <thead className="bg-gray-50 dark:bg-gray-800/50">
                               <tr>
                                 {chartSection.table.columns.map((column) => (
                                   <th
                                     key={column}
-                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                   >
                                     {column}
                                   </th>
                                 ))}
-                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                               {chartSection.table.rows.length ? (
                                 chartSection.table.rows.map((row) => (
-                                  <tr key={row.id} className="hover:bg-gray-50">
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                       {row.code || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       <div className="flex flex-col">
                                         <span>{row.name || '-'}</span>
                                         {row.accountSubTypeLabel ? (
-                                          <span className="text-xs text-gray-400">{row.accountSubTypeLabel}</span>
+                                          <span className="text-xs text-gray-400 dark:text-gray-500">{row.accountSubTypeLabel}</span>
                                         ) : null}
                                       </div>
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.accountTypeLabel || row.accountType || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.parentAccountName || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm uppercase text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm uppercase text-gray-600 dark:text-gray-400">
                                       {row.normalBalanceLabel || row.normalBalance || '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -2602,7 +2602,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenEditModal(row.accountId)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                         >
                                           <Edit className="h-4 w-4" />
                                           Edit
@@ -2610,7 +2610,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenDeleteModal(row.accountId, row.name || `Account #${row.accountId}`)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                         >
                                           <Trash2 className="h-4 w-4" />
                                           Delete
@@ -2618,7 +2618,7 @@ export function CoreAccountingMastersClient({
                                       <button
                                         type="button"
                                         onClick={() => handleViewAccount(row.accountId)}
-                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       >
                                         <Eye className="h-4 w-4" />
                                         View
@@ -2632,7 +2632,7 @@ export function CoreAccountingMastersClient({
                                 <tr>
                                   <td
                                     colSpan={chartSection.table.columns.length + 1}
-                                    className="px-4 py-10 text-center text-sm text-gray-500"
+                                    className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                                   >
                                     No accounts matched the current filters.
                                   </td>
@@ -2645,7 +2645,7 @@ export function CoreAccountingMastersClient({
 
                       {chartData?.pagination.totalPages && chartData.pagination.totalPages > 1 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Page {chartData.pagination.page} of {chartData.pagination.totalPages}
                           </p>
                           <div className="flex items-center gap-2">
@@ -2653,7 +2653,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!chartData.pagination.hasPrevPage}
                               onClick={() => setChartCurrentPage((previous) => Math.max(1, previous - 1))}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Previous
                             </button>
@@ -2661,7 +2661,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!chartData.pagination.hasNextPage}
                               onClick={() => setChartCurrentPage((previous) => previous + 1)}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Next
                             </button>
@@ -2675,10 +2675,10 @@ export function CoreAccountingMastersClient({
             </>
           ) : activeTab === 'fiscal-years' ? (
             <>
-              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{fySection.label}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{fySection.description}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{fySection.label}</h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{fySection.description}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -2709,7 +2709,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {fyError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -2737,21 +2737,21 @@ export function CoreAccountingMastersClient({
                     ))}
                   </div>
 
-                  <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 px-5 py-4">
+                  <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                    <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <form
                           onSubmit={handleFySearchSubmit}
                           className="flex min-w-0 flex-1 flex-col gap-3 lg:flex-row lg:items-center"
                         >
                           <div className="relative min-w-0 flex-1 max-w-xl">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                               type="text"
                               value={fySearchInput}
                               onChange={(event) => setFySearchInput(event.target.value)}
                               placeholder={fySection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                             />
                           </div>
                           <div className="flex items-center gap-2">
@@ -2764,12 +2764,12 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               <Filter className="h-4 w-4" />
                               Filters
                               {fyFilterCount ? (
-                                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-400">
                                   {fyFilterCount}
                                 </span>
                               ) : null}
@@ -2795,8 +2795,8 @@ export function CoreAccountingMastersClient({
                                 onClick={() => handleToggleFyQuickFilter(filter.value)}
                                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 {filter.label}
@@ -2807,14 +2807,14 @@ export function CoreAccountingMastersClient({
                       </div>
 
                       {isFilterPanelOpen ? (
-                        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="mt-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Status
                               </p>
                               {fySection.filters.statuses.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftFyFilters.statuses.includes(option.value)}
@@ -2824,18 +2824,18 @@ export function CoreAccountingMastersClient({
                                         statuses: toggleFilterValue(previous.statuses, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
                               ))}
                             </div>
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Close Mode
                               </p>
                               {fySection.filters.closeModes.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftFyFilters.closeModes.includes(option.value)}
@@ -2845,7 +2845,7 @@ export function CoreAccountingMastersClient({
                                         closeModes: toggleFilterValue(previous.closeModes, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
@@ -2864,7 +2864,7 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={handleFyResetFilters}
-                              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               Reset Filters
                             </button>
@@ -2876,15 +2876,15 @@ export function CoreAccountingMastersClient({
                     <div className="space-y-4 p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-base font-semibold text-gray-900">{fySection.table.title}</h3>
-                          <p className="mt-1 text-sm text-gray-600">{fySection.table.description}</p>
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{fySection.table.title}</h3>
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{fySection.table.description}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span>{fyData?.totals.filteredYears ?? 0} matching fiscal years</span>
                           <button
                             type="button"
                             onClick={handleFyExport}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             <Download className="h-4 w-4" />
                             Export View
@@ -2892,41 +2892,41 @@ export function CoreAccountingMastersClient({
                         </div>
                       </div>
 
-                      <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                         <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                            <thead className="bg-gray-50 dark:bg-gray-800/50">
                               <tr>
                                 {fySection.table.columns.map((column) => (
                                   <th
                                     key={column}
-                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                   >
                                     {column}
                                   </th>
                                 ))}
-                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                               {fySection.table.rows.length ? (
                                 fySection.table.rows.map((row) => (
-                                  <tr key={row.id} className="hover:bg-gray-50">
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                       {row.code || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.name || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.dateRange || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.closeModeLabel || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.lockedFromDate || '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -2941,7 +2941,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenFyEditModal(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                         >
                                           <Edit className="h-4 w-4" />
                                           Edit
@@ -2949,7 +2949,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenFyDeleteModal(row.id, row.name || `FY #${row.id}`)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                         >
                                           <Trash2 className="h-4 w-4" />
                                           Delete
@@ -2957,7 +2957,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleViewFiscalYear(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                           <Eye className="h-4 w-4" />
                                           View
@@ -2971,7 +2971,7 @@ export function CoreAccountingMastersClient({
                                 <tr>
                                   <td
                                     colSpan={fySection.table.columns.length + 1}
-                                    className="px-4 py-10 text-center text-sm text-gray-500"
+                                    className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                                   >
                                     No fiscal years matched the current filters.
                                   </td>
@@ -2984,7 +2984,7 @@ export function CoreAccountingMastersClient({
 
                       {fyData?.pagination.totalPages && fyData.pagination.totalPages > 1 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Page {fyData.pagination.page} of {fyData.pagination.totalPages}
                           </p>
                           <div className="flex items-center gap-2">
@@ -2992,7 +2992,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!fyData.pagination.hasPrevPage}
                               onClick={() => setFyCurrentPage((previous) => Math.max(1, previous - 1))}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Previous
                             </button>
@@ -3000,7 +3000,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!fyData.pagination.hasNextPage}
                               onClick={() => setFyCurrentPage((previous) => previous + 1)}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Next
                             </button>
@@ -3014,10 +3014,10 @@ export function CoreAccountingMastersClient({
             </>
           ) : activeTab === 'accounting-periods' ? (
             <>
-              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{periodSection.label}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{periodSection.description}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{periodSection.label}</h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{periodSection.description}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -3048,7 +3048,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {periodError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -3076,21 +3076,21 @@ export function CoreAccountingMastersClient({
                     ))}
                   </div>
 
-                  <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 px-5 py-4">
+                  <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                    <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <form
                           onSubmit={handlePeriodSearchSubmit}
                           className="flex min-w-0 flex-1 flex-col gap-3 lg:flex-row lg:items-center"
                         >
                           <div className="relative min-w-0 flex-1 max-w-xl">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                               type="text"
                               value={periodSearchInput}
                               onChange={(event) => setPeriodSearchInput(event.target.value)}
                               placeholder={periodSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                             />
                           </div>
                           <div className="flex items-center gap-2">
@@ -3103,12 +3103,12 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               <Filter className="h-4 w-4" />
                               Filters
                               {periodFilterCount ? (
-                                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-400">
                                   {periodFilterCount}
                                 </span>
                               ) : null}
@@ -3134,8 +3134,8 @@ export function CoreAccountingMastersClient({
                                 onClick={() => handleTogglePeriodQuickFilter(filter.value)}
                                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 {filter.label}
@@ -3146,14 +3146,14 @@ export function CoreAccountingMastersClient({
                       </div>
 
                       {isFilterPanelOpen ? (
-                        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="mt-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Status
                               </p>
                               {periodSection.filters.statuses.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftPeriodFilters.statuses.includes(option.value)}
@@ -3163,18 +3163,18 @@ export function CoreAccountingMastersClient({
                                         statuses: toggleFilterValue(previous.statuses, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
                               ))}
                             </div>
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Fiscal Year
                               </p>
                               {periodSection.filters.fiscalYears.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="radio"
                                     name="period-fiscal-year"
@@ -3185,7 +3185,7 @@ export function CoreAccountingMastersClient({
                                         fiscalYearId: option.value,
                                       }))
                                     }
-                                    className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
@@ -3199,7 +3199,7 @@ export function CoreAccountingMastersClient({
                                       fiscalYearId: '',
                                     }))
                                   }
-                                  className="text-xs text-blue-600 hover:text-blue-700"
+                                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                                 >
                                   Clear filter
                                 </button>
@@ -3218,7 +3218,7 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={handlePeriodResetFilters}
-                              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               Reset Filters
                             </button>
@@ -3230,15 +3230,15 @@ export function CoreAccountingMastersClient({
                     <div className="space-y-4 p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-base font-semibold text-gray-900">{periodSection.table.title}</h3>
-                          <p className="mt-1 text-sm text-gray-600">{periodSection.table.description}</p>
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{periodSection.table.title}</h3>
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{periodSection.table.description}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span>{periodData?.totals.filteredPeriods ?? 0} matching periods</span>
                           <button
                             type="button"
                             onClick={handlePeriodExport}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             <Download className="h-4 w-4" />
                             Export View
@@ -3246,38 +3246,38 @@ export function CoreAccountingMastersClient({
                         </div>
                       </div>
 
-                      <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                         <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                            <thead className="bg-gray-50 dark:bg-gray-800/50">
                               <tr>
                                 {periodSection.table.columns.map((column) => (
                                   <th
                                     key={column}
-                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                   >
                                     {column}
                                   </th>
                                 ))}
-                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                               {periodSection.table.rows.length ? (
                                 periodSection.table.rows.map((row) => (
-                                  <tr key={row.id} className="hover:bg-gray-50">
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                       {row.label || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.periodNumber ?? '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.fiscalYearCode || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.dateRange || '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -3287,7 +3287,7 @@ export function CoreAccountingMastersClient({
                                         {row.statusLabel}
                                       </span>
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.lockedFromDate || '-'}
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -3295,7 +3295,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenPeriodEditModal(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                         >
                                           <Edit className="h-4 w-4" />
                                           Edit
@@ -3303,7 +3303,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenPeriodDeleteModal(row.id, row.label || `Period #${row.id}`)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                         >
                                           <Trash2 className="h-4 w-4" />
                                           Delete
@@ -3311,7 +3311,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleViewPeriod(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                           <Eye className="h-4 w-4" />
                                           View
@@ -3325,7 +3325,7 @@ export function CoreAccountingMastersClient({
                                 <tr>
                                   <td
                                     colSpan={periodSection.table.columns.length + 1}
-                                    className="px-4 py-10 text-center text-sm text-gray-500"
+                                    className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                                   >
                                     No periods matched the current filters.
                                   </td>
@@ -3338,7 +3338,7 @@ export function CoreAccountingMastersClient({
 
                       {periodData?.pagination.totalPages && periodData.pagination.totalPages > 1 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Page {periodData.pagination.page} of {periodData.pagination.totalPages}
                           </p>
                           <div className="flex items-center gap-2">
@@ -3346,7 +3346,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!periodData.pagination.hasPrevPage}
                               onClick={() => setPeriodCurrentPage((previous) => Math.max(1, previous - 1))}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Previous
                             </button>
@@ -3354,7 +3354,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!periodData.pagination.hasNextPage}
                               onClick={() => setPeriodCurrentPage((previous) => previous + 1)}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Next
                             </button>
@@ -3368,10 +3368,10 @@ export function CoreAccountingMastersClient({
             </>
           ) : activeTab === 'tax-codes' ? (
             <>
-              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{tcSection.label}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{tcSection.description}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{tcSection.label}</h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{tcSection.description}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -3402,7 +3402,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {tcError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -3430,21 +3430,21 @@ export function CoreAccountingMastersClient({
                     ))}
                   </div>
 
-                  <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 px-5 py-4">
+                  <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                    <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <form
                           onSubmit={handleTcSearchSubmit}
                           className="flex min-w-0 flex-1 flex-col gap-3 lg:flex-row lg:items-center"
                         >
                           <div className="relative min-w-0 flex-1 max-w-xl">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                               type="text"
                               value={tcSearchInput}
                               onChange={(event) => setTcSearchInput(event.target.value)}
                               placeholder={tcSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                             />
                           </div>
                           <div className="flex items-center gap-2">
@@ -3457,12 +3457,12 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               <Filter className="h-4 w-4" />
                               Filters
                               {tcFilterCount ? (
-                                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-400">
                                   {tcFilterCount}
                                 </span>
                               ) : null}
@@ -3489,8 +3489,8 @@ export function CoreAccountingMastersClient({
                                 onClick={() => handleToggleTcQuickFilter(filter.value)}
                                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 {filter.label}
@@ -3501,14 +3501,14 @@ export function CoreAccountingMastersClient({
                       </div>
 
                       {isFilterPanelOpen ? (
-                        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="mt-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Scope
                               </p>
                               {tcSection.filters.scopes.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftTcFilters.scopes.includes(option.value)}
@@ -3518,18 +3518,18 @@ export function CoreAccountingMastersClient({
                                         scopes: toggleFilterValue(previous.scopes, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
                               ))}
                             </div>
                             <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Calculation Method
                               </p>
                               {tcSection.filters.calculationMethods.map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftTcFilters.calculationMethods.includes(option.value)}
@@ -3539,7 +3539,7 @@ export function CoreAccountingMastersClient({
                                         calculationMethods: toggleFilterValue(previous.calculationMethods, option.value),
                                       }))
                                     }
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                   />
                                   {option.label}
                                 </label>
@@ -3558,7 +3558,7 @@ export function CoreAccountingMastersClient({
                             <button
                               type="button"
                               onClick={handleTcResetFilters}
-                              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                               Reset Filters
                             </button>
@@ -3570,15 +3570,15 @@ export function CoreAccountingMastersClient({
                     <div className="space-y-4 p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <h3 className="text-base font-semibold text-gray-900">{tcSection.table.title}</h3>
-                          <p className="mt-1 text-sm text-gray-600">{tcSection.table.description}</p>
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{tcSection.table.title}</h3>
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{tcSection.table.description}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span>{tcData?.totals.filteredCodes ?? 0} matching tax codes</span>
                           <button
                             type="button"
                             onClick={handleTcExport}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             <Download className="h-4 w-4" />
                             Export View
@@ -3586,41 +3586,41 @@ export function CoreAccountingMastersClient({
                         </div>
                       </div>
 
-                      <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                         <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                            <thead className="bg-gray-50 dark:bg-gray-800/50">
                               <tr>
                                 {tcSection.table.columns.map((column) => (
                                   <th
                                     key={column}
-                                    className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${column === 'Rate' ? 'text-right' : 'text-left'}`}
+                                    className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${column === 'Rate' ? 'text-right' : 'text-left'}`}
                                   >
                                     {column}
                                   </th>
                                 ))}
-                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                               {tcSection.table.rows.length ? (
                                 tcSection.table.rows.map((row) => (
-                                  <tr key={row.id} className="hover:bg-gray-50">
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                       {row.code || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.name || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.scopeLabel || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-right text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">
                                       {row.rateDisplay || '-'}
                                     </td>
-                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                       {row.calculationMethodLabel || '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -3635,7 +3635,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenTcEditModal(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                         >
                                           <Edit className="h-4 w-4" />
                                           Edit
@@ -3643,7 +3643,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleOpenTcDeleteModal(row.id, row.name || `Tax Code #${row.id}`)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                         >
                                           <Trash2 className="h-4 w-4" />
                                           Delete
@@ -3651,7 +3651,7 @@ export function CoreAccountingMastersClient({
                                         <button
                                           type="button"
                                           onClick={() => handleViewTaxCode(row.id)}
-                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                           <Eye className="h-4 w-4" />
                                           View
@@ -3665,7 +3665,7 @@ export function CoreAccountingMastersClient({
                                 <tr>
                                   <td
                                     colSpan={tcSection.table.columns.length + 1}
-                                    className="px-4 py-10 text-center text-sm text-gray-500"
+                                    className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                                   >
                                     No tax codes matched the current filters.
                                   </td>
@@ -3678,7 +3678,7 @@ export function CoreAccountingMastersClient({
 
                       {tcData?.pagination.totalPages && tcData.pagination.totalPages > 1 ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Page {tcData.pagination.page} of {tcData.pagination.totalPages}
                           </p>
                           <div className="flex items-center gap-2">
@@ -3686,7 +3686,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!tcData.pagination.hasPrevPage}
                               onClick={() => setTcCurrentPage((previous) => Math.max(1, previous - 1))}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Previous
                             </button>
@@ -3694,7 +3694,7 @@ export function CoreAccountingMastersClient({
                               type="button"
                               disabled={!tcData.pagination.hasNextPage}
                               onClick={() => setTcCurrentPage((previous) => previous + 1)}
-                              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Next
                             </button>
@@ -3718,13 +3718,13 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateFiscalYear} className="space-y-6">
               {fyCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyCreateError}
                 </div>
               ) : null}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Code</span>
                   <input
                     required
@@ -3732,10 +3732,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Name</span>
                   <input
                     required
@@ -3743,10 +3743,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Start Date</span>
                   <input
                     required
@@ -3755,10 +3755,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, startDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">End Date</span>
                   <input
                     required
@@ -3767,37 +3767,37 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, endDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Status</span>
                   <select
                     value={fyCreateForm.status}
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, status: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="draft">Draft</option>
                     <option value="open">Open</option>
                     <option value="closed">Closed</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Close Mode</span>
                   <select
                     value={fyCreateForm.closeMode}
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, closeMode: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="manual">Manual</option>
                     <option value="hard_lock">Hard Lock</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Locked From Date</span>
                   <input
                     type="date"
@@ -3805,12 +3805,12 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
               </div>
 
-              <label className="block space-y-2 text-sm text-gray-700">
+              <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Notes</span>
                 <textarea
                   rows={4}
@@ -3818,15 +3818,15 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setFyCreateForm((previous) => ({ ...previous, notes: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <button
                   type="button"
                   onClick={handleCloseFyCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -3849,13 +3849,13 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateAccount} className="space-y-6">
               {createError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {createError}
                 </div>
               ) : null}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Code</span>
                   <input
                     required
@@ -3863,10 +3863,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Name</span>
                   <input
                     required
@@ -3874,10 +3874,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Account Type</span>
                   <select
                     value={createForm.accountType}
@@ -3894,7 +3894,7 @@ export function CoreAccountingMastersClient({
                             : 'debit',
                       }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     {(chartData?.section.filters.accountTypes || []).map((option) => (
                       <option key={option.value} value={option.value}>
@@ -3903,14 +3903,14 @@ export function CoreAccountingMastersClient({
                     ))}
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Account Subtype</span>
                   <select
                     value={createForm.accountSubType}
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, accountSubType: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="">Select subtype</option>
                     {(chartData?.section.filters.accountSubTypes || []).map((option) => (
@@ -3920,14 +3920,14 @@ export function CoreAccountingMastersClient({
                     ))}
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Parent Account</span>
                   <select
                     value={createForm.parentAccount}
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, parentAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="">No parent</option>
                     {(chartData?.referenceData.parentAccounts || []).map((account) => (
@@ -3938,7 +3938,7 @@ export function CoreAccountingMastersClient({
                     ))}
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Normal Balance</span>
                   <select
                     value={createForm.normalBalance}
@@ -3948,13 +3948,13 @@ export function CoreAccountingMastersClient({
                         normalBalance: event.target.value as 'debit' | 'credit',
                       }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="debit">Debit</option>
                     <option value="credit">Credit</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Sort Order</span>
                   <input
                     type="number"
@@ -3962,12 +3962,12 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, sortOrder: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
               </div>
 
-              <label className="block space-y-2 text-sm text-gray-700">
+              <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Description</span>
                 <textarea
                   rows={4}
@@ -3975,23 +3975,23 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setCreateForm((previous) => ({ ...previous, description: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isActive}
                     onChange={() =>
                       setCreateForm((previous) => ({ ...previous, isActive: !previous.isActive }))
                     }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                   />
                   Active Account
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.allowManualEntries}
@@ -4001,11 +4001,11 @@ export function CoreAccountingMastersClient({
                         allowManualEntries: !previous.allowManualEntries,
                       }))
                     }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                   />
                   Allow Manual Entries
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isControlAccount}
@@ -4015,11 +4015,11 @@ export function CoreAccountingMastersClient({
                         isControlAccount: !previous.isControlAccount,
                       }))
                     }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                   />
                   Control Account
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isRetainedEarnings}
@@ -4029,11 +4029,11 @@ export function CoreAccountingMastersClient({
                         isRetainedEarnings: !previous.isRetainedEarnings,
                       }))
                     }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                   />
                   Retained Earnings
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700 md:col-span-2">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                   <input
                     type="checkbox"
                     checked={createForm.isSuspenseAccount}
@@ -4043,17 +4043,17 @@ export function CoreAccountingMastersClient({
                         isSuspenseAccount: !previous.isSuspenseAccount,
                       }))
                     }
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                   />
                   Suspense Account
                 </label>
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <button
                   type="button"
                   onClick={handleCloseCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -4076,13 +4076,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditFiscalYear} className="space-y-6">
                   {fyEditError ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {fyEditError}
                     </div>
                   ) : null}
 
                   {editingFy?.usageSummary?.hasPeriods ? (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                       <p className="font-medium">Restricted edit mode</p>
                       <p className="mt-1">
                         {editingFy.editPermissions?.restrictionReason ||
@@ -4095,7 +4095,7 @@ export function CoreAccountingMastersClient({
                   ) : null}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Code</span>
                       <input
                         required
@@ -4103,10 +4103,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Name</span>
                       <input
                         required
@@ -4114,10 +4114,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Start Date</span>
                       <input
                         required
@@ -4127,10 +4127,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, startDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">End Date</span>
                       <input
                         required
@@ -4140,37 +4140,37 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, endDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Status</span>
                       <select
                         value={fyEditForm.status}
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, status: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="draft">Draft</option>
                         <option value="open">Open</option>
                         <option value="closed">Closed</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Close Mode</span>
                       <select
                         value={fyEditForm.closeMode}
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, closeMode: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="manual">Manual</option>
                         <option value="hard_lock">Hard Lock</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Locked From Date</span>
                       <input
                         type="date"
@@ -4178,12 +4178,12 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
                   </div>
 
-                  <label className="block space-y-2 text-sm text-gray-700">
+                  <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-medium">Notes</span>
                     <textarea
                       rows={4}
@@ -4191,15 +4191,15 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setFyEditForm((previous) => ({ ...previous, notes: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <button
                       type="button"
                       onClick={handleCloseFyEditModal}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -4222,13 +4222,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditAccount} className="space-y-6">
                   {editError ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {editError}
                     </div>
                   ) : null}
 
                   {editingAccount?.usageSummary?.hasTransactions ? (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                       <p className="font-medium">Restricted edit mode</p>
                       <p className="mt-1">
                         {editRestrictionReason ||
@@ -4241,7 +4241,7 @@ export function CoreAccountingMastersClient({
                   ) : null}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Code</span>
                       <input
                         required
@@ -4249,10 +4249,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Name</span>
                       <input
                         required
@@ -4260,10 +4260,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Account Type</span>
                       <select
                         value={editForm.accountType}
@@ -4281,7 +4281,7 @@ export function CoreAccountingMastersClient({
                                 : 'debit',
                           }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         {(chartData?.section.filters.accountTypes || []).map((option) => (
                           <option key={option.value} value={option.value}>
@@ -4290,14 +4290,14 @@ export function CoreAccountingMastersClient({
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Account Subtype</span>
                       <select
                         value={editForm.accountSubType}
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, accountSubType: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="">Select subtype</option>
                         {(chartData?.section.filters.accountSubTypes || []).map((option) => (
@@ -4307,7 +4307,7 @@ export function CoreAccountingMastersClient({
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Parent Account</span>
                       <select
                         value={editForm.parentAccount}
@@ -4315,7 +4315,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, parentAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         <option value="">No parent</option>
                         {(chartData?.referenceData.parentAccounts || []).map((account) => (
@@ -4326,7 +4326,7 @@ export function CoreAccountingMastersClient({
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Normal Balance</span>
                       <select
                         value={editForm.normalBalance}
@@ -4337,13 +4337,13 @@ export function CoreAccountingMastersClient({
                             normalBalance: event.target.value as 'debit' | 'credit',
                           }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         <option value="debit">Debit</option>
                         <option value="credit">Credit</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Sort Order</span>
                       <input
                         type="number"
@@ -4351,12 +4351,12 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, sortOrder: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
                   </div>
 
-                  <label className="block space-y-2 text-sm text-gray-700">
+                  <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-medium">Description</span>
                     <textarea
                       rows={4}
@@ -4364,23 +4364,23 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setEditForm((previous) => ({ ...previous, description: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                     />
                   </label>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isActive}
                         onChange={() =>
                           setEditForm((previous) => ({ ...previous, isActive: !previous.isActive }))
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                       />
                       Active Account
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.allowManualEntries}
@@ -4390,11 +4390,11 @@ export function CoreAccountingMastersClient({
                             allowManualEntries: !previous.allowManualEntries,
                           }))
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                       />
                       Allow Manual Entries
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isControlAccount}
@@ -4404,11 +4404,11 @@ export function CoreAccountingMastersClient({
                             isControlAccount: !previous.isControlAccount,
                           }))
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                       />
                       Control Account
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isRetainedEarnings}
@@ -4418,11 +4418,11 @@ export function CoreAccountingMastersClient({
                             isRetainedEarnings: !previous.isRetainedEarnings,
                           }))
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                       />
                       Retained Earnings
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700 md:col-span-2">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                       <input
                         type="checkbox"
                         checked={editForm.isSuspenseAccount}
@@ -4432,17 +4432,17 @@ export function CoreAccountingMastersClient({
                             isSuspenseAccount: !previous.isSuspenseAccount,
                           }))
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                       />
                       Suspense Account
                     </label>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <button
                       type="button"
                       onClick={handleCloseEditModal}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -4465,14 +4465,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {fyDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyDeleteError}
                 </div>
               ) : null}
 
               {fyDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this fiscal year</p>
                     <p className="mt-1">
                       This fiscal year cannot be deleted because the following dependencies exist:
@@ -4490,7 +4490,7 @@ export function CoreAccountingMastersClient({
                     <button
                       type="button"
                       onClick={handleCloseFyDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Close
                     </button>
@@ -4498,7 +4498,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The fiscal year &ldquo;{deletingFyName}&rdquo; will be permanently removed.
@@ -4509,7 +4509,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseFyDeleteModal}
                       disabled={isFyDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -4517,7 +4517,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleConfirmFyDelete}
                       disabled={isFyDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-800"
                     >
                       {isFyDeleteSubmitting ? 'Deleting...' : 'Delete Fiscal Year'}
                     </button>
@@ -4536,77 +4536,77 @@ export function CoreAccountingMastersClient({
         {isFyDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
                   ))}
                 </div>
               ) : fyDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyDetailError}
                 </div>
               ) : selectedFy ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedFy.code || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedFy.code || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedFy.name || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedFy.name || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Start Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Start Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.startDate ? new Date(selectedFy.startDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">End Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">End Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.endDate ? new Date(selectedFy.endDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedFy.status || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.status || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Close Mode</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedFy.closeMode || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Close Mode</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.closeMode || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Locked From Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Locked From Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.lockedFromDate ? new Date(selectedFy.lockedFromDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Periods</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedFy.usageSummary?.periodCount ?? '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Periods</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.usageSummary?.periodCount ?? '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Closed At</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedFy.closedAt) || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed At</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.closedAt) || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Closed By</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed By</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedFy.closedBy === 'object' && selectedFy.closedBy?.name
                           ? selectedFy.closedBy.name
                           : selectedFy.closedBy || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedFy.notes || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.notes || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedFy.createdAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedFy.updatedAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.updatedAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -4623,90 +4623,90 @@ export function CoreAccountingMastersClient({
         {isAccountDetailLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+              <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
             ))}
           </div>
         ) : accountDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {accountDetailError}
                 </div>
               ) : selectedAccount ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedAccount.code || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedAccount.code || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</p>
-                    <p className="mt-2 text-sm font-semibold text-gray-900">{selectedAccount.name || '-'}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
+                    <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedAccount.name || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
-                    <p className="mt-2 text-sm text-gray-700">{selectedAccount.accountType || '-'}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.accountType || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Subtype</p>
-                    <p className="mt-2 text-sm text-gray-700">{selectedAccount.accountSubType || '-'}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Subtype</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.accountSubType || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Parent</p>
-                    <p className="mt-2 text-sm text-gray-700">
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Parent</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                       {selectedAccount.parentAccount?.code
                         ? `${selectedAccount.parentAccount.code} ${selectedAccount.parentAccount.name || ''}`.trim()
                         : selectedAccount.parentAccount?.name || '-'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Normal Balance</p>
-                    <p className="mt-2 text-sm uppercase text-gray-700">{selectedAccount.normalBalance || '-'}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Normal Balance</p>
+                    <p className="mt-2 text-sm uppercase text-gray-700 dark:text-gray-300">{selectedAccount.normalBalance || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                    <p className="mt-2 text-sm text-gray-700">
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                       {selectedAccount.isActive === false ? 'Inactive' : 'Active'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Sort Order</p>
-                    <p className="mt-2 text-sm text-gray-700">{selectedAccount.sortOrder ?? 0}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sort Order</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.sortOrder ?? 0}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 md:col-span-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Flags</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Flags</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                      <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                         {selectedAccount.allowManualEntries === false
                           ? 'Manual Entries Disabled'
                           : 'Manual Entries Allowed'}
                       </span>
                       {selectedAccount.isControlAccount ? (
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                        <span className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
                           Control Account
                         </span>
                       ) : null}
                       {selectedAccount.isRetainedEarnings ? (
-                        <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700">
+                        <span className="rounded-full bg-purple-50 dark:bg-purple-950/30 px-3 py-1 text-xs font-medium text-purple-700 dark:text-purple-400">
                           Retained Earnings
                         </span>
                       ) : null}
                       {selectedAccount.isSuspenseAccount ? (
-                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                        <span className="rounded-full bg-amber-50 dark:bg-amber-950/30 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
                           Suspense Account
                         </span>
                       ) : null}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 md:col-span-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Description</p>
-                    <p className="mt-2 text-sm text-gray-700">{selectedAccount.description || '-'}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Description</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.description || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created</p>
-                    <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedAccount.createdAt)}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedAccount.createdAt)}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated</p>
-                    <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedAccount.updatedAt)}</p>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedAccount.updatedAt)}</p>
                   </div>
                 </div>
                 </div>
@@ -4721,13 +4721,13 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreatePeriod} className="space-y-6">
               {periodCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodCreateError}
                 </div>
               ) : null}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Fiscal Year</span>
                   <select
                     required
@@ -4735,7 +4735,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, fiscalYear: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="">Select fiscal year</option>
                     {(periodSection.filters.fiscalYears || []).map((option) => (
@@ -4745,7 +4745,7 @@ export function CoreAccountingMastersClient({
                     ))}
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Period Number</span>
                   <input
                     required
@@ -4755,10 +4755,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, periodNumber: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700 md:col-span-2">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                   <span className="font-medium">Label</span>
                   <input
                     required
@@ -4766,10 +4766,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, label: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Start Date</span>
                   <input
                     required
@@ -4778,10 +4778,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, startDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">End Date</span>
                   <input
                     required
@@ -4790,17 +4790,17 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, endDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Status</span>
                   <select
                     value={periodCreateForm.status}
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, status: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="draft">Draft</option>
                     <option value="open">Open</option>
@@ -4808,7 +4808,7 @@ export function CoreAccountingMastersClient({
                     <option value="closed">Closed</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Locked From Date</span>
                   <input
                     type="date"
@@ -4816,12 +4816,12 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
               </div>
 
-              <label className="block space-y-2 text-sm text-gray-700">
+              <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Notes</span>
                 <textarea
                   rows={4}
@@ -4829,15 +4829,15 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setPeriodCreateForm((previous) => ({ ...previous, notes: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <button
                   type="button"
                   onClick={handleClosePeriodCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -4860,13 +4860,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditPeriod} className="space-y-6">
                   {periodEditError ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {periodEditError}
                     </div>
                   ) : null}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Fiscal Year</span>
                       <select
                         required
@@ -4874,7 +4874,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, fiscalYear: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="">Select fiscal year</option>
                         {(periodSection.filters.fiscalYears || []).map((option) => (
@@ -4884,7 +4884,7 @@ export function CoreAccountingMastersClient({
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Period Number</span>
                       <input
                         required
@@ -4894,10 +4894,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, periodNumber: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700 md:col-span-2">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                       <span className="font-medium">Label</span>
                       <input
                         required
@@ -4905,10 +4905,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, label: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Start Date</span>
                       <input
                         required
@@ -4917,10 +4917,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, startDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">End Date</span>
                       <input
                         required
@@ -4929,17 +4929,17 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, endDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Status</span>
                       <select
                         value={periodEditForm.status}
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, status: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="draft">Draft</option>
                         <option value="open">Open</option>
@@ -4947,7 +4947,7 @@ export function CoreAccountingMastersClient({
                         <option value="closed">Closed</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Locked From Date</span>
                       <input
                         type="date"
@@ -4955,12 +4955,12 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
                   </div>
 
-                  <label className="block space-y-2 text-sm text-gray-700">
+                  <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-medium">Notes</span>
                     <textarea
                       rows={4}
@@ -4968,15 +4968,15 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setPeriodEditForm((previous) => ({ ...previous, notes: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <button
                       type="button"
                       onClick={handleClosePeriodEditModal}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -4999,14 +4999,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {periodDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodDeleteError}
                 </div>
               ) : null}
 
               {periodDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this period</p>
                     <p className="mt-1">
                       This period cannot be deleted because the following dependencies exist:
@@ -5024,7 +5024,7 @@ export function CoreAccountingMastersClient({
                     <button
                       type="button"
                       onClick={handleClosePeriodDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Close
                     </button>
@@ -5032,7 +5032,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The period &ldquo;{deletingPeriodName}&rdquo; will be permanently removed.
@@ -5043,7 +5043,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleClosePeriodDeleteModal}
                       disabled={isPeriodDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -5051,7 +5051,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleConfirmPeriodDelete}
                       disabled={isPeriodDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-800"
                     >
                       {isPeriodDeleteSubmitting ? 'Deleting...' : 'Delete Period'}
                     </button>
@@ -5070,77 +5070,77 @@ export function CoreAccountingMastersClient({
         {isPeriodDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
                   ))}
                 </div>
               ) : periodDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodDetailError}
                 </div>
               ) : selectedPeriod ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Label</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedPeriod.label || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Label</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedPeriod.label || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Period Number</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedPeriod.periodNumber ?? '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Period Number</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.periodNumber ?? '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Fiscal Year</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Fiscal Year</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedPeriod.fiscalYear === 'object' && selectedPeriod.fiscalYear
                           ? `${selectedPeriod.fiscalYear.code || ''} ${selectedPeriod.fiscalYear.name || ''}`.trim() || '-'
                           : selectedPeriod.fiscalYear || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedPeriod.status || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.status || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Start Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Start Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.startDate ? new Date(selectedPeriod.startDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">End Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">End Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.endDate ? new Date(selectedPeriod.endDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Locked From Date</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Locked From Date</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.lockedFromDate ? new Date(selectedPeriod.lockedFromDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Closed At</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedPeriod.closedAt) || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed At</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.closedAt) || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Closed By</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed By</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedPeriod.closedBy === 'object' && selectedPeriod.closedBy?.name
                           ? selectedPeriod.closedBy.name
                           : selectedPeriod.closedBy || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedPeriod.notes || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.notes || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedPeriod.createdAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedPeriod.updatedAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.updatedAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -5155,14 +5155,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {deleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {deleteError}
                 </div>
               ) : null}
 
               {deleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this account</p>
                     <p className="mt-1">
                       This account cannot be deleted because the following dependencies exist:
@@ -5180,7 +5180,7 @@ export function CoreAccountingMastersClient({
                     <button
                       type="button"
                       onClick={handleCloseDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Close
                     </button>
@@ -5188,7 +5188,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The account &ldquo;{deletingAccountName}&rdquo; will be permanently removed.
@@ -5199,7 +5199,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseDeleteModal}
                       disabled={isDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -5207,7 +5207,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleConfirmDeleteAccount}
                       disabled={isDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-800"
                     >
                       {isDeleteSubmitting ? 'Deleting...' : 'Delete Account'}
                     </button>
@@ -5224,13 +5224,13 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateTaxCode} className="space-y-6">
               {tcCreateError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcCreateError}
                 </div>
               ) : null}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Code</span>
                   <input
                     required
@@ -5238,10 +5238,10 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Name</span>
                   <input
                     required
@@ -5249,24 +5249,24 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Scope</span>
                   <select
                     value={tcCreateForm.scope}
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, scope: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="both">Both</option>
                     <option value="sales">Sales</option>
                     <option value="purchase">Purchase</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Rate (%)</span>
                   <input
                     required
@@ -5278,30 +5278,30 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, rate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Calculation Method</span>
                   <select
                     value={tcCreateForm.calculationMethod}
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, calculationMethod: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="exclusive">Exclusive</option>
                     <option value="inclusive">Inclusive</option>
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Purchase Account</span>
                   <select
                     value={tcCreateForm.purchaseAccount}
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, purchaseAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="">Select a value</option>
                     {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5311,14 +5311,14 @@ export function CoreAccountingMastersClient({
                     ))}
                   </select>
                 </label>
-                <label className="space-y-2 text-sm text-gray-700">
+                <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">Sales Account</span>
                   <select
                     value={tcCreateForm.salesAccount}
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, salesAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   >
                     <option value="">Select a value</option>
                     {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5330,19 +5330,19 @@ export function CoreAccountingMastersClient({
                 </label>
               </div>
 
-              <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                 <input
                   type="checkbox"
                   checked={tcCreateForm.isActive}
                   onChange={() =>
                     setTcCreateForm((previous) => ({ ...previous, isActive: !previous.isActive }))
                   }
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                 />
                 Active Tax Code
               </label>
 
-              <label className="block space-y-2 text-sm text-gray-700">
+              <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Description</span>
                 <textarea
                   rows={4}
@@ -5350,15 +5350,15 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setTcCreateForm((previous) => ({ ...previous, description: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <button
                   type="button"
                   onClick={handleCloseTcCreateModal}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -5381,13 +5381,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditTaxCode} className="space-y-6">
                   {tcEditError ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {tcEditError}
                     </div>
                   ) : null}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Code</span>
                       <input
                         required
@@ -5395,10 +5395,10 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Name</span>
                       <input
                         required
@@ -5406,24 +5406,24 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Scope</span>
                       <select
                         value={tcEditForm.scope}
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, scope: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="both">Both</option>
                         <option value="sales">Sales</option>
                         <option value="purchase">Purchase</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Rate (%)</span>
                       <input
                         required
@@ -5435,30 +5435,30 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, rate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Calculation Method</span>
                       <select
                         value={tcEditForm.calculationMethod}
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, calculationMethod: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="exclusive">Exclusive</option>
                         <option value="inclusive">Inclusive</option>
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Purchase Account</span>
                       <select
                         value={tcEditForm.purchaseAccount}
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, purchaseAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="">Select a value</option>
                         {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5468,14 +5468,14 @@ export function CoreAccountingMastersClient({
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-2 text-sm text-gray-700">
+                    <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-medium">Sales Account</span>
                       <select
                         value={tcEditForm.salesAccount}
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, salesAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       >
                         <option value="">Select a value</option>
                         {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5487,19 +5487,19 @@ export function CoreAccountingMastersClient({
                     </label>
                   </div>
 
-                  <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                  <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                     <input
                       type="checkbox"
                       checked={tcEditForm.isActive}
                       onChange={() =>
                         setTcEditForm((previous) => ({ ...previous, isActive: !previous.isActive }))
                       }
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                     />
                     Active Tax Code
                   </label>
 
-                  <label className="block space-y-2 text-sm text-gray-700">
+                  <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-medium">Description</span>
                     <textarea
                       rows={4}
@@ -5507,15 +5507,15 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setTcEditForm((previous) => ({ ...previous, description: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <button
                       type="button"
                       onClick={handleCloseTcEditModal}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -5538,14 +5538,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {tcDeleteError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcDeleteError}
                 </div>
               ) : null}
 
               {tcDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this tax code</p>
                     <p className="mt-1">
                       This tax code cannot be deleted because the following dependencies exist:
@@ -5563,7 +5563,7 @@ export function CoreAccountingMastersClient({
                     <button
                       type="button"
                       onClick={handleCloseTcDeleteModal}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Close
                     </button>
@@ -5571,7 +5571,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The tax code &ldquo;{deletingTcName}&rdquo; will be permanently removed.
@@ -5582,7 +5582,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseTcDeleteModal}
                       disabled={isTcDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -5590,7 +5590,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleConfirmTcDelete}
                       disabled={isTcDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-800"
                     >
                       {isTcDeleteSubmitting ? 'Deleting...' : 'Delete Tax Code'}
                     </button>
@@ -5609,67 +5609,67 @@ export function CoreAccountingMastersClient({
         {isTcDetailLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+                    <div key={index} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
                   ))}
                 </div>
               ) : tcDetailError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcDetailError}
                 </div>
               ) : selectedTc ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Code</p>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">{selectedTc.code || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
+                      <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedTc.code || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.name || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.name || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Scope</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.scope || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Scope</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.scope || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Rate</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.rate !== null && selectedTc.rate !== undefined ? `${selectedTc.rate}%` : '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Rate</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.rate !== null && selectedTc.rate !== undefined ? `${selectedTc.rate}%` : '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Calculation Method</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.calculationMethod || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Calculation Method</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.calculationMethod || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.isActive !== false ? 'Active' : 'Inactive'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.isActive !== false ? 'Active' : 'Inactive'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Purchase Account</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Purchase Account</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedTc.purchaseAccount === 'object' && selectedTc.purchaseAccount
                           ? `${selectedTc.purchaseAccount.code || ''} ${selectedTc.purchaseAccount.name || ''}`.trim() || String(selectedTc.purchaseAccount.id)
                           : selectedTc.purchaseAccount || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Sales Account</p>
-                      <p className="mt-2 text-sm text-gray-700">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sales Account</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedTc.salesAccount === 'object' && selectedTc.salesAccount
                           ? `${selectedTc.salesAccount.code || ''} ${selectedTc.salesAccount.name || ''}`.trim() || String(selectedTc.salesAccount.id)
                           : selectedTc.salesAccount || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Description</p>
-                      <p className="mt-2 text-sm text-gray-700">{selectedTc.description || '-'}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Description</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.description || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedTc.createdAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedTc.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated</p>
-                      <p className="mt-2 text-sm text-gray-700">{formatDateTime(selectedTc.updatedAt)}</p>
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
+                      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedTc.updatedAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -5718,22 +5718,22 @@ function SlideOver({
       onClick={onClose}
     >
       <div
-        className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${
+        className={`flex h-full w-full ${width} flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${
           animate ? 'translate-x-0' : 'translate-x-full'
         }`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
             {description ? (
-              <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+              <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p>
             ) : null}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <X className="h-5 w-5" />
           </button>

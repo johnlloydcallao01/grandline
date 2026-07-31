@@ -29,12 +29,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         style={{
           top: '4rem',
           height: 'calc(100vh - 4rem)',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--card-border) transparent',
         }}
       >
-        <div className="p-3">
-          <nav className="space-y-1">
+        <div className="p-3 pb-20">
+          <nav className="space-y-4">
             <SidebarMenuItems isOpen={isOpen} />
           </nav>
         </div>

@@ -49,15 +49,15 @@ const STATIC_TABS = [
 
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 dark:bg-blue-700 dark:border-blue-700';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300';
+  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: HistoryMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
+  return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
@@ -113,15 +113,15 @@ function SlideOver({
       onClick={onClose}
     >
       <div
-        className={`flex w-full max-w-lg flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`flex w-full max-w-lg flex-col bg-white shadow-xl transition-all duration-300 ease-in-out dark:bg-[var(--card-background)] ${animate ? 'translate-x-0' : 'translate-x-full'}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-[var(--card-border)]">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -135,13 +135,13 @@ function SlideOver({
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: HistoryMetric['trend'] }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 p-3 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
@@ -158,23 +158,23 @@ function MetricCard({ label, value, change, trend = 'neutral' }: { label: string
 function LoadingSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
                 {Array.from({ length: 7 }).map((_, index) => (
                   <th key={index} className="px-4 py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-[var(--card-background)]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
                   <td colSpan={7} className="px-4 py-3">
-                    <div className="h-6 animate-pulse rounded bg-gray-100" />
+                    <div className="h-6 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                   </td>
                 </tr>
               ))}
@@ -189,7 +189,7 @@ function LoadingSkeleton() {
 function renderCell(cell: TableCell, index: number) {
   if (typeof cell === 'string') {
     return (
-      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
         {cell}
       </td>
     );
@@ -198,11 +198,11 @@ function renderCell(cell: TableCell, index: number) {
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800',
+      gray: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600',
+      green: 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800',
+      red: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400 dark:ring-red-800',
     };
 
     return (
@@ -215,7 +215,7 @@ function renderCell(cell: TableCell, index: number) {
   }
 
   return (
-    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>
+    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>
       {cell.text}
     </td>
   );
@@ -457,15 +457,15 @@ export function RecordHistoryClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Audit & History</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">Record History</h1>
-          <p className="mt-1 text-base text-gray-600">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Audit & History</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Record History</h1>
+          <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
             Inspect entity activity and before/after snapshots to understand how finance records changed over time.
           </p>
         </div>
       </div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {STATIC_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -473,7 +473,7 @@ export function RecordHistoryClient() {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'}`}
               >
                 {tab.label}
               </button>
@@ -485,11 +485,11 @@ export function RecordHistoryClient() {
       <div className="mt-6">
         {activeTab === 'entity-history' ? (
           <div className="space-y-6">
-            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-[var(--card-border)] dark:bg-gray-800/50 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-gray-900">{currentTab.label}</h2>
-                <p className="text-sm text-gray-600">{currentTab.description}</p>
-                <p className="text-sm text-gray-500">{entityData?.totals.filteredRows ?? 0} matching rows</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentTab.label}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{currentTab.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{entityData?.totals.filteredRows ?? 0} matching rows</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
@@ -509,21 +509,21 @@ export function RecordHistoryClient() {
               </div>
             ) : null}
 
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
+              <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 dark:border-[var(--card-border)] lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                   <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
                     <div className="relative min-w-0 flex-1">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                       <input
                         type="text"
                         placeholder={currentTab.searchPlaceholder}
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100 dark:focus:ring-blue-800"
                       />
                     </div>
-                    <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+                    <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 dark:bg-blue-700 dark:border-blue-700">
                       <Search className="h-4 w-4" />
                       Search
                     </button>
@@ -535,12 +535,12 @@ export function RecordHistoryClient() {
                       if (!isFilterPanelOpen) setDraftFilters({ ...filters });
                       setIsFilterPanelOpen((previous) => !previous);
                     }}
-                    className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800'}`}
                   >
                     <Filter className="h-4 w-4" />
                     Filters
                     {filterCount > 0 ? (
-                      <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                      <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white dark:bg-blue-700">
                         {filterCount}
                       </span>
                     ) : null}
@@ -554,7 +554,7 @@ export function RecordHistoryClient() {
                         key={filter.value}
                         type="button"
                         onClick={() => handleToggleQuickFilter(filter.value)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${entityQuickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${entityQuickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
                       >
                         {filter.label}
                       </button>
@@ -565,11 +565,11 @@ export function RecordHistoryClient() {
 
               <div className="space-y-4 p-[10px] sm:p-5">
                 {isFilterPanelOpen ? (
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-[var(--card-border)] dark:bg-gray-800/50">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                        <p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Select as many filter values as needed, then apply them in one step.</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <button
@@ -580,7 +580,7 @@ export function RecordHistoryClient() {
                             setCurrentPage(1);
                             setIsFilterPanelOpen(false);
                           }}
-                          className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                          className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                         >
                           Clear all
                         </button>
@@ -590,7 +590,7 @@ export function RecordHistoryClient() {
                             setDraftFilters({ ...filters });
                             setIsFilterPanelOpen(false);
                           }}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                         >
                           Cancel
                         </button>
@@ -601,7 +601,7 @@ export function RecordHistoryClient() {
                             setCurrentPage(1);
                             setIsFilterPanelOpen(false);
                           }}
-                          className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                          className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-700"
                         >
                           Apply Filters
                         </button>
@@ -610,7 +610,7 @@ export function RecordHistoryClient() {
 
                     <div className="mt-6 grid gap-6 md:grid-cols-2">
                       <div>
-                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Action Type</h5>
+                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Action Type</h5>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {(entityData?.section.filters.actionTypes || []).map((option) => {
                             const isSelected = draftFilters.actionTypes.includes(option.value);
@@ -619,7 +619,7 @@ export function RecordHistoryClient() {
                                 key={option.value}
                                 type="button"
                                 onClick={() => setDraftFilters((previous) => ({ ...previous, actionTypes: toggleFilterValue(previous.actionTypes, option.value) }))}
-                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}
+                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}
                               >
                                 {option.label}
                               </button>
@@ -629,7 +629,7 @@ export function RecordHistoryClient() {
                       </div>
 
                       <div>
-                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Entity Type</h5>
+                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Entity Type</h5>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {(entityData?.section.filters.entityTypes || []).map((option) => {
                             const isSelected = draftFilters.entityTypes.includes(option.value);
@@ -638,7 +638,7 @@ export function RecordHistoryClient() {
                                 key={option.value}
                                 type="button"
                                 onClick={() => setDraftFilters((previous) => ({ ...previous, entityTypes: toggleFilterValue(previous.entityTypes, option.value) }))}
-                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}
+                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}
                               >
                                 {option.label}
                               </button>
@@ -652,15 +652,15 @@ export function RecordHistoryClient() {
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
-                    <h3 className="text-base font-semibold text-gray-900">{entityData?.section.table.title || 'Entity Activity History'}</h3>
-                    <p className="text-sm text-gray-600">{entityData?.section.table.description || 'Entity-oriented audit history showing who changed which accounting record and when.'}</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{entityData?.section.table.title || 'Entity Activity History'}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{entityData?.section.table.description || 'Entity-oriented audit history showing who changed which accounting record and when.'}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>{entityData?.totals.filteredRows ?? 0} matching rows</span>
                     <button
                       type="button"
                       onClick={handleExport}
-                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                       disabled={!(entityData?.section.table.rows.length)}
                     >
                       <Download className="h-4 w-4" />
@@ -670,7 +670,7 @@ export function RecordHistoryClient() {
                 </div>
 
                 {error ? (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {error}
                   </div>
@@ -680,23 +680,23 @@ export function RecordHistoryClient() {
                   <LoadingSkeleton />
                 ) : (
                   <>
-                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                    <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50">
                             <tr>
                               {currentTab.columns.map((column) => (
-                                <th key={column} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th key={column} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   {column}
                                 </th>
                               ))}
-                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-[var(--card-background)]">
                             {(entityData?.section.table.rows || []).length > 0 ? (
                               (entityData?.section.table.rows || []).map((row) => (
-                                <tr key={row.id} className="hover:bg-gray-50">
+                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                   {row.cells.map((cell, index) => renderCell(cell, index))}
                                   <td className="px-4 py-3 text-right">
                                     <div className="flex justify-end gap-2">
@@ -706,7 +706,7 @@ export function RecordHistoryClient() {
                                           setViewDetail(row);
                                           setIsViewOpen(true);
                                         }}
-                                        className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                        className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         title="View detail"
                                       >
                                         <Eye className="h-4 w-4" />
@@ -717,7 +717,7 @@ export function RecordHistoryClient() {
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={currentTab.columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">
+                                <td colSpan={currentTab.columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                   No entity-history rows found.
                                 </td>
                               </tr>
@@ -729,13 +729,13 @@ export function RecordHistoryClient() {
 
                     {entityData?.pagination && entityData.pagination.totalPages > 1 ? (
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">Page {entityData.pagination.page} of {entityData.pagination.totalPages}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Page {entityData.pagination.page} of {entityData.pagination.totalPages}</p>
                         <div className="flex gap-2">
                           <button
                             type="button"
                             disabled={!entityData.pagination.hasPrevPage}
                             onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
-                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                           >
                             Previous
                           </button>
@@ -743,7 +743,7 @@ export function RecordHistoryClient() {
                             type="button"
                             disabled={!entityData.pagination.hasNextPage}
                             onClick={() => setCurrentPage((previous) => previous + 1)}
-                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                           >
                             Next
                           </button>
@@ -764,36 +764,36 @@ export function RecordHistoryClient() {
               <div className="space-y-6">
                 {viewDetail ? (
                   <>
-                    <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Performed At</span><span className="text-sm font-medium text-gray-900">{viewDetail.performedAtLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Entity Type</span><span className="text-sm font-medium text-gray-900">{viewDetail.entityTypeLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Entity ID</span><span className="text-sm font-medium text-gray-900">{viewDetail.entityId}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Action</span><span className="text-sm font-medium text-gray-900">{viewDetail.actionLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Performed By</span><span className="text-sm font-medium text-gray-900">{viewDetail.performedBy}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Source Field</span><span className="text-sm font-medium text-gray-900">{viewDetail.sourceFieldSummary}</span></div>
-                      <div className="flex justify-between"><span className="text-sm text-gray-500">Reason</span><span className="text-right text-sm font-medium text-gray-900">{viewDetail.reason || '-'}</span></div>
+                    <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Performed At</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.performedAtLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Entity Type</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.entityTypeLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Entity ID</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.entityId}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Action</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.actionLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Performed By</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.performedBy}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Source Field</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.sourceFieldSummary}</span></div>
+                      <div className="flex justify-between"><span className="text-sm text-gray-500 dark:text-gray-400">Reason</span><span className="text-right text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.reason || '-'}</span></div>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Metadata</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(viewDetail.metadata)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Metadata</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(viewDetail.metadata)}</pre>
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Before Data</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(viewDetail.beforeData)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Before Data</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(viewDetail.beforeData)}</pre>
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">After Data</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(viewDetail.afterData)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">After Data</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(viewDetail.afterData)}</pre>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-500">No details available.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No details available.</p>
                 )}
                 <div className="flex justify-end pt-4">
-                  <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                  <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800">
                     Close
                   </button>
                 </div>
@@ -802,11 +802,11 @@ export function RecordHistoryClient() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-[var(--card-border)] dark:bg-gray-800/50 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-gray-900">{currentTab.label}</h2>
-                <p className="text-sm text-gray-600">{currentTab.description}</p>
-                <p className="text-sm text-gray-500">{snapshotData?.totals.filteredRows ?? 0} matching rows</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentTab.label}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{currentTab.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{snapshotData?.totals.filteredRows ?? 0} matching rows</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={handleSnapshotRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
@@ -826,21 +826,21 @@ export function RecordHistoryClient() {
               </div>
             ) : null}
 
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
+              <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 dark:border-[var(--card-border)] lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                   <form onSubmit={handleSnapshotSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
                     <div className="relative min-w-0 flex-1">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                       <input
                         type="text"
                         placeholder={currentTab.searchPlaceholder}
                         value={snapshotSearchInput}
                         onChange={(event) => setSnapshotSearchInput(event.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100 dark:focus:ring-blue-800"
                       />
                     </div>
-                    <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+                    <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 dark:bg-blue-700 dark:border-blue-700">
                       <Search className="h-4 w-4" />
                       Search
                     </button>
@@ -851,12 +851,12 @@ export function RecordHistoryClient() {
                       if (!isSnapshotFilterPanelOpen) setSnapshotDraftFilters({ ...snapshotFilters });
                       setIsSnapshotFilterPanelOpen((previous) => !previous);
                     }}
-                    className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isSnapshotFilterPanelOpen || snapshotFilterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isSnapshotFilterPanelOpen || snapshotFilterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800'}`}
                   >
                     <Filter className="h-4 w-4" />
                     Filters
                     {snapshotFilterCount > 0 ? (
-                      <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                      <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white dark:bg-blue-700">
                         {snapshotFilterCount}
                       </span>
                     ) : null}
@@ -869,7 +869,7 @@ export function RecordHistoryClient() {
                         key={filter.value}
                         type="button"
                         onClick={() => handleToggleSnapshotQuickFilter(filter.value)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${snapshotQuickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${snapshotQuickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
                       >
                         {filter.label}
                       </button>
@@ -880,11 +880,11 @@ export function RecordHistoryClient() {
 
               <div className="space-y-4 p-[10px] sm:p-5">
                 {isSnapshotFilterPanelOpen ? (
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-[var(--card-border)] dark:bg-gray-800/50">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                        <p className="mt-1 text-sm text-gray-600">Select as many filter values as needed, then apply them in one step.</p>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Select as many filter values as needed, then apply them in one step.</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <button
@@ -895,7 +895,7 @@ export function RecordHistoryClient() {
                             setSnapshotCurrentPage(1);
                             setIsSnapshotFilterPanelOpen(false);
                           }}
-                          className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                          className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                         >
                           Clear all
                         </button>
@@ -905,7 +905,7 @@ export function RecordHistoryClient() {
                             setSnapshotDraftFilters({ ...snapshotFilters });
                             setIsSnapshotFilterPanelOpen(false);
                           }}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                         >
                           Cancel
                         </button>
@@ -916,7 +916,7 @@ export function RecordHistoryClient() {
                             setSnapshotCurrentPage(1);
                             setIsSnapshotFilterPanelOpen(false);
                           }}
-                          className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                          className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-700"
                         >
                           Apply Filters
                         </button>
@@ -925,7 +925,7 @@ export function RecordHistoryClient() {
 
                     <div className="mt-6 grid gap-6 md:grid-cols-2">
                       <div>
-                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Action Type</h5>
+                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Action Type</h5>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {(snapshotData?.section.filters.actionTypes || []).map((option) => {
                             const isSelected = snapshotDraftFilters.actionTypes.includes(option.value);
@@ -934,7 +934,7 @@ export function RecordHistoryClient() {
                                 key={option.value}
                                 type="button"
                                 onClick={() => setSnapshotDraftFilters((previous) => ({ ...previous, actionTypes: toggleFilterValue(previous.actionTypes, option.value) }))}
-                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}
+                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}
                               >
                                 {option.label}
                               </button>
@@ -944,7 +944,7 @@ export function RecordHistoryClient() {
                       </div>
 
                       <div>
-                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Snapshot Type</h5>
+                        <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Snapshot Type</h5>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {(snapshotData?.section.filters.snapshotTypes || []).map((option) => {
                             const isSelected = snapshotDraftFilters.snapshotTypes.includes(option.value);
@@ -953,7 +953,7 @@ export function RecordHistoryClient() {
                                 key={option.value}
                                 type="button"
                                 onClick={() => setSnapshotDraftFilters((previous) => ({ ...previous, snapshotTypes: toggleFilterValue(previous.snapshotTypes, option.value) }))}
-                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}
+                                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}
                               >
                                 {option.label}
                               </button>
@@ -967,12 +967,12 @@ export function RecordHistoryClient() {
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
-                    <h3 className="text-base font-semibold text-gray-900">{snapshotData?.section.table.title || 'Before / After Snapshot History'}</h3>
-                    <p className="text-sm text-gray-600">{snapshotData?.section.table.description || 'History of audit-log entries that preserve prior and resulting data for finance record changes.'}</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{snapshotData?.section.table.title || 'Before / After Snapshot History'}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{snapshotData?.section.table.description || 'History of audit-log entries that preserve prior and resulting data for finance record changes.'}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>{snapshotData?.totals.filteredRows ?? 0} matching rows</span>
-                    <button type="button" onClick={handleSnapshotExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!(snapshotData?.section.table.rows.length)}>
+                    <button type="button" onClick={handleSnapshotExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800" disabled={!(snapshotData?.section.table.rows.length)}>
                       <Download className="h-4 w-4" />
                       Download View
                     </button>
@@ -980,7 +980,7 @@ export function RecordHistoryClient() {
                 </div>
 
                 {error ? (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {error}
                   </div>
@@ -990,23 +990,23 @@ export function RecordHistoryClient() {
                   <LoadingSkeleton />
                 ) : (
                   <>
-                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                    <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50">
                             <tr>
                               {currentTab.columns.map((column) => (
-                                <th key={column} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <th key={column} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                   {column}
                                 </th>
                               ))}
-                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-[var(--card-background)]">
                             {(snapshotData?.section.table.rows || []).length > 0 ? (
                               (snapshotData?.section.table.rows || []).map((row) => (
-                                <tr key={row.id} className="hover:bg-gray-50">
+                                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                   {row.cells.map((cell, index) => renderCell(cell, index))}
                                   <td className="px-4 py-3 text-right">
                                     <div className="flex justify-end gap-2">
@@ -1016,7 +1016,7 @@ export function RecordHistoryClient() {
                                           setSnapshotViewDetail(row);
                                           setIsSnapshotViewOpen(true);
                                         }}
-                                        className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                        className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         title="View detail"
                                       >
                                         <Eye className="h-4 w-4" />
@@ -1027,7 +1027,7 @@ export function RecordHistoryClient() {
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={currentTab.columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">
+                                <td colSpan={currentTab.columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                   No snapshot rows found.
                                 </td>
                               </tr>
@@ -1039,13 +1039,13 @@ export function RecordHistoryClient() {
 
                     {snapshotData?.pagination && snapshotData.pagination.totalPages > 1 ? (
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">Page {snapshotData.pagination.page} of {snapshotData.pagination.totalPages}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Page {snapshotData.pagination.page} of {snapshotData.pagination.totalPages}</p>
                         <div className="flex gap-2">
                           <button
                             type="button"
                             disabled={!snapshotData.pagination.hasPrevPage}
                             onClick={() => setSnapshotCurrentPage((previous) => Math.max(1, previous - 1))}
-                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                           >
                             Previous
                           </button>
@@ -1053,7 +1053,7 @@ export function RecordHistoryClient() {
                             type="button"
                             disabled={!snapshotData.pagination.hasNextPage}
                             onClick={() => setSnapshotCurrentPage((previous) => previous + 1)}
-                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800"
                           >
                             Next
                           </button>
@@ -1074,37 +1074,37 @@ export function RecordHistoryClient() {
               <div className="space-y-6">
                 {snapshotViewDetail ? (
                   <>
-                    <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Performed At</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.performedAtLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Entity Type</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.entityType || '-'}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Entity ID</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.entityId}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Action</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.actionLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Performed By</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.performedBy}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Snapshot Type</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.snapshotTypeLabel}</span></div>
-                      <div className="flex justify-between border-b border-gray-100 pb-3"><span className="text-sm text-gray-500">Changed Fields</span><span className="text-sm font-medium text-gray-900">{snapshotViewDetail.changedFieldCount}</span></div>
-                      <div className="flex justify-between"><span className="text-sm text-gray-500">Reason</span><span className="text-right text-sm font-medium text-gray-900">{snapshotViewDetail.reason || '-'}</span></div>
+                    <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Performed At</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.performedAtLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Entity Type</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.entityType || '-'}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Entity ID</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.entityId}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Action</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.actionLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Performed By</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.performedBy}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Snapshot Type</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.snapshotTypeLabel}</span></div>
+                      <div className="flex justify-between border-b border-gray-100 pb-3 dark:border-gray-800"><span className="text-sm text-gray-500 dark:text-gray-400">Changed Fields</span><span className="text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.changedFieldCount}</span></div>
+                      <div className="flex justify-between"><span className="text-sm text-gray-500 dark:text-gray-400">Reason</span><span className="text-right text-sm font-medium text-gray-900 dark:text-gray-100">{snapshotViewDetail.reason || '-'}</span></div>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Metadata</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(snapshotViewDetail.metadata)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Metadata</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(snapshotViewDetail.metadata)}</pre>
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Before Data</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(snapshotViewDetail.beforeData)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Before Data</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(snapshotViewDetail.beforeData)}</pre>
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">After Data</h4>
-                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700">{formatJsonValue(snapshotViewDetail.afterData)}</pre>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">After Data</h4>
+                        <pre className="mt-2 overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs text-gray-700 dark:border-[var(--card-border)] dark:bg-gray-800/50 dark:text-gray-300">{formatJsonValue(snapshotViewDetail.afterData)}</pre>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-500">No details available.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No details available.</p>
                 )}
                 <div className="flex justify-end pt-4">
-                  <button type="button" onClick={() => setIsSnapshotViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                  <button type="button" onClick={() => setIsSnapshotViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800">
                     Close
                   </button>
                 </div>

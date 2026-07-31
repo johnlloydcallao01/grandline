@@ -2,6 +2,7 @@ import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
 import { createNotificationFanout } from '../utils/notificationFanout'
 import { AccountingLmsBridgeSyncService } from '../accounting/services/enrollment-billing/AccountingLmsBridgeSyncService'
+import { recalculateEnrollmentGrade, determineFinalEvaluation } from '../utils/gradeCalculation'
 
 export const CourseEnrollments: CollectionConfig = {
   slug: 'course-enrollments',
@@ -368,6 +369,45 @@ export const CourseEnrollments: CollectionConfig = {
         // 3. Auto-set progress to 100% when completed
         if (data && data.status === 'completed' && data.progressPercentage !== 100) {
           data.progressPercentage = 100
+        }
+
+        // 4. Recalculate grade when status changes to completed or currentGrade/finalGrade is explicitly null
+        if (data && (data.status === 'completed' || operation === 'update')) {
+          const enrollmentId = originalDoc?.id || data?.id
+          if (enrollmentId) {
+            try {
+              const result = await recalculateEnrollmentGrade(req.payload, enrollmentId)
+              if (result.currentGrade != null) {
+                data.currentGrade = result.currentGrade
+                if (data.status === 'completed') {
+                  data.finalGrade = result.finalGrade
+                }
+              }
+            } catch (err) {
+              console.error('[CourseEnrollments Hook] Grade calculation error:', err)
+            }
+          }
+        }
+
+        // 5. Auto-set finalEvaluation based on grade and passing criteria
+        if (data && data.status === 'completed' && data.finalGrade != null) {
+          try {
+            const getRelId = (val: any) => (val && typeof val === 'object' && 'id' in val) ? val.id : val
+            const courseId = getRelId(data?.course) || (originalDoc ? getRelId(originalDoc.course) : null)
+            if (courseId) {
+              const course = await req.payload.findByID({
+                collection: 'courses',
+                id: courseId,
+                depth: 0,
+              })
+              const evaluation = determineFinalEvaluation(data.finalGrade as number, course)
+              if (evaluation) {
+                data.finalEvaluation = evaluation
+              }
+            }
+          } catch (err) {
+            console.error('[CourseEnrollments Hook] Final evaluation error:', err)
+          }
         }
 
         return data

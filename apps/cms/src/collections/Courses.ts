@@ -262,6 +262,15 @@ export const Courses: CollectionConfig = {
       },
     },
     {
+      name: 'gradeScale',
+      type: 'relationship',
+      relationTo: 'grade-scales',
+      admin: {
+        description: 'Grade scale for mapping percentage scores to letter grades',
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'evaluationMode',
       type: 'select',
       options: [

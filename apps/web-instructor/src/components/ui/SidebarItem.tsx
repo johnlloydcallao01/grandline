@@ -17,17 +17,17 @@ export function SidebarItem({
   collapsed = false,
   href,
 }: SidebarItemProps) {
-  const baseClasses = "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+  const baseClasses = "w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors";
   const activeClasses = active
-    ? 'bg-gray-100 text-gray-900'
-    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+    ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100';
 
   const content = (
     <>
-      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg">
+      <div className="flex-shrink-0">
         {getIcon(icon)}
       </div>
-      {!collapsed && <span className="truncate">{label}</span>}
+      {!collapsed && <span className="ml-3 truncate">{label}</span>}
     </>
   );
 

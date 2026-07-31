@@ -1,5 +1,7 @@
 'use server'
 
+import type { Course, CourseListResult } from '@encreasl/cms-types'
+
 const CMS_API = process.env.NEXT_PUBLIC_API_URL
 const API_KEY = process.env.PAYLOAD_API_KEY
 
@@ -34,52 +36,23 @@ export interface MediaRef {
   alt?: string
 }
 
-export interface CourseDoc {
+export interface SimpleDocRef {
   id: string
   title: string
-  courseCode: string
-  excerpt?: string
-  description?: any
-  instructor: InstructorRef | string
-  coInstructors?: (InstructorRef | string)[]
-  category?: (CategoryRef | string)[]
-  modules?: (SimpleDocRef | string)[]
-  thumbnail?: MediaRef | string
-  bannerImage?: MediaRef | string
-  price: number
-  discountedPrice?: number
-  status: 'draft' | 'published' | 'archived'
-  difficultyLevel: string
-  isFeatured: boolean
-  language: string
-  estimatedDuration?: number
-  estimatedDurationUnit?: string
-  maxStudents?: number
-  enrollmentStartDate?: string
-  enrollmentEndDate?: string
-  courseStartDate?: string
-  courseEndDate?: string
-  evaluationMode: string
-  passingGrade: number
-  certificateTemplate?: SimpleDocRef | string
-  feedbackForm?: SimpleDocRef | string
-  isFeedbackRequired?: boolean
-  updatedAt: string
-  createdAt: string
-  publishedAt?: string
-}
-
-export interface CourseListResult {
-  docs: CourseDoc[]
-  totalDocs: number
-  page: number
-  limit: number
-  totalPages: number
+  name?: string
 }
 
 export interface CategoryOption {
   id: string
   name: string
+}
+
+export type CourseDoc = Course
+
+export interface CourseEditData {
+  course: CourseDoc
+  categories: CategoryOption[]
+  modules: SimpleDocRef[]
 }
 
 export async function getCourses(params: {
@@ -256,12 +229,6 @@ export async function searchInstructors(search: string): Promise<InstructorRef[]
   }))
 }
 
-export interface SimpleDocRef {
-  id: string
-  title: string
-  name?: string
-}
-
 export async function searchCollection(collection: string, search: string, labelField = 'title'): Promise<SimpleDocRef[]> {
   if (!search || search.length < 1) return []
   const limit = search.length <= 2 ? '8' : '20'
@@ -284,20 +251,7 @@ export async function listCollection(collection: string, _labelField = 'title'):
   return (data.docs || []).map((d: any) => ({ id: String(d.id), title: d.title || d.name || String(d.id), name: d.name || undefined }))
 }
 
-export interface CourseEditData {
-  course: CourseDoc
-  categories: CategoryOption[]
-  modules: SimpleDocRef[]
-}
-
 export async function getCourseEditData(id: string): Promise<CourseEditData> {
-  const res = await fetch(apiUrl(`/lms/course-edit/${id}`), {
-    headers: headers(),
-    cache: 'no-store',
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).error || `Failed to load course data: ${res.statusText}`)
-  }
-  return res.json()
+  const [course, categories] = await Promise.all([getCourseById(id), getCategories()])
+  return { course, categories, modules: [] }
 }

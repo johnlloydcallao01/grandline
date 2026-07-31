@@ -79,4 +79,5 @@ export type IconName =
   | 'verification'
   | 'issuance'
   | 'template'
-  | 'pricing';
+  | 'pricing'
+  | 'messenger';

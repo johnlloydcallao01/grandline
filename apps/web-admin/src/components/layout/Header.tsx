@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { HeaderProps } from '@/types';
-import { ChevronDown, User, Settings } from '@/components/ui/IconWrapper';
+import { ChevronDown, User, Settings, MessageSquare } from '@/components/ui/IconWrapper';
 import LogoutButton from '@/components/LogoutButton';
 import { useAuth, getFullName, getUserInitials } from '@/hooks/useAuth';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { getCMSImageUrl } from '@/lib/cms';
+import { MessengerPanel } from './MessengerPanel';
 
 /**
  * Admin Header component with navigation, search, and user controls
@@ -23,6 +24,7 @@ export function Header({
   const { siteName, logoUrl } = useSiteSettings();
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
 
   // Get authenticated user data from PayloadCMS
   const { user, isLoading, error } = useAuth();
@@ -145,6 +147,15 @@ export function Header({
 
         {/* Right section */}
         <div className="flex items-center space-x-2 shrink-0">
+          {/* Messenger Icon */}
+          <button
+            onClick={() => setIsMessengerOpen(true)}
+            className="p-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-gray-800 dark:text-gray-200 transition-colors"
+            aria-label="Messenger"
+          >
+            <MessageSquare className="w-5 h-5" />
+          </button>
+
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -246,6 +257,7 @@ export function Header({
         </div>
       </div>
     </header>
+      <MessengerPanel isOpen={isMessengerOpen} onClose={() => setIsMessengerOpen(false)} />
     </>
   );
 }

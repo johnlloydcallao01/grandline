@@ -118,6 +118,16 @@ export const Assessments: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'gradeWeight',
+      type: 'number',
+      min: 0,
+      max: 100,
+      defaultValue: 1,
+      admin: {
+        description: 'Weight of this assessment toward the final course grade',
+      },
+    },
+    {
       name: 'showCorrectAnswer',
       type: 'checkbox',
       label: 'Show Correct Answer',

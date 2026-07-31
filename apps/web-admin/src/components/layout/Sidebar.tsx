@@ -40,8 +40,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
     const [isCourseManagerExpanded, setIsCourseManagerExpanded] = React.useState(hasActiveCourseManagerChild);
 
     const hasActiveGradebookChild =
-        pathname?.startsWith('/grades/recent-activity') ||
-        pathname?.startsWith('/trainees/accounts');
+        pathname?.startsWith('/gradebook');
 
     const [isGradebookExpanded, setIsGradebookExpanded] = React.useState(hasActiveGradebookChild);
 
@@ -54,7 +53,8 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
     const [isCertificationExpanded, setIsCertificationExpanded] = React.useState(hasActiveCertificationChild);
 
     const hasActiveCmsBlogPostsChild =
-        pathname?.startsWith('/cms/posts');
+        pathname?.startsWith('/cms/posts') ||
+        pathname?.startsWith('/cms/comments');
 
     const [isCmsBlogPostsExpanded, setIsCmsBlogPostsExpanded] = React.useState(hasActiveCmsBlogPostsChild);
 
@@ -271,15 +271,24 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         </SidebarDropdownGroup>
                         <SidebarDropdownGroup
                             icon="grade"
-                            label="Gradebook"
+                            label="Grading"
                             isOpen={expanded}
                             isExpanded={isGradebookExpanded}
                             onToggle={() => setIsGradebookExpanded((current) => !current)}
                             active={hasActiveGradebookChild}
                         >
                             <Link
-                                href="/grades/recent-activity"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/grades/recent-activity')
+                                href="/gradebook"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/gradebook'
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Gradebook</span>
+                            </Link>
+                            <Link
+                                href="/gradebook/recent-activity"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/recent-activity')
                                     ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
                                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
@@ -287,13 +296,22 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                                 <span className="truncate">Recent Activity</span>
                             </Link>
                             <Link
-                                href="/trainees/accounts"
-                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/trainees/accounts')
+                                href="/gradebook/student-overview"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/student-overview')
                                     ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
                                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                                     }`}
                             >
                                 <span className="truncate">Student Overview</span>
+                            </Link>
+                            <Link
+                                href="/gradebook/setup"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/setup')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Grade Setup</span>
                             </Link>
                         </SidebarDropdownGroup>
                         <SidebarDropdownGroup
@@ -334,10 +352,10 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                         </SidebarDropdownGroup>
                         <SidebarItem
                             icon="review"
-                            label="Feedback & Reviews"
-                            active={pathname?.startsWith('/reviews')}
+                            label="Feedback Forms"
+                            active={pathname?.startsWith('/feedback-forms')}
                             collapsed={!expanded}
-                            href="/reviews"
+                            href="/feedback-forms"
                         />
                         <SidebarItem
                             icon="users"
@@ -396,14 +414,16 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             >
                                 <span className="truncate">Tags</span>
                             </Link>
+                            <Link
+                                href="/cms/comments"
+                                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/cms/comments')
+                                    ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                                    }`}
+                            >
+                                <span className="truncate">Comments</span>
+                            </Link>
                         </SidebarDropdownGroup>
-                        <SidebarItem
-                            icon="review"
-                            label="Comments"
-                            active={pathname?.startsWith('/cms/comments')}
-                            collapsed={!expanded}
-                            href="/cms/comments"
-                        />
                     </div>
 
                     {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
@@ -424,6 +444,13 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             active={pathname?.startsWith('/announcements')}
                             collapsed={!expanded}
                             href="/announcements"
+                        />
+                        <SidebarItem
+                            icon="messenger"
+                            label="Messenger"
+                            active={pathname?.startsWith('/messenger')}
+                            collapsed={!expanded}
+                            href="/messenger"
                         />
                     </div>
 

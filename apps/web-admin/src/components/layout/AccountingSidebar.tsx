@@ -398,7 +398,7 @@ function SidebarSectionLabel({ children, isOpen }: { children: React.ReactNode; 
   }
 
   return (
-    <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+    <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
       {children}
     </div>
   );
@@ -418,8 +418,8 @@ function renderSidebarChildLink(
         href={item.href}
         className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${
           item.isActive(pathname)
-            ? 'bg-gray-100 font-medium text-gray-900'
-            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
         }`}
       >
         <span className="truncate">{item.label}</span>
@@ -623,13 +623,9 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
     )}
     <aside
       data-sidebar="accounting"
-      className={`fixed left-0 top-[56px] lg:top-16 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto z-50 lg:z-40
+      className={`fixed left-0 top-[56px] lg:top-16 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
         w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
-      style={{
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#cbd5e1 transparent',
-      }}
       onScroll={onScroll}
     >
       <div className="p-3 pb-20">
@@ -638,13 +634,13 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
             <SidebarSectionLabel isOpen={expanded}>Navigation</SidebarSectionLabel>
             <Link
               href="/dashboard"
-              className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
             >
               {!expanded ? <span className="mx-auto text-xs font-semibold">AD</span> : <span>Back To Admin</span>}
             </Link>
           </div>
 
-          {expanded && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={expanded}>Core</SidebarSectionLabel>
@@ -708,7 +704,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
             {coreMenuItems.slice(1).map((item) => renderSidebarNavItem(item, pathname, expanded))}
           </div>
 
-          {expanded && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={expanded}>Operations</SidebarSectionLabel>
@@ -784,7 +780,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
             </SidebarDropdownGroup>
           </div>
 
-          {expanded && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={expanded}>LMS Finance</SidebarSectionLabel>
@@ -820,7 +816,7 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
             </SidebarDropdownGroup>
           </div>
 
-          {expanded && <hr className="border-gray-200" />}
+          {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
           <div className="space-y-1">
             <SidebarSectionLabel isOpen={expanded}>Advanced Finance</SidebarSectionLabel>

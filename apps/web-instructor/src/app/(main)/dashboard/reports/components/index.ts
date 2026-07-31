@@ -1,0 +1,5 @@
+export { OverviewTab } from './OverviewTab'
+export { LearnersTab } from './LearnersTab'
+export { CoursesTab } from './CoursesTab'
+export { AssessmentsTab } from './AssessmentsTab'
+export { CertificationsTab } from './CertificationsTab'

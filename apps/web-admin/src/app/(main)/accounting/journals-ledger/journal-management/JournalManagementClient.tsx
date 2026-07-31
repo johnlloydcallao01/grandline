@@ -90,23 +90,23 @@ const JOURNAL_STATUS_OPTIONS = [
 ];
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'primary') return 'border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 hover:border-blue-700';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: JournalEntryMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function getStatusBadgeClasses(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
-    case 'draft': case 'amber': return 'bg-amber-50 text-amber-700 ring-amber-200';
-    case 'posted': case 'green': return 'bg-green-50 text-green-700 ring-green-200';
-    case 'reversed': case 'voided': case 'gray': return 'bg-gray-100 text-gray-700 ring-gray-200';
-    default: return 'bg-gray-100 text-gray-700 ring-gray-200';
+    case 'draft': case 'amber': return 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800';
+    case 'posted': case 'green': return 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800';
+    case 'reversed': case 'voided': case 'gray': return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700';
+    default: return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700';
   }
 }
 
@@ -170,18 +170,18 @@ const initialLineForm: JournalEntryLineFormState = {
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: 'up' | 'down' | 'neutral' }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 bg-gray-100'}`}>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'}`}>
           <TrendIcon className="h-3.5 w-3.5" />
           {change}
         </span>
@@ -195,25 +195,25 @@ function LoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200" />
+          <div key={i} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           <div className="flex gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-8 w-28 animate-pulse rounded-full bg-gray-200" />
+              <div key={i} className="h-8 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
             ))}
           </div>
         </div>
         <div className="mt-6 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
           ))}
         </div>
       </div>
@@ -223,7 +223,7 @@ function LoadingSkeleton() {
 
 function renderCell(cell: StaticTableCell, index: number) {
   if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{cell}</td>;
   }
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
@@ -236,7 +236,7 @@ function renderCell(cell: StaticTableCell, index: number) {
     );
   }
   return (
-    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>
+    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>
       {cell.text}
     </td>
   );
@@ -258,13 +258,13 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
   if (!mounted) return null;
   return createPortal(
     <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animate ? 'bg-black/50' : 'bg-transparent'}`} onClick={onClose}>
-      <div className={`flex w-full max-w-lg flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className={`flex w-full max-w-lg flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description && <p className="mt-0.5 text-sm text-gray-500">{description}</p>}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description && <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p>}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -278,8 +278,8 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
 function FormField({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
-        {label}{required && <span className="ml-0.5 text-red-500">*</span>}
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}{required && <span className="ml-0.5 text-red-500 dark:text-red-400">*</span>}
       </label>
       {children}
     </div>
@@ -289,14 +289,14 @@ function FormField({ label, children, required }: { label: string; children: Rea
 function Input({ value, onChange, placeholder, type = 'text', required }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean }) {
   return (
     <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
   );
 }
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: Array<{ label: string; value: string }> }) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800">
       {options.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
     </select>
   );
@@ -305,7 +305,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
 function TextArea({ value, onChange, rows = 3 }: { value: string; onChange: (v: string) => void; rows?: number }) {
   return (
     <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
   );
 }
 
@@ -782,27 +782,27 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       {/* Header */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Journals &amp; Ledger</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Journals &amp; Ledger</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div>
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400"><FileText className="h-6 w-6" /></div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Journal Management</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">Create, review, and track journal headers, line detail, and supported journal source types.</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Journal Management</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">Create, review, and track journal headers, line detail, and supported journal source types.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs card */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
         {/* Tab bar */}
-        <div className="border-b border-gray-200 px-6">
+        <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {STATIC_TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button key={tab.id} type="button" onClick={() => handleTabChange(tab.id)}
-                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
+                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'}`}>
                   {tab.label}
                 </button>
               );
@@ -816,11 +816,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       {activeTab === 'journal-source-types' ? (
         <>
           {/* Source types tab header */}
-          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-gray-900">Journal Source Types</h2>
-              <p className="text-sm text-gray-600">{STATIC_TABS[2].description}</p>
-              <p className="text-sm text-gray-500">{stData?.totals.filteredEntries ?? 0} matching entries</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Journal Source Types</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{STATIC_TABS[2].description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{stData?.totals.filteredEntries ?? 0} matching entries</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={handleOpenCreate}
@@ -842,7 +842,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 const link = document.createElement('a'); link.href = url; link.download = 'journal-source-types.csv';
                 document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
               }}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={!(stData?.section.table.rows.length)}>
                 <Download className="h-4 w-4" /> Download View
               </button>
@@ -859,30 +859,30 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           ) : null}
 
           {/* Source types table card */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
             <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">Source-Type Journal View</h3>
-                  <p className="mt-1 text-sm text-gray-600">Journal inventory grouped around the supported sourceType values.</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Source-Type Journal View</h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Journal inventory grouped around the supported sourceType values.</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <span>{stData?.totals.filteredEntries ?? 0} matching entries</span>
                 </div>
               </div>
-              <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                   <form onSubmit={(e) => { e.preventDefault(); setStSubmittedSearch(stSearchInput); fetchSt({ search: stSearchInput, page: 1, filters: stFilters, nextQuickFilters: stQuickFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <input type="text" placeholder="Search source type, entry no., source reference, memo, or user"
                     value={stSearchInput} onChange={(e) => setStSearchInput(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
                 </form>
                 <button type="button" onClick={() => { if (!isStFilterPanelOpen) setDraftStFilters({ ...stFilters }); setIsStFilterPanelOpen((p) => !p); }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Filter className="h-4 w-4" /> Filters
                   {stFilterCount > 0 && (
-                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">{stFilterCount}</span>
+                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-2 py-0.5 text-xs font-medium text-white">{stFilterCount}</span>
                   )}
                 </button>
               </div>
@@ -899,7 +899,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                           setStQuickFilters((previous) => toggleFilterValue(previous, f.value));
                           setStCurrentPage(1);
                         }}
-                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                           {f.label}
                         </button>
                       );
@@ -912,14 +912,14 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
             {/* Source types filter panel */}
             {isStFilterPanelOpen && (
-              <div className="border-b border-gray-200 bg-gray-50 px-5 py-4">
+              <div className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900">Source Type Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Source Type Filters</h4>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => { setDraftStFilters({ sourceTypes: [], statuses: [] }); setStFilters({ sourceTypes: [], statuses: [] }); setStCurrentPage(1); setIsStFilterPanelOpen(false); }}
-                      className="text-sm text-gray-500 hover:text-gray-700">Reset</button>
+                      className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Reset</button>
                     <button type="button" onClick={() => { setStFilters({ ...draftStFilters }); setStCurrentPage(1); setIsStFilterPanelOpen(false); }}
-                      className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
+                      className="rounded-lg bg-blue-600 dark:bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -927,21 +927,21 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                     const isSelected = draftStFilters.sourceTypes.includes(opt.value);
                     return (
                       <button key={opt.value} type="button" onClick={() => setDraftStFilters((p) => ({ ...p, sourceTypes: toggleFilterValue(p.sourceTypes, opt.value) }))}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {opt.label}
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-3">
-                  <h4 className="text-sm font-semibold text-gray-900">Status Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Status Filters</h4>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {stData?.section?.filters?.statuses?.map((opt) => {
                     const isSelected = draftStFilters.statuses.includes(opt.value);
                     return (
                       <button key={opt.value} type="button" onClick={() => setDraftStFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {opt.label}
                       </button>
                     );
@@ -953,7 +953,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             {/* Source types table */}
             <div className="space-y-4 p-[10px] sm:p-5">
               {stError && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {stError}
                 </div>
@@ -963,34 +963,34 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 <LoadingSkeleton />
               ) : (
                 <>
-                  <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50">
                           <tr>
                             {STATIC_TABS[2].columns.map((col) => (
-                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                             ))}
-                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                           {(stData?.section.table.rows ?? []).length > 0 ? (
                             (stData?.section.table.rows ?? []).map((row) => (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                                 {row.cells.map((cell, index) => renderCell(cell, index))}
                                 <td className="px-4 py-3 text-right">
                                   <div className="flex justify-end gap-2">
                                     <button type="button" onClick={() => handleView(row.id)}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                                       <Eye className="h-4 w-4" />
                                     </button>
                                     <button type="button" onClick={() => handleOpenEdit(row.id)}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="Edit">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="Edit">
                                       <Edit className="h-4 w-4" />
                                     </button>
                                     <button type="button" onClick={() => { const r = row as SourceTypeRegisterRow; handleOpenDelete(row.id, r.entryNumber || 'Journal Entry'); }}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700" title="Delete">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-400" title="Delete">
                                       <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
@@ -999,7 +999,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={STATIC_TABS[2].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">No journal entries found for the selected source types.</td>
+                              <td colSpan={STATIC_TABS[2].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No journal entries found for the selected source types.</td>
                             </tr>
                           )}
                         </tbody>
@@ -1010,14 +1010,14 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                   {/* Pagination */}
                   {stData?.pagination && stData.pagination.totalPages > 1 && (
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">Page {stData.pagination.page} of {stData.pagination.totalPages}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Page {stData.pagination.page} of {stData.pagination.totalPages}</p>
                       <div className="flex gap-2">
                         <button type="button" disabled={!stData.pagination.hasPrevPage}
                           onClick={() => setStCurrentPage((p) => Math.max(1, p - 1))}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Previous</button>
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Previous</button>
                         <button type="button" disabled={!stData.pagination.hasNextPage}
                           onClick={() => setStCurrentPage((p) => p + 1)}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Next</button>
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Next</button>
                       </div>
                     </div>
                   )}
@@ -1030,11 +1030,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       ) : activeTab === 'journal-entry-detail' ? (
         <>
           {/* Lines tab header */}
-          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-gray-900">Journal Entry Detail</h2>
-              <p className="text-sm text-gray-600">{STATIC_TABS[1].description}</p>
-              <p className="text-sm text-gray-500">{lineData?.totals.filteredLines ?? 0} matching journal lines</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Journal Entry Detail</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{STATIC_TABS[1].description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{lineData?.totals.filteredLines ?? 0} matching journal lines</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={async () => { setLineCreateForm(initialLineForm); setLineCreateErr(null); setIsLineCreateSubmitting(false); setIsLineCreateOpen(true); try { const [je, ca] = await Promise.all([getJournalEntryChoices(), getChartAccountChoices()]); setJournalEntryChoices(je.choices); setChartAccountChoices(ca.choices); } catch (_e) { /* choices fetch failed */ } }}
@@ -1059,7 +1059,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 const link = document.createElement('a'); link.href = url; link.download = 'journal-line-detail.csv';
                 document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
               }}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={!(lineData?.section.table.rows.length)}>
                 <Download className="h-4 w-4" /> Download View
               </button>
@@ -1078,30 +1078,30 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           ) : null}
 
           {/* Lines table card */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
             <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">Journal Line Detail Register</h3>
-                  <p className="mt-1 text-sm text-gray-600">Line-level detail for journal entries showing account coding, amounts, tax links, and source references.</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Journal Line Detail Register</h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Line-level detail for journal entries showing account coding, amounts, tax links, and source references.</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <span>{lineData?.totals.filteredLines ?? 0} matching journal lines</span>
                 </div>
               </div>
-              <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                   <form onSubmit={(e) => { e.preventDefault(); setLineSubmittedSearch(lineSearchInput); fetchLines({ search: lineSearchInput, page: 1, filters: lineFilters, nextQuickFilters: lineQuickFilters }); }} className="relative min-w-0 flex-1 max-w-xl">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <input type="text" placeholder="Search entry no., account, line description, tax code, or reference entity"
                     value={lineSearchInput} onChange={(e) => setLineSearchInput(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
                 </form>
                 <button type="button" onClick={() => { if (!isLineFilterPanelOpen) setDraftLineFilters({ ...lineFilters }); setIsLineFilterPanelOpen((p) => !p); }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Filter className="h-4 w-4" /> Filters
                   {lineFilterCount > 0 && (
-                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-2 py-0.5 text-xs font-medium text-white">
                       {lineFilterCount}
                     </span>
                   )}
@@ -1120,7 +1120,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                           setLineQuickFilters((previous) => toggleFilterValue(previous, qf.value));
                           setLineCurrentPage(1);
                         }}
-                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                           {qf.label}
                         </button>
                       );
@@ -1133,40 +1133,40 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
             {/* Lines filter panel */}
             {isLineFilterPanelOpen && (
-              <div className="border-b border-gray-200 bg-gray-50 px-5 py-4">
+              <div className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900">Line Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Line Filters</h4>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => { setDraftLineFilters({ hasTaxCode: false, hasReference: false, lineTypes: [] }); setLineFilters({ hasTaxCode: false, hasReference: false, lineTypes: [] }); setLineCurrentPage(1); setIsLineFilterPanelOpen(false); }}
-                      className="text-sm text-gray-500 hover:text-gray-700">Reset</button>
+                      className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Reset</button>
                     <button type="button" onClick={() => { setLineFilters({ ...draftLineFilters }); setLineCurrentPage(1); setIsLineFilterPanelOpen(false); }}
-                      className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
+                      className="rounded-lg bg-blue-600 dark:bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-3">
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                     <input type="checkbox" checked={draftLineFilters.hasTaxCode}
                       onChange={() => setDraftLineFilters((p) => ({ ...p, hasTaxCode: !p.hasTaxCode }))}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
                     Has Tax Code
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                     <input type="checkbox" checked={draftLineFilters.hasReference}
                       onChange={() => setDraftLineFilters((p) => ({ ...p, hasReference: !p.hasReference }))}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
                     Has Reference
                   </label>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                       <input type="checkbox" checked={draftLineFilters.lineTypes.includes('debit')}
                         onChange={() => setDraftLineFilters((p) => ({ ...p, lineTypes: toggleFilterValue(p.lineTypes, 'debit') }))}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
                       Debit Lines
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                       <input type="checkbox" checked={draftLineFilters.lineTypes.includes('credit')}
                         onChange={() => setDraftLineFilters((p) => ({ ...p, lineTypes: toggleFilterValue(p.lineTypes, 'credit') }))}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
                       Credit Lines
                     </label>
                   </div>
@@ -1177,7 +1177,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             {/* Lines table */}
             <div className="space-y-4 p-[10px] sm:p-5">
               {lineError && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {lineError}
                 </div>
@@ -1187,34 +1187,34 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 <LoadingSkeleton />
               ) : (
                 <>
-                  <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50">
                           <tr>
                             {STATIC_TABS[1].columns.map((col) => (
-                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                             ))}
-                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                           {(lineData?.section.table.rows ?? []).length > 0 ? (
                             (lineData?.section.table.rows ?? []).map((row) => (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                                 {row.cells.map((cell, index) => renderCell(cell, index))}
                                 <td className="px-4 py-3 text-right">
                                   <div className="flex justify-end gap-2">
                                     <button type="button" onClick={async () => { setLineSelectedId(row.id); setLineSelected(null); setIsLineDetailLoading(true); setLineDetailErr(null); try { setLineSelected(await getJournalEntryLineDetail(row.id)); } catch (err) { setLineDetailErr(err instanceof Error ? err.message : 'Unable to load line detail.'); } finally { setIsLineDetailLoading(false); } }}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                                       <Eye className="h-4 w-4" />
                                     </button>
                                     <button type="button" onClick={async () => { try { const [je, ca] = await Promise.all([getJournalEntryChoices(), getChartAccountChoices()]); setJournalEntryChoices(je.choices); setChartAccountChoices(ca.choices); } catch (_e) { /* choices fetch failed */ } setLineSelectedId(null); setLineEditingId(row.id); setLineEditForm(initialLineForm); setLineEditErr(null); setIsLineEditSubmitting(false); setIsLineEditOpen(true); try { const d = await getJournalEntryLineDetail(row.id); setLineEditForm({ journalEntry: d.journalEntry && typeof d.journalEntry === 'object' ? String((d.journalEntry as Record<string, unknown>).id ?? '') : String(d.journalEntry ?? ''), account: d.account && typeof d.account === 'object' ? String((d.account as Record<string, unknown>).id ?? '') : String(d.account ?? ''), description: d.description || '', debit: String(d.debit ?? '0'), credit: String(d.credit ?? '0'), taxCode: d.taxCode && typeof d.taxCode === 'object' ? String((d.taxCode as Record<string, unknown>).id ?? '') : String(d.taxCode ?? ''), referenceEntityType: d.referenceEntityType || '', referenceEntityId: d.referenceEntityId || '' }); } catch (err) { setLineEditErr(err instanceof Error ? err.message : 'Unable to load for editing.'); } }}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="Edit">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="Edit">
                                       <Edit className="h-4 w-4" />
                                     </button>
                                     <button type="button" onClick={() => { setLineDeletingId(row.id); setLineDeleteErr(null); setIsLineDeleteSubmitting(false); setIsLineDeleteOpen(true); }}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700" title="Delete">
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-400" title="Delete">
                                       <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
@@ -1223,7 +1223,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={STATIC_TABS[1].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">No journal lines found.</td>
+                              <td colSpan={STATIC_TABS[1].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No journal lines found.</td>
                             </tr>
                           )}
                         </tbody>
@@ -1234,14 +1234,14 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                   {/* Lines Pagination */}
                   {lineData?.pagination && lineData.pagination.totalPages > 1 && (
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">Page {lineData.pagination.page} of {lineData.pagination.totalPages}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Page {lineData.pagination.page} of {lineData.pagination.totalPages}</p>
                       <div className="flex gap-2">
                         <button type="button" disabled={!lineData.pagination.hasPrevPage}
                           onClick={() => setLineCurrentPage((p) => Math.max(1, p - 1))}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Previous</button>
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Previous</button>
                         <button type="button" disabled={!lineData.pagination.hasNextPage}
                           onClick={() => setLineCurrentPage((p) => p + 1)}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Next</button>
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Next</button>
                       </div>
                     </div>
                   )}
@@ -1254,11 +1254,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       ) : (
         <>
           {/* Tab header */}
-          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-gray-900">{currentSection.label}</h2>
-              <p className="text-sm text-gray-600">{currentSection.description}</p>
-              <p className="text-sm text-gray-500">{currentTotal ?? 0} matching journal entries</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentSection.label}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{currentSection.description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{currentTotal ?? 0} matching journal entries</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
@@ -1290,31 +1290,31 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           )}
 
           {/* Table card */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
             <div className="space-y-4 p-[10px] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">{data?.section.table.title || 'Journal Entry Register'}</h3>
-                  <p className="mt-1 text-sm text-gray-600">{data?.section.table.description || 'Journal header register using entry number, posting date, source type, totals, and status.'}</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{data?.section.table.title || 'Journal Entry Register'}</h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{data?.section.table.description || 'Journal header register using entry number, posting date, source type, totals, and status.'}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <span>{currentTotal ?? 0} matching journal entries</span>
-                  <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!currentRows.length}><Download className="h-4 w-4" /> Export View</button>
+                  <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={!currentRows.length}><Download className="h-4 w-4" /> Export View</button>
                 </div>
               </div>
-              <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                 <form onSubmit={handleSearchSubmit} className="relative min-w-0 flex-1 max-w-xl">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <input type="text" placeholder={currentSection.searchPlaceholder}
                     value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
                 </form>
                 <button type="button" onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Filter className="h-4 w-4" /> Filters
                   {filterCount > 0 && (
-                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="inline-flex items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-2 py-0.5 text-xs font-medium text-white">
                       {filterCount}
                     </span>
                   )}
@@ -1330,7 +1330,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                       const isActive = quickFilters.includes(qf.value);
                       return (
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
-                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                           {qf.label}
                         </button>
                       );
@@ -1343,12 +1343,12 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
             {/* Filter panel */}
             {isFilterPanelOpen && (
-              <div className="border-b border-gray-200 bg-gray-50 px-5 py-4">
+              <div className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900">Status Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Status Filters</h4>
                   <div className="flex gap-2">
-                    <button type="button" onClick={handleResetFilters} className="text-sm text-gray-500 hover:text-gray-700">Reset</button>
-                    <button type="button" onClick={handleApplyFilters} className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
+                    <button type="button" onClick={handleResetFilters} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Reset</button>
+                    <button type="button" onClick={handleApplyFilters} className="rounded-lg bg-blue-600 dark:bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -1356,31 +1356,31 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                     const isSelected = draftFilters.statuses.includes(opt.value);
                     return (
                       <button key={opt.value} type="button" onClick={() => setDraftFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }))}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {opt.label}
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-3">
-                  <h4 className="text-sm font-semibold text-gray-900">Source Type Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Source Type Filters</h4>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {data?.section?.filters?.sourceTypes?.map((opt) => {
                     const isSelected = draftFilters.sourceTypes.includes(opt.value);
                     return (
                       <button key={opt.value} type="button" onClick={() => setDraftFilters((p) => ({ ...p, sourceTypes: toggleFilterValue(p.sourceTypes, opt.value) }))}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {opt.label}
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-3 flex items-center gap-2">
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                     <input type="checkbox" checked={draftFilters.isUnbalanced}
                       onChange={() => setDraftFilters((p) => ({ ...p, isUnbalanced: !p.isUnbalanced }))}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
                     Unbalanced Only
                   </label>
                 </div>
@@ -1390,7 +1390,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             {/* Table */}
             <div className="space-y-4 p-[10px] sm:p-5">
               {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
@@ -1400,31 +1400,31 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                 <LoadingSkeleton />
               ) : (
                 <>
-                  <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50">
                           <tr>
                             {STATIC_TABS[0].columns.map((col) => (
-                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                             ))}
-                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                           {currentRows.length > 0 ? (
                             currentRows.map((row) => (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                                 {row.cells.map((cell, index) => renderCell(cell, index))}
                                 <td className="px-4 py-3 text-right">
                                   <div className="flex justify-end gap-2">
                                     <button type="button" onClick={() => handleView(row.id)}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       title="View detail">
                                       <Eye className="h-4 w-4" />
                                     </button>
                                     <button type="button" onClick={() => handleOpenEdit(row.id)}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       title="Edit">
                                       <Edit className="h-4 w-4" />
                                     </button>
@@ -1432,7 +1432,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                                       const r = row as JournalEntryRegisterRow;
                                       handleOpenDelete(row.id, r.entryNumber || 'Journal Entry');
                                     }}
-                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"
+                                      className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-400"
                                       title="Delete">
                                       <Trash2 className="h-4 w-4" />
                                     </button>
@@ -1442,7 +1442,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={STATIC_TABS[0].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">No journal entries found.</td>
+                              <td colSpan={STATIC_TABS[0].columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No journal entries found.</td>
                             </tr>
                           )}
                         </tbody>
@@ -1453,18 +1453,18 @@ export default function JournalManagementClient({ initialData }: JournalManageme
                   {/* Pagination */}
                   {currentPagination && currentPagination.totalPages > 1 && (
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Page {currentPagination.page} of {currentPagination.totalPages}
                       </p>
                       <div className="flex gap-2">
                         <button type="button" disabled={!currentPagination.hasPrevPage}
                           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                           Previous
                         </button>
                         <button type="button" disabled={!currentPagination.hasNextPage}
                           onClick={() => setCurrentPage((p) => p + 1)}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                           Next
                         </button>
                       </div>
@@ -1482,34 +1482,34 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Detail SlideOver */}
       <SlideOver isOpen={selectedId !== null} onClose={handleCloseDetail} title={selectedEntry?.entryNumber || 'Journal Entry Detail'}>
-        {detailErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{detailErr}</div>}
+        {detailErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{detailErr}</div>}
         {isDetailLoading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         ) : selectedEntry ? (
           <div className="space-y-4 text-sm">
-            <div><span className="font-medium text-gray-500">Entry No.:</span> <span className="ml-2 text-gray-900">{selectedEntry.entryNumber || '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Entry Date:</span> <span className="ml-2 text-gray-900">{formatDateTime(selectedEntry.entryDate)}</span></div>
-            <div><span className="font-medium text-gray-500">Posting Date:</span> <span className="ml-2 text-gray-900">{formatDateTime(selectedEntry.postingDate)}</span></div>
-            <div><span className="font-medium text-gray-500">Source Type:</span> <span className="ml-2 text-gray-900">{selectedEntry.sourceType || '-'}</span></div>
-            {selectedEntry.sourceReference && <div><span className="font-medium text-gray-500">Source Ref:</span> <span className="ml-2 text-gray-900">{selectedEntry.sourceReference}</span></div>}
-            {selectedEntry.memo && <div><span className="font-medium text-gray-500">Memo:</span> <span className="ml-2 text-gray-900">{selectedEntry.memo}</span></div>}
-            {selectedEntry.referenceNumber && <div><span className="font-medium text-gray-500">Reference No.:</span> <span className="ml-2 text-gray-900">{selectedEntry.referenceNumber}</span></div>}
-            <div><span className="font-medium text-gray-500">Status:</span> <span className={`ml-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getStatusBadgeClasses(selectedEntry.status)}`}>{selectedEntry.status || '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Total Debit:</span> <span className="ml-2 text-gray-900">{selectedEntry.totalDebit != null ? `PHP ${Number(selectedEntry.totalDebit).toLocaleString()}` : '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Total Credit:</span> <span className="ml-2 text-gray-900">{selectedEntry.totalCredit != null ? `PHP ${Number(selectedEntry.totalCredit).toLocaleString()}` : '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Balanced:</span> <span className="ml-2 text-gray-900">{selectedEntry.isBalanced ? 'Yes' : 'No'}</span></div>
-            {selectedEntry.notes && <div><span className="font-medium text-gray-500">Notes:</span> <span className="ml-2 text-gray-900">{selectedEntry.notes}</span></div>}
-            <div><span className="font-medium text-gray-500">Created:</span> <span className="ml-2 text-gray-900">{formatDateTime(selectedEntry.createdAt)}</span></div>
-            <div><span className="font-medium text-gray-500">Updated:</span> <span className="ml-2 text-gray-900">{formatDateTime(selectedEntry.updatedAt)}</span></div>
-            <div><span className="font-medium text-gray-500">Created By:</span> <span className="ml-2 text-gray-900">{formatUser(selectedEntry.createdBy)}</span></div>
-            <div><span className="font-medium text-gray-500">Updated By:</span> <span className="ml-2 text-gray-900">{formatUser(selectedEntry.updatedBy)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Entry No.:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.entryNumber || '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Entry Date:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(selectedEntry.entryDate)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Posting Date:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(selectedEntry.postingDate)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Source Type:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.sourceType || '-'}</span></div>
+            {selectedEntry.sourceReference && <div><span className="font-medium text-gray-500 dark:text-gray-400">Source Ref:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.sourceReference}</span></div>}
+            {selectedEntry.memo && <div><span className="font-medium text-gray-500 dark:text-gray-400">Memo:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.memo}</span></div>}
+            {selectedEntry.referenceNumber && <div><span className="font-medium text-gray-500 dark:text-gray-400">Reference No.:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.referenceNumber}</span></div>}
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Status:</span> <span className={`ml-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getStatusBadgeClasses(selectedEntry.status)}`}>{selectedEntry.status || '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Total Debit:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.totalDebit != null ? `PHP ${Number(selectedEntry.totalDebit).toLocaleString()}` : '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Total Credit:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.totalCredit != null ? `PHP ${Number(selectedEntry.totalCredit).toLocaleString()}` : '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Balanced:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.isBalanced ? 'Yes' : 'No'}</span></div>
+            {selectedEntry.notes && <div><span className="font-medium text-gray-500 dark:text-gray-400">Notes:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedEntry.notes}</span></div>}
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Created:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(selectedEntry.createdAt)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Updated:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(selectedEntry.updatedAt)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Created By:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatUser(selectedEntry.createdBy)}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Updated By:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatUser(selectedEntry.updatedBy)}</span></div>
             <div className="flex gap-2 pt-4">
               <button type="button" onClick={() => { const id = selectedEntry.id; handleCloseDetail(); handleOpenEdit(id); }}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 <Edit className="h-4 w-4" /> Edit
               </button>
               <button type="button" onClick={handleCloseDetail}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 Close
               </button>
             </div>
@@ -1519,7 +1519,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Create SlideOver */}
       <SlideOver isOpen={isCreateOpen} onClose={handleCloseCreate} title="Create Journal Entry">
-        {createErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{createErr}</div>}
+        {createErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{createErr}</div>}
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <FormField label="Entry Date" required>
             <Input type="date" value={createForm.entryDate} onChange={(v) => setCreateForm((p) => ({ ...p, entryDate: v }))} required />
@@ -1546,8 +1546,8 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             <TextArea value={createForm.notes} onChange={(v) => setCreateForm((p) => ({ ...p, notes: v }))} />
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={handleCloseCreate} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={isCreateSubmitting} className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+            <button type="button" onClick={handleCloseCreate} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
+            <button type="submit" disabled={isCreateSubmitting} className="rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isCreateSubmitting ? 'Creating...' : 'Create'}
             </button>
           </div>
@@ -1556,7 +1556,7 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Edit SlideOver */}
       <SlideOver isOpen={isEditOpen} onClose={handleCloseEdit} title="Edit Journal Entry">
-        {editErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{editErr}</div>}
+        {editErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{editErr}</div>}
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <FormField label="Entry Date" required>
             <Input type="date" value={editForm.entryDate} onChange={(v) => setEditForm((p) => ({ ...p, entryDate: v }))} required />
@@ -1578,14 +1578,14 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           </FormField>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Total Debit">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">{editingTotals.totalDebit != null ? `PHP ${Number(editingTotals.totalDebit).toLocaleString()}` : 'PHP 0'}</div>
+              <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{editingTotals.totalDebit != null ? `PHP ${Number(editingTotals.totalDebit).toLocaleString()}` : 'PHP 0'}</div>
             </FormField>
             <FormField label="Total Credit">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">{editingTotals.totalCredit != null ? `PHP ${Number(editingTotals.totalCredit).toLocaleString()}` : 'PHP 0'}</div>
+              <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{editingTotals.totalCredit != null ? `PHP ${Number(editingTotals.totalCredit).toLocaleString()}` : 'PHP 0'}</div>
             </FormField>
           </div>
           <FormField label="Balanced">
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">{editingTotals.isBalanced ? 'Yes' : 'No'}</div>
+            <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{editingTotals.isBalanced ? 'Yes' : 'No'}</div>
           </FormField>
           <FormField label="Status">
             <Select value={editForm.status} onChange={(v) => setEditForm((p) => ({ ...p, status: v }))} options={JOURNAL_STATUS_OPTIONS} />
@@ -1594,8 +1594,8 @@ export default function JournalManagementClient({ initialData }: JournalManageme
             <TextArea value={editForm.notes} onChange={(v) => setEditForm((p) => ({ ...p, notes: v }))} />
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={handleCloseEdit} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={isEditSubmitting} className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+            <button type="button" onClick={handleCloseEdit} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
+            <button type="submit" disabled={isEditSubmitting} className="rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isEditSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>
@@ -1606,10 +1606,10 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       <SlideOver isOpen={isDeleteOpen} onClose={handleCloseDelete}
         title="Delete Journal Entry"
         description={`Remove "${deletingEntryNumber}" from the Journal Entries list.`}>
-        {deleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{deleteErr}</div>}
+        {deleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{deleteErr}</div>}
         {deleteBlockers.length > 0 ? (
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
               <p className="font-medium">Cannot delete this journal entry</p>
               <p className="mt-1">This journal entry cannot be deleted because the following dependencies exist:</p>
               <ul className="mt-2 list-inside list-disc space-y-1">
@@ -1618,22 +1618,22 @@ export default function JournalManagementClient({ initialData }: JournalManageme
               <p className="mt-2">Remove all dependencies before attempting to delete this journal entry.</p>
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={handleCloseDelete} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+              <button type="button" onClick={handleCloseDelete} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">
                 Close
               </button>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <p className="font-medium">Are you sure?</p>
               <p className="mt-1">This action cannot be undone. The journal entry &ldquo;{deletingEntryNumber}&rdquo; will be permanently removed.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button type="button" onClick={handleCloseDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50">
+              <button type="button" onClick={handleCloseDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50">
                 Cancel
               </button>
-              <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
+              <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
                 {isDeleteSubmitting ? 'Deleting...' : 'Delete Entry'}
               </button>
             </div>
@@ -1643,26 +1643,26 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Line Detail SlideOver */}
       <SlideOver isOpen={lineSelectedId !== null} onClose={() => { setLineSelectedId(null); setLineSelected(null); setLineDetailErr(null); }} title="Journal Line Detail">
-        {lineDetailErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineDetailErr}</div>}
+        {lineDetailErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{lineDetailErr}</div>}
         {isLineDetailLoading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         ) : lineSelected ? (
           <div className="space-y-4 text-sm">
-            <div><span className="font-medium text-gray-500">Entry No.:</span> <span className="ml-2 text-gray-900">{lineSelected.journalEntry && typeof lineSelected.journalEntry === 'object' ? String((lineSelected.journalEntry as Record<string, unknown>).entryNumber ?? '') : '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Line No.:</span> <span className="ml-2 text-gray-900">{lineSelected.lineNumber ?? '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Account:</span> <span className="ml-2 text-gray-900">{lineSelected.account && typeof lineSelected.account === 'object' ? `${(lineSelected.account as Record<string, unknown>).code ?? ''} - ${(lineSelected.account as Record<string, unknown>).name ?? ''}` : '-'}</span></div>
-            {lineSelected.description && <div><span className="font-medium text-gray-500">Description:</span> <span className="ml-2 text-gray-900">{lineSelected.description}</span></div>}
-            <div><span className="font-medium text-gray-500">Debit:</span> <span className="ml-2 text-gray-900">{lineSelected.debit != null ? `PHP ${Number(lineSelected.debit).toLocaleString()}` : '-'}</span></div>
-            <div><span className="font-medium text-gray-500">Credit:</span> <span className="ml-2 text-gray-900">{lineSelected.credit != null ? `PHP ${Number(lineSelected.credit).toLocaleString()}` : '-'}</span></div>
-            {lineSelected.taxCode && <div><span className="font-medium text-gray-500">Tax Code:</span> <span className="ml-2 text-gray-900">{typeof lineSelected.taxCode === 'object' ? String((lineSelected.taxCode as Record<string, unknown>).code ?? '') : String(lineSelected.taxCode)}</span></div>}
-            {lineSelected.referenceEntityType && <div><span className="font-medium text-gray-500">Reference:</span> <span className="ml-2 text-gray-900">{lineSelected.referenceEntityType} / {lineSelected.referenceEntityId || ''}</span></div>}
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Entry No.:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.journalEntry && typeof lineSelected.journalEntry === 'object' ? String((lineSelected.journalEntry as Record<string, unknown>).entryNumber ?? '') : '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Line No.:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.lineNumber ?? '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Account:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.account && typeof lineSelected.account === 'object' ? `${(lineSelected.account as Record<string, unknown>).code ?? ''} - ${(lineSelected.account as Record<string, unknown>).name ?? ''}` : '-'}</span></div>
+            {lineSelected.description && <div><span className="font-medium text-gray-500 dark:text-gray-400">Description:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.description}</span></div>}
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Debit:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.debit != null ? `PHP ${Number(lineSelected.debit).toLocaleString()}` : '-'}</span></div>
+            <div><span className="font-medium text-gray-500 dark:text-gray-400">Credit:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.credit != null ? `PHP ${Number(lineSelected.credit).toLocaleString()}` : '-'}</span></div>
+            {lineSelected.taxCode && <div><span className="font-medium text-gray-500 dark:text-gray-400">Tax Code:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{typeof lineSelected.taxCode === 'object' ? String((lineSelected.taxCode as Record<string, unknown>).code ?? '') : String(lineSelected.taxCode)}</span></div>}
+            {lineSelected.referenceEntityType && <div><span className="font-medium text-gray-500 dark:text-gray-400">Reference:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{lineSelected.referenceEntityType} / {lineSelected.referenceEntityId || ''}</span></div>}
             <div className="flex gap-2 pt-4">
               <button type="button" onClick={async () => { try { const [je, ca] = await Promise.all([getJournalEntryChoices(), getChartAccountChoices()]); setJournalEntryChoices(je.choices); setChartAccountChoices(ca.choices); } catch (_e) { /* choices fetch failed */ } const id = lineSelected.id; setLineSelectedId(null); setLineSelected(null); setLineEditingId(id); setLineEditForm(initialLineForm); setLineEditErr(null); setIsLineEditSubmitting(false); setIsLineEditOpen(true); try { const d = await getJournalEntryLineDetail(id); setLineEditForm({ journalEntry: d.journalEntry && typeof d.journalEntry === 'object' ? String((d.journalEntry as Record<string, unknown>).id ?? '') : String(d.journalEntry ?? ''), account: d.account && typeof d.account === 'object' ? String((d.account as Record<string, unknown>).id ?? '') : String(d.account ?? ''), description: d.description || '', debit: String(d.debit ?? '0'), credit: String(d.credit ?? '0'), taxCode: d.taxCode && typeof d.taxCode === 'object' ? String((d.taxCode as Record<string, unknown>).id ?? '') : String(d.taxCode ?? ''), referenceEntityType: d.referenceEntityType || '', referenceEntityId: d.referenceEntityId || '' }); } catch (err) { setLineEditErr(err instanceof Error ? err.message : 'Unable to load for editing.'); } }}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 <Edit className="h-4 w-4" /> Edit
               </button>
               <button type="button" onClick={() => { setLineSelectedId(null); setLineSelected(null); setLineDetailErr(null); }}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Close</button>
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Close</button>
             </div>
           </div>
         ) : null}
@@ -1670,18 +1670,18 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Line Create SlideOver */}
       <SlideOver isOpen={isLineCreateOpen} onClose={() => { setIsLineCreateOpen(false); setLineCreateErr(null); }} title="Create Journal Line">
-        {lineCreateErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineCreateErr}</div>}
+        {lineCreateErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{lineCreateErr}</div>}
         <form onSubmit={async (e) => { e.preventDefault(); setIsLineCreateSubmitting(true); setLineCreateErr(null); try { await createJournalEntryLine({ journalEntry: Number(lineCreateForm.journalEntry), account: Number(lineCreateForm.account), description: lineCreateForm.description || null, debit: Number(lineCreateForm.debit) || 0, credit: Number(lineCreateForm.credit) || 0, taxCode: lineCreateForm.taxCode ? Number(lineCreateForm.taxCode) : null, referenceEntityType: lineCreateForm.referenceEntityType || null, referenceEntityId: lineCreateForm.referenceEntityId || null }); setIsLineCreateOpen(false); setLineCreateErr(null); setLineCreateForm(initialLineForm); setIsLineCreateSubmitting(false); setLineCurrentPage(1); fetchLines({ search: lineSubmittedSearch, page: 1, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineCreateErr(err instanceof Error ? err.message : 'Unable to create line.'); setIsLineCreateSubmitting(false); } }} className="space-y-4">
            <FormField label="Journal Entry" required>
             <select value={lineCreateForm.journalEntry} onChange={(v) => setLineCreateForm((p) => ({ ...p, journalEntry: v.target.value }))}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" required>
               <option value="">Select a journal entry...</option>
               {journalEntryChoices.map((c) => <option key={String(c.value)} value={String(c.value)}>{c.label}</option>)}
             </select>
           </FormField>
           <FormField label="Account" required>
             <select value={lineCreateForm.account} onChange={(v) => setLineCreateForm((p) => ({ ...p, account: v.target.value }))}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" required>
               <option value="">Select an account...</option>
               {chartAccountChoices.map((c) => <option key={String(c.value)} value={String(c.value)}>{c.label}</option>)}
             </select>
@@ -1704,9 +1704,9 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => { setIsLineCreateOpen(false); setLineCreateErr(null); }}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
             <button type="submit" disabled={isLineCreateSubmitting}
-              className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+              className="rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isLineCreateSubmitting ? 'Creating...' : 'Create'}
             </button>
           </div>
@@ -1715,11 +1715,11 @@ export default function JournalManagementClient({ initialData }: JournalManageme
 
       {/* Line Edit SlideOver */}
       <SlideOver isOpen={isLineEditOpen} onClose={() => { setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); }} title="Edit Journal Line">
-        {lineEditErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineEditErr}</div>}
+        {lineEditErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{lineEditErr}</div>}
         <form onSubmit={async (e) => { e.preventDefault(); if (lineEditingId === null) return; setIsLineEditSubmitting(true); setLineEditErr(null); try { await updateJournalEntryLine(lineEditingId, { account: Number(lineEditForm.account), description: lineEditForm.description || null, debit: Number(lineEditForm.debit) || 0, credit: Number(lineEditForm.credit) || 0, taxCode: lineEditForm.taxCode ? Number(lineEditForm.taxCode) : null, referenceEntityType: lineEditForm.referenceEntityType || null, referenceEntityId: lineEditForm.referenceEntityId || null }); setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); setLineEditForm(initialLineForm); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineEditErr(err instanceof Error ? err.message : 'Unable to update line.'); setIsLineEditSubmitting(false); } }} className="space-y-4">
            <FormField label="Account" required>
             <select value={lineEditForm.account} onChange={(v) => setLineEditForm((p) => ({ ...p, account: v.target.value }))}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" required>
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" required>
               <option value="">Select an account...</option>
               {chartAccountChoices.map((c) => <option key={String(c.value)} value={String(c.value)}>{c.label}</option>)}
             </select>
@@ -1742,9 +1742,9 @@ export default function JournalManagementClient({ initialData }: JournalManageme
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => { setIsLineEditOpen(false); setLineEditingId(null); setLineEditErr(null); }}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
             <button type="submit" disabled={isLineEditSubmitting}
-              className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+              className="rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isLineEditSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>
@@ -1755,18 +1755,18 @@ export default function JournalManagementClient({ initialData }: JournalManageme
       <SlideOver isOpen={isLineDeleteOpen} onClose={() => { setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); }}
         title="Delete Journal Line"
         description={`Remove this journal line`}>
-        {lineDeleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{lineDeleteErr}</div>}
+        {lineDeleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{lineDeleteErr}</div>}
         <div className="space-y-3">
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
             <p className="font-medium">Are you sure?</p>
             <p className="mt-1">This action cannot be undone. This journal line will be permanently removed.</p>
           </div>
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => { setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); }} disabled={isLineDeleteSubmitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50">Cancel</button>
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50">Cancel</button>
             <button type="button" onClick={async () => { if (lineDeletingId === null) return; setIsLineDeleteSubmitting(true); setLineDeleteErr(null); try { await deleteJournalEntryLine(lineDeletingId); setIsLineDeleteOpen(false); setLineDeletingId(null); setLineDeleteErr(null); setIsLineDeleteSubmitting(false); fetchLines({ search: lineSubmittedSearch, page: lineCurrentPage, filters: lineFilters, nextQuickFilters: lineQuickFilters }); } catch (err) { setLineDeleteErr(err instanceof Error ? err.message : 'Unable to delete line.'); setIsLineDeleteSubmitting(false); } }}
               disabled={isLineDeleteSubmitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
               {isLineDeleteSubmitting ? 'Deleting...' : 'Delete Line'}
             </button>
           </div>

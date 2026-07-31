@@ -64,11 +64,45 @@ export interface Config {
   globals: any[];
 }
 
-export type CourseDifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+export type CourseDifficultyLevel = 'standard' | 'intermediate' | 'advanced';
 
 export type CourseLanguage = 'en' | 'es' | 'fr' | 'de';
 
-export type CourseStatus = 'draft' | 'published';
+export type CourseStatus = 'draft' | 'published' | 'archived';
+
+export type EvaluationMode = 'lessons' | 'exam' | 'quizzes' | 'lessons_exam' | 'lessons_quizzes' | 'quizzes_exam' | 'lessons_quizzes_exam';
+
+export type DurationUnit = 'minutes' | 'hours' | 'days' | 'weeks';
+
+export interface InstructorRef {
+  id: string;
+  user?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
+}
+
+export interface CategoryRef {
+  id: string;
+  name?: string;
+  title?: string;
+}
+
+export interface MediaRef {
+  id: string;
+  url?: string;
+  cloudinaryURL?: string;
+  filename?: string;
+  alt?: string;
+}
+
+export interface SimpleDocRef {
+  id: string;
+  title?: string;
+  name?: string;
+}
 
 export interface Course {
   id: string;
@@ -77,12 +111,13 @@ export interface Course {
   excerpt?: string;
   description?: any;
   descriptionBlocks?: ContentBlock[];
-  instructor: User | string;
-  coInstructors?: Array<User | string>;
-  category?: Array<string>;
-  thumbnail?: Media | string;
-  bannerImage?: Media | string;
-  price?: number;
+  instructor: InstructorRef | string;
+  coInstructors?: (InstructorRef | string)[];
+  category?: (CategoryRef | string)[];
+  modules?: (SimpleDocRef | string)[];
+  thumbnail?: MediaRef | string;
+  bannerImage?: MediaRef | string;
+  price: number;
   discountedPrice?: number;
   maxStudents?: number;
   enrollmentStartDate?: string;
@@ -90,17 +125,42 @@ export interface Course {
   courseStartDate?: string;
   courseEndDate?: string;
   estimatedDuration?: number;
+  estimatedDurationUnit?: DurationUnit;
   difficultyLevel: CourseDifficultyLevel;
   isFeatured: boolean;
   language: CourseLanguage;
   passingGrade: number;
+  gradeScale?: SimpleDocRef | string;
+  evaluationMode: EvaluationMode;
   learningObjectives?: Array<{ objective: string }>;
   prerequisites?: Array<{ prerequisite: string }>;
+  certificateTemplate?: SimpleDocRef | string;
+  feedbackForm?: SimpleDocRef | string;
+  isFeedbackRequired?: boolean;
   status: CourseStatus;
   publishedAt?: string;
   settings?: Record<string, unknown>;
   updatedAt: string;
   createdAt: string;
+}
+
+export interface CourseListResult {
+  docs: Course[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CategoryOption {
+  id: string;
+  name: string;
+}
+
+export interface CourseEditData {
+  course: Course;
+  categories: CategoryOption[];
+  modules?: SimpleDocRef[];
 }
 
 export interface CourseModule {
@@ -323,3 +383,4 @@ export interface CMSError {
 
 export * from './schemas';
 export * from './api';
+export * from './course-api';

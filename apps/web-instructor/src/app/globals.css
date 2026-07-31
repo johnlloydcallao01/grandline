@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@source "../../../../packages/ui/src";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
@@ -8,6 +11,17 @@
   --muted: #6b7280;
   --accent: #3127a4;
   --primary: #3127a4;
+  --primary-foreground: #ffffff;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #171717;
+  --card-border: #262626;
+  --muted: #a1a1aa;
+  --accent: #5d4ee6;
+  --primary: #5d4ee6;
   --primary-foreground: #ffffff;
 }
 
@@ -26,6 +40,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 a {
@@ -67,6 +82,19 @@ a {
   border-color: var(--accent);
 }
 
+aside[data-sidebar="instructor"] {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+aside[data-sidebar="instructor"]::-webkit-scrollbar { width: 5px; }
+aside[data-sidebar="instructor"]::-webkit-scrollbar-track { background: #f8fafc; }
+aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark aside[data-sidebar="instructor"] { scrollbar-color: #777 transparent; }
+.dark aside[data-sidebar="instructor"]::-webkit-scrollbar-track { background: #1f2937; }
+.dark aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb { background: #777; }
+.dark aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb:hover { background: #999; }
+
 @media (max-width: 1023px) {
   [data-sidebar="instructor"] {
     display: none !important;
@@ -78,3 +106,4 @@ a {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+

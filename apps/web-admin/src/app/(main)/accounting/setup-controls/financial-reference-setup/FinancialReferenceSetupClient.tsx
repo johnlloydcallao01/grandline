@@ -37,12 +37,12 @@ const paymentTermColumns = ['Code', 'Name', 'Due In Days', 'Active', '']
 
 function statusDot(active: boolean) {
   return active ? (
-    <span className="inline-flex items-center gap-1.5 text-green-600">
+    <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400">
       <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
       Yes
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 text-red-500">
+    <span className="inline-flex items-center gap-1.5 text-red-500 dark:text-red-400">
       <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
       No
     </span>
@@ -53,24 +53,24 @@ function MetricCard({ icon: Icon, label, value, sub, color }: {
   icon: React.ElementType; label: string; value: number | string; sub?: string; color: string
 }) {
   const colors: Record<string, string> = {
-    blue: 'text-blue-600 bg-blue-50 border-blue-200',
-    amber: 'text-amber-600 bg-amber-50 border-amber-200',
-    green: 'text-green-600 bg-green-50 border-green-200',
-    purple: 'text-purple-600 bg-purple-50 border-purple-200',
-    slate: 'text-slate-600 bg-slate-50 border-slate-200',
-    red: 'text-red-600 bg-red-50 border-red-200',
-    teal: 'text-teal-600 bg-teal-50 border-teal-200',
-    indigo: 'text-indigo-600 bg-indigo-50 border-indigo-200',
+    blue: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
+    amber: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+    green: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+    purple: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800',
+    slate: 'text-slate-600 bg-slate-50 border-slate-200 dark:text-slate-400 dark:bg-slate-900/50 dark:border-slate-700',
+    red: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+    teal: 'text-teal-600 bg-teal-50 border-teal-200 dark:text-teal-400 dark:bg-teal-950/30 dark:border-teal-800',
+    indigo: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800',
   }
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="flex items-center gap-4 rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-5 shadow-sm">
       <div className={`flex h-12 w-12 items-center justify-center rounded-lg border ${colors[color]}`}>
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-sm text-gray-500">{label}</p>
-        {sub ? <p className="text-xs text-gray-400">{sub}</p> : null}
+        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+        {sub ? <p className="text-xs text-gray-400 dark:text-gray-500">{sub}</p> : null}
       </div>
     </div>
   )
@@ -81,12 +81,12 @@ function LoadingSkeleton() {
     <div className="space-y-5">
       <div className="grid grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
+          <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
         ))}
       </div>
       <div className="space-y-2">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-14 w-full animate-pulse rounded-lg bg-gray-50" />
+          <div key={i} className="h-14 w-full animate-pulse rounded-lg bg-gray-50 dark:bg-gray-800/50" />
         ))}
       </div>
     </div>
@@ -152,9 +152,9 @@ export function FinancialReferenceSetupClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Setup & Controls</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">Financial Reference Setup</h1>
-          <p className="mt-1 text-base text-gray-600">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Setup & Controls</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Financial Reference Setup</h1>
+          <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
             Maintain currency and payment-term reference records used across the accounting system.
           </p>
         </div>
@@ -162,7 +162,7 @@ export function FinancialReferenceSetupClient() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -190,7 +190,7 @@ export function FinancialReferenceSetupClient() {
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-gray-200">
+      <div className="flex gap-1 border-b border-gray-200 dark:border-[var(--card-border)]">
         {[
           { id: 'currencies' as TabId, label: 'Currencies', icon: DollarSign },
           { id: 'payment-terms' as TabId, label: 'Payment Terms', icon: Calendar },
@@ -200,7 +200,7 @@ export function FinancialReferenceSetupClient() {
             className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id
                 ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <tab.icon className="h-4 w-4" /> {tab.label}
@@ -209,7 +209,7 @@ export function FinancialReferenceSetupClient() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       ) : null}
@@ -226,52 +226,52 @@ export function FinancialReferenceSetupClient() {
           ) : isLoading ? (
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
+                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
               ))}
             </div>
           ) : null}
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative min-w-0 flex-1 md:max-w-xs">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search code, name, or symbol..."
-                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2 pl-10 pr-3 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </div>
             <button
               type="button"
               onClick={handleSearch}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <Search className="h-4 w-4" />
               Search
             </button>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/80">
+                  <tr className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50/50 dark:bg-gray-800/50">
                     {currencyTableColumns.map((col) => (
-                      <th key={col} className="px-5 py-3 font-semibold text-gray-600">{col}</th>
+                      <th key={col} className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr><td colSpan={6} className="px-5 py-8"><LoadingSkeleton /></td></tr>
                   ) : filteredCurrencies.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-5 py-16 text-center text-gray-500">
-                        <DollarSign className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+                      <td colSpan={6} className="px-5 py-16 text-center text-gray-500 dark:text-gray-400">
+                        <DollarSign className="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
                         <p className="font-medium">No currencies found</p>
-                        <p className="mt-1 text-sm text-gray-400">
+                        <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
                           {search ? 'Try adjusting your search.' : 'Create your first currency to get started.'}
                         </p>
                       </td>
@@ -281,18 +281,18 @@ export function FinancialReferenceSetupClient() {
                       <tr
                         key={String(c.id)}
                         onClick={() => { setSelectedCurrencyId(c.id); setIsCurrencyEditorOpen(true) }}
-                        className="cursor-pointer border-b border-gray-50 transition-colors last:border-b-0 hover:bg-blue-50/40"
+                        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
                       >
-                        <td className="px-5 py-3.5 font-medium text-gray-900 font-mono text-xs">{c.code}</td>
-                        <td className="px-5 py-3.5 text-gray-700">{c.name}</td>
-                        <td className="px-5 py-3.5 text-gray-600">{c.symbol || '—'}</td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900 dark:text-gray-100 font-mono text-xs">{c.code}</td>
+                        <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">{c.name}</td>
+                        <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400">{c.symbol || '—'}</td>
                         <td className="px-5 py-3.5">
                           {c.isBaseCurrency ? (
-                            <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
                               <Tag className="h-3 w-3" /> Base
                             </span>
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-gray-400 dark:text-gray-500">—</span>
                           )}
                         </td>
                         <td className="px-5 py-3.5">{statusDot(c.isActive)}</td>
@@ -300,7 +300,7 @@ export function FinancialReferenceSetupClient() {
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setSelectedCurrencyId(c.id); setIsCurrencyEditorOpen(true) }}
-                            className="rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                            className="rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             Edit
                           </button>
@@ -327,52 +327,52 @@ export function FinancialReferenceSetupClient() {
           ) : isLoading ? (
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
+                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
               ))}
             </div>
           ) : null}
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative min-w-0 flex-1 md:max-w-xs">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search code or name..."
-                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2 pl-10 pr-3 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </div>
             <button
               type="button"
               onClick={handleSearch}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <Search className="h-4 w-4" />
               Search
             </button>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/80">
+                  <tr className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50/50 dark:bg-gray-800/50">
                     {paymentTermColumns.map((col) => (
-                      <th key={col} className="px-5 py-3 font-semibold text-gray-600">{col}</th>
+                      <th key={col} className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr><td colSpan={5} className="px-5 py-8"><LoadingSkeleton /></td></tr>
                   ) : filteredPaymentTerms.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-5 py-16 text-center text-gray-500">
-                        <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-300" />
+                      <td colSpan={5} className="px-5 py-16 text-center text-gray-500 dark:text-gray-400">
+                        <Calendar className="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
                         <p className="font-medium">No payment terms found</p>
-                        <p className="mt-1 text-sm text-gray-400">
+                        <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
                           {search ? 'Try adjusting your search.' : 'Create your first payment term to get started.'}
                         </p>
                       </td>
@@ -382,17 +382,17 @@ export function FinancialReferenceSetupClient() {
                       <tr
                         key={String(p.id)}
                         onClick={() => { setSelectedPaymentTermId(p.id); setIsPaymentTermEditorOpen(true) }}
-                        className="cursor-pointer border-b border-gray-50 transition-colors last:border-b-0 hover:bg-blue-50/40"
+                        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
                       >
-                        <td className="px-5 py-3.5 font-medium text-gray-900 font-mono text-xs">{p.code}</td>
-                        <td className="px-5 py-3.5 text-gray-700">{p.name}</td>
-                        <td className="px-5 py-3.5 text-gray-700">{p.dueInDays} day{p.dueInDays !== 1 ? 's' : ''}</td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900 dark:text-gray-100 font-mono text-xs">{p.code}</td>
+                        <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">{p.name}</td>
+                        <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">{p.dueInDays} day{p.dueInDays !== 1 ? 's' : ''}</td>
                         <td className="px-5 py-3.5">{statusDot(p.isActive)}</td>
                         <td className="px-5 py-3.5 text-right">
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setSelectedPaymentTermId(p.id); setIsPaymentTermEditorOpen(true) }}
-                            className="rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                            className="rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             Edit
                           </button>
@@ -424,9 +424,9 @@ export function FinancialReferenceSetupClient() {
                 <MetricCard icon={FileText} label="Chart of Accounts" value={counts.chartOfAccounts} sub="Ledger accounts" color="red" />
               </div>
 
-              <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Reference Data Quick Links</h3>
-                <p className="mt-1 text-xs text-gray-500">Manage these reference records in the Master Records section.</p>
+              <div className="mt-6 bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-6 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Reference Data Quick Links</h3>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Manage these reference records in the Master Records section.</p>
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[
                     { label: 'Bank Accounts', href: '../master-records/business-parties', icon: Landmark, desc: 'Bank, cash, and deposit accounts' },
@@ -437,14 +437,14 @@ export function FinancialReferenceSetupClient() {
                     <a
                       key={link.label}
                       href={link.href}
-                      className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:border-blue-200 hover:bg-blue-50/40"
+                      className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] p-3 transition-colors hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/40 dark:hover:bg-blue-950/20"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-600">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
                         <link.icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{link.label}</p>
-                        <p className="text-xs text-gray-500">{link.desc}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{link.label}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{link.desc}</p>
                       </div>
                     </a>
                   ))}
@@ -454,7 +454,7 @@ export function FinancialReferenceSetupClient() {
           ) : isLoading ? (
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
+                <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
               ))}
             </div>
           ) : null}

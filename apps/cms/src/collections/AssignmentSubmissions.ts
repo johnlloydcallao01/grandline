@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { recalculateEnrollmentGrade } from '../utils/gradeCalculation'
 
 export const AssignmentSubmissions: CollectionConfig = {
   slug: 'assignment-submissions',
@@ -147,4 +148,28 @@ export const AssignmentSubmissions: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        if (doc.status === 'graded' && doc.enrollment) {
+          const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment.id : doc.enrollment
+          try {
+            const result = await recalculateEnrollmentGrade(req.payload, enrollmentId)
+            if (result.currentGrade != null) {
+              await req.payload.update({
+                collection: 'course-enrollments',
+                id: enrollmentId,
+                data: {
+                  currentGrade: result.currentGrade,
+                  finalGrade: result.finalGrade,
+                },
+              })
+            }
+          } catch (err) {
+            console.error('[AssignmentSubmissions Hook] Grade recalculation error:', err)
+          }
+        }
+      },
+    ],
+  },
 }

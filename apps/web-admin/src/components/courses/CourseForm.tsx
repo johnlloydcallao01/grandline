@@ -136,6 +136,14 @@ export default function CourseForm({
     const [openSelector, setOpenSelector] = useState<string | null>(null);
     const selectorRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const s = document.createElement('style');
+        s.textContent = '.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,.dark input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1)}';
+        s.id = 'calendar-picker-dark-fix';
+        document.head.appendChild(s);
+        return () => { const e = document.getElementById('calendar-picker-dark-fix'); if (e) e.remove(); };
+    }, []);
+
     useEffect(() => { getCategories().then(setCategoryOptions).catch(() => {}); }, []);
 
     useEffect(() => {
@@ -243,10 +251,10 @@ export default function CourseForm({
     const renderSearchDropdown = (options: any[], onSelect: (item: any) => void) => {
         if (options.length === 0) return null;
         return (
-            <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto bg-white shadow-sm">
+            <div className="mt-1 border border-gray-200 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-gray-800 shadow-sm">
                 {options.map((opt: any) => (
                     <button key={opt.id} onClick={() => onSelect(opt)}
-                        className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-50">
+                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30">
                         {opt.title || opt.name || `#${opt.id}`}
                     </button>
                 ))}
@@ -279,42 +287,42 @@ export default function CourseForm({
 
         return (
             <div ref={isOpen ? selectorRef : undefined}>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>
                 {value ? (
-                    <div className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-900">
+                    <div className="flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-[var(--card-background)] text-sm text-gray-900 dark:text-gray-100">
                         <span className="truncate">{displayLabel}</span>
-                        <button onClick={onClear} className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-red-500 shrink-0 ml-2">
+                        <button onClick={onClear} className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-red-500 shrink-0 ml-2">
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
                         </button>
                     </div>
                 ) : (
                     <button onClick={() => setOpenSelector(isOpen ? null : id)} type="button"
-                        className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 bg-white text-left">
+                        className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:border-gray-400 bg-white dark:bg-[var(--card-background)] text-left">
                         <span>{placeholder}</span>
                         <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                 )}
                 {isOpen && (
-                    <div className="mt-1 border border-gray-200 rounded-lg bg-white shadow-sm">
-                        <div className="p-2 border-b border-gray-100">
+                    <div className="mt-1 border border-gray-200 dark:border-[var(--card-border)] rounded-lg bg-white dark:bg-[var(--card-background)] shadow-sm">
+                        <div className="p-2 border-b border-gray-100 dark:border-gray-700">
                             <input autoFocus type="text" value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 dark:bg-gray-700"
                                 placeholder="Filter results..." />
                         </div>
                         <div className="max-h-48 overflow-y-auto">
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="px-3 py-2.5 border-b border-gray-50 last:border-0 animate-pulse">
-                                        <div className="h-3 bg-gray-100 rounded w-3/4" />
+                                    <div key={i} className="px-3 py-2.5 border-b border-gray-50 dark:border-gray-700 last:border-0 animate-pulse">
+                                        <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-3/4" />
                                     </div>
                                 ))
                             ) : filtered.length === 0 ? (
-                                <p className="px-3 py-3 text-sm text-gray-400 text-center">{search ? 'No matches' : 'No items'}</p>
+                                <p className="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">{search ? 'No matches' : 'No items'}</p>
                             ) : (
                                 filtered.map(opt => (
                                     <button key={opt.id} onClick={() => { onSelect(opt); setOpenSelector(null); }} type="button"
-                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-50 border-b border-gray-50 last:border-0">
+                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 border-b border-gray-50 dark:border-gray-700 last:border-0">
                                         {opt.title || opt.name || `#${opt.id}`}
                                     </button>
                                 ))
@@ -327,28 +335,28 @@ export default function CourseForm({
     };
 
     return (
-        <form id="course-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="contents">
+    <form id="course-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="contents">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* === MAIN CONTENT === */}
             <div className="lg:col-span-2 space-y-6">
                 {/* Basic Information */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Basic Information</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Basic Information</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
                             <input type="text" value={form.title} onChange={e => updateField('title', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Course Code *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course Code *</label>
                             <input type="text" value={form.courseCode} onChange={e => updateField('courseCode', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] font-mono" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                             <select value={form.status} onChange={e => updateField('status', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] bg-white">
                                 {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </div>
@@ -356,28 +364,28 @@ export default function CourseForm({
                 </div>
 
                 {/* Description */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                    <h2 className="text-base font-bold text-gray-900">Description</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Description</h2>
                     <RichTextEditor
                         value={form.description}
                         onChange={(json) => updateField('description', json)}
                         placeholder="Type /image to insert an image" />
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Excerpt</label>
                         <textarea value={form.excerpt} onChange={e => updateField('excerpt', e.target.value)} rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
                             placeholder="Brief summary for listings..." />
                     </div>
                 </div>
 
                 {/* Instructor & Classification */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Instructor & Classification</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Instructor & Classification</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Primary Instructor *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Primary Instructor *</label>
                         <input type="text" value={form.instructorSearch}
                             onChange={e => { updateField('instructorSearch', e.target.value); updateField('instructor', ''); }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="Search instructors..." />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="Search instructors..." />
                         {renderSearchDropdown(instructorOptions, (inst) => {
                             const label = inst.user ? `${inst.user.firstName} ${inst.user.lastName}`.trim() || `Instructor #${inst.id}` : `Instructor #${inst.id}`;
                             updateField('instructor', inst.id); updateField('instructorSearch', label); updateField('instructorLabel', label);
@@ -385,11 +393,11 @@ export default function CourseForm({
                         })}
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Co-Instructors</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Co-Instructors</label>
                         {form.coInstructors.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mb-2">
                                 {form.coInstructors.map(id => (
-                                    <span key={id} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                                    <span key={id} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-medium">
                                         #{String(id).slice(0, 8)}
                                         <button onClick={() => removeCoInstructor(id)} className="hover:text-red-500"><X className="h-3 w-3" /></button>
                                     </span>
@@ -397,7 +405,7 @@ export default function CourseForm({
                             </div>
                         )}
                         <input type="text" value={coInstructorSearch} onChange={e => setCoInstructorSearch(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="Search co-instructors..." />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="Search co-instructors..." />
                         {renderSearchDropdown(coInstructorOptions, (inst) => addCoInstructor(inst.id))}
                     </div>
                     <div>
@@ -406,86 +414,86 @@ export default function CourseForm({
                             {categoryOptions.map(cat => (
                                 <button key={cat.id} onClick={() => updateField('category',
                                     form.category.includes(cat.id) ? form.category.filter(id => id !== cat.id) : [...form.category, cat.id])}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${form.category.includes(cat.id) ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${form.category.includes(cat.id) ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                     {cat.name}
                                 </button>
                             ))}
-                            {categoryOptions.length === 0 && <p className="text-sm text-gray-400">No categories</p>}
+                            {categoryOptions.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-500">No categories</p>}
                         </div>
                     </div>
                 </div>
 
                 {/* Media */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Media</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Media</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail URL</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail URL</label>
                         <input type="text" value={form.thumbnailUrl} onChange={e => updateField('thumbnailUrl', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono text-xs"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] font-mono text-xs"
                             placeholder="Cloudinary or media URL..." />
-                        {form.thumbnailUrl && <img src={form.thumbnailUrl} alt="thumbnail preview" className="mt-2 h-24 rounded border border-gray-200 object-cover" />}
+                        {form.thumbnailUrl && <img src={form.thumbnailUrl} alt="thumbnail preview" className="mt-2 h-24 rounded border border-gray-200 dark:border-gray-600 object-cover" />}
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Banner Image URL</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Banner Image URL</label>
                         <input type="text" value={form.bannerImageUrl} onChange={e => updateField('bannerImageUrl', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono text-xs"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] font-mono text-xs"
                             placeholder="Cloudinary or media URL..." />
-                        {form.bannerImageUrl && <img src={form.bannerImageUrl} alt="banner preview" className="mt-2 h-24 rounded border border-gray-200 object-cover" />}
+                        {form.bannerImageUrl && <img src={form.bannerImageUrl} alt="banner preview" className="mt-2 h-24 rounded border border-gray-200 dark:border-gray-600 object-cover" />}
                     </div>
                 </div>
 
                 {/* Pricing & Enrollment */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Pricing & Enrollment</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Pricing & Enrollment</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price ($)</label>
                             <input type="number" min="0" step="0.01" value={form.price} onChange={e => updateField('price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Discounted Price ($)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discounted Price ($)</label>
                             <input type="number" min="0" step="0.01" value={form.discountedPrice} onChange={e => updateField('discountedPrice', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Max Students</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Students</label>
                             <input type="number" min="0" value={form.maxStudents} onChange={e => updateField('maxStudents', parseInt(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="0 = unlimited" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="0 = unlimited" />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Start</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enrollment Start</label>
                             <input type="datetime-local" value={form.enrollmentStartDate} onChange={e => updateField('enrollmentStartDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment End</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enrollment End</label>
                             <input type="datetime-local" value={form.enrollmentEndDate} onChange={e => updateField('enrollmentEndDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Course Start</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course Start</label>
                             <input type="datetime-local" value={form.courseStartDate} onChange={e => updateField('courseStartDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Course End</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course End</label>
                             <input type="datetime-local" value={form.courseEndDate} onChange={e => updateField('courseEndDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Duration</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimated Duration</label>
                             <input type="number" min="0" value={form.estimatedDuration} onChange={e => updateField('estimatedDuration', parseInt(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="Value" />
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="Value" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
                             <select value={form.estimatedDurationUnit} onChange={e => updateField('estimatedDurationUnit', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] bg-white">
                                 {DURATION_UNIT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </div>
@@ -493,13 +501,13 @@ export default function CourseForm({
                 </div>
 
                 {/* Modules */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                    <h2 className="text-base font-bold text-gray-900">Modules</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Modules</h2>
                     {form.modules.length > 0 && (
                         <div className="space-y-1.5">
                             {form.modules.map(id => (
-                                <div key={id} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg text-sm">
-                                    <span className="text-gray-700 font-mono text-xs">Module #{String(id).slice(0, 8)}</span>
+                                <div key={id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg text-sm">
+                                    <span className="text-gray-700 dark:text-gray-300 font-mono text-xs">Module #{String(id).slice(0, 8)}</span>
                                     <button onClick={() => removeModule(id)} className="text-gray-400 hover:text-red-500"><X className="h-4 w-4" /></button>
                                 </div>
                             ))}
@@ -507,26 +515,26 @@ export default function CourseForm({
                     )}
                     <div>
                         <input type="text" value={moduleSearch} onChange={e => setModuleSearch(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
                             placeholder="Search modules to add..." />
                         {renderSearchDropdown(moduleResults, (m: SimpleDocRef) => addModule(m.id))}
                     </div>
                 </div>
 
                 {/* Learning Objectives & Prerequisites */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Learning Objectives & Prerequisites</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Learning Objectives & Prerequisites</h2>
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-medium text-gray-700">Learning Objectives</label>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Learning Objectives</label>
                             <button onClick={() => updateField('learningObjectives', [...form.learningObjectives, ''])}
-                                className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"><Plus className="h-3.5 w-3.5" />Add Objective</button>
+                                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"><Plus className="h-3.5 w-3.5" />Add Objective</button>
                         </div>
                         <div className="space-y-2">
                             {form.learningObjectives.map((obj, i) => (
                                 <div key={i} className="flex items-center gap-2">
                                     <input type="text" value={obj} onChange={e => { const u = [...form.learningObjectives]; u[i] = e.target.value; updateField('learningObjectives', u); }}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="e.g. Understand React fundamentals" />
+                                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="e.g. Understand React fundamentals" />
                                     <button onClick={() => updateField('learningObjectives', form.learningObjectives.filter((_, idx) => idx !== i))}
                                         className="p-2 text-gray-400 hover:text-red-500"><X className="h-4 w-4" /></button>
                                 </div>
@@ -535,15 +543,15 @@ export default function CourseForm({
                     </div>
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-medium text-gray-700">Prerequisites</label>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Prerequisites</label>
                             <button onClick={() => updateField('prerequisites', [...form.prerequisites, ''])}
-                                className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"><Plus className="h-3.5 w-3.5" />Add Prerequisite</button>
+                                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"><Plus className="h-3.5 w-3.5" />Add Prerequisite</button>
                         </div>
                         <div className="space-y-2">
                             {form.prerequisites.map((pr, i) => (
                                 <div key={i} className="flex items-center gap-2">
                                     <input type="text" value={pr} onChange={e => { const u = [...form.prerequisites]; u[i] = e.target.value; updateField('prerequisites', u); }}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" placeholder="e.g. Basic JavaScript" />
+                                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" placeholder="e.g. Basic JavaScript" />
                                     <button onClick={() => updateField('prerequisites', form.prerequisites.filter((_, idx) => idx !== i))}
                                         className="p-2 text-gray-400 hover:text-red-500"><X className="h-4 w-4" /></button>
                                 </div>
@@ -556,44 +564,44 @@ export default function CourseForm({
             {/* === SIDEBAR === */}
             <div className="space-y-6">
                 {/* Settings */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-                    <h2 className="text-base font-bold text-gray-900">Settings</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Settings</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty Level</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Difficulty Level</label>
                         <select value={form.difficultyLevel} onChange={e => updateField('difficultyLevel', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] bg-white">
                             {DIFFICULTY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
                         <select value={form.language} onChange={e => updateField('language', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] bg-white">
                             {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Passing Grade (%)</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Passing Grade (%)</label>
                         <input type="number" min="0" max="100" value={form.passingGrade} onChange={e => updateField('passingGrade', parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Evaluation Mode</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evaluation Mode</label>
                         <select value={form.evaluationMode} onChange={e => updateField('evaluationMode', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white">
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)] bg-white">
                             {EVALUATION_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={form.isFeatured} onChange={e => updateField('isFeatured', e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                            className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-800" />
                         <span className="text-sm font-medium text-gray-700">Featured Course</span>
                     </label>
                 </div>
 
                 {/* Certification */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                    <h2 className="text-base font-bold text-gray-900">Certification</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Certification</h2>
                     <RelationSelector
                         id="certificateTemplate"
                         label="Certificate Template"
@@ -615,8 +623,8 @@ export default function CourseForm({
                 </div>
 
                 {/* Feedback */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-                    <h2 className="text-base font-bold text-gray-900">Feedback</h2>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Feedback</h2>
                     <RelationSelector
                         id="feedbackForm"
                         label="Feedback Form"
@@ -638,7 +646,7 @@ export default function CourseForm({
                     {form.feedbackForm && (
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" checked={form.isFeedbackRequired} onChange={e => updateField('isFeedbackRequired', e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-800" />
                             <span className="text-sm font-medium text-gray-700">Require feedback to complete</span>
                         </label>
                     )}
@@ -649,26 +657,26 @@ export default function CourseForm({
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3">
                         <h2 className="text-sm font-bold text-gray-900">Publishing</h2>
                         <div>
-                            <span className="text-xs text-gray-500">Published At</span>
-                            <p className="text-sm text-gray-900 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Published At</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                 {course.publishedAt ? new Date(course.publishedAt).toLocaleString() : 'Not published'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Last Updated</span>
-                            <p className="text-sm text-gray-900 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Last Updated</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                 {course.updatedAt ? new Date(course.updatedAt).toLocaleString() : '-'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Created At</span>
-                            <p className="text-sm text-gray-900 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Created At</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                 {course.createdAt ? new Date(course.createdAt).toLocaleString() : '-'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500">Course ID</span>
-                            <p className="text-xs text-gray-400 font-mono break-all bg-gray-50 p-2 rounded mt-1">{courseId}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Course ID</span>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono break-all bg-gray-50 dark:bg-gray-800 p-2 rounded mt-1">{courseId}</p>
                         </div>
                     </div>
                 )}

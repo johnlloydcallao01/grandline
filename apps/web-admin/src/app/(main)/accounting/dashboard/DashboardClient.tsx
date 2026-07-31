@@ -29,10 +29,10 @@ import {
 
 function statusToneStyles(tone: RecentTransactionRow['statusTone']): string {
   const map: Record<string, string> = {
-    green: 'bg-green-50 text-green-700 border-green-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    gray: 'bg-gray-100 text-gray-600 border-gray-200',
+    green: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+    blue: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800',
+    gray: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
   }
   return map[tone] || map.gray
 }
@@ -42,7 +42,7 @@ function healthDot(status: SystemHealthItem['status']) {
     healthy: 'bg-green-500',
     warning: 'bg-amber-500',
     critical: 'bg-red-500',
-    neutral: 'bg-gray-300',
+    neutral: 'bg-gray-300 dark:bg-gray-600',
   }
   return <span className={`inline-block h-2.5 w-2.5 rounded-full ${colors[status] || colors.neutral}`} />
 }
@@ -95,10 +95,10 @@ function KpiCard({ metric }: { metric: DashboardKpiMetric }) {
   const TrendIcon = metric.trend === 'down' ? ArrowDownRight : ArrowUpRight
   const trendColor =
     metric.trend === 'down'
-      ? 'text-red-600 bg-red-50'
+      ? 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30'
       : metric.trend === 'neutral'
-        ? 'text-gray-500 bg-gray-100'
-        : 'text-green-600 bg-green-50'
+        ? 'text-gray-500 bg-gray-100 dark:text-gray-400 dark:bg-gray-800'
+        : 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30'
 
   const iconMap: Record<string, React.ElementType> = {
     receivables: CreditCard,
@@ -111,11 +111,11 @@ function KpiCard({ metric }: { metric: DashboardKpiMetric }) {
   const IconComponent = iconMap[metric.id] || PieChart
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-3 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] sm:text-sm font-medium text-gray-500 truncate">{metric.label}</p>
-          <p className="mt-1 sm:mt-2 text-lg sm:text-2xl font-bold text-gray-900 truncate leading-tight sm:leading-normal">{metric.value}</p>
+          <p className="text-[11px] sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{metric.label}</p>
+          <p className="mt-1 sm:mt-2 text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate leading-tight sm:leading-normal">{metric.value}</p>
           <div className="mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5">
             <span className={`inline-flex items-center gap-1 rounded-full px-1.5 sm:px-2.5 py-[1px] sm:py-0.5 text-[10px] sm:text-xs font-medium leading-tight sm:leading-normal ${trendColor}`}>
               <TrendIcon className="h-2.5 sm:h-3.5 w-2.5 sm:w-3.5 shrink-0" />
@@ -123,7 +123,7 @@ function KpiCard({ metric }: { metric: DashboardKpiMetric }) {
             </span>
           </div>
         </div>
-        <div className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-600">
+        <div className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--card-border)] bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
           <IconComponent className="h-5 w-5" />
         </div>
       </div>
@@ -202,10 +202,10 @@ function FinancialPositionChart({
   }), [receivables, payables, cashBank, workingCapital, isMobile])
 
   return (
-    <div className="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Financial Position Overview</h3>
-        <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500">Comparison of key financial metrics</p>
+    <div className="min-w-0 rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+      <div className="border-b border-[var(--card-border)] px-4 sm:px-5 py-2.5 sm:py-3.5">
+        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">Financial Position Overview</h3>
+        <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Comparison of key financial metrics</p>
       </div>
       <div className="h-[170px] sm:h-[280px] overflow-x-auto sm:overflow-x-hidden overscroll-x-contain">
         <ReactECharts option={option} style={{ height: '100%', width: '100%' }} notMerge autoResize />
@@ -296,10 +296,10 @@ function AgingDonutChart({
   }), [buckets, totalLabel, totalValue, isMobile])
 
   return (
-    <div className="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-900">{title}</h3>
-        <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500">{formatCurrencyShort(total)} total outstanding</p>
+    <div className="min-w-0 rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+      <div className="border-b border-[var(--card-border)] px-4 sm:px-5 py-2.5 sm:py-3.5">
+        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{formatCurrencyShort(total)} total outstanding</p>
       </div>
       <div className="h-[190px] sm:h-[280px] overflow-x-auto sm:overflow-x-hidden overscroll-x-contain">
         <ReactECharts option={option} style={{ height: '100%', width: '100%' }} notMerge autoResize />
@@ -321,30 +321,35 @@ function TransactionMiniList({
   accentColor: string
   emptyLabel: string
 }) {
-  const borderColor = `border-l-${accentColor}-400`
+  const borderColorMap: Record<string, string> = {
+    blue: 'border-l-blue-400 dark:border-l-blue-500',
+    amber: 'border-l-amber-400 dark:border-l-amber-500',
+    green: 'border-l-green-400 dark:border-l-green-500',
+  }
+  const borderColor = borderColorMap[accentColor] || 'border-l-gray-400 dark:border-l-gray-500'
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
-        <Icon className="h-4 w-4 text-gray-500 shrink-0" />
-        <h3 className="text-xs sm:text-sm font-semibold text-gray-900">{title}</h3>
+    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+      <div className="flex items-center gap-2 border-b border-[var(--card-border)] px-4 sm:px-5 py-2.5 sm:py-3.5">
+        <Icon className="h-4 w-4 text-gray-500 dark:text-gray-400 shrink-0" />
+        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
       </div>
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-gray-50 dark:divide-gray-800">
         {rows.length === 0 ? (
-          <div className="px-4 sm:px-5 py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-400">{emptyLabel}</div>
+          <div className="px-4 sm:px-5 py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-400 dark:text-gray-500">{emptyLabel}</div>
         ) : (
           rows.map((row) => (
-            <div key={row.id} className={`border-l-2 px-3 sm:px-5 py-2.5 sm:py-3 transition-colors hover:bg-gray-50 ${borderColor}`}>
+            <div key={row.id} className={`border-l-2 px-3 sm:px-5 py-2.5 sm:py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 ${borderColor}`}>
               <div className="flex items-start justify-between gap-2 sm:gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{row.documentNumber}</p>
-                  <p className="mt-px sm:mt-0.5 text-[11px] sm:text-sm text-gray-500 truncate">{row.partyName}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{row.documentNumber}</p>
+                  <p className="mt-px sm:mt-0.5 text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">{row.partyName}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{row.totalFormatted}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{row.totalFormatted}</p>
                 </div>
               </div>
               <div className="mt-1 sm:mt-2 flex items-center justify-between">
-                <span className="text-[10px] sm:text-xs text-gray-400">{row.documentDate}</span>
+                <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">{row.documentDate}</span>
                 <span className={`inline-flex rounded-md border px-1.5 sm:px-2 py-[1px] sm:py-0.5 text-[10px] sm:text-xs font-medium ${statusToneStyles(row.statusTone)}`}>
                   {row.statusLabel}
                 </span>
@@ -362,21 +367,21 @@ function LoadingSkeleton() {
     <div className="space-y-4 sm:space-y-6">
       <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-24 sm:h-32 animate-pulse rounded-xl bg-gray-100" />
+          <div key={i} className="h-24 sm:h-32 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
         ))}
       </div>
-      <div className="h-[170px] sm:h-[280px] animate-pulse rounded-xl bg-gray-50" />
+      <div className="h-[170px] sm:h-[280px] animate-pulse rounded-xl bg-gray-50 dark:bg-gray-800/50" />
       <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="h-[190px] sm:h-[280px] animate-pulse rounded-xl bg-gray-50" />
+          <div key={i} className="h-[190px] sm:h-[280px] animate-pulse rounded-xl bg-gray-50 dark:bg-gray-800/50" />
         ))}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-56 sm:h-64 animate-pulse rounded-xl bg-gray-50" />
+          <div key={i} className="h-56 sm:h-64 animate-pulse rounded-xl bg-gray-50 dark:bg-gray-800/50" />
         ))}
       </div>
-      <div className="h-44 sm:h-48 animate-pulse rounded-xl bg-gray-50" />
+      <div className="h-44 sm:h-48 animate-pulse rounded-xl bg-gray-50 dark:bg-gray-800/50" />
     </div>
   )
 }
@@ -429,15 +434,15 @@ export function DashboardClient() {
     <div className="space-y-4 sm:space-y-6 p-[10px]">
       <div className="flex flex-col gap-3 sm:gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
-          <p className="text-xs sm:text-sm font-medium text-blue-600">Accounting / Dashboard</p>
-          <h1 className="mt-1 text-lg sm:text-2xl font-bold text-gray-900">Accounting Dashboard</h1>
-          <p className="mt-0.5 sm:mt-1 text-sm sm:text-base text-gray-600">
+          <p className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">Accounting / Dashboard</p>
+          <h1 className="mt-1 text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Accounting Dashboard</h1>
+          <p className="mt-0.5 sm:mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Financial overview, recent transactions, and system health at a glance.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {data ? (
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
               <Clock className="h-3.5 w-3.5" />
               Updated {lastUpdatedDisplay}
             </div>
@@ -446,7 +451,7 @@ export function DashboardClient() {
             type="button"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-gray-300 bg-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 sm:h-4 w-3.5 sm:w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="sr-only sm:not-sr-only">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -455,13 +460,13 @@ export function DashboardClient() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1">{error}</span>
           <button
             type="button"
             onClick={() => void load()}
-            className="shrink-0 rounded-md border border-red-200 bg-white px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium text-red-600 hover:bg-red-50"
+            className="shrink-0 rounded-md border border-red-200 dark:border-red-800 bg-white dark:bg-[var(--card-background)] px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
           >
             Retry
           </button>
@@ -541,17 +546,17 @@ export function DashboardClient() {
             />
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-100 px-4 sm:px-5 py-2.5 sm:py-3.5">
+          <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+            <div className="border-b border-[var(--card-border)] px-4 sm:px-5 py-2.5 sm:py-3.5">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-gray-500 shrink-0" />
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-900">System Health</h3>
+                <Shield className="h-4 w-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">System Health</h3>
               </div>
-              <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500">
+              <p className="mt-px sm:mt-0.5 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                 Key system configuration status. Items needing attention are highlighted.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-px bg-gray-100 sm:grid-cols-2 lg:grid-cols-3 min-w-0">
+            <div className="grid grid-cols-1 gap-px bg-gray-100 dark:bg-gray-800 sm:grid-cols-2 lg:grid-cols-3 min-w-0">
               {data.systemHealth.map((item) => {
                 const Container = item.linkTo ? 'a' : 'div'
                 const containerProps = item.linkTo
@@ -562,17 +567,17 @@ export function DashboardClient() {
                   <Container
                     key={item.id}
                     {...containerProps}
-                    className={`flex items-start gap-2 sm:gap-3 bg-white px-4 sm:px-5 py-3 sm:py-4 transition-colors ${
-                      item.linkTo ? 'cursor-pointer hover:bg-blue-50/40 active:bg-blue-50' : ''
+                    className={`flex items-start gap-2 sm:gap-3 bg-white dark:bg-[var(--card-background)] px-4 sm:px-5 py-3 sm:py-4 transition-colors ${
+                      item.linkTo ? 'cursor-pointer hover:bg-blue-50/40 dark:hover:bg-blue-950/20 active:bg-blue-50 dark:active:bg-blue-950/40' : ''
                     }`}
                   >
                     <div className={`flex h-8 sm:h-9 w-8 sm:w-9 shrink-0 items-center justify-center rounded-lg border ${
                       (() => {
                         const map: Record<string, string> = {
-                          healthy: 'text-green-500 bg-green-50 border-green-200',
-                          warning: 'text-amber-500 bg-amber-50 border-amber-200',
-                          critical: 'text-red-500 bg-red-50 border-red-200',
-                          neutral: 'text-gray-400 bg-gray-50 border-gray-200',
+                          healthy: 'text-green-500 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+                          warning: 'text-amber-500 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+                          critical: 'text-red-500 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+                          neutral: 'text-gray-400 bg-gray-50 border-gray-200 dark:text-gray-500 dark:bg-gray-800 dark:border-gray-700',
                         }
                         return map[item.status] || map.neutral
                       })()
@@ -581,13 +586,13 @@ export function DashboardClient() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1 sm:gap-1.5">
-                        <p className="text-xs sm:text-sm font-medium text-gray-900">{item.label}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{item.label}</p>
                         {item.linkTo ? (
-                          <ChevronRight className="h-3 sm:h-3.5 w-3 sm:w-3.5 shrink-0 text-gray-300" />
+                          <ChevronRight className="h-3 sm:h-3.5 w-3 sm:w-3.5 shrink-0 text-gray-300 dark:text-gray-600" />
                         ) : null}
                       </div>
-                      <p className="mt-px sm:mt-0.5 text-xs sm:text-sm font-semibold text-gray-800">{item.value}</p>
-                      <p className="mt-px text-[10px] sm:text-xs text-gray-500">{item.sub}</p>
+                      <p className="mt-px sm:mt-0.5 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200">{item.value}</p>
+                      <p className="mt-px text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{item.sub}</p>
                     </div>
                   </Container>
                 )

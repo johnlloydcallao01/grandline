@@ -127,18 +127,18 @@ const PAYMENT_METHOD_OPTIONS: Array<{ label: string; value: PaymentMadeMutationI
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
   if (variant === 'primary') {
-    return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
+    return 'border border-blue-600 dark:bg-blue-700 dark:border-blue-700 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
   }
   if (variant === 'ghost') {
-    return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+    return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300';
   }
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: PaymentsMadeMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
@@ -296,13 +296,13 @@ function MetricCard({ label, value, change, trend = 'neutral' }: { label: string
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
@@ -319,23 +319,23 @@ function MetricCard({ label, value, change, trend = 'neutral' }: { label: string
 function LoadingSkeleton({ columnCount = 6 }: { columnCount?: number }) {
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
                 {Array.from({ length: columnCount + 1 }).map((_, index) => (
                   <th key={index} className="px-4 py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
                   <td colSpan={columnCount + 1} className="px-4 py-3">
-                    <div className="h-6 animate-pulse rounded bg-gray-100" />
+                    <div className="h-6 animate-pulse rounded bg-gray-100 dark:bg-gray-800/50" />
                   </td>
                 </tr>
               ))}
@@ -350,7 +350,7 @@ function LoadingSkeleton({ columnCount = 6 }: { columnCount?: number }) {
 function renderCell(cell: PaymentsMadeCell, index: number) {
   if (typeof cell === 'string') {
     return (
-      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
         {cell}
       </td>
     );
@@ -361,11 +361,11 @@ function renderCell(cell: PaymentsMadeCell, index: number) {
 
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-200 dark:ring-amber-800',
+      blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-800',
+      gray: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-gray-200 dark:ring-gray-700',
+      green: 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 ring-green-200 dark:ring-green-800',
+      red: 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 ring-red-200 dark:ring-red-800',
     };
 
     return (
@@ -380,7 +380,7 @@ function renderCell(cell: PaymentsMadeCell, index: number) {
   return (
     <td
       key={index}
-      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}
+      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}
     >
       {cell.text}
     </td>
@@ -422,15 +422,15 @@ function SlideOver({
       onClick={onClose}
     >
       <div
-        className={`flex w-full max-w-5xl flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`flex w-full max-w-5xl flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -452,7 +452,7 @@ function FormField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
         {required ? <span className="ml-0.5 text-red-500">*</span> : null}
       </label>
@@ -484,7 +484,7 @@ function Input({
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800/50 disabled:text-gray-500"
     />
   );
 }
@@ -505,7 +505,7 @@ function Select({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       disabled={disabled}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800/50 disabled:text-gray-500"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -530,7 +530,7 @@ function TextArea({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       rows={rows}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
     />
   );
 }
@@ -607,7 +607,7 @@ function PaymentMadeForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       {error ? (
-        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -720,11 +720,11 @@ function PaymentMadeForm({
             />
           </FormField>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Bill Applications</h4>
-                <p className="mt-1 text-sm text-gray-600">Allocate this payment to one or more vendor bills.</p>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Bill Applications</h4>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Allocate this payment to one or more vendor bills.</p>
               </div>
               <button
                 type="button"
@@ -734,7 +734,7 @@ function PaymentMadeForm({
                     applications: [...previous.applications, createEmptyApplication()],
                   }))
                 }
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <Plus className="h-4 w-4" />
                 Add Application
@@ -743,7 +743,7 @@ function PaymentMadeForm({
 
             <div className="mt-4 space-y-3">
               {formState.applications.map((application, index) => (
-                <div key={application.id} className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-[minmax(0,1fr),180px,auto]">
+                <div key={application.id} className="grid gap-3 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 md:grid-cols-[minmax(0,1fr),180px,auto]">
                   <FormField label={`Bill ${index + 1}`} required>
                     <Select
                       value={application.bill}
@@ -786,7 +786,7 @@ function PaymentMadeForm({
                               : [createEmptyApplication()],
                         }))
                       }
-                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50"
                     >
                       <Trash2 className="h-4 w-4" />
                       Remove
@@ -799,26 +799,26 @@ function PaymentMadeForm({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <h4 className="text-sm font-semibold text-gray-900">Payment Preview</h4>
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payment Preview</h4>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-500">Amount Paid</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(preview.amountPaid, formState.currency || 'PHP')}</span>
+                <span className="text-gray-500 dark:text-gray-400">Amount Paid</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(preview.amountPaid, formState.currency || 'PHP')}</span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-500">Applied Amount</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(preview.appliedAmount, formState.currency || 'PHP')}</span>
+                <span className="text-gray-500 dark:text-gray-400">Applied Amount</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(preview.appliedAmount, formState.currency || 'PHP')}</span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-500">Unapplied Amount</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(preview.unappliedAmount, formState.currency || 'PHP')}</span>
+                <span className="text-gray-500 dark:text-gray-400">Unapplied Amount</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(preview.unappliedAmount, formState.currency || 'PHP')}</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <h4 className="text-sm font-semibold text-gray-900">Read-Only Workflow Fields</h4>
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Read-Only Workflow Fields</h4>
             <div className="mt-4 space-y-4">
               <FormField label="Posting Status">
                 <Input value="Unposted until the payment is posted" disabled />
@@ -834,11 +834,11 @@ function PaymentMadeForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:bg-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitLabel}
         </button>
@@ -1095,41 +1095,41 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{data?.meta.label || tab.label}</h2>
-          <p className="text-sm text-gray-600">{data?.meta.description || tab.description}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{data?.meta.label || tab.label}</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{data?.meta.description || tab.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" />
             Refresh Balances
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows.length}>
             <Download className="h-4 w-4" />
             Export Balances
           </button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder={data?.meta.searchPlaceholder || tab.searchPlaceholder}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:border-blue-700 hover:bg-blue-700"
+                className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:bg-blue-700 dark:border-blue-700 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:border-blue-700 hover:bg-blue-700"
               >
                 <Search className="h-4 w-4" />
                 Search
@@ -1143,14 +1143,14 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
               }}
               className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                 isFilterPanelOpen || filterCount > 0
-                  ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               }`}
             >
               <Filter className="h-4 w-4" />
               Filters
               {filterCount > 0 ? (
-                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">
                   {filterCount}
                 </span>
               ) : null}
@@ -1165,8 +1165,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                 onClick={() => handleToggleQuickFilter(filter.value)}
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   quickFilters.includes(filter.value)
-                    ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {filter.label}
@@ -1177,11 +1177,11 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
 
         <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Select as many filter values as needed, then apply them in one step.
                   </p>
                 </div>
@@ -1195,14 +1195,14 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                       setCurrentPage(1);
                       setIsFilterPanelOpen(false);
                     }}
-                    className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   >
                     Clear all
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsFilterPanelOpen(false)}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </button>
@@ -1213,7 +1213,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                       setCurrentPage(1);
                       setIsFilterPanelOpen(false);
                     }}
-                    className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                    className="rounded-lg border border-blue-600 dark:bg-blue-700 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
                   >
                     Apply Filters
                   </button>
@@ -1222,7 +1222,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
 
               <div className="mt-6 grid gap-6 md:grid-cols-2">
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.statuses || []).map((option) => {
                       const isSelected = draftFilters.statuses.includes(option.value);
@@ -1238,8 +1238,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                           }
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                             isSelected
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                              ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {option.label}
@@ -1250,7 +1250,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                 </div>
 
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment Terms</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.paymentTerms || []).map((option) => {
                       const isSelected = draftFilters.paymentTermIds.includes(option.value);
@@ -1266,8 +1266,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                           }
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                             isSelected
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                              ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {option.label}
@@ -1277,8 +1277,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                   </div>
                 </div>
 
-                <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Balance State</h5>
+                  <div>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Balance State</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.balanceStates || []).map((option) => {
                       const isSelected = draftFilters.balanceStates.includes(option.value);
@@ -1294,8 +1294,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                           }
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                             isSelected
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                              ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {option.label}
@@ -1318,16 +1318,16 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || tab.tableTitle}</h3>
-              <p className="text-sm text-gray-600">{data?.meta.tableDescription || tab.tableDescription}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{data?.meta.tableTitle || tab.tableTitle}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{data?.meta.tableDescription || tab.tableDescription}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <span>{data?.totals.filteredRows ?? 0} matching rows</span>
             </div>
           </div>
 
           {error ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {error}
             </div>
@@ -1337,37 +1337,37 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
             <LoadingSkeleton columnCount={(data?.meta.columns || tab.columns).length} />
           ) : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {(data?.meta.columns || tab.columns).map((column) => (
                           <th
                             key={getColumnLabel(column)}
-                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${
+                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${
                               getColumnAlign(column) === 'right' ? 'text-right' : 'text-left'
                             }`}
                           >
                             {getColumnLabel(column)}
                           </th>
                         ))}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {data?.rows.length ? (
                         data.rows.map((row) => (
-                          <tr key={row.id} className="hover:bg-gray-50">
+                          <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             {row.cells.map((cell, index) => renderCell(cell, index))}
                             <td className="px-4 py-3 text-right">
                               <div className="flex justify-end gap-2">
                                 <button
                                   type="button"
                                   onClick={() => handleView(row.id)}
-                                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                  className="rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                   title="View"
                                 >
                                   <Eye className="h-4 w-4" />
@@ -1375,7 +1375,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEdit(row.id)}
-                                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                  className="rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                   title="Edit vendor"
                                 >
                                   <Edit className="h-4 w-4" />
@@ -1383,7 +1383,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenDelete(row.id, row.vendorLabel)}
-                                  className="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"
+                                  className="rounded-lg p-2 text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-400"
                                   title="Delete vendor"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1394,7 +1394,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={(data?.meta.columns || tab.columns).length + 1} className="px-4 py-10 text-center text-sm text-gray-500">
+                          <td colSpan={(data?.meta.columns || tab.columns).length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                             No rows found.
                           </td>
                         </tr>
@@ -1406,7 +1406,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
 
               {data?.pagination.totalPages && data.pagination.totalPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Page {data.pagination.page} of {data.pagination.totalPages}
                   </p>
                   <div className="flex gap-2">
@@ -1414,7 +1414,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                       type="button"
                       disabled={!data.pagination.hasPrevPage}
                       onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       Previous
                     </button>
@@ -1422,7 +1422,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                       type="button"
                       disabled={!data.pagination.hasNextPage}
                       onClick={() => setCurrentPage((previous) => previous + 1)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       Next
                     </button>
@@ -1445,27 +1445,27 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
         ) : viewDetail ? (
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.displayName || '-'}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.displayName || '-'}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Balance Due</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.currentBalanceDueLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Balance Due</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.currentBalanceDueLabel}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Open Bills</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.openBillCount}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Open Bills</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.openBillCount}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Overdue Bills</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.overdueBillCount}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Overdue Bills</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.overdueBillCount}</p>
               </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
-              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                <h4 className="text-sm font-semibold text-gray-900">Vendor Master</h4>
+              <div className="space-y-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Vendor Master</h4>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField label="Vendor Code">
                     <Input value={viewDetail.vendorCode || '-'} disabled />
@@ -1488,8 +1488,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                <h4 className="text-sm font-semibold text-gray-900">Dependency Summary</h4>
+              <div className="space-y-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Dependency Summary</h4>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField label="Bill Count">
                     <Input value={String(viewDetail.usageSummary.billCount)} disabled />
@@ -1507,22 +1507,22 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-gray-200 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Open Bills</h4>
-                  <p className="mt-1 text-sm text-gray-600">Current payable obligations still carrying balance due.</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Open Bills</h4>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Current payable obligations still carrying balance due.</p>
                 </div>
               </div>
-              <div className="mt-4 overflow-hidden rounded-xl border border-gray-200">
+              <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {['Bill', 'Bill Date', 'Due Date', 'Status', 'Balance Due'].map((column) => (
                           <th
                             key={column}
-                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${
+                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${
                               column === 'Balance Due' ? 'text-right' : 'text-left'
                             }`}
                           >
@@ -1531,20 +1531,20 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {viewDetail.openBills.length ? (
                         viewDetail.openBills.map((bill) => (
                           <tr key={bill.id}>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{bill.billNumber}</td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{bill.billDateLabel}</td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{bill.dueDateLabel}</td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{bill.statusLabel}</td>
-                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-gray-900">{bill.balanceDueLabel}</td>
+                            <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{bill.billNumber}</td>
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{bill.billDateLabel}</td>
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{bill.dueDateLabel}</td>
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{bill.statusLabel}</td>
+                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">{bill.balanceDueLabel}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">No open bills recorded.</td>
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No open bills recorded.</td>
                         </tr>
                       )}
                     </tbody>
@@ -1570,7 +1570,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
         ) : (
           <form onSubmit={handleSubmitEdit} className="space-y-6">
             {editError ? (
-              <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {editError}
               </div>
@@ -1619,8 +1619,8 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
               </div>
 
               <div className="space-y-4">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <h4 className="text-sm font-semibold text-gray-900">Read-Only Balance Fields</h4>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Read-Only Balance Fields</h4>
                   <div className="mt-4 space-y-4">
                     <FormField label="Current Balance Due">
                       <Input value={editDetail?.currentBalanceDueLabel || 'PHP 0.00'} disabled />
@@ -1639,11 +1639,11 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
               <button
                 type="submit"
                 disabled={isEditSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:bg-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isEditSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
@@ -1662,16 +1662,16 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
         description="Delete this vendor only when no payables references remain."
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-700">
-            Delete <span className="font-semibold text-gray-900">{deleteTarget?.vendorLabel || 'this vendor'}</span>?
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            Delete <span className="font-semibold text-gray-900 dark:text-gray-100">{deleteTarget?.vendorLabel || 'this vendor'}</span>?
             This cannot be undone.
           </p>
 
           {isDeleteLoading ? (
             <LoadingSkeleton columnCount={2} />
           ) : deleteDetail ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <h4 className="text-sm font-semibold text-gray-900">Dependency Check</h4>
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Dependency Check</h4>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <FormField label="Bills">
                   <Input value={String(deleteDetail.usageSummary.billCount)} disabled />
@@ -1687,7 +1687,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                 </FormField>
               </div>
               {!deleteDetail.usageSummary.canDelete ? (
-                <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
+                <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-sm text-amber-700 dark:text-amber-400">
                   This vendor still has dependent accounting records and cannot be deleted.
                 </div>
               ) : null}
@@ -1701,7 +1701,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
                 setDeleteTarget(null);
                 setDeleteDetail(null);
               }}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -1709,7 +1709,7 @@ function VendorBalancesPanel({ tab }: { tab: (typeof TABS)[number] }) {
               type="button"
               onClick={handleConfirmDelete}
               disabled={isDeleting || !deleteDetail?.usageSummary.canDelete}
-              className="rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-red-600 dark:bg-red-700 bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isDeleting ? 'Deleting...' : 'Delete Vendor'}
             </button>
@@ -1989,15 +1989,15 @@ export function VendorPaymentsBalancesClient() {
       <div className="space-y-6 p-[10px]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
-            <h1 className="mt-1 text-2xl font-bold text-gray-900">Vendor Payments & Balances</h1>
-            <p className="mt-1 text-base text-gray-600">
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Purchases & Payables</p>
+            <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Payments & Balances</h1>
+            <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
               Manage vendor disbursements and vendor-level payable balances in one payables workspace.
             </p>
           </div>
         </div>
 
-        <div className="border-b border-gray-200">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -2008,8 +2008,8 @@ export function VendorPaymentsBalancesClient() {
                   onClick={() => handleTabChange(tab.id)}
                   className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
                     isActive
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab.label}
@@ -2035,15 +2035,15 @@ export function VendorPaymentsBalancesClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Purchases & Payables</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">Vendor Payments & Balances</h1>
-          <p className="mt-1 text-base text-gray-600">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Purchases & Payables</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Payments & Balances</h1>
+          <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
             Manage vendor disbursements and vendor-level payable balances in one payables workspace.
           </p>
         </div>
       </div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -2054,8 +2054,8 @@ export function VendorPaymentsBalancesClient() {
                 onClick={() => handleTabChange(tab.id)}
                 className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
                   isActive
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 {tab.label}
@@ -2066,11 +2066,11 @@ export function VendorPaymentsBalancesClient() {
       </div>
 
       <div className="space-y-6">
-        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold text-gray-900">{currentTab.label}</h2>
-            <p className="text-sm text-gray-600">{currentTab.description}</p>
-            <p className="text-sm text-gray-500">{totalMatches} matching rows</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentTab.label}</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{currentTab.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{totalMatches} matching rows</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -2107,23 +2107,23 @@ export function VendorPaymentsBalancesClient() {
           </div>
         ) : null}
 
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
               <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
                 <div className="relative min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <input
                     type="text"
                     placeholder={currentTab.searchPlaceholder}
                     value={searchInput}
                     onChange={(event) => setSearchInput(event.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:border-blue-700 hover:bg-blue-700"
+                  className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:bg-blue-700 dark:border-blue-700 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:border-blue-700 hover:bg-blue-700"
                 >
                   <Search className="h-4 w-4" />
                   Search
@@ -2137,14 +2137,14 @@ export function VendorPaymentsBalancesClient() {
                 }}
                 className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                   isFilterPanelOpen || filterCount > 0
-                    ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 <Filter className="h-4 w-4" />
                 Filters
                 {filterCount > 0 ? (
-                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">
                     {filterCount}
                   </span>
                 ) : null}
@@ -2159,8 +2159,8 @@ export function VendorPaymentsBalancesClient() {
                   onClick={() => handleToggleQuickFilter(filter.value)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     quickFilters.includes(filter.value)
-                      ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   {filter.label}
@@ -2171,11 +2171,11 @@ export function VendorPaymentsBalancesClient() {
 
           <div className="space-y-4 p-[10px] sm:p-5">
             {isFilterPanelOpen ? (
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       Select as many filter values as needed, then apply them in one step.
                     </p>
                   </div>
@@ -2194,14 +2194,14 @@ export function VendorPaymentsBalancesClient() {
                         setCurrentPage(1);
                         setIsFilterPanelOpen(false);
                       }}
-                      className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                      className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                     >
                       Clear all
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsFilterPanelOpen(false)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </button>
@@ -2212,7 +2212,7 @@ export function VendorPaymentsBalancesClient() {
                         setCurrentPage(1);
                         setIsFilterPanelOpen(false);
                       }}
-                      className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                      className="rounded-lg border border-blue-600 dark:bg-blue-700 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
                     >
                       Apply Filters
                     </button>
@@ -2221,7 +2221,7 @@ export function VendorPaymentsBalancesClient() {
 
                 <div className="mt-6 grid gap-6 md:grid-cols-2">
                   <div>
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</h5>
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</h5>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(data?.filterOptions.statuses || []).map((option) => {
                         const isSelected = draftFilters.statuses.includes(option.value);
@@ -2237,8 +2237,8 @@ export function VendorPaymentsBalancesClient() {
                             }
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isSelected
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                                ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                           >
                             {option.label}
@@ -2249,7 +2249,7 @@ export function VendorPaymentsBalancesClient() {
                   </div>
 
                   <div>
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Method</h5>
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment Method</h5>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(data?.filterOptions.paymentMethods || []).map((option) => {
                         const isSelected = draftFilters.paymentMethods.includes(option.value);
@@ -2265,8 +2265,8 @@ export function VendorPaymentsBalancesClient() {
                             }
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isSelected
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                                ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                           >
                             {option.label}
@@ -2277,7 +2277,7 @@ export function VendorPaymentsBalancesClient() {
                   </div>
 
                   <div>
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor</h5>
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor</h5>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(data?.filterOptions.vendors || []).map((option) => {
                         const isSelected = draftFilters.vendorIds.includes(option.value);
@@ -2293,8 +2293,8 @@ export function VendorPaymentsBalancesClient() {
                             }
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isSelected
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                                ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                           >
                             {option.label}
@@ -2305,7 +2305,7 @@ export function VendorPaymentsBalancesClient() {
                   </div>
 
                   <div>
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Application State</h5>
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Application State</h5>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(data?.filterOptions.applicationStates || []).map((option) => {
                         const isSelected = draftFilters.applicationStates.includes(option.value);
@@ -2321,8 +2321,8 @@ export function VendorPaymentsBalancesClient() {
                             }
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isSelected
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
+                                ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                           >
                             {option.label}
@@ -2337,16 +2337,16 @@ export function VendorPaymentsBalancesClient() {
 
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-2">
-                <h3 className="text-base font-semibold text-gray-900">{tableTitle}</h3>
-                <p className="text-sm text-gray-600">{tableDescription}</p>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{tableTitle}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{tableDescription}</p>
               </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                 <span>{totalMatches} matching rows</span>
                 <button
                   type="button"
                   onClick={handleExport}
                   disabled={!data?.rows.length}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Download className="h-4 w-4" />
                   Download View
@@ -2355,7 +2355,7 @@ export function VendorPaymentsBalancesClient() {
             </div>
 
             {error ? (
-              <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {error}
               </div>
@@ -2365,40 +2365,40 @@ export function VendorPaymentsBalancesClient() {
               <LoadingSkeleton columnCount={liveColumns.length} />
             ) : (
               <>
-                <div className="overflow-hidden rounded-xl border border-gray-200">
+                <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                      <thead className="bg-gray-50 dark:bg-gray-800/50">
                         <tr>
                           {liveColumns.map((column) => (
                             <th
                               key={getColumnLabel(column)}
-                              className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${
+                              className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${
                                 getColumnAlign(column) === 'right' ? 'text-right' : 'text-left'
                               }`}
                             >
                               {getColumnLabel(column)}
                             </th>
                           ))}
-                          <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                          <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                         {rows.length > 0 ? (
                           rows.map((row) => {
                             const mutable = data?.flags.mutablePaymentIds.includes(row.id);
                             const liveRow = row as PaymentMadeRow;
                             return (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                 {row.cells.map((cell, index) => renderCell(cell, index))}
                                 <td className="px-4 py-3 text-right">
                                   <div className="flex justify-end gap-2">
                                     <button
                                       type="button"
                                       onClick={() => handleView(liveRow.id)}
-                                      className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                      className="rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       title="View"
                                     >
                                       <Eye className="h-4 w-4" />
@@ -2407,7 +2407,7 @@ export function VendorPaymentsBalancesClient() {
                                       type="button"
                                       onClick={() => handleOpenEdit(liveRow.id)}
                                       disabled={!mutable}
-                                      className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                      className="rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-40"
                                       title={mutable ? 'Edit' : 'Only draft payments can be edited'}
                                     >
                                       <Edit className="h-4 w-4" />
@@ -2416,7 +2416,7 @@ export function VendorPaymentsBalancesClient() {
                                       type="button"
                                       onClick={() => handleOpenDelete(liveRow)}
                                       disabled={!mutable}
-                                      className="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                      className="rounded-lg p-2 text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
                                       title={mutable ? 'Delete' : 'Only draft payments can be deleted'}
                                     >
                                       <Trash2 className="h-4 w-4" />
@@ -2425,7 +2425,7 @@ export function VendorPaymentsBalancesClient() {
                                       type="button"
                                       onClick={() => handlePost(liveRow.id)}
                                       disabled={!mutable || postingId === liveRow.id}
-                                      className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                      className="rounded-lg p-2 text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-40"
                                       title={mutable ? 'Post payment' : 'Only draft payments can be posted'}
                                     >
                                       <SendHorizonal className="h-4 w-4" />
@@ -2439,7 +2439,7 @@ export function VendorPaymentsBalancesClient() {
                           <tr>
                             <td
                               colSpan={liveColumns.length + 1}
-                              className="px-4 py-10 text-center text-sm text-gray-500"
+                              className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                             >
                               No rows found.
                             </td>
@@ -2452,7 +2452,7 @@ export function VendorPaymentsBalancesClient() {
 
                 {data?.pagination.totalPages && data.pagination.totalPages > 1 ? (
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Page {data.pagination.page} of {data.pagination.totalPages}
                     </p>
                     <div className="flex gap-2">
@@ -2460,7 +2460,7 @@ export function VendorPaymentsBalancesClient() {
                         type="button"
                         disabled={!data.pagination.hasPrevPage}
                         onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
-                        className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
                       >
                         Previous
                       </button>
@@ -2468,7 +2468,7 @@ export function VendorPaymentsBalancesClient() {
                         type="button"
                         disabled={!data.pagination.hasNextPage}
                         onClick={() => setCurrentPage((previous) => previous + 1)}
-                        className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
                       >
                         Next
                       </button>
@@ -2533,42 +2533,42 @@ export function VendorPaymentsBalancesClient() {
         {isViewLoading ? (
           <LoadingSkeleton columnCount={2} />
         ) : viewError ? (
-          <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {viewError}
           </div>
         ) : viewDetail ? (
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment No.</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.paymentNumber}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment No.</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.paymentNumber}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.vendorLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.vendorLabel}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.statusLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.statusLabel}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Amount Paid</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.amountPaidLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount Paid</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.amountPaidLabel}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Applied Amount</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.appliedAmountLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Applied Amount</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.appliedAmountLabel}</p>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Unapplied Amount</p>
-                <p className="mt-2 text-base font-semibold text-gray-900">{viewDetail.unappliedAmountLabel}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Unapplied Amount</p>
+                <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{viewDetail.unappliedAmountLabel}</p>
               </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
-              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                <h4 className="text-sm font-semibold text-gray-900">Header Details</h4>
+              <div className="space-y-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Header Details</h4>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField label="Payment Date">
                     <Input value={viewDetail.paymentDateLabel} disabled />
@@ -2594,13 +2594,13 @@ export function VendorPaymentsBalancesClient() {
                     value={viewDetail.notes || '-'}
                     disabled
                     rows={4}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2 text-sm text-gray-500 dark:text-gray-400"
                   />
                 </FormField>
               </div>
 
-              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                <h4 className="text-sm font-semibold text-gray-900">Usage Summary</h4>
+              <div className="space-y-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Usage Summary</h4>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField label="Applications">
                     <Input value={String(viewDetail.usageSummary.applicationCount)} disabled />
@@ -2618,22 +2618,22 @@ export function VendorPaymentsBalancesClient() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-gray-200 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Bill Applications</h4>
-                  <p className="mt-1 text-sm text-gray-600">Applied bill allocations tied to this payment.</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Bill Applications</h4>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Applied bill allocations tied to this payment.</p>
                 </div>
               </div>
-              <div className="mt-4 overflow-hidden rounded-xl border border-gray-200">
+              <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {['Bill', 'Bill Status', 'Balance Due', 'Amount Applied'].map((column) => (
                           <th
                             key={column}
-                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${
+                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${
                               column.includes('Amount') || column.includes('Balance') ? 'text-right' : 'text-left'
                             }`}
                           >
@@ -2642,27 +2642,27 @@ export function VendorPaymentsBalancesClient() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {viewDetail.applications.length > 0 ? (
                         viewDetail.applications.map((application) => (
                           <tr key={application.id}>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                            <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                               {application.billLabel}
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                            <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                               {application.billStatusLabel}
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-600">
+                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-400">
                               {application.billBalanceDueLabel}
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                            <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {application.amountAppliedLabel}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
+                          <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                             No bill applications recorded.
                           </td>
                         </tr>
@@ -2683,11 +2683,11 @@ export function VendorPaymentsBalancesClient() {
         description="Delete this draft payment if it has no blocking dependencies."
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-700">
-            Delete <span className="font-semibold text-gray-900">{deleteLabel}</span>? This cannot be undone.
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            Delete <span className="font-semibold text-gray-900 dark:text-gray-100">{deleteLabel}</span>? This cannot be undone.
           </p>
           {deleteError ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {deleteError}
             </div>
@@ -2696,7 +2696,7 @@ export function VendorPaymentsBalancesClient() {
             <button
               type="button"
               onClick={() => setIsDeleteOpen(false)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -2704,7 +2704,7 @@ export function VendorPaymentsBalancesClient() {
               type="button"
               onClick={handleConfirmDelete}
               disabled={isDeleteSubmitting}
-              className="rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-red-600 dark:bg-red-700 bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isDeleteSubmitting ? 'Deleting...' : 'Delete Payment'}
             </button>

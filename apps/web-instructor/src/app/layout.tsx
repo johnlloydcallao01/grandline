@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { LoadingScreenWrapper } from "@/components/loading";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getServerToken, getServerUser } from "@/app/actions/auth";
 import { getSiteSettingsFavicon } from "@/server/siteSettings";
 import "./globals.css";
@@ -59,11 +61,25 @@ export default async function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            (function() {
+              var theme = localStorage.getItem('grandline-instructor-theme-preference') || 'system';
+              var resolved = theme === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : theme;
+              document.documentElement.classList.add(resolved);
+              document.documentElement.setAttribute('data-theme', resolved);
+            })();
+          `}
+        </Script>
       </head>
       <body className="min-h-full font-sans">
         <AuthErrorBoundary>
           <AuthProvider initialUser={initialUser} initialToken={initialToken}>
-            <LoadingScreenWrapper>{children}</LoadingScreenWrapper>
+            <ThemeProvider>
+              <LoadingScreenWrapper>{children}</LoadingScreenWrapper>
+            </ThemeProvider>
           </AuthProvider>
         </AuthErrorBoundary>
       </body>

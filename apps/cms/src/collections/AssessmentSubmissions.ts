@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { submitAssessmentHandler } from '../endpoints/submit-assessment'
+import { recalculateEnrollmentGrade } from '../utils/gradeCalculation'
 
 export const AssessmentSubmissions: CollectionConfig = {
   slug: 'assessment-submissions',
@@ -145,4 +146,28 @@ export const AssessmentSubmissions: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        if (doc.status === 'graded' && doc.enrollment) {
+          const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment.id : doc.enrollment
+          try {
+            const result = await recalculateEnrollmentGrade(req.payload, enrollmentId)
+            if (result.currentGrade != null) {
+              await req.payload.update({
+                collection: 'course-enrollments',
+                id: enrollmentId,
+                data: {
+                  currentGrade: result.currentGrade,
+                  finalGrade: result.finalGrade,
+                },
+              })
+            }
+          } catch (err) {
+            console.error('[AssessmentSubmissions Hook] Grade recalculation error:', err)
+          }
+        }
+      },
+    ],
+  },
 }

@@ -92,22 +92,22 @@ const ACCOUNTING_DIMENSION_STATUS_OPTIONS = [
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
   if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: OrgDimensionMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
+  return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30';
 }
 
 function getStatusBadgeClasses(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
-    case 'active': case 'green': return 'bg-green-50 text-green-700 ring-green-200';
-    case 'inactive': case 'amber': return 'bg-amber-50 text-amber-700 ring-amber-200';
-    case 'archived': case 'gray': return 'bg-gray-100 text-gray-700 ring-gray-200';
-    default: return 'bg-gray-100 text-gray-700 ring-gray-200';
+    case 'active': case 'green': return 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800';
+    case 'inactive': case 'amber': return 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800';
+    case 'archived': case 'gray': return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700';
+    default: return 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700';
   }
 }
 
@@ -181,18 +181,18 @@ function mapLocationDetailToForm(detail: LocationDetail): LocationFormState {
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: 'up' | 'down' | 'neutral' }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 bg-gray-100'}`}>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${trend ? getMetricTone(trend) : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'}`}>
           <TrendIcon className="h-3.5 w-3.5" />
           {change}
         </span>
@@ -206,25 +206,25 @@ function LoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200" />
+          <div key={i} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-6 w-40 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-10 w-full max-w-xl animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           <div className="flex gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-8 w-28 animate-pulse rounded-full bg-gray-200" />
+              <div key={i} className="h-8 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
             ))}
           </div>
         </div>
         <div className="mt-6 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100" />
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
           ))}
         </div>
       </div>
@@ -234,7 +234,7 @@ function LoadingSkeleton() {
 
 function renderCell(cell: StaticTableCell, index: number) {
   if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{cell}</td>;
   }
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
@@ -247,7 +247,7 @@ function renderCell(cell: StaticTableCell, index: number) {
     );
   }
   return (
-    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>
+    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>
       {cell.text}
     </td>
   );
@@ -270,13 +270,13 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
   if (!mounted) return null;
   return createPortal(
     <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animate ? 'bg-black/50' : 'bg-transparent'}`} onClick={onClose}>
-      <div className={`flex w-full max-w-lg flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className={`flex w-full max-w-lg flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description && <p className="mt-0.5 text-sm text-gray-500">{description}</p>}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description && <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p>}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -290,8 +290,8 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
 function FormField({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
-        {label}{required && <span className="ml-0.5 text-red-500">*</span>}
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}{required && <span className="ml-0.5 text-red-500 dark:text-red-400">*</span>}
       </label>
       {children}
     </div>
@@ -301,14 +301,14 @@ function FormField({ label, children, required }: { label: string; children: Rea
 function Input({ value, onChange, placeholder, type = 'text', required }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean }) {
   return (
     <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
   );
 }
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: Array<{ label: string; value: string }> }) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800">
       {options.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
     </select>
   );
@@ -317,7 +317,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
 function TextArea({ value, onChange, rows = 3 }: { value: string; onChange: (v: string) => void; rows?: number }) {
   return (
     <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
   );
 }
 
@@ -854,27 +854,27 @@ export function OrganizationReportingDimensionsClient({
       {/* Header */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Master Records</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Master Records</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></div>
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400"><FileText className="h-6 w-6" /></div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Organization & Reporting Dimensions</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">Maintain branches, departments, and locations used to segment records and drive accounting reporting filters.</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Organization & Reporting Dimensions</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">Maintain branches, departments, and locations used to segment records and drive accounting reporting filters.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs card */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
         {/* Tab bar */}
-        <div className="border-b border-gray-200 px-6">
+        <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {staticTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button key={tab.id} type="button" onClick={() => handleTabChange(tab.id as OrgDimensionTab)}
-                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
+                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'}`}>
                   {tab.label}
                 </button>
               );
@@ -885,11 +885,11 @@ export function OrganizationReportingDimensionsClient({
         {/* Tab content */}
         <div className="space-y-6 p-[10px]">
           {/* Tab header */}
-          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-gray-900">{currentSection.label}</h2>
-              <p className="text-sm text-gray-600">{currentSection.description}</p>
-              <p className="text-sm text-gray-500">{currentTotal ?? 0} matching {activeTab === 'branches' ? 'branches' : activeTab === 'departments' ? 'departments' : 'locations'}</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentSection.label}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{currentSection.description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{currentTotal ?? 0} matching {activeTab === 'branches' ? 'branches' : activeTab === 'departments' ? 'departments' : 'locations'}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
@@ -899,7 +899,7 @@ export function OrganizationReportingDimensionsClient({
                 <RefreshCw className="h-4 w-4" /> Refresh
               </button>
               <button type="button" onClick={handleExport}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={activeTab === 'branches' ? !branchData?.section.table.rows.length : activeTab === 'departments' ? !deptData?.section.table.rows.length : !locData?.section.table.rows.length}>
                 <Download className="h-4 w-4" /> Download View
               </button>
@@ -926,9 +926,9 @@ export function OrganizationReportingDimensionsClient({
           )}
 
           {/* Table card */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
             {/* Search + filters */}
-            <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                 <form onSubmit={handleSearchSubmit} className="relative min-w-0 flex-1 max-w-xl">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -940,10 +940,10 @@ export function OrganizationReportingDimensionsClient({
                       else if (activeTab === 'departments') setDeptSearchInput(v);
                       else setLocSearchInput(v);
                     }}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800" />
                 </form>
                 <button type="button" onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <Filter className="h-4 w-4" /> Filters
                   {(branchFilterCount || deptFilterCount || locFilterCount) > 0 && (
                     <span className="inline-flex items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
@@ -967,7 +967,7 @@ export function OrganizationReportingDimensionsClient({
                         const isActive = branchQuickFilters.includes(qf.value);
                         return (
                           <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
-                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                             {qf.label}
                           </button>
                         );
@@ -977,8 +977,8 @@ export function OrganizationReportingDimensionsClient({
                       <button key={f} type="button" onClick={() => handleToggleQuickFilter(f === 'With Address' ? 'hasAddress' : `status:${f.toLowerCase()}`)}
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                           branchQuickFilters.includes(f === 'With Address' ? 'hasAddress' : `status:${f.toLowerCase()}`)
-                            ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}>
                         {f}
                       </button>
@@ -992,8 +992,8 @@ export function OrganizationReportingDimensionsClient({
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                             isActive
-                              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}>
                           {qf.label}
                         </button>
@@ -1008,8 +1008,8 @@ export function OrganizationReportingDimensionsClient({
                         <button key={qf.value} type="button" onClick={() => handleToggleQuickFilter(qf.value)}
                           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                             isActive
-                              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}>
                           {qf.label}
                         </button>
@@ -1024,11 +1024,11 @@ export function OrganizationReportingDimensionsClient({
 
             {/* Filter panel */}
             {isFilterPanelOpen && (
-              <div className="border-b border-gray-200 bg-gray-50 px-5 py-4">
+              <div className="border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900">Status Filters</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Status Filters</h4>
                   <div className="flex gap-2">
-                    <button type="button" onClick={handleResetFilters} className="text-sm text-gray-500 hover:text-gray-700">Reset</button>
+                    <button type="button" onClick={handleResetFilters} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Reset</button>
                     <button type="button" onClick={handleApplyFilters} className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">Apply</button>
                   </div>
                 </div>
@@ -1045,7 +1045,7 @@ export function OrganizationReportingDimensionsClient({
                         else if (activeTab === 'departments') setDraftDeptFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }));
                         else setDraftLocFilters((p) => ({ ...p, statuses: toggleFilterValue(p.statuses, opt.value) }));
                       }}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {opt.label}
                       </button>
                     );
@@ -1057,7 +1057,7 @@ export function OrganizationReportingDimensionsClient({
             {/* Table */}
             <div className="space-y-4 p-[10px] sm:p-5">
               {currentError && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {currentError}
                 </div>
@@ -1067,35 +1067,35 @@ export function OrganizationReportingDimensionsClient({
                 <LoadingSkeleton />
               ) : (
                 <>
-                  <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50">
                           <tr>
                             {columns.map((col) => (
-                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                              <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                             ))}
-                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                           {currentRows.length === 0 ? (
                             <tr>
-                              <td colSpan={columns.length + 1} className="px-4 py-8 text-center text-sm text-gray-500">No records found.</td>
+                              <td colSpan={columns.length + 1} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No records found.</td>
                             </tr>
                           ) : (
                             currentRows.map((row: any) => (
-                              <tr key={row.id} className="hover:bg-gray-50">
+                              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                 {row.cells.map((cell: StaticTableCell, idx: number) => renderCell(cell, idx))}
                                 <td className="px-4 py-3 text-right">
                                   <div className="inline-flex items-center gap-1">
-                                    <button type="button" onClick={() => handleView(row.id)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600" title="View">
+                                    <button type="button" onClick={() => handleView(row.id)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400" title="View">
                                       <Eye className="h-4 w-4" />
                                     </button>
-                                    <button type="button" onClick={() => handleOpenEdit(row.id)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-amber-600" title="Edit">
+                                    <button type="button" onClick={() => handleOpenEdit(row.id)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-amber-600 dark:hover:text-amber-400" title="Edit">
                                       <Edit className="h-4 w-4" />
                                     </button>
-                                    <button type="button" onClick={() => { const n = row.branchCode || row.departmentCode || row.locationCode || row.name || ''; handleOpenDelete(row.id, n); }} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600" title="Delete">
+                                    <button type="button" onClick={() => { const n = row.branchCode || row.departmentCode || row.locationCode || row.name || ''; handleOpenDelete(row.id, n); }} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-600 dark:hover:text-red-400" title="Delete">
                                       <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
@@ -1110,8 +1110,8 @@ export function OrganizationReportingDimensionsClient({
 
                   {/* Pagination */}
                   {currentPagination && (
-                    <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                      <p className="text-sm text-gray-600">
+                    <div className="flex items-center justify-between border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Page {currentPagination.page} of {currentPagination.totalPages} ({currentPagination.totalDocs} total)
                       </p>
                       <div className="flex gap-2">
@@ -1121,7 +1121,7 @@ export function OrganizationReportingDimensionsClient({
                             else if (activeTab === 'departments') setDeptCurrentPage((p) => Math.max(1, p - 1));
                             else setLocCurrentPage((p) => Math.max(1, p - 1));
                           }}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                           Previous
                         </button>
                         <button type="button" disabled={!currentPagination.hasNextPage}
@@ -1130,7 +1130,7 @@ export function OrganizationReportingDimensionsClient({
                             else if (activeTab === 'departments') setDeptCurrentPage((p) => p + 1);
                             else setLocCurrentPage((p) => p + 1);
                           }}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                           Next
                         </button>
                       </div>
@@ -1147,10 +1147,10 @@ export function OrganizationReportingDimensionsClient({
       <SlideOver isOpen={isDetailOpen} onClose={handleCloseDetail} title={`${entityLabel} Detail`}>
         {isDetailLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-6 animate-pulse rounded bg-gray-200" />)}
+            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />)}
           </div>
         ) : detailErr ? (
-          <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {detailErr}
           </div>
@@ -1162,20 +1162,20 @@ export function OrganizationReportingDimensionsClient({
               const code = 'branchCode' in d ? d.branchCode : 'departmentCode' in d ? d.departmentCode : 'locationCode' in d ? d.locationCode : null;
               return (
                 <>
-                  <div><span className="font-medium text-gray-500">Code:</span> <span className="ml-2 text-gray-900">{code || '-'}</span></div>
-                  <div><span className="font-medium text-gray-500">Name:</span> <span className="ml-2 text-gray-900">{d.name || '-'}</span></div>
-                  <div><span className="font-medium text-gray-500">Status:</span> <span className={`ml-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getStatusBadgeClasses(d.status)}`}>{d.status || '-'}</span></div>
-                  {'branch' in d && d.branch ? <div><span className="font-medium text-gray-500">Branch:</span> <span className="ml-2 text-gray-900">{typeof d.branch === 'object' ? `${d.branch.branchCode ?? ''} - ${d.branch.name ?? ''}` : String(d.branch)}</span></div> : null}
-                  {'notes' in d && d.notes ? <div><span className="font-medium text-gray-500">Notes:</span> <span className="ml-2 text-gray-900">{d.notes}</span></div> : null}
-                  <div><span className="font-medium text-gray-500">Created:</span> <span className="ml-2 text-gray-900">{formatDateTime(d.createdAt)}</span></div>
-                  <div><span className="font-medium text-gray-500">Updated:</span> <span className="ml-2 text-gray-900">{formatDateTime(d.updatedAt)}</span></div>
-                  <div><span className="font-medium text-gray-500">Created By:</span> <span className="ml-2 text-gray-900">{formatUser(d.createdBy)}</span></div>
-                  <div><span className="font-medium text-gray-500">Updated By:</span> <span className="ml-2 text-gray-900">{formatUser(d.updatedBy)}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Code:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{code || '-'}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Name:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{d.name || '-'}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Status:</span> <span className={`ml-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getStatusBadgeClasses(d.status)}`}>{d.status || '-'}</span></div>
+                  {'branch' in d && d.branch ? <div><span className="font-medium text-gray-500 dark:text-gray-400">Branch:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{typeof d.branch === 'object' ? `${d.branch.branchCode ?? ''} - ${d.branch.name ?? ''}` : String(d.branch)}</span></div> : null}
+                  {'notes' in d && d.notes ? <div><span className="font-medium text-gray-500 dark:text-gray-400">Notes:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{d.notes}</span></div> : null}
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Created:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(d.createdAt)}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Updated:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDateTime(d.updatedAt)}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Created By:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatUser(d.createdBy)}</span></div>
+                  <div><span className="font-medium text-gray-500 dark:text-gray-400">Updated By:</span> <span className="ml-2 text-gray-900 dark:text-gray-100">{formatUser(d.updatedBy)}</span></div>
                   <div className="flex gap-2 pt-4">
-                    <button type="button" onClick={() => { const id = d.id; handleCloseDetail(); handleOpenEdit(id); }} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button type="button" onClick={() => { const id = d.id; handleCloseDetail(); handleOpenEdit(id); }} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <Edit className="h-4 w-4" /> Edit
                     </button>
-                    <button type="button" onClick={handleCloseDetail} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button type="button" onClick={handleCloseDetail} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                       Close
                     </button>
                   </div>
@@ -1188,7 +1188,7 @@ export function OrganizationReportingDimensionsClient({
 
       {/* Create Modal */}
       <SlideOver isOpen={isCreateOpen} onClose={handleCloseCreate} title={`Create ${entityLabel}`}>
-        {createErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{createErr}</div>}
+        {createErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{createErr}</div>}
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <FormField label={`${entityLabel} Code`} required>
             <Input value={activeTab === 'branches' ? branchCreateForm.branchCode : activeTab === 'departments' ? deptCreateForm.departmentCode : locCreateForm.locationCode}
@@ -1232,7 +1232,7 @@ export function OrganizationReportingDimensionsClient({
               }} />
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={handleCloseCreate} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={handleCloseCreate} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
             <button type="submit" disabled={isCreateSubmitting} className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isCreateSubmitting ? 'Creating...' : 'Create'}
             </button>
@@ -1242,7 +1242,7 @@ export function OrganizationReportingDimensionsClient({
 
       {/* Edit Modal */}
       <SlideOver isOpen={isEditOpen} onClose={handleCloseEdit} title={`Edit ${entityLabel}`}>
-        {editErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{editErr}</div>}
+        {editErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{editErr}</div>}
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <FormField label={`${entityLabel} Code`} required>
             <Input value={activeTab === 'branches' ? branchEditForm.branchCode : activeTab === 'departments' ? deptEditForm.departmentCode : locEditForm.locationCode}
@@ -1286,7 +1286,7 @@ export function OrganizationReportingDimensionsClient({
               }} />
           </FormField>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={handleCloseEdit} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={handleCloseEdit} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
             <button type="submit" disabled={isEditSubmitting} className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isEditSubmitting ? 'Saving...' : 'Save'}
             </button>
@@ -1296,10 +1296,10 @@ export function OrganizationReportingDimensionsClient({
 
       {/* Delete Modal */}
       <SlideOver isOpen={isDeleteOpen} onClose={handleCloseDelete} title={`Delete ${entityType}`} description={`Remove "${deleteEntityName}" from the ${entityLabelPlural} list.`}>
-        {deleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{deleteErr}</div>}
+        {deleteErr && <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{deleteErr}</div>}
         {activeDeleteBlockers.length > 0 ? (
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
               <p className="font-medium">Cannot delete this {entityType}</p>
               <p className="mt-1">This {entityType} cannot be deleted because the following dependencies exist:</p>
               <ul className="mt-2 list-inside list-disc space-y-1">
@@ -1308,19 +1308,19 @@ export function OrganizationReportingDimensionsClient({
               <p className="mt-2">Remove all dependencies before attempting to delete this {entityType}.</p>
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={handleCloseDelete} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+              <button type="button" onClick={handleCloseDelete} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-800">
                 Close
               </button>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <p className="font-medium">Are you sure?</p>
               <p className="mt-1">This action cannot be undone. The {entityType} &ldquo;{deleteEntityName}&rdquo; will be permanently removed.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button type="button" onClick={handleCloseDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50">
+              <button type="button" onClick={handleCloseDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-50">
                 Cancel
               </button>
               <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">

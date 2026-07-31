@@ -7,6 +7,7 @@ import { CoursesCarousel } from '@/components/sections/CoursesCarousel';
 import { useCourses } from '@/hooks/useCourses';
 import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { HomePageSkeleton } from '@/components/skeletons';
 
 export function HomeCoursesSection({ categories, enrollments = [] }: { categories: CourseCategory[]; enrollments?: any[] }) {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
   const [categoryId, setCategoryId] = useState<number | undefined>(initialIdFromUrl);
   const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const { courses, isLoading, isLoadingMore, hasMore, loadMore, totalCourses } = useCourses({ status: 'published', limit: 4, page: 1, sort: '-updatedAt', category: typeof categoryId === 'number' ? String(categoryId) : undefined });
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState<number>(8);
   const displayCourses = useMemo(() => {
     return (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
@@ -142,10 +144,19 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
   useEffect(() => { hasMoreRef.current = hasMore; }, [hasMore]);
   useEffect(() => { isLoadingMoreRef.current = isLoadingMore; }, [isLoadingMore]);
 
-  // Removed continuous mobile auto-loading; we only fetch up to initial 8 via effect above
+  // Wishlist-style: keep skeleton until both hooks have settled their data
+  useEffect(() => {
+    if (!isPageLoading) return;
+    const featuredDone = !showFeatured || !isLoadingFeatured;
+    if (!isLoading && featuredDone) {
+      const raf = requestAnimationFrame(() => setIsPageLoading(false));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isLoading, isLoadingFeatured, showFeatured, isPageLoading]);
 
-  // Removed continuous mobile auto-loading for featured; we only fetch up to initial 8
-
+  if (isPageLoading) {
+    return <HomePageSkeleton />;
+  }
 
   return (
     <div className="bg-[var(--background)]">
@@ -169,9 +180,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
       <div className="hidden lg:block">
         <CoursesGrid
           courses={displayCourses.slice(0, Math.min(visibleCount, displayCourses.length))}
-          isLoading={isLoading}
-          isLoadingMore={isLoadingMore}
-          skeletonCount={categoryId ? 4 : 8}
           title="Available Courses"
           viewAllLink={availableCoursesLink}
           keyPrefix="available"
@@ -182,9 +190,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
           <CoursesGrid
             title="Available Courses"
             courses={displayCourses}
-            isLoading={isLoading}
-            isLoadingMore={isLoadingMore}
-            skeletonCount={4}
             paddingClass="p-[10px]"
             viewAllLink={availableCoursesLink}
             keyPrefix="available"
@@ -194,8 +199,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
         <div className="lg:hidden">
           <CoursesCarousel
             courses={displayCourses.slice(0, 8)}
-            isLoading={isLoading}
-            skeletonCount={8}
             title="Available Courses"
             viewAllLink={availableCoursesLink}
             keyPrefix="available"
@@ -216,21 +219,18 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
               disabled={isLoadingMore}
               className="inline-flex items-center justify-center rounded-md border border-[var(--card-border)] bg-[var(--card-background)] p-[10px] text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isLoadingMore ? 'Loading...' : 'Load More'}
+              Load More
             </button>
           </div>
         )}
       </div>
 
-      {showFeatured && (
+      {showFeatured && featuredDisplay.length > 0 && (
         <>
           <div className="hidden lg:block">
             <CoursesGrid
               title="Featured Courses"
               courses={featuredDisplay.slice(0, Math.min(visibleFeaturedCount, featuredDisplay.length))}
-              isLoading={isLoadingFeatured}
-              isLoadingMore={isLoadingMoreFeatured}
-              skeletonCount={8}
               viewAllLink={featuredCoursesLink}
               keyPrefix="featured"
             />
@@ -238,8 +238,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
           <div className="lg:hidden">
             <CoursesCarousel
               courses={featuredDisplay.slice(0, 8)}
-              isLoading={isLoadingFeatured}
-              skeletonCount={8}
               title="Featured Courses"
               viewAllLink={featuredCoursesLink}
               keyPrefix="featured"
@@ -259,7 +257,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
                   disabled={isLoadingMoreFeatured}
                   className="inline-flex items-center justify-center rounded-md border border-[var(--card-border)] bg-[var(--card-background)] p-[10px] text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isLoadingMoreFeatured ? 'Loading...' : 'Load More'}
+                  Load More
                 </button>
               </div>
             )}
@@ -273,7 +271,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
             <CoursesGrid
               title="Enrolled Courses"
               courses={enrolledCourses.slice(0, 8)}
-              skeletonCount={4}
               viewAllLink={enrolledCoursesLink}
               keyPrefix="enrolled"
               ribbonMap={enrollmentStatusMap}

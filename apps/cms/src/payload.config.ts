@@ -25,6 +25,7 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { PostCategories } from './collections/PostCategories'
 import { PostTags } from './collections/PostTags'
+import { PostComments } from './collections/PostComments'
 import { Courses } from './collections/Courses'
 import { CourseCategories } from './collections/CourseCategories'
 import { CourseTags } from './collections/CourseTags'
@@ -43,6 +44,7 @@ import { Assessments } from './collections/Assessments'
 import { AssessmentSubmissions } from './collections/AssessmentSubmissions'
 import { Assignments } from './collections/Assignments'
 import { AssignmentSubmissions } from './collections/AssignmentSubmissions'
+import { GradeScales } from './collections/GradeScales'
 import { SubmissionAnswers } from './collections/SubmissionAnswers'
 import { Wishlists } from './collections/Wishlists'
 import { RecentlyViewedCourses } from './collections/RecentlyViewedCourses'
@@ -177,6 +179,7 @@ const rawCmsCollections: CollectionConfig[] = [
   Posts,
   PostCategories,
   PostTags,
+  PostComments,
   AccountingChartOfAccounts,
   AccountingFiscalYears,
   AccountingPeriods,
@@ -262,6 +265,7 @@ const rawCmsCollections: CollectionConfig[] = [
   AssessmentSubmissions,
   Assignments,
   AssignmentSubmissions,
+  GradeScales,
   SubmissionAnswers,
   NotificationTemplates,
   Notifications,
@@ -279,6 +283,7 @@ const lockDocumentAllowList = new Set<string>([
   Posts.slug,
   PostCategories.slug,
   PostTags.slug,
+  PostComments.slug,
   Courses.slug,
   CourseCategories.slug,
   CourseModules.slug,
@@ -303,6 +308,7 @@ const cacheInvalidationSlugs = new Set<string>([
   'posts',
   'post-categories',
   'post-tags',
+  'post-comments',
   'course-modules',
   'course-lessons',
   'materials',
@@ -387,6 +393,8 @@ const allowedCorsOrigins = Array.from(
 
 import { generateCertificateEndpoint } from './endpoints/generate-certificate'
 import { getTraineeDashboardSummary } from './endpoints/getTraineeDashboardSummary'
+import { getInstructorDashboardSummary } from './endpoints/getInstructorDashboardSummary'
+import { getInstructorReportsSummary } from './endpoints/getInstructorReportsSummary'
 
 export default buildConfig({
   sharp: sharp as unknown as Parameters<typeof buildConfig>[0]['sharp'],
@@ -429,6 +437,16 @@ export default buildConfig({
       path: '/dashboard/trainee-summary',
       method: 'get',
       handler: getTraineeDashboardSummary as any,
+    },
+    {
+      path: '/dashboard/instructor-summary',
+      method: 'get',
+      handler: getInstructorDashboardSummary as any,
+    },
+    {
+      path: '/reports/instructor-summary',
+      method: 'get',
+      handler: getInstructorReportsSummary as any,
     },
     {
       path: '/generate-certificate',

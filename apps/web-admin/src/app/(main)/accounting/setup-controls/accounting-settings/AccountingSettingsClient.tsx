@@ -29,13 +29,13 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-8 p-6">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 h-5 w-48 animate-pulse rounded bg-gray-200" />
+        <div key={i} className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] p-6 shadow-sm">
+          <div className="mb-5 h-5 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: i === 1 ? 12 : 3 }).map((_, j) => (
               <div key={j} className="space-y-2">
-                <div className="h-3.5 w-24 animate-pulse rounded bg-gray-200" />
-                <div className="h-9 w-full animate-pulse rounded bg-gray-100" />
+                <div className="h-3.5 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-9 w-full animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
               </div>
             ))}
           </div>
@@ -47,9 +47,9 @@ function LoadingSkeleton() {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-6 py-4">
-        <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] shadow-sm">
+      <div className="border-b border-[var(--card-border)] px-6 py-4">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
       </div>
       <div className="px-6 py-5">{children}</div>
     </div>
@@ -58,7 +58,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
 
 function FieldLabel({ label, htmlFor }: { label: string; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-gray-700">
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
       {label}
     </label>
   );
@@ -82,7 +82,7 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
     />
   );
 }
@@ -105,7 +105,7 @@ function SelectInput({
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
     >
       {placeholder ? <option value="">{placeholder}</option> : null}
       {options.map((opt) => (
@@ -138,7 +138,7 @@ function AccountPicker({
         const parsed = Number(raw);
         onChange(Number.isFinite(parsed) ? parsed : raw);
       }}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
     >
       <option value="">-- None --</option>
       {accounts.map((acc) => (
@@ -232,9 +232,9 @@ export function AccountingSettingsClient() {
     return (
       <div className="p-6">
         <div className="mb-6">
-          <p className="text-sm font-medium text-blue-600">Core / Setup & Controls</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">Accounting Settings</h1>
-          <p className="mt-1 text-base text-gray-600">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Setup & Controls</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Accounting Settings</h1>
+          <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
             Configure accounting-wide defaults for journals, numbering, default accounts, and posting
             behavior.
           </p>
@@ -248,9 +248,9 @@ export function AccountingSettingsClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Setup & Controls</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">Accounting Settings</h1>
-          <p className="mt-1 text-base text-gray-600">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Setup & Controls</p>
+          <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Accounting Settings</h1>
+          <p className="mt-1 text-base text-gray-600 dark:text-gray-400">
             Configure accounting-wide defaults for journals, numbering, default accounts, and posting
             behavior.
           </p>
@@ -259,7 +259,7 @@ export function AccountingSettingsClient() {
           <button
             type="button"
             onClick={loadSettings}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -268,7 +268,7 @@ export function AccountingSettingsClient() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -395,20 +395,20 @@ export function AccountingSettingsClient() {
                     type="checkbox"
                     checked={form.allowBackdatedPosting}
                     onChange={(e) => updateField('allowBackdatedPosting', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 outline-none focus:ring-2 focus:ring-blue-100"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                   />
-                  <span className="text-sm font-medium text-gray-700">Allow Backdated Posting</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Allow Backdated Posting</span>
                 </label>
               </div>
             </div>
           </SectionCard>
 
-          <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-end gap-3 border-t border-[var(--card-border)] pt-6">
             <button
               type="button"
               onClick={loadSettings}
               disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>

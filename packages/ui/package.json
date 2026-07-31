@@ -39,7 +39,8 @@
     "./stats-card": "./src/stats-card.tsx",
     "./physics-carousel": "./src/physics-carousel.ts",
     "./lexical-course-editor": "./src/lexical-course-editor.tsx",
-    "./media-library-modal": "./src/media-library-modal.tsx"
+    "./media-library-modal": "./src/media-library-modal.tsx",
+    "./messenger": "./src/messenger.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -58,6 +59,7 @@
   },
   "peerDependencies": {
     "@types/react": "^19",
-    "react": "^19.1.0"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }

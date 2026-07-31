@@ -231,15 +231,15 @@ const STATIC_TABS: StaticTab[] = [
 ];
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 dark:bg-blue-700 dark:border-blue-700';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: BankTransactionMetric['trend'] | StaticMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
@@ -363,15 +363,15 @@ function SlideOver({
       onClick={onClose}
     >
       <div
-        className={`flex w-full max-w-2xl flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`flex w-full max-w-2xl flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -393,7 +393,7 @@ function FormField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
         {required ? <span className="ml-0.5 text-red-500">*</span> : null}
       </label>
@@ -425,7 +425,7 @@ function Input({
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800/50 disabled:text-gray-500"
     />
   );
 }
@@ -449,7 +449,7 @@ function Select({
       onChange={(event) => onChange(event.target.value)}
       required={required}
       disabled={disabled}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800/50 disabled:text-gray-500"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -474,7 +474,7 @@ function TextArea({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       rows={rows}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
     />
   );
 }
@@ -492,13 +492,13 @@ function MetricCard({
 }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
@@ -515,23 +515,23 @@ function MetricCard({
 function LoadingSkeleton({ columnCount = 6 }: { columnCount?: number }) {
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
                 {Array.from({ length: columnCount }).map((_, index) => (
                   <th key={index} className="px-4 py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
                   <td colSpan={columnCount} className="px-4 py-3">
-                    <div className="h-6 animate-pulse rounded bg-gray-100" />
+                    <div className="h-6 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                   </td>
                 </tr>
               ))}
@@ -546,7 +546,7 @@ function LoadingSkeleton({ columnCount = 6 }: { columnCount?: number }) {
 function renderCell(cell: BankTransactionCell, index: number) {
   if (typeof cell === 'string') {
     return (
-      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
         {cell}
       </td>
     );
@@ -555,11 +555,11 @@ function renderCell(cell: BankTransactionCell, index: number) {
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800',
+      green: 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800',
+      gray: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800',
+      red: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400 dark:ring-red-800',
     };
     return (
       <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
@@ -573,7 +573,7 @@ function renderCell(cell: BankTransactionCell, index: number) {
   return (
     <td
       key={index}
-      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}
+      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}
     >
       {cell.text}
     </td>
@@ -590,11 +590,11 @@ function getStaticActionIcon(icon: StaticTab['actions'][number]['icon']) {
 function StaticTabPanel({ tab }: { tab: StaticTab }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{tab.label}</h2>
-          <p className="text-sm text-gray-600">{tab.description}</p>
-          <p className="text-sm text-gray-500">{tab.rows.length} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{tab.label}</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{tab.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{tab.rows.length} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {tab.actions.map((action) => {
@@ -621,18 +621,18 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative min-w-0 flex-1 max-w-xl">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder={tab.searchPlaceholder}
-                className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
               />
             </div>
-            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
               <Filter className="h-4 w-4" />
               Filters
             </button>
@@ -642,7 +642,7 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
               <button
                 key={`${tab.id}-${filter}`}
                 type="button"
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
               >
                 {filter}
               </button>
@@ -653,34 +653,34 @@ function StaticTabPanel({ tab }: { tab: StaticTab }) {
         <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold text-gray-900">{tab.tableTitle}</h3>
-              <p className="mt-1 text-sm text-gray-600">{tab.tableDescription}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{tab.tableTitle}</h3>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{tab.tableDescription}</p>
             </div>
-            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
               <Download className="h-4 w-4" />
               Export View
             </button>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     {tab.columns.map((column) => (
-                      <th key={`${tab.id}-${column}`} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      <th key={`${tab.id}-${column}`} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         {column}
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                   {tab.rows.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50">
+                    <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       {row.cells.map((cell, index) => renderCell(cell, index))}
                       <td className="px-4 py-3 text-right">
-                        <button type="button" className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
+                        <button type="button" className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300">
                           View
                         </button>
                       </td>
@@ -962,7 +962,7 @@ function BankTransactionsPanel() {
   ) => (
     <form onSubmit={onSubmit} className="space-y-6">
       {errorMessage ? (
-        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {errorMessage}
         </div>
@@ -1023,26 +1023,26 @@ function BankTransactionsPanel() {
         <TextArea value={formState.notes} onChange={(value) => setFormState((previous) => ({ ...previous, notes: value }))} rows={4} />
       </FormField>
 
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <h4 className="text-sm font-semibold text-gray-900">Movement Preview</h4>
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Movement Preview</h4>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Net Movement</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{Number(formState.amountIn || 0) - Number(formState.amountOut || 0)}</p>
+          <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Net Movement</p>
+            <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{Number(formState.amountIn || 0) - Number(formState.amountOut || 0)}</p>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Entity Link</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{formState.matchedEntityType && formState.matchedEntityId ? 'Ready' : 'Not Linked'}</p>
+          <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Entity Link</p>
+            <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{formState.matchedEntityType && formState.matchedEntityId ? 'Ready' : 'Not Linked'}</p>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Running Balance</p>
-            <p className="mt-2 text-sm font-semibold text-gray-900">{formState.runningBalance || '-'}</p>
+          <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Running Balance</p>
+            <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{formState.runningBalance || '-'}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
-        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+      <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
+        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-800">
           Cancel
         </button>
         <button type="submit" disabled={isSubmitting} className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}>
@@ -1054,14 +1054,14 @@ function BankTransactionsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{data?.meta.label || LIVE_TAB.label}</h2>
-          <p className="text-sm text-gray-600">{data?.meta.description || LIVE_TAB.description}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{data?.meta.label || LIVE_TAB.label}</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{data?.meta.description || LIVE_TAB.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
+          <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" />
             Refresh Feed
           </button>
@@ -1080,21 +1080,21 @@ function BankTransactionsPanel() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder={data?.meta.searchPlaceholder || LIVE_TAB.searchPlaceholder}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 dark:border-blue-700 dark:bg-blue-700">
                 <Search className="h-4 w-4" />
                 Search
               </button>
@@ -1105,11 +1105,11 @@ function BankTransactionsPanel() {
                 if (!isFilterPanelOpen) setDraftFilters({ ...filters });
                 setIsFilterPanelOpen((previous) => !previous);
               }}
-              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800'}`}
             >
               <Filter className="h-4 w-4" />
               Filters
-              {filterCount > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">{filterCount}</span> : null}
+              {filterCount > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">{filterCount}</span> : null}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1118,7 +1118,7 @@ function BankTransactionsPanel() {
                 key={filter.value}
                 type="button"
                 onClick={() => handleToggleQuickFilter(filter.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
               >
                 {filter.label}
               </button>
@@ -1128,20 +1128,20 @@ function BankTransactionsPanel() {
 
         <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                  <p className="mt-1 text-sm text-gray-600">Select as many filter values as needed. Bank transaction filters widen results using OR behavior across all checked options.</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Select as many filter values as needed. Bank transaction filters widen results using OR behavior across all checked options.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], directions: [], coverageStates: [] }); setFilters({ statuses: [], directions: [], coverageStates: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], directions: [], coverageStates: [] }); setFilters({ statuses: [], directions: [], coverageStates: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                     Clear all
                   </button>
-                  <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                     Cancel
                   </button>
-                  <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                  <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:border-blue-700 dark:bg-blue-700">
                     Apply Filters
                   </button>
                 </div>
@@ -1149,12 +1149,12 @@ function BankTransactionsPanel() {
 
               <div className="mt-6 grid gap-6 md:grid-cols-3">
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.statuses || []).map((option) => {
                       const isSelected = draftFilters.statuses.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, statuses: toggleFilterValue(previous.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, statuses: toggleFilterValue(previous.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}>
                           {option.label}
                         </button>
                       );
@@ -1163,12 +1163,12 @@ function BankTransactionsPanel() {
                 </div>
 
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Direction</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Direction</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.directions || []).map((option) => {
                       const isSelected = draftFilters.directions.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, directions: toggleFilterValue(previous.directions, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, directions: toggleFilterValue(previous.directions, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}>
                           {option.label}
                         </button>
                       );
@@ -1177,12 +1177,12 @@ function BankTransactionsPanel() {
                 </div>
 
                 <div>
-                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Coverage</h5>
+                  <h5 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Coverage</h5>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {(data?.filterOptions.coverageStates || []).map((option) => {
                       const isSelected = draftFilters.coverageStates.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, coverageStates: toggleFilterValue(previous.coverageStates, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((previous) => ({ ...previous, coverageStates: toggleFilterValue(previous.coverageStates, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-600 text-white dark:bg-blue-700' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700'}`}>
                           {option.label}
                         </button>
                       );
@@ -1195,12 +1195,12 @@ function BankTransactionsPanel() {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{data?.meta.tableTitle || 'Incoming Transaction Queue'}</h3>
-              <p className="text-sm text-gray-600">{data?.meta.tableDescription || 'Operational queue for bank transactions waiting to be matched, reviewed, or maintained.'}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{data?.meta.tableTitle || 'Incoming Transaction Queue'}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{data?.meta.tableDescription || 'Operational queue for bank transactions waiting to be matched, reviewed, or maintained.'}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <span>{data?.totals.filteredRows ?? 0} matching rows</span>
-              <button type="button" onClick={handleExport} disabled={!(data?.rows.length)} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" onClick={handleExport} disabled={!(data?.rows.length)} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50">
                 <Download className="h-4 w-4" />
                 Export View
               </button>
@@ -1208,7 +1208,7 @@ function BankTransactionsPanel() {
           </div>
 
           {error ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {error}
             </div>
@@ -1218,37 +1218,37 @@ function BankTransactionsPanel() {
             <LoadingSkeleton columnCount={liveColumns.length + 1} />
           ) : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {liveColumns.map((column) => {
                           const columnLabel = typeof column === 'string' ? column : column.label;
                           const align = typeof column === 'string' ? 'left' : column.align;
                           return (
-                            <th key={columnLabel} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+                            <th key={columnLabel} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${align === 'right' ? 'text-right' : 'text-left'}`}>
                               {columnLabel}
                             </th>
                           );
                         })}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {(data?.rows || []).length > 0 ? (
                         (data?.rows || []).map((row) => (
-                          <tr key={row.id} className="hover:bg-gray-50">
+                          <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             {row.cells.map((cell, index) => renderCell(cell, index))}
                             <td className="px-4 py-3 text-right">
                               <div className="flex justify-end gap-2">
-                                <button type="button" onClick={() => handleOpenView(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                                <button type="button" onClick={() => handleOpenView(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300" title="View detail">
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Edit' : 'Matched transactions cannot be edited directly'}>
+                                <button type="button" onClick={() => handleOpenEdit(row.id)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Edit' : 'Matched transactions cannot be edited directly'}>
                                   <Edit className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => handleOpenDelete(row)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Delete' : 'Matched transactions cannot be deleted directly'}>
+                                <button type="button" onClick={() => handleOpenDelete(row)} disabled={!mutableIds.has(row.id)} className="inline-flex items-center gap-1 rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" title={mutableIds.has(row.id) ? 'Delete' : 'Matched transactions cannot be deleted directly'}>
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
@@ -1257,7 +1257,7 @@ function BankTransactionsPanel() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={liveColumns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500">
+                          <td colSpan={liveColumns.length + 1} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                             No bank transactions match the current search and filter combination.
                           </td>
                         </tr>
@@ -1269,12 +1269,12 @@ function BankTransactionsPanel() {
 
               {data?.pagination && data.pagination.totalPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">Page {data.pagination.page} of {data.pagination.totalPages}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Page {data.pagination.page} of {data.pagination.totalPages}</p>
                   <div className="flex gap-2">
-                    <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">
+                    <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                       Previous
                     </button>
-                    <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">
+                    <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                       Next
                     </button>
                   </div>
@@ -1303,9 +1303,9 @@ function BankTransactionsPanel() {
                 ['Matched Entity Type', viewDetail.matchedEntityTypeLabel || '-'],
                 ['Matched Entity ID', viewDetail.matchedEntityId || '-'],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
-                  <p className="mt-2 text-sm font-medium text-gray-900">{value}</p>
+                <div key={label} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</p>
+                  <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{value}</p>
                 </div>
               ))}
             </div>
@@ -1316,25 +1316,25 @@ function BankTransactionsPanel() {
                 ['Amount Out', viewDetail.amountOutLabel],
                 ['Net Movement', viewDetail.netAmountLabel],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{value}</p>
+                <div key={label} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h4 className="text-sm font-semibold text-gray-900">Counterparty / Description</h4>
-              <p className="mt-2 text-sm text-gray-700">{viewDetail.description || '-'}</p>
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Counterparty / Description</h4>
+              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{viewDetail.description || '-'}</p>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h4 className="text-sm font-semibold text-gray-900">Notes / Memo</h4>
-              <p className="mt-2 text-sm text-gray-700">{getMetadataNote(viewDetail.metadata) || '-'}</p>
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notes / Memo</h4>
+              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{getMetadataNote(viewDetail.metadata) || '-'}</p>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-500">No detail available.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">No detail available.</p>
         )}
       </SlideOver>
 
@@ -1353,13 +1353,13 @@ function BankTransactionsPanel() {
       <SlideOver isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Bank Transaction" description="Delete this bank transaction only when it is not already linked to another accounting entity.">
         <div className="space-y-6">
           {deleteError ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {deleteError}
             </div>
           ) : null}
 
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-400">
             <p className="font-medium">Delete {deleteTarget?.referenceNumber || deleteTarget?.description || 'this transaction'}?</p>
             <p className="mt-1">This action cannot be undone.</p>
           </div>
@@ -1369,33 +1369,33 @@ function BankTransactionsPanel() {
           ) : deleteDetail ? (
             <div className="space-y-4">
               {!deleteDetail.usageSummary.canDelete ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-400">
                   <p className="font-medium">Delete is blocked.</p>
                   <p className="mt-1">This transaction is already linked to a matched accounting entity.</p>
                 </div>
               ) : null}
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="flex justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-500">Bank Account</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.bankAccountLabel}</span>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+                <div className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Bank Account</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{deleteDetail.bankAccountLabel}</span>
                 </div>
-                <div className="mt-3 flex justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-500">Transaction Date</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.transactionDateLabel}</span>
+                <div className="mt-3 flex justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Transaction Date</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{deleteDetail.transactionDateLabel}</span>
                 </div>
                 <div className="mt-3 flex justify-between">
-                  <span className="text-sm text-gray-500">Net Movement</span>
-                  <span className="text-sm font-medium text-gray-900">{deleteDetail.netAmountLabel}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Net Movement</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{deleteDetail.netAmountLabel}</span>
                 </div>
               </div>
             </div>
           ) : null}
 
-          <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
-            <button type="button" onClick={() => setIsDeleteOpen(false)} disabled={isDeleteSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
+            <button type="button" onClick={() => setIsDeleteOpen(false)} disabled={isDeleteSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 dark:bg-[var(--card-background)] dark:text-gray-300 dark:hover:bg-gray-800">
               Cancel
             </button>
-            <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting || (deleteDetail ? !deleteDetail.usageSummary.canDelete : true)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
+            <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting || (deleteDetail ? !deleteDetail.usageSummary.canDelete : true)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-800">
               {isDeleteSubmitting ? 'Deleting...' : 'Delete Transaction'}
             </button>
           </div>
@@ -1435,20 +1435,20 @@ export function BankOperationsClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Banking & Cash</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Banking & Cash</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
               <Landmark className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bank Operations</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">Manage bank transaction intake, statement imports, and connected bank feeds in one operations workspace.</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Bank Operations</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">Manage bank transaction intake, statement imports, and connected bank feeds in one operations workspace.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -1457,7 +1457,7 @@ export function BankOperationsClient() {
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabChange(tab.id as TabId)}
-                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300'}`}
               >
                 {tab.label}
               </button>

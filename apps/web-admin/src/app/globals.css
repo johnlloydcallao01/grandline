@@ -35,33 +35,42 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-aside[data-sidebar="admin"] {
+aside[data-sidebar="admin"],
+aside[data-sidebar="accounting"] {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
-aside[data-sidebar="admin"]::-webkit-scrollbar {
+aside[data-sidebar="admin"]::-webkit-scrollbar,
+aside[data-sidebar="accounting"]::-webkit-scrollbar {
   width: 5px;
 }
-aside[data-sidebar="admin"]::-webkit-scrollbar-track {
+aside[data-sidebar="admin"]::-webkit-scrollbar-track,
+aside[data-sidebar="accounting"]::-webkit-scrollbar-track {
   background: #f8fafc;
 }
-aside[data-sidebar="admin"]::-webkit-scrollbar-thumb {
+aside[data-sidebar="admin"]::-webkit-scrollbar-thumb,
+aside[data-sidebar="accounting"]::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
-aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover {
+aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover,
+aside[data-sidebar="accounting"]::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-.dark aside[data-sidebar="admin"] {
+.dark aside[data-sidebar="admin"],
+.dark aside[data-sidebar="accounting"] {
   scrollbar-color: #777 transparent;
 }
-.dark aside[data-sidebar="admin"]::-webkit-scrollbar-track {
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-track,
+.dark aside[data-sidebar="accounting"]::-webkit-scrollbar-track {
   background: #1f2937;
 }
-.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb {
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb,
+.dark aside[data-sidebar="accounting"]::-webkit-scrollbar-thumb {
   background: #777;
 }
-.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover {
+.dark aside[data-sidebar="admin"]::-webkit-scrollbar-thumb:hover,
+.dark aside[data-sidebar="accounting"]::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
 
@@ -433,3 +442,4 @@ main {
     display: none;
   }
 }
+

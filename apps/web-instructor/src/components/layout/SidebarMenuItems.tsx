@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { SidebarItem } from '@/components/ui';
+import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
+import Link from 'next/link';
 
 interface SidebarMenuItemsProps {
   isOpen: boolean;
@@ -11,82 +12,317 @@ interface SidebarMenuItemsProps {
 export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
   const pathname = usePathname();
 
+  const hasActiveCourseManagerChild =
+    pathname?.startsWith('/courses');
+
+  const [isCourseManagerExpanded, setIsCourseManagerExpanded] = React.useState(hasActiveCourseManagerChild);
+
+  const [isEnrollmentsExpanded, setIsEnrollmentsExpanded] = React.useState(
+    pathname?.startsWith('/enrollments') ?? false
+  );
+
+  const [isSubmissionsExpanded, setIsSubmissionsExpanded] = React.useState(
+    pathname?.startsWith('/submissions') ?? false
+  );
+
+  const hasActiveGradebookChild =
+    pathname?.startsWith('/gradebook');
+
+  const [isGradebookExpanded, setIsGradebookExpanded] = React.useState(hasActiveGradebookChild);
+
+  React.useEffect(() => {
+    if (hasActiveCourseManagerChild) {
+      setIsCourseManagerExpanded(true);
+    }
+  }, [hasActiveCourseManagerChild]);
+
+  React.useEffect(() => {
+    if (pathname?.startsWith('/enrollments')) {
+      setIsEnrollmentsExpanded(true);
+    }
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (pathname?.startsWith('/submissions')) {
+      setIsSubmissionsExpanded(true);
+    }
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (hasActiveGradebookChild) {
+      setIsGradebookExpanded(true);
+    }
+  }, [hasActiveGradebookChild]);
+
+  const LinkComponent = Link as any;
+
   return (
     <>
-      {/* Dashboard & Analytics */}
+      {/* Dashboard */}
       <div className="space-y-1">
         {isOpen && (
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Dashboard & Analytics
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            Dashboard
           </div>
         )}
         <SidebarItem
           icon="overview"
-          label="Overview"
-          href="/"
+          label="My Overview"
           active={pathname === '/' || pathname === '/dashboard'}
           collapsed={!isOpen}
+          href="/dashboard"
+        />
+        <SidebarItem
+          icon="report"
+          label="My Course Reports"
+          active={pathname?.startsWith('/dashboard/reports')}
+          collapsed={!isOpen}
+          href="/dashboard/reports"
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-      {/* Course Management */}
+      {/* My Courses */}
       <div className="space-y-1">
         {isOpen && (
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Course Management
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            My Courses
           </div>
         )}
+        <SidebarDropdownGroup
+          icon="course-manager"
+          label="Course Manager"
+          isOpen={isOpen}
+          isExpanded={isCourseManagerExpanded}
+          onToggle={() => setIsCourseManagerExpanded((current) => !current)}
+          active={hasActiveCourseManagerChild}
+        >
+          <LinkComponent
+            href="/courses"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assessments') && !pathname?.startsWith('/courses/questions') && !pathname?.startsWith('/courses/assignments'))
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Courses</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/lessons"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/lessons')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Lessons</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/assessments"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/assessments')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Assessments</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/questions"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/questions')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Questions</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/assignments"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/assignments')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Assignments</span>
+          </LinkComponent>
+        </SidebarDropdownGroup>
+        <SidebarDropdownGroup
+          icon="enrollments"
+          label="Enrollments"
+          isOpen={isOpen}
+          isExpanded={isEnrollmentsExpanded}
+          onToggle={() => setIsEnrollmentsExpanded((current) => !current)}
+          active={pathname?.startsWith('/enrollments') ?? false}
+        >
+          <LinkComponent
+            href="/enrollments/roster"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/roster')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Roster</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/enrollments/assign-unassign"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/enrollments/assign-unassign')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Assign / Unassign</span>
+          </LinkComponent>
+        </SidebarDropdownGroup>
         <SidebarItem
-          icon="courses"
-          label="Courses"
-          href="/courses"
-          active={pathname?.startsWith('/courses')}
+          icon="media"
+          label="Media Library"
+          active={pathname?.startsWith('/media-library')}
           collapsed={!isOpen}
-        />
-        <SidebarItem
-          icon="assessments"
-          label="Assessments"
-          href="/assessments"
-          active={pathname?.startsWith('/assessments')}
-          collapsed={!isOpen}
+          href="/media-library"
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-      {/* People */}
+      {/* Grading & Submissions */}
       <div className="space-y-1">
         {isOpen && (
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            People
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            Grading & Submissions
+          </div>
+        )}
+        <SidebarDropdownGroup
+          icon="submissions"
+          label="Submissions"
+          isOpen={isOpen}
+          isExpanded={isSubmissionsExpanded}
+          onToggle={() => setIsSubmissionsExpanded((current) => !current)}
+          active={pathname?.startsWith('/submissions') ?? false}
+        >
+          <LinkComponent
+            href="/submissions/assessments"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/assessments')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Assessments</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/submissions/assignments"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/assignments')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Assignments</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/submissions/feedbacks"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/submissions/feedbacks')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Feedbacks</span>
+          </LinkComponent>
+        </SidebarDropdownGroup>
+        <SidebarDropdownGroup
+          icon="gradebook"
+          label="Gradebook"
+          isOpen={isOpen}
+          isExpanded={isGradebookExpanded}
+          onToggle={() => setIsGradebookExpanded((current) => !current)}
+          active={hasActiveGradebookChild}
+        >
+          <LinkComponent
+            href="/gradebook"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/gradebook'
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Recent Activity</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/gradebook/student-overview"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/student-overview')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Student Overview</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/gradebook/setup"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/setup')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Grade Setup</span>
+          </LinkComponent>
+        </SidebarDropdownGroup>
+      </div>
+
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
+
+      {/* Certification */}
+      <div className="space-y-1">
+        {isOpen && (
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            Certification
           </div>
         )}
         <SidebarItem
-          icon="students"
-          label="Students"
-          href="/students"
-          active={pathname?.startsWith('/students')}
+          icon="issuance"
+          label="Issuance"
+          active={pathname?.startsWith('/certifications/issuance')}
           collapsed={!isOpen}
+          href="/certifications/issuance"
+        />
+        <SidebarItem
+          icon="verification"
+          label="Verification"
+          active={pathname?.startsWith('/certifications/verification')}
+          collapsed={!isOpen}
+          href="/certifications/verification"
         />
       </div>
 
-      {isOpen && <hr className="my-3 border-gray-200" />}
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-      {/* Schedule */}
+      {/* Feedback Forms */}
+      <div className="space-y-1">
+        <SidebarItem
+          icon="feedback-forms"
+          label="Feedback Forms"
+          active={pathname?.startsWith('/feedback-forms')}
+          collapsed={!isOpen}
+          href="/feedback-forms"
+        />
+      </div>
+
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
+
+      {/* Communications */}
       <div className="space-y-1">
         {isOpen && (
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Schedule
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            Communications
           </div>
         )}
         <SidebarItem
-          icon="schedule"
-          label="Schedule"
-          href="/schedule"
-          active={pathname?.startsWith('/schedule')}
+          icon="announcements"
+          label="Announcements"
+          active={pathname?.startsWith('/announcements')}
           collapsed={!isOpen}
+          href="/announcements"
+        />
+        <SidebarItem
+          icon="messenger"
+          label="Messenger"
+          active={pathname?.startsWith('/messenger')}
+          collapsed={!isOpen}
+          href="/messenger"
         />
       </div>
     </>

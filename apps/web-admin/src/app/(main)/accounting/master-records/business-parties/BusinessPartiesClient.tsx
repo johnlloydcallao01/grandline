@@ -180,27 +180,27 @@ const bankAccountQuickFilterConfig: Record<
 
 function getMetricTone(trend: Metric['trend']) {
   if (trend === 'down') {
-    return 'text-red-600 bg-red-50';
+    return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30';
   }
 
   if (trend === 'neutral') {
-    return 'text-gray-600 bg-gray-100';
+    return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
   }
 
-  return 'text-green-600 bg-green-50';
+  return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30';
 }
 
 function getStatusBadgeClasses(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
     case 'active':
-      return 'bg-green-50 text-green-700 ring-green-200';
+      return 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800';
     case 'inactive':
     case 'on_hold':
-      return 'bg-amber-50 text-amber-700 ring-amber-200';
+      return 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800';
     case 'archived':
-      return 'bg-gray-100 text-gray-700 ring-gray-200';
+      return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 ring-gray-200 dark:ring-gray-700';
     default:
-      return 'bg-blue-50 text-blue-700 ring-blue-200';
+      return 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800';
   }
 }
 
@@ -338,7 +338,7 @@ function SkeletonBlock({
 }: {
   className: string;
 }) {
-  return <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} aria-hidden="true" />;
+  return <div className={`animate-pulse rounded bg-gray-200 dark:bg-gray-700 ${className}`} aria-hidden="true" />;
 }
 
 function RegisterSkeleton({
@@ -350,7 +350,7 @@ function RegisterSkeleton({
     <>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={`metric-skeleton-${index}`} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div key={`metric-skeleton-${index}`} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3">
                 <SkeletonBlock className="h-4 w-28" />
@@ -365,8 +365,8 @@ function RegisterSkeleton({
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <SkeletonBlock className="h-11 w-full max-w-xl rounded-lg" />
             <SkeletonBlock className="h-11 w-28 rounded-lg" />
@@ -392,22 +392,22 @@ function RegisterSkeleton({
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     {[...columns, 'Actions'].map((column) => (
                       <th
                         key={`skeleton-column-${column}`}
-                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                       >
                         {column}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                   {Array.from({ length: 6 }).map((_, rowIndex) => (
                     <tr key={`customer-row-skeleton-${rowIndex}`}>
                       <td className="px-4 py-3">
@@ -440,7 +440,7 @@ function RegisterSkeleton({
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-gray-200 dark:border-gray-700 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <SkeletonBlock className="h-4 w-24" />
             <div className="flex items-center gap-2">
               <SkeletonBlock className="h-10 w-24 rounded-lg" />
@@ -458,13 +458,13 @@ function DetailSkeleton() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={`detail-card-skeleton-${index}`} className="rounded-xl border border-gray-200 p-4">
+          <div key={`detail-card-skeleton-${index}`} className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
             <SkeletonBlock className="h-3 w-24" />
             <SkeletonBlock className="mt-3 h-4 w-32" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-gray-200 p-4">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
         <SkeletonBlock className="h-3 w-20" />
         <SkeletonBlock className="mt-3 h-16 w-full" />
       </div>
@@ -1963,14 +1963,14 @@ export function BusinessPartiesClient({
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Core / Master Records</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Core / Master Records</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{PAGE_TITLE}</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">{PAGE_DESCRIPTION}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{PAGE_TITLE}</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">{PAGE_DESCRIPTION}</p>
             </div>
           </div>
         </div>
@@ -1978,8 +1978,8 @@ export function BusinessPartiesClient({
 
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="border-b border-gray-200 dark:border-[var(--card-border)] px-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {(['customers', 'vendors', 'bank-accounts'] as const).map((tabId) => {
               const label =
@@ -1993,8 +1993,8 @@ export function BusinessPartiesClient({
                   onClick={() => handleTabChange(tabId)}
                   className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {label}
@@ -2006,12 +2006,12 @@ export function BusinessPartiesClient({
 
         {activeTab === 'customers' ? (
           <div className="space-y-6 p-[10px]">
-            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {customerData?.section.label || 'Customers'}
                 </h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   {customerData?.section.description ||
                     'Manage customer master records with codes, type, contacts, tax profile, currency, terms, and credit limit.'}
                 </p>
@@ -2028,7 +2028,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleRefreshCustomers}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <RefreshCw className={`h-4 w-4 ${isCustomerLoading ? 'animate-spin' : ''}`} />
                   Refresh Customers
@@ -2036,7 +2036,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleExportCustomers}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!customerRows.length}
                 >
                   <Download className="h-4 w-4" />
@@ -2064,13 +2064,13 @@ export function BusinessPartiesClient({
                   {(customerData?.section.metrics || []).map((metric) => {
                     const TrendIcon = metric.trend === 'down' ? ArrowDownRight : ArrowUpRight;
                     return (
-                      <div key={metric.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                      <div key={metric.id} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-                            <p className="mt-3 text-2xl font-bold text-gray-900">{metric.value}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.label}</p>
+                            <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
                           </div>
-                          <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+                          <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
                             <Wallet className="h-5 w-5" />
                           </div>
                         </div>
@@ -2087,8 +2087,8 @@ export function BusinessPartiesClient({
                   })}
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                   <form
                     onSubmit={(event) => {
@@ -2109,7 +2109,7 @@ export function BusinessPartiesClient({
                           customerData?.section.searchPlaceholder ||
                           'Search customer code, display name, type, email, or status'
                         }
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                       />
                     </div>
                     <button
@@ -2127,8 +2127,8 @@ export function BusinessPartiesClient({
                     aria-controls="customer-filter-panel"
                     className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                       isCustomerFilterPanelOpen || customerActiveFilterCount > 0
-                        ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50'
+                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                   >
                     <Filter className="h-4 w-4" />
@@ -2150,8 +2150,8 @@ export function BusinessPartiesClient({
                         onClick={() => handleToggleCustomerQuickFilter(filterKey)}
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                           isActive
-                            ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       >
                         {customerQuickFilterConfig[filterKey].label}
@@ -2165,12 +2165,12 @@ export function BusinessPartiesClient({
                 {isCustomerFilterPanelOpen ? (
                   <div
                     id="customer-filter-panel"
-                    className="rounded-xl border border-gray-200 bg-gray-50 p-4"
+                    className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-900">Customer Filters</h4>
-                        <p className="mt-1 text-sm text-gray-600">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Customer Filters</h4>
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           Select as many filter values as needed, then apply them in one step.
                         </p>
                       </div>
@@ -2178,7 +2178,7 @@ export function BusinessPartiesClient({
                         <button
                           type="button"
                           onClick={handleClearCustomerDraftFilters}
-                          className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={customerDraftFilterCount === 0}
                         >
                           Clear Selections
@@ -2195,16 +2195,16 @@ export function BusinessPartiesClient({
                     </div>
 
                     <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-                      <div className="rounded-lg border border-gray-200 bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                         <div className="mt-3 space-y-2">
                           {(customerData?.section.filters.statuses || []).map((option) => (
-                            <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                            <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftCustomerFilters.statuses.includes(option.value)}
                                 onChange={() => handleToggleStatusFilter(option.value)}
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                               />
                               <span>{option.label}</span>
                             </label>
@@ -2212,16 +2212,16 @@ export function BusinessPartiesClient({
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-gray-200 bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer Type</p>
+                      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer Type</p>
                         <div className="mt-3 space-y-2">
                           {(customerData?.section.filters.customerTypes || []).map((option) => (
-                            <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                            <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                               <input
                                 type="checkbox"
                                 checked={draftCustomerFilters.customerTypes.includes(option.value)}
                                 onChange={() => handleToggleCustomerTypeFilter(option.value)}
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                               />
                               <span>{option.label}</span>
                             </label>
@@ -2229,15 +2229,15 @@ export function BusinessPartiesClient({
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-gray-200 bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Other</p>
+                      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Other</p>
                         <div className="mt-3 space-y-2">
-                          <label className="flex items-center gap-3 text-sm text-gray-700">
+                          <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                             <input
                               type="checkbox"
                               checked={draftCustomerFilters.hasCreditLimit}
                               onChange={handleToggleCreditLimitFilter}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                             />
                             <span>With Credit Limit</span>
                           </label>
@@ -2245,7 +2245,7 @@ export function BusinessPartiesClient({
                       </div>
                     </div>
                     {hasPendingCustomerFilterChanges ? (
-                      <p className="mt-4 text-sm text-amber-700">
+                      <p className="mt-4 text-sm text-amber-700 dark:text-amber-400">
                         You have unapplied filter changes. Click Apply Filters to update the register.
                       </p>
                     ) : null}
@@ -2254,21 +2254,21 @@ export function BusinessPartiesClient({
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {customerData?.section.table.title || 'Customer Master Register'}
                     </h3>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       {customerData?.section.table.description ||
                         'Customer records using customer code, type, currency, payment terms, and status.'}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>{customerData?.totals.filteredCustomers ?? 0} matching customers</span>
                     {customerActiveFilterCount > 0 ? (
                       <button
                         type="button"
                         onClick={handleClearAppliedCustomerFilters}
-                        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                       >
                         Clear Applied Filters
                       </button>
@@ -2276,7 +2276,7 @@ export function BusinessPartiesClient({
                     <button
                       type="button"
                       onClick={handleExportCustomers}
-                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={!customerRows.length}
                     >
                       <Download className="h-4 w-4" />
@@ -2286,7 +2286,7 @@ export function BusinessPartiesClient({
                 </div>
 
                 {customerError ? (
-                  <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
                     <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
                     <div>
                       <p className="font-medium">Unable to load the customer register.</p>
@@ -2295,10 +2295,10 @@ export function BusinessPartiesClient({
                   </div>
                 ) : null}
 
-                <div className="overflow-hidden rounded-xl border border-gray-200">
+                <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                      <thead className="bg-gray-50 dark:bg-gray-800/50">
                         <tr>
                           {(customerData?.section.table.columns || [
                             'Customer Code',
@@ -2310,29 +2310,29 @@ export function BusinessPartiesClient({
                           ]).map((column) => (
                             <th
                               key={column}
-                              className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                              className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                             >
                               {column}
                             </th>
                           ))}
-                          <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                          <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                         {customerRows.length ? (
                           customerRows.map((row) => (
-                            <tr key={String(row.id)} className="hover:bg-gray-50">
-                              <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                            <tr key={String(row.id)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                              <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 {row.customerCode || '-'}
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-600">{row.displayName || '-'}</td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{row.displayName || '-'}</td>
+                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                 {row.typeLabel || '-'}
                               </td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{row.currency || '-'}</td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{row.currency || '-'}</td>
+                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                 {row.paymentTerms || '-'}
                               </td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -2347,7 +2347,7 @@ export function BusinessPartiesClient({
                                   <button
                                     type="button"
                                     onClick={() => void handleOpenCustomerEditModal(row.customerId)}
-                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                   >
                                     <Edit className="h-4 w-4" />
                                     Edit
@@ -2355,7 +2355,7 @@ export function BusinessPartiesClient({
                                   <button
                                     type="button"
                                     onClick={() => void handleOpenCustomerDeleteModal(row.customerId, row.displayName || `Customer #${row.customerId}`)}
-                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
@@ -2363,7 +2363,7 @@ export function BusinessPartiesClient({
                                   <button
                                     type="button"
                                     onClick={() => void handleViewCustomer(row.customerId)}
-                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                   >
                                     <Eye className="h-4 w-4" />
                                     View
@@ -2375,7 +2375,7 @@ export function BusinessPartiesClient({
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">
+                            <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                               No customers match the current search and filter combination.
                             </td>
                           </tr>
@@ -2385,7 +2385,7 @@ export function BusinessPartiesClient({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 border-t border-gray-200 dark:border-gray-700 pt-4 text-sm text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
                   <span>
                     Page {customerData?.pagination.page || 1} of {customerData?.pagination.totalPages || 1}
                   </span>
@@ -2394,7 +2394,7 @@ export function BusinessPartiesClient({
                       type="button"
                       onClick={() => setCustomerCurrentPage((previous) => Math.max(1, previous - 1))}
                       disabled={!customerData?.pagination.hasPrevPage || isCustomerLoading}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Previous
                     </button>
@@ -2402,7 +2402,7 @@ export function BusinessPartiesClient({
                       type="button"
                       onClick={() => setCustomerCurrentPage((previous) => previous + 1)}
                       disabled={!customerData?.pagination.hasNextPage || isCustomerLoading}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Next
                     </button>
@@ -2415,10 +2415,10 @@ export function BusinessPartiesClient({
           </div>
         ) : activeTab === 'vendors' ? (
           <div className="space-y-6 p-[10px]">
-            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">{vendorData?.section.label || 'Vendors'}</h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{vendorData?.section.label || 'Vendors'}</h2>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   {vendorData?.section.description ||
                     'Manage vendor master records with codes, type, contacts, tax profile, currency, payment terms, and status.'}
                 </p>
@@ -2435,7 +2435,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleRefreshVendors}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <RefreshCw className={`h-4 w-4 ${isVendorLoading ? 'animate-spin' : ''}`} />
                   Refresh Vendors
@@ -2443,7 +2443,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleExportVendors}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!vendorRows.length}
                 >
                   <Download className="h-4 w-4" />
@@ -2471,13 +2471,13 @@ export function BusinessPartiesClient({
                   {(vendorData?.section.metrics || []).map((metric) => {
                     const TrendIcon = metric.trend === 'down' ? ArrowDownRight : ArrowUpRight;
                     return (
-                      <div key={metric.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                      <div key={metric.id} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-                            <p className="mt-3 text-2xl font-bold text-gray-900">{metric.value}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.label}</p>
+                            <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
                           </div>
-                          <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+                          <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
                             <Wallet className="h-5 w-5" />
                           </div>
                         </div>
@@ -2494,8 +2494,8 @@ export function BusinessPartiesClient({
                   })}
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+                  <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                       <form
                         onSubmit={(event) => {
@@ -2516,7 +2516,7 @@ export function BusinessPartiesClient({
                               vendorData?.section.searchPlaceholder ||
                               'Search vendor code, display name, type, email, or status'
                             }
-                            className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                           />
                         </div>
                         <button
@@ -2534,8 +2534,8 @@ export function BusinessPartiesClient({
                         aria-controls="vendor-filter-panel"
                         className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                           isVendorFilterPanelOpen || vendorActiveFilterCount > 0
-                            ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
                       >
                         <Filter className="h-4 w-4" />
@@ -2557,8 +2557,8 @@ export function BusinessPartiesClient({
                             onClick={() => handleToggleVendorQuickFilter(filterKey)}
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isActive
-                                ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                           >
                             {vendorQuickFilterConfig[filterKey].label}
@@ -2570,11 +2570,11 @@ export function BusinessPartiesClient({
 
                   <div className="space-y-4 p-[10px] sm:p-5">
                     {isVendorFilterPanelOpen ? (
-                      <div id="vendor-filter-panel" className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                      <div id="vendor-filter-panel" className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-900">Vendor Filters</h4>
-                            <p className="mt-1 text-sm text-gray-600">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Vendor Filters</h4>
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                               Select as many filter values as needed, then apply them in one step.
                             </p>
                           </div>
@@ -2582,7 +2582,7 @@ export function BusinessPartiesClient({
                             <button
                               type="button"
                               onClick={handleClearVendorDraftFilters}
-                              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                               disabled={vendorDraftFilterCount === 0}
                             >
                               Clear Selections
@@ -2599,16 +2599,16 @@ export function BusinessPartiesClient({
                         </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                             <div className="mt-3 space-y-2">
                               {(vendorData?.section.filters.statuses || []).map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftVendorFilters.statuses.includes(option.value)}
                                     onChange={() => handleToggleVendorStatusFilter(option.value)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                   />
                                   <span>{option.label}</span>
                                 </label>
@@ -2616,16 +2616,16 @@ export function BusinessPartiesClient({
                             </div>
                           </div>
 
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor Type</p>
+                          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor Type</p>
                             <div className="mt-3 space-y-2">
                               {(vendorData?.section.filters.vendorTypes || []).map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftVendorFilters.vendorTypes.includes(option.value)}
                                     onChange={() => handleToggleVendorTypeFilter(option.value)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                   />
                                   <span>{option.label}</span>
                                 </label>
@@ -2634,7 +2634,7 @@ export function BusinessPartiesClient({
                           </div>
                         </div>
                         {hasPendingVendorFilterChanges ? (
-                          <p className="mt-4 text-sm text-amber-700">
+                          <p className="mt-4 text-sm text-amber-700 dark:text-amber-400">
                             You have unapplied filter changes. Click Apply Filters to update the register.
                           </p>
                         ) : null}
@@ -2643,21 +2643,21 @@ export function BusinessPartiesClient({
 
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h3 className="text-base font-semibold text-gray-900">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                           {vendorData?.section.table.title || 'Vendor Master Register'}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {vendorData?.section.table.description ||
                             'Vendor records using vendor code, type, currency, payment terms, and status.'}
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                         <span>{vendorData?.totals.filteredVendors ?? 0} matching vendors</span>
                         {vendorActiveFilterCount > 0 ? (
                           <button
                             type="button"
                             onClick={handleClearAppliedVendorFilters}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             Clear Applied Filters
                           </button>
@@ -2665,7 +2665,7 @@ export function BusinessPartiesClient({
                         <button
                           type="button"
                           onClick={handleExportVendors}
-                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={!vendorRows.length}
                         >
                           <Download className="h-4 w-4" />
@@ -2675,7 +2675,7 @@ export function BusinessPartiesClient({
                     </div>
 
                     {vendorError ? (
-                      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
                         <div>
                           <p className="font-medium">Unable to load the vendor register.</p>
@@ -2684,10 +2684,10 @@ export function BusinessPartiesClient({
                       </div>
                     ) : null}
 
-                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                    <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50">
                             <tr>
                               {(vendorData?.section.table.columns || [
                                 'Vendor Code',
@@ -2699,31 +2699,31 @@ export function BusinessPartiesClient({
                               ]).map((column) => (
                                 <th
                                   key={column}
-                                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                 >
                                   {column}
                                 </th>
                               ))}
-                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Actions
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                             {vendorRows.length ? (
                               vendorRows.map((row) => (
-                                <tr key={String(row.id)} className="hover:bg-gray-50">
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                <tr key={String(row.id)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {row.vendorCode || '-'}
                                   </td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{row.displayName || '-'}</td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{row.displayName || '-'}</td>
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.typeLabel || '-'}
                                   </td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.currency || '-'}
                                   </td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.paymentTerms || '-'}
                                   </td>
                                   <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -2738,7 +2738,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleOpenVendorEditModal(row.vendorId)}
-                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                       >
                                         <Edit className="h-4 w-4" />
                                         Edit
@@ -2746,7 +2746,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleOpenVendorDeleteModal(row.vendorId, row.displayName || `Vendor #${row.vendorId}`)}
-                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                         Delete
@@ -2754,7 +2754,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleViewVendor(row.vendorId)}
-                                        className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                        className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       >
                                         <Eye className="h-4 w-4" />
                                         View
@@ -2766,7 +2766,7 @@ export function BusinessPartiesClient({
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">
+                                <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                   No vendors match the current search and filter combination.
                                 </td>
                               </tr>
@@ -2776,7 +2776,7 @@ export function BusinessPartiesClient({
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 border-t border-gray-200 dark:border-gray-700 pt-4 text-sm text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
                       <span>
                         Page {vendorData?.pagination.page || 1} of {vendorData?.pagination.totalPages || 1}
                       </span>
@@ -2785,7 +2785,7 @@ export function BusinessPartiesClient({
                           type="button"
                           onClick={() => setVendorCurrentPage((previous) => Math.max(1, previous - 1))}
                           disabled={!vendorData?.pagination.hasPrevPage || isVendorLoading}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Previous
                         </button>
@@ -2793,7 +2793,7 @@ export function BusinessPartiesClient({
                           type="button"
                           onClick={() => setVendorCurrentPage((previous) => previous + 1)}
                           disabled={!vendorData?.pagination.hasNextPage || isVendorLoading}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Next
                         </button>
@@ -2806,12 +2806,12 @@ export function BusinessPartiesClient({
           </div>
         ) : activeTab === 'bank-accounts' ? (
           <div className="space-y-6 p-[10px]">
-            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {bankAccountData?.section.label || 'Bank Accounts'}
                 </h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   {bankAccountData?.section.description ||
                     'Manage bank, cash on hand, and undeposited funds accounts used across treasury and accounting workflows.'}
                 </p>
@@ -2828,7 +2828,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleRefreshBankAccounts}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <RefreshCw className={`h-4 w-4 ${isBankAccountLoading ? 'animate-spin' : ''}`} />
                   Refresh Bank Accounts
@@ -2836,7 +2836,7 @@ export function BusinessPartiesClient({
                 <button
                   type="button"
                   onClick={handleExportBankAccounts}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!bankAccountRows.length}
                 >
                   <Download className="h-4 w-4" />
@@ -2864,13 +2864,13 @@ export function BusinessPartiesClient({
                   {(bankAccountData?.section.metrics || []).map((metric) => {
                     const TrendIcon = metric.trend === 'down' ? ArrowDownRight : ArrowUpRight;
                     return (
-                      <div key={metric.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                      <div key={metric.id} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-                            <p className="mt-3 text-2xl font-bold text-gray-900">{metric.value}</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.label}</p>
+                            <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
                           </div>
-                          <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+                          <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
                             <Wallet className="h-5 w-5" />
                           </div>
                         </div>
@@ -2887,8 +2887,8 @@ export function BusinessPartiesClient({
                   })}
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+                  <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-[var(--card-border)] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
                       <form
                         onSubmit={(event) => {
@@ -2909,7 +2909,7 @@ export function BusinessPartiesClient({
                               bankAccountData?.section.searchPlaceholder ||
                               'Search account name, bank name, type, currency, ledger account, or status'
                             }
-                            className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                           />
                         </div>
                         <button
@@ -2927,8 +2927,8 @@ export function BusinessPartiesClient({
                         aria-controls="bank-account-filter-panel"
                         className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                           isBankAccountFilterPanelOpen || bankAccountActiveFilterCount > 0
-                            ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
                       >
                         <Filter className="h-4 w-4" />
@@ -2950,8 +2950,8 @@ export function BusinessPartiesClient({
                             onClick={() => handleToggleBankAccountQuickFilter(filterKey)}
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                               isActive
-                                ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                           >
                             {bankAccountQuickFilterConfig[filterKey].label}
@@ -2965,12 +2965,12 @@ export function BusinessPartiesClient({
                     {isBankAccountFilterPanelOpen ? (
                       <div
                         id="bank-account-filter-panel"
-                        className="rounded-xl border border-gray-200 bg-gray-50 p-4"
+                        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4"
                       >
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-900">Bank Account Filters</h4>
-                            <p className="mt-1 text-sm text-gray-600">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Bank Account Filters</h4>
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                               Select as many filter values as needed, then apply them in one step.
                             </p>
                           </div>
@@ -2978,7 +2978,7 @@ export function BusinessPartiesClient({
                             <button
                               type="button"
                               onClick={handleClearBankAccountDraftFilters}
-                              className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                               disabled={bankAccountDraftFilterCount === 0}
                             >
                               Clear Selections
@@ -2995,16 +2995,16 @@ export function BusinessPartiesClient({
                         </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                             <div className="mt-3 space-y-2">
                               {(bankAccountData?.section.filters.statuses || []).map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftBankAccountFilters.statuses.includes(option.value)}
                                     onChange={() => handleToggleBankAccountStatusFilter(option.value)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                   />
                                   <span>{option.label}</span>
                                 </label>
@@ -3012,16 +3012,16 @@ export function BusinessPartiesClient({
                             </div>
                           </div>
 
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Type</p>
+                          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Account Type</p>
                             <div className="mt-3 space-y-2">
                               {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
-                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                   <input
                                     type="checkbox"
                                     checked={draftBankAccountFilters.accountTypes.includes(option.value)}
                                     onChange={() => handleToggleBankAccountTypeFilter(option.value)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                   />
                                   <span>{option.label}</span>
                                 </label>
@@ -3029,33 +3029,33 @@ export function BusinessPartiesClient({
                             </div>
                           </div>
 
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Other</p>
+                          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Other</p>
                             <div className="mt-3 space-y-2">
-                              <label className="flex items-center gap-3 text-sm text-gray-700">
+                              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                 <input
                                   type="checkbox"
                                   checked={draftBankAccountFilters.defaultReceiptOnly}
                                   onChange={handleToggleDefaultReceiptOnlyFilter}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span>Default Receipt Accounts</span>
                               </label>
-                              <label className="flex items-center gap-3 text-sm text-gray-700">
+                              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                 <input
                                   type="checkbox"
                                   checked={draftBankAccountFilters.defaultDisbursementOnly}
                                   onChange={handleToggleDefaultDisbursementOnlyFilter}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span>Default Disbursement Accounts</span>
                               </label>
-                              <label className="flex items-center gap-3 text-sm text-gray-700">
+                              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                                 <input
                                   type="checkbox"
                                   checked={draftBankAccountFilters.ledgerMappedOnly}
                                   onChange={handleToggleLedgerMappedOnlyFilter}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span>Ledger Mapped Only</span>
                               </label>
@@ -3063,7 +3063,7 @@ export function BusinessPartiesClient({
                           </div>
                         </div>
                         {hasPendingBankAccountFilterChanges ? (
-                          <p className="mt-4 text-sm text-amber-700">
+                          <p className="mt-4 text-sm text-amber-700 dark:text-amber-400">
                             You have unapplied filter changes. Click Apply Filters to update the register.
                           </p>
                         ) : null}
@@ -3072,21 +3072,21 @@ export function BusinessPartiesClient({
 
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <h3 className="text-base font-semibold text-gray-900">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                           {bankAccountData?.section.table.title || 'Bank Account Master Register'}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {bankAccountData?.section.table.description ||
                             'Cash and bank accounts using account name, bank name, type, currency, ledger account, and status.'}
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                         <span>{bankAccountData?.totals.filteredBankAccounts ?? 0} matching bank accounts</span>
                         {bankAccountActiveFilterCount > 0 ? (
                           <button
                             type="button"
                             onClick={handleClearAppliedBankAccountFilters}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             Clear Applied Filters
                           </button>
@@ -3094,7 +3094,7 @@ export function BusinessPartiesClient({
                         <button
                           type="button"
                           onClick={handleExportBankAccounts}
-                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={!bankAccountRows.length}
                         >
                           <Download className="h-4 w-4" />
@@ -3104,7 +3104,7 @@ export function BusinessPartiesClient({
                     </div>
 
                     {bankAccountError ? (
-                      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
                         <div>
                           <p className="font-medium">Unable to load the bank account register.</p>
@@ -3113,10 +3113,10 @@ export function BusinessPartiesClient({
                       </div>
                     ) : null}
 
-                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                    <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50">
                             <tr>
                               {(bankAccountData?.section.table.columns || [
                                 'Account Name',
@@ -3128,31 +3128,31 @@ export function BusinessPartiesClient({
                               ]).map((column) => (
                                 <th
                                   key={column}
-                                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                 >
                                   {column}
                                 </th>
                               ))}
-                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                 Actions
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                             {bankAccountRows.length ? (
                               bankAccountRows.map((row) => (
-                                <tr key={String(row.id)} className="hover:bg-gray-50">
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
+                                <tr key={String(row.id)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {row.accountName || '-'}
                                   </td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{row.bankName || '-'}</td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{row.bankName || '-'}</td>
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.typeLabel || '-'}
                                   </td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.currency || '-'}
                                   </td>
-                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                     {row.ledgerAccountDisplay || '-'}
                                   </td>
                                   <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -3167,7 +3167,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleOpenBankAccountEditModal(row.bankAccountId)}
-                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
                                       >
                                         <Edit className="h-4 w-4" />
                                         Edit
@@ -3175,7 +3175,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleOpenBankAccountDeleteModal(row.bankAccountId, row.accountName || `Bank Account #${row.bankAccountId}`)}
-                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 dark:hover:text-red-300"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                         Delete
@@ -3183,7 +3183,7 @@ export function BusinessPartiesClient({
                                       <button
                                         type="button"
                                         onClick={() => void handleViewBankAccount(row.bankAccountId)}
-                                        className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                        className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                                       >
                                         <Eye className="h-4 w-4" />
                                         View
@@ -3195,7 +3195,7 @@ export function BusinessPartiesClient({
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">
+                                <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                   No bank accounts match the current search and filter combination.
                                 </td>
                               </tr>
@@ -3205,7 +3205,7 @@ export function BusinessPartiesClient({
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 border-t border-gray-200 dark:border-gray-700 pt-4 text-sm text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
                       <span>
                         Page {bankAccountData?.pagination.page || 1} of {bankAccountData?.pagination.totalPages || 1}
                       </span>
@@ -3214,7 +3214,7 @@ export function BusinessPartiesClient({
                           type="button"
                           onClick={() => setBankAccountCurrentPage((previous) => Math.max(1, previous - 1))}
                           disabled={!bankAccountData?.pagination.hasPrevPage || isBankAccountLoading}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Previous
                         </button>
@@ -3222,7 +3222,7 @@ export function BusinessPartiesClient({
                           type="button"
                           onClick={() => setBankAccountCurrentPage((previous) => previous + 1)}
                           disabled={!bankAccountData?.pagination.hasNextPage || isBankAccountLoading}
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Next
                         </button>
@@ -3244,12 +3244,12 @@ export function BusinessPartiesClient({
       >
         <form onSubmit={handleCreateCustomer} className="space-y-6">
           {customerCreateError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               {customerCreateError}
             </div>
           ) : null}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Customer Code</span>
               <input
                 value={customerCreateForm.customerCode}
@@ -3260,10 +3260,10 @@ export function BusinessPartiesClient({
                   }))
                 }
                 placeholder="Auto-generate if blank"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Display Name</span>
               <input
                 required
@@ -3271,27 +3271,27 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Legal Name</span>
               <input
                 value={customerCreateForm.legalName}
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Customer Type</span>
               <select
                 value={customerCreateForm.customerType}
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, customerType: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 {(customerData?.section.filters.customerTypes || []).map((option) => (
                   <option key={option.value} value={option.value}>
@@ -3300,7 +3300,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Currency</span>
               <select
                 required
@@ -3308,7 +3308,7 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select currency</option>
                 {(customerData?.referenceData.currencies || []).map((option) => (
@@ -3319,7 +3319,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Payment Terms</span>
               <select
                 required
@@ -3330,7 +3330,7 @@ export function BusinessPartiesClient({
                     paymentTermReference: event.target.value,
                   }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select payment terms</option>
                 {(customerData?.referenceData.paymentTerms || []).map((option) => (
@@ -3340,14 +3340,14 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Status</span>
               <select
                 value={customerCreateForm.status}
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, status: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 {(customerData?.section.filters.statuses || []).map((option) => (
                   <option key={option.value} value={option.value}>
@@ -3356,7 +3356,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Credit Limit</span>
               <input
                 type="number"
@@ -3365,10 +3365,10 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, creditLimit: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Email</span>
               <input
                 type="email"
@@ -3376,31 +3376,31 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, email: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Phone</span>
               <input
                 value={customerCreateForm.phone}
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, phone: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Tax ID</span>
               <input
                 value={customerCreateForm.taxId}
                 onChange={(event) =>
                   setCustomerCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
           </div>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Billing Address</span>
             <textarea
               rows={3}
@@ -3408,10 +3408,10 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setCustomerCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Shipping Address</span>
             <textarea
               rows={3}
@@ -3419,10 +3419,10 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setCustomerCreateForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Notes</span>
             <textarea
               rows={4}
@@ -3430,14 +3430,14 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setCustomerCreateForm((previous) => ({ ...previous, notes: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
             <button
               type="button"
               onClick={handleCloseCustomerCreateModal}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -3463,12 +3463,12 @@ export function BusinessPartiesClient({
         ) : (
           <form onSubmit={handleEditCustomer} className="space-y-6">
             {customerEditError ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                 {customerEditError}
               </div>
             ) : null}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Customer Code</span>
                 <input
                   value={customerEditForm.customerCode}
@@ -3479,10 +3479,10 @@ export function BusinessPartiesClient({
                     }))
                   }
                   placeholder="Auto-generate if blank"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Display Name</span>
                 <input
                   required
@@ -3490,27 +3490,27 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, displayName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Legal Name</span>
                 <input
                   value={customerEditForm.legalName}
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, legalName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Customer Type</span>
                 <select
                   value={customerEditForm.customerType}
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, customerType: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   {(customerData?.section.filters.customerTypes || []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -3519,7 +3519,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Currency</span>
                 <select
                   required
@@ -3527,7 +3527,7 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select currency</option>
                   {(customerData?.referenceData.currencies || []).map((option) => (
@@ -3538,7 +3538,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Payment Terms</span>
                 <select
                   required
@@ -3549,7 +3549,7 @@ export function BusinessPartiesClient({
                       paymentTermReference: event.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select payment terms</option>
                   {(customerData?.referenceData.paymentTerms || []).map((option) => (
@@ -3559,14 +3559,14 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Status</span>
                 <select
                   value={customerEditForm.status}
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, status: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   {(customerData?.section.filters.statuses || []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -3575,7 +3575,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Credit Limit</span>
                 <input
                   type="number"
@@ -3584,10 +3584,10 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, creditLimit: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Email</span>
                 <input
                   type="email"
@@ -3595,31 +3595,31 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, email: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Phone</span>
                 <input
                   value={customerEditForm.phone}
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, phone: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Tax ID</span>
                 <input
                   value={customerEditForm.taxId}
                   onChange={(event) =>
                     setCustomerEditForm((previous) => ({ ...previous, taxId: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
             </div>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Billing Address</span>
               <textarea
                 rows={3}
@@ -3627,10 +3627,10 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Shipping Address</span>
               <textarea
                 rows={3}
@@ -3638,10 +3638,10 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerEditForm((previous) => ({ ...previous, shippingAddress: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Notes</span>
               <textarea
                 rows={4}
@@ -3649,14 +3649,14 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setCustomerEditForm((previous) => ({ ...previous, notes: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
               <button
                 type="button"
                 onClick={handleCloseCustomerEditModal}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -3680,12 +3680,12 @@ export function BusinessPartiesClient({
       >
         <form onSubmit={handleCreateVendor} className="space-y-6">
           {vendorCreateError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               {vendorCreateError}
             </div>
           ) : null}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Vendor Code</span>
               <input
                 value={vendorCreateForm.vendorCode}
@@ -3696,10 +3696,10 @@ export function BusinessPartiesClient({
                   }))
                 }
                 placeholder="Auto-generate if blank"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Display Name</span>
               <input
                 required
@@ -3707,27 +3707,27 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, displayName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Legal Name</span>
               <input
                 value={vendorCreateForm.legalName}
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, legalName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Vendor Type</span>
               <select
                 value={vendorCreateForm.vendorType}
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, vendorType: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 {(vendorData?.section.filters.vendorTypes || []).map((option) => (
                   <option key={option.value} value={option.value}>
@@ -3736,7 +3736,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Currency</span>
               <select
                 required
@@ -3744,7 +3744,7 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, currencyReference: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select currency</option>
                 {(vendorData?.referenceData.currencies || []).map((option) => (
@@ -3755,7 +3755,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Payment Terms</span>
               <select
                 required
@@ -3766,7 +3766,7 @@ export function BusinessPartiesClient({
                     paymentTermReference: event.target.value,
                   }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select payment terms</option>
                 {(vendorData?.referenceData.paymentTerms || []).map((option) => (
@@ -3776,14 +3776,14 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Status</span>
               <select
                 value={vendorCreateForm.status}
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, status: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 {(vendorData?.section.filters.statuses || []).map((option) => (
                   <option key={option.value} value={option.value}>
@@ -3792,7 +3792,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Email</span>
               <input
                 type="email"
@@ -3800,31 +3800,31 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, email: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Phone</span>
               <input
                 value={vendorCreateForm.phone}
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, phone: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Tax ID</span>
               <input
                 value={vendorCreateForm.taxId}
                 onChange={(event) =>
                   setVendorCreateForm((previous) => ({ ...previous, taxId: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
           </div>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Billing Address</span>
             <textarea
               rows={3}
@@ -3832,10 +3832,10 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setVendorCreateForm((previous) => ({ ...previous, billingAddress: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Notes</span>
             <textarea
               rows={4}
@@ -3843,14 +3843,14 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setVendorCreateForm((previous) => ({ ...previous, notes: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
             <button
               type="button"
               onClick={handleCloseVendorCreateModal}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -3873,12 +3873,12 @@ export function BusinessPartiesClient({
       >
         <form onSubmit={handleCreateBankAccount} className="space-y-6">
           {bankAccountCreateError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               {bankAccountCreateError}
             </div>
           ) : null}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Account Name</span>
               <input
                 required
@@ -3886,10 +3886,10 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setBankAccountCreateForm((previous) => ({ ...previous, accountName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Account Number</span>
               <input
                 value={bankAccountCreateForm.accountNumberMasked}
@@ -3899,37 +3899,37 @@ export function BusinessPartiesClient({
                     accountNumberMasked: event.target.value,
                   }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Bank Name</span>
               <input
                 value={bankAccountCreateForm.bankName}
                 onChange={(event) =>
                   setBankAccountCreateForm((previous) => ({ ...previous, bankName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Branch Name</span>
               <input
                 value={bankAccountCreateForm.branchName}
                 onChange={(event) =>
                   setBankAccountCreateForm((previous) => ({ ...previous, branchName: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Account Type</span>
               <select
                 value={bankAccountCreateForm.accountType}
                 onChange={(event) =>
                   setBankAccountCreateForm((previous) => ({ ...previous, accountType: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
                   <option key={option.value} value={option.value}>
@@ -3938,7 +3938,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Currency</span>
               <select
                 required
@@ -3949,7 +3949,7 @@ export function BusinessPartiesClient({
                     currencyReference: event.target.value,
                   }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select currency</option>
                 {(bankAccountData?.referenceData.currencies || []).map((option) => (
@@ -3960,7 +3960,7 @@ export function BusinessPartiesClient({
                 ))}
               </select>
             </label>
-            <label className="space-y-2 text-sm text-gray-700">
+            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Ledger Account</span>
               <select
                 required
@@ -3968,7 +3968,7 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setBankAccountCreateForm((previous) => ({ ...previous, ledgerAccount: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               >
                 <option value="">Select ledger account</option>
                 {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
@@ -3981,7 +3981,7 @@ export function BusinessPartiesClient({
             </label>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={bankAccountCreateForm.isDefaultReceiptAccount}
@@ -3991,11 +3991,11 @@ export function BusinessPartiesClient({
                     isDefaultReceiptAccount: !previous.isDefaultReceiptAccount,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
               />
               Default Receipt
             </label>
-            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={bankAccountCreateForm.isDefaultDisbursementAccount}
@@ -4005,11 +4005,11 @@ export function BusinessPartiesClient({
                     isDefaultDisbursementAccount: !previous.isDefaultDisbursementAccount,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
               />
               Default Disbursement
             </label>
-            <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700">
+            <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={bankAccountCreateForm.isActive}
@@ -4019,12 +4019,12 @@ export function BusinessPartiesClient({
                     isActive: !previous.isActive,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-blue-600 focus:ring-blue-500"
               />
               Active Account
             </label>
           </div>
-          <label className="block space-y-2 text-sm text-gray-700">
+          <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <span className="font-medium">Notes</span>
             <textarea
               rows={4}
@@ -4032,14 +4032,14 @@ export function BusinessPartiesClient({
               onChange={(event) =>
                 setBankAccountCreateForm((previous) => ({ ...previous, notes: event.target.value }))
               }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
             />
           </label>
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
             <button
               type="button"
               onClick={handleCloseBankAccountCreateModal}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -4062,14 +4062,14 @@ export function BusinessPartiesClient({
         width="max-w-lg"
       >
         {customerDeleteError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
             {customerDeleteError}
           </div>
         ) : null}
 
         {customerDeleteBlockers.length > 0 ? (
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
               <p className="font-medium">Cannot delete this customer</p>
               <p className="mt-1">
                 This customer cannot be deleted because the following dependencies exist:
@@ -4087,7 +4087,7 @@ export function BusinessPartiesClient({
               <button
                 type="button"
                 onClick={handleCloseCustomerDeleteModal}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 Close
               </button>
@@ -4095,7 +4095,7 @@ export function BusinessPartiesClient({
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <p className="font-medium">Are you sure?</p>
               <p className="mt-1">
                 This action cannot be undone. The customer &ldquo;{deletingCustomerName}&rdquo; will be permanently removed.
@@ -4106,7 +4106,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleCloseCustomerDeleteModal}
                 disabled={isCustomerDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -4114,7 +4114,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleConfirmCustomerDelete}
                 disabled={isCustomerDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50"
               >
                 {isCustomerDeleteSubmitting ? 'Deleting...' : 'Delete Customer'}
               </button>
@@ -4134,76 +4134,76 @@ export function BusinessPartiesClient({
           {isCustomerDetailLoading ? (
             <DetailSkeleton />
           ) : customerDetailError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
               {customerDetailError}
             </div>
           ) : selectedCustomer ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer Code</p>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{selectedCustomer.customerCode || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer Code</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedCustomer.customerCode || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.status || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.status || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.displayName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Display Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.displayName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.legalName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Legal Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.legalName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {formatPartyTypeLabel(selectedCustomer.customerType)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Credit Limit</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.creditLimit ?? 0}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Credit Limit</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.creditLimit ?? 0}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedCustomer.currencyReference?.code || selectedCustomer.currencyReference?.name || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment Terms</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedCustomer.paymentTermReference?.name || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.email || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Email</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.email || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.phone || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Phone</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.phone || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.billingAddress || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Billing Address</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.billingAddress || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedCustomer.notes || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedCustomer.notes || '-'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.createdAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedCustomer.createdAt)}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedCustomer.updatedAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedCustomer.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -4222,76 +4222,76 @@ export function BusinessPartiesClient({
           {isVendorDetailLoading ? (
             <DetailSkeleton />
           ) : vendorDetailError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
               {vendorDetailError}
             </div>
           ) : selectedVendor ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Vendor Code</p>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{selectedVendor.vendorCode || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor Code</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedVendor.vendorCode || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.status || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.status || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Display Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.displayName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Display Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.displayName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Legal Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.legalName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Legal Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.legalName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Type</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {formatPartyTypeLabel(selectedVendor.vendorType)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Tax ID</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.taxId || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Tax ID</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.taxId || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedVendor.currencyReference?.code || selectedVendor.currencyReference?.name || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Terms</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment Terms</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedVendor.paymentTermReference?.name || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.email || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Email</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.email || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.phone || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Phone</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.phone || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing Address</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.billingAddress || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Billing Address</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.billingAddress || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedVendor.notes || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedVendor.notes || '-'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.createdAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedVendor.createdAt)}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedVendor.updatedAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedVendor.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -4307,14 +4307,14 @@ export function BusinessPartiesClient({
         width="max-w-lg"
       >
         {vendorDeleteError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
             {vendorDeleteError}
           </div>
         ) : null}
 
         {vendorDeleteBlockers.length > 0 ? (
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
               <p className="font-medium">Cannot delete this vendor</p>
               <p className="mt-1">
                 This vendor cannot be deleted because the following dependencies exist:
@@ -4332,7 +4332,7 @@ export function BusinessPartiesClient({
               <button
                 type="button"
                 onClick={handleCloseVendorDeleteModal}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 Close
               </button>
@@ -4340,7 +4340,7 @@ export function BusinessPartiesClient({
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <p className="font-medium">Are you sure?</p>
               <p className="mt-1">
                 This action cannot be undone. The vendor &ldquo;{deletingVendorName}&rdquo; will be permanently removed.
@@ -4351,7 +4351,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleCloseVendorDeleteModal}
                 disabled={isVendorDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -4359,7 +4359,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleConfirmVendorDelete}
                 disabled={isVendorDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50"
               >
                 {isVendorDeleteSubmitting ? 'Deleting...' : 'Delete Vendor'}
               </button>
@@ -4379,12 +4379,12 @@ export function BusinessPartiesClient({
         ) : (
           <form onSubmit={handleEditVendor} className="space-y-6">
             {vendorEditError ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                 {vendorEditError}
               </div>
             ) : null}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Vendor Code</span>
                 <input
                   value={vendorEditForm.vendorCode}
@@ -4395,10 +4395,10 @@ export function BusinessPartiesClient({
                     }))
                   }
                   placeholder="Auto-generate if blank"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Display Name</span>
                 <input
                   required
@@ -4406,27 +4406,27 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, displayName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Legal Name</span>
                 <input
                   value={vendorEditForm.legalName}
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, legalName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Vendor Type</span>
                 <select
                   value={vendorEditForm.vendorType}
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, vendorType: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   {(vendorData?.section.filters.vendorTypes || []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -4435,7 +4435,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Currency</span>
                 <select
                   required
@@ -4443,7 +4443,7 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, currencyReference: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select currency</option>
                   {(vendorData?.referenceData.currencies || []).map((option) => (
@@ -4454,7 +4454,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Payment Terms</span>
                 <select
                   required
@@ -4465,7 +4465,7 @@ export function BusinessPartiesClient({
                       paymentTermReference: event.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select payment terms</option>
                   {(vendorData?.referenceData.paymentTerms || []).map((option) => (
@@ -4475,14 +4475,14 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Status</span>
                 <select
                   value={vendorEditForm.status}
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, status: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   {(vendorData?.section.filters.statuses || []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -4491,7 +4491,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Email</span>
                 <input
                   type="email"
@@ -4499,31 +4499,31 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, email: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Phone</span>
                 <input
                   value={vendorEditForm.phone}
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, phone: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Tax ID</span>
                 <input
                   value={vendorEditForm.taxId}
                   onChange={(event) =>
                     setVendorEditForm((previous) => ({ ...previous, taxId: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
             </div>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Billing Address</span>
               <textarea
                 rows={3}
@@ -4531,10 +4531,10 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setVendorEditForm((previous) => ({ ...previous, billingAddress: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Notes</span>
               <textarea
                 rows={4}
@@ -4542,14 +4542,14 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setVendorEditForm((previous) => ({ ...previous, notes: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
               <button
                 type="button"
                 onClick={handleCloseVendorEditModal}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -4573,14 +4573,14 @@ export function BusinessPartiesClient({
         width="max-w-lg"
       >
         {bankAccountDeleteError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
             {bankAccountDeleteError}
           </div>
         ) : null}
 
         {bankAccountDeleteBlockers.length > 0 ? (
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
               <p className="font-medium">Cannot delete this bank account</p>
               <p className="mt-1">
                 This bank account cannot be deleted because the following dependencies exist:
@@ -4598,7 +4598,7 @@ export function BusinessPartiesClient({
               <button
                 type="button"
                 onClick={handleCloseBankAccountDeleteModal}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 Close
               </button>
@@ -4606,7 +4606,7 @@ export function BusinessPartiesClient({
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <p className="font-medium">Are you sure?</p>
               <p className="mt-1">
                 This action cannot be undone. The bank account &ldquo;{deletingBankAccountName}&rdquo; will be permanently removed.
@@ -4617,7 +4617,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleCloseBankAccountDeleteModal}
                 disabled={isBankAccountDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -4625,7 +4625,7 @@ export function BusinessPartiesClient({
                 type="button"
                 onClick={handleConfirmBankAccountDelete}
                 disabled={isBankAccountDeleteSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50"
               >
                 {isBankAccountDeleteSubmitting ? 'Deleting...' : 'Delete Bank Account'}
               </button>
@@ -4645,12 +4645,12 @@ export function BusinessPartiesClient({
         ) : (
           <form onSubmit={handleEditBankAccount} className="space-y-6">
             {bankAccountEditError ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                 {bankAccountEditError}
               </div>
             ) : null}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Account Name</span>
                 <input
                   required
@@ -4658,10 +4658,10 @@ export function BusinessPartiesClient({
                   onChange={(event) =>
                     setBankAccountEditForm((previous) => ({ ...previous, accountName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Account Number</span>
                 <input
                   value={bankAccountEditForm.accountNumberMasked}
@@ -4671,37 +4671,37 @@ export function BusinessPartiesClient({
                       accountNumberMasked: event.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Bank Name</span>
                 <input
                   value={bankAccountEditForm.bankName}
                   onChange={(event) =>
                     setBankAccountEditForm((previous) => ({ ...previous, bankName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Branch Name</span>
                 <input
                   value={bankAccountEditForm.branchName}
                   onChange={(event) =>
                     setBankAccountEditForm((previous) => ({ ...previous, branchName: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 />
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Account Type</span>
                 <select
                   value={bankAccountEditForm.accountType}
                   onChange={(event) =>
                     setBankAccountEditForm((previous) => ({ ...previous, accountType: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   {(bankAccountData?.section.filters.accountTypes || []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -4710,7 +4710,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Currency</span>
                 <select
                   required
@@ -4721,7 +4721,7 @@ export function BusinessPartiesClient({
                       currencyReference: event.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select currency</option>
                   {(bankAccountData?.referenceData.currencies || []).map((option) => (
@@ -4732,7 +4732,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Ledger Account</span>
                 <select
                   required
@@ -4743,7 +4743,7 @@ export function BusinessPartiesClient({
                       ledgerAccount: event.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="">Select ledger account</option>
                   {(bankAccountData?.referenceData.ledgerAccounts || []).map((option) => (
@@ -4754,7 +4754,7 @@ export function BusinessPartiesClient({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Status</span>
                 <select
                   value={bankAccountEditForm.isActive ? 'true' : 'false'}
@@ -4764,13 +4764,13 @@ export function BusinessPartiesClient({
                       isActive: event.target.value === 'true',
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="true">Active</option>
                   <option value="false">Inactive</option>
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Default Receipt Account</span>
                 <select
                   value={bankAccountEditForm.isDefaultReceiptAccount ? 'true' : 'false'}
@@ -4780,13 +4780,13 @@ export function BusinessPartiesClient({
                       isDefaultReceiptAccount: event.target.value === 'true',
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="false">No</option>
                   <option value="true">Yes</option>
                 </select>
               </label>
-              <label className="space-y-2 text-sm text-gray-700">
+              <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-medium">Default Disbursement Account</span>
                 <select
                   value={bankAccountEditForm.isDefaultDisbursementAccount ? 'true' : 'false'}
@@ -4796,14 +4796,14 @@ export function BusinessPartiesClient({
                       isDefaultDisbursementAccount: event.target.value === 'true',
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
                 >
                   <option value="false">No</option>
                   <option value="true">Yes</option>
                 </select>
               </label>
             </div>
-            <label className="block space-y-2 text-sm text-gray-700">
+            <label className="block space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-medium">Notes</span>
               <textarea
                 rows={4}
@@ -4811,14 +4811,14 @@ export function BusinessPartiesClient({
                 onChange={(event) =>
                   setBankAccountEditForm((previous) => ({ ...previous, notes: event.target.value }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
               />
             </label>
-            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+            <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
               <button
                 type="button"
                 onClick={handleCloseBankAccountEditModal}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -4845,55 +4845,55 @@ export function BusinessPartiesClient({
           {isBankAccountDetailLoading ? (
             <DetailSkeleton />
           ) : bankAccountDetailError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
               {bankAccountDetailError}
             </div>
           ) : selectedBankAccount ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Name</p>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Account Name</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {selectedBankAccount.accountName || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {getBankAccountStatus(selectedBankAccount.isActive)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Bank Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.bankName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bank Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedBankAccount.bankName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Branch Name</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.branchName || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Branch Name</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedBankAccount.branchName || '-'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Type</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Account Type</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {formatPartyTypeLabel(selectedBankAccount.accountType)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Number</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Account Number</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedBankAccount.accountNumberMasked || '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Currency</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Currency</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedBankAccount.currencyReference?.code ||
                       selectedBankAccount.currencyReference?.name ||
                       '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Ledger Account</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Ledger Account</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedBankAccount.ledgerAccount?.code && selectedBankAccount.ledgerAccount?.name
                       ? `${selectedBankAccount.ledgerAccount.code} ${selectedBankAccount.ledgerAccount.name}`
                       : selectedBankAccount.ledgerAccount?.code ||
@@ -4901,34 +4901,34 @@ export function BusinessPartiesClient({
                         '-'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Default Receipt</p>
-                  <p className="mt-2 text-sm text-gray-900">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Default Receipt</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedBankAccount.isDefaultReceiptAccount ? 'Yes' : 'No'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Default Disbursement
                   </p>
-                  <p className="mt-2 text-sm text-gray-900">
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">
                     {selectedBankAccount.isDefaultDisbursementAccount ? 'Yes' : 'No'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4 md:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                  <p className="mt-2 text-sm text-gray-900">{selectedBankAccount.notes || '-'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{selectedBankAccount.notes || '-'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Created At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.createdAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedBankAccount.createdAt)}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Updated At</p>
-                  <p className="mt-2 text-sm text-gray-900">{formatDateTime(selectedBankAccount.updatedAt)}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated At</p>
+                  <p className="mt-2 text-sm text-gray-900 dark:text-gray-300">{formatDateTime(selectedBankAccount.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -4978,22 +4978,22 @@ function SlideOver({
       onClick={onClose}
     >
       <div
-        className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${
+        className={`flex h-full w-full ${width} flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${
           animate ? 'translate-x-0' : 'translate-x-full'
         }`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
             {description ? (
-              <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+              <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p>
             ) : null}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <X className="h-5 w-5" />
           </button>

@@ -110,5 +110,15 @@ export const Assignments: CollectionConfig = {
         description: 'Optional deadline for submission',
       },
     },
+    {
+      name: 'gradeWeight',
+      type: 'number',
+      min: 0,
+      max: 100,
+      defaultValue: 1,
+      admin: {
+        description: 'Weight of this assignment toward the final course grade',
+      },
+    },
   ],
 }
