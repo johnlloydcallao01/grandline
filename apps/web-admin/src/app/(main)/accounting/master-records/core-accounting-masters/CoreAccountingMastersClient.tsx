@@ -199,11 +199,11 @@ function normalizeCoreAccountingTab(value?: string | null): CoreAccountingTab {
 }
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') {
-    return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
+   if (variant === 'primary') {
+    return 'border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 hover:border-blue-700';
   }
   if (variant === 'ghost') {
-    return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200';
+    return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300';
   }
   return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
@@ -2274,7 +2274,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {chartError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -2316,13 +2316,13 @@ export function CoreAccountingMastersClient({
                               value={chartSearchInput}
                               onChange={(event) => setChartSearchInput(event.target.value)}
                               placeholder={chartSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                             />
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
                             >
                               Search
                             </button>
@@ -2709,7 +2709,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {fyError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -2751,13 +2751,13 @@ export function CoreAccountingMastersClient({
                               value={fySearchInput}
                               onChange={(event) => setFySearchInput(event.target.value)}
                               placeholder={fySection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                             />
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
                             >
                               Search
                             </button>
@@ -3048,7 +3048,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {periodError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -3090,13 +3090,13 @@ export function CoreAccountingMastersClient({
                               value={periodSearchInput}
                               onChange={(event) => setPeriodSearchInput(event.target.value)}
                               placeholder={periodSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                             />
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
                             >
                               Search
                             </button>
@@ -3402,7 +3402,7 @@ export function CoreAccountingMastersClient({
               </div>
 
               {tcError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-none" />
                     <div>
@@ -3444,13 +3444,13 @@ export function CoreAccountingMastersClient({
                               value={tcSearchInput}
                               onChange={(event) => setTcSearchInput(event.target.value)}
                               placeholder={tcSection.searchPlaceholder}
-                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                             />
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
+                              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700"
                             >
                               Search
                             </button>
@@ -3718,7 +3718,7 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateFiscalYear} className="space-y-6">
               {fyCreateError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyCreateError}
                 </div>
               ) : null}
@@ -3732,7 +3732,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3743,7 +3743,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3755,7 +3755,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, startDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3767,7 +3767,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, endDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3777,7 +3777,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, status: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="draft">Draft</option>
                     <option value="open">Open</option>
@@ -3791,7 +3791,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, closeMode: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="manual">Manual</option>
                     <option value="hard_lock">Hard Lock</option>
@@ -3805,7 +3805,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setFyCreateForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
               </div>
@@ -3818,22 +3818,22 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setFyCreateForm((previous) => ({ ...previous, notes: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                 <button
                   type="button"
                   onClick={handleCloseFyCreateModal}
-                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isFyCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                 >
                   {isFyCreateSubmitting ? 'Creating...' : 'Create Fiscal Year'}
                 </button>
@@ -3849,7 +3849,7 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateAccount} className="space-y-6">
               {createError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {createError}
                 </div>
               ) : null}
@@ -3863,7 +3863,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3874,7 +3874,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -3894,7 +3894,7 @@ export function CoreAccountingMastersClient({
                             : 'debit',
                       }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     {(chartData?.section.filters.accountTypes || []).map((option) => (
                       <option key={option.value} value={option.value}>
@@ -3910,7 +3910,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, accountSubType: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="">Select subtype</option>
                     {(chartData?.section.filters.accountSubTypes || []).map((option) => (
@@ -3927,7 +3927,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, parentAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="">No parent</option>
                     {(chartData?.referenceData.parentAccounts || []).map((account) => (
@@ -3948,7 +3948,7 @@ export function CoreAccountingMastersClient({
                         normalBalance: event.target.value as 'debit' | 'credit',
                       }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="debit">Debit</option>
                     <option value="credit">Credit</option>
@@ -3962,7 +3962,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setCreateForm((previous) => ({ ...previous, sortOrder: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
               </div>
@@ -3975,12 +3975,12 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setCreateForm((previous) => ({ ...previous, description: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </label>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isActive}
@@ -3991,7 +3991,7 @@ export function CoreAccountingMastersClient({
                   />
                   Active Account
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.allowManualEntries}
@@ -4005,7 +4005,7 @@ export function CoreAccountingMastersClient({
                   />
                   Allow Manual Entries
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isControlAccount}
@@ -4019,7 +4019,7 @@ export function CoreAccountingMastersClient({
                   />
                   Control Account
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={createForm.isRetainedEarnings}
@@ -4033,7 +4033,7 @@ export function CoreAccountingMastersClient({
                   />
                   Retained Earnings
                 </label>
-                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                   <input
                     type="checkbox"
                     checked={createForm.isSuspenseAccount}
@@ -4049,18 +4049,18 @@ export function CoreAccountingMastersClient({
                 </label>
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                 <button
                   type="button"
                   onClick={handleCloseCreateModal}
-                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                 >
                   {isCreateSubmitting ? 'Creating...' : 'Create Account'}
                 </button>
@@ -4076,13 +4076,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditFiscalYear} className="space-y-6">
                   {fyEditError ? (
-                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {fyEditError}
                     </div>
                   ) : null}
 
                   {editingFy?.usageSummary?.hasPeriods ? (
-                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                       <p className="font-medium">Restricted edit mode</p>
                       <p className="mt-1">
                         {editingFy.editPermissions?.restrictionReason ||
@@ -4103,7 +4103,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4114,7 +4114,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4127,7 +4127,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, startDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4140,7 +4140,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, endDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4150,7 +4150,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, status: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="draft">Draft</option>
                         <option value="open">Open</option>
@@ -4164,7 +4164,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, closeMode: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="manual">Manual</option>
                         <option value="hard_lock">Hard Lock</option>
@@ -4178,7 +4178,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setFyEditForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                   </div>
@@ -4191,22 +4191,22 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setFyEditForm((previous) => ({ ...previous, notes: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                     <button
                       type="button"
                       onClick={handleCloseFyEditModal}
-                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isFyEditSubmitting || isFyEditLoading}
-                      className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                     >
                       {isFyEditSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -4222,13 +4222,13 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditAccount} className="space-y-6">
                   {editError ? (
-                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {editError}
                     </div>
                   ) : null}
 
                   {editingAccount?.usageSummary?.hasTransactions ? (
-                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                       <p className="font-medium">Restricted edit mode</p>
                       <p className="mt-1">
                         {editRestrictionReason ||
@@ -4249,7 +4249,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4260,7 +4260,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4281,7 +4281,7 @@ export function CoreAccountingMastersClient({
                                 : 'debit',
                           }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         {(chartData?.section.filters.accountTypes || []).map((option) => (
                           <option key={option.value} value={option.value}>
@@ -4297,7 +4297,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, accountSubType: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="">Select subtype</option>
                         {(chartData?.section.filters.accountSubTypes || []).map((option) => (
@@ -4315,7 +4315,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, parentAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         <option value="">No parent</option>
                         {(chartData?.referenceData.parentAccounts || []).map((account) => (
@@ -4337,7 +4337,7 @@ export function CoreAccountingMastersClient({
                             normalBalance: event.target.value as 'debit' | 'credit',
                           }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm uppercase text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-400"
                       >
                         <option value="debit">Debit</option>
                         <option value="credit">Credit</option>
@@ -4351,7 +4351,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setEditForm((previous) => ({ ...previous, sortOrder: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                   </div>
@@ -4364,12 +4364,12 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setEditForm((previous) => ({ ...previous, description: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                     />
                   </label>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isActive}
@@ -4380,7 +4380,7 @@ export function CoreAccountingMastersClient({
                       />
                       Active Account
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.allowManualEntries}
@@ -4394,7 +4394,7 @@ export function CoreAccountingMastersClient({
                       />
                       Allow Manual Entries
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isControlAccount}
@@ -4408,7 +4408,7 @@ export function CoreAccountingMastersClient({
                       />
                       Control Account
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
                         checked={editForm.isRetainedEarnings}
@@ -4422,7 +4422,7 @@ export function CoreAccountingMastersClient({
                       />
                       Retained Earnings
                     </label>
-                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
+                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
                       <input
                         type="checkbox"
                         checked={editForm.isSuspenseAccount}
@@ -4438,18 +4438,18 @@ export function CoreAccountingMastersClient({
                     </label>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                     <button
                       type="button"
                       onClick={handleCloseEditModal}
-                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isEditSubmitting || isEditLoading}
-                      className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                     >
                       {isEditSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -4465,14 +4465,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {fyDeleteError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyDeleteError}
                 </div>
               ) : null}
 
               {fyDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this fiscal year</p>
                     <p className="mt-1">
                       This fiscal year cannot be deleted because the following dependencies exist:
@@ -4498,7 +4498,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The fiscal year &ldquo;{deletingFyName}&rdquo; will be permanently removed.
@@ -4509,7 +4509,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseFyDeleteModal}
                       disabled={isFyDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -4540,55 +4540,55 @@ export function CoreAccountingMastersClient({
                   ))}
                 </div>
               ) : fyDetailError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {fyDetailError}
                 </div>
               ) : selectedFy ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
                       <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedFy.code || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
                       <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedFy.name || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Start Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.startDate ? new Date(selectedFy.startDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">End Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.endDate ? new Date(selectedFy.endDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.status || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Close Mode</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.closeMode || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Locked From Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedFy.lockedFromDate ? new Date(selectedFy.lockedFromDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Periods</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.usageSummary?.periodCount ?? '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed At</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.closedAt) || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed By</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedFy.closedBy === 'object' && selectedFy.closedBy?.name
@@ -4596,15 +4596,15 @@ export function CoreAccountingMastersClient({
                           : selectedFy.closedBy || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedFy.notes || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedFy.updatedAt)}</p>
                     </div>
@@ -4627,29 +4627,29 @@ export function CoreAccountingMastersClient({
             ))}
           </div>
         ) : accountDetailError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {accountDetailError}
                 </div>
               ) : selectedAccount ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
                       <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedAccount.code || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
                     <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedAccount.name || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.accountType || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Subtype</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.accountSubType || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Parent</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                       {selectedAccount.parentAccount?.code
@@ -4657,21 +4657,21 @@ export function CoreAccountingMastersClient({
                         : selectedAccount.parentAccount?.name || '-'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Normal Balance</p>
                     <p className="mt-2 text-sm uppercase text-gray-700 dark:text-gray-300">{selectedAccount.normalBalance || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                       {selectedAccount.isActive === false ? 'Inactive' : 'Active'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sort Order</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.sortOrder ?? 0}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Flags</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -4696,15 +4696,15 @@ export function CoreAccountingMastersClient({
                       ) : null}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Description</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedAccount.description || '-'}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedAccount.createdAt)}</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                  <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedAccount.updatedAt)}</p>
                   </div>
@@ -4721,7 +4721,7 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreatePeriod} className="space-y-6">
               {periodCreateError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodCreateError}
                 </div>
               ) : null}
@@ -4735,7 +4735,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, fiscalYear: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="">Select fiscal year</option>
                     {(periodSection.filters.fiscalYears || []).map((option) => (
@@ -4755,7 +4755,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, periodNumber: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
@@ -4766,7 +4766,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, label: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4778,7 +4778,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, startDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4790,7 +4790,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, endDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4800,7 +4800,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, status: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="draft">Draft</option>
                     <option value="open">Open</option>
@@ -4816,7 +4816,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setPeriodCreateForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
               </div>
@@ -4829,22 +4829,22 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setPeriodCreateForm((previous) => ({ ...previous, notes: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                 <button
                   type="button"
                   onClick={handleClosePeriodCreateModal}
-                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPeriodCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                 >
                   {isPeriodCreateSubmitting ? 'Creating...' : 'Create Period'}
                 </button>
@@ -4860,7 +4860,7 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditPeriod} className="space-y-6">
                   {periodEditError ? (
-                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {periodEditError}
                     </div>
                   ) : null}
@@ -4874,7 +4874,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, fiscalYear: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="">Select fiscal year</option>
                         {(periodSection.filters.fiscalYears || []).map((option) => (
@@ -4894,7 +4894,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, periodNumber: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300 md:col-span-2">
@@ -4905,7 +4905,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, label: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4917,7 +4917,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, startDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4929,7 +4929,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, endDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -4939,7 +4939,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, status: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="draft">Draft</option>
                         <option value="open">Open</option>
@@ -4955,7 +4955,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setPeriodEditForm((previous) => ({ ...previous, lockedFromDate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                   </div>
@@ -4968,22 +4968,22 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setPeriodEditForm((previous) => ({ ...previous, notes: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                     <button
                       type="button"
                       onClick={handleClosePeriodEditModal}
-                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isPeriodEditSubmitting || isPeriodEditLoading}
-                      className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                     >
                       {isPeriodEditSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -4999,14 +4999,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {periodDeleteError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodDeleteError}
                 </div>
               ) : null}
 
               {periodDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this period</p>
                     <p className="mt-1">
                       This period cannot be deleted because the following dependencies exist:
@@ -5032,7 +5032,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The period &ldquo;{deletingPeriodName}&rdquo; will be permanently removed.
@@ -5043,7 +5043,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleClosePeriodDeleteModal}
                       disabled={isPeriodDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -5074,21 +5074,21 @@ export function CoreAccountingMastersClient({
                   ))}
                 </div>
               ) : periodDetailError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {periodDetailError}
                 </div>
               ) : selectedPeriod ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Label</p>
                       <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedPeriod.label || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Period Number</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.periodNumber ?? '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Fiscal Year</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedPeriod.fiscalYear === 'object' && selectedPeriod.fiscalYear
@@ -5096,33 +5096,33 @@ export function CoreAccountingMastersClient({
                           : selectedPeriod.fiscalYear || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.status || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Start Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.startDate ? new Date(selectedPeriod.startDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">End Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.endDate ? new Date(selectedPeriod.endDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Locked From Date</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {selectedPeriod.lockedFromDate ? new Date(selectedPeriod.lockedFromDate).toISOString().slice(0, 10) : '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed At</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.closedAt) || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Closed By</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedPeriod.closedBy === 'object' && selectedPeriod.closedBy?.name
@@ -5130,15 +5130,15 @@ export function CoreAccountingMastersClient({
                           : selectedPeriod.closedBy || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedPeriod.notes || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedPeriod.updatedAt)}</p>
                     </div>
@@ -5155,14 +5155,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {deleteError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {deleteError}
                 </div>
               ) : null}
 
               {deleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this account</p>
                     <p className="mt-1">
                       This account cannot be deleted because the following dependencies exist:
@@ -5188,7 +5188,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The account &ldquo;{deletingAccountName}&rdquo; will be permanently removed.
@@ -5199,7 +5199,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseDeleteModal}
                       disabled={isDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -5224,7 +5224,7 @@ export function CoreAccountingMastersClient({
       >
         <form onSubmit={handleCreateTaxCode} className="space-y-6">
               {tcCreateError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcCreateError}
                 </div>
               ) : null}
@@ -5238,7 +5238,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5249,7 +5249,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, name: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5259,7 +5259,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, scope: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="both">Both</option>
                     <option value="sales">Sales</option>
@@ -5278,7 +5278,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, rate: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5288,7 +5288,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, calculationMethod: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="exclusive">Exclusive</option>
                     <option value="inclusive">Inclusive</option>
@@ -5301,7 +5301,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, purchaseAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="">Select a value</option>
                     {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5318,7 +5318,7 @@ export function CoreAccountingMastersClient({
                     onChange={(event) =>
                       setTcCreateForm((previous) => ({ ...previous, salesAccount: event.target.value }))
                     }
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                   >
                     <option value="">Select a value</option>
                     {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5330,7 +5330,7 @@ export function CoreAccountingMastersClient({
                 </label>
               </div>
 
-              <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+              <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                 <input
                   type="checkbox"
                   checked={tcCreateForm.isActive}
@@ -5350,22 +5350,22 @@ export function CoreAccountingMastersClient({
                   onChange={(event) =>
                     setTcCreateForm((previous) => ({ ...previous, description: event.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </label>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                 <button
                   type="button"
                   onClick={handleCloseTcCreateModal}
-                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isTcCreateSubmitting}
-                  className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                 >
                   {isTcCreateSubmitting ? 'Creating...' : 'Create Tax Code'}
                 </button>
@@ -5381,7 +5381,7 @@ export function CoreAccountingMastersClient({
       >
                 <form onSubmit={handleEditTaxCode} className="space-y-6">
                   {tcEditError ? (
-                    <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                    <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                       {tcEditError}
                     </div>
                   ) : null}
@@ -5395,7 +5395,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, code: event.target.value.toUpperCase() }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5406,7 +5406,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, name: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5416,7 +5416,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, scope: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="both">Both</option>
                         <option value="sales">Sales</option>
@@ -5435,7 +5435,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, rate: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       />
                     </label>
                     <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5445,7 +5445,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, calculationMethod: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="exclusive">Exclusive</option>
                         <option value="inclusive">Inclusive</option>
@@ -5458,7 +5458,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, purchaseAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="">Select a value</option>
                         {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5475,7 +5475,7 @@ export function CoreAccountingMastersClient({
                         onChange={(event) =>
                           setTcEditForm((previous) => ({ ...previous, salesAccount: event.target.value }))
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                       >
                         <option value="">Select a value</option>
                         {(tcData?.referenceData.chartAccounts || []).map((account) => (
@@ -5487,7 +5487,7 @@ export function CoreAccountingMastersClient({
                     </label>
                   </div>
 
-                  <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                  <label className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-[var(--card-border)] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                     <input
                       type="checkbox"
                       checked={tcEditForm.isActive}
@@ -5507,22 +5507,22 @@ export function CoreAccountingMastersClient({
                       onChange={(event) =>
                         setTcEditForm((previous) => ({ ...previous, description: event.target.value }))
                       }
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-800"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 dark:border-[var(--card-border)] pt-4">
                     <button
                       type="button"
                       onClick={handleCloseTcEditModal}
-                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isTcEditSubmitting || isTcEditLoading}
-                      className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}
                     >
                       {isTcEditSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -5538,14 +5538,14 @@ export function CoreAccountingMastersClient({
         width="max-w-lg"
       >
               {tcDeleteError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcDeleteError}
                 </div>
               ) : null}
 
               {tcDeleteBlockers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-400">
                     <p className="font-medium">Cannot delete this tax code</p>
                     <p className="mt-1">
                       This tax code cannot be deleted because the following dependencies exist:
@@ -5571,7 +5571,7 @@ export function CoreAccountingMastersClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                  <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">Are you sure?</p>
                     <p className="mt-1">
                       This action cannot be undone. The tax code &ldquo;{deletingTcName}&rdquo; will be permanently removed.
@@ -5582,7 +5582,7 @@ export function CoreAccountingMastersClient({
                       type="button"
                       onClick={handleCloseTcDeleteModal}
                       disabled={isTcDeleteSubmitting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
@@ -5613,37 +5613,37 @@ export function CoreAccountingMastersClient({
                   ))}
                 </div>
               ) : tcDetailError ? (
-                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
                   {tcDetailError}
                 </div>
               ) : selectedTc ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code</p>
                       <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedTc.code || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.name || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Scope</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.scope || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Rate</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.rate !== null && selectedTc.rate !== undefined ? `${selectedTc.rate}%` : '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Calculation Method</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.calculationMethod || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.isActive !== false ? 'Active' : 'Inactive'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Purchase Account</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedTc.purchaseAccount === 'object' && selectedTc.purchaseAccount
@@ -5651,7 +5651,7 @@ export function CoreAccountingMastersClient({
                           : selectedTc.purchaseAccount || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sales Account</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {typeof selectedTc.salesAccount === 'object' && selectedTc.salesAccount
@@ -5659,15 +5659,15 @@ export function CoreAccountingMastersClient({
                           : selectedTc.salesAccount || '-'}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4 md:col-span-2">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Description</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{selectedTc.description || '-'}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedTc.createdAt)}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Updated</p>
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{formatDateTime(selectedTc.updatedAt)}</p>
                     </div>

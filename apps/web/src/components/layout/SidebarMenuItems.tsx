@@ -3,6 +3,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarItem } from '@/components/ui';
+import { useMessenger } from '@encreasl/ui/messenger-context';
 
 interface SidebarMenuItemsProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface SidebarMenuItemsProps {
 
 export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps) {
   const pathname = usePathname();
+  const { unreadCount } = useMessenger();
 
   return (
     <>
@@ -78,6 +80,15 @@ export function SidebarMenuItems({ isOpen, onItemClick }: SidebarMenuItemsProps)
           collapsed={!isOpen}
           href="/announcements"
           onClick={onItemClick}
+        />
+        <SidebarItem
+          icon="messenger"
+          label="Messenger"
+          active={pathname === '/messenger'}
+          collapsed={!isOpen}
+          href="/messenger"
+          onClick={onItemClick}
+          badge={unreadCount}
         />
       </div>
 

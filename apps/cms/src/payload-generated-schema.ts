@@ -250,7 +250,7 @@ export const enum_support_tickets_category = pgEnum('enum_support_tickets_catego
   'general',
   'enrollment',
 ])
-export const enum_chats_type = pgEnum('enum_chats_type', ['direct', 'group'])
+export const enum_chats_type = pgEnum('enum_chats_type', ['direct', 'group', 'instructor_trainee', 'messenger'])
 export const enum_chats_status = pgEnum('enum_chats_status', ['active', 'archived', 'deleted'])
 export const enum_chat_messages_content_type = pgEnum('enum_chat_messages_content_type', [
   'text',

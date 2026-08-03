@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@grandline/chat-engine": "workspace:*",
     "@lexical/html": "0.28.0",
     "@lexical/link": "0.28.0",
     "@lexical/list": "0.28.0",
@@ -40,7 +41,10 @@
     "./physics-carousel": "./src/physics-carousel.ts",
     "./lexical-course-editor": "./src/lexical-course-editor.tsx",
     "./media-library-modal": "./src/media-library-modal.tsx",
-    "./messenger": "./src/messenger.tsx"
+    "./messenger": "./src/messenger.tsx",
+    "./messenger-button": "./src/messenger-button.tsx",
+    "./messenger-context": "./src/messenger-context.tsx",
+    "./messenger-icons": "./src/messenger-icons.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -50,6 +54,7 @@
     "@encreasl/eslint-config": "workspace:*",
     "@encreasl/typescript-config": "workspace:*",
     "@eslint/js": "^9",
+    "@types/node": "^26.1.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8",

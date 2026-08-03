@@ -91,7 +91,6 @@ export const ChatMessages: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      required: true,
     },
     {
       name: 'contentType',

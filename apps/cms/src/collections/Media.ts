@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { v2 as cloudinary } from 'cloudinary'
 import type { UploadApiResponse } from 'cloudinary'
 import { authenticatedUsers, adminOnly } from '../access'
+import { getRequestUserId } from '../accounting/utils/accounting-audit'
 
 // Configure Cloudinary
 cloudinary.config({
@@ -15,11 +16,24 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
     create: authenticatedUsers,
-    update: authenticatedUsers,
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      // Admins can update any media; other authenticated users can only update media they uploaded.
+      if (user.role === 'admin') return true
+      return { uploadedBy: { equals: user.id } }
+    },
     delete: adminOnly,
   },
   hooks: {
     beforeChange: [
+      async ({ data, req, operation }) => {
+        // Attribute new uploads to the authenticated user who created them.
+        if (operation === 'create' && data && !data.uploadedBy) {
+          const uid = getRequestUserId(req)
+          if (uid) data.uploadedBy = uid
+        }
+        return data
+      },
       async ({ data, req, operation }) => {
         // Only process on create with a file upload
         if (operation !== 'create' || !req.file) {
@@ -114,6 +128,29 @@ export const Media: CollectionConfig = {
       type: 'text',
       admin: {
         readOnly: true,
+      },
+    },
+    {
+      name: 'visibility',
+      type: 'select',
+      options: [
+        { label: 'Shared', value: 'shared' },
+        { label: 'Private', value: 'private' },
+      ],
+      defaultValue: 'shared',
+      admin: {
+        description: 'Shared media is visible to other instructors; private media is only visible to the uploader.',
+      },
+    },
+    {
+      name: 'uploadedBy',
+      type: 'relationship',
+      relationTo: 'users',
+      index: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'User who uploaded this media file.',
       },
     },
   ],

@@ -266,6 +266,7 @@ const CHAT_TYPE_RULES: Record<string, { minParticipants: number; maxParticipants
   support: { minParticipants: 2, maxParticipants: 2 },
   instructor_trainee: { minParticipants: 2, maxParticipants: 2 },
   admin_user: { minParticipants: 2, maxParticipants: 2 },
+  messenger: { minParticipants: 2, maxParticipants: 2 },
   group: { minParticipants: 2, maxParticipants: 100 }
 }
 

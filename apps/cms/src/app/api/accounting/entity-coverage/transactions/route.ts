@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         description: 'Review approval workflow mappings for transaction entity types such as invoices, bills, expenses, and journal entries.',
         searchPlaceholder: 'Search entity type, collection, outcome, or mapping status',
         filters: {
-          entityTypes: rows.map((r) => ({ label: r.entityTypeLabel, value: r.entityType })),
+          entityTypes: Array.from(new Map(rows.map((r) => [r.entityType, { label: r.entityTypeLabel, value: r.entityType }])).values()),
           quickFilters: [
             { label: 'Has Workflow', value: 'workflow:active' },
             { label: 'Missing Workflow', value: 'workflow:missing' },
@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       pagination: { page: currentPage, limit, totalDocs, totalPages, hasPrevPage: currentPage > 1, hasNextPage: currentPage < totalPages },
       totals: { totalRows: rows.length, filteredRows: totalDocs, withWorkflowCount, totalRequests, totalPending },
       referenceData: {
-        entityTypes: rows.map((r) => ({ label: r.entityTypeLabel, value: r.entityType })),
+        entityTypes: Array.from(new Map(rows.map((r) => [r.entityType, { label: r.entityTypeLabel, value: r.entityType }])).values()),
         users,
       },
     })

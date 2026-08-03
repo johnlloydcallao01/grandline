@@ -3,7 +3,58 @@ import { getPayload } from 'payload'
 import { requireAuth, handleApiError, ApiError } from '@/app/api/chat/_utils/auth'
 import type { ApiResponse, MessageListResponse, MessageResponse, SendMessageRequest } from '@/app/api/chat/_types/responses'
 import type { Chat, ChatMessage } from '@/payload-types'
-import { canSendToChat, validateNewMessage } from '@grandline/chat-engine'
+import { canSendToChat, validateNewMessage, validateMessageType, validateReplyChain } from '@grandline/chat-engine'
+
+function createLexicalContent(message: string): ChatMessage['content'] {
+  return {
+    root: {
+      type: 'root',
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1,
+      children: message.trim()
+        ? [
+            {
+              type: 'paragraph',
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+              children: [
+                {
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: message,
+                  type: 'text',
+                  version: 1,
+                },
+              ],
+            },
+          ]
+        : [
+            // Canonical empty paragraph (Payload stores this when a richText
+            // field is emptied) — an empty text node is rejected by Lexical.
+            {
+              type: 'paragraph',
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+              children: [],
+            },
+          ],
+    },
+  }
+}
+
+function toLexicalContent(content: any): ChatMessage['content'] {
+  if (!content) return createLexicalContent('')
+  if (typeof content === 'string') return createLexicalContent(content)
+  return content
+}
 
 export async function GET(
   req: NextRequest,
@@ -146,6 +197,7 @@ export async function POST(
     }
 
     const body: SendMessageRequest = await req.json()
+    const messageType = body.type || 'text'
 
     // Extract text for validation if content is a Lexical object
     let textContent = body.content as any
@@ -162,20 +214,70 @@ export async function POST(
       textContent = String(textContent || '')
     }
 
-    // Validate message
-    const validation = validateNewMessage({
-      content: textContent,
-      type: body.type || 'text',
-      replyToMessageId: body.replyToMessageId,
-      attachments: body.attachments
-    })
+    // Validate type
+    const typeValidation = validateMessageType(messageType)
+    if (!typeValidation.valid) {
+      throw new ApiError(typeValidation.error || 'Invalid message type', 400, typeValidation.code)
+    }
+
+    // Validate message (image/file messages may have empty content when attachments are present)
+    const hasAttachments = Array.isArray(body.attachments) && body.attachments.length > 0
+    const isMediaMessage = messageType === 'image' || messageType === 'file'
+    const validation = validateNewMessage(
+      {
+        content: textContent,
+        type: messageType,
+        replyToMessageId: body.replyToMessageId,
+        attachments: hasAttachments ? undefined : body.attachments
+      },
+      hasAttachments && isMediaMessage ? { allowEmpty: true } : undefined
+    )
 
     if (!validation.valid) {
       throw new ApiError(validation.error || 'Invalid message', 400, validation.code)
     }
 
+    // Validate reply chain explicitly (kept separate because media messages may have empty content)
+    if (body.replyToMessageId) {
+      const replyValidation = validateReplyChain(body.replyToMessageId)
+      if (!replyValidation.valid) {
+        throw new ApiError(replyValidation.error || 'Invalid reply', 400, replyValidation.code)
+      }
+    }
+
+    // Resolve attachment media IDs → existing media docs. Only images allowed for image messages.
+    let attachmentMediaIds: number[] = []
+    if (hasAttachments) {
+      const rawAttachments = body.attachments ?? []
+      attachmentMediaIds = rawAttachments
+        .map((a: any) => parseInt(a, 10))
+        .filter((id: number) => Number.isInteger(id) && id > 0)
+
+      if (attachmentMediaIds.length !== rawAttachments.length || attachmentMediaIds.length > 10) {
+        throw new ApiError('Invalid attachments. Up to 10 valid media IDs allowed.', 400, 'INVALID_ATTACHMENTS_FORMAT')
+      }
+
+      const mediaResult = await payload.find({
+        collection: 'media',
+        where: { id: { in: attachmentMediaIds } },
+        limit: attachmentMediaIds.length,
+        overrideAccess: true,
+      })
+      const existing = new Set(mediaResult.docs.map((m: any) => m.id))
+      if (existing.size !== attachmentMediaIds.length) {
+        throw new ApiError('One or more attachment media items not found', 400, 'INVALID_ATTACHMENT')
+      }
+
+      if (messageType === 'image') {
+        const isImage = (m: any) => (m.mimeType || '').startsWith('image/')
+        if (!mediaResult.docs.every(isImage)) {
+          throw new ApiError('Image messages can only include image attachments', 400, 'INVALID_ATTACHMENT_TYPE')
+        }
+      }
+    }
+
     // Create message
-    console.log('Creating message:', { chatId, senderId: user.id, contentType: body.type });
+    console.log('Creating message:', { chatId, senderId: user.id, contentType: messageType, attachments: attachmentMediaIds });
     ; (req as any).user = user;
     const message = await payload.create({
       collection: 'chat-messages',
@@ -185,9 +287,10 @@ export async function POST(
       data: {
         chat: chatId,
         sender: user.id,
-        content: body.content as any,
-        contentType: body.type || 'text',
+        content: toLexicalContent(body.content),
+        contentType: messageType,
         replyTo: body.replyToMessageId ? body.replyToMessageId : null,
+        ...(attachmentMediaIds.length > 0 ? { attachments: attachmentMediaIds } : {}),
       }
     })
 
@@ -220,7 +323,7 @@ export async function POST(
       if (previewText.length > 80) {
         previewText = previewText.substring(0, 80).trim() + '...';
       } else if (!previewText) {
-        previewText = body.type === 'image' ? '[Image]' : body.type === 'file' ? '[File]' : '[Message]';
+        previewText = messageType === 'image' ? '[Image]' : messageType === 'file' ? '[File]' : '[Message]';
       }
 
       await payload.update({

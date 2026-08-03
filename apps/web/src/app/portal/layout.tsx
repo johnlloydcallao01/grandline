@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Header, MobileFooter } from '@/components/layout'
 import { ProtectedRoute } from '@/components/auth'
 import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import { MessengerProvider } from '@encreasl/ui/messenger-context'
 import { useUser } from '@/hooks/useAuth'
 
 /**
@@ -24,7 +25,8 @@ export default function PortalLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
   const pathname = usePathname()
-  const { user } = useUser()
+  const { user, token } = useUser()
+const messengerApiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '')
 
   const isCoursePlayer =
     typeof pathname === 'string' &&
@@ -81,44 +83,46 @@ export default function PortalLayout({
 
   return (
     <ProtectedRoute>
-      <NotificationsProvider userId={user?.id}>
-        <div
-          className="min-h-screen bg-[var(--background)]"
-          style={{ backgroundColor: 'var(--background)' }}
-          data-fixed-header={!isCoursePlayer ? 'true' : undefined}
-        >
-          {/* Header - Same as main app for consistency */}
-          {!isCoursePlayer && (
-            <Header
-              sidebarOpen={sidebarOpen}
-              onToggleSidebar={toggleSidebar}
-              onSearch={handleSearch}
-            />
-          )}
-
-          {/* Portal Sidebar - Custom sidebar for portal pages */}
-          {!isCoursePlayer && (
-            <PortalSidebar
-              isOpen={sidebarOpen}
-              onToggle={toggleSidebar}
-            />
-          )}
-
-          {/* Main Content Area - Portal pages content */}
-          <main
-            className={`transition-all duration-300 bg-[var(--background)] ${isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
-              }`}
+      <MessengerProvider token={token} userId={user?.id} apiBaseUrl={messengerApiBase}>
+        <NotificationsProvider userId={user?.id}>
+          <div
+            className="min-h-screen bg-[var(--background)]"
             style={{ backgroundColor: 'var(--background)' }}
+            data-fixed-header={!isCoursePlayer ? 'true' : undefined}
           >
-            <div className="min-h-full bg-[var(--background)]" style={{ backgroundColor: 'var(--background)' }}>
-              {children}
-            </div>
-          </main>
+            {/* Header - Same as main app for consistency */}
+            {!isCoursePlayer && (
+              <Header
+                sidebarOpen={sidebarOpen}
+                onToggleSidebar={toggleSidebar}
+                onSearch={handleSearch}
+              />
+            )}
 
-          {/* Mobile Footer - Same as main app */}
-          {!isCoursePlayer && <MobileFooter />}
-        </div>
-      </NotificationsProvider>
+            {/* Portal Sidebar - Custom sidebar for portal pages */}
+            {!isCoursePlayer && (
+              <PortalSidebar
+                isOpen={sidebarOpen}
+                onToggle={toggleSidebar}
+              />
+            )}
+
+            {/* Main Content Area - Portal pages content */}
+            <main
+              className={`transition-all duration-300 bg-[var(--background)] ${isCoursePlayer ? '' : sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'
+                }`}
+              style={{ backgroundColor: 'var(--background)' }}
+            >
+              <div className="min-h-full bg-[var(--background)]" style={{ backgroundColor: 'var(--background)' }}>
+                {children}
+              </div>
+            </main>
+
+            {/* Mobile Footer - Same as main app */}
+            {!isCoursePlayer && <MobileFooter />}
+          </div>
+        </NotificationsProvider>
+      </MessengerProvider>
     </ProtectedRoute>
   )
 }

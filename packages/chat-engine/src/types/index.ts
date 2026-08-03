@@ -19,7 +19,7 @@ export interface ChatParticipant {
   joinedAt: string
 }
 
-export type ChatType = 'support' | 'instructor_trainee' | 'admin_user' | 'group'
+export type ChatType = 'support' | 'instructor_trainee' | 'admin_user' | 'group' | 'messenger'
 
 export interface Chat {
   id: number

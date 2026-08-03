@@ -51,15 +51,15 @@ const STATIC_TABS: Array<{ id: TabId; label: string; description: string; search
 ];
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 dark:border-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: PipelineMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
@@ -100,13 +100,13 @@ function SlideOver({
 
   return createPortal(
     <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animate ? 'bg-black/50' : 'bg-transparent'}`} onClick={onClose}>
-      <div className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(event) => event.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className={`flex h-full w-full ${width} flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(event) => event.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -120,13 +120,13 @@ function SlideOver({
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: 'up' | 'down' | 'neutral' }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <FileText className="h-5 w-5" />
         </div>
       </div>
@@ -145,30 +145,30 @@ function LoadingSkeleton() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-100" />
-            <div className="mt-4 h-5 w-28 animate-pulse rounded bg-gray-100" />
+          <div key={index} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="mt-4 h-8 w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+            <div className="mt-4 h-5 w-28 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
           </div>
         ))}
       </div>
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
                 {Array.from({ length: 7 }).map((_, index) => (
                   <th key={index} className="px-4 py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
                   <td colSpan={7} className="px-4 py-3">
-                    <div className="h-6 animate-pulse rounded bg-gray-100" />
+                    <div className="h-6 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                   </td>
                 </tr>
               ))}
@@ -182,17 +182,17 @@ function LoadingSkeleton() {
 
 function renderCell(cell: PipelineCell, index: number) {
   if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{cell}</td>;
   }
 
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800',
+      gray: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
+      green: 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800',
+      red: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400 dark:ring-red-800',
     };
     return (
       <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
@@ -201,7 +201,7 @@ function renderCell(cell: PipelineCell, index: number) {
     );
   }
 
-  return <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>{cell.text}</td>;
+  return <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>{cell.text}</td>;
 }
 
 function PendingEnrollmentBillingTab() {
@@ -276,17 +276,17 @@ function PendingEnrollmentBillingTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">Pending Enrollment Billing</h2>
-          <p className="text-sm text-gray-600">{data?.tab === 'pending-enrollment-billing' ? 'Pending enrollment billing workload aligned to enrollment billing link status snapshots.' : 'Review pending LMS enrollment billing workload.'}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Pending Enrollment Billing</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{data?.tab === 'pending-enrollment-billing' ? 'Pending enrollment billing workload aligned to enrollment billing link status snapshots.' : 'Review pending LMS enrollment billing workload.'}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
             <Download className="h-4 w-4" /> Export
           </button>
         </div>
@@ -294,15 +294,15 @@ function PendingEnrollmentBillingTab() {
 
       {data?.metrics?.length ? <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">{data.metrics.map((metric) => <div key={metric.id}><MetricCard label={metric.label} value={metric.value} change={metric.change} trend={metric.trend} /></div>)}</div> : null}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="Search enrollment, course, trainee, requested amount, or billing state" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input type="text" placeholder="Search enrollment, course, trainee, requested amount, or billing state" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" /> Search
               </button>
             </form>
@@ -310,28 +310,28 @@ function PendingEnrollmentBillingTab() {
         </div>
 
         <div className="space-y-4 p-[10px] sm:p-5">
-          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
+          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {['Enrollment', 'Course', 'Trainee', 'Billing State', 'Estimated Charge', 'Action Stage'].map((column) => (
-                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${column === 'Estimated Charge' ? 'text-right' : 'text-left'}`}>{column}</th>
+                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${column === 'Estimated Charge' ? 'text-right' : 'text-left'}`}>{column}</th>
                         ))}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {((data?.rows || []) as PendingEnrollmentRow[]).length > 0 ? ((data?.rows || []) as PendingEnrollmentRow[]).map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50">
+                        <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           {row.cells.map((cell, index) => renderCell(cell, index))}
                           <td className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
-                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                                 <Eye className="h-4 w-4" />
                               </button>
                             </div>
@@ -339,7 +339,7 @@ function PendingEnrollmentBillingTab() {
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">No pending enrollment billing rows found.</td>
+                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No pending enrollment billing rows found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -348,9 +348,9 @@ function PendingEnrollmentBillingTab() {
               </div>
               {data?.pagination && data.pagination.totalPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Previous</button>
-                  <span className="text-sm text-gray-600">Page {data.pagination.page} of {data.pagination.totalPages}</span>
-                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Next</button>
+                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Previous</button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Page {data.pagination.page} of {data.pagination.totalPages}</span>
+                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Next</button>
                 </div>
               ) : null}
             </>
@@ -362,51 +362,51 @@ function PendingEnrollmentBillingTab() {
         {viewDetail ? (
           <div className="space-y-4">
             <div className="grid gap-4">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Enrollment Reference</p>
-                <p className="mt-1 text-lg font-semibold text-gray-900">{viewDetail.sourceReference}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Enrollment Reference</p>
+                <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{viewDetail.sourceReference}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Course</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.courseTitle}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Course</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.courseTitle}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Trainee</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.traineeName}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Trainee</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.traineeName}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Billing State</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Billing State</p>
                   <p className="mt-2">
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${
-                      viewDetail.billingStatusTone === 'amber' ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                      viewDetail.billingStatusTone === 'blue' ? 'bg-blue-50 text-blue-700 ring-blue-200' :
-                      viewDetail.billingStatusTone === 'green' ? 'bg-green-50 text-green-700 ring-green-200' :
-                      viewDetail.billingStatusTone === 'red' ? 'bg-red-50 text-red-700 ring-red-200' :
-                      'bg-gray-100 text-gray-700 ring-gray-200'
+                      viewDetail.billingStatusTone === 'amber' ? 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800' :
+                      viewDetail.billingStatusTone === 'blue' ? 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' :
+                      viewDetail.billingStatusTone === 'green' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800' :
+                      viewDetail.billingStatusTone === 'red' ? 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400 dark:ring-red-800' :
+                      'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
                     }`}>{viewDetail.billingStatusLabel}</span>
                   </p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Estimated Charge</p>
-                  <p className="mt-1 text-2xl font-bold text-gray-900">{viewDetail.finalChargeLabel}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Estimated Charge</p>
+                  <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{viewDetail.finalChargeLabel}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.customerLabel || 'Not assigned'}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.customerLabel || 'Not assigned'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Action Stage</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.actionStage}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Action Stage</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.actionStage}</p>
                 </div>
               </div>
             </div>
-            <div className="flex justify-end border-t border-gray-200 pt-4">
-              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Close</button>
+            <div className="flex justify-end border-t border-gray-200 dark:border-gray-800 pt-4">
+              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">Close</button>
             </div>
           </div>
         ) : null}
@@ -487,17 +487,17 @@ function CorporateReceivablesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">Corporate Receivables</h2>
-          <p className="text-sm text-gray-600">{data?.tab === 'corporate-receivables' ? 'Corporate receivable balances aligned to corporate billing link records.' : 'Review active corporate receivable balances.'}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Corporate Receivables</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{data?.tab === 'corporate-receivables' ? 'Corporate receivable balances aligned to corporate billing link records.' : 'Review active corporate receivable balances.'}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
             <Download className="h-4 w-4" /> Export
           </button>
         </div>
@@ -505,15 +505,15 @@ function CorporateReceivablesTab() {
 
       {data?.metrics?.length ? <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">{data.metrics.map((metric) => <div key={metric.id}><MetricCard label={metric.label} value={metric.value} change={metric.change} trend={metric.trend} /></div>)}</div> : null}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="Search corporate account, invoice, covered amount, trainee share, balance due, or status" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input type="text" placeholder="Search corporate account, invoice, covered amount, trainee share, balance due, or status" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" /> Search
               </button>
             </form>
@@ -521,28 +521,28 @@ function CorporateReceivablesTab() {
         </div>
 
         <div className="space-y-4 p-[10px] sm:p-5">
-          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
+          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {['Account Code', 'Corporate Account', 'Invoice', 'Covered Amount', 'Balance Due', 'Status'].map((column) => (
-                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${column === 'Covered Amount' || column === 'Balance Due' ? 'text-right' : 'text-left'}`}>{column}</th>
+                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${column === 'Covered Amount' || column === 'Balance Due' ? 'text-right' : 'text-left'}`}>{column}</th>
                         ))}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {((data?.rows || []) as CorporateReceivableRow[]).length > 0 ? ((data?.rows || []) as CorporateReceivableRow[]).map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50">
+                        <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           {row.cells.map((cell, index) => renderCell(cell, index))}
                           <td className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
-                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                                 <Eye className="h-4 w-4" />
                               </button>
                             </div>
@@ -550,7 +550,7 @@ function CorporateReceivablesTab() {
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">No corporate receivable rows found.</td>
+                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No corporate receivable rows found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -559,9 +559,9 @@ function CorporateReceivablesTab() {
               </div>
               {data?.pagination && data.pagination.totalPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Previous</button>
-                  <span className="text-sm text-gray-600">Page {data.pagination.page} of {data.pagination.totalPages}</span>
-                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Next</button>
+                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Previous</button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Page {data.pagination.page} of {data.pagination.totalPages}</span>
+                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Next</button>
                 </div>
               ) : null}
             </>
@@ -573,49 +573,49 @@ function CorporateReceivablesTab() {
         {viewDetail ? (
           <div className="space-y-4">
             <div className="grid gap-4">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Code</p>
-                <p className="mt-1 text-lg font-semibold text-gray-900">{viewDetail.accountCode}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Account Code</p>
+                <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{viewDetail.accountCode}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Corporate Account</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.accountName}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Corporate Account</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.accountName}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Invoice</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.invoiceNumber || '-'}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Covered Amount</p>
-                  <p className="mt-1 text-2xl font-bold text-gray-900">{viewDetail.coveredAmountLabel}</p>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Balance Due</p>
-                  <p className="mt-1 text-2xl font-bold text-gray-900">{viewDetail.balanceDueLabel}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Invoice</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.invoiceNumber || '-'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Coverage Type</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.coverageType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Covered Amount</p>
+                  <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{viewDetail.coveredAmountLabel}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Balance Due</p>
+                  <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{viewDetail.balanceDueLabel}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Coverage Type</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.coverageType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                   <p className="mt-2">
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${
-                      viewDetail.statusTone === 'green' ? 'bg-green-50 text-green-700 ring-green-200' :
-                      viewDetail.statusTone === 'gray' ? 'bg-gray-100 text-gray-700 ring-gray-200' :
-                      'bg-amber-50 text-amber-700 ring-amber-200'
+                      viewDetail.statusTone === 'green' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800' :
+                      viewDetail.statusTone === 'gray' ? 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700' :
+                      'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800'
                     }`}>{viewDetail.statusLabel}</span>
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex justify-end border-t border-gray-200 pt-4">
-              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Close</button>
+            <div className="flex justify-end border-t border-gray-200 dark:border-gray-800 pt-4">
+              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">Close</button>
             </div>
           </div>
         ) : null}
@@ -696,17 +696,17 @@ function TraineeCollectionsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">Trainee Collections</h2>
-          <p className="text-sm text-gray-600">{data?.tab === 'trainee-collections' ? 'Trainee collection balances ranked by amount due from enrollment billing link snapshots.' : 'Review top trainee collection balances.'}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Trainee Collections</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{data?.tab === 'trainee-collections' ? 'Trainee collection balances ranked by amount due from enrollment billing link snapshots.' : 'Review top trainee collection balances.'}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleRefresh} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('secondary')}`}>
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
-          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
+          <button type="button" onClick={handleExport} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={!data?.rows?.length}>
             <Download className="h-4 w-4" /> Export
           </button>
         </div>
@@ -714,15 +714,15 @@ function TraineeCollectionsTab() {
 
       {data?.metrics?.length ? <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">{data.metrics.map((metric) => <div key={metric.id}><MetricCard label={metric.label} value={metric.value} change={metric.change} trend={metric.trend} /></div>)}</div> : null}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="Search enrollment, trainee id, customer id, amount due, or collection priority" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input type="text" placeholder="Search enrollment, trainee id, customer id, amount due, or collection priority" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
                 <Search className="h-4 w-4" /> Search
               </button>
             </form>
@@ -730,28 +730,28 @@ function TraineeCollectionsTab() {
         </div>
 
         <div className="space-y-4 p-[10px] sm:p-5">
-          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
+          {error ? <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div> : null}
 
           {isLoading ? <LoadingSkeleton /> : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {['Enrollment', 'Trainee ID', 'Customer ID', 'Amount Due', 'Priority', 'Collection State'].map((column) => (
-                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 ${column === 'Amount Due' ? 'text-right' : 'text-left'}`}>{column}</th>
+                          <th key={column} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 ${column === 'Amount Due' ? 'text-right' : 'text-left'}`}>{column}</th>
                         ))}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                       {((data?.rows || []) as TraineeCollectionRow[]).length > 0 ? ((data?.rows || []) as TraineeCollectionRow[]).map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50">
+                        <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           {row.cells.map((cell, index) => renderCell(cell, index))}
                           <td className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
-                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                              <button type="button" onClick={() => { setViewDetail(row); setIsViewOpen(true); }} className="inline-flex items-center gap-1 rounded-lg p-2 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                                 <Eye className="h-4 w-4" />
                               </button>
                             </div>
@@ -759,7 +759,7 @@ function TraineeCollectionsTab() {
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500">No trainee collection rows found.</td>
+                          <td colSpan={7} className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No trainee collection rows found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -768,9 +768,9 @@ function TraineeCollectionsTab() {
               </div>
               {data?.pagination && data.pagination.totalPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Previous</button>
-                  <span className="text-sm text-gray-600">Page {data.pagination.page} of {data.pagination.totalPages}</span>
-                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50">Next</button>
+                  <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Previous</button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Page {data.pagination.page} of {data.pagination.totalPages}</span>
+                  <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setCurrentPage((previous) => previous + 1)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">Next</button>
                 </div>
               ) : null}
             </>
@@ -782,43 +782,43 @@ function TraineeCollectionsTab() {
         {viewDetail ? (
           <div className="space-y-4">
             <div className="grid gap-4">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Enrollment Reference</p>
-                <p className="mt-1 text-lg font-semibold text-gray-900">{viewDetail.sourceReference}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Enrollment Reference</p>
+                <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{viewDetail.sourceReference}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Trainee</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.traineeName || viewDetail.traineeId}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Trainee</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.traineeName || viewDetail.traineeId}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Customer</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.customerLabel || viewDetail.customerIdRef}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.customerLabel || viewDetail.customerIdRef}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Amount Due</p>
-                  <p className="mt-1 text-2xl font-bold text-gray-900">{viewDetail.amountDueLabel}</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount Due</p>
+                  <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{viewDetail.amountDueLabel}</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Priority</p>
+                <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Priority</p>
                   <p className="mt-2">
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${
-                      viewDetail.priorityTone === 'amber' ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                      viewDetail.priorityTone === 'blue' ? 'bg-blue-50 text-blue-700 ring-blue-200' :
-                      'bg-gray-100 text-gray-700 ring-gray-200'
+                      viewDetail.priorityTone === 'amber' ? 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800' :
+                      viewDetail.priorityTone === 'blue' ? 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' :
+                      'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
                     }`}>{viewDetail.priority}</span>
                   </p>
                 </div>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Collection State</p>
-                <p className="mt-1 text-sm font-medium text-gray-900">{viewDetail.collectionState}</p>
+              <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Collection State</p>
+                <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{viewDetail.collectionState}</p>
               </div>
             </div>
-            <div className="flex justify-end border-t border-gray-200 pt-4">
-              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Close</button>
+            <div className="flex justify-end border-t border-gray-200 dark:border-gray-800 pt-4">
+              <button type="button" onClick={() => setIsViewOpen(false)} className="rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">Close</button>
             </div>
           </div>
         ) : null}
@@ -848,21 +848,21 @@ export function BillingPipelineMonitoringClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">LMS Finance / LMS Finance Reporting</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">LMS Finance / LMS Finance Reporting</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Billing Pipeline Monitoring</h1>
-              <p className="mt-1 max-w-3xl text-base text-gray-600">Review pending enrollment billing, corporate receivable balances, and trainee collection exposure using the LMS reporting service outputs.</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Billing Pipeline Monitoring</h1>
+              <p className="mt-1 max-w-3xl text-base text-gray-600 dark:text-gray-400">Review pending enrollment billing, corporate receivable balances, and trainee collection exposure using the LMS reporting service outputs.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-[10px]">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="border-b border-gray-200 dark:border-gray-700 px-[10px]">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {STATIC_TABS.map((tab) => {
               const isActive = selectedTab.id === tab.id;
@@ -873,8 +873,8 @@ export function BillingPipelineMonitoringClient() {
                   onClick={() => handleTabChange(tab.id)}
                   className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-blue-500 text-blue-600 dark:border-blue-500 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab.label}

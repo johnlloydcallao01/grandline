@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Header, Sidebar, MobileFooter } from '@/components/layout';
 import { ProtectedRoute } from '@/components/auth';
+import { MessengerProvider } from '@encreasl/ui/messenger-context';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function MainLayout({
   children,
@@ -11,6 +13,8 @@ export default function MainLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDesktop, setIsDesktop] = useState(false);
+  const { user, token } = useAuth();
+  const messengerApiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
 
   useEffect(() => {
     const hideInstantLoadingScreen = () => {
@@ -52,29 +56,31 @@ export default function MainLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--background)]">
-        {/* Header */}
-        <Header
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={toggleSidebar}
-        />
+      <MessengerProvider token={token} userId={user?.id} apiBaseUrl={messengerApiBase}>
+        <div className="min-h-screen bg-[var(--background)]">
+          {/* Header */}
+          <Header
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
+          />
 
-        {/* Sidebar */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
+          {/* Sidebar */}
+          <Sidebar
+            isOpen={sidebarOpen}
+            onToggle={toggleSidebar}
+          />
 
-        {/* Main Content */}
-        <main className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'}`}>
-          <div className="min-h-full px-[10px] pb-20 lg:pb-0">
-            {children}
-          </div>
-        </main>
+          {/* Main Content */}
+          <main className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'}`}>
+            <div className="min-h-full px-[10px] pb-20 lg:pb-0">
+              {children}
+            </div>
+          </main>
 
-        {/* Mobile Footer */}
-        <MobileFooter />
-      </div>
+          {/* Mobile Footer */}
+          <MobileFooter />
+        </div>
+      </MessengerProvider>
     </ProtectedRoute>
   );
 }

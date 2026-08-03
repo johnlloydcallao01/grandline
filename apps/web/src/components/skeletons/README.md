@@ -22,27 +22,31 @@ Skeleton screens are essential for enterprise-grade applications because they:
 - `PageHeaderSkeleton` - Page headers
 
 ### Page Layouts (`/skeletons/index.tsx`)
-- `HomePageSkeleton` - Category carousel + courses grid
+- `CategoryCarouselSkeleton` - Category carousel section skeleton (home page)
 - `DashboardPageSkeleton` - Analytics/dashboard pages
 - `ListPageSkeleton` - Task/team/project lists
 - `CalendarPageSkeleton` - Calendar grid layout
+
+> The home page (`/`) does not use a single full-page skeleton. Each section (category carousel, available courses, featured courses, enrolled courses) renders its own skeleton until that section's data is ready, driven by the `isLoading` props of `CoursesGrid`/`CoursesCarousel` and the dedicated `CategoryCarouselSkeleton`.
 
 ## 🔧 **Usage**
 
 ### Basic Implementation
 ```tsx
 import { usePageLoading } from '@/hooks';
-import { HomePageSkeleton } from '@/components/skeletons';
+import { CategoryCarouselSkeleton } from '@/components/skeletons';
 
 export default function HomePage() {
   const isLoading = usePageLoading();
 
-  if (isLoading) {
-    return <HomePageSkeleton />;
-  }
-
   return (
-    // Your page content
+    <div>
+      {isLoading ? (
+        <CategoryCarouselSkeleton />
+      ) : (
+        // Your section content
+      )}
+    </div>
   );
 }
 ```

@@ -55,6 +55,16 @@ export const Assignments: CollectionConfig = {
       },
     },
     {
+      name: 'instructor',
+      type: 'relationship',
+      relationTo: 'instructors',
+      required: true,
+      index: true,
+      admin: {
+        description: 'Primary instructor for this assignment',
+      },
+    },
+    {
       name: 'maxScore',
       type: 'number',
       required: true,

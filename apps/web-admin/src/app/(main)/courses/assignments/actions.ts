@@ -20,6 +20,7 @@ export interface AssignmentDoc {
   title: string
   description?: any
   attachments?: any[]
+  instructor?: { id: string } | string | null
   maxScore: number
   passingScore: number
   submissionType: 'file_upload' | 'text_entry' | 'both'
@@ -88,6 +89,7 @@ export async function createAssignment(data: {
   description?: any
   allowedFileTypes?: string[]
   dueDate?: string
+  instructor?: string
 }): Promise<AssignmentDoc> {
   const body: Record<string, any> = {
     title: data.title,
@@ -99,6 +101,7 @@ export async function createAssignment(data: {
   if (data.description) body.description = data.description
   if (data.allowedFileTypes && data.allowedFileTypes.length > 0) body.allowedFileTypes = data.allowedFileTypes
   if (data.dueDate) body.dueDate = data.dueDate
+  if (data.instructor) body.instructor = data.instructor
 
   const res = await fetch(apiUrl('/assignments'), {
     method: 'POST',

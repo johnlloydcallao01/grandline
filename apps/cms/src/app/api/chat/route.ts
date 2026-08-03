@@ -149,10 +149,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<a
         type,
         title,
         status: 'active',
-        participants: participantIds.map((id: number) => ({
-          relationTo: 'users',
-          value: id
-        })) as any,
+        participants: participantIds,
         createdBy: user.id
       }
     })

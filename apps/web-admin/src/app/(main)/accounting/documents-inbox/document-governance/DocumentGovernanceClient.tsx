@@ -57,14 +57,14 @@ export function DocumentGovernanceClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Documents & Inbox</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Documents & Inbox</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Document Governance</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Document Governance</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
                 Review the categories, entity-link coverage, and primary-document controls already modeled by the accounting document-link backend.
               </p>
             </div>
@@ -72,8 +72,8 @@ export function DocumentGovernanceClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="border-b border-gray-200 dark:border-gray-800 px-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {TABS.map((tab) => {
               const isActive = currentTab.id === tab.id;
@@ -82,7 +82,7 @@ export function DocumentGovernanceClient() {
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
-                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                  className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${isActive ? 'border-blue-500 text-blue-600 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
                   {tab.label}
                 </button>

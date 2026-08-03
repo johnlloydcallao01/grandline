@@ -5,6 +5,43 @@ import type { ApiResponse, MessageResponse, EditMessageRequest } from '@/app/api
 import type { ChatMessage } from '@/payload-types'
 import { canEditMessage, canDeleteMessage, validateMessageContent } from '@grandline/chat-engine'
 
+function createLexicalContent(message: string): ChatMessage['content'] {
+  return {
+    root: {
+      type: 'root',
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          type: 'paragraph',
+          format: '',
+          indent: 0,
+          version: 1,
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: message,
+              type: 'text',
+              version: 1,
+            },
+          ],
+        },
+      ],
+    },
+  }
+}
+
+function toLexicalContent(content: any): ChatMessage['content'] {
+  if (!content) return createLexicalContent('')
+  if (typeof content === 'string') return createLexicalContent(content)
+  return content
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<Record<string, string>> }
@@ -56,8 +93,11 @@ export async function PATCH(
 
     const body: EditMessageRequest = await req.json()
 
-    // Validate new content
-    const validation = validateMessageContent(body.content)
+    // Validate new content (plain text is converted to Lexical on save)
+    const contentText = typeof body.content === 'object' && body.content !== null
+      ? (JSON.stringify(body.content) || '')
+      : String(body.content || '')
+    const validation = validateMessageContent(contentText)
     if (!validation.valid) {
       throw new ApiError(validation.error || 'Invalid content', 400, validation.code)
     }
@@ -67,7 +107,7 @@ export async function PATCH(
       collection: 'chat-messages',
       id: messageId,
       data: {
-        content: body.content as any,
+        content: toLexicalContent(body.content),
         editedAt: new Date().toISOString()
       }
     })

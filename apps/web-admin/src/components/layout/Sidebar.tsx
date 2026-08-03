@@ -6,6 +6,7 @@ import { SidebarProps } from '@/types';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 import Link from '@/components/ui/LinkWrapper';
 import { useMediaQuery } from '@/hooks';
+import { useMessenger } from '@encreasl/ui/messenger-context';
 
 /**
  * Sidebar component with navigation items for Admin Panel
@@ -21,6 +22,7 @@ import { useMediaQuery } from '@/hooks';
 export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = false, onCloseMobile }: SidebarProps & { mobileOpen?: boolean; onCloseMobile?: () => void }) {
     const pathname = usePathname();
     const isDesktop = useMediaQuery('(min-width: 1024px)');
+    const { unreadCount } = useMessenger();
 
     // On mobile the drawer should always render expanded (labels visible).
     // On desktop, honor the collapse state.
@@ -451,6 +453,7 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
                             active={pathname?.startsWith('/messenger')}
                             collapsed={!expanded}
                             href="/messenger"
+                            badge={unreadCount}
                         />
                     </div>
 

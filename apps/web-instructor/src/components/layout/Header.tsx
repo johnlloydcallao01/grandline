@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLogout, useUser } from '@/hooks/useAuth';
+import { MessengerButton } from '@encreasl/ui/messenger-button';
 import { MessengerPanel } from './MessengerPanel';
 
 interface HeaderProps {
@@ -19,7 +20,6 @@ const pageTitles: Record<string, string> = {
 export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const pathname = usePathname();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, displayName, initials } = useUser();
@@ -87,16 +87,14 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <div className="relative h-10 w-10">
-              <Image
-                src="/calsiter-inc-logo.png"
-                alt="Grandline Maritime Logo"
-                fill
-                sizes="(max-width: 768px) 40px, 40px"
-                className="object-contain"
-                priority
-              />
-            </div>
+            <Image
+              src="/grandline-logo.png"
+              alt="Grandline Logo"
+              width={180}
+              height={48}
+              className="h-10 w-auto rounded-xl lg:h-12"
+              priority
+            />
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-gray-500 dark:text-gray-400">Grandline Maritime</p>
               <h1 className="font-display text-base font-semibold text-gray-900 dark:text-gray-100">{pageTitle}</h1>
@@ -131,15 +129,7 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
         {/* Right section */}
         <div className="flex items-center gap-2">
           {/* Messenger Icon */}
-          <button
-            onClick={() => setIsMessengerOpen(true)}
-            className="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
-            aria-label="Messenger"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </button>
+          <MessengerButton />
 
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -237,7 +227,7 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
         </div>
       </div>
     </header>
-      <MessengerPanel isOpen={isMessengerOpen} onClose={() => setIsMessengerOpen(false)} />
+      <MessengerPanel />
     </>
   );
 }

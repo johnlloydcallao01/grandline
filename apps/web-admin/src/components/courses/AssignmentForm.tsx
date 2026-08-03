@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     X, Plus, CheckCircle, AlertTriangle
 } from '@/components/ui/IconWrapper';
 import { RichTextEditor } from '@/components/cms/RichTextEditor';
+import {
+    searchInstructors,
+    type InstructorRef,
+} from '@/app/(main)/courses/actions';
 
 const SUBMISSION_TYPE_OPTIONS = [
     { value: 'file_upload', label: 'File Upload Only' },
@@ -25,6 +29,9 @@ interface FormState {
     title: string;
     description: unknown;
     attachments: string[];
+    instructor: string;
+    instructorSearch: string;
+    instructorLabel: string;
     maxScore: number;
     passingScore: number;
     submissionType: string;
@@ -36,6 +43,9 @@ const DEFAULTS: FormState = {
     title: '',
     description: '',
     attachments: [],
+    instructor: '',
+    instructorSearch: '',
+    instructorLabel: '',
     maxScore: 100,
     passingScore: 75,
     submissionType: 'both',
@@ -74,6 +84,42 @@ export default function AssignmentForm({
 
     const showFileTypes = form.submissionType === 'file_upload' || form.submissionType === 'both';
 
+    const [instructorOptions, setInstructorOptions] = useState<InstructorRef[]>([]);
+
+    useEffect(() => {
+        if (form.instructorSearch.length < 1 || form.instructorSearch === form.instructorLabel) {
+            setInstructorOptions([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            try { setInstructorOptions(await searchInstructors(form.instructorSearch)); } catch { setInstructorOptions([]); }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [form.instructorSearch, form.instructorLabel]);
+
+    const instructorName = (inst: InstructorRef): string => {
+        if (inst.user) {
+            const name = `${inst.user.firstName || ''} ${inst.user.lastName || ''}`.trim();
+            if (name) return name;
+            if (inst.user.email) return inst.user.email;
+        }
+        return `Instructor #${inst.id}`;
+    };
+
+    const renderSearchDropdown = (options: any[], onSelect: (item: any) => void) => {
+        if (options.length === 0) return null;
+        return (
+            <div className="mt-1 border border-gray-200 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-gray-800 shadow-sm">
+                {options.map((opt: any) => (
+                    <button key={opt.id} type="button" onClick={() => onSelect(opt)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30">
+                        {opt.title || opt.name || instructorName(opt)}
+                    </button>
+                ))}
+            </div>
+        );
+    };
+
     const toggleFileType = (value: string) => {
         setForm(prev => ({
             ...prev,
@@ -85,6 +131,11 @@ export default function AssignmentForm({
 
     const handleSubmit = async () => {
         if (!form.title.trim()) return;
+        if (!form.instructor) {
+            onClearError();
+            window.alert('Please select an instructor for this assignment.');
+            return;
+        }
 
         let description: any = form.description || undefined;
         if (description && typeof description === 'string') {
@@ -96,6 +147,7 @@ export default function AssignmentForm({
             maxScore: form.maxScore,
             passingScore: form.passingScore,
             submissionType: form.submissionType,
+            instructor: form.instructor,
         };
 
         if (description) payload.description = description;
@@ -195,6 +247,24 @@ export default function AssignmentForm({
 
             {/* === SIDEBAR === */}
             <div className="space-y-6">
+                {/* Instructor */}
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Instructor</h2>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Primary Instructor *</label>
+                        <input type="text" value={form.instructorSearch}
+                            onChange={e => { updateField('instructorSearch', e.target.value); updateField('instructor', ''); }}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
+                            placeholder="Search instructors..." />
+                        {renderSearchDropdown(instructorOptions, (inst: InstructorRef) => {
+                            const label = instructorName(inst);
+                            updateField('instructor', inst.id);
+                            updateField('instructorSearch', label);
+                            updateField('instructorLabel', label);
+                        })}
+                    </div>
+                </div>
+
                 {/* Grading */}
                 <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-5">
                     <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Grading</h2>

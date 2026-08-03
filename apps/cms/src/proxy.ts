@@ -10,6 +10,9 @@ const allowedOrigins = [
   process.env.CMS_PROD_URL!,
   process.env.CMS_LOCAL_URL!,
   process.env.CMS_DEV_URL!,
+  process.env.INSTRUCTOR_PROD_URL!,
+  process.env.INSTRUCTOR_LOCAL_URL!,
+  process.env.INSTRUCTOR_DEV_URL!,
   // Web-landing URLs (both www and non-www)
   process.env.WEB_LANDING_PROD_URL || 'https://grandlinemaritime.com',
   'https://www.grandlinemaritime.com', // www variant

@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 import Link from 'next/link';
+import { useMessenger } from '@encreasl/ui/messenger-context';
 
 interface SidebarMenuItemsProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface SidebarMenuItemsProps {
 
 export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
   const pathname = usePathname();
+  const { unreadCount } = useMessenger();
 
   const hasActiveCourseManagerChild =
     pathname?.startsWith('/courses');
@@ -323,6 +325,7 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
           active={pathname?.startsWith('/messenger')}
           collapsed={!isOpen}
           href="/messenger"
+          badge={unreadCount}
         />
       </div>
     </>

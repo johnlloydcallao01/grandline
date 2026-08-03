@@ -60,13 +60,13 @@ function SlideOver({
 
   return createPortal(
     <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animate ? 'bg-black/50' : 'bg-transparent'}`} onClick={onClose}>
-      <div className={`flex h-full w-full ${width} flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(event) => event.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className={`flex h-full w-full ${width} flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(event) => event.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -78,9 +78,9 @@ function SlideOver({
 }
 
 function getMetricTone(trend: PostingMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(v: string) {
@@ -104,7 +104,7 @@ const META = {
 
 function renderCell(cell: PostingCell, index: number) {
   if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{cell}</td>;
   }
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
@@ -124,7 +124,7 @@ function renderCell(cell: PostingCell, index: number) {
     );
   }
   return (
-    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>
+    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>
       {cell.text}
     </td>
   );
@@ -139,42 +139,42 @@ function renderDetail(detail: PostingDetail) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <div><p className="text-xs font-medium text-gray-500">Payroll Code</p><p className="mt-0.5 text-sm font-semibold text-gray-900">{String(d.payrollCode || '-')}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Status</p><p className="mt-0.5 text-sm text-gray-900">{String(d.status || '-')}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Period Start</p><p className="mt-0.5 text-sm text-gray-900">{d.periodStart ? String(d.periodStart).slice(0, 10) : '-'}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Period End</p><p className="mt-0.5 text-sm text-gray-900">{d.periodEnd ? String(d.periodEnd).slice(0, 10) : '-'}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Payment Date</p><p className="mt-0.5 text-sm text-gray-900">{d.paymentDate ? String(d.paymentDate).slice(0, 10) : '-'}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Branch</p><p className="mt-0.5 text-sm text-gray-900">{branch ? String(branch.name || '') : '-'}</p></div>
-        <div><p className="text-xs font-medium text-gray-500">Department</p><p className="mt-0.5 text-sm text-gray-900">{department ? String(department.name || '') : '-'}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Payroll Code</p><p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100">{String(d.payrollCode || '-')}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Status</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{String(d.status || '-')}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Period Start</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{d.periodStart ? String(d.periodStart).slice(0, 10) : '-'}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Period End</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{d.periodEnd ? String(d.periodEnd).slice(0, 10) : '-'}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Payment Date</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{d.paymentDate ? String(d.paymentDate).slice(0, 10) : '-'}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Branch</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{branch ? String(branch.name || '') : '-'}</p></div>
+        <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Department</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{department ? String(department.name || '') : '-'}</p></div>
       </div>
       {je && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-          <p className="text-xs font-medium text-green-700">Posted Journal Entry</p>
-          <p className="mt-1 text-sm font-semibold text-green-800">{String(je.entryNumber || je.id || '')}</p>
-          {je.memo && <p className="mt-0.5 text-xs text-green-600">{String(je.memo)}</p>}
+        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+          <p className="text-xs font-medium text-green-700 dark:text-green-400">Posted Journal Entry</p>
+          <p className="mt-1 text-sm font-semibold text-green-800 dark:text-green-300">{String(je.entryNumber || je.id || '')}</p>
+          {je.memo && <p className="mt-0.5 text-xs text-green-600 dark:text-green-400">{String(je.memo)}</p>}
         </div>
       )}
-      <div><p className="text-xs font-medium text-gray-500">Notes</p><p className="mt-0.5 text-sm text-gray-900">{d.notes ? String(d.notes) : '-'}</p></div>
+      <div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">Notes</p><p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{d.notes ? String(d.notes) : '-'}</p></div>
       {entries && entries.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">Payroll Entries ({entries.length})</p>
-          <div className="overflow-hidden rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200 text-xs">
-              <thead className="bg-gray-50">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payroll Entries ({entries.length})</p>
+          <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-[var(--card-border)]">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-xs">
+              <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-500">Person</th>
-                  <th className="px-3 py-2 text-right font-semibold text-gray-500">Gross</th>
-                  <th className="px-3 py-2 text-right font-semibold text-gray-500">Net</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-500">Status</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Person</th>
+                  <th className="px-3 py-2 text-right font-semibold text-gray-500 dark:text-gray-400">Gross</th>
+                  <th className="px-3 py-2 text-right font-semibold text-gray-500 dark:text-gray-400">Net</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                 {entries.map((e: Record<string, unknown>) => (
-                  <tr key={String(e.id)} className="hover:bg-gray-50">
-                    <td className="px-3 py-2 text-gray-900">{String(e.user ? (e.user as Record<string, unknown>).name || '' : e.employeeName || e.employeeCode || '')}</td>
-                    <td className="px-3 py-2 text-right text-gray-900">{fmt(Number(e.grossAmount) || 0)}</td>
-                    <td className="px-3 py-2 text-right text-gray-900">{fmt(Number(e.netAmount) || 0)}</td>
-                    <td className="px-3 py-2 text-gray-600">{String(e.status || '')}</td>
+                  <tr key={String(e.id)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{String(e.user ? (e.user as Record<string, unknown>).name || '' : e.employeeName || e.employeeCode || '')}</td>
+                    <td className="px-3 py-2 text-right text-gray-900 dark:text-gray-100">{fmt(Number(e.grossAmount) || 0)}</td>
+                    <td className="px-3 py-2 text-right text-gray-900 dark:text-gray-100">{fmt(Number(e.netAmount) || 0)}</td>
+                    <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{String(e.status || '')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -297,7 +297,7 @@ export default function PayrollPostingClient() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
           <button type="button" onClick={() => setError(null)} className="ml-auto"><X className="h-4 w-4" /></button>
@@ -309,13 +309,13 @@ export default function PayrollPostingClient() {
           const TrendIcon = metric.trend === 'down' ? ArrowDownRight : ArrowUpRight;
           const toneClass = getMetricTone(metric.trend);
           return (
-            <div key={metric.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div key={metric.id} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-                  <p className="mt-3 text-2xl font-bold text-gray-900">{metric.value}</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.label}</p>
+                  <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
                 </div>
-                <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+                <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
                   <FileText className="h-5 w-5" />
                 </div>
               </div>
@@ -330,38 +330,38 @@ export default function PayrollPostingClient() {
         })}
       </div>
 
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">Payroll Posting</h2>
-          <p className="text-sm text-gray-600">{META.tableDescription}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payroll Posting</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{META.tableDescription}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => fetchData()} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          <button type="button" onClick={() => fetchData()} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
-          <button type="button" onClick={handleExportCsv} className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900">
+          <button type="button" onClick={handleExportCsv} className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300">
             <Download className="h-4 w-4" /> Export CSV
           </button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative min-w-0 flex-1 max-w-xl">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder={META.searchPlaceholder}
                 value={searchInput}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Quick Filters</span>
+              <Filter className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-500 dark:text-gray-400">Quick Filters</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -373,7 +373,7 @@ export default function PayrollPostingClient() {
                   type="button"
                   onClick={() => handleQuickFilter(qf.value)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    selected ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    selected ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
                   {qf.label}
@@ -386,39 +386,39 @@ export default function PayrollPostingClient() {
         <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h3 className="text-base font-semibold text-gray-900">{META.tableTitle}</h3>
-              <p className="text-sm text-gray-600">{META.tableDescription}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{META.tableTitle}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{META.tableDescription}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <span>{data?.totals.filteredRows ?? 0} matching rows</span>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     {META.columns.map((col) => (
-                      <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                      <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                     ))}
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                   {data?.rows.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50">
+                    <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       {row.cells.map((cell, index) => renderCell(cell, index))}
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button type="button" onClick={() => openView(row.id)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View detail">
+                          <button type="button" onClick={() => openView(row.id)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300" title="View detail">
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
                             onClick={() => row.postingState === 'ready_to_post' && setPostTarget({ id: row.id, label: row.payrollCode })}
                             disabled={row.postingState !== 'ready_to_post' || isPosting}
-                            className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="rounded-lg p-2 text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-40"
                             title={row.postingState === 'ready_to_post' ? 'Post to General Ledger' : row.postingState === 'posted' ? 'Already posted' : 'Must be approved first'}
                           >
                             <SendHorizonal className="h-4 w-4" />
@@ -427,7 +427,7 @@ export default function PayrollPostingClient() {
                             type="button"
                             onClick={() => (row.postingState === 'draft' || row.postingState === 'pending_review') && setVoidTarget({ id: row.id, label: row.payrollCode })}
                             disabled={row.postingState !== 'draft' && row.postingState !== 'pending_review'}
-                            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
                             title={row.postingState === 'draft' || row.postingState === 'pending_review' ? 'Void payroll run' : row.postingState === 'voided' ? 'Already voided' : 'Cannot void after posting'}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -438,7 +438,7 @@ export default function PayrollPostingClient() {
                   ))}
                   {(!data || data.rows.length === 0) && (
                     <tr>
-                      <td colSpan={META.columns.length + 1} className="px-4 py-12 text-center text-sm text-gray-500">
+                      <td colSpan={META.columns.length + 1} className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                         No payroll posting records found.
                       </td>
                     </tr>
@@ -449,15 +449,15 @@ export default function PayrollPostingClient() {
           </div>
 
           {data && data.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-              <p className="text-sm text-gray-500">
+            <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Page {data.pagination.page} of {data.pagination.totalPages} ({data.pagination.totalDocs} total)
               </p>
               <div className="flex gap-2">
-                <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setPage((p) => Math.max(1, p - 1))} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" disabled={!data.pagination.hasPrevPage} onClick={() => setPage((p) => Math.max(1, p - 1))} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                   Previous
                 </button>
-                <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" disabled={!data.pagination.hasNextPage} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                   Next
                 </button>
               </div>
@@ -468,14 +468,14 @@ export default function PayrollPostingClient() {
 
       <SlideOver isOpen={isViewOpen} onClose={closeView} title="Payroll Posting Detail">
         {isViewLoading ? (
-          <div className="flex items-center justify-center py-12"><RefreshCw className="h-6 w-6 animate-spin text-gray-400" /></div>
+          <div className="flex items-center justify-center py-12"><RefreshCw className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" /></div>
         ) : viewDetail ? (
           renderDetail(viewDetail)
         ) : (
-          <p className="text-sm text-gray-500">No detail available.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">No detail available.</p>
         )}
-        <div className="mt-6 flex items-center gap-3 border-t border-gray-200 pt-4">
-          <button type="button" onClick={closeView} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+        <div className="mt-6 flex items-center gap-3 border-t border-gray-200 dark:border-gray-800 pt-4">
+          <button type="button" onClick={closeView} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
             Close
           </button>
         </div>
@@ -483,26 +483,26 @@ export default function PayrollPostingClient() {
 
       <SlideOver isOpen={Boolean(postTarget)} onClose={() => setPostTarget(null)} title="Post Payroll Run" description="Posting creates the journal entry and finalizes the payroll run in the General Ledger." width="max-w-lg">
         <div className="space-y-6">
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4 text-sm text-blue-700 dark:text-blue-400">
             <p className="font-medium">Post payroll run {postTarget?.label}?</p>
             <p className="mt-1">Make sure the payroll entries are complete and the expense/payable accounts are correctly mapped before posting.</p>
           </div>
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-            <button type="button" onClick={() => setPostTarget(null)} disabled={isPosting} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50">Cancel</button>
-            <button type="button" onClick={handleConfirmPost} disabled={isPosting} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">{isPosting ? 'Posting...' : 'Post Payroll Run'}</button>
+          <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-4">
+            <button type="button" onClick={() => setPostTarget(null)} disabled={isPosting} className="rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50">Cancel</button>
+            <button type="button" onClick={handleConfirmPost} disabled={isPosting} className="rounded-lg bg-blue-600 dark:bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50">{isPosting ? 'Posting...' : 'Post Payroll Run'}</button>
           </div>
         </div>
       </SlideOver>
 
       <SlideOver isOpen={Boolean(voidTarget)} onClose={() => setVoidTarget(null)} title="Void Payroll Run" description="Cancel this payroll run and prevent any further posting actions." width="max-w-lg">
         <div className="space-y-6">
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
             <p className="font-medium">Void payroll run {voidTarget?.label}?</p>
             <p className="mt-1">This action cannot be undone. The run and its entries will be voided and excluded from posting.</p>
           </div>
-          <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
-            <button type="button" onClick={() => setVoidTarget(null)} disabled={isVoiding} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50">Cancel</button>
-            <button type="button" onClick={handleConfirmVoid} disabled={isVoiding} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">{isVoiding ? 'Voiding...' : 'Void Payroll Run'}</button>
+          <div className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-4">
+            <button type="button" onClick={() => setVoidTarget(null)} disabled={isVoiding} className="rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50">Cancel</button>
+            <button type="button" onClick={handleConfirmVoid} disabled={isVoiding} className="rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50">{isVoiding ? 'Voiding...' : 'Void Payroll Run'}</button>
           </div>
         </div>
       </SlideOver>

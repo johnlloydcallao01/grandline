@@ -187,15 +187,15 @@ const TABS: TabConfig[] = [
 ];
 
 function getMetricTone(trend: StaticMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function renderStaticCell(cell: StaticCell, index: number) {
   if (typeof cell === 'string') {
     return (
-      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+      <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
         {cell}
       </td>
     );
@@ -205,11 +205,11 @@ function renderStaticCell(cell: StaticCell, index: number) {
     cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-amber-200 dark:ring-amber-800',
+      blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-800',
+      gray: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-gray-200 dark:ring-gray-700',
+      green: 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 ring-green-200 dark:ring-green-800',
+      red: 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 ring-red-200 dark:ring-red-800',
     };
     return (
       <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
@@ -225,7 +225,7 @@ function renderStaticCell(cell: StaticCell, index: number) {
   return (
     <td
       key={index}
-      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}
+      className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}
     >
       {cell.text}
     </td>
@@ -234,13 +234,13 @@ function renderStaticCell(cell: StaticCell, index: number) {
 
 function MetricCard({ metric }: { metric: StaticMetric }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{metric.label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{metric.value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{metric.label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <FileText className="h-5 w-5" />
         </div>
       </div>
@@ -256,23 +256,23 @@ function MetricCard({ metric }: { metric: StaticMetric }) {
 function StaticTabPanel({ tab }: { tab: TabConfig }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">{tab.label}</h2>
-          <p className="text-sm text-gray-600">{tab.description}</p>
-          <p className="text-sm text-gray-500">{tab.rows.length} sample rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{tab.label}</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{tab.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{tab.rows.length} sample rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh View
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Download className="h-4 w-4" />
             Export View
@@ -288,19 +288,19 @@ function StaticTabPanel({ tab }: { tab: TabConfig }) {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative min-w-0 max-w-xl flex-1">
               <input
                 type="text"
                 placeholder={tab.searchPlaceholder}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
               />
             </div>
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Filters
             </button>
@@ -310,7 +310,7 @@ function StaticTabPanel({ tab }: { tab: TabConfig }) {
               <button
                 key={`${tab.id}-${filter}`}
                 type="button"
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${index === 0 ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
               >
                 {filter}
               </button>
@@ -321,38 +321,38 @@ function StaticTabPanel({ tab }: { tab: TabConfig }) {
         <div className="space-y-4 p-[10px] sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold text-gray-900">{tab.tableTitle}</h3>
-              <p className="mt-1 text-sm text-gray-600">{tab.tableDescription}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{tab.tableTitle}</h3>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{tab.tableDescription}</p>
             </div>
-            <span className="text-sm text-gray-500">{tab.rows.length} matching rows</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{tab.rows.length} matching rows</span>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     {tab.columns.map((column) => (
                       <th
                         key={`${tab.id}-${column}`}
-                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                       >
                         {column}
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[var(--card-background)]">
                   {tab.rows.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50">
+                    <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       {row.cells.map((cell, index) => renderStaticCell(cell, index))}
                       <td className="px-4 py-3 text-right">
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                         >
                           View
                           <MoreHorizontal className="h-4 w-4" />
@@ -388,14 +388,14 @@ export function DocumentLibraryClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Documents & Inbox</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Documents & Inbox</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Document Library</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Document Library</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
                 Browse accounting-supporting files and document links across invoices, bills, expenses,
                 receipts, and banking records.
               </p>
@@ -404,7 +404,7 @@ export function DocumentLibraryClient() {
         </div>
       </div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -413,7 +413,7 @@ export function DocumentLibraryClient() {
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabChange(tab.id)}
-                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${isActive ? 'border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'}`}
               >
                 {tab.label}
               </button>

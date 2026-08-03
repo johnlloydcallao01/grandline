@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { CourseCategory } from '@/server';
 import { CourseCategoryCarousel } from '@/components/sections/CourseCategoryCarousel';
 import { CoursesGrid } from '@/components/sections/CoursesGrid';
@@ -7,9 +7,12 @@ import { CoursesCarousel } from '@/components/sections/CoursesCarousel';
 import { useCourses } from '@/hooks/useCourses';
 import { useFeaturedCourses } from '@/hooks/useFeaturedCourses';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { HomePageSkeleton } from '@/components/skeletons';
+import { fetchPortalCourses } from '@/app/portal/courses/actions';
+import { CategoryCarouselSkeleton } from '@/components/skeletons';
 
-export function HomeCoursesSection({ categories, enrollments = [] }: { categories: CourseCategory[]; enrollments?: any[] }) {
+type Enrollment = { course?: any; status?: string; finalEvaluation?: string };
+
+export function HomeCoursesSection() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialIdFromUrl = (() => {
@@ -20,11 +23,58 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
   const [categoryId, setCategoryId] = useState<number | undefined>(initialIdFromUrl);
   const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const { courses, isLoading, isLoadingMore, hasMore, loadMore, totalCourses } = useCourses({ status: 'published', limit: 4, page: 1, sort: '-updatedAt', category: typeof categoryId === 'number' ? String(categoryId) : undefined });
-  const [isPageLoading, setIsPageLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState<number>(8);
   const displayCourses = useMemo(() => {
     return (Array.isArray(courses) ? courses : []).filter((c) => c.status === 'published');
   }, [courses]);
+
+  // Categories - fetched on the client, section shows its own skeleton until ready
+  const [categoriesState, setCategoriesState] = useState<CourseCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const entries = (performance.getEntriesByType('navigation') as any) || [];
+        const isReload = entries[0] && entries[0].type === 'reload';
+        const res = await fetch(`/api/course-categories${isReload ? '?fresh=1' : ''}`, {
+          cache: isReload ? 'no-store' : undefined,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const arr = Array.isArray(data?.categories) ? data.categories : Array.isArray(data?.docs) ? data.docs : [];
+          if (!cancelled) setCategoriesState(arr as CourseCategory[]);
+        }
+      } catch {
+        void 0;
+      } finally {
+        if (!cancelled) setCategoriesLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Enrolled courses - fetched on the client, section shows its own skeleton until ready
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [enrollmentsLoading, setEnrollmentsLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetchPortalCourses();
+        if (!cancelled) setEnrollments(Array.isArray(res) ? res : []);
+      } catch {
+        void 0;
+      } finally {
+        if (!cancelled) setEnrollmentsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Featured Courses (only when no category filter)
   const showFeatured = typeof categoryId !== 'number';
@@ -73,7 +123,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
       if (isPassed) { label = 'Passed'; classKey = 'completed'; }
       else if (isFailed) { label = 'Failed'; classKey = 'dropped'; }
       else if (status === 'completed') { label = 'Completed'; classKey = 'completed'; }
-      else { label = status; classKey = status; }
+      else { label = status ?? ''; classKey = status ?? 'completed'; }
       const cls = statusClasses[classKey] || statusClasses.completed;
       map[key] = (
         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize border ${cls}`}>
@@ -83,28 +133,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
     });
     return map;
   }, [enrollments]);
-
-  const [categoriesState, setCategoriesState] = useState<CourseCategory[]>(Array.isArray(categories) ? categories : []);
-  useEffect(() => {
-    setCategoriesState(Array.isArray(categories) ? categories : []);
-  }, [categories]);
-
-  useEffect(() => {
-    try {
-      const entries = (performance.getEntriesByType('navigation') as any) || [];
-      const isReload = entries[0] && entries[0].type === 'reload';
-      if (isReload) {
-        (async () => {
-          const res = await fetch('/api/course-categories?fresh=1', { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            const arr = Array.isArray(data?.categories) ? data.categories : Array.isArray(data?.docs) ? data.docs : [];
-            if (Array.isArray(arr) && arr.length >= 0) setCategoriesState(arr as CourseCategory[]);
-          }
-        })();
-      }
-    } catch { void 0 }
-  }, []);
 
   const availableCoursesLink = totalCourses > 8
     ? (categoryId ? `/courses/available?course-category=${categoryId}` : '/courses/available')
@@ -126,7 +154,6 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
     }
   }, [showFeatured, isLoadingFeatured, isLoadingMoreFeatured, hasMoreFeatured, featuredDisplay.length, loadMoreFeatured]);
 
-
   useEffect(() => {
     const updateViewport = () => setIsMobile(window.innerWidth < 1024);
     updateViewport();
@@ -139,47 +166,37 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
     setVisibleFeaturedCount(isMobile ? 4 : 8);
   }, [isMobile]);
 
-  const hasMoreRef = useRef(hasMore);
-  const isLoadingMoreRef = useRef(isLoadingMore);
-  useEffect(() => { hasMoreRef.current = hasMore; }, [hasMore]);
-  useEffect(() => { isLoadingMoreRef.current = isLoadingMore; }, [isLoadingMore]);
-
-  // Wishlist-style: keep skeleton until both hooks have settled their data
-  useEffect(() => {
-    if (!isPageLoading) return;
-    const featuredDone = !showFeatured || !isLoadingFeatured;
-    if (!isLoading && featuredDone) {
-      const raf = requestAnimationFrame(() => setIsPageLoading(false));
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [isLoading, isLoadingFeatured, showFeatured, isPageLoading]);
-
-  if (isPageLoading) {
-    return <HomePageSkeleton />;
-  }
-
   return (
     <div className="bg-[var(--background)]">
+      {/* Category Carousel Section */}
       <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
-        <CourseCategoryCarousel
-          categories={categoriesState as CourseCategory[]}
-          onCategoryChange={(id) => {
-            setCategoryId(id);
-            const params = new URLSearchParams(searchParams.toString());
-            if (typeof id === 'number') {
-              params.set('course-category', String(id));
-              router.replace(`/?${params.toString()}`, { scroll: false });
-            } else {
-              params.delete('course-category');
-              const qs = params.toString();
-              router.replace(qs ? `/?${qs}` : '/', { scroll: false });
-            }
-          }}
-        />
+        {categoriesLoading ? (
+          <CategoryCarouselSkeleton />
+        ) : (
+          <CourseCategoryCarousel
+            categories={categoriesState as CourseCategory[]}
+            onCategoryChange={(id) => {
+              setCategoryId(id);
+              const params = new URLSearchParams(searchParams.toString());
+              if (typeof id === 'number') {
+                params.set('course-category', String(id));
+                router.replace(`/?${params.toString()}`, { scroll: false });
+              } else {
+                params.delete('course-category');
+                const qs = params.toString();
+                router.replace(qs ? `/?${qs}` : '/', { scroll: false });
+              }
+            }}
+          />
+        )}
       </div>
+
+      {/* Available Courses Section */}
       <div className="hidden lg:block">
         <CoursesGrid
           courses={displayCourses.slice(0, Math.min(visibleCount, displayCourses.length))}
+          isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
           title="Available Courses"
           viewAllLink={availableCoursesLink}
           keyPrefix="available"
@@ -190,6 +207,8 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
           <CoursesGrid
             title="Available Courses"
             courses={displayCourses}
+            isLoading={isLoading}
+            isLoadingMore={isLoadingMore}
             paddingClass="p-[10px]"
             viewAllLink={availableCoursesLink}
             keyPrefix="available"
@@ -199,6 +218,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
         <div className="lg:hidden">
           <CoursesCarousel
             courses={displayCourses.slice(0, 8)}
+            isLoading={isLoading}
             title="Available Courses"
             viewAllLink={availableCoursesLink}
             keyPrefix="available"
@@ -206,7 +226,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
         </div>
       )}
       <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
-        {(displayCourses.length > visibleCount || hasMore) && (
+        {!isLoading && (displayCourses.length > visibleCount || hasMore) && (
           <div className="flex justify-center">
             <button
               onClick={() => {
@@ -225,12 +245,15 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
         )}
       </div>
 
-      {showFeatured && featuredDisplay.length > 0 && (
+      {/* Featured Courses Section */}
+      {showFeatured && (isLoadingFeatured || featuredDisplay.length > 0) && (
         <>
           <div className="hidden lg:block">
             <CoursesGrid
               title="Featured Courses"
               courses={featuredDisplay.slice(0, Math.min(visibleFeaturedCount, featuredDisplay.length))}
+              isLoading={isLoadingFeatured}
+              isLoadingMore={isLoadingMoreFeatured}
               viewAllLink={featuredCoursesLink}
               keyPrefix="featured"
             />
@@ -238,13 +261,14 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
           <div className="lg:hidden">
             <CoursesCarousel
               courses={featuredDisplay.slice(0, 8)}
+              isLoading={isLoadingFeatured}
               title="Featured Courses"
               viewAllLink={featuredCoursesLink}
               keyPrefix="featured"
             />
           </div>
           <div className="hidden lg:block max-w-7xl mx-auto p-[10px]">
-            {(featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
+            {!isLoadingFeatured && (featuredDisplay.length > visibleFeaturedCount || hasMoreFeatured) && (
               <div className="flex justify-center">
                 <button
                   onClick={() => {
@@ -265,12 +289,14 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
         </>
       )}
 
-      {enrolledCourses.length > 0 && (
+      {/* Enrolled Courses Section */}
+      {(enrollmentsLoading || enrolledCourses.length > 0) && (
         <>
           <div className="hidden lg:block">
             <CoursesGrid
               title="Enrolled Courses"
               courses={enrolledCourses.slice(0, 8)}
+              isLoading={enrollmentsLoading}
               viewAllLink={enrolledCoursesLink}
               keyPrefix="enrolled"
               ribbonMap={enrollmentStatusMap}
@@ -280,6 +306,7 @@ export function HomeCoursesSection({ categories, enrollments = [] }: { categorie
           <div className="lg:hidden">
             <CoursesCarousel
               courses={enrolledCourses.slice(0, 8)}
+              isLoading={enrollmentsLoading}
               title="Enrolled Courses"
               viewAllLink={enrolledCoursesLink}
               keyPrefix="enrolled"

@@ -8,31 +8,17 @@ import {
 } from '@/components/ui/Skeleton';
 
 /**
- * Home Page Skeleton - Category carousel + Courses grid
+ * Category Carousel Skeleton - rendered while course categories are loading
  */
-export function HomePageSkeleton() {
+export function CategoryCarouselSkeleton() {
   return (
-    <>
-      {/* Category Carousel Skeleton */}
-      <div className="bg-[var(--card-background)] border-b border-[var(--card-border)]">
-        <div className="w-full px-2.5 py-4">
-          <div className="flex space-x-6 overflow-hidden">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <CategoryCircleSkeleton key={index} />
-            ))}
-          </div>
-        </div>
+    <div className="w-full px-2.5 py-4">
+      <div className="flex space-x-6 overflow-hidden">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <CategoryCircleSkeleton key={index} />
+        ))}
       </div>
-
-      {/* Courses Grid Skeleton */}
-      <div className="p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <CardSkeleton key={index} />
-          ))}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
 

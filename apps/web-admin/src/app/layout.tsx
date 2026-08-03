@@ -7,8 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthErrorBoundary } from "@/components/auth";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { cmsConfig, getCMSImageUrl } from "@/lib/cms";
 import { getServerUser, getServerToken } from "@/app/actions/auth";
+import { getSiteSettingsFavicon } from "@/server/siteSettings";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,39 +22,10 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  let siteName = "Grandline Maritime Admin Dashboard";
-  let description = "Admin dashboard for Grandline Maritime Training and Development Center Inc";
-  let iconUrl = '/favicon.ico';
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout for build
-
-    const res = await fetch(`${cmsConfig.apiUrl}/globals/site-settings?depth=1`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const settings = await res.json();
-      
-      if (settings.siteName) {
-        siteName = settings.siteName;
-      }
-      
-      if (settings.description) {
-        description = settings.description;
-      }
-      
-      if (settings.favicon && typeof settings.favicon === 'object') {
-        iconUrl = settings.favicon.cloudinaryURL || getCMSImageUrl(settings.favicon.url);
-      }
-    }
-  } catch (error) {
-    console.warn("Failed to fetch site settings for metadata (using defaults):", error instanceof Error ? error.message : "Unknown error");
-  }
+  const { siteSettings, faviconUrl } = await getSiteSettingsFavicon();
+  const siteName = siteSettings?.siteName || "Grandline Maritime Admin Dashboard";
+  const description = siteSettings?.description || "Admin dashboard for Grandline Maritime Training and Development Center Inc";
+  const iconUrl = faviconUrl || '/favicon.ico';
 
   return {
     title: siteName,

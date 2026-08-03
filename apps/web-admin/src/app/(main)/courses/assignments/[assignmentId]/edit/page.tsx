@@ -38,10 +38,24 @@ export default function EditAssignmentPage() {
                 return '';
             }).filter(Boolean);
 
+            const instructor = data.instructor;
+            const instructorId = typeof instructor === 'object' && instructor !== null ? instructor.id : instructor;
+            const instructorUser = typeof instructor === 'object' && instructor !== null && (instructor as any).user
+                ? (instructor as any).user
+                : null;
+            const instructorLabel = instructorUser
+                ? `${instructorUser.firstName || ''} ${instructorUser.lastName || ''}`.trim() || instructorUser.email || `Instructor #${instructorId}`
+                : instructorId
+                    ? `Instructor #${instructorId}`
+                    : '';
+
             setInitialData({
                 title: data.title || '',
                 description,
                 attachments: atts,
+                instructor: instructorId ? String(instructorId) : '',
+                instructorSearch: instructorLabel,
+                instructorLabel,
                 maxScore: data.maxScore ?? 100,
                 passingScore: data.passingScore ?? 75,
                 submissionType: data.submissionType || 'both',

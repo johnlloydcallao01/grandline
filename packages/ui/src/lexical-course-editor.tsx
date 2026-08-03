@@ -246,7 +246,6 @@ const SlashPopupPlugin: React.FC<{
           // Only trigger at start of paragraph (offset 0) or after newline
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
-            const anchorNode = selection.anchor.getNode();
             const offset = selection.anchor.offset;
             if (offset === 0) {
               setOpen(true);

@@ -44,7 +44,8 @@ export const Chats: CollectionConfig = {
       name: 'type',
       type: 'select',
       options: [
-        { label: 'Direct (1:1)', value: 'direct' },
+        { label: 'Messenger (1:1)', value: 'messenger' },
+        { label: 'Direct (1:1) Legacy', value: 'direct' },
         { label: 'Group', value: 'group' },
         { label: 'Instructor & Trainee', value: 'instructor_trainee' },
       ],

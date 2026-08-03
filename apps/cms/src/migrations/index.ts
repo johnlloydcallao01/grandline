@@ -117,6 +117,12 @@ import * as migration_20260621_190000_bounced_payments from './20260621_190000_b
 import * as migration_20260709_add_acct_payroll_account_mappings from './20260709_add_acct_payroll_account_mappings';
 import * as migration_20260718_add_archived_status_to_courses from './20260718_add_archived_status_to_courses';
 import * as migration_20260722_create_course_tags from './20260722_create_course_tags';
+import * as migration_20260801_add_created_by_to_assignments from './20260801_add_created_by_to_assignments';
+import * as migration_20260801_fix_created_by_column_name from './20260801_fix_created_by_column_name';
+import * as migration_20260801_switch_assignments_created_by_to_instructor from './20260801_switch_assignments_created_by_to_instructor';
+import * as migration_20260801_add_uploaded_by_visibility_to_media from './20260801_add_uploaded_by_visibility_to_media';
+import * as migration_20260802_add_messenger_chat_type from './20260802_add_messenger_chat_type';
+import * as migration_20260803_make_chat_messages_content_optional from './20260803_make_chat_messages_content_optional';
 
 export const migrations = [
   {
@@ -713,5 +719,35 @@ export const migrations = [
     up: migration_20260722_create_course_tags.up,
     down: migration_20260722_create_course_tags.down,
     name: '20260722_create_course_tags',
+  },
+  {
+    up: migration_20260801_add_created_by_to_assignments.up,
+    down: migration_20260801_add_created_by_to_assignments.down,
+    name: '20260801_add_created_by_to_assignments',
+  },
+  {
+    up: migration_20260801_fix_created_by_column_name.up,
+    down: migration_20260801_fix_created_by_column_name.down,
+    name: '20260801_fix_created_by_column_name',
+  },
+  {
+    up: migration_20260801_switch_assignments_created_by_to_instructor.up,
+    down: migration_20260801_switch_assignments_created_by_to_instructor.down,
+    name: '20260801_switch_assignments_created_by_to_instructor',
+  },
+  {
+    up: migration_20260801_add_uploaded_by_visibility_to_media.up,
+    down: migration_20260801_add_uploaded_by_visibility_to_media.down,
+    name: '20260801_add_uploaded_by_visibility_to_media',
+  },
+  {
+    up: migration_20260802_add_messenger_chat_type.up,
+    down: migration_20260802_add_messenger_chat_type.down,
+    name: '20260802_add_messenger_chat_type',
+  },
+  {
+    up: migration_20260803_make_chat_messages_content_optional.up,
+    down: migration_20260803_make_chat_messages_content_optional.down,
+    name: '20260803_make_chat_messages_content_optional',
   },
 ];

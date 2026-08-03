@@ -11,6 +11,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@encreasl/ui": "workspace:*",
+    "@grandline/chat-engine": "workspace:*",
     "echarts": "6.1.0",
     "echarts-for-react": "3.0.6",
     "next": "^16.2.0",

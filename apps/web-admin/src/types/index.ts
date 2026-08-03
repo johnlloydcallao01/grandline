@@ -9,6 +9,7 @@ export interface SidebarItemProps {
   collapsed?: boolean;
   onClick?: () => void;
   href?: string;
+  badge?: number;
 }
 
 export interface HeaderProps {

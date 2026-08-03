@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Header, OverlaySidebar } from '@/components/layout';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
+import { MessengerProvider } from '@encreasl/ui/messenger-context';
 import { useUser } from '@/hooks/useAuth';
 
 interface ViewCourseLayoutProps {
@@ -16,7 +17,8 @@ interface ViewCourseLayoutProps {
 export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
   const [isOverlaySidebarOpen, setIsOverlaySidebarOpen] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const { user } = useUser();
+  const { user, token } = useUser();
+  const messengerApiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       if (typeof history !== 'undefined' && (history as any).scrollRestoration !== undefined) {
@@ -69,16 +71,17 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
   };
 
   return (
-    <NotificationsProvider userId={user?.id}>
-      <div className="min-h-screen bg-[var(--background)]">
-        {/* Shared Header - only visible on desktop */}
-        <div className="hidden lg:block lg:sticky lg:top-0 lg:z-50">
-        <Header
-          sidebarOpen={isOverlaySidebarOpen}
-          onToggleSidebar={handleToggleOverlaySidebar}
-          onSearch={handleSearch}
-        />
-      </div>
+    <MessengerProvider token={token} userId={user?.id} apiBaseUrl={messengerApiBase}>
+      <NotificationsProvider userId={user?.id}>
+        <div className="min-h-screen bg-[var(--background)]">
+          {/* Shared Header - only visible on desktop */}
+          <div className="hidden lg:block lg:sticky lg:top-0 lg:z-50">
+          <Header
+            sidebarOpen={isOverlaySidebarOpen}
+            onToggleSidebar={handleToggleOverlaySidebar}
+            onSearch={handleSearch}
+          />
+        </div>
 
       {/* Overlay Sidebar - only on desktop */}
       <div className="hidden lg:block">
@@ -152,5 +155,6 @@ export default function ViewCourseLayout({ children }: ViewCourseLayoutProps) {
       )}
     </div>
     </NotificationsProvider>
+    </MessengerProvider>
   );
 }

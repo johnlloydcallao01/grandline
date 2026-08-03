@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
         description: 'Review approval workflow mappings for operational entity types such as budgets, asset disposals, timesheets, and payroll runs.',
         searchPlaceholder: 'Search entity type, collection, behavior, outcome, or mapping status',
         filters: {
-          entityTypes: rows.map((r) => ({ label: r.entityTypeLabel, value: r.entityType })),
+          entityTypes: Array.from(new Map(rows.map((r) => [r.entityType, { label: r.entityTypeLabel, value: r.entityType }])).values()),
           quickFilters: [
             { label: 'Has Mapping', value: 'mapping:active' },
             { label: 'Missing Mapping', value: 'mapping:missing' },
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
       appliedFilters: { search, entityTypes, quickFilters },
       pagination: { page: currentPage, limit, totalDocs, totalPages, hasPrevPage: currentPage > 1, hasNextPage: currentPage < totalPages },
       totals: { totalRows: rows.length, filteredRows: totalDocs, withWorkflowCount, totalRequests, totalPending: rows.reduce((sum, r) => sum + r.pendingCount, 0) },
-      referenceData: { entityTypes: rows.map((r) => ({ label: r.entityTypeLabel, value: r.entityType })), users },
+      referenceData: { entityTypes: Array.from(new Map(rows.map((r) => [r.entityType, { label: r.entityTypeLabel, value: r.entityType }])).values()), users },
     })
   } catch (error) { return handleAccountingApiError(error) }
 }

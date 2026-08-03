@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Image from "@/components/ui/ImageWrapper";
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { HeaderProps } from '@/types';
@@ -11,6 +12,10 @@ import { useSearch } from '@/hooks/useSearch';
 import { DesktopSearchDropdown } from '@/components/search/DesktopSearchDropdown';
 import { MobileSearchOverlay } from '@/components/search/MobileSearchOverlay';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { MessengerButton } from '@encreasl/ui/messenger-button';
+import { MessengerIcon } from '@encreasl/ui/messenger-icons';
+import { useMessenger } from '@encreasl/ui/messenger-context';
+import { MessengerPanel } from './MessengerPanel';
 
 /**
  * Header component with navigation, search, and user controls
@@ -36,6 +41,7 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
         onClose={() => setIsMobilePortalMenuOpen(false)}
       />
       <MobileSearchOverlay />
+      <MessengerPanel />
     </SearchProvider>
   )
 }
@@ -217,6 +223,28 @@ function MobilePortalMenuOverlay({
   )
 }
 
+function MobileMessengerLink() {
+  const { unreadCount } = useMessenger()
+
+  return (
+    <Link
+      href="/messenger"
+      aria-label={unreadCount > 0 ? `Messenger, ${unreadCount} unread messages` : "Messenger"}
+      className="relative inline-flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-800 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+    >
+      <MessengerIcon className="h-5 w-5" />
+      {unreadCount > 0 && (
+        <span
+          className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-gray-900"
+          aria-hidden="true"
+        >
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </Link>
+  )
+}
+
 function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch, isMobilePortalMenuOpen, onOpenMobilePortalMenu }: HeaderInnerProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -390,6 +418,9 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch, isMobilePortalMen
             )}
           </div>
           <div className="flex-none">
+            <MobileMessengerLink />
+          </div>
+          <div className="flex-none">
             <NotificationBell navigateToPage isMobile />
           </div>
           <button onClick={() => { setOverlayOpen(true); loadRecentKeywords(); }} className="w-10 h-10 bg-[var(--card-background)] border border-[var(--card-border)] rounded-md flex items-center justify-center flex-none">
@@ -450,6 +481,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch, isMobilePortalMen
         </div>
 
         <div className="flex items-center space-x-4">
+          <MessengerButton />
           <NotificationBell />
           {!pathname.startsWith('/portal') && (
             <button

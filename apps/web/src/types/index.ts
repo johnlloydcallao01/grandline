@@ -14,6 +14,7 @@ export interface SidebarItemProps {
   onClick?: () => void;
   href?: string;
   target?: string;
+  badge?: number;
 }
 
 
@@ -78,6 +79,7 @@ export type IconName =
   | 'contact-us'
   | 'about-us'
   | 'blogs'
+  | 'messenger'
   | 'terms-conditions'
   | 'privacy-policy';
 

@@ -60,15 +60,15 @@ const META = {
 };
 
 function getActionClasses(variant: 'primary' | 'secondary' | 'ghost' = 'secondary') {
-  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700';
-  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900';
-  return 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50';
+  if (variant === 'primary') return 'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 dark:border-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800';
+  if (variant === 'ghost') return 'border border-transparent bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300';
+  return 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
 }
 
 function getMetricTone(trend: RegisterMetric['trend']) {
-  if (trend === 'down') return 'text-red-600 bg-red-50';
-  if (trend === 'neutral') return 'text-gray-600 bg-gray-100';
-  return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30';
+  if (trend === 'neutral') return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800';
+  return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30';
 }
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
@@ -98,13 +98,13 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
   if (!mounted) return null;
   return createPortal(
     <div className={`fixed inset-0 z-50 flex justify-end transition-opacity duration-300 ease-in-out ${animate ? 'bg-black/50' : 'bg-transparent'}`} onClick={onClose}>
-      <div className={`flex w-full max-w-3xl flex-col bg-white shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className={`flex w-full max-w-3xl flex-col bg-white dark:bg-[var(--card-background)] shadow-xl transition-all duration-300 ease-in-out ${animate ? 'translate-x-0' : 'translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {description ? <p className="mt-0.5 text-sm text-gray-500">{description}</p> : null}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            {description ? <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -118,13 +118,13 @@ function SlideOver({ isOpen, onClose, title, description, children }: { isOpen: 
 function MetricCard({ label, value, change, trend = 'neutral' }: { label: string; value: string | number; change: string; trend?: 'up' | 'down' | 'neutral' }) {
   const TrendIcon = trend === 'down' ? ArrowDownRight : ArrowUpRight;
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
-        <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
+        <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-gray-600 dark:text-gray-400">
           <Wallet className="h-5 w-5" />
         </div>
       </div>
@@ -141,23 +141,23 @@ function MetricCard({ label, value, change, trend = 'neutral' }: { label: string
 function LoadingSkeleton({ columnCount = 7 }: { columnCount?: number }) {
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
                 {Array.from({ length: columnCount + 1 }).map((_, i) => (
                   <th key={i} className="px-4 py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-[var(--card-background)]">
               {Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i}>
                   <td colSpan={columnCount + 1} className="px-4 py-3">
-                    <div className="h-6 animate-pulse rounded bg-gray-100" />
+                    <div className="h-6 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                   </td>
                 </tr>
               ))}
@@ -171,16 +171,16 @@ function LoadingSkeleton({ columnCount = 7 }: { columnCount?: number }) {
 
 function renderCell(cell: RegisterCell, index: number) {
   if (typeof cell === 'string') {
-    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{cell}</td>;
+    return <td key={index} className="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{cell}</td>;
   }
   const alignClass = cell.align === 'right' ? 'text-right' : cell.align === 'center' ? 'text-center' : 'text-left';
   if (cell.tone) {
     const toneMap: Record<string, string> = {
-      amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-      green: 'bg-green-50 text-green-700 ring-green-200',
-      gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-      blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-      red: 'bg-red-50 text-red-700 ring-red-200',
+      amber: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:ring-amber-800',
+      green: 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-800',
+      gray: 'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:ring-blue-800',
+      red: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400 dark:ring-red-800',
     };
     return (
       <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${alignClass}`}>
@@ -191,7 +191,7 @@ function renderCell(cell: RegisterCell, index: number) {
     );
   }
   return (
-    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900' : 'text-gray-600'} ${alignClass}`}>
+    <td key={index} className={`whitespace-nowrap px-4 py-3 text-sm ${cell.emphasis ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} ${alignClass}`}>
       {cell.text}
     </td>
   );
@@ -200,7 +200,7 @@ function renderCell(cell: RegisterCell, index: number) {
 function FormField({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
         {required ? <span className="ml-0.5 text-red-500">*</span> : null}
       </label>
@@ -218,7 +218,7 @@ function Input({ value, onChange, placeholder, type = 'text', required, disabled
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
     />
   );
 }
@@ -228,11 +228,11 @@ function Select({ value, onChange, options }: { value: string; onChange: (value:
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
     >
-      {options.length > 0 && options[0].value !== '' ? <option value="" className="text-gray-900">Select...</option> : null}
+      {options.length > 0 && options[0].value !== '' ? <option value="" className="text-gray-900 dark:text-gray-100">Select...</option> : null}
       {options.map((option) => (
-        <option key={option.value} value={option.value} className="text-gray-900 bg-white">{option.label}</option>
+        <option key={option.value} value={option.value} className="text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]">{option.label}</option>
       ))}
     </select>
   );
@@ -244,7 +244,7 @@ function TextArea({ value, onChange, rows = 3 }: { value: string; onChange: (val
       value={value}
       onChange={(event) => onChange(event.target.value)}
       rows={rows}
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
     />
   );
 }
@@ -367,7 +367,7 @@ function renderForm(
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       {errorMessage ? (
-        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {errorMessage}
         </div>
@@ -428,8 +428,8 @@ function renderForm(
         <TextArea value={formState.notes} onChange={(value) => setFormState((prev) => ({ ...prev, notes: value }))} />
       </FormField>
 
-      <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
-        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+      <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-4">
+        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50">
           Cancel
         </button>
         <button type="submit" disabled={isSubmitting} className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${getActionClasses('primary')}`}>
@@ -628,11 +628,11 @@ export default function AssetRegisterReportClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900">Asset Register Report</h2>
-          <p className="text-sm text-gray-600">{META.tableDescription}</p>
-          <p className="text-sm text-gray-500">{data?.totals.filteredRows ?? 0} matching rows</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asset Register Report</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{META.tableDescription}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{data?.totals.filteredRows ?? 0} matching rows</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleOpenCreate} className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${getActionClasses('primary')}`}>
@@ -643,7 +643,7 @@ export default function AssetRegisterReportClient() {
             <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
-          <button type="button" onClick={handleExport} disabled={!currentRows.length} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="button" onClick={handleExport} disabled={!currentRows.length} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50">
             <Download className="h-4 w-4" />
             Export
           </button>
@@ -658,21 +658,21 @@ export default function AssetRegisterReportClient() {
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-gray-800 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
             <form onSubmit={handleSearch} className="flex min-w-0 max-w-xl flex-1 gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder={META.searchPlaceholder}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-500 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                 />
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800">
                 <Search className="h-4 w-4" />
                 Search
               </button>
@@ -683,16 +683,16 @@ export default function AssetRegisterReportClient() {
                 if (!isFilterPanelOpen) setDraftFilters({ ...filters });
                 setIsFilterPanelOpen((previous) => !previous);
               }}
-              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${isFilterPanelOpen || filterCount > 0 ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
               <Filter className="h-4 w-4" />
               Filters
-              {filterCount > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">{filterCount}</span> : null}
+              {filterCount > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-blue-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">{filterCount}</span> : null}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
             {(data?.filterOptions.quickFilters || []).map((filter) => (
-              <button key={filter.value} type="button" onClick={() => handleToggleQuickFilter(filter.value)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+              <button key={filter.value} type="button" onClick={() => handleToggleQuickFilter(filter.value)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${quickFilters.includes(filter.value) ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                 {filter.label}
               </button>
             ))}
@@ -701,32 +701,32 @@ export default function AssetRegisterReportClient() {
 
         <div className="space-y-4 p-[10px] sm:p-5">
           {isFilterPanelOpen ? (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Filters</h4>
-                  <p className="mt-1 text-sm text-gray-600">Select as many values as needed. All checked filters widen the result set using OR logic.</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Filters</h4>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Select as many values as needed. All checked filters widen the result set using OR logic.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], categories: [] }); setFilters({ statuses: [], categories: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <button type="button" onClick={() => { setDraftFilters({ statuses: [], categories: [] }); setFilters({ statuses: [], categories: [] }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                     Clear all
                   </button>
-                  <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <button type="button" onClick={() => setIsFilterPanelOpen(false)} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                     Cancel
                   </button>
-                  <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                  <button type="button" onClick={() => { setFilters({ ...draftFilters }); setCurrentPage(1); setIsFilterPanelOpen(false); }} className="rounded-lg border border-blue-600 dark:border-blue-700 bg-blue-600 dark:bg-blue-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-800">
                     Apply Filters
                   </button>
                 </div>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</p>
                   <div className="flex flex-wrap gap-2">
                     {(data?.filterOptions.statuses || []).map((option) => {
                       const isSelected = draftFilters.statuses.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((prev) => ({ ...prev, statuses: toggleFilterValue(prev.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((prev) => ({ ...prev, statuses: toggleFilterValue(prev.statuses, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                           {option.label}
                         </button>
                       );
@@ -734,12 +734,12 @@ export default function AssetRegisterReportClient() {
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Category</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Category</p>
                   <div className="flex flex-wrap gap-2">
                     {(data?.filterOptions.categories || []).map((option) => {
                       const isSelected = draftFilters.categories.includes(option.value);
                       return (
-                        <button key={option.value} type="button" onClick={() => setDraftFilters((prev) => ({ ...prev, categories: toggleFilterValue(prev.categories, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                        <button key={option.value} type="button" onClick={() => setDraftFilters((prev) => ({ ...prev, categories: toggleFilterValue(prev.categories, option.value) }))} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-200 dark:ring-blue-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                           {option.label}
                         </button>
                       );
@@ -753,41 +753,41 @@ export default function AssetRegisterReportClient() {
           {isLoading ? (
             <LoadingSkeleton columnCount={cols.length} />
           ) : errorState ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {errorState}
             </div>
           ) : currentRows.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-gray-500">No asset register records found.</p>
-              <p className="mt-1 text-xs text-gray-400">Try adjusting your search or filters, or create a new asset.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">No asset register records found.</p>
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Try adjusting your search or filters, or create a new asset.</p>
             </div>
           ) : (
             <>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-[var(--card-border)]">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
                       <tr>
                         {cols.map((col) => (
-                          <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{col}</th>
+                          <th key={col} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{col}</th>
                         ))}
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-[var(--card-background)]">
                       {currentRows.map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50">
+                        <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           {row.cells.map((cell, index) => renderCell(cell, index))}
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <button type="button" onClick={() => handleView(row.id)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600" title="View">
+                              <button type="button" onClick={() => handleView(row.id)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400" title="View">
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={() => handleOpenEdit(row.id)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600" title="Edit">
+                              <button type="button" onClick={() => handleOpenEdit(row.id)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400" title="Edit">
                                 <Edit className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={() => handleOpenDelete(row.id, `${row.assetCode} - ${row.name}`)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600" title="Delete">
+                              <button type="button" onClick={() => handleOpenDelete(row.id, `${row.assetCode} - ${row.name}`)} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-600 dark:hover:text-red-400" title="Delete">
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
@@ -800,7 +800,7 @@ export default function AssetRegisterReportClient() {
               </div>
 
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Page {data?.pagination.page ?? 1} of {data?.pagination.totalPages ?? 1}
                 </p>
                 <div className="flex items-center gap-2">
@@ -808,7 +808,7 @@ export default function AssetRegisterReportClient() {
                     type="button"
                     onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
                     disabled={!data?.pagination.hasPrevPage}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Previous
                   </button>
@@ -816,7 +816,7 @@ export default function AssetRegisterReportClient() {
                     type="button"
                     onClick={() => setCurrentPage((previous) => Math.min(data?.pagination.totalPages ?? 1, previous + 1))}
                     disabled={!data?.pagination.hasNextPage}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[var(--card-background)] px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -881,17 +881,17 @@ export default function AssetRegisterReportClient() {
                   return loc ? `${loc.code ?? ''} - ${loc.name ?? ''}` : '-';
                 })()],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
-                  <p className="mt-2 text-sm font-medium text-gray-900">{value}</p>
+                <div key={label} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</p>
+                  <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{value}</p>
                 </div>
               ))}
             </div>
 
             {(viewDetail as Record<string, unknown>).notes ? (
-              <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</p>
-                <p className="mt-2 text-sm text-gray-700">{(viewDetail as Record<string, unknown>).notes as string}</p>
+              <div className="mt-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Notes</p>
+                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{(viewDetail as Record<string, unknown>).notes as string}</p>
               </div>
             ) : null}
           </>
@@ -909,19 +909,19 @@ export default function AssetRegisterReportClient() {
       <SlideOver isOpen={isDeleteOpen} onClose={() => { if (!isDeleteSubmitting) { setIsDeleteOpen(false); setDeleteId(null); setDeleteLabel(''); } }} title="Delete Asset" description="Remove this asset record if it has no blocking dependencies (depreciation entries or disposal records).">
         <div className="space-y-4">
           {deleteError ? (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {deleteError}
             </div>
           ) : null}
-          <p className="text-sm text-gray-600">
-            Are you sure you want to delete <span className="font-semibold text-gray-900">{deleteLabel}</span>? This action cannot be undone.
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-gray-100">{deleteLabel}</span>? This action cannot be undone.
           </p>
-          <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
-            <button type="button" onClick={() => { setIsDeleteOpen(false); setDeleteId(null); setDeleteLabel(''); }} disabled={isDeleteSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-800 pt-4">
+            <button type="button" onClick={() => { setIsDeleteOpen(false); setDeleteId(null); setDeleteLabel(''); }} disabled={isDeleteSubmitting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50">
               Cancel
             </button>
-            <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
+            <button type="button" onClick={handleConfirmDelete} disabled={isDeleteSubmitting} className="rounded-lg bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50">
               {isDeleteSubmitting ? 'Deleting...' : 'Delete'}
             </button>
           </div>

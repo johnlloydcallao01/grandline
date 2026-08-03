@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserAvatar } from '@/components/auth';
 import { useLogout, useUser } from '@/hooks/useAuth';
+import { useMessenger } from '@encreasl/ui/messenger-context';
 
 /**
  * Professional Menu Page - Facebook-style user menu
@@ -19,7 +20,8 @@ const menuSections = [
     items: [
       { icon: 'fa-home', label: 'Home', path: '/', badge: null },
       { icon: 'fa-bookmark', label: 'Wishlists', path: '/wishlists', badge: null },
-      { icon: 'fa-history', label: 'Recently Viewed', path: '/history', badge: null }
+      { icon: 'fa-history', label: 'Recently Viewed', path: '/history', badge: null },
+      { icon: 'fa-comments', label: 'Messenger', path: '/messenger', badge: null }
     ]
   },
   {
@@ -59,6 +61,7 @@ export default function MenuPage() {
   const router = useRouter();
   const { logout, isLoggingOut } = useLogout();
   const { user, displayName, isLoading } = useUser();
+  const { unreadCount } = useMessenger();
   const [menuStats, setMenuStats] = useState<MenuStats | null>(null);
   const [isLoadingMenuStats, setIsLoadingMenuStats] = useState(true);
 
@@ -221,11 +224,17 @@ export default function MenuPage() {
                     <span className="font-medium text-gray-900 dark:text-gray-100">{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {item.badge && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">
-                        {item.badge}
-                      </span>
-                    )}
+                    {item.path === '/messenger'
+                      ? unreadCount > 0 && (
+                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )
+                      : item.badge && (
+                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">
+                            {item.badge}
+                          </span>
+                        )}
                     <i className="fa fa-chevron-right text-gray-400 dark:text-gray-500 text-sm"></i>
                   </div>
                 </button>

@@ -23,14 +23,14 @@ export function DocumentIntakeClient() {
     <div className="space-y-6 p-[10px]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Operations / Documents & Inbox</p>
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Operations / Documents & Inbox</p>
           <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-blue-700 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Document Intake</h1>
-              <p className="mt-1 max-w-3xl text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Document Intake</h1>
+              <p className="mt-1 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
                 Review uploaded files entering accounting and prepare them for linkage to invoices, bills, expenses, banking records, and other finance entities.
               </p>
             </div>
