@@ -20,6 +20,7 @@ import {
   postMessage,
   createChat,
   markChatRead,
+  deleteConversation as apiDeleteConversation,
   extractTextFromContent,
   resolveMediaUrl,
   getErrorMessage,
@@ -45,6 +46,7 @@ interface BroadcastPayload {
     type?: string
     attachments?: string[]
     createdAt?: string
+    deletedBy?: number | string
   }
 }
 
@@ -161,6 +163,7 @@ export interface MessengerContextValue {
     participantIds: number[],
     title?: string
   ) => Promise<MessengerConversation>
+  deleteConversation: (conversationId: number) => Promise<void>
   markRead: (conversationId: number) => Promise<void>
 
   unreadCount: number
@@ -267,6 +270,7 @@ export function MessengerProvider({
   const messagesCursorRef = useRef<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const activeConversationRef = useRef<MessengerConversation | null>(null)
+  const conversationsRef = useRef<MessengerConversation[]>([])
   const channelManagerRef = useRef<ChatChannelManager | null>(null)
   const supabaseClientRef = useRef<ReturnType<typeof createSupabaseClient> | null>(null)
   const channelManagerReadyRef = useRef(false)
@@ -289,6 +293,7 @@ export function MessengerProvider({
   // Keep a ref of the active conversation so realtime handlers can always
   // access the latest value without re-subscribing.
   activeConversationRef.current = activeConversation
+  conversationsRef.current = conversations
 
   // Initialize the Supabase realtime client once (mirrors discussion-board).
   useEffect(() => {
@@ -602,6 +607,24 @@ export function MessengerProvider({
           const preview = extractTextFromContent(bc.content) || "[Message]"
           updateSidebar(chatId, preview, bc.createdAt ?? "")
         })
+        channel.on("broadcast", { event: "conversation_deleted" }, (payload: BroadcastPayload) => {
+          const bc = payload?.payload || {}
+          console.log("[Messenger] 🗑️ Sidebar conversation deleted broadcast:", bc)
+          // "Delete for me only": only remove if the current user initiated the deletion.
+          // The other participant must keep the conversation — their broadcast listener
+          // receives the same event but ignores it because deletedBy !== their id.
+          if (String(bc.deletedBy) !== String(currentUserId)) return
+          const target = conversations.find((c) => c.id === chatId)
+          if (target && target.unread > 0) {
+            setUnreadCount((u) => Math.max(0, u - target.unread))
+          }
+          setConversations((prev) => prev.filter((c) => c.id !== chatId))
+          if (activeConversationRef.current?.id === chatId) {
+            setActiveConversation(null)
+            setMessages([])
+            messagesCursorRef.current = null
+          }
+        })
         channels.push(channel)
       }
     })
@@ -612,6 +635,73 @@ export function MessengerProvider({
       // handler is removed, which also removes the broadcast listeners.
     }
   }, [chatIdsKey, channelManagerReady, currentUserId, apiOpts])
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Per-user messenger channel
+  // Subscribes to `messenger-user:${userId}` — a private Supabase channel
+  // that receives server-side broadcasts for EVERY new message, including
+  // brand-new conversations (first message from another user). This is the
+  // mechanism that makes real-time work even when the chat doesn't yet
+  // appear in the sidebar.
+  // ──────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!channelManagerReady || !supabaseClientRef.current || !currentUserId) return
+
+    const supabase = supabaseClientRef.current
+    const channelName = `messenger-user:${currentUserId}`
+
+    console.log(`[Messenger] Subscribing to per-user channel: ${channelName}`)
+
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { self: false } },
+    })
+
+    channel.on(
+      "broadcast",
+      { event: "new_message" },
+      (payload: { payload?: Record<string, any> }) => {
+        const bc = payload?.payload
+        if (!bc) return
+
+        const chatId = Number(bc.chatId)
+        const senderId = String(bc.senderId)
+        if (!chatId || senderId === String(currentUserId)) return
+
+        console.log(`[Messenger] 📬 Per-user channel: new_message for chat ${chatId}`)
+
+        // Check if the conversation already exists in the sidebar
+        if (conversationsRef.current.some((c) => c.id === chatId)) {
+          // Chat is already in the sidebar — the per-chat subscription
+          // (chat:${chatId}) already handles preview/unread updates.
+          // Do nothing here to avoid double-counting.
+          return
+        }
+
+        // Brand-new conversation — refetch overview to get full details
+        // (participants, names, avatars, etc.) since the broadcast only
+        // carries a preview, not the full sidebar item.
+        console.log(`[Messenger] 🆕 New conversation detected (${chatId}), refetching overview`)
+        fetchMessengerOverview(apiOpts).then((overview) => {
+          const mapped = overview.conversations.map((c) => mapChatToConversation(c))
+          setConversations(mapped)
+          setUnreadCount(mapped.reduce((s, c) => s + c.unread, 0))
+        }).catch(() => {})
+      }
+    )
+
+    channel.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        console.log(`[Messenger] ✅ Per-user channel ${channelName} subscribed`)
+      } else {
+        console.warn(`[Messenger] Per-user channel ${channelName} status: ${status}`)
+      }
+    })
+
+    return () => {
+      console.log(`[Messenger] Unsubscribing from per-user channel: ${channelName}`)
+      supabase.removeChannel(channel)
+    }
+  }, [channelManagerReady, currentUserId, apiOpts])
 
   const loadMoreMessages = useCallback(async () => {
     if (!activeConversation || !hasMoreMessages || !isAuthenticated || !token)
@@ -792,6 +882,53 @@ export function MessengerProvider({
     [isAuthenticated, token, apiOpts]
   )
 
+  const deleteConversation = useCallback(
+    async (conversationId: number) => {
+      if (!isAuthenticated || !token) return
+
+      // Optimistic: remove from sidebar immediately
+      const conv = conversations.find((c) => c.id === conversationId)
+      setConversations((prev) => prev.filter((c) => c.id !== conversationId))
+      if (conv && conv.unread > 0) {
+        setUnreadCount((prev) => Math.max(0, prev - conv.unread))
+      }
+
+      // If this was the active conversation, close it
+      if (activeConversation?.id === conversationId) {
+        setActiveConversation(null)
+        setMessages([])
+        messagesCursorRef.current = null
+      }
+
+      try {
+        await apiDeleteConversation(conversationId, apiOpts)
+
+        // Broadcast deletion to other tabs
+        if (channelManagerRef.current) {
+          try {
+            const channel = getChatChannel(channelManagerRef.current, conversationId)
+            if (channel) {
+              await channel.send({
+                type: "broadcast",
+                event: "conversation_deleted",
+                payload: { chatId: conversationId, deletedBy: currentUserId },
+              })
+            }
+          } catch { /* broadcast failure is non-critical */ }
+        }
+      } catch (err: unknown) {
+        setError(getErrorMessage(err) || "Failed to delete conversation")
+        // Re-fetch sidebar to restore state on failure
+        if (token) {
+          fetchMessengerOverview(apiOpts).then((overview) => {
+            setConversations(overview.conversations.map(mapChatToConversation))
+          })
+        }
+      }
+    },
+    [isAuthenticated, token, apiOpts, conversations, activeConversation, currentUserId]
+  )
+
   const markRead = useCallback(
     async (conversationId: number) => {
       if (!isAuthenticated || !token) return
@@ -892,6 +1029,7 @@ export function MessengerProvider({
       loadMoreMessages,
       sendMessage,
       createNewConversation,
+      deleteConversation,
       markRead,
       unreadCount,
       error,
@@ -922,6 +1060,7 @@ export function MessengerProvider({
       loadMoreMessages,
       sendMessage,
       createNewConversation,
+      deleteConversation,
       markRead,
       unreadCount,
       error,

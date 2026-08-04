@@ -254,6 +254,124 @@ function MessageSkeleton() {
   )
 }
 
+function ConversationOptionsButton({ onDelete }: { onDelete: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [confirmText, setConfirmText] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [menuOpen])
+
+  const handleDeleteClick = () => {
+    setMenuOpen(false)
+    setConfirmText("")
+    setShowConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (confirmText !== "Delete") return
+    setIsDeleting(true)
+    try {
+      await onDelete()
+      setShowConfirm(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Conversation options"
+          aria-expanded={menuOpen}
+          className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="5" r="1.5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="12" cy="19" r="1.5" />
+          </svg>
+        </button>
+        {menuOpen && (
+          <div className="absolute right-0 mt-1 w-56 bg-[var(--card-background)] border border-[var(--card-border)] rounded-lg shadow-lg z-50 py-1">
+            <button
+              type="button"
+              onClick={handleDeleteClick}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <span className="text-base">🗑️</span>
+              Delete Conversation
+            </button>
+          </div>
+        )}
+      </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Delete Conversation
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              This will permanently delete this conversation and all its messages. This cannot be undone.
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              Type <span className="font-semibold text-gray-900 dark:text-gray-100">Delete</span> to confirm.
+            </p>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && confirmText === "Delete" && !isDeleting) {
+                  handleConfirmDelete()
+                }
+              }}
+              placeholder='Type "Delete"'
+              autoFocus
+              className="w-full px-3 py-2 mt-2 mb-4 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowConfirm(false)
+                  setConfirmText("")
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={confirmText !== "Delete" || isDeleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 function MessengerShell({ variant, onClose }: MessengerShellProps) {
   const {
     filteredConversations,
@@ -268,6 +386,7 @@ function MessengerShell({ variant, onClose }: MessengerShellProps) {
     hasMoreMessages,
     loadMoreMessages,
     sendMessage,
+    deleteConversation,
     error,
     clearError,
     token,
@@ -477,7 +596,7 @@ function MessengerShell({ variant, onClose }: MessengerShellProps) {
   )
 
   const chatPanel = activeConversation ? (
-    <div className="flex flex-col min-h-0 h-full">
+    <div className="relative flex flex-col min-h-0 h-full">
       <div
         className={`flex items-center gap-3 px-4 border-b border-gray-200 dark:border-[var(--card-border)] shrink-0 ${variant === "page" ? "h-16" : "py-3"}`}
       >
@@ -516,7 +635,10 @@ function MessengerShell({ variant, onClose }: MessengerShellProps) {
               : activeConversation.participants[0]?.role || "Member"}
           </p>
         </div>
-        </div>
+        <ConversationOptionsButton
+          onDelete={() => deleteConversation(activeConversation.id)}
+        />
+      </div>
 
       {replyTo && (
         <div className="px-4 py-2 border-b border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-900/50 flex items-center gap-2">
@@ -653,6 +775,15 @@ function MessengerShell({ variant, onClose }: MessengerShellProps) {
         <div ref={messagesEndRef} />
       </div>
 
+      {isUploading && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg border border-gray-200 dark:border-gray-700">
+            <span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 animate-spin" />
+            <span className="text-sm text-gray-600 dark:text-gray-300">Uploading image...</span>
+          </div>
+        </div>
+      )}
+
       <div className="px-4 py-3 border-t border-gray-200 dark:border-[var(--card-border)] shrink-0">
         {pendingImages.length > 0 && (
           <div className="flex items-center gap-2 pb-2 overflow-x-auto">
@@ -702,11 +833,6 @@ function MessengerShell({ variant, onClose }: MessengerShellProps) {
             aria-hidden="true"
             tabIndex={-1}
           />
-          {isUploading && (
-            <div className="p-2 text-gray-500 dark:text-gray-400 shrink-0">
-              <span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 animate-spin" />
-            </div>
-          )}
           <div className="flex-1 flex items-center gap-1.5 px-4 py-2.5 text-sm bg-gray-100 dark:bg-gray-800 rounded-full">
             <input
               type="text"

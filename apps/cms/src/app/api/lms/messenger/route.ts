@@ -111,7 +111,16 @@ export async function GET(request: NextRequest) {
       overrideAccess: true,
     })
 
-    const chatIds = chatsResult.docs.map((c: any) => c.id)
+    // "Delete for me only": exclude chats the current user has hidden.
+    // Stored in metadata.deletedBy (JSON array of user IDs).
+    const visibleChats = chatsResult.docs.filter((chat: any) => {
+      const deletedBy: number[] = Array.isArray(chat?.metadata?.deletedBy)
+        ? chat.metadata.deletedBy
+        : []
+      return !deletedBy.map(String).includes(userId)
+    })
+
+    const chatIds = visibleChats.map((c: any) => c.id)
 
     // ─── 2. Batch fetch all messages across all chats (to know which have any) ───
     const chatsWithMessages = new Set<number>()
@@ -136,7 +145,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter out chats with no messages (Facebook-style: only show conversations that have messages)
-    const chatsWithMsgs = chatsResult.docs.filter((c: any) => chatsWithMessages.has(c.id))
+    const chatsWithMsgs = visibleChats.filter((c: any) => chatsWithMessages.has(c.id))
 
     // ─── 3. Batch fetch read statuses ───
     const readMessageIds = new Set<number>()

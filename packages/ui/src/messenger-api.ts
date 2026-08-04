@@ -336,6 +336,15 @@ export async function postTyping(
   })
 }
 
+export async function deleteConversation(
+  chatId: number,
+  options: ApiFetchOptions
+): Promise<{ success: boolean }> {
+  return apiFetch(`/api/chat/${chatId}`, options, {
+    method: "DELETE",
+  })
+}
+
 export {
   extractTextFromContent,
   resolveSenderId,

@@ -130,7 +130,7 @@ export const Chats: CollectionConfig = {
       name: 'metadata',
       type: 'json',
       admin: {
-        description: 'Additional context (courseId, contextType, etc.)',
+        description: 'Additional context (courseId, contextType, deletedBy, etc.)',
       },
     },
   ],

@@ -4,6 +4,7 @@ import { requireAuth, handleApiError, ApiError } from '@/app/api/chat/_utils/aut
 import type { ApiResponse, MessageListResponse, MessageResponse, SendMessageRequest } from '@/app/api/chat/_types/responses'
 import type { Chat, ChatMessage } from '@/payload-types'
 import { canSendToChat, validateNewMessage, validateMessageType, validateReplyChain } from '@grandline/chat-engine'
+import { broadcastMessengerMessage } from '@/utils/supabaseNotifications'
 
 function createLexicalContent(message: string): ChatMessage['content'] {
   return {
@@ -326,6 +327,8 @@ export async function POST(
         previewText = messageType === 'image' ? '[Image]' : messageType === 'file' ? '[File]' : '[Message]';
       }
 
+      const parentMetadata = (parentChat.metadata as any) || {}
+
       await payload.update({
         collection: 'chats',
         id: chatId,
@@ -333,14 +336,43 @@ export async function POST(
         data: {
           lastMessageAt: new Date().toISOString(),
           lastMessagePreview: previewText,
+          // Messenger behaviour: when a new message arrives, the conversation
+          // reappears for any participant who had previously hidden it.
           metadata: {
-            ...(parentChat.metadata as any || {}),
+            ...parentMetadata,
+            deletedBy: [],
             status: isCreator ? 'pending' : 'answered'
           }
         }
       })
     }
 
+    // ─── Realtime: broadcast to each non-sender participant ──────────────
+    // Server-side broadcast on a per-user channel (`messenger-user:${userId}`)
+    // ensures even the FIRST message in a brand-new conversation reaches the
+    // recipient in real time, because the client subscribes to this channel on
+    // mount regardless of which chats exist in its sidebar.
+    // Fire-and-forget: failures must not block the message response.
+    if (parentChat) {
+      const participants: number[] = (parentChat.participants || [])
+        .map((p: any) => {
+          const pid = typeof p === 'object' ? (p.id || p.value?.id || p.value) : p
+          return pid ? Number(pid) : null
+        })
+        .filter((id: number | null): id is number => id !== null && id !== user.id)
+
+      const senderName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'User'
+
+      for (const recipientId of participants) {
+        broadcastMessengerMessage(recipientId, {
+          chatId,
+          senderId: user.id,
+          senderName,
+          preview: textContent.trim().substring(0, 80) || '[Message]',
+          createdAt: message.createdAt,
+        }).catch(() => {}) // swallow — broadcast is best-effort
+      }
+    }
 
     const response: MessageResponse = {
       id: message.id,

@@ -42,8 +42,17 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Ch
       sort: '-updatedAt'
     })
 
+    // "Delete for me only": filter out chats the current user has hidden.
+    // Stored in metadata.deletedBy (JSON array of user IDs) so no schema change needed.
+    const filteredChats = chatsResult.docs.filter((chat: any) => {
+      const deletedBy: number[] = Array.isArray(chat?.metadata?.deletedBy)
+        ? chat.metadata.deletedBy
+        : []
+      return !deletedBy.includes(user.id)
+    })
+
     // Fetch last messages for each chat to determine status
-    const formattedChats = await Promise.all(chatsResult.docs.map(async (chat: Chat) => {
+    const formattedChats = await Promise.all(filteredChats.map(async (chat: Chat) => {
       // Get the last message to find the sender
       const lastMessages = await payload.find({
         collection: 'chat-messages',

@@ -144,15 +144,39 @@ export async function DELETE(
       throw new ApiError('Chat not found', 404)
     }
 
-    // Only admin can delete chats
-    if (user.role !== 'admin') {
-      throw new ApiError('Only admin can delete chats', 403)
+    const isParticipant = chat.participants?.some(
+      (p: any) => {
+        const pid = typeof p === 'object' ? (p.id || p.value?.id || p.value) : p
+        return String(pid) === String(user.id)
+      }
+    )
+
+    if (!isParticipant && user.role !== 'admin') {
+      throw new ApiError('You can only delete conversations you are part of', 403)
     }
 
-    await payload.delete({
-      collection: 'chats',
-      id: chatId
-    })
+    // "Delete for me only" — hide the conversation from this user's list.
+    // Messages, files, and the chat remain intact for other participants.
+    // Stored in metadata.deletedBy (JSON array of user IDs). If someone
+    // messages later, deletedBy is cleared so the conversation reappears.
+    const currentMetadata = (chat as any).metadata || {}
+    const existingDeletedBy: number[] = Array.isArray(currentMetadata.deletedBy)
+      ? currentMetadata.deletedBy
+      : []
+
+    if (!existingDeletedBy.includes(user.id)) {
+      await payload.update({
+        collection: 'chats',
+        id: chatId,
+        overrideAccess: true,
+        data: {
+          metadata: {
+            ...currentMetadata,
+            deletedBy: [...existingDeletedBy, user.id],
+          },
+        },
+      })
+    }
 
     return NextResponse.json({ data: { success: true } })
   } catch (error) {

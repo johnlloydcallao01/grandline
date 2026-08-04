@@ -129,3 +129,57 @@ export async function broadcastNotificationRead(
     console.error('[SupabaseNotifications] Failed to broadcast read status:', error)
   }
 }
+
+// ============================================================================
+// Messenger Realtime - Per-user channel for new messages
+// ============================================================================
+
+/**
+ * Broadcast a new-message event to a user's private messenger channel.
+ * This lets the client discover new conversations (first message) or
+ * update existing ones (message in an open chat) in real time.
+ *
+ * Channel convention: `messenger-user:${userId}`
+ * Event: `new_message`
+ */
+export async function broadcastMessengerMessage(
+  userId: string | number,
+  payload: {
+    chatId: number
+    senderId: number | string
+    senderName: string
+    preview: string
+    createdAt: string
+  }
+): Promise<void> {
+  try {
+    const supabase = getSupabaseServiceClient()
+    const channelName = `messenger-user:${userId}`
+
+    console.log(`[SupabaseNotifications] Broadcasting messenger message to ${channelName}`, payload.chatId)
+
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { self: false } },
+    })
+
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        channel.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: {
+            ...payload,
+            senderId: String(payload.senderId),
+            timestamp: new Date().toISOString(),
+          },
+        })
+
+        setTimeout(() => {
+          supabase.removeChannel(channel)
+        }, 1000)
+      }
+    })
+  } catch (error) {
+    console.error('[SupabaseNotifications] Failed to broadcast messenger message:', error)
+  }
+}
