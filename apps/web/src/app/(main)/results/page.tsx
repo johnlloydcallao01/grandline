@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import type { SearchResult } from '@/types/search'
+import type { SearchResult } from '@encreasl/ui/search'
 import { useUser } from '@/hooks/useAuth'
 
 export default function ResultsPage() {

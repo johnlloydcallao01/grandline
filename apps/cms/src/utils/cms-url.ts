@@ -1,4 +1,4 @@
-const LOCAL_CMS_ORIGIN = 'http://localhost:3001'
+const LOCAL_CMS_ORIGIN = 'http://localhost:3005'
 
 const normalizeUrl = (value?: string | null): string | null => {
   const normalized = value?.trim().replace(/\/+$/, '')

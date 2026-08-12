@@ -12,7 +12,7 @@
     }
   },
   "env": {
-    "NODE_OPTIONS": "--no-deprecation --max-old-space-size=8000"
+    "NODE_OPTIONS": "--no-deprecation --max-old-space-size=4096"
   },
   "headers": [
     {

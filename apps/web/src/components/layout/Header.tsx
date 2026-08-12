@@ -7,10 +7,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { HeaderProps } from '@/types';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import { UserAvatar } from '@/components/auth';
-import { SearchProvider } from '@/contexts/SearchContext';
-import { useSearch } from '@/hooks/useSearch';
-import { DesktopSearchDropdown } from '@/components/search/DesktopSearchDropdown';
-import { MobileSearchOverlay } from '@/components/search/MobileSearchOverlay';
+import { SearchProvider, Search, useSearch } from '@encreasl/ui/search';
+import { useWebSearch } from '@/lib/search';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { MessengerButton } from '@encreasl/ui/messenger-button';
 import { MessengerIcon } from '@encreasl/ui/messenger-icons';
@@ -26,9 +24,10 @@ import { MessengerPanel } from './MessengerPanel';
  */
 export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) {
   const [isMobilePortalMenuOpen, setIsMobilePortalMenuOpen] = useState(false)
+  const { dataSource, navigateToResults } = useWebSearch()
 
   return (
-    <SearchProvider>
+    <SearchProvider dataSource={dataSource} onNavigateToResults={navigateToResults}>
       <HeaderInner
         sidebarOpen={sidebarOpen}
         onToggleSidebar={onToggleSidebar}
@@ -40,7 +39,7 @@ export function Header({ sidebarOpen, onToggleSidebar, onSearch }: HeaderProps) 
         isOpen={isMobilePortalMenuOpen}
         onClose={() => setIsMobilePortalMenuOpen(false)}
       />
-      <MobileSearchOverlay />
+      <Search variant="mobile" />
       <MessengerPanel />
     </SearchProvider>
   )
@@ -472,7 +471,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onSearch, isMobilePortalMen
                   <i className="fa fa-times"></i>
                 </button>
               )}
-              <DesktopSearchDropdown />
+              <Search variant="desktop" />
             </div>
             <button type="submit" className="px-6 py-2 bg-gray-100 dark:bg-gray-800 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none" aria-label="Search">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>

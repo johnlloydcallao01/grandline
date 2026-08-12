@@ -76,10 +76,6 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
     setMobileSidebarOpen(false);
   };
 
-  const handleSearch = (_query: string) => {
-    // TODO: Implement admin search functionality
-  };
-
   const dashboardValue: DashboardContextType = {
     sidebarOpen,
     toggleSidebar,
@@ -96,7 +92,6 @@ export function AdminDashboard({ children }: AdminDashboardProps) {
             sidebarOpen={sidebarOpen}
             onToggleSidebar={toggleSidebar}
             onToggleMobileSidebar={toggleMobileSidebar}
-            onSearch={handleSearch}
           />
         )}
         {!isBuilderPage && (

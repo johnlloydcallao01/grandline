@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import React from 'react'
-import { useSearch } from '@/hooks/useSearch'
-import { SearchList } from './SearchList'
+import React from "react"
+import { useSearch } from "./search-context"
+import { SearchList } from "./search-list"
 
 export function DesktopSearchDropdown(): React.ReactNode {
   const { isDropdownOpen } = useSearch()

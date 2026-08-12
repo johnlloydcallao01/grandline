@@ -45,7 +45,7 @@ This is the dedicated CMS application for managing blog posts, services, and med
    ```
 
 5. **Access Admin Panel**
-   - Open http://localhost:3001/admin
+   - Open http://localhost:3005/admin
    - Create your first admin user
 
 3. `pnpm install && pnpm dev` to install dependencies and start the dev server

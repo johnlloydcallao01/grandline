@@ -1,10 +1,9 @@
-'use client'
+"use client"
 
-import React, { createContext, useContext, useMemo, useRef, useState } from 'react'
-import { useUser } from '@/hooks/useAuth'
-import type { SearchResult, Suggestion } from '@/types/search'
+import React, { createContext, useContext, useMemo, useRef, useState } from "react"
+import type { SearchDataSource, SearchResult, Suggestion } from "./types"
 
-interface SearchContextValue {
+export interface SearchContextValue {
   query: string
   setQuery: (v: string) => void
   results: SearchResult[]
@@ -12,8 +11,8 @@ interface SearchContextValue {
   recentKeywords: string[]
   suggestions: Suggestion[]
   setSuggestions: (s: Suggestion[]) => void
-  mode: 'suggestions' | 'results'
-  setMode: (m: 'suggestions' | 'results') => void
+  mode: "suggestions" | "results"
+  setMode: (m: "suggestions" | "results") => void
   isDropdownOpen: boolean
   setDropdownOpen: (v: boolean) => void
   isOverlayOpen: boolean
@@ -35,39 +34,48 @@ interface SearchContextValue {
   removeRecentKeyword: (kw: string) => void
   clearRecentKeywords: () => void
   persistRecentKeyword: (kw: string) => Promise<void>
+  navigateToResults: (query: string) => void
 }
 
 const SearchContext = createContext<SearchContextValue | null>(null)
 
 const cache = new Map<string, { ts: number; data: SearchResult[] }>()
 
-export function SearchProvider({ children }: { children: React.ReactNode }) {
-  const [query, setQuery] = useState('')
+export interface SearchProviderProps {
+  children: React.ReactNode
+  dataSource: SearchDataSource
+  onNavigateToResults?: (query: string) => void
+}
+
+export function SearchProvider({ children, dataSource, onNavigateToResults }: SearchProviderProps) {
+  const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [recentKeywords, setRecentKeywords] = useState<string[]>([])
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [mode, setMode] = useState<'suggestions' | 'results'>('suggestions')
+  const [mode, setMode] = useState<"suggestions" | "results">("suggestions")
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const [isOverlayOpen, setOverlayOpen] = useState(false)
   const [isLoading, setLoading] = useState(false)
-  const [lastCompletedKey, setLastCompletedKey] = useState('')
+  const [lastCompletedKey, setLastCompletedKey] = useState("")
   const [isRecentLoading, setRecentLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [selectIndex, setSelectIndex] = useState(0)
   const abortRef = useRef<AbortController | null>(null)
   const [isTyping, setTyping] = useState(false)
   const suggSeqRef = useRef(0)
-  const { user } = useUser()
+
+  const navigateToResults = (q: string) => {
+    onNavigateToResults?.(q)
+  }
 
   const loadRecentKeywords = () => {
     try {
-      if (user && user.role === 'trainee') {
+      if (dataSource.recentSearchEnabled) {
         setRecentLoading(true)
-        fetch(`/api/search/recent?userId=${encodeURIComponent(String(user.id))}`)
-          .then(r => r.json())
-          .then(j => {
-            const remote = Array.isArray(j?.keywords) ? j.keywords as string[] : []
-            setRecentKeywords(remote)
+        dataSource
+          .loadRecentKeywords()
+          .then((keywords) => {
+            setRecentKeywords(Array.isArray(keywords) ? keywords : [])
           })
           .catch(() => setRecentKeywords([]))
           .finally(() => setRecentLoading(false))
@@ -75,54 +83,64 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         setRecentKeywords([])
         setRecentLoading(false)
       }
-    } catch (_e) { void 0 }
+    } catch {
+      void 0
+    }
   }
 
   const saveRecentKeyword = (_kw: string) => {
-    try { void 0 } catch (_e) { void 0 }
+    try {
+      void 0
+    } catch {
+      void 0
+    }
   }
 
   const removeRecentKeyword = (_kw: string) => {
-    try { void 0 } catch (_e) { void 0 }
+    try {
+      void 0
+    } catch {
+      void 0
+    }
   }
 
   const clearRecentKeywords = () => {
-    try { setRecentKeywords([]) } catch (_e) { void 0 }
+    try {
+      setRecentKeywords([])
+    } catch {
+      void 0
+    }
   }
 
   const persistRecentKeyword = async (kw: string) => {
     try {
-      if (!user || user.role !== 'trainee') return
+      if (!dataSource.recentSearchEnabled) return
       const v = kw.trim()
       if (!v) return
-      await fetch('/api/search/recent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword: v, userId: user.id }),
-      })
+      await dataSource.persistRecentKeyword(v)
       setRecentLoading(true)
-      await fetch(`/api/search/recent?userId=${encodeURIComponent(String(user.id))}`)
-        .then(r => r.json())
-        .then(j => {
-          const remote = Array.isArray(j?.keywords) ? j.keywords as string[] : []
-          setRecentKeywords(remote)
+      await dataSource
+        .loadRecentKeywords()
+        .then((keywords) => {
+          setRecentKeywords(Array.isArray(keywords) ? keywords : [])
         })
         .catch(() => void 0)
         .finally(() => setRecentLoading(false))
-    } catch (_e) { void 0 }
+    } catch {
+      void 0
+    }
   }
 
   const search = async (q: string) => {
-    const v = q.trim().toLowerCase().replace(/\s+/g, ' ')
+    const v = q.trim().toLowerCase().replace(/\s+/g, " ")
     const requestKey = `q:${v}`
 
     if (abortRef.current) abortRef.current.abort()
     abortRef.current = null
 
-    // Set loading and clear results IMMEDIATELY (synchronously) before any async work
     setLoading(true)
     setResults([])
-    setMode('results')
+    setMode("results")
     setQuery(v)
     setError(undefined)
     setTyping(false)
@@ -144,14 +162,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const ac = new AbortController()
     abortRef.current = ac
     try {
-      const resp = await fetch(`/api/search?q=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
-      const json = await resp.json()
-      const data: SearchResult[] = json.results || []
-      setResults(data)
-      cache.set(v, { ts: Date.now(), data })
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        setError('Search failed')
+      const data = await dataSource.search(v, ac.signal)
+      const items: SearchResult[] = Array.isArray(data) ? data : []
+      setResults(items)
+      cache.set(v, { ts: Date.now(), data: items })
+    } catch (e) {
+      if (e instanceof Error && e.name !== "AbortError") {
+        setError("Search failed")
         setResults([])
       }
     } finally {
@@ -162,15 +179,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const getSuggestions = async (q: string) => {
+  const getSuggestions = async (q: string): Promise<Suggestion[]> => {
     try {
       const seq = ++suggSeqRef.current
-      const resp = await fetch(`/api/search/suggestions?q=${encodeURIComponent(q)}`)
-      const json = await resp.json()
-      const items: Suggestion[] = json.suggestions || []
+      const items: Suggestion[] = await dataSource.getSuggestions(q)
       if (suggSeqRef.current === seq) {
         setSuggestions(items)
-        setMode('suggestions')
+        setMode("suggestions")
       }
       return items
     } catch {
@@ -180,7 +195,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   }
 
   const searchByCategory = async (categoryLabel: string) => {
-    const v = categoryLabel.trim().toLowerCase().replace(/\s+/g, ' ')
+    const v = categoryLabel.trim().toLowerCase().replace(/\s+/g, " ")
     const requestKey = `category:${v}`
     setQuery(categoryLabel)
     setError(undefined)
@@ -188,15 +203,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     const ac = new AbortController()
     abortRef.current = ac
     setLoading(true)
-    setMode('results')
+    setMode("results")
     try {
-      const resp = await fetch(`/api/search?categoryLabel=${encodeURIComponent(v)}&limit=50`, { signal: ac.signal })
-      const json = await resp.json()
-      const data: SearchResult[] = json.results || []
-      setResults(data)
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        setError('Search failed')
+      const data = await dataSource.searchByCategory(v, ac.signal)
+      setResults(Array.isArray(data) ? data : [])
+    } catch (e) {
+      if (e instanceof Error && e.name !== "AbortError") {
+        setError("Search failed")
         setResults([])
       }
     } finally {
@@ -209,7 +222,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
   const onSuggestionClick = async (s: Suggestion) => {
     setTyping(false)
-    if (s.kind === 'category') {
+    if (s.kind === "category") {
       saveRecentKeyword(s.label)
       await persistRecentKeyword(s.label)
       await searchByCategory(s.label)
@@ -220,57 +233,71 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const value = useMemo(() => ({
-    query, setQuery,
-    results, setResults,
-    recentKeywords,
-    suggestions, setSuggestions,
-    mode, setMode,
-    isDropdownOpen, setDropdownOpen,
-    isOverlayOpen, setOverlayOpen,
-    isLoading,
-    lastCompletedKey,
-    error,
-    isRecentLoading,
-    selectIndex, setSelectIndex,
-    isTyping, setTyping,
-    search,
-    getSuggestions,
-    searchByCategory,
-    onSuggestionClick,
-    loadRecentKeywords,
-    saveRecentKeyword,
-    removeRecentKeyword,
-    clearRecentKeywords,
-    persistRecentKeyword,
-  } as SearchContextValue & {
-    loadRecentKeywords: () => void
-    saveRecentKeyword: (kw: string) => void
-    removeRecentKeyword: (kw: string) => void
-    clearRecentKeywords: () => void
-    persistRecentKeyword: (kw: string) => Promise<void>
-  }), [
-    query,
-    results,
-    recentKeywords,
-    suggestions,
-    mode,
-    isDropdownOpen,
-    isOverlayOpen,
-    isLoading,
-    lastCompletedKey,
-    isRecentLoading,
-    error,
-    selectIndex,
-    isTyping,
-    user,
-  ])
+  const value = useMemo(
+    () =>
+      ({
+        query,
+        setQuery,
+        results,
+        setResults,
+        recentKeywords,
+        suggestions,
+        setSuggestions,
+        mode,
+        setMode,
+        isDropdownOpen,
+        setDropdownOpen,
+        isOverlayOpen,
+        setOverlayOpen,
+        isLoading,
+        lastCompletedKey,
+        error,
+        isRecentLoading,
+        selectIndex,
+        setSelectIndex,
+        isTyping,
+        setTyping,
+        navigateToResults,
+        search,
+        getSuggestions,
+        searchByCategory,
+        onSuggestionClick,
+        loadRecentKeywords,
+        saveRecentKeyword,
+        removeRecentKeyword,
+        clearRecentKeywords,
+        persistRecentKeyword,
+      } as SearchContextValue & {
+        loadRecentKeywords: () => void
+        saveRecentKeyword: (kw: string) => void
+        removeRecentKeyword: (kw: string) => void
+        clearRecentKeywords: () => void
+        persistRecentKeyword: (kw: string) => Promise<void>
+      }) as SearchContextValue,
+    [
+      query,
+      results,
+      recentKeywords,
+      suggestions,
+      mode,
+      isDropdownOpen,
+      isOverlayOpen,
+      isLoading,
+      lastCompletedKey,
+      isRecentLoading,
+      error,
+      selectIndex,
+      isTyping,
+      dataSource,
+      onNavigateToResults,
+    ],
+  )
 
   return React.createElement(SearchContext.Provider, { value }, children)
 }
 
 export function useSearch() {
   const ctx = useContext(SearchContext)
-  if (!ctx) throw new Error('useSearch must be used within SearchProvider')
+  if (!ctx) throw new Error("useSearch must be used within SearchProvider")
   return ctx
 }

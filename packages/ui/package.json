@@ -44,7 +44,13 @@
     "./messenger": "./src/messenger.tsx",
     "./messenger-button": "./src/messenger-button.tsx",
     "./messenger-context": "./src/messenger-context.tsx",
-    "./messenger-icons": "./src/messenger-icons.tsx"
+    "./messenger-icons": "./src/messenger-icons.tsx",
+    "./search": "./src/search/search.tsx",
+    "./search-context": "./src/search/search-context.tsx",
+    "./search-list": "./src/search/search-list.tsx",
+    "./desktop-search-dropdown": "./src/search/desktop-search-dropdown.tsx",
+    "./mobile-fullscreen-search": "./src/search/mobile-fullscreen-search.tsx",
+    "./search-types": "./src/search/types.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

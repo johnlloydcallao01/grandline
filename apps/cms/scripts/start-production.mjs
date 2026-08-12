@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const nextBin = require.resolve('next/dist/bin/next')
-const port = process.env.PORT || '3001'
+const port = process.env.PORT || '3005'
 const hostname = process.env.HOSTNAME || '0.0.0.0'
 
 const child = spawn(process.execPath, [nextBin, 'start', '-H', hostname, '-p', port], {
