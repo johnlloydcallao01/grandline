@@ -112,7 +112,7 @@ export default function SecuritySettingsPage() {
 
     if (isLoading) {
         return (
-            <div className="p-6 space-y-6">
+            <div className="py-6 space-y-6">
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64" />
                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96" />
@@ -147,7 +147,7 @@ export default function SecuritySettingsPage() {
     ];
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Security Settings</h1>

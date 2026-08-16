@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Header, Sidebar, MobileFooter } from '@/components/layout';
+import { usePathname } from 'next/navigation';
+import { Header, Sidebar } from '@/components/layout';
 import { ProtectedRoute } from '@/components/auth';
 import { MessengerProvider } from '@encreasl/ui/messenger-context';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +13,8 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const pathname = usePathname();
   const { user, token } = useAuth();
   const messengerApiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api').replace(/\/api$/, '');
 
@@ -32,26 +34,31 @@ export default function MainLayout({
     return () => clearTimeout(timer);
   }, []);
 
+  // Close the mobile drawer whenever the route changes
   useEffect(() => {
-    const checkScreenSize = () => {
-      const isLargeScreen = window.innerWidth >= 1024;
-      setIsDesktop(isLargeScreen);
+    setMobileSidebarOpen(false);
+  }, [pathname]);
 
-      if (!isLargeScreen) {
-        setSidebarOpen(false);
-      }
-    };
-
-    checkScreenSize();
-
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  // Prevent body scroll when the mobile drawer is open
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSidebarOpen]);
 
   const toggleSidebar = () => {
-    if (isDesktop) {
-      setSidebarOpen(prev => !prev);
-    }
+    setSidebarOpen(prev => !prev);
+  };
+
+  const toggleMobileSidebar = () => {
+    setMobileSidebarOpen(prev => !prev);
+  };
+
+  const closeMobileSidebar = () => {
+    setMobileSidebarOpen(false);
   };
 
   return (
@@ -62,12 +69,15 @@ export default function MainLayout({
           <Header
             sidebarOpen={sidebarOpen}
             onToggleSidebar={toggleSidebar}
+            onToggleMobileSidebar={toggleMobileSidebar}
           />
 
           {/* Sidebar */}
           <Sidebar
             isOpen={sidebarOpen}
             onToggle={toggleSidebar}
+            mobileOpen={mobileSidebarOpen}
+            onCloseMobile={closeMobileSidebar}
           />
 
           {/* Main Content */}
@@ -77,8 +87,6 @@ export default function MainLayout({
             </div>
           </main>
 
-          {/* Mobile Footer */}
-          <MobileFooter />
         </div>
       </MessengerProvider>
     </ProtectedRoute>

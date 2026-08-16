@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { SidebarProps } from '@/types';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 import Link from '@/components/ui/LinkWrapper';
@@ -21,6 +21,7 @@ import { useMessenger } from '@encreasl/ui/messenger-context';
  */
 export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = false, onCloseMobile }: SidebarProps & { mobileOpen?: boolean; onCloseMobile?: () => void }) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const isDesktop = useMediaQuery('(min-width: 1024px)');
     const { unreadCount } = useMessenger();
 
@@ -95,16 +96,16 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
         {/* Mobile backdrop overlay - only visible on small screens when drawer is open */}
         {mobileOpen && (
             <div
-                className="fixed inset-x-0 top-[56px] bottom-0 bg-black/50 z-40 lg:hidden"
+                className="fixed inset-x-0 top-[57px] sm:top-[65px] bottom-0 bg-black/50 z-40 lg:hidden"
                 onClick={onCloseMobile}
                 aria-hidden="true"
             />
         )}
         <aside
             data-sidebar="admin"
-            className={`fixed left-0 top-[56px] lg:top-16 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
+            className={`fixed left-0 top-[57px] sm:top-[65px] bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
                 // Mobile drawer: full-width, slides in/out, starts right below header
-                w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+                w-64 h-[calc(100vh-57px)] sm:h-[calc(100vh-65px)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 // Desktop: always visible, collapsible width
                 lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
             onScroll={onScroll}
@@ -487,15 +488,36 @@ export function Sidebar({ isOpen, onToggle: _onToggle, onScroll, mobileOpen = fa
 
                     {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-                    {/* 10. SYSTEM SETTINGS */}
+                    {/* 10. ACCOUNT */}
+                    <div className="space-y-1">
+                        {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">Account</div>}
+                        <SidebarItem
+                            icon="profile"
+                            label="Your Profile"
+                            active={pathname === '/profile' && searchParams.get('tab') !== 'settings'}
+                            collapsed={!expanded}
+                            href="/profile"
+                        />
+                        <SidebarItem
+                            icon="settings"
+                            label="Account Settings"
+                            active={pathname === '/profile' && searchParams.get('tab') === 'settings'}
+                            collapsed={!expanded}
+                            href="/profile?tab=settings"
+                        />
+                    </div>
+
+                    {expanded && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
+
+                    {/* 11. SYSTEM SETTINGS */}
                     <div className="space-y-1">
                         {expanded && <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">System Settings</div>}
                         <SidebarItem
                             icon="settings"
                             label="General Settings"
-                            active={pathname === '/settings'}
+                            active={pathname === '/settings' || pathname?.startsWith('/settings/general') || pathname?.startsWith('/settings/contact') || pathname?.startsWith('/settings/social') || pathname?.startsWith('/settings/preferences')}
                             collapsed={!expanded}
-                            href="/settings"
+                            href="/settings/general"
                         />
                         <SidebarItem
                             icon="security"

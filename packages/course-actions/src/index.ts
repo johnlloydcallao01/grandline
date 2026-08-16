@@ -146,3 +146,5 @@ export async function listCollection(
 }
 
 export type { Course, CourseListResult, CategoryOption, SimpleDocRef };
+
+export * from './enrollments';

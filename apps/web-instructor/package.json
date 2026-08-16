@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@encreasl/cms-types": "workspace:*",
+    "@encreasl/course-actions": "workspace:*",
     "@encreasl/env": "workspace:*",
     "@encreasl/eslint-config": "workspace:*",
     "@encreasl/typescript-config": "workspace:*",

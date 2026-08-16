@@ -157,6 +157,84 @@ export interface CategoryOption {
   name: string;
 }
 
+// ========================================
+// ENROLLMENT TYPES
+// ========================================
+
+export type EnrollmentStatus = 'active' | 'pending' | 'suspended' | 'dropped' | 'completed' | 'expired';
+
+export interface EnrollmentStudentRef {
+  id: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  srn?: string;
+}
+
+export interface EnrollmentCourseRef {
+  id: string;
+  title: string;
+  courseCode: string;
+  status?: string;
+}
+
+export interface EnrollmentDoc {
+  id: string;
+  student: EnrollmentStudentRef;
+  course: EnrollmentCourseRef;
+  status: string;
+  enrollmentType: string;
+  enrolledAt: string;
+  progressPercentage: number;
+  completedAt?: string | null;
+  notes: string;
+}
+
+export interface EnrollmentListResult {
+  docs: EnrollmentDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CourseOption {
+  id: string;
+  title: string;
+  courseCode: string;
+  status?: string;
+}
+
+export interface TraineeOption {
+  id: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  srn: string;
+}
+
+export interface EnrollmentFilters {
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  userId?: string;
+}
+
+export interface CreateEnrollmentInput {
+  student: string;
+  course: string;
+  notes?: string;
+  status?: string;
+  userId?: string;
+}
+
 export interface CourseEditData {
   course: Course;
   categories: CategoryOption[];

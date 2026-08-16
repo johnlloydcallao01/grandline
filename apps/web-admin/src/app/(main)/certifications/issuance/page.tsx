@@ -201,13 +201,13 @@ export default function CertificateIssuancePage() {
     const selectedEnrollment = enrollments.find(e => e.id.toString() === selectedEnrollmentId);
 
     return (
-        <div className="w-full h-full min-h-screen bg-gray-50/50 p-6 md:p-8 space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+        <div className="w-full min-h-screen bg-gray-50 dark:bg-[var(--background)] py-6 md:py-8 space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-[var(--card-border)] pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Certificate Issuance</h1>
-                    <p className="text-gray-500 mt-2 text-lg">Manually verify and issue certificates for completed course enrollments.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Certificate Issuance</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">Manually verify and issue certificates for completed course enrollments.</p>
                 </div>
-                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 shadow-sm">
+                <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg border border-blue-100 dark:border-blue-800 shadow-sm">
                     <Info className="w-5 h-5" />
                     <span className="font-medium text-sm">System Ready</span>
                 </div>
@@ -216,20 +216,20 @@ export default function CertificateIssuancePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                                <FileCheck className="w-5 h-5 text-blue-600" />
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
+                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                 Issuance Details
                             </h2>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
                                 {enrollments.length} eligible enrollment{enrollments.length !== 1 ? 's' : ''} found
                             </div>
                         </div>
 
                         <div className="p-6 md:p-8">
                             {message && (
-                                <div className={`p-4 rounded-lg mb-8 flex items-start gap-3 shadow-sm ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
+                                <div className={`p-4 rounded-lg mb-8 flex items-start gap-3 shadow-sm ${message.type === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300'}`}>
                                     {message.type === 'success' ? <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
                                     <div className="text-sm font-medium">{message.text}</div>
                                 </div>
@@ -237,20 +237,20 @@ export default function CertificateIssuancePage() {
 
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 <div className="space-y-4">
-                                    <label htmlFor="enrollment-combobox" className="block text-sm font-semibold text-gray-700">
+                                    <label htmlFor="enrollment-combobox" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                         Select Eligible Course Enrollment
                                     </label>
 
                                     <div className="relative" ref={comboboxRef}>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <Search className="h-5 w-5 text-gray-400" />
+                                                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                                             </div>
                                             <input
                                                 ref={inputRef}
                                                 id="enrollment-combobox"
                                                 type="text"
-                                                className="block w-full pl-10 pr-10 py-3 text-base text-gray-900 border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm"
+                                                className="block w-full pl-10 pr-10 py-3 text-base text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-[var(--card-background)] placeholder-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm"
                                                 placeholder="Search by student name or course title..."
                                                 value={query}
                                                 onChange={(event) => handleInputChange(event.target.value)}
@@ -260,7 +260,7 @@ export default function CertificateIssuancePage() {
                                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
                                                 {selectedEnrollmentId ? (
                                                     <div onClick={handleClear} className="cursor-pointer">
-                                                        <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                                        <X className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
                                                     </div>
                                                 ) : (
                                                     <div
@@ -270,21 +270,21 @@ export default function CertificateIssuancePage() {
                                                             if (!isOpen) inputRef.current?.focus();
                                                         }}
                                                     >
-                                                        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                                                        <ChevronDown className={`h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
                                         {isOpen && (
-                                            <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[var(--card-background)] shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black dark:ring-gray-600 ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                                 {isLoading ? (
-                                                    <div className="relative cursor-default select-none py-4 px-4 text-gray-500 flex items-center justify-center">
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
+                                                    <div className="relative cursor-default select-none py-4 px-4 text-gray-500 dark:text-gray-400 flex items-center justify-center">
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 dark:border-gray-400 mr-2"></div>
                                                         Loading...
                                                     </div>
                                                 ) : enrollments.length === 0 ? (
-                                                    <div className="relative cursor-default select-none py-4 px-4 text-gray-500 text-center">
+                                                    <div className="relative cursor-default select-none py-4 px-4 text-gray-500 dark:text-gray-400 text-center">
                                                         {isSearching ? 'Searching...' : 'No enrollments found.'}
                                                     </div>
                                                 ) : (
@@ -297,8 +297,8 @@ export default function CertificateIssuancePage() {
                                                         return (
                                                             <div
                                                                 key={enc.id}
-                                                                className={`cursor-pointer select-none relative py-3 pl-4 pr-9 border-b border-gray-50 last:border-0 ${
-                                                                    !hasTemplate ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'text-gray-900 hover:bg-blue-50'
+                                                                className={`cursor-pointer select-none relative py-3 pl-4 pr-9 border-b border-gray-50 dark:border-gray-800 last:border-0 ${
+                                                                    !hasTemplate ? 'bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                                                                 }`}
                                                                 onClick={() => !hasTemplate ? null : handleSelect(enc)}
                                                             >
@@ -307,14 +307,14 @@ export default function CertificateIssuancePage() {
                                                                         {studentName} — {enc.course.title || 'Unknown Course'}
                                                                     </span>
                                                                     {!hasTemplate && (
-                                                                        <span className="text-xs text-red-400 italic mt-0.5">
+                                                                        <span className="text-xs text-red-400 dark:text-red-500 italic mt-0.5">
                                                                             (No Template Assigned)
                                                                         </span>
                                                                     )}
                                                                 </div>
 
                                                                 {isSelected && (
-                                                                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600">
+                                                                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 dark:text-blue-400">
                                                                         <Check className="h-5 w-5" aria-hidden="true" />
                                                                     </span>
                                                                 )}
@@ -325,12 +325,12 @@ export default function CertificateIssuancePage() {
                                             </div>
                                         )}
                                     </div>
-                                    <p className="mt-2 text-sm text-gray-500 text-right">
+                                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-right">
                                         Type to search, then click to select.
                                     </p>
                                 </div>
 
-                                <div className="pt-4 border-t border-gray-100 flex items-center justify-end">
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end">
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || !selectedEnrollmentId || enrollments.length === 0}
@@ -350,12 +350,12 @@ export default function CertificateIssuancePage() {
                                     </button>
                                 </div>
                                 {isSubmitting && (
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-4">
+                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-4">
                                         <div
                                             className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
                                             style={{ width: `${progress}%` }}
                                         ></div>
-                                        <p className="text-xs text-center text-gray-500 mt-1">{Math.round(progress)}% — {progressMessage}</p>
+                                        <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-1">{Math.round(progress)}% — {progressMessage}</p>
                                     </div>
                                 )}
                             </form>
@@ -365,14 +365,14 @@ export default function CertificateIssuancePage() {
 
                 <div className="space-y-6">
                     {selectedEnrollment && (
-                        <div className="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden ring-4 ring-blue-50/50">
-                            <div className="bg-blue-50/80 p-4 border-b border-blue-100">
-                                <h3 className="font-semibold text-blue-900 text-sm uppercase tracking-wider">Selection Summary</h3>
+                        <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-blue-100 dark:border-blue-800 shadow-sm overflow-hidden ring-4 ring-blue-50/50 dark:ring-blue-900/20">
+                            <div className="bg-blue-50/80 dark:bg-blue-900/30 p-4 border-b border-blue-100 dark:border-blue-800">
+                                <h3 className="font-semibold text-blue-900 dark:text-blue-300 text-sm uppercase tracking-wider">Selection Summary</h3>
                             </div>
                             <div className="p-6 space-y-4">
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Student</label>
-                                    <div className="text-lg font-medium text-gray-900">
+                                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Student</label>
+                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">
                                         {(() => {
                                             const u = typeof selectedEnrollment.student.user === 'object' ? selectedEnrollment.student.user : null;
                                             return u ? `${u.firstName} ${u.lastName}` : `#${selectedEnrollment.student.id}`;
@@ -380,18 +380,18 @@ export default function CertificateIssuancePage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Course</label>
-                                    <div className="text-lg font-medium text-gray-900">{selectedEnrollment.course.title}</div>
+                                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Course</label>
+                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">{selectedEnrollment.course.title}</div>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Completion Date</label>
-                                    <div className="text-base text-gray-700">
+                                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Completion Date</label>
+                                    <div className="text-base text-gray-700 dark:text-gray-300">
                                         {selectedEnrollment.completedAt ? new Date(selectedEnrollment.completedAt).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'N/A'}
                                     </div>
                                 </div>
 
-                                <div className="pt-4 mt-2 border-t border-gray-100">
-                                    <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-lg">
+                                <div className="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800">
+                                    <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
                                         <CheckCircle className="w-4 h-4" />
                                         Ready for issuance
                                     </div>
@@ -400,9 +400,9 @@ export default function CertificateIssuancePage() {
                         </div>
                     )}
 
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-5 border-b border-gray-100 bg-gray-50/30">
-                            <h3 className="font-semibold text-gray-800">Issuance Process</h3>
+                    <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm overflow-hidden">
+                        <div className="p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/30">
+                            <h3 className="font-semibold text-gray-800 dark:text-gray-200">Issuance Process</h3>
                         </div>
                         <div className="p-6">
                             <ul className="space-y-4">
@@ -413,12 +413,12 @@ export default function CertificateIssuancePage() {
                                     { title: 'Notification', desc: 'Updates the enrollment status to "Certificate Issued".' }
                                 ].map((step, idx) => (
                                     <li key={idx} className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-100">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-100 dark:border-blue-800">
                                             {idx + 1}
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900">{step.title}</h4>
-                                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{step.desc}</p>
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{step.title}</h4>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{step.desc}</p>
                                         </div>
                                     </li>
                                 ))}

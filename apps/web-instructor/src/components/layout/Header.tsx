@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useLogout, useUser } from '@/hooks/useAuth'
 import { SearchProvider, Search, useSearch } from '@encreasl/ui/search'
 import { useInstructorSearch } from '@/lib/search'
@@ -12,6 +12,7 @@ import { MessengerPanel } from './MessengerPanel'
 interface HeaderProps {
   sidebarOpen: boolean
   onToggleSidebar: () => void
+  onToggleMobileSidebar: () => void
   onSearch?: (query: string) => void
 }
 
@@ -20,19 +21,23 @@ const pageTitles: Record<string, string> = {
   '/search': 'Search',
 }
 
-export function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
+export function Header({ sidebarOpen, onToggleSidebar, onToggleMobileSidebar }: HeaderProps) {
   const { dataSource, navigateToResults } = useInstructorSearch()
 
   return (
     <SearchProvider dataSource={dataSource} onNavigateToResults={navigateToResults}>
-      <HeaderInner sidebarOpen={sidebarOpen} onToggleSidebar={onToggleSidebar} />
+      <HeaderInner
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={onToggleSidebar}
+        onToggleMobileSidebar={onToggleMobileSidebar}
+      />
       <Search variant="mobile" />
       <MessengerPanel />
     </SearchProvider>
   )
 }
 
-function HeaderInner({ sidebarOpen, onToggleSidebar }: HeaderProps) {
+function HeaderInner({ sidebarOpen, onToggleSidebar, onToggleMobileSidebar }: HeaderProps) {
   const pathname = usePathname()
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -40,6 +45,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar }: HeaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { user, displayName, initials } = useUser()
   const { logout, isLoggingOut } = useLogout()
+  const router = useRouter()
   const {
     query,
     setQuery,
@@ -147,13 +153,24 @@ function HeaderInner({ sidebarOpen, onToggleSidebar }: HeaderProps) {
         {/* Left section */}
         <div className="flex items-center gap-4 min-w-0">
           <button
-            type="button"
-            onClick={onToggleSidebar}
-            className={`rounded-full p-2 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${sidebarOpen ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            onClick={onToggleMobileSidebar}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200 transition-colors lg:hidden"
+            aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <button
+            onClick={onToggleSidebar}
+            className={`hidden lg:inline-flex p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-800 dark:text-gray-200 transition-colors ${
+              sidebarOpen ? 'bg-gray-50 dark:bg-gray-900' : ''
+            }`}
+            aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+            aria-expanded={sidebarOpen}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -327,23 +344,14 @@ function HeaderInner({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                 </div>
 
                 <div className="py-1">
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <svg
-                      className="h-4 w-4 text-gray-400 dark:text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                    Your Profile
-                  </button>
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false)
+                      router.push('/settings/profile')
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
                     <svg
                       className="h-4 w-4 text-gray-400 dark:text-gray-500"
                       fill="none"
@@ -363,7 +371,7 @@ function HeaderInner({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Account Settings
+                    Settings & Profile
                   </button>
                 </div>
 

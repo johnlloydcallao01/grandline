@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { HeaderProps } from '@/types'
 import { ChevronDown, User, Settings } from '@/components/ui/IconWrapper'
 import LogoutButton from '@/components/LogoutButton'
@@ -40,6 +40,7 @@ function HeaderInner({
   onToggleMobileSidebar,
 }: HeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { siteName, logoUrl } = useSiteSettings()
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const { user, isLoading, error } = useAuth()
@@ -70,7 +71,7 @@ function HeaderInner({
   const userRole = user?.role || 'Loading...'
 
   const profilePictureUrl = user?.profilePicture
-    ? user.profilePicture.cloudinaryURL || getCMSImageUrl(user.profilePicture.url)
+    ? user.profilePicture.cloudinaryURL || (user.profilePicture.url ? getCMSImageUrl(user.profilePicture.url) : null)
     : null
 
   useEffect(() => {
@@ -359,11 +360,25 @@ function HeaderInner({
                 </div>
 
                 <div className="py-1">
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false)
+                      router.push('/profile')
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
                     <User className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" />
                     Your Profile
                   </button>
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false)
+                      router.push('/profile?tab=settings')
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
                     <Settings className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" />
                     Account Settings
                   </button>

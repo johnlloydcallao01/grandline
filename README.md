@@ -64,7 +64,7 @@ cp apps/web-admin/.env.example apps/web-admin/.env.local
 ### Development
 ```bash
 # Start CMS development server
-pnpm dev:cms          # Runs on http://localhost:3001
+pnpm dev:cms          # Runs on http://localhost:3005
 
 # Start main LMS platform
 pnpm dev:web          # Runs on http://localhost:3000
@@ -88,7 +88,7 @@ pnpm type-check
 ## 📦 **Applications & Packages**
 
 ### Applications
-- **`cms`** - PayloadCMS content management system with PostgreSQL and Cloudinary (Port 3001)
+- **`cms`** - PayloadCMS content management system with PostgreSQL and Cloudinary (Port 3005)
   - Course content management
   - User administration
   - Media library with Cloudinary integration
@@ -186,7 +186,7 @@ pnpm run db:test        # Test database connectivity
 pnpm dev               # Start CMS development server
 
 # Access CMS admin panel
-# http://localhost:3001/admin
+# http://localhost:3005/admin
 ```
 
 ### Adding New Course Content
@@ -225,7 +225,7 @@ export default function StudentDashboard() {
 | Command | Description |
 |---------|-------------|
 | `pnpm dev` | Start all development servers |
-| `pnpm dev:cms` | Start PayloadCMS server (Port 3001) |
+| `pnpm dev:cms` | Start PayloadCMS server (Port 3005) |
 | `pnpm dev:web` | Start main LMS platform (Port 3000) |
 | `pnpm dev:admin` | Start admin dashboard (Port 3002) |
 | `pnpm build` | Build all packages and apps |

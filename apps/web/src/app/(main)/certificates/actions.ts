@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 
 export async function getMyCertificates(userId: number) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
   const apiKey = process.env.PAYLOAD_API_KEY || '';
 
   if (!userId || !apiKey) {
@@ -54,7 +54,7 @@ export async function getMyCertificates(userId: number) {
 }
 
 export async function getCertificateById(certificateId: string | number) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
   const apiKey = process.env.PAYLOAD_API_KEY || 'db6c3436-72f8-47d0-855a-30112b7e9214';
 
   // Extract auth token from cookies (which is how the trainee is logged in)
@@ -128,6 +128,5 @@ export async function getCertificateById(certificateId: string | number) {
     return null;
   }
 }
-
 
 

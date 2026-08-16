@@ -29,7 +29,7 @@ export default function CreateQuestionPage() {
     };
 
     return (
-        <div className="p-6 w-full">
+        <div className="py-6 w-full">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Link href="/courses/questions" className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">

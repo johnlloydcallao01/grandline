@@ -198,7 +198,7 @@ export default function ResetCourseDataPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reset Course Data</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Clear all progress, submissions, and grades for an enrollment</p>

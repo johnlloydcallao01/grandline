@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { Suspense, useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
     getFeedbackSubmissions,
     getFeedbackFormOptions,
@@ -102,6 +103,15 @@ function getFieldLabel(form: FormRef | number | undefined, fieldName: string): s
 }
 
 export default function FeedbackSubmissionsPage() {
+    return (
+        <Suspense fallback={null}>
+            <FeedbackSubmissionsContent />
+        </Suspense>
+    );
+}
+
+function FeedbackSubmissionsContent() {
+    const searchParams = useSearchParams();
     const [submissions, setSubmissions] = useState<FeedbackSubmissionDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -109,7 +119,7 @@ export default function FeedbackSubmissionsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [formFilter, setFormFilter] = useState('all');
+    const [formFilter, setFormFilter] = useState<string>(searchParams.get('formId') || 'all');
     const [formOptions, setFormOptions] = useState<FeedbackFormOption[]>([]);
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
@@ -191,7 +201,7 @@ export default function FeedbackSubmissionsPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>

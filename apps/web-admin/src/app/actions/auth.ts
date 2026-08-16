@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import type { LoginCredentials, AuthResponse, User } from '@/types/auth';
+import { sanitizeUser } from '@/lib/sanitizeUser';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cms.grandlinemaritime.com/api';
 
@@ -18,7 +19,9 @@ export async function serverLogin(credentials: LoginCredentials): Promise<AuthRe
         throw new Error(data.message || data.errors?.[0]?.message || 'Login failed');
     }
 
-    if (data.user?.role !== 'admin') {
+    const user = sanitizeUser(data.user);
+
+    if (!user || user.role !== 'admin') {
         throw new Error('Access denied. Only administrators can access this application.');
     }
 
@@ -35,7 +38,7 @@ export async function serverLogin(credentials: LoginCredentials): Promise<AuthRe
 
     return {
         message: data.message,
-        user: data.user,
+        user,
         token: data.token,
         exp: data.exp,
     };
@@ -71,8 +74,10 @@ export async function getServerUser(): Promise<User | null> {
 
         const data = await response.json();
 
-        if (data.user && data.user.role === 'admin') {
-            return data.user;
+        const user = sanitizeUser(data.user);
+
+        if (user && user.role === 'admin') {
+            return user;
         }
 
         return null;
@@ -96,7 +101,7 @@ export async function serverRefresh(): Promise<AuthResponse> {
 
     const response = await fetch(`${API_BASE_URL}/users/refresh-token`, {
         method: 'POST',
-        headers: { Authorization: `users JWT ${currentToken}` },
+        headers: { Authorization: `JWT ${currentToken}` },
     });
 
     const data = await response.json();
@@ -105,12 +110,16 @@ export async function serverRefresh(): Promise<AuthResponse> {
         throw new Error(data.message || 'Access denied during refresh');
     }
 
-    if (data.user?.role !== 'admin') {
+    const user = sanitizeUser(data.user);
+
+    if (!user || user.role !== 'admin') {
         throw new Error('Access denied during refresh');
     }
 
-    if (data.token) {
-        cookieStore.set('grandline-admin-token', data.token, {
+    const refreshedToken = data.refreshedToken || data.token;
+
+    if (refreshedToken) {
+        cookieStore.set('grandline-admin-token', refreshedToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
@@ -121,8 +130,8 @@ export async function serverRefresh(): Promise<AuthResponse> {
 
     return {
         message: data.message,
-        user: data.user,
-        token: data.token,
+        user,
+        token: refreshedToken,
         exp: data.exp,
     };
 }

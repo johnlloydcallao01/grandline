@@ -95,12 +95,6 @@ aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb:hover { background: #9
 .dark aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb { background: #777; }
 .dark aside[data-sidebar="instructor"]::-webkit-scrollbar-thumb:hover { background: #999; }
 
-@media (max-width: 1023px) {
-  [data-sidebar="instructor"] {
-    display: none !important;
-  }
-}
-
 @media (max-width: 767px) {
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);

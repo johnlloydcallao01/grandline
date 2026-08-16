@@ -616,15 +616,15 @@ export function AccountingSidebar({ isOpen, onToggle: _onToggle, onScroll, mobil
     <>
     {mobileOpen && (
         <div
-            className="fixed inset-x-0 top-[56px] bottom-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-x-0 top-[57px] sm:top-[65px] bottom-0 bg-black/50 z-40 lg:hidden"
             onClick={onCloseMobile}
             aria-hidden="true"
         />
     )}
     <aside
       data-sidebar="accounting"
-      className={`fixed left-0 top-[56px] lg:top-16 bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
-        w-64 h-[calc(100vh-56px)] lg:h-[calc(100vh-4rem)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+      className={`fixed left-0 top-[57px] sm:top-[65px] bg-[var(--card-background)] border-r border-[var(--card-border)] transition-all duration-300 overflow-y-auto z-50 lg:z-40
+        w-64 h-[calc(100vh-57px)] sm:h-[calc(100vh-65px)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 ${isOpen ? 'lg:w-60' : 'lg:w-20'}`}
       onScroll={onScroll}
     >

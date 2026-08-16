@@ -3,7 +3,7 @@
 import { getServerUser } from '@/app/actions/auth';
 
 export async function getAnnouncements() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
   try {
     const user = await getServerUser();

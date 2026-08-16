@@ -38,6 +38,7 @@ type AuthAction =
   | { type: 'LOGOUT_START' }
   | { type: 'LOGOUT_SUCCESS' }
   | { type: 'REFRESH_SUCCESS'; payload: { user: User; token: string } }
+  | { type: 'USER_UPDATED'; payload: { user: User } }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SESSION_EXPIRED' };
 
@@ -132,6 +133,13 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         user: action.payload.user,
         token: action.payload.token,
         isAuthenticated: true,
+        error: null,
+      };
+
+    case 'USER_UPDATED':
+      return {
+        ...state,
+        user: action.payload.user,
         error: null,
       };
 
@@ -287,6 +295,18 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
     dispatch({ type: 'CLEAR_ERROR' });
   }, []);
 
+  const updateUser = useCallback((user: User) => {
+    dispatch({ type: 'USER_UPDATED', payload: { user } });
+
+    try {
+      localStorage.setItem('grandline_auth_user_instructor', JSON.stringify(user));
+    } catch {
+      // Keep the in-memory session usable when storage is unavailable.
+    }
+
+    emitAuthEvent('user_updated', { user });
+  }, []);
+
   // ========================================
   // SESSION MONITORING
   // ========================================
@@ -335,6 +355,7 @@ export const AuthProvider = ({ children, initialUser = null, initialToken = null
     login,
     logout,
     refreshSession,
+    updateUser,
     clearError,
     checkAuthStatus,
   };

@@ -30,7 +30,7 @@ export const CertificatesShelf: React.FC<CertificatesShelfProps> = ({ certificat
 
   const getDownloadUrl = (file: Certificate['file']) => {
     const downloadUrl = file?.cloudinaryURL || (file?.url
-      ? `${process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:3001'}${file.url}`
+      ? `${process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:3005'}${file.url}`
       : null);
     return downloadUrl ? getForcedDownloadUrl(downloadUrl) : null;
   };

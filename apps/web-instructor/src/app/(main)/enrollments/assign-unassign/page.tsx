@@ -9,10 +9,8 @@ import {
     createEnrollment,
     updateEnrollmentStatus,
     unassignEnrollment,
-    type EnrollmentDoc,
-    type CourseOption,
-    type TraineeOption,
 } from './actions';
+import type { EnrollmentDoc, CourseOption, TraineeOption } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -476,7 +474,7 @@ export default function AssignUnassignPage() {
     ];
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -503,7 +501,21 @@ export default function AssignUnassignPage() {
             </div>
 
             {/* Metric Cards */}
-            {!isLoading && (
+            {isLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-800" />
+                                <div>
+                                    <div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" />
+                                    <div className="h-3 w-20 bg-gray-100 dark:bg-gray-800 rounded" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {metricCards.map((card) => (
                         <div key={card.label} className="rounded-xl border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] p-4 shadow-sm">
@@ -545,8 +557,7 @@ export default function AssignUnassignPage() {
             </div>
 
             {/* Quick-Filter Status Chips */}
-            {!isLoading && enrollments.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
                     <button
                         onClick={() => handleStatusFilter('')}
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -561,7 +572,6 @@ export default function AssignUnassignPage() {
                         </span>
                     </button>
                     {['active', 'pending', 'completed', 'suspended', 'dropped', 'expired']
-                        .filter((s) => statusCounts[s] || statusFilter === s)
                         .map((s) => (
                             <button
                                 key={s}
@@ -579,7 +589,6 @@ export default function AssignUnassignPage() {
                             </button>
                         ))}
                 </div>
-            )}
 
             {/* Error banner */}
             {error && (
@@ -590,11 +599,35 @@ export default function AssignUnassignPage() {
                 </div>
             )}
 
-            {/* Content */}
+            {/* Loading State */}
             {isLoading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2Icon className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500 mr-2" />
-                    <span className="text-gray-500 dark:text-gray-400">Loading enrollments...</span>
+                <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-white dark:bg-[var(--card-background)] overflow-hidden">
+                    <table className="min-w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                            <tr>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Course</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enrolled</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Progress</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <tr key={i} className="animate-pulse">
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-40" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-44" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-40" /></td>
+                                    <td className="px-4 py-4"><div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-20" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-24" /></td>
+                                    <td className="px-4 py-4"><div className="h-2 bg-gray-100 dark:bg-gray-800 rounded w-20" /></td>
+                                    <td className="px-4 py-4"><div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-16 ml-auto" /></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             ) : enrollments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">

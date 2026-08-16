@@ -23,7 +23,7 @@ export interface FrontendMaterial {
 }
 
 export async function getMaterialDetails(id: string, isLessonMaterial: boolean, clientToken?: string): Promise<any> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
   const apiKey = process.env.PAYLOAD_API_KEY || 'db6c3436-72f8-47d0-855a-30112b7e9214';
 
   const user = await getServerUser();
@@ -53,7 +53,7 @@ export async function getMaterialDetails(id: string, isLessonMaterial: boolean, 
 }
 
 export async function getEnrolledMaterials(clientToken?: string): Promise<FrontendMaterial[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
   const apiKey = process.env.PAYLOAD_API_KEY || 'db6c3436-72f8-47d0-855a-30112b7e9214';
 
   const user = await getServerUser();

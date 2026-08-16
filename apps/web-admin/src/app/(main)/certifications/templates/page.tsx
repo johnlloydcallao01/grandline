@@ -52,7 +52,7 @@ export default function CertificateTemplatesPage() {
         id: undefined,
         backgroundImage: null,
         elements: [],
-        width: 3508, // Default A4 Landscape @ 300 DPI
+        width: 3508,
         height: 2480,
         backgroundFit: 'contain'
     });
@@ -76,10 +76,10 @@ export default function CertificateTemplatesPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'published': return 'bg-green-100 text-green-700';
-            case 'draft': return 'bg-yellow-100 text-yellow-700';
-            case 'archived': return 'bg-gray-100 text-gray-600';
-            default: return 'bg-gray-100 text-gray-600';
+            case 'published': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+            case 'draft': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+            case 'archived': return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
+            default: return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
         }
     };
 
@@ -105,8 +105,8 @@ export default function CertificateTemplatesPage() {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading templates...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Loading templates...</p>
                 </div>
             </div>
         );
@@ -114,11 +114,11 @@ export default function CertificateTemplatesPage() {
 
     if (error) {
         return (
-            <div className="p-6 text-center text-red-600">
+            <div className="py-6 text-center text-red-600 dark:text-red-400">
                 <p>{error}</p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="mt-4 text-blue-600 hover:underline"
+                    className="mt-4 text-blue-600 dark:text-blue-400 hover:underline"
                 >
                     Retry
                 </button>
@@ -127,11 +127,11 @@ export default function CertificateTemplatesPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Certificate Templates</h1>
-                    <p className="text-gray-600 mt-1">Manage designs for your course certificates</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Certificate Templates</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">Manage designs for your course certificates</p>
                 </div>
                 <Link
                     href="/certifications/builder"
@@ -143,20 +143,20 @@ export default function CertificateTemplatesPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-4 bg-white dark:bg-[var(--card-background)] p-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                     <input
                         type="text"
                         placeholder="Search templates..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-600"
+                        className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm w-full focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-600 dark:placeholder:text-gray-400 bg-white dark:bg-[var(--card-background)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex gap-2">
                     <select
-                        className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                        className="border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -193,15 +193,15 @@ export default function CertificateTemplatesPage() {
                     const elements = template.canvasSchema?.elements || [];
 
                     return (
-                        <div key={template.id} className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+                        <div key={template.id} className="group bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
                             {/* Thumbnail */}
-                            <div className="aspect-video bg-slate-50 relative border-b border-gray-100 flex items-center justify-center overflow-hidden">
+                            <div className="aspect-video bg-slate-50 dark:bg-gray-800/50 relative border-b border-gray-100 dark:border-gray-800 flex items-center justify-center overflow-hidden">
                                 <CertificateThumbnail
                                     backgroundImage={imageUrl}
                                     elements={elements}
                                 />
 
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2 z-20">
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2 z-20">
                                     <button
                                         onClick={() => setPreviewTemplate({
                                             isOpen: true,
@@ -212,13 +212,13 @@ export default function CertificateTemplatesPage() {
                                             height: template.canvasSchema?.height || 2480,
                                             backgroundFit: template.canvasSchema?.backgroundFit || 'contain'
                                         })}
-                                        className="p-2 bg-white rounded-full shadow-sm text-gray-700 hover:text-blue-600 hover:scale-105 transition-all"
+                                        className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-all"
                                     >
                                         <Eye className="h-5 w-5" />
                                     </button>
                                     <Link
                                         href={`/certifications/builder?id=${template.id}`}
-                                        className="p-2 bg-white rounded-full shadow-sm text-gray-700 hover:text-blue-600 hover:scale-105 transition-all"
+                                        className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-all"
                                     >
                                         <Edit className="h-5 w-5" />
                                     </Link>
@@ -233,18 +233,18 @@ export default function CertificateTemplatesPage() {
                             <div className="p-5 flex-1 flex flex-col">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{template.name}</h3>
+                                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{template.name}</h3>
                                     </div>
-                                    <button className="text-gray-400 hover:text-gray-600">
+                                    <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                                         <MoreHorizontal className="h-5 w-5" />
                                     </button>
                                 </div>
 
-                                <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
+                                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500">
                                     <span>Modified {formatCMSDate(template.updatedAt)}</span>
                                     <div className="flex gap-2">
-                                        <button title="Duplicate" className="hover:text-gray-600"><Copy className="h-4 w-4" /></button>
-                                        <button title="Delete" className="hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                                        <button title="Duplicate" className="hover:text-gray-600 dark:hover:text-gray-300"><Copy className="h-4 w-4" /></button>
+                                        <button title="Delete" className="hover:text-red-600 dark:hover:text-red-400"><Trash2 className="h-4 w-4" /></button>
                                     </div>
                                 </div>
                             </div>
@@ -255,13 +255,13 @@ export default function CertificateTemplatesPage() {
                 {/* New Template Card */}
                 <Link
                     href="/certifications/builder"
-                    className="group relative flex flex-col items-center justify-center h-full min-h-[300px] border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all p-6 text-center"
+                    className="group relative flex flex-col items-center justify-center h-full min-h-[300px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all p-6 text-center"
                 >
-                    <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                        <Plus className="h-8 w-8 text-blue-600" />
+                    <div className="h-16 w-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 transition-colors">
+                        <Plus className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-700">New Template</h3>
-                    <p className="text-sm text-gray-500 mt-1 max-w-[200px]">Start from scratch</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300">New Template</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-[200px]">Start from scratch</p>
                 </Link>
             </div>
 

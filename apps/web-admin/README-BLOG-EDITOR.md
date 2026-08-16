@@ -5,7 +5,7 @@ This document describes the implementation of the blog post editor in the web-ad
 ## 🏗️ Architecture Overview
 
 ### **Standalone CMS + Integrated UI Components**
-- **CMS Backend**: `apps/cms` (Payload CMS 3.0) - Standalone service on port 3001
+- **CMS Backend**: `apps/cms` (Payload CMS 3.0) - Standalone service on port 3005
 - **Admin Frontend**: `apps/web-admin` - Consumes CMS APIs and UI components
 - **Shared Types**: `packages/cms-types` - Type-safe API client and schemas
 
@@ -166,7 +166,7 @@ pnpm install
 pnpm dev
 
 # Or start specific services
-pnpm dev:cms      # CMS on port 3001
+pnpm dev:cms      # CMS on port 3005
 pnpm dev:admin    # Admin on port 3002
 ```
 

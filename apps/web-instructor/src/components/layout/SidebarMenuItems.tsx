@@ -85,11 +85,11 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
 
       {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-      {/* My Courses */}
+      {/* Core LMS */}
       <div className="space-y-1">
         {isOpen && (
           <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
-            My Courses
+            Core LMS
           </div>
         )}
         <SidebarDropdownGroup
@@ -173,24 +173,6 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
             <span className="truncate">Assign / Unassign</span>
           </LinkComponent>
         </SidebarDropdownGroup>
-        <SidebarItem
-          icon="media"
-          label="Media Library"
-          active={pathname?.startsWith('/media-library')}
-          collapsed={!isOpen}
-          href="/media-library"
-        />
-      </div>
-
-      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
-
-      {/* Grading & Submissions */}
-      <div className="space-y-1">
-        {isOpen && (
-          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
-            Grading & Submissions
-          </div>
-        )}
         <SidebarDropdownGroup
           icon="submissions"
           label="Submissions"
@@ -242,7 +224,7 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
             }`}
           >
-            <span className="truncate">Recent Activity</span>
+            <span className="truncate">Gradebook</span>
           </LinkComponent>
           <LinkComponent
             href="/gradebook/student-overview"
@@ -263,6 +245,20 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
             <span className="truncate">Grade Setup</span>
           </LinkComponent>
         </SidebarDropdownGroup>
+        <SidebarItem
+          icon="media"
+          label="Media Library"
+          active={pathname?.startsWith('/media-library')}
+          collapsed={!isOpen}
+          href="/media-library"
+        />
+        <SidebarItem
+          icon="feedback-forms"
+          label="Feedback Forms"
+          active={pathname?.startsWith('/feedback-forms')}
+          collapsed={!isOpen}
+          href="/feedback-forms"
+        />
       </div>
 
       {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
@@ -292,19 +288,6 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
 
       {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
 
-      {/* Feedback Forms */}
-      <div className="space-y-1">
-        <SidebarItem
-          icon="feedback-forms"
-          label="Feedback Forms"
-          active={pathname?.startsWith('/feedback-forms')}
-          collapsed={!isOpen}
-          href="/feedback-forms"
-        />
-      </div>
-
-      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
-
       {/* Communications */}
       <div className="space-y-1">
         {isOpen && (
@@ -326,6 +309,24 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
           collapsed={!isOpen}
           href="/messenger"
           badge={unreadCount}
+        />
+      </div>
+
+      {isOpen && <hr className="border-gray-200 dark:border-[var(--card-border)]" />}
+
+      {/* Settings */}
+      <div className="space-y-1">
+        {isOpen && (
+          <div className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-gray-100">
+            Settings
+          </div>
+        )}
+        <SidebarItem
+          icon="settings"
+          label="General Settings"
+          active={pathname?.startsWith('/settings')}
+          collapsed={!isOpen}
+          href="/settings/profile"
         />
       </div>
     </>

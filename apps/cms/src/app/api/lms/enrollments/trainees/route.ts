@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
+import { isAuthorizedServiceRequest } from '../../../_utils/service-api-key'
 
+// GET /api/lms/enrollments/trainees?search=&limit=
+// Searches trainees by user name or email. Used by the assign slide-over in
+// both web-admin and web-instructor.
 export async function GET(request: NextRequest) {
   try {
+    if (!isAuthorizedServiceRequest(request, process.env.PAYLOAD_API_KEY)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const payload = await getPayload({ config: configPromise })
     const { searchParams } = new URL(request.url)
 
@@ -59,10 +67,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(trainees)
   } catch (error) {
-    console.error('Error searching admin trainees:', error)
+    console.error('Error searching trainees:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

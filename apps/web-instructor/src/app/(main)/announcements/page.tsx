@@ -215,7 +215,7 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 py-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div><h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Announcements</h1><p className="mt-1 text-gray-500 dark:text-gray-400">Share updates with trainees in your courses</p></div>
         <button onClick={openCreate} disabled={courses.length === 0} className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"><PlusIcon className="mr-2 h-4 w-4" />New Announcement</button>

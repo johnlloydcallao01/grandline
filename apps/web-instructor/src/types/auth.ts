@@ -35,6 +35,9 @@ export interface User {
     alt?: string | null;
     cloudinaryURL?: string;
   } | null;
+  biography?: unknown;
+  pushNotificationsEnabled?: boolean | null;
+  securityAlertsEmailEnabled?: boolean | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -89,6 +92,7 @@ export interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  updateUser: (user: User) => void;
   clearError: () => void;
   checkAuthStatus: () => Promise<boolean>;
 }

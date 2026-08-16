@@ -73,21 +73,21 @@ const handleSearch = async (e: React.FormEvent) => {
         switch (status) {
             case 'active':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Active
                     </span>
                 );
             case 'revoked':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
                         <XCircle className="h-3 w-3 mr-1" />
                         Revoked
                     </span>
                 );
             case 'expired':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
                         <Clock className="h-3 w-3 mr-1" />
                         Expired
                     </span>
@@ -113,7 +113,7 @@ const handleSearch = async (e: React.FormEvent) => {
     };
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-4xl mx-auto py-6">
             <div className="text-center mb-10">
                 <div className="relative w-24 h-24 mx-auto mb-6">
                     <Image
@@ -125,8 +125,8 @@ const handleSearch = async (e: React.FormEvent) => {
                         priority
                     />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900">Certificate Verification</h1>
-                <p className="text-gray-600 mt-3 max-w-lg mx-auto">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Certificate Verification</h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-3 max-w-lg mx-auto">
                     Verify the authenticity of any certificate issued by Grandline.
                     Enter the unique certificate ID or scan the QR code on the document.
                 </p>
@@ -134,17 +134,17 @@ const handleSearch = async (e: React.FormEvent) => {
 
             {/* Search Box - only show if no verified result yet */}
             {!result?.verified && (
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                <div className="bg-white dark:bg-[var(--card-background)] p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-[var(--card-border)]">
                     <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative">
                             <label htmlFor="cert-id" className="sr-only">Certificate ID</label>
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FileCheck className="h-5 w-5 text-gray-400" />
+                                <FileCheck className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                             </div>
                             <input
                                 type="text"
                                 id="cert-id"
-                                className="block w-full pl-10 pr-4 py-4 border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900 placeholder-gray-500"
+                                className="block w-full pl-10 pr-4 py-4 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder:text-gray-400 bg-white dark:bg-[var(--card-background)]"
                                 placeholder="e.g. CERT-2026-ABCD-1234"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -177,28 +177,27 @@ const handleSearch = async (e: React.FormEvent) => {
 
             {/* Results */}
             {result && result.verified && result.certificate && (
-                <div className="bg-white rounded-2xl shadow-sm border overflow-hidden animate-in fade-in"
-                     style={{ borderColor: result.certificate.status === 'active' ? '#86efac' : result.certificate.status === 'revoked' ? '#fca5a5' : '#fde047' }}>
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-2xl shadow-sm border border-gray-200 dark:border-[var(--card-border)] overflow-hidden animate-in fade-in">
                     <div className={`px-6 py-4 border-b flex items-center ${
                         result.certificate.status === 'active'
-                            ? 'bg-green-50'
+                            ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800'
                             : result.certificate.status === 'revoked'
-                                ? 'bg-red-50'
-                                : 'bg-yellow-50'
+                                ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'
+                                : 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800'
                     }`}>
                         {result.certificate.status === 'active' ? (
-                            <CheckCircle className="h-6 w-6 text-green-600 mr-3 shrink-0" />
+                            <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400 mr-3 shrink-0" />
                         ) : result.certificate.status === 'revoked' ? (
-                            <XCircle className="h-6 w-6 text-red-600 mr-3 shrink-0" />
+                            <XCircle className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 shrink-0" />
                         ) : (
-                            <Clock className="h-6 w-6 text-yellow-600 mr-3 shrink-0" />
+                            <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400 mr-3 shrink-0" />
                         )}
                         <h3 className={`text-lg font-bold ${
                             result.certificate.status === 'active'
-                                ? 'text-green-800'
+                                ? 'text-green-800 dark:text-green-300'
                                 : result.certificate.status === 'revoked'
-                                    ? 'text-red-800'
-                                    : 'text-yellow-800'
+                                    ? 'text-red-800 dark:text-red-300'
+                                    : 'text-yellow-800 dark:text-yellow-300'
                         }`}>
                             {result.certificate.status === 'active' && 'Valid Certificate Found'}
                             {result.certificate.status === 'revoked' && 'Certificate Revoked'}
@@ -210,50 +209,50 @@ const handleSearch = async (e: React.FormEvent) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-6">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Supplied To</p>
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Supplied To</p>
                                     <div className="flex items-center">
-                                        <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                                            <User className="h-5 w-5 text-gray-500" />
+                                        <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mr-3">
+                                            <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                         </div>
                                         <div>
-                                            <p className="text-xl font-bold text-gray-900">{result.trainee?.fullName || 'N/A'}</p>
-                                            <p className="text-sm text-gray-500">Student ID: {result.trainee?.srn || 'N/A'}</p>
+                                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.trainee?.fullName || 'N/A'}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Student ID: {result.trainee?.srn || 'N/A'}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Course</p>
-                                    <p className="text-lg font-medium text-gray-900">{result.course?.title || 'N/A'}</p>
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Course</p>
+                                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{result.course?.title || 'N/A'}</p>
                                     {result.course?.code && (
-                                        <p className="text-sm text-gray-500">Course Code: {result.course.code}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Course Code: {result.course.code}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className="space-y-6">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Issue Date</p>
-                                    <div className="flex items-center text-gray-900">
-                                        <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Issue Date</p>
+                                    <div className="flex items-center text-gray-900 dark:text-gray-100">
+                                        <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500 mr-2" />
                                         <span className="text-lg font-medium">{formatDate(result.certificate.issueDate)}</span>
                                     </div>
                                 </div>
                                 {result.certificate.expiryDate && (
                                     <div>
-                                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Expiry Date</p>
-                                        <div className="flex items-center text-gray-900">
-                                            <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Expiry Date</p>
+                                        <div className="flex items-center text-gray-900 dark:text-gray-100">
+                                            <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500 mr-2" />
                                             <span className="text-lg font-medium">{formatDate(result.certificate.expiryDate)}</span>
                                         </div>
                                     </div>
                                 )}
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Status</p>
                                     {getStatusBadge(result.certificate.status)}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Certificate ID</p>
-                                    <p className="font-mono text-gray-600 bg-gray-50 px-3 py-1 rounded inline-block border border-gray-200">
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Certificate ID</p>
+                                    <p className="font-mono text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded inline-block border border-gray-200 dark:border-gray-700">
                                         {result.certificate.certificateCode}
                                     </p>
                                 </div>
@@ -261,21 +260,21 @@ const handleSearch = async (e: React.FormEvent) => {
                         </div>
 
                         {/* Share/QR Section */}
-                        <div className="mt-8 pt-6 border-t border-gray-100">
-                            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Share Verification</p>
+                        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Share Verification</p>
                             {shareUrl && (
-                                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-3 flex-1">
-                                    <LinkIcon className="h-5 w-5 text-gray-400" />
+                                <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 flex-1">
+                                    <LinkIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                                     <input
                                         type="text"
                                         readOnly
                                         value={shareUrl}
-                                        className="bg-transparent border-none outline-none text-sm text-gray-700 font-mono flex-1"
+                                        className="bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 font-mono flex-1"
                                         aria-label="Verification URL"
                                     />
                                     <button
                                         onClick={copyToClipboard}
-                                        className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 rounded hover:bg-blue-50 transition-colors"
+                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm px-3 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                     >
                                         Copy Link
                                     </button>
@@ -287,13 +286,13 @@ const handleSearch = async (e: React.FormEvent) => {
             )}
 
             {result && !result.verified && (
-                <div className="bg-red-50 rounded-2xl border border-red-200 p-8 flex flex-col items-center text-center animate-in fade-in">
-                    <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-                    <h3 className="text-xl font-bold text-red-800">Certificate Not Found</h3>
-                    <p className="text-red-600 mt-2 max-w-md">
+                <div className="bg-red-50 dark:bg-red-900/30 rounded-2xl border border-red-200 dark:border-red-800 p-8 flex flex-col items-center text-center animate-in fade-in">
+                    <AlertCircle className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
+                    <h3 className="text-xl font-bold text-red-800 dark:text-red-300">Certificate Not Found</h3>
+                    <p className="text-red-600 dark:text-red-400 mt-2 max-w-md">
                         {result.error || `We could not find a valid certificate with the ID "${currentCode}".`}
                     </p>
-                    <p className="text-red-500 text-sm mt-4 max-w-md">
+                    <p className="text-red-500 dark:text-red-500 text-sm mt-4 max-w-md">
                         Please double-check the ID and try again, or contact support if you believe this is an error.
                     </p>
                 </div>

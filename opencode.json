@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "omniroute/auto/best-coding",
+  "small_model": "omniroute/auto/fast",
+  "provider": {
+    "omniroute": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OmniRoute",
+      "options": {
+        "baseURL": "http://localhost:20128/v1",
+        "apiKey": "sk-883b5b2ee1b88354-2b2061-8169a510"
+      },
+      "models": {
+        "auto/best-coding": { "name": "Auto Best Coding", "tool_call": true, "reasoning": true },
+        "auto/best-reasoning": { "name": "Auto Best Reasoning", "tool_call": true, "reasoning": true },
+        "auto/best-fast": { "name": "Auto Best Fast", "tool_call": true },
+        "auto/best-vision": { "name": "Auto Best Vision", "tool_call": true, "attachment": true },
+        "auto/best-chat": { "name": "Auto Best Chat", "tool_call": true },
+        "auto/best-free": { "name": "Auto Best Free", "tool_call": true },
+        "auto/coding": { "name": "Auto Coding", "tool_call": true, "reasoning": true },
+        "auto/coding:free": { "name": "Auto Coding Free", "tool_call": true, "reasoning": true },
+        "auto/coding:fast": { "name": "Auto Coding Fast", "tool_call": true },
+        "auto/pro-coding": { "name": "Auto Pro Coding", "tool_call": true, "reasoning": true },
+        "auto/fast": { "name": "Auto Fast", "tool_call": true },
+        "auto/cheap": { "name": "Auto Cheap", "tool_call": true },
+        "auto/chat": { "name": "Auto Chat", "tool_call": true },
+        "oc/nemotron-3-ultra-free": { "name": "Nemotron 3 Ultra (Free)", "tool_call": true, "reasoning": true }
+      }
+    }
+  }
+}

@@ -44,7 +44,7 @@ export function CertificateDetailsView({ certificate, onBack, backHref }: Certif
   };
 
   const downloadUrl = certificate.file?.cloudinaryURL || (certificate.file?.url
-    ? `${process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:3001'}${certificate.file.url}`
+    ? `${process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:3005'}${certificate.file.url}`
     : null);
 
   const getForcedDownloadUrl = (url: string | null) => {
