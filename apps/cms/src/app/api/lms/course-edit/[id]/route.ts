@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import { isAuthorizedServiceRequest } from '../../../_utils/service-api-key'
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isAuthorizedServiceRequest(request, process.env.PAYLOAD_API_KEY)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const payload = await getPayload({ config: configPromise })
     const { id } = await context.params
 
-    const [course, categories, modules] = await Promise.all([
+    const [course, categories, tags, modules] = await Promise.all([
       payload.findByID({ collection: 'courses', id, depth: 2, overrideAccess: true }),
       payload.find({ collection: 'course-categories', limit: 100, sort: 'name', depth: 0, overrideAccess: true }),
+      payload.find({ collection: 'course-tags', limit: 100, sort: 'name', depth: 0, overrideAccess: true }),
       payload.find({ collection: 'course-modules', limit: 10, sort: '-createdAt', depth: 0, overrideAccess: true }),
     ])
 
@@ -21,13 +27,18 @@ export async function GET(
       name: c.name || '',
     }))
 
+    const tagOptions = (tags.docs || []).map((t: any) => ({
+      id: String(t.id),
+      name: t.name || '',
+    }))
+
     const moduleOptions = (modules.docs || []).map((m: any) => ({
       id: String(m.id),
       title: m.title || m.name || String(m.id),
       name: m.name || undefined,
     }))
 
-    return NextResponse.json({ course, categories: categoryOptions, modules: moduleOptions })
+    return NextResponse.json({ course, categories: categoryOptions, tags: tagOptions, modules: moduleOptions })
   } catch (error) {
     console.error('[CourseEdit] Error loading course data:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

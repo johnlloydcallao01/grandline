@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getCategoriesList, deleteCategory, getCategoryById,
-    type CategoryDoc
 } from './actions';
+import type { CategoryDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -424,53 +424,26 @@ export default function CourseCategoriesPage() {
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Category ID</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">#{detailCategory.id}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Slug</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">{detailCategory.slug}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Parent</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{getParentName(detailCategory) || 'None (top-level)'}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Display Order</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailCategory.displayOrder ?? 0}</p>
-                                        </div>
+                                        <div><span className="text-gray-500 dark:text-gray-400">Category ID</span><p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">#{detailCategory.id}</p></div>
+                                        <div><span className="text-gray-500 dark:text-gray-400">Slug</span><p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">{detailCategory.slug}</p></div>
+                                        <div><span className="text-gray-500 dark:text-gray-400">Parent</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{getParentName(detailCategory) || 'None (top-level)'}</p></div>
+                                        <div><span className="text-gray-500 dark:text-gray-400">Display Order</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailCategory.displayOrder ?? 0}</p></div>
                                         <div>
                                             <span className="text-gray-500 dark:text-gray-400">Color</span>
                                             <p className="font-medium text-gray-900 dark:text-gray-100 mt-1 flex items-center gap-2">
-                                                {detailCategory.colorCode ? (
-                                                    <><span className="h-4 w-4 rounded border border-gray-200 dark:border-gray-600 inline-block" style={{ backgroundColor: detailCategory.colorCode }} />{detailCategory.colorCode}</>
-                                                ) : '-'}
+                                                {detailCategory.colorCode ? <><span className="h-4 w-4 rounded border border-gray-200 dark:border-gray-600 inline-block" style={{ backgroundColor: detailCategory.colorCode }} />{detailCategory.colorCode}</> : '-'}
                                             </p>
                                         </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{new Date(detailCategory.updatedAt).toLocaleDateString()}</p>
-                                        </div>
+                                        <div><span className="text-gray-500 dark:text-gray-400">Last Updated</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{new Date(detailCategory.updatedAt).toLocaleDateString()}</p></div>
                                     </div>
-
                                     {detailCategory.description ? (
-                                        <div>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
-                                            <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{detailCategory.description}</p>
-                                        </div>
+                                        <div><span className="text-sm text-gray-500 dark:text-gray-400">Description</span><p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{detailCategory.description}</p></div>
                                     ) : (
-                                        <div className="text-center py-8">
-                                            <Folder className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" />
-                                            <p className="text-sm text-gray-400 dark:text-gray-500">No description</p>
-                                        </div>
+                                        <div className="text-center py-8"><Folder className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" /><p className="text-sm text-gray-400 dark:text-gray-500">No description</p></div>
                                     )}
-
                                     <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
-                                        <Link href={`/courses/categories/${detailCategory.id}/edit`}
-                                            className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
-                                            <Edit className="h-4 w-4 mr-2" />
-                                            Edit Category
+                                        <Link href={`/courses/categories/${detailCategory.id}/edit`} className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
+                                            <Edit className="h-4 w-4 mr-2" />Edit Category
                                         </Link>
                                     </div>
                                 </>

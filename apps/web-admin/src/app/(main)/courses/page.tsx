@@ -6,7 +6,8 @@ import {
     Search, BookOpen, Users, Clock, Edit, Trash2, Eye,
     DollarSign, Loader2, X
 } from '@/components/ui/IconWrapper';
-import { getCourses, deleteCourse, updateCourse, type CourseDoc } from './actions';
+import { getCourses, deleteCourse, updateCourse } from './actions';
+import type { Course, CourseCounts } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -37,9 +38,10 @@ const DURATION_LABELS: Record<string, string> = {
 };
 
 export default function CoursesPage() {
-    const [courses, setCourses] = useState<CourseDoc[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [counts, setCounts] = useState<CourseCounts | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,11 +51,11 @@ export default function CoursesPage() {
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
     // Delete confirmation state
-    const [deleteTarget, setDeleteTarget] = useState<CourseDoc | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Detail slide-over
-    const [detailCourse, setDetailCourse] = useState<CourseDoc | null>(null);
+    const [detailCourse, setDetailCourse] = useState<Course | null>(null);
 
     const loadCourses = useCallback(async () => {
         try {
@@ -68,6 +70,7 @@ export default function CoursesPage() {
             setCourses(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setCounts(data.counts || null);
         } catch (err) {
             console.error(err);
             setError('Failed to load courses');
@@ -89,7 +92,7 @@ export default function CoursesPage() {
         return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
     }, [searchTerm]);
 
-    const handleStatusChange = async (course: CourseDoc, newStatus: string) => {
+    const handleStatusChange = async (course: Course, newStatus: string) => {
         try {
             await updateCourse(course.id, { status: newStatus as any });
             setCourses(prev => prev.map(c => c.id === course.id ? { ...c, status: newStatus as any } : c));
@@ -113,7 +116,7 @@ export default function CoursesPage() {
         }
     };
 
-    const getImageUrl = (course: CourseDoc): string | null => {
+    const getImageUrl = (course: Course): string | null => {
         const t = course.thumbnail;
         if (!t) return null;
         if (typeof t === 'object') {
@@ -123,7 +126,7 @@ export default function CoursesPage() {
         return null;
     };
 
-    const getInstructorName = (course: CourseDoc): string => {
+    const getInstructorName = (course: Course): string => {
         const inst = course.instructor;
         if (!inst) return 'Unknown';
         if (typeof inst === 'object' && inst.user && typeof inst.user === 'object') {
@@ -132,7 +135,7 @@ export default function CoursesPage() {
         return 'Unknown';
     };
 
-    const getCategoryNames = (course: CourseDoc): string[] => {
+    const getCategoryNames = (course: Course): string[] => {
         const cats = course.category;
         if (!cats || !Array.isArray(cats)) return [];
         return cats.map(c => {
@@ -160,10 +163,10 @@ export default function CoursesPage() {
     };
 
     const metricCards = [
-        { label: 'Total Courses', value: totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookOpen },
-        { label: 'Published', value: courses.filter(c => c.status === 'published').length, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: Eye },
-        { label: 'Draft', value: courses.filter(c => c.status === 'draft').length, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30', icon: Clock },
-        { label: 'Archived', value: courses.filter(c => c.status === 'archived').length, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800', icon: ArchiveIcon },
+        { label: 'Total Courses', value: counts?.total ?? totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookOpen },
+        { label: 'Published', value: counts?.published ?? 0, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: Eye },
+        { label: 'Draft', value: counts?.draft ?? 0, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30', icon: Clock },
+        { label: 'Archived', value: counts?.archived ?? 0, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800', icon: ArchiveIcon },
     ];
 
     if (error) {

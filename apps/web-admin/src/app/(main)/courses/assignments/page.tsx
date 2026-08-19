@@ -7,9 +7,9 @@ import {
     Loader2, X, FileText
 } from '@/components/ui/IconWrapper';
 import {
-    getAssignments, deleteAssignment, getAssignmentById,
-    type AssignmentDoc
+    getAssignments, deleteAssignment, getAssignmentById
 } from './actions';
+import type { AssignmentDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
 

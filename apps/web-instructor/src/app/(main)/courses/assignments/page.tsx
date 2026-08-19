@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import NextLink from 'next/link';
 import {
-    getAssignments, deleteAssignment, getAssignmentById,
-    type AssignmentDoc
+    getAssignments, deleteAssignment, getAssignmentById
 } from './actions';
+import type { AssignmentDoc } from '@encreasl/cms-types';
 
 const Link = NextLink as any;
 const ITEMS_PER_PAGE = 12;

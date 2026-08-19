@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getQuestions, deleteQuestion, getQuestionById,
-    type QuestionDoc
 } from './actions';
+import type { QuestionDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
 

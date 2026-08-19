@@ -7,8 +7,8 @@ import {
 import { RichTextEditor } from '@/components/cms/RichTextEditor';
 import {
     searchInstructors,
-    type InstructorRef,
 } from '@/app/(main)/courses/actions';
+import type { InstructorRef } from '@encreasl/cms-types';
 
 const SUBMISSION_TYPE_OPTIONS = [
     { value: 'file_upload', label: 'File Upload Only' },

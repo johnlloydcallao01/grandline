@@ -5,9 +5,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, BookOpen, AlertTriangle } from '@/components/ui/IconWrapper';
 import {
-    getAssessmentById, updateAssessment, getQuestions,
-    type AssessmentDoc, type ModuleOption, type CourseOption, type QuestionOption
+    getAssessmentById, updateAssessment, getQuestions
 } from '../../actions';
+import type {
+    AssessmentCourseOption, AssessmentDoc, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types';
 import AssessmentForm from '@/components/courses/AssessmentForm';
 
 const extractLabel = (ref: any): string => {
@@ -31,9 +33,9 @@ export default function EditAssessmentPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
-    const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
-    const [questions, setQuestions] = useState<QuestionOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<AssessmentModuleOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AssessmentCourseOption[]>([]);
+    const [questions, setQuestions] = useState<AssessmentQuestionOption[]>([]);
     const [initialData, setInitialData] = useState<any>(null);
     const [initialItems, setInitialItems] = useState<any[]>([]);
 

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import Script from "next/script";
 import { LoadingScreenWrapper, InstantLoadingController } from "@/components/loading";
@@ -10,16 +9,6 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getServerUser, getServerToken } from "@/app/actions/auth";
 import { getSiteSettingsFavicon } from "@/server/siteSettings";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const { siteSettings, faviconUrl } = await getSiteSettingsFavicon();
@@ -78,9 +67,7 @@ export default async function RootLayout({ children }: LayoutProps) {
           `}
         </Script>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         {/* Instant Loading Screen - Shows immediately on page load */}
         <div id="instant-loading-screen" className="facebook-loading-screen">
           <div className="facebook-loading-overlay">

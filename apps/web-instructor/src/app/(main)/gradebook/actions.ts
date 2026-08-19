@@ -110,12 +110,19 @@ function traineeEmail(student: any): string {
   return ''
 }
 
-export async function getGradebookData(): Promise<GradebookData> {
+export async function getGradebookData(courseId?: number): Promise<GradebookData> {
   const instructorId = await getInstructorId()
 
   const courseParams = new URLSearchParams({ depth: '0', limit: '500', sort: 'title' })
-  courseParams.set('where[or][0][instructor][equals]', instructorId)
-  courseParams.set('where[or][1][coInstructors][contains]', instructorId)
+  if (courseId != null) {
+    // Scoped single-course fetch: must belong to the instructor/co-instructed set.
+    courseParams.set('where[or][0][id][equals]', String(courseId))
+    courseParams.set('where[and][0][or][0][instructor][equals]', instructorId)
+    courseParams.set('where[and][0][or][1][coInstructors][contains]', instructorId)
+  } else {
+    courseParams.set('where[or][0][instructor][equals]', instructorId)
+    courseParams.set('where[or][1][coInstructors][contains]', instructorId)
+  }
 
   const courseRes = await fetch(`${CMS_API}/courses?${courseParams.toString()}`, {
     headers: adminHeaders(),

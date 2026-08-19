@@ -152,7 +152,7 @@ export default function CourseGradebookPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4">
@@ -404,7 +404,7 @@ export default function CourseGradebookPage() {
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
                             {isDetailLoading ? (
                                 <div className="space-y-4 animate-pulse">
                                     <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />

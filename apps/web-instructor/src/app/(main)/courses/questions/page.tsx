@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import NextLink from 'next/link';
 import {
     getQuestions, deleteQuestion, getQuestionById,
-    type QuestionDoc
 } from './actions';
+import type { QuestionDoc } from '@encreasl/cms-types';
 
 const Link = NextLink as any;
 
@@ -283,13 +283,13 @@ export default function QuestionsPage() {
                 )}
             </div>
 
-            {/* SearchIcon & Filters */}
+            {/* Search & Filters */}
             <div className="bg-white dark:bg-[var(--card-background)] p-4 rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                     <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
-                        placeholder="SearchIcon by prompt..."
+                        placeholder="Search by prompt..."
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 dark:focus:ring-[#201a7c]/20 focus:border-blue-500 dark:focus:border-[#201a7c] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-[var(--card-background)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -362,7 +362,7 @@ export default function QuestionsPage() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No questions found</h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                         {debouncedSearch || typeFilter !== 'all' || difficultyFilter !== 'all' || statusFilter !== 'all'
-                            ? 'No questions match your SearchIcon criteria. Try adjusting the filters.'
+                            ? 'No questions match your search criteria. Try adjusting the filters.'
                             : 'Get started by creating your first question.'}
                     </p>
                     {!debouncedSearch && typeFilter === 'all' && difficultyFilter === 'all' && statusFilter === 'all' && (
@@ -447,9 +447,9 @@ export default function QuestionsPage() {
                                                     <EyeIcon className="h-4 w-4" />
                                                 </button>
                                                 <Link
-                                                    href={`/courses/questions/${question.id}/EditIcon`}
+                                                    href={`/courses/questions/${question.id}/edit`}
                                                     className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                                    title="EditIcon Question"
+                                                    title="Edit Question"
                                                 >
                                                     <EditIcon className="h-4 w-4" />
                                                 </Link>
@@ -634,10 +634,10 @@ export default function QuestionsPage() {
                                     </div>
 
                                     <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
-                                        <Link href={`/courses/questions/${detailQuestion.id}/EditIcon`}
+                                        <Link href={`/courses/questions/${detailQuestion.id}/edit`}
                                             className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
                                             <EditIcon className="h-4 w-4 mr-2" />
-                                            EditIcon Question
+                                            Edit Question
                                         </Link>
                                     </div>
                                 </>

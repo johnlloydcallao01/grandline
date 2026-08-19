@@ -169,6 +169,31 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Per-status totals matching the current search but independent of the
+    // status filter, so the filter chips stay stable and accurate.
+    const countsWhere = JSON.parse(JSON.stringify(where)) as Where
+    const STATUSES = ['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'] as const
+    const [totalCount, ...statusCounts] = await Promise.all([
+      payload.count({
+        collection: 'course-enrollments',
+        where: countsWhere,
+        overrideAccess: true,
+      }),
+      ...STATUSES.map((s) =>
+        payload.count({
+          collection: 'course-enrollments',
+          where: {
+            and: [...(countsWhere.and as any[]), { status: { equals: s } }],
+          },
+          overrideAccess: true,
+        })
+      ),
+    ])
+    const counts: Record<string, number> = { total: totalCount.totalDocs }
+    STATUSES.forEach((s, i) => {
+      counts[s] = statusCounts[i].totalDocs
+    })
+
     if (status) {
       ;(where as any).and.push({ status: { equals: status } })
     }
@@ -189,6 +214,7 @@ export async function GET(request: NextRequest) {
       page: enrollments.page,
       limit: enrollments.limit,
       totalPages: enrollments.totalPages,
+      counts,
     })
   } catch (error) {
     console.error('Error fetching instructor enrollments:', error)

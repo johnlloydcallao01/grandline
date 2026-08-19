@@ -5,6 +5,12 @@ const nextConfig = {
   allowedDevOrigins: ['cms-dev.grandlinemaritime.com'],
   output: 'standalone',
   serverExternalPackages: ['@react-pdf/renderer', '@payloadcms/db-postgres'],
+  // Cap build workers to keep memory within the available RAM. Next defaults
+  // this to os.cpus().length - 1, which spawns one worker per core and can
+  // exhaust memory on machines with many cores but limited RAM.
+  experimental: {
+    cpus: 4,
+  },
   // Redirect root path to admin
   async redirects() {
     return [

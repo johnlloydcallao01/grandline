@@ -18,8 +18,9 @@ import {
   serial,
   jsonb,
   boolean,
-  numeric,
   type AnyPgColumn,
+  numeric,
+  text,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
@@ -43,7 +44,7 @@ export const enum_users_role = pgEnum('enum_users_role', [
   'service',
 ])
 export const enum_trainees_current_level = pgEnum('enum_trainees_current_level', [
-  'beginner',
+  'standard',
   'intermediate',
   'advanced',
 ])
@@ -72,10 +73,645 @@ export const enum_emergency_contacts_relationship = pgEnum('enum_emergency_conta
   'relative',
   'other',
 ])
-export const enum_posts_status = pgEnum('enum_posts_status', ['draft', 'published'])
+export const enum_media_visibility = pgEnum('enum_media_visibility', ['shared', 'private'])
+export const enum_posts_status = pgEnum('enum_posts_status', ['draft', 'published', 'archived'])
 export const enum__posts_v_version_status = pgEnum('enum__posts_v_version_status', [
   'draft',
   'published',
+  'archived',
+])
+export const enum_post_comments_status = pgEnum('enum_post_comments_status', [
+  'approved',
+  'pending',
+  'spam',
+])
+export const enum_accounting_chart_of_accounts_account_type = pgEnum(
+  'enum_accounting_chart_of_accounts_account_type',
+  ['asset', 'liability', 'equity', 'revenue', 'expense'],
+)
+export const enum_accounting_chart_of_accounts_account_sub_type = pgEnum(
+  'enum_accounting_chart_of_accounts_account_sub_type',
+  [
+    'cash_and_cash_equivalents',
+    'bank',
+    'accounts_receivable',
+    'prepaid_expense',
+    'fixed_asset',
+    'other_asset',
+    'accounts_payable',
+    'accrued_liability',
+    'deferred_revenue',
+    'tax_payable',
+    'other_liability',
+    'owner_equity',
+    'retained_earnings',
+    'revenue',
+    'other_income',
+    'cost_of_sales',
+    'operating_expense',
+    'tax_expense',
+    'other_expense',
+  ],
+)
+export const enum_accounting_chart_of_accounts_normal_balance = pgEnum(
+  'enum_accounting_chart_of_accounts_normal_balance',
+  ['debit', 'credit'],
+)
+export const enum_accounting_fiscal_years_status = pgEnum('enum_accounting_fiscal_years_status', [
+  'draft',
+  'open',
+  'closed',
+])
+export const enum_accounting_fiscal_years_close_mode = pgEnum(
+  'enum_accounting_fiscal_years_close_mode',
+  ['manual', 'hard_lock'],
+)
+export const enum_accounting_periods_status = pgEnum('enum_accounting_periods_status', [
+  'draft',
+  'open',
+  'soft_locked',
+  'closed',
+])
+export const enum_accounting_tax_codes_scope = pgEnum('enum_accounting_tax_codes_scope', [
+  'sales',
+  'purchase',
+  'both',
+])
+export const enum_accounting_tax_codes_calculation_method = pgEnum(
+  'enum_accounting_tax_codes_calculation_method',
+  ['exclusive', 'inclusive'],
+)
+export const enum_accounting_journal_entries_source_type = pgEnum(
+  'enum_accounting_journal_entries_source_type',
+  ['manual', 'opening_balance', 'adjustment', 'reversal', 'system'],
+)
+export const enum_accounting_journal_entries_status = pgEnum(
+  'enum_accounting_journal_entries_status',
+  ['draft', 'posted', 'reversed', 'voided'],
+)
+export const enum_accounting_journal_entries_posting_status = pgEnum(
+  'enum_accounting_journal_entries_posting_status',
+  ['unposted', 'posted', 'reversed', 'voided'],
+)
+export const enum_accounting_customers_customer_type = pgEnum(
+  'enum_accounting_customers_customer_type',
+  ['individual', 'company', 'sponsor', 'other'],
+)
+export const enum_accounting_customers_status = pgEnum('enum_accounting_customers_status', [
+  'active',
+  'on_hold',
+  'inactive',
+  'archived',
+])
+export const enum_accounting_vendors_vendor_type = pgEnum('enum_accounting_vendors_vendor_type', [
+  'supplier',
+  'contractor',
+  'utility',
+  'government',
+  'other',
+])
+export const enum_accounting_vendors_status = pgEnum('enum_accounting_vendors_status', [
+  'active',
+  'on_hold',
+  'inactive',
+  'archived',
+])
+export const enum_accounting_bank_accounts_account_type = pgEnum(
+  'enum_accounting_bank_accounts_account_type',
+  ['bank', 'cash_on_hand', 'undeposited_funds'],
+)
+export const enum_accounting_invoices_status = pgEnum('enum_accounting_invoices_status', [
+  'draft',
+  'approved',
+  'posted',
+  'partially_paid',
+  'paid',
+  'voided',
+])
+export const enum_accounting_invoices_posting_status = pgEnum(
+  'enum_accounting_invoices_posting_status',
+  ['unposted', 'posted', 'reversed', 'voided'],
+)
+export const enum_accounting_invoice_line_items_item_type = pgEnum(
+  'enum_accounting_invoice_line_items_item_type',
+  ['service', 'product', 'fee', 'other'],
+)
+export const enum_accounting_bills_status = pgEnum('enum_accounting_bills_status', [
+  'draft',
+  'approved',
+  'posted',
+  'partially_paid',
+  'paid',
+  'voided',
+])
+export const enum_accounting_bills_posting_status = pgEnum('enum_accounting_bills_posting_status', [
+  'unposted',
+  'posted',
+  'reversed',
+  'voided',
+])
+export const enum_accounting_credit_notes_status = pgEnum('enum_accounting_credit_notes_status', [
+  'draft',
+  'approved',
+  'posted',
+  'partially_paid',
+  'paid',
+  'voided',
+])
+export const enum_accounting_vendor_credits_status = pgEnum(
+  'enum_accounting_vendor_credits_status',
+  ['draft', 'approved', 'posted', 'partially_paid', 'paid', 'voided'],
+)
+export const enum_accounting_payments_received_payment_method = pgEnum(
+  'enum_accounting_payments_received_payment_method',
+  ['cash', 'bank_transfer', 'check', 'card', 'e_wallet', 'other'],
+)
+export const enum_accounting_payments_received_status = pgEnum(
+  'enum_accounting_payments_received_status',
+  ['draft', 'posted', 'voided'],
+)
+export const enum_accounting_payments_made_payment_method = pgEnum(
+  'enum_accounting_payments_made_payment_method',
+  ['cash', 'bank_transfer', 'check', 'card', 'e_wallet', 'other'],
+)
+export const enum_accounting_payments_made_status = pgEnum('enum_accounting_payments_made_status', [
+  'draft',
+  'posted',
+  'voided',
+])
+export const enum_accounting_expenses_payment_method = pgEnum(
+  'enum_accounting_expenses_payment_method',
+  ['cash', 'bank', 'card', 'other'],
+)
+export const enum_accounting_expenses_status = pgEnum('enum_accounting_expenses_status', [
+  'draft',
+  'posted',
+  'voided',
+])
+export const enum_accounting_deposits_status = pgEnum('enum_accounting_deposits_status', [
+  'draft',
+  'posted',
+  'voided',
+])
+export const enum_accounting_transfers_status = pgEnum('enum_accounting_transfers_status', [
+  'draft',
+  'posted',
+  'voided',
+])
+export const enum_accounting_bounced_payments_bounce_reason = pgEnum(
+  'enum_accounting_bounced_payments_bounce_reason',
+  [
+    'insufficient_funds',
+    'account_closed',
+    'payment_recalled',
+    'stop_payment',
+    'invalid_account',
+    'bank_error',
+    'other',
+  ],
+)
+export const enum_accounting_bounced_payments_case_status = pgEnum(
+  'enum_accounting_bounced_payments_case_status',
+  ['open', 'awaiting_reversal', 'collections_follow_up', 'resolved', 'written_off'],
+)
+export const enum_accounting_bank_feeds_connector_type = pgEnum(
+  'enum_accounting_bank_feeds_connector_type',
+  ['direct_api', 'treasury_hub', 'csv_bridge', 'plaid', 'manual_sync', 'other'],
+)
+export const enum_accounting_bank_feeds_connection_status = pgEnum(
+  'enum_accounting_bank_feeds_connection_status',
+  ['connected', 'sync_delayed', 'action_required', 'disconnected'],
+)
+export const enum_accounting_bank_feeds_health_status = pgEnum(
+  'enum_accounting_bank_feeds_health_status',
+  ['healthy', 'monitor', 'warning', 'critical'],
+)
+export const enum_accounting_bank_feeds_sync_frequency = pgEnum(
+  'enum_accounting_bank_feeds_sync_frequency',
+  ['hourly', 'daily', 'manual'],
+)
+export const enum_accounting_bank_statement_imports_source_format = pgEnum(
+  'enum_accounting_bank_statement_imports_source_format',
+  ['csv', 'xlsx', 'ofx', 'pdf', 'other'],
+)
+export const enum_accounting_bank_statement_imports_import_status = pgEnum(
+  'enum_accounting_bank_statement_imports_import_status',
+  ['queued', 'imported', 'partial_import', 'parse_error', 'reupload_required'],
+)
+export const enum_accounting_bank_transactions_match_status = pgEnum(
+  'enum_accounting_bank_transactions_match_status',
+  ['unmatched', 'suggested', 'matched', 'ignored'],
+)
+export const enum_accounting_bank_transactions_matched_entity_type = pgEnum(
+  'enum_accounting_bank_transactions_matched_entity_type',
+  [
+    'customer',
+    'vendor',
+    'invoice',
+    'bill',
+    'payment_received',
+    'payment_made',
+    'expense',
+    'credit_note',
+    'vendor_credit',
+    'bank_transaction',
+    'bank_reconciliation',
+    'deposit',
+    'transfer',
+    'journal_entry',
+    'enrollment_billing_link',
+    'payment_allocation',
+    'receipt',
+    'refund',
+    'revenue_recognition_schedule',
+    'scholarship_award',
+    'corporate_billing_link',
+    'instructor_payout',
+    'branch',
+    'department',
+    'location',
+    'project',
+    'project_task',
+    'time_entry',
+    'timesheet',
+    'budget',
+    'forecast_scenario',
+    'fixed_asset',
+    'depreciation_entry',
+    'asset_disposal',
+    'payroll_run',
+    'payroll_entry',
+    'approval_workflow',
+    'approval_request',
+    'audit_log',
+  ],
+)
+export const enum_accounting_bank_reconciliations_status = pgEnum(
+  'enum_accounting_bank_reconciliations_status',
+  ['draft', 'in_progress', 'completed', 'locked'],
+)
+export const enum_accounting_document_links_entity_type = pgEnum(
+  'enum_accounting_document_links_entity_type',
+  [
+    'customer',
+    'vendor',
+    'invoice',
+    'bill',
+    'payment_received',
+    'payment_made',
+    'expense',
+    'credit_note',
+    'vendor_credit',
+    'bank_transaction',
+    'bank_reconciliation',
+    'deposit',
+    'transfer',
+    'journal_entry',
+    'enrollment_billing_link',
+    'payment_allocation',
+    'receipt',
+    'refund',
+    'revenue_recognition_schedule',
+    'scholarship_award',
+    'corporate_billing_link',
+    'instructor_payout',
+    'branch',
+    'department',
+    'location',
+    'project',
+    'project_task',
+    'time_entry',
+    'timesheet',
+    'budget',
+    'forecast_scenario',
+    'fixed_asset',
+    'depreciation_entry',
+    'asset_disposal',
+    'payroll_run',
+    'payroll_entry',
+    'approval_workflow',
+    'approval_request',
+    'audit_log',
+  ],
+)
+export const enum_accounting_document_links_document_category = pgEnum(
+  'enum_accounting_document_links_document_category',
+  [
+    'invoice',
+    'bill',
+    'receipt',
+    'proof_of_payment',
+    'expense_receipt',
+    'bank_statement',
+    'contract',
+    'tax',
+    'other',
+  ],
+)
+export const enum_acct_course_fee_profiles_default_recognition_method = pgEnum(
+  'enum_acct_course_fee_profiles_default_recognition_method',
+  ['on_activation', 'straight_line', 'completion_based', 'certificate_based', 'manual'],
+)
+export const enum_acct_scholarship_sponsors_status = pgEnum(
+  'enum_acct_scholarship_sponsors_status',
+  ['active', 'inactive', 'archived'],
+)
+export const enum_acct_corporate_accounts_status = pgEnum('enum_acct_corporate_accounts_status', [
+  'active',
+  'inactive',
+  'archived',
+])
+export const enum_acct_instructor_payout_rules_payout_method = pgEnum(
+  'enum_acct_instructor_payout_rules_payout_method',
+  ['flat', 'revenue_share', 'per_enrollment', 'hybrid'],
+)
+export const enum_acct_instructor_payout_rules_status = pgEnum(
+  'enum_acct_instructor_payout_rules_status',
+  ['active', 'inactive', 'archived'],
+)
+export const enum_acct_enrollment_billing_links_billing_status = pgEnum(
+  'enum_acct_enrollment_billing_links_billing_status',
+  ['not_started', 'drafted', 'invoiced', 'partially_paid', 'paid', 'cancelled', 'refunded'],
+)
+export const enum_acct_billing_adjustments_adjustment_type = pgEnum(
+  'enum_acct_billing_adjustments_adjustment_type',
+  [
+    'manual_discount',
+    'manual_surcharge',
+    'late_fee',
+    'certificate_fee',
+    'retake_fee',
+    'reassessment_fee',
+    'renewal_fee',
+  ],
+)
+export const enum_acct_billing_adjustments_direction = pgEnum(
+  'enum_acct_billing_adjustments_direction',
+  ['increase', 'decrease'],
+)
+export const enum_acct_payment_allocations_allocation_type = pgEnum(
+  'enum_acct_payment_allocations_allocation_type',
+  [
+    'invoice_settlement',
+    'deposit_application',
+    'installment_payment',
+    'refund_reversal',
+    'manual_adjustment',
+  ],
+)
+export const enum_acct_receipts_status = pgEnum('enum_acct_receipts_status', [
+  'draft',
+  'issued',
+  'voided',
+])
+export const enum_acct_refunds_refund_type = pgEnum('enum_acct_refunds_refund_type', [
+  'full',
+  'partial',
+  'credit_only',
+])
+export const enum_acct_refunds_status = pgEnum('enum_acct_refunds_status', [
+  'draft',
+  'requested',
+  'approved',
+  'processed',
+  'rejected',
+  'voided',
+])
+export const enum_acct_rev_rec_schedules_recognition_method = pgEnum(
+  'enum_acct_rev_rec_schedules_recognition_method',
+  ['on_activation', 'straight_line', 'completion_based', 'certificate_based', 'manual'],
+)
+export const enum_acct_rev_rec_schedules_status = pgEnum('enum_acct_rev_rec_schedules_status', [
+  'draft',
+  'scheduled',
+  'partially_recognized',
+  'recognized',
+  'cancelled',
+])
+export const enum_acct_scholarship_awards_award_type = pgEnum(
+  'enum_acct_scholarship_awards_award_type',
+  ['full', 'partial', 'contra_revenue', 'third_party_billed'],
+)
+export const enum_acct_scholarship_awards_status = pgEnum('enum_acct_scholarship_awards_status', [
+  'active',
+  'inactive',
+  'archived',
+])
+export const enum_acct_corporate_billing_links_coverage_type = pgEnum(
+  'enum_acct_corporate_billing_links_coverage_type',
+  ['full_company_pay', 'shared_pay', 'credit_terms'],
+)
+export const enum_acct_corporate_billing_links_status = pgEnum(
+  'enum_acct_corporate_billing_links_status',
+  ['active', 'inactive', 'archived'],
+)
+export const enum_acct_instructor_payouts_status = pgEnum('enum_acct_instructor_payouts_status', [
+  'draft',
+  'calculated',
+  'approved',
+  'paid',
+  'voided',
+])
+export const enum_acct_branches_status = pgEnum('enum_acct_branches_status', [
+  'active',
+  'inactive',
+  'archived',
+])
+export const enum_acct_departments_status = pgEnum('enum_acct_departments_status', [
+  'active',
+  'inactive',
+  'archived',
+])
+export const enum_acct_locations_status = pgEnum('enum_acct_locations_status', [
+  'active',
+  'inactive',
+  'archived',
+])
+export const enum_acct_projects_status = pgEnum('enum_acct_projects_status', [
+  'draft',
+  'active',
+  'on_hold',
+  'completed',
+  'cancelled',
+])
+export const enum_acct_projects_project_type = pgEnum('enum_acct_projects_project_type', [
+  'internal',
+  'customer_project',
+  'training_delivery',
+  'implementation',
+])
+export const enum_acct_project_tasks_status = pgEnum('enum_acct_project_tasks_status', [
+  'draft',
+  'open',
+  'in_progress',
+  'completed',
+  'cancelled',
+])
+export const enum_acct_budgets_status = pgEnum('enum_acct_budgets_status', [
+  'draft',
+  'approved',
+  'locked',
+  'archived',
+])
+export const enum_acct_budgets_budget_type = pgEnum('enum_acct_budgets_budget_type', [
+  'annual',
+  'monthly',
+  'project',
+  'department',
+  'course_category',
+])
+export const enum_acct_forecast_scenarios_scenario_type = pgEnum(
+  'enum_acct_forecast_scenarios_scenario_type',
+  ['base_case', 'best_case', 'worst_case', 'custom'],
+)
+export const enum_acct_forecast_scenarios_status = pgEnum('enum_acct_forecast_scenarios_status', [
+  'draft',
+  'approved',
+  'archived',
+])
+export const enum_acct_time_entries_status = pgEnum('enum_acct_time_entries_status', [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+  'posted',
+])
+export const enum_acct_time_entries_source_type = pgEnum('enum_acct_time_entries_source_type', [
+  'manual',
+  'timer',
+  'course_delivery',
+  'project_work',
+  'support',
+  'other',
+])
+export const enum_acct_timesheets_status = pgEnum('enum_acct_timesheets_status', [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+  'locked',
+])
+export const enum_acct_fixed_assets_asset_category = pgEnum(
+  'enum_acct_fixed_assets_asset_category',
+  ['equipment', 'furniture', 'it_infrastructure', 'vehicle', 'leasehold_improvement', 'other'],
+)
+export const enum_acct_fixed_assets_depreciation_method = pgEnum(
+  'enum_acct_fixed_assets_depreciation_method',
+  ['straight_line', 'manual'],
+)
+export const enum_acct_fixed_assets_status = pgEnum('enum_acct_fixed_assets_status', [
+  'draft',
+  'active',
+  'fully_depreciated',
+  'disposed',
+  'written_off',
+])
+export const enum_acct_depr_entries_status = pgEnum('enum_acct_depr_entries_status', [
+  'scheduled',
+  'posted',
+  'reversed',
+])
+export const enum_acct_asset_disposals_disposal_type = pgEnum(
+  'enum_acct_asset_disposals_disposal_type',
+  ['sale', 'write_off', 'scrap', 'transfer'],
+)
+export const enum_acct_asset_disposals_status = pgEnum('enum_acct_asset_disposals_status', [
+  'draft',
+  'approved',
+  'posted',
+  'voided',
+])
+export const enum_acct_payroll_runs_status = pgEnum('enum_acct_payroll_runs_status', [
+  'draft',
+  'review',
+  'approved',
+  'posted',
+  'voided',
+])
+export const enum_acct_payroll_entries_entry_type = pgEnum('enum_acct_payroll_entries_entry_type', [
+  'salary',
+  'contractor',
+  'reimbursement',
+  'adjustment',
+])
+export const enum_acct_payroll_entries_status = pgEnum('enum_acct_payroll_entries_status', [
+  'draft',
+  'approved',
+  'posted',
+  'voided',
+])
+export const enum_acct_payroll_account_mappings_entry_type = pgEnum(
+  'enum_acct_payroll_account_mappings_entry_type',
+  ['salary', 'contractor', 'reimbursement', 'adjustment'],
+)
+export const enum_acct_payroll_account_mappings_status = pgEnum(
+  'enum_acct_payroll_account_mappings_status',
+  ['draft', 'approved', 'posted', 'voided'],
+)
+export const enum_acct_approval_workflows_entity_type = pgEnum(
+  'enum_acct_approval_workflows_entity_type',
+  ['invoice', 'bill', 'expense', 'journal', 'budget', 'asset_disposal', 'timesheet', 'payroll_run'],
+)
+export const enum_acct_approval_requests_entity_type = pgEnum(
+  'enum_acct_approval_requests_entity_type',
+  ['invoice', 'bill', 'expense', 'journal', 'budget', 'asset_disposal', 'timesheet', 'payroll_run'],
+)
+export const enum_acct_approval_requests_status = pgEnum('enum_acct_approval_requests_status', [
+  'pending',
+  'approved',
+  'rejected',
+  'cancelled',
+])
+export const enum_acct_audit_logs_entity_type = pgEnum('enum_acct_audit_logs_entity_type', [
+  'customer',
+  'vendor',
+  'invoice',
+  'bill',
+  'payment_received',
+  'payment_made',
+  'expense',
+  'credit_note',
+  'vendor_credit',
+  'bank_transaction',
+  'bank_reconciliation',
+  'deposit',
+  'transfer',
+  'journal_entry',
+  'enrollment_billing_link',
+  'payment_allocation',
+  'receipt',
+  'refund',
+  'revenue_recognition_schedule',
+  'scholarship_award',
+  'corporate_billing_link',
+  'instructor_payout',
+  'branch',
+  'department',
+  'location',
+  'project',
+  'project_task',
+  'time_entry',
+  'timesheet',
+  'budget',
+  'forecast_scenario',
+  'fixed_asset',
+  'depreciation_entry',
+  'asset_disposal',
+  'payroll_run',
+  'payroll_entry',
+  'approval_workflow',
+  'approval_request',
+  'audit_log',
+])
+export const enum_acct_audit_logs_action_type = pgEnum('enum_acct_audit_logs_action_type', [
+  'created',
+  'updated',
+  'submitted',
+  'approved',
+  'posted',
+  'reversed',
+  'voided',
+  'exported',
 ])
 export const enum_courses_estimated_duration_unit = pgEnum('enum_courses_estimated_duration_unit', [
   'minutes',
@@ -84,7 +720,7 @@ export const enum_courses_estimated_duration_unit = pgEnum('enum_courses_estimat
   'weeks',
 ])
 export const enum_courses_difficulty_level = pgEnum('enum_courses_difficulty_level', [
-  'beginner',
+  'standard',
   'intermediate',
   'advanced',
 ])
@@ -98,12 +734,40 @@ export const enum_courses_evaluation_mode = pgEnum('enum_courses_evaluation_mode
   'quizzes_exam',
   'lessons_quizzes_exam',
 ])
-export const enum_courses_status = pgEnum('enum_courses_status', ['draft', 'published'])
+export const enum_courses_status = pgEnum('enum_courses_status', ['draft', 'published', 'archived'])
 export const enum_course_categories_category_type = pgEnum('enum_course_categories_category_type', [
   'course',
   'skill',
   'topic',
   'industry',
+])
+export const enum_coupon_codes_status = pgEnum('enum_coupon_codes_status', [
+  'draft',
+  'active',
+  'paused',
+  'expired',
+  'archived',
+])
+export const enum_coupon_codes_discount_type = pgEnum('enum_coupon_codes_discount_type', [
+  'percent',
+  'fixed_course',
+  'fixed_cart',
+])
+export const enum_coupon_codes_scope_type = pgEnum('enum_coupon_codes_scope_type', [
+  'all_courses',
+  'specific_courses',
+  'specific_categories',
+])
+export const enum_coupon_redemptions_context_type = pgEnum('enum_coupon_redemptions_context_type', [
+  'checkout_preview',
+  'checkout_commit',
+  'manual_adjustment',
+  'refund_reversal',
+])
+export const enum_coupon_redemptions_status = pgEnum('enum_coupon_redemptions_status', [
+  'applied',
+  'voided',
+  'reversed',
 ])
 export const enum_course_enrollments_enrollment_type = pgEnum(
   'enum_course_enrollments_enrollment_type',
@@ -139,6 +803,14 @@ export const enum_materials_material_source = pgEnum('enum_materials_material_so
   'media',
   'external',
 ])
+export const enum_feedback_forms_blocks_text_input_format = pgEnum(
+  'enum_feedback_forms_blocks_text_input_format',
+  ['text', 'email', 'phone', 'number', 'textarea'],
+)
+export const enum_feedback_forms_blocks_choice_input_ui_type = pgEnum(
+  'enum_feedback_forms_blocks_choice_input_ui_type',
+  ['radio', 'dropdown', 'checkbox_group'],
+)
 export const enum_course_item_progress_status = pgEnum('enum_course_item_progress_status', [
   'not_started',
   'in_progress',
@@ -174,6 +846,25 @@ export const enum_assessment_submissions_status = pgEnum('enum_assessment_submis
   'in_progress',
   'submitted',
   'graded',
+])
+export const enum_assignments_allowed_file_types = pgEnum('enum_assignments_allowed_file_types', [
+  'pdf',
+  'word',
+  'excel',
+  'powerpoint',
+  'images',
+  'zip',
+])
+export const enum_assignments_submission_type = pgEnum('enum_assignments_submission_type', [
+  'file_upload',
+  'text_entry',
+  'both',
+])
+export const enum_assignment_submissions_status = pgEnum('enum_assignment_submissions_status', [
+  'draft',
+  'submitted',
+  'graded',
+  'returned_for_revision',
 ])
 export const enum_submission_answers_question_type = pgEnum(
   'enum_submission_answers_question_type',
@@ -229,6 +920,10 @@ export const enum_user_notifications_channel = pgEnum('enum_user_notifications_c
   'email',
   'push',
 ])
+export const enum_web_push_subscriptions_permission_state = pgEnum(
+  'enum_web_push_subscriptions_permission_state',
+  ['default', 'granted', 'denied'],
+)
 export const enum_support_tickets_status = pgEnum('enum_support_tickets_status', [
   'open',
   'in_progress',
@@ -250,7 +945,12 @@ export const enum_support_tickets_category = pgEnum('enum_support_tickets_catego
   'general',
   'enrollment',
 ])
-export const enum_chats_type = pgEnum('enum_chats_type', ['direct', 'group', 'instructor_trainee', 'messenger'])
+export const enum_chats_type = pgEnum('enum_chats_type', [
+  'messenger',
+  'direct',
+  'group',
+  'instructor_trainee',
+])
 export const enum_chats_status = pgEnum('enum_chats_status', ['active', 'archived', 'deleted'])
 export const enum_chat_messages_content_type = pgEnum('enum_chat_messages_content_type', [
   'text',
@@ -262,6 +962,14 @@ export const enum_chat_message_status_status = pgEnum('enum_chat_message_status_
   'delivered',
   'read',
 ])
+export const enum_accounting_settings_opening_balance_source_type = pgEnum(
+  'enum_accounting_settings_opening_balance_source_type',
+  ['manual', 'opening_balance', 'adjustment', 'reversal', 'system'],
+)
+export const enum_accounting_settings_default_tax_behavior = pgEnum(
+  'enum_accounting_settings_default_tax_behavior',
+  ['exclusive', 'inclusive'],
+)
 export const enum_site_settings_social_links_platform = pgEnum(
   'enum_site_settings_social_links_platform',
   ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok'],
@@ -329,12 +1037,15 @@ export const users = pgTable(
     nationality: varchar('nationality'),
     birthDate: timestamp('birth_date', { mode: 'string', withTimezone: true, precision: 3 }),
     placeOfBirth: varchar('place_of_birth'),
+    phone: varchar('phone'),
     completeAddress: varchar('complete_address'),
     biography: jsonb('biography'),
     role: enum_users_role('role').notNull().default('trainee'),
     isActive: boolean('is_active').default(true),
+    pushNotificationsEnabled: boolean('push_notifications_enabled').default(true),
+    securityAlertsEmailEnabled: boolean('security_alerts_email_enabled').default(true),
     lastLogin: timestamp('last_login', { mode: 'string', withTimezone: true, precision: 3 }),
-    profilePicture: integer('profile_picture_id').references(() => media.id, {
+    profilePicture: integer('profile_picture_id').references((): AnyPgColumn => media.id, {
       onDelete: 'set null',
     }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -412,7 +1123,7 @@ export const trainees = pgTable(
       withTimezone: true,
       precision: 3,
     }),
-    currentLevel: enum_trainees_current_level('current_level').default('beginner'),
+    currentLevel: enum_trainees_current_level('current_level').default('standard'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -509,7 +1220,7 @@ export const emergency_contacts = pgTable(
       .notNull(),
   },
   (columns) => [
-    index('emergency_contacts_user_idx').on(columns.user),
+    uniqueIndex('emergency_contacts_user_idx').on(columns.user),
     index('emergency_contacts_updated_at_idx').on(columns.updatedAt),
     index('emergency_contacts_created_at_idx').on(columns.createdAt),
   ],
@@ -522,6 +1233,10 @@ export const media = pgTable(
     alt: varchar('alt'),
     cloudinaryPublicId: varchar('cloudinary_public_id'),
     cloudinaryURL: varchar('cloudinary_u_r_l'),
+    visibility: enum_media_visibility('visibility').default('shared'),
+    uploadedBy: integer('uploaded_by_id').references((): AnyPgColumn => users.id, {
+      onDelete: 'set null',
+    }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -539,6 +1254,7 @@ export const media = pgTable(
     focalY: numeric('focal_y', { mode: 'number' }),
   },
   (columns) => [
+    index('media_uploaded_by_idx').on(columns.uploadedBy),
     index('media_updated_at_idx').on(columns.updatedAt),
     index('media_created_at_idx').on(columns.createdAt),
     uniqueIndex('media_filename_idx').on(columns.filename),
@@ -765,6 +1481,3759 @@ export const post_categories = pgTable(
   ],
 )
 
+export const post_tags = pgTable(
+  'post_tags',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    slug: varchar('slug').notNull(),
+    description: varchar('description'),
+    colorCode: varchar('color_code'),
+    displayOrder: numeric('display_order', { mode: 'number' }).default(0),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('post_tags_slug_idx').on(columns.slug),
+    index('post_tags_updated_at_idx').on(columns.updatedAt),
+    index('post_tags_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const post_comments = pgTable(
+  'post_comments',
+  {
+    id: serial('id').primaryKey(),
+    post: integer('post_id')
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: 'set null',
+      }),
+    parent: integer('parent_id').references((): AnyPgColumn => post_comments.id, {
+      onDelete: 'set null',
+    }),
+    content: varchar('content').notNull(),
+    author: integer('author_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    authorName: varchar('author_name'),
+    authorEmail: varchar('author_email'),
+    status: enum_post_comments_status('status').notNull().default('pending'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('post_comments_post_idx').on(columns.post),
+    index('post_comments_parent_idx').on(columns.parent),
+    index('post_comments_author_idx').on(columns.author),
+    index('post_comments_updated_at_idx').on(columns.updatedAt),
+    index('post_comments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_chart_of_accounts = pgTable(
+  'accounting_chart_of_accounts',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name').notNull(),
+    accountType: enum_accounting_chart_of_accounts_account_type('account_type').notNull(),
+    accountSubType: enum_accounting_chart_of_accounts_account_sub_type('account_sub_type'),
+    normalBalance: enum_accounting_chart_of_accounts_normal_balance('normal_balance')
+      .notNull()
+      .default('debit'),
+    parentAccount: integer('parent_account_id').references(
+      (): AnyPgColumn => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    isActive: boolean('is_active').default(true),
+    allowManualEntries: boolean('allow_manual_entries').default(true),
+    isControlAccount: boolean('is_control_account').default(false),
+    isRetainedEarnings: boolean('is_retained_earnings').default(false),
+    isSuspenseAccount: boolean('is_suspense_account').default(false),
+    description: varchar('description'),
+    sortOrder: numeric('sort_order', { mode: 'number' }).default(0),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_chart_of_accounts_code_idx').on(columns.code),
+    index('accounting_chart_of_accounts_account_type_idx').on(columns.accountType),
+    index('accounting_chart_of_accounts_parent_account_idx').on(columns.parentAccount),
+    index('accounting_chart_of_accounts_is_active_idx').on(columns.isActive),
+    index('accounting_chart_of_accounts_created_by_idx').on(columns.createdBy),
+    index('accounting_chart_of_accounts_updated_by_idx').on(columns.updatedBy),
+    index('accounting_chart_of_accounts_updated_at_idx').on(columns.updatedAt),
+    index('accounting_chart_of_accounts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_fiscal_years = pgTable(
+  'accounting_fiscal_years',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name').notNull(),
+    startDate: timestamp('start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }).notNull(),
+    status: enum_accounting_fiscal_years_status('status').notNull().default('draft'),
+    closeMode: enum_accounting_fiscal_years_close_mode('close_mode').notNull().default('manual'),
+    lockedFromDate: timestamp('locked_from_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    closedAt: timestamp('closed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    closedBy: integer('closed_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_fiscal_years_code_idx').on(columns.code),
+    index('accounting_fiscal_years_status_idx').on(columns.status),
+    index('accounting_fiscal_years_closed_by_idx').on(columns.closedBy),
+    index('accounting_fiscal_years_created_by_idx').on(columns.createdBy),
+    index('accounting_fiscal_years_updated_by_idx').on(columns.updatedBy),
+    index('accounting_fiscal_years_updated_at_idx').on(columns.updatedAt),
+    index('accounting_fiscal_years_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_periods = pgTable(
+  'accounting_periods',
+  {
+    id: serial('id').primaryKey(),
+    fiscalYear: integer('fiscal_year_id')
+      .notNull()
+      .references(() => accounting_fiscal_years.id, {
+        onDelete: 'set null',
+      }),
+    periodNumber: numeric('period_number', { mode: 'number' }).notNull(),
+    label: varchar('label').notNull(),
+    startDate: timestamp('start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }).notNull(),
+    status: enum_accounting_periods_status('status').notNull().default('draft'),
+    lockedFromDate: timestamp('locked_from_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    closedAt: timestamp('closed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    closedBy: integer('closed_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_periods_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_periods_status_idx').on(columns.status),
+    index('accounting_periods_closed_by_idx').on(columns.closedBy),
+    index('accounting_periods_created_by_idx').on(columns.createdBy),
+    index('accounting_periods_updated_by_idx').on(columns.updatedBy),
+    index('accounting_periods_updated_at_idx').on(columns.updatedAt),
+    index('accounting_periods_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_tax_codes = pgTable(
+  'accounting_tax_codes',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name').notNull(),
+    scope: enum_accounting_tax_codes_scope('scope').notNull().default('both'),
+    rate: numeric('rate', { mode: 'number' }).notNull().default(0),
+    calculationMethod: enum_accounting_tax_codes_calculation_method('calculation_method')
+      .notNull()
+      .default('exclusive'),
+    purchaseAccount: integer('purchase_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    salesAccount: integer('sales_account_id').references(() => accounting_chart_of_accounts.id, {
+      onDelete: 'set null',
+    }),
+    isActive: boolean('is_active').default(true),
+    description: varchar('description'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_tax_codes_code_idx').on(columns.code),
+    index('accounting_tax_codes_purchase_account_idx').on(columns.purchaseAccount),
+    index('accounting_tax_codes_sales_account_idx').on(columns.salesAccount),
+    index('accounting_tax_codes_is_active_idx').on(columns.isActive),
+    index('accounting_tax_codes_created_by_idx').on(columns.createdBy),
+    index('accounting_tax_codes_updated_by_idx').on(columns.updatedBy),
+    index('accounting_tax_codes_updated_at_idx').on(columns.updatedAt),
+    index('accounting_tax_codes_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_journal_entries = pgTable(
+  'accounting_journal_entries',
+  {
+    id: serial('id').primaryKey(),
+    entryNumber: varchar('entry_number').notNull(),
+    entryDate: timestamp('entry_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    sourceType: enum_accounting_journal_entries_source_type('source_type')
+      .notNull()
+      .default('manual'),
+    sourceReference: varchar('source_reference'),
+    memo: varchar('memo'),
+    referenceNumber: varchar('reference_number'),
+    status: enum_accounting_journal_entries_status('status').notNull().default('draft'),
+    postingStatus: enum_accounting_journal_entries_posting_status('posting_status')
+      .notNull()
+      .default('unposted'),
+    totalDebit: numeric('total_debit', { mode: 'number' }).default(0),
+    totalCredit: numeric('total_credit', { mode: 'number' }).default(0),
+    isBalanced: boolean('is_balanced').default(false),
+    reversalOf: integer('reversal_of_id').references(
+      (): AnyPgColumn => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    reversalEntry: integer('reversal_entry_id').references(
+      (): AnyPgColumn => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    reversedByUser: integer('reversed_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    reversedAt: timestamp('reversed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    postedAt: timestamp('posted_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    postedBy: integer('posted_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    approvedBy: integer('approved_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_journal_entries_entry_number_idx').on(columns.entryNumber),
+    index('accounting_journal_entries_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_journal_entries_period_idx').on(columns.period),
+    index('accounting_journal_entries_status_idx').on(columns.status),
+    index('accounting_journal_entries_reversal_of_idx').on(columns.reversalOf),
+    index('accounting_journal_entries_reversal_entry_idx').on(columns.reversalEntry),
+    index('accounting_journal_entries_reversed_by_user_idx').on(columns.reversedByUser),
+    index('accounting_journal_entries_posted_by_idx').on(columns.postedBy),
+    index('accounting_journal_entries_approved_by_idx').on(columns.approvedBy),
+    index('accounting_journal_entries_created_by_idx').on(columns.createdBy),
+    index('accounting_journal_entries_updated_by_idx').on(columns.updatedBy),
+    index('accounting_journal_entries_updated_at_idx').on(columns.updatedAt),
+    index('accounting_journal_entries_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_journal_entry_lines = pgTable(
+  'accounting_journal_entry_lines',
+  {
+    id: serial('id').primaryKey(),
+    journalEntry: integer('journal_entry_id')
+      .notNull()
+      .references(() => accounting_journal_entries.id, {
+        onDelete: 'set null',
+      }),
+    lineNumber: numeric('line_number', { mode: 'number' }).notNull(),
+    account: integer('account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    description: varchar('description'),
+    debit: numeric('debit', { mode: 'number' }).default(0),
+    credit: numeric('credit', { mode: 'number' }).default(0),
+    taxCode: integer('tax_code_id').references(() => accounting_tax_codes.id, {
+      onDelete: 'set null',
+    }),
+    referenceEntityType: varchar('reference_entity_type'),
+    referenceEntityId: varchar('reference_entity_id'),
+    lineMeta: jsonb('line_meta'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_journal_entry_lines_journal_entry_idx').on(columns.journalEntry),
+    index('accounting_journal_entry_lines_account_idx').on(columns.account),
+    index('accounting_journal_entry_lines_tax_code_idx').on(columns.taxCode),
+    index('accounting_journal_entry_lines_created_by_idx').on(columns.createdBy),
+    index('accounting_journal_entry_lines_updated_by_idx').on(columns.updatedBy),
+    index('accounting_journal_entry_lines_updated_at_idx').on(columns.updatedAt),
+    index('accounting_journal_entry_lines_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_currencies = pgTable(
+  'acct_currencies',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name').notNull(),
+    symbol: varchar('symbol'),
+    isBaseCurrency: boolean('is_base_currency').default(false),
+    isActive: boolean('is_active').default(true),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_currencies_code_idx').on(columns.code),
+    index('acct_currencies_name_idx').on(columns.name),
+    index('acct_currencies_is_base_currency_idx').on(columns.isBaseCurrency),
+    index('acct_currencies_is_active_idx').on(columns.isActive),
+    index('acct_currencies_created_by_idx').on(columns.createdBy),
+    index('acct_currencies_updated_by_idx').on(columns.updatedBy),
+    index('acct_currencies_updated_at_idx').on(columns.updatedAt),
+    index('acct_currencies_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_payment_terms = pgTable(
+  'acct_payment_terms',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name').notNull(),
+    dueInDays: numeric('due_in_days', { mode: 'number' }).default(0),
+    description: varchar('description'),
+    isActive: boolean('is_active').default(true),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_payment_terms_code_idx').on(columns.code),
+    index('acct_payment_terms_name_idx').on(columns.name),
+    index('acct_payment_terms_is_active_idx').on(columns.isActive),
+    index('acct_payment_terms_created_by_idx').on(columns.createdBy),
+    index('acct_payment_terms_updated_by_idx').on(columns.updatedBy),
+    index('acct_payment_terms_updated_at_idx').on(columns.updatedAt),
+    index('acct_payment_terms_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_customers = pgTable(
+  'accounting_customers',
+  {
+    id: serial('id').primaryKey(),
+    customerCode: varchar('customer_code').notNull(),
+    displayName: varchar('display_name').notNull(),
+    legalName: varchar('legal_name'),
+    customerType: enum_accounting_customers_customer_type('customer_type')
+      .notNull()
+      .default('individual'),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    billingAddress: varchar('billing_address'),
+    shippingAddress: varchar('shipping_address'),
+    taxId: varchar('tax_id'),
+    taxProfile: jsonb('tax_profile'),
+    currencyReference: integer('currency_reference_id')
+      .notNull()
+      .references(() => acct_currencies.id, {
+        onDelete: 'set null',
+      }),
+    paymentTermReference: integer('payment_term_reference_id')
+      .notNull()
+      .references(() => acct_payment_terms.id, {
+        onDelete: 'set null',
+      }),
+    creditLimit: numeric('credit_limit', { mode: 'number' }).default(0),
+    status: enum_accounting_customers_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_customers_customer_code_idx').on(columns.customerCode),
+    index('accounting_customers_display_name_idx').on(columns.displayName),
+    index('accounting_customers_currency_reference_idx').on(columns.currencyReference),
+    index('accounting_customers_payment_term_reference_idx').on(columns.paymentTermReference),
+    index('accounting_customers_status_idx').on(columns.status),
+    index('accounting_customers_created_by_idx').on(columns.createdBy),
+    index('accounting_customers_updated_by_idx').on(columns.updatedBy),
+    index('accounting_customers_updated_at_idx').on(columns.updatedAt),
+    index('accounting_customers_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_vendors = pgTable(
+  'accounting_vendors',
+  {
+    id: serial('id').primaryKey(),
+    vendorCode: varchar('vendor_code').notNull(),
+    displayName: varchar('display_name').notNull(),
+    legalName: varchar('legal_name'),
+    vendorType: enum_accounting_vendors_vendor_type('vendor_type').notNull().default('supplier'),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    billingAddress: varchar('billing_address'),
+    taxId: varchar('tax_id'),
+    taxProfile: jsonb('tax_profile'),
+    currencyReference: integer('currency_reference_id')
+      .notNull()
+      .references(() => acct_currencies.id, {
+        onDelete: 'set null',
+      }),
+    paymentTermReference: integer('payment_term_reference_id')
+      .notNull()
+      .references(() => acct_payment_terms.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_accounting_vendors_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_vendors_vendor_code_idx').on(columns.vendorCode),
+    index('accounting_vendors_display_name_idx').on(columns.displayName),
+    index('accounting_vendors_currency_reference_idx').on(columns.currencyReference),
+    index('accounting_vendors_payment_term_reference_idx').on(columns.paymentTermReference),
+    index('accounting_vendors_status_idx').on(columns.status),
+    index('accounting_vendors_created_by_idx').on(columns.createdBy),
+    index('accounting_vendors_updated_by_idx').on(columns.updatedBy),
+    index('accounting_vendors_updated_at_idx').on(columns.updatedAt),
+    index('accounting_vendors_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bank_accounts = pgTable(
+  'accounting_bank_accounts',
+  {
+    id: serial('id').primaryKey(),
+    accountName: varchar('account_name').notNull(),
+    accountNumberMasked: varchar('account_number_masked'),
+    bankName: varchar('bank_name'),
+    branchName: varchar('branch_name'),
+    accountType: enum_accounting_bank_accounts_account_type('account_type')
+      .notNull()
+      .default('bank'),
+    currencyReference: integer('currency_reference_id')
+      .notNull()
+      .references(() => acct_currencies.id, {
+        onDelete: 'set null',
+      }),
+    ledgerAccount: integer('ledger_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    isDefaultReceiptAccount: boolean('is_default_receipt_account').default(false),
+    isDefaultDisbursementAccount: boolean('is_default_disbursement_account').default(false),
+    isActive: boolean('is_active').default(true),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bank_accounts_account_type_idx').on(columns.accountType),
+    index('accounting_bank_accounts_currency_reference_idx').on(columns.currencyReference),
+    index('accounting_bank_accounts_ledger_account_idx').on(columns.ledgerAccount),
+    index('accounting_bank_accounts_is_active_idx').on(columns.isActive),
+    index('accounting_bank_accounts_created_by_idx').on(columns.createdBy),
+    index('accounting_bank_accounts_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bank_accounts_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bank_accounts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_invoices = pgTable(
+  'accounting_invoices',
+  {
+    id: serial('id').primaryKey(),
+    invoiceNumber: varchar('invoice_number').notNull(),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    project: integer('project_id').references(() => acct_projects.id, {
+      onDelete: 'set null',
+    }),
+    invoiceDate: timestamp('invoice_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    dueDate: timestamp('due_date', { mode: 'string', withTimezone: true, precision: 3 }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_accounting_invoices_status('status').notNull().default('draft'),
+    postingStatus: enum_accounting_invoices_posting_status('posting_status')
+      .notNull()
+      .default('unposted'),
+    currency: varchar('currency').notNull().default('PHP'),
+    exchangeRate: numeric('exchange_rate', { mode: 'number' }).notNull().default(1),
+    subtotal: numeric('subtotal', { mode: 'number' }).default(0),
+    taxTotal: numeric('tax_total', { mode: 'number' }).default(0),
+    discountTotal: numeric('discount_total', { mode: 'number' }).default(0),
+    total: numeric('total', { mode: 'number' }).default(0),
+    balanceDue: numeric('balance_due', { mode: 'number' }).default(0),
+    referenceNumber: varchar('reference_number'),
+    memo: varchar('memo'),
+    sourceType: varchar('source_type').default('commercial_invoice'),
+    sourceReference: varchar('source_reference'),
+    receivableAccountOverride: integer('receivable_account_override_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    voidedAt: timestamp('voided_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    voidedBy: integer('voided_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_invoices_invoice_number_idx').on(columns.invoiceNumber),
+    index('accounting_invoices_customer_idx').on(columns.customer),
+    index('accounting_invoices_project_idx').on(columns.project),
+    index('accounting_invoices_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_invoices_period_idx').on(columns.period),
+    index('accounting_invoices_status_idx').on(columns.status),
+    index('accounting_invoices_receivable_account_override_idx').on(
+      columns.receivableAccountOverride,
+    ),
+    index('accounting_invoices_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_invoices_voided_by_idx').on(columns.voidedBy),
+    index('accounting_invoices_created_by_idx').on(columns.createdBy),
+    index('accounting_invoices_updated_by_idx').on(columns.updatedBy),
+    index('accounting_invoices_updated_at_idx').on(columns.updatedAt),
+    index('accounting_invoices_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_invoice_line_items = pgTable(
+  'accounting_invoice_line_items',
+  {
+    id: serial('id').primaryKey(),
+    invoice: integer('invoice_id')
+      .notNull()
+      .references(() => accounting_invoices.id, {
+        onDelete: 'set null',
+      }),
+    lineNumber: numeric('line_number', { mode: 'number' }).notNull(),
+    description: varchar('description').notNull(),
+    itemType: enum_accounting_invoice_line_items_item_type('item_type')
+      .notNull()
+      .default('service'),
+    quantity: numeric('quantity', { mode: 'number' }).notNull().default(1),
+    unitPrice: numeric('unit_price', { mode: 'number' }).notNull().default(0),
+    discountAmount: numeric('discount_amount', { mode: 'number' }).default(0),
+    taxCode: integer('tax_code_id').references(() => accounting_tax_codes.id, {
+      onDelete: 'set null',
+    }),
+    lineSubtotal: numeric('line_subtotal', { mode: 'number' }).default(0),
+    lineTax: numeric('line_tax', { mode: 'number' }).default(0),
+    lineTotal: numeric('line_total', { mode: 'number' }).default(0),
+    incomeAccount: integer('income_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    receivableAccountOverride: integer('receivable_account_override_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    referenceEntityType: varchar('reference_entity_type'),
+    referenceEntityId: varchar('reference_entity_id'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_invoice_line_items_invoice_idx').on(columns.invoice),
+    index('accounting_invoice_line_items_tax_code_idx').on(columns.taxCode),
+    index('accounting_invoice_line_items_income_account_idx').on(columns.incomeAccount),
+    index('accounting_invoice_line_items_receivable_account_overrid_idx').on(
+      columns.receivableAccountOverride,
+    ),
+    index('accounting_invoice_line_items_created_by_idx').on(columns.createdBy),
+    index('accounting_invoice_line_items_updated_by_idx').on(columns.updatedBy),
+    index('accounting_invoice_line_items_updated_at_idx').on(columns.updatedAt),
+    index('accounting_invoice_line_items_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bills = pgTable(
+  'accounting_bills',
+  {
+    id: serial('id').primaryKey(),
+    billNumber: varchar('bill_number').notNull(),
+    vendor: integer('vendor_id')
+      .notNull()
+      .references(() => accounting_vendors.id, {
+        onDelete: 'set null',
+      }),
+    billDate: timestamp('bill_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    dueDate: timestamp('due_date', { mode: 'string', withTimezone: true, precision: 3 }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_accounting_bills_status('status').notNull().default('draft'),
+    postingStatus: enum_accounting_bills_posting_status('posting_status')
+      .notNull()
+      .default('unposted'),
+    currency: varchar('currency').notNull().default('PHP'),
+    exchangeRate: numeric('exchange_rate', { mode: 'number' }).notNull().default(1),
+    subtotal: numeric('subtotal', { mode: 'number' }).default(0),
+    taxTotal: numeric('tax_total', { mode: 'number' }).default(0),
+    total: numeric('total', { mode: 'number' }).default(0),
+    balanceDue: numeric('balance_due', { mode: 'number' }).default(0),
+    referenceNumber: varchar('reference_number'),
+    memo: varchar('memo'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    payableAccountOverride: integer('payable_account_override_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_bills_bill_number_idx').on(columns.billNumber),
+    index('accounting_bills_vendor_idx').on(columns.vendor),
+    index('accounting_bills_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_bills_period_idx').on(columns.period),
+    index('accounting_bills_status_idx').on(columns.status),
+    index('accounting_bills_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_bills_payable_account_override_idx').on(columns.payableAccountOverride),
+    index('accounting_bills_created_by_idx').on(columns.createdBy),
+    index('accounting_bills_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bills_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bills_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bill_line_items = pgTable(
+  'accounting_bill_line_items',
+  {
+    id: serial('id').primaryKey(),
+    bill: integer('bill_id')
+      .notNull()
+      .references(() => accounting_bills.id, {
+        onDelete: 'set null',
+      }),
+    lineNumber: numeric('line_number', { mode: 'number' }).notNull(),
+    description: varchar('description').notNull(),
+    quantity: numeric('quantity', { mode: 'number' }).notNull().default(1),
+    unitPrice: numeric('unit_price', { mode: 'number' }).notNull().default(0),
+    taxCode: integer('tax_code_id').references(() => accounting_tax_codes.id, {
+      onDelete: 'set null',
+    }),
+    lineSubtotal: numeric('line_subtotal', { mode: 'number' }).default(0),
+    lineTax: numeric('line_tax', { mode: 'number' }).default(0),
+    lineTotal: numeric('line_total', { mode: 'number' }).default(0),
+    expenseAccount: integer('expense_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    assetAccount: integer('asset_account_id').references(() => accounting_chart_of_accounts.id, {
+      onDelete: 'set null',
+    }),
+    payableAccountOverride: integer('payable_account_override_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    referenceEntityType: varchar('reference_entity_type'),
+    referenceEntityId: varchar('reference_entity_id'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bill_line_items_bill_idx').on(columns.bill),
+    index('accounting_bill_line_items_tax_code_idx').on(columns.taxCode),
+    index('accounting_bill_line_items_expense_account_idx').on(columns.expenseAccount),
+    index('accounting_bill_line_items_asset_account_idx').on(columns.assetAccount),
+    index('accounting_bill_line_items_payable_account_override_idx').on(
+      columns.payableAccountOverride,
+    ),
+    index('accounting_bill_line_items_created_by_idx').on(columns.createdBy),
+    index('accounting_bill_line_items_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bill_line_items_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bill_line_items_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_credit_notes_applications = pgTable(
+  'accounting_credit_notes_applications',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    invoice: integer('invoice_id')
+      .notNull()
+      .references(() => accounting_invoices.id, {
+        onDelete: 'set null',
+      }),
+    amountApplied: numeric('amount_applied', { mode: 'number' }).notNull(),
+  },
+  (columns) => [
+    index('accounting_credit_notes_applications_order_idx').on(columns._order),
+    index('accounting_credit_notes_applications_parent_id_idx').on(columns._parentID),
+    index('accounting_credit_notes_applications_invoice_idx').on(columns.invoice),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [accounting_credit_notes.id],
+      name: 'accounting_credit_notes_applications_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const accounting_credit_notes = pgTable(
+  'accounting_credit_notes',
+  {
+    id: serial('id').primaryKey(),
+    creditNoteNumber: varchar('credit_note_number').notNull(),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    creditDate: timestamp('credit_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_accounting_credit_notes_status('status').notNull().default('draft'),
+    currency: varchar('currency').notNull().default('PHP'),
+    subtotal: numeric('subtotal', { mode: 'number' }).notNull().default(0),
+    taxTotal: numeric('tax_total', { mode: 'number' }).default(0),
+    total: numeric('total', { mode: 'number' }).notNull().default(0),
+    appliedAmount: numeric('applied_amount', { mode: 'number' }).default(0),
+    remainingAmount: numeric('remaining_amount', { mode: 'number' }).default(0),
+    sourceInvoice: integer('source_invoice_id').references(() => accounting_invoices.id, {
+      onDelete: 'set null',
+    }),
+    adjustmentAccount: integer('adjustment_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    reason: varchar('reason'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_credit_notes_credit_note_number_idx').on(columns.creditNoteNumber),
+    index('accounting_credit_notes_customer_idx').on(columns.customer),
+    index('accounting_credit_notes_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_credit_notes_period_idx').on(columns.period),
+    index('accounting_credit_notes_status_idx').on(columns.status),
+    index('accounting_credit_notes_source_invoice_idx').on(columns.sourceInvoice),
+    index('accounting_credit_notes_adjustment_account_idx').on(columns.adjustmentAccount),
+    index('accounting_credit_notes_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_credit_notes_created_by_idx').on(columns.createdBy),
+    index('accounting_credit_notes_updated_by_idx').on(columns.updatedBy),
+    index('accounting_credit_notes_updated_at_idx').on(columns.updatedAt),
+    index('accounting_credit_notes_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_vendor_credits_applications = pgTable(
+  'accounting_vendor_credits_applications',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    bill: integer('bill_id')
+      .notNull()
+      .references(() => accounting_bills.id, {
+        onDelete: 'set null',
+      }),
+    amountApplied: numeric('amount_applied', { mode: 'number' }).notNull(),
+  },
+  (columns) => [
+    index('accounting_vendor_credits_applications_order_idx').on(columns._order),
+    index('accounting_vendor_credits_applications_parent_id_idx').on(columns._parentID),
+    index('accounting_vendor_credits_applications_bill_idx').on(columns.bill),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [accounting_vendor_credits.id],
+      name: 'accounting_vendor_credits_applications_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const accounting_vendor_credits = pgTable(
+  'accounting_vendor_credits',
+  {
+    id: serial('id').primaryKey(),
+    vendorCreditNumber: varchar('vendor_credit_number').notNull(),
+    vendor: integer('vendor_id')
+      .notNull()
+      .references(() => accounting_vendors.id, {
+        onDelete: 'set null',
+      }),
+    creditDate: timestamp('credit_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_accounting_vendor_credits_status('status').notNull().default('draft'),
+    currency: varchar('currency').notNull().default('PHP'),
+    subtotal: numeric('subtotal', { mode: 'number' }).notNull().default(0),
+    taxTotal: numeric('tax_total', { mode: 'number' }).default(0),
+    total: numeric('total', { mode: 'number' }).notNull().default(0),
+    appliedAmount: numeric('applied_amount', { mode: 'number' }).default(0),
+    remainingAmount: numeric('remaining_amount', { mode: 'number' }).default(0),
+    sourceBill: integer('source_bill_id').references(() => accounting_bills.id, {
+      onDelete: 'set null',
+    }),
+    adjustmentAccount: integer('adjustment_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    reason: varchar('reason'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_vendor_credits_vendor_credit_number_idx').on(
+      columns.vendorCreditNumber,
+    ),
+    index('accounting_vendor_credits_vendor_idx').on(columns.vendor),
+    index('accounting_vendor_credits_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_vendor_credits_period_idx').on(columns.period),
+    index('accounting_vendor_credits_status_idx').on(columns.status),
+    index('accounting_vendor_credits_source_bill_idx').on(columns.sourceBill),
+    index('accounting_vendor_credits_adjustment_account_idx').on(columns.adjustmentAccount),
+    index('accounting_vendor_credits_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_vendor_credits_created_by_idx').on(columns.createdBy),
+    index('accounting_vendor_credits_updated_by_idx').on(columns.updatedBy),
+    index('accounting_vendor_credits_updated_at_idx').on(columns.updatedAt),
+    index('accounting_vendor_credits_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_payments_received_applications = pgTable(
+  'accounting_payments_received_applications',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    invoice: integer('invoice_id')
+      .notNull()
+      .references(() => accounting_invoices.id, {
+        onDelete: 'set null',
+      }),
+    amountApplied: numeric('amount_applied', { mode: 'number' }).notNull(),
+  },
+  (columns) => [
+    index('accounting_payments_received_applications_order_idx').on(columns._order),
+    index('accounting_payments_received_applications_parent_id_idx').on(columns._parentID),
+    index('accounting_payments_received_applications_invoice_idx').on(columns.invoice),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [accounting_payments_received.id],
+      name: 'accounting_payments_received_applications_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const accounting_payments_received = pgTable(
+  'accounting_payments_received',
+  {
+    id: serial('id').primaryKey(),
+    receiptNumber: varchar('receipt_number').notNull(),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    paymentDate: timestamp('payment_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    paymentMethod: enum_accounting_payments_received_payment_method('payment_method')
+      .notNull()
+      .default('bank_transfer'),
+    depositAccount: integer('deposit_account_id').references(() => accounting_bank_accounts.id, {
+      onDelete: 'set null',
+    }),
+    undepositedFundsAccount: integer('undeposited_funds_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    amountReceived: numeric('amount_received', { mode: 'number' }).notNull(),
+    currency: varchar('currency').notNull().default('PHP'),
+    exchangeRate: numeric('exchange_rate', { mode: 'number' }).notNull().default(1),
+    status: enum_accounting_payments_received_status('status').notNull().default('draft'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    referenceNumber: varchar('reference_number'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_payments_received_receipt_number_idx').on(columns.receiptNumber),
+    index('accounting_payments_received_customer_idx').on(columns.customer),
+    index('accounting_payments_received_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_payments_received_period_idx').on(columns.period),
+    index('accounting_payments_received_deposit_account_idx').on(columns.depositAccount),
+    index('accounting_payments_received_undeposited_funds_account_idx').on(
+      columns.undepositedFundsAccount,
+    ),
+    index('accounting_payments_received_status_idx').on(columns.status),
+    index('accounting_payments_received_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_payments_received_created_by_idx').on(columns.createdBy),
+    index('accounting_payments_received_updated_by_idx').on(columns.updatedBy),
+    index('accounting_payments_received_updated_at_idx').on(columns.updatedAt),
+    index('accounting_payments_received_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_payments_made_applications = pgTable(
+  'accounting_payments_made_applications',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    bill: integer('bill_id')
+      .notNull()
+      .references(() => accounting_bills.id, {
+        onDelete: 'set null',
+      }),
+    amountApplied: numeric('amount_applied', { mode: 'number' }).notNull(),
+  },
+  (columns) => [
+    index('accounting_payments_made_applications_order_idx').on(columns._order),
+    index('accounting_payments_made_applications_parent_id_idx').on(columns._parentID),
+    index('accounting_payments_made_applications_bill_idx').on(columns.bill),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [accounting_payments_made.id],
+      name: 'accounting_payments_made_applications_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const accounting_payments_made = pgTable(
+  'accounting_payments_made',
+  {
+    id: serial('id').primaryKey(),
+    paymentNumber: varchar('payment_number').notNull(),
+    vendor: integer('vendor_id')
+      .notNull()
+      .references(() => accounting_vendors.id, {
+        onDelete: 'set null',
+      }),
+    paymentDate: timestamp('payment_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    paymentMethod: enum_accounting_payments_made_payment_method('payment_method')
+      .notNull()
+      .default('bank_transfer'),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    amountPaid: numeric('amount_paid', { mode: 'number' }).notNull(),
+    currency: varchar('currency').notNull().default('PHP'),
+    exchangeRate: numeric('exchange_rate', { mode: 'number' }).notNull().default(1),
+    status: enum_accounting_payments_made_status('status').notNull().default('draft'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    referenceNumber: varchar('reference_number'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_payments_made_payment_number_idx').on(columns.paymentNumber),
+    index('accounting_payments_made_vendor_idx').on(columns.vendor),
+    index('accounting_payments_made_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_payments_made_period_idx').on(columns.period),
+    index('accounting_payments_made_bank_account_idx').on(columns.bankAccount),
+    index('accounting_payments_made_status_idx').on(columns.status),
+    index('accounting_payments_made_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_payments_made_created_by_idx').on(columns.createdBy),
+    index('accounting_payments_made_updated_by_idx').on(columns.updatedBy),
+    index('accounting_payments_made_updated_at_idx').on(columns.updatedAt),
+    index('accounting_payments_made_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_expenses = pgTable(
+  'accounting_expenses',
+  {
+    id: serial('id').primaryKey(),
+    expenseNumber: varchar('expense_number').notNull(),
+    expenseDate: timestamp('expense_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    postingDate: timestamp('posting_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fiscalYear: integer('fiscal_year_id').references(() => accounting_fiscal_years.id, {
+      onDelete: 'set null',
+    }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    vendor: integer('vendor_id').references(() => accounting_vendors.id, {
+      onDelete: 'set null',
+    }),
+    expenseCategory: varchar('expense_category'),
+    paymentMethod: enum_accounting_expenses_payment_method('payment_method')
+      .notNull()
+      .default('bank'),
+    status: enum_accounting_expenses_status('status').notNull().default('draft'),
+    currency: varchar('currency').notNull().default('PHP'),
+    subtotal: numeric('subtotal', { mode: 'number' }).notNull().default(0),
+    taxTotal: numeric('tax_total', { mode: 'number' }).default(0),
+    total: numeric('total', { mode: 'number' }).default(0),
+    project: integer('project_id').references(() => acct_projects.id, {
+      onDelete: 'set null',
+    }),
+    expenseAccount: integer('expense_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    taxCode: integer('tax_code_id').references(() => accounting_tax_codes.id, {
+      onDelete: 'set null',
+    }),
+    paymentAccount: integer('payment_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    bankAccount: integer('bank_account_id').references(() => accounting_bank_accounts.id, {
+      onDelete: 'set null',
+    }),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_expenses_expense_number_idx').on(columns.expenseNumber),
+    index('accounting_expenses_fiscal_year_idx').on(columns.fiscalYear),
+    index('accounting_expenses_period_idx').on(columns.period),
+    index('accounting_expenses_vendor_idx').on(columns.vendor),
+    index('accounting_expenses_status_idx').on(columns.status),
+    index('accounting_expenses_project_idx').on(columns.project),
+    index('accounting_expenses_expense_account_idx').on(columns.expenseAccount),
+    index('accounting_expenses_tax_code_idx').on(columns.taxCode),
+    index('accounting_expenses_payment_account_idx').on(columns.paymentAccount),
+    index('accounting_expenses_bank_account_idx').on(columns.bankAccount),
+    index('accounting_expenses_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_expenses_created_by_idx').on(columns.createdBy),
+    index('accounting_expenses_updated_by_idx').on(columns.updatedBy),
+    index('accounting_expenses_updated_at_idx').on(columns.updatedAt),
+    index('accounting_expenses_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_deposits = pgTable(
+  'accounting_deposits',
+  {
+    id: serial('id').primaryKey(),
+    depositNumber: varchar('deposit_number').notNull(),
+    depositDate: timestamp('deposit_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    sourceAccount: integer('source_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    status: enum_accounting_deposits_status('status').notNull().default('draft'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_deposits_deposit_number_idx').on(columns.depositNumber),
+    index('accounting_deposits_bank_account_idx').on(columns.bankAccount),
+    index('accounting_deposits_source_account_idx').on(columns.sourceAccount),
+    index('accounting_deposits_status_idx').on(columns.status),
+    index('accounting_deposits_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_deposits_created_by_idx').on(columns.createdBy),
+    index('accounting_deposits_updated_by_idx').on(columns.updatedBy),
+    index('accounting_deposits_updated_at_idx').on(columns.updatedAt),
+    index('accounting_deposits_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_transfers = pgTable(
+  'accounting_transfers',
+  {
+    id: serial('id').primaryKey(),
+    transferNumber: varchar('transfer_number').notNull(),
+    transferDate: timestamp('transfer_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    fromBankAccount: integer('from_bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    toBankAccount: integer('to_bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    status: enum_accounting_transfers_status('status').notNull().default('draft'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('accounting_transfers_transfer_number_idx').on(columns.transferNumber),
+    index('accounting_transfers_from_bank_account_idx').on(columns.fromBankAccount),
+    index('accounting_transfers_to_bank_account_idx').on(columns.toBankAccount),
+    index('accounting_transfers_status_idx').on(columns.status),
+    index('accounting_transfers_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('accounting_transfers_created_by_idx').on(columns.createdBy),
+    index('accounting_transfers_updated_by_idx').on(columns.updatedBy),
+    index('accounting_transfers_updated_at_idx').on(columns.updatedAt),
+    index('accounting_transfers_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bounced_payments = pgTable(
+  'accounting_bounced_payments',
+  {
+    id: serial('id').primaryKey(),
+    caseNumber: varchar('case_number').notNull(),
+    originalPayment: integer('original_payment_id')
+      .notNull()
+      .references(() => accounting_payments_received.id, {
+        onDelete: 'set null',
+      }),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    originalReceiptNumber: varchar('original_receipt_number').notNull(),
+    originalPaymentDate: timestamp('original_payment_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    originalPaymentAmount: numeric('original_payment_amount', { mode: 'number' }).default(0),
+    originalDepositAccount: integer('original_deposit_account_id').references(
+      () => accounting_bank_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    originalJournalEntry: integer('original_journal_entry_id')
+      .notNull()
+      .references(() => accounting_journal_entries.id, {
+        onDelete: 'set null',
+      }),
+    bounceDate: timestamp('bounce_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    bankNoticeDate: timestamp('bank_notice_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    bounceReason: enum_accounting_bounced_payments_bounce_reason('bounce_reason')
+      .notNull()
+      .default('insufficient_funds'),
+    caseStatus: enum_accounting_bounced_payments_case_status('case_status')
+      .notNull()
+      .default('open'),
+    bankChargeAmount: numeric('bank_charge_amount', { mode: 'number' }).default(0),
+    chargeExpenseAccount: integer('charge_expense_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    reversalJournalEntry: integer('reversal_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    chargeJournalEntry: integer('charge_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    recoveryPayment: integer('recovery_payment_id').references(
+      () => accounting_payments_received.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    recoveryDate: timestamp('recovery_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    followUpDate: timestamp('follow_up_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    resolutionDate: timestamp('resolution_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    notes: varchar('notes'),
+    resolutionNotes: varchar('resolution_notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bounced_payments_case_number_idx').on(columns.caseNumber),
+    index('accounting_bounced_payments_original_payment_idx').on(columns.originalPayment),
+    index('accounting_bounced_payments_customer_idx').on(columns.customer),
+    index('accounting_bounced_payments_original_receipt_number_idx').on(
+      columns.originalReceiptNumber,
+    ),
+    index('accounting_bounced_payments_original_deposit_account_idx').on(
+      columns.originalDepositAccount,
+    ),
+    index('accounting_bounced_payments_original_journal_entry_idx').on(
+      columns.originalJournalEntry,
+    ),
+    index('accounting_bounced_payments_bounce_date_idx').on(columns.bounceDate),
+    index('accounting_bounced_payments_bounce_reason_idx').on(columns.bounceReason),
+    index('accounting_bounced_payments_case_status_idx').on(columns.caseStatus),
+    index('accounting_bounced_payments_charge_expense_account_idx').on(
+      columns.chargeExpenseAccount,
+    ),
+    index('accounting_bounced_payments_reversal_journal_entry_idx').on(
+      columns.reversalJournalEntry,
+    ),
+    index('accounting_bounced_payments_charge_journal_entry_idx').on(columns.chargeJournalEntry),
+    index('accounting_bounced_payments_recovery_payment_idx').on(columns.recoveryPayment),
+    index('accounting_bounced_payments_created_by_idx').on(columns.createdBy),
+    index('accounting_bounced_payments_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bounced_payments_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bounced_payments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bank_feeds = pgTable(
+  'accounting_bank_feeds',
+  {
+    id: serial('id').primaryKey(),
+    feedReference: varchar('feed_reference').notNull(),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    connectorType: enum_accounting_bank_feeds_connector_type('connector_type')
+      .notNull()
+      .default('direct_api'),
+    connectorName: varchar('connector_name').notNull(),
+    providerReference: varchar('provider_reference'),
+    externalAccountId: varchar('external_account_id'),
+    connectionStatus: enum_accounting_bank_feeds_connection_status('connection_status')
+      .notNull()
+      .default('connected'),
+    healthStatus: enum_accounting_bank_feeds_health_status('health_status')
+      .notNull()
+      .default('healthy'),
+    syncFrequency: enum_accounting_bank_feeds_sync_frequency('sync_frequency')
+      .notNull()
+      .default('hourly'),
+    lastSyncAt: timestamp('last_sync_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    lastSuccessfulSyncAt: timestamp('last_successful_sync_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastAttemptedSyncAt: timestamp('last_attempted_sync_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    nextScheduledSyncAt: timestamp('next_scheduled_sync_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastImportedRowCount: numeric('last_imported_row_count', { mode: 'number' }).default(0),
+    lastImportedTransactionCount: numeric('last_imported_transaction_count', {
+      mode: 'number',
+    }).default(0),
+    feedRuleSetName: varchar('feed_rule_set_name'),
+    feedRuleCount: numeric('feed_rule_count', { mode: 'number' }).default(0),
+    autoPostRuleCount: numeric('auto_post_rule_count', { mode: 'number' }).default(0),
+    manualReviewRuleCount: numeric('manual_review_rule_count', { mode: 'number' }).default(0),
+    lastRuleChangeAt: timestamp('last_rule_change_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    syncDelayMinutes: numeric('sync_delay_minutes', { mode: 'number' }).default(0),
+    averageSyncLatencySeconds: numeric('average_sync_latency_seconds', { mode: 'number' }).default(
+      0,
+    ),
+    tokenExpiresAt: timestamp('token_expires_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    needsReconnection: boolean('needs_reconnection').default(false),
+    disconnectReason: varchar('disconnect_reason'),
+    lastErrorSummary: varchar('last_error_summary'),
+    notes: varchar('notes'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bank_feeds_feed_reference_idx').on(columns.feedReference),
+    index('accounting_bank_feeds_bank_account_idx').on(columns.bankAccount),
+    index('accounting_bank_feeds_connector_type_idx').on(columns.connectorType),
+    index('accounting_bank_feeds_connection_status_idx').on(columns.connectionStatus),
+    index('accounting_bank_feeds_health_status_idx').on(columns.healthStatus),
+    index('accounting_bank_feeds_sync_frequency_idx').on(columns.syncFrequency),
+    index('accounting_bank_feeds_last_sync_at_idx').on(columns.lastSyncAt),
+    index('accounting_bank_feeds_needs_reconnection_idx').on(columns.needsReconnection),
+    index('accounting_bank_feeds_created_by_idx').on(columns.createdBy),
+    index('accounting_bank_feeds_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bank_feeds_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bank_feeds_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bank_statement_imports = pgTable(
+  'accounting_bank_statement_imports',
+  {
+    id: serial('id').primaryKey(),
+    importBatchNumber: varchar('import_batch_number').notNull(),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    statementFile: integer('statement_file_id')
+      .notNull()
+      .references(() => media.id, {
+        onDelete: 'set null',
+      }),
+    statementDateFrom: timestamp('statement_date_from', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    statementDateTo: timestamp('statement_date_to', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    sourceFormat: enum_accounting_bank_statement_imports_source_format('source_format')
+      .notNull()
+      .default('csv'),
+    importStatus: enum_accounting_bank_statement_imports_import_status('import_status')
+      .notNull()
+      .default('queued'),
+    totalLines: numeric('total_lines', { mode: 'number' }).default(0),
+    importedLines: numeric('imported_lines', { mode: 'number' }).default(0),
+    failedLines: numeric('failed_lines', { mode: 'number' }).default(0),
+    duplicateLines: numeric('duplicate_lines', { mode: 'number' }).default(0),
+    importedTransactionCount: numeric('imported_transaction_count', { mode: 'number' }).default(0),
+    uploadedBy: integer('uploaded_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    importedBy: integer('imported_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    importedAt: timestamp('imported_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    parseErrorSummary: varchar('parse_error_summary'),
+    notes: varchar('notes'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bank_statement_imports_import_batch_number_idx').on(
+      columns.importBatchNumber,
+    ),
+    index('accounting_bank_statement_imports_bank_account_idx').on(columns.bankAccount),
+    index('accounting_bank_statement_imports_statement_file_idx').on(columns.statementFile),
+    index('accounting_bank_statement_imports_source_format_idx').on(columns.sourceFormat),
+    index('accounting_bank_statement_imports_import_status_idx').on(columns.importStatus),
+    index('accounting_bank_statement_imports_uploaded_by_idx').on(columns.uploadedBy),
+    index('accounting_bank_statement_imports_imported_by_idx').on(columns.importedBy),
+    index('accounting_bank_statement_imports_created_by_idx').on(columns.createdBy),
+    index('accounting_bank_statement_imports_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bank_statement_imports_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bank_statement_imports_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bank_transactions = pgTable(
+  'accounting_bank_transactions',
+  {
+    id: serial('id').primaryKey(),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    transactionDate: timestamp('transaction_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    valueDate: timestamp('value_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    description: varchar('description').notNull(),
+    referenceNumber: varchar('reference_number'),
+    amountIn: numeric('amount_in', { mode: 'number' }).default(0),
+    amountOut: numeric('amount_out', { mode: 'number' }).default(0),
+    runningBalance: numeric('running_balance', { mode: 'number' }),
+    matchStatus: enum_accounting_bank_transactions_match_status('match_status')
+      .notNull()
+      .default('unmatched'),
+    matchedEntityType: enum_accounting_bank_transactions_matched_entity_type('matched_entity_type'),
+    matchedEntityId: varchar('matched_entity_id'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bank_transactions_bank_account_idx').on(columns.bankAccount),
+    index('accounting_bank_transactions_transaction_date_idx').on(columns.transactionDate),
+    index('accounting_bank_transactions_match_status_idx').on(columns.matchStatus),
+    index('accounting_bank_transactions_created_by_idx').on(columns.createdBy),
+    index('accounting_bank_transactions_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bank_transactions_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bank_transactions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_bank_reconciliations = pgTable(
+  'accounting_bank_reconciliations',
+  {
+    id: serial('id').primaryKey(),
+    bankAccount: integer('bank_account_id')
+      .notNull()
+      .references(() => accounting_bank_accounts.id, {
+        onDelete: 'set null',
+      }),
+    statementStartDate: timestamp('statement_start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    statementEndDate: timestamp('statement_end_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    statementClosingBalance: numeric('statement_closing_balance', { mode: 'number' }).notNull(),
+    bookClosingBalance: numeric('book_closing_balance', { mode: 'number' }).default(0),
+    differenceAmount: numeric('difference_amount', { mode: 'number' }).default(0),
+    status: enum_accounting_bank_reconciliations_status('status').notNull().default('draft'),
+    completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    completedBy: integer('completed_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_bank_reconciliations_bank_account_idx').on(columns.bankAccount),
+    index('accounting_bank_reconciliations_statement_end_date_idx').on(columns.statementEndDate),
+    index('accounting_bank_reconciliations_status_idx').on(columns.status),
+    index('accounting_bank_reconciliations_completed_by_idx').on(columns.completedBy),
+    index('accounting_bank_reconciliations_created_by_idx').on(columns.createdBy),
+    index('accounting_bank_reconciliations_updated_by_idx').on(columns.updatedBy),
+    index('accounting_bank_reconciliations_updated_at_idx').on(columns.updatedAt),
+    index('accounting_bank_reconciliations_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_document_links = pgTable(
+  'accounting_document_links',
+  {
+    id: serial('id').primaryKey(),
+    media: integer('media_id')
+      .notNull()
+      .references(() => media.id, {
+        onDelete: 'set null',
+      }),
+    entityType: enum_accounting_document_links_entity_type('entity_type').notNull(),
+    entityId: varchar('entity_id').notNull(),
+    documentCategory: enum_accounting_document_links_document_category('document_category')
+      .notNull()
+      .default('other'),
+    documentDate: timestamp('document_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    uploadedBy: integer('uploaded_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    isPrimary: boolean('is_primary').default(false),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('accounting_document_links_media_idx').on(columns.media),
+    index('accounting_document_links_entity_type_idx').on(columns.entityType),
+    index('accounting_document_links_entity_id_idx').on(columns.entityId),
+    index('accounting_document_links_uploaded_by_idx').on(columns.uploadedBy),
+    index('accounting_document_links_created_by_idx').on(columns.createdBy),
+    index('accounting_document_links_updated_by_idx').on(columns.updatedBy),
+    index('accounting_document_links_updated_at_idx').on(columns.updatedAt),
+    index('accounting_document_links_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_course_fee_profiles = pgTable(
+  'acct_course_fee_profiles',
+  {
+    id: serial('id').primaryKey(),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    certificateFee: numeric('certificate_fee', { mode: 'number' }).default(0),
+    retakeFee: numeric('retake_fee', { mode: 'number' }).default(0),
+    reassessmentFee: numeric('reassessment_fee', { mode: 'number' }).default(0),
+    renewalFee: numeric('renewal_fee', { mode: 'number' }).default(0),
+    latePaymentFee: numeric('late_payment_fee', { mode: 'number' }).default(0),
+    manualAdjustmentAllowed: boolean('manual_adjustment_allowed').default(true),
+    defaultRecognitionMethod: enum_acct_course_fee_profiles_default_recognition_method(
+      'default_recognition_method',
+    ).default('on_activation'),
+    courseRevenueAccount: integer('course_revenue_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    deferredRevenueAccount: integer('deferred_revenue_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    certificateRevenueAccount: integer('certificate_revenue_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    discountContraRevenueAccount: integer('discount_contra_revenue_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    instructorExpenseAccount: integer('instructor_expense_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_course_fee_profiles_course_idx').on(columns.course),
+    index('acct_course_fee_profiles_course_revenue_account_idx').on(columns.courseRevenueAccount),
+    index('acct_course_fee_profiles_deferred_revenue_account_idx').on(
+      columns.deferredRevenueAccount,
+    ),
+    index('acct_course_fee_profiles_certificate_revenue_account_idx').on(
+      columns.certificateRevenueAccount,
+    ),
+    index('acct_course_fee_profiles_discount_contra_revenue_account_idx').on(
+      columns.discountContraRevenueAccount,
+    ),
+    index('acct_course_fee_profiles_instructor_expense_account_idx').on(
+      columns.instructorExpenseAccount,
+    ),
+    index('acct_course_fee_profiles_created_by_idx').on(columns.createdBy),
+    index('acct_course_fee_profiles_updated_by_idx').on(columns.updatedBy),
+    index('acct_course_fee_profiles_updated_at_idx').on(columns.updatedAt),
+    index('acct_course_fee_profiles_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_scholarship_sponsors = pgTable(
+  'acct_scholarship_sponsors',
+  {
+    id: serial('id').primaryKey(),
+    sponsorCode: varchar('sponsor_code').notNull(),
+    name: varchar('name').notNull(),
+    contactName: varchar('contact_name'),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    billingAddress: varchar('billing_address'),
+    defaultCustomer: integer('default_customer_id').references(() => accounting_customers.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_acct_scholarship_sponsors_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_scholarship_sponsors_sponsor_code_idx').on(columns.sponsorCode),
+    index('acct_scholarship_sponsors_name_idx').on(columns.name),
+    index('acct_scholarship_sponsors_default_customer_idx').on(columns.defaultCustomer),
+    index('acct_scholarship_sponsors_status_idx').on(columns.status),
+    index('acct_scholarship_sponsors_created_by_idx').on(columns.createdBy),
+    index('acct_scholarship_sponsors_updated_by_idx').on(columns.updatedBy),
+    index('acct_scholarship_sponsors_updated_at_idx').on(columns.updatedAt),
+    index('acct_scholarship_sponsors_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_corporate_accounts = pgTable(
+  'acct_corporate_accounts',
+  {
+    id: serial('id').primaryKey(),
+    accountCode: varchar('account_code').notNull(),
+    name: varchar('name').notNull(),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    billingContact: varchar('billing_contact'),
+    email: varchar('email'),
+    phone: varchar('phone'),
+    creditTerms: varchar('credit_terms'),
+    paymentTerms: varchar('payment_terms'),
+    negotiatedPricingPolicy: jsonb('negotiated_pricing_policy'),
+    status: enum_acct_corporate_accounts_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_corporate_accounts_account_code_idx').on(columns.accountCode),
+    index('acct_corporate_accounts_name_idx').on(columns.name),
+    index('acct_corporate_accounts_customer_idx').on(columns.customer),
+    index('acct_corporate_accounts_status_idx').on(columns.status),
+    index('acct_corporate_accounts_created_by_idx').on(columns.createdBy),
+    index('acct_corporate_accounts_updated_by_idx').on(columns.updatedBy),
+    index('acct_corporate_accounts_updated_at_idx').on(columns.updatedAt),
+    index('acct_corporate_accounts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_instructor_payout_rules = pgTable(
+  'acct_instructor_payout_rules',
+  {
+    id: serial('id').primaryKey(),
+    instructor: integer('instructor_id')
+      .notNull()
+      .references(() => instructors.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    payoutMethod: enum_acct_instructor_payout_rules_payout_method('payout_method')
+      .notNull()
+      .default('flat'),
+    flatAmount: numeric('flat_amount', { mode: 'number' }).default(0),
+    percentOfRevenue: numeric('percent_of_revenue', { mode: 'number' }).default(0),
+    perEnrollmentAmount: numeric('per_enrollment_amount', { mode: 'number' }).default(0),
+    completionBonusAmount: numeric('completion_bonus_amount', { mode: 'number' }).default(0),
+    status: enum_acct_instructor_payout_rules_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_instructor_payout_rules_instructor_idx').on(columns.instructor),
+    index('acct_instructor_payout_rules_course_idx').on(columns.course),
+    index('acct_instructor_payout_rules_status_idx').on(columns.status),
+    index('acct_instructor_payout_rules_created_by_idx').on(columns.createdBy),
+    index('acct_instructor_payout_rules_updated_by_idx').on(columns.updatedBy),
+    index('acct_instructor_payout_rules_updated_at_idx').on(columns.updatedAt),
+    index('acct_instructor_payout_rules_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_enrollment_billing_links = pgTable(
+  'acct_enrollment_billing_links',
+  {
+    id: serial('id').primaryKey(),
+    enrollment: integer('enrollment_id')
+      .notNull()
+      .references(() => course_enrollments.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    user: integer('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    invoice: integer('invoice_id').references(() => accounting_invoices.id, {
+      onDelete: 'set null',
+    }),
+    customer: integer('customer_id').references(() => accounting_customers.id, {
+      onDelete: 'set null',
+    }),
+    billingStatus: enum_acct_enrollment_billing_links_billing_status('billing_status')
+      .notNull()
+      .default('not_started'),
+    sourceType: varchar('source_type').notNull().default('enrollment'),
+    sourceReference: varchar('source_reference').notNull(),
+    listPriceSnapshot: numeric('list_price_snapshot', { mode: 'number' }).default(0),
+    salePriceSnapshot: numeric('sale_price_snapshot', { mode: 'number' }).default(0),
+    couponDiscountSnapshot: numeric('coupon_discount_snapshot', { mode: 'number' }).default(0),
+    scholarshipDiscountSnapshot: numeric('scholarship_discount_snapshot', {
+      mode: 'number',
+    }).default(0),
+    corporateCoverageSnapshot: numeric('corporate_coverage_snapshot', { mode: 'number' }).default(
+      0,
+    ),
+    adjustmentsNetSnapshot: numeric('adjustments_net_snapshot', { mode: 'number' }).default(0),
+    finalChargeSnapshot: numeric('final_charge_snapshot', { mode: 'number' }).default(0),
+    recognizedRevenueSnapshot: numeric('recognized_revenue_snapshot', { mode: 'number' }).default(
+      0,
+    ),
+    currency: varchar('currency').notNull().default('PHP'),
+    linkedAt: timestamp('linked_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    metadata: jsonb('metadata'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_enrollment_billing_links_enrollment_idx').on(columns.enrollment),
+    index('acct_enrollment_billing_links_course_idx').on(columns.course),
+    index('acct_enrollment_billing_links_trainee_idx').on(columns.trainee),
+    index('acct_enrollment_billing_links_user_idx').on(columns.user),
+    index('acct_enrollment_billing_links_invoice_idx').on(columns.invoice),
+    index('acct_enrollment_billing_links_customer_idx').on(columns.customer),
+    index('acct_enrollment_billing_links_billing_status_idx').on(columns.billingStatus),
+    index('acct_enrollment_billing_links_source_reference_idx').on(columns.sourceReference),
+    index('acct_enrollment_billing_links_created_by_idx').on(columns.createdBy),
+    index('acct_enrollment_billing_links_updated_by_idx').on(columns.updatedBy),
+    index('acct_enrollment_billing_links_updated_at_idx').on(columns.updatedAt),
+    index('acct_enrollment_billing_links_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_billing_adjustments = pgTable(
+  'acct_billing_adjustments',
+  {
+    id: serial('id').primaryKey(),
+    enrollmentBillingLink: integer('enrollment_billing_link_id')
+      .notNull()
+      .references(() => acct_enrollment_billing_links.id, {
+        onDelete: 'set null',
+      }),
+    adjustmentType: enum_acct_billing_adjustments_adjustment_type('adjustment_type').notNull(),
+    reason: varchar('reason'),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    direction: enum_acct_billing_adjustments_direction('direction').notNull().default('increase'),
+    approvedBy: integer('approved_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    appliedAt: timestamp('applied_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_billing_adjustments_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_billing_adjustments_approved_by_idx').on(columns.approvedBy),
+    index('acct_billing_adjustments_created_by_idx').on(columns.createdBy),
+    index('acct_billing_adjustments_updated_by_idx').on(columns.updatedBy),
+    index('acct_billing_adjustments_updated_at_idx').on(columns.updatedAt),
+    index('acct_billing_adjustments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_payment_allocations = pgTable(
+  'acct_payment_allocations',
+  {
+    id: serial('id').primaryKey(),
+    paymentReceived: integer('payment_received_id')
+      .notNull()
+      .references(() => accounting_payments_received.id, {
+        onDelete: 'set null',
+      }),
+    invoice: integer('invoice_id').references(() => accounting_invoices.id, {
+      onDelete: 'set null',
+    }),
+    enrollmentBillingLink: integer('enrollment_billing_link_id').references(
+      () => acct_enrollment_billing_links.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    allocationDate: timestamp('allocation_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    allocatedAmount: numeric('allocated_amount', { mode: 'number' }).notNull(),
+    allocationType: enum_acct_payment_allocations_allocation_type('allocation_type')
+      .notNull()
+      .default('invoice_settlement'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_payment_allocations_payment_received_idx').on(columns.paymentReceived),
+    index('acct_payment_allocations_invoice_idx').on(columns.invoice),
+    index('acct_payment_allocations_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_payment_allocations_created_by_idx').on(columns.createdBy),
+    index('acct_payment_allocations_updated_by_idx').on(columns.updatedBy),
+    index('acct_payment_allocations_updated_at_idx').on(columns.updatedAt),
+    index('acct_payment_allocations_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_receipts = pgTable(
+  'acct_receipts',
+  {
+    id: serial('id').primaryKey(),
+    receiptNumber: varchar('receipt_number').notNull(),
+    paymentReceived: integer('payment_received_id')
+      .notNull()
+      .references(() => accounting_payments_received.id, {
+        onDelete: 'set null',
+      }),
+    enrollmentBillingLink: integer('enrollment_billing_link_id').references(
+      () => acct_enrollment_billing_links.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    customer: integer('customer_id')
+      .notNull()
+      .references(() => accounting_customers.id, {
+        onDelete: 'set null',
+      }),
+    receiptDate: timestamp('receipt_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    currency: varchar('currency').notNull().default('PHP'),
+    status: enum_acct_receipts_status('status').notNull().default('draft'),
+    proofDocument: integer('proof_document_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    issuedBy: integer('issued_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    voidedAt: timestamp('voided_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    voidedBy: integer('voided_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_receipts_receipt_number_idx').on(columns.receiptNumber),
+    index('acct_receipts_payment_received_idx').on(columns.paymentReceived),
+    index('acct_receipts_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_receipts_customer_idx').on(columns.customer),
+    index('acct_receipts_status_idx').on(columns.status),
+    index('acct_receipts_proof_document_idx').on(columns.proofDocument),
+    index('acct_receipts_issued_by_idx').on(columns.issuedBy),
+    index('acct_receipts_voided_by_idx').on(columns.voidedBy),
+    index('acct_receipts_created_by_idx').on(columns.createdBy),
+    index('acct_receipts_updated_by_idx').on(columns.updatedBy),
+    index('acct_receipts_updated_at_idx').on(columns.updatedAt),
+    index('acct_receipts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_refunds = pgTable(
+  'acct_refunds',
+  {
+    id: serial('id').primaryKey(),
+    refundNumber: varchar('refund_number').notNull(),
+    enrollmentBillingLink: integer('enrollment_billing_link_id').references(
+      () => acct_enrollment_billing_links.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    invoice: integer('invoice_id').references(() => accounting_invoices.id, {
+      onDelete: 'set null',
+    }),
+    paymentReceived: integer('payment_received_id').references(
+      () => accounting_payments_received.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    creditNote: integer('credit_note_id').references(() => accounting_credit_notes.id, {
+      onDelete: 'set null',
+    }),
+    refundDate: timestamp('refund_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    refundReason: varchar('refund_reason'),
+    refundType: enum_acct_refunds_refund_type('refund_type').notNull().default('partial'),
+    requestedAmount: numeric('requested_amount', { mode: 'number' }).notNull(),
+    approvedAmount: numeric('approved_amount', { mode: 'number' }),
+    currency: varchar('currency').notNull().default('PHP'),
+    status: enum_acct_refunds_status('status').notNull().default('draft'),
+    processedBy: integer('processed_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    proofDocument: integer('proof_document_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_refunds_refund_number_idx').on(columns.refundNumber),
+    index('acct_refunds_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_refunds_invoice_idx').on(columns.invoice),
+    index('acct_refunds_payment_received_idx').on(columns.paymentReceived),
+    index('acct_refunds_credit_note_idx').on(columns.creditNote),
+    index('acct_refunds_status_idx').on(columns.status),
+    index('acct_refunds_processed_by_idx').on(columns.processedBy),
+    index('acct_refunds_proof_document_idx').on(columns.proofDocument),
+    index('acct_refunds_created_by_idx').on(columns.createdBy),
+    index('acct_refunds_updated_by_idx').on(columns.updatedBy),
+    index('acct_refunds_updated_at_idx').on(columns.updatedAt),
+    index('acct_refunds_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_rev_rec_schedules = pgTable(
+  'acct_rev_rec_schedules',
+  {
+    id: serial('id').primaryKey(),
+    invoice: integer('invoice_id')
+      .notNull()
+      .references(() => accounting_invoices.id, {
+        onDelete: 'set null',
+      }),
+    enrollmentBillingLink: integer('enrollment_billing_link_id')
+      .notNull()
+      .references(() => acct_enrollment_billing_links.id, {
+        onDelete: 'set null',
+      }),
+    recognitionMethod: enum_acct_rev_rec_schedules_recognition_method('recognition_method')
+      .notNull()
+      .default('on_activation'),
+    startDate: timestamp('start_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }).notNull(),
+    totalDeferredAmount: numeric('total_deferred_amount', { mode: 'number' }).notNull(),
+    recognizedAmount: numeric('recognized_amount', { mode: 'number' }).notNull().default(0),
+    remainingDeferredAmount: numeric('remaining_deferred_amount', { mode: 'number' })
+      .notNull()
+      .default(0),
+    status: enum_acct_rev_rec_schedules_status('status').notNull().default('draft'),
+    scheduleData: jsonb('schedule_data'),
+    lastRecognitionAt: timestamp('last_recognition_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_rev_rec_schedules_invoice_idx').on(columns.invoice),
+    index('acct_rev_rec_schedules_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_rev_rec_schedules_status_idx').on(columns.status),
+    index('acct_rev_rec_schedules_created_by_idx').on(columns.createdBy),
+    index('acct_rev_rec_schedules_updated_by_idx').on(columns.updatedBy),
+    index('acct_rev_rec_schedules_updated_at_idx').on(columns.updatedAt),
+    index('acct_rev_rec_schedules_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_scholarship_awards = pgTable(
+  'acct_scholarship_awards',
+  {
+    id: serial('id').primaryKey(),
+    enrollmentBillingLink: integer('enrollment_billing_link_id')
+      .notNull()
+      .references(() => acct_enrollment_billing_links.id, {
+        onDelete: 'set null',
+      }),
+    scholarshipSponsor: integer('scholarship_sponsor_id')
+      .notNull()
+      .references(() => acct_scholarship_sponsors.id, {
+        onDelete: 'set null',
+      }),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    awardType: enum_acct_scholarship_awards_award_type('award_type').notNull().default('partial'),
+    awardAmount: numeric('award_amount', { mode: 'number' }).default(0),
+    awardPercent: numeric('award_percent', { mode: 'number' }),
+    traineeShareAmount: numeric('trainee_share_amount', { mode: 'number' }).default(0),
+    effectiveDate: timestamp('effective_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    status: enum_acct_scholarship_awards_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_scholarship_awards_enrollment_billing_link_idx').on(columns.enrollmentBillingLink),
+    index('acct_scholarship_awards_scholarship_sponsor_idx').on(columns.scholarshipSponsor),
+    index('acct_scholarship_awards_trainee_idx').on(columns.trainee),
+    index('acct_scholarship_awards_status_idx').on(columns.status),
+    index('acct_scholarship_awards_created_by_idx').on(columns.createdBy),
+    index('acct_scholarship_awards_updated_by_idx').on(columns.updatedBy),
+    index('acct_scholarship_awards_updated_at_idx').on(columns.updatedAt),
+    index('acct_scholarship_awards_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_corporate_billing_links = pgTable(
+  'acct_corporate_billing_links',
+  {
+    id: serial('id').primaryKey(),
+    corporateAccount: integer('corporate_account_id')
+      .notNull()
+      .references(() => acct_corporate_accounts.id, {
+        onDelete: 'set null',
+      }),
+    enrollmentBillingLink: integer('enrollment_billing_link_id')
+      .notNull()
+      .references(() => acct_enrollment_billing_links.id, {
+        onDelete: 'set null',
+      }),
+    invoice: integer('invoice_id').references(() => accounting_invoices.id, {
+      onDelete: 'set null',
+    }),
+    coverageType: enum_acct_corporate_billing_links_coverage_type('coverage_type')
+      .notNull()
+      .default('full_company_pay'),
+    coveredAmount: numeric('covered_amount', { mode: 'number' }).default(0),
+    traineeShareAmount: numeric('trainee_share_amount', { mode: 'number' }).default(0),
+    status: enum_acct_corporate_billing_links_status('status').notNull().default('active'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_corporate_billing_links_corporate_account_idx').on(columns.corporateAccount),
+    index('acct_corporate_billing_links_enrollment_billing_link_idx').on(
+      columns.enrollmentBillingLink,
+    ),
+    index('acct_corporate_billing_links_invoice_idx').on(columns.invoice),
+    index('acct_corporate_billing_links_status_idx').on(columns.status),
+    index('acct_corporate_billing_links_created_by_idx').on(columns.createdBy),
+    index('acct_corporate_billing_links_updated_by_idx').on(columns.updatedBy),
+    index('acct_corporate_billing_links_updated_at_idx').on(columns.updatedAt),
+    index('acct_corporate_billing_links_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_instructor_payouts = pgTable(
+  'acct_instructor_payouts',
+  {
+    id: serial('id').primaryKey(),
+    instructor: integer('instructor_id')
+      .notNull()
+      .references(() => instructors.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    periodStart: timestamp('period_start', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    periodEnd: timestamp('period_end', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    sourceType: varchar('source_type').notNull().default('course_activity'),
+    sourceReference: varchar('source_reference').notNull(),
+    calculatedAmount: numeric('calculated_amount', { mode: 'number' }).notNull().default(0),
+    approvedAmount: numeric('approved_amount', { mode: 'number' }),
+    status: enum_acct_instructor_payouts_status('status').notNull().default('draft'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_instructor_payouts_instructor_idx').on(columns.instructor),
+    index('acct_instructor_payouts_course_idx').on(columns.course),
+    index('acct_instructor_payouts_source_reference_idx').on(columns.sourceReference),
+    index('acct_instructor_payouts_status_idx').on(columns.status),
+    index('acct_instructor_payouts_created_by_idx').on(columns.createdBy),
+    index('acct_instructor_payouts_updated_by_idx').on(columns.updatedBy),
+    index('acct_instructor_payouts_updated_at_idx').on(columns.updatedAt),
+    index('acct_instructor_payouts_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_branches = pgTable(
+  'acct_branches',
+  {
+    id: serial('id').primaryKey(),
+    branchCode: varchar('branch_code').notNull(),
+    name: varchar('name').notNull(),
+    status: enum_acct_branches_status('status').notNull().default('active'),
+    address: varchar('address'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_branches_branch_code_idx').on(columns.branchCode),
+    index('acct_branches_created_by_idx').on(columns.createdBy),
+    index('acct_branches_updated_by_idx').on(columns.updatedBy),
+    index('acct_branches_updated_at_idx').on(columns.updatedAt),
+    index('acct_branches_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_departments = pgTable(
+  'acct_departments',
+  {
+    id: serial('id').primaryKey(),
+    departmentCode: varchar('department_code').notNull(),
+    name: varchar('name').notNull(),
+    status: enum_acct_departments_status('status').notNull().default('active'),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_departments_department_code_idx').on(columns.departmentCode),
+    index('acct_departments_branch_idx').on(columns.branch),
+    index('acct_departments_created_by_idx').on(columns.createdBy),
+    index('acct_departments_updated_by_idx').on(columns.updatedBy),
+    index('acct_departments_updated_at_idx').on(columns.updatedAt),
+    index('acct_departments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_locations = pgTable(
+  'acct_locations',
+  {
+    id: serial('id').primaryKey(),
+    locationCode: varchar('location_code').notNull(),
+    name: varchar('name').notNull(),
+    status: enum_acct_locations_status('status').notNull().default('active'),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_locations_location_code_idx').on(columns.locationCode),
+    index('acct_locations_branch_idx').on(columns.branch),
+    index('acct_locations_created_by_idx').on(columns.createdBy),
+    index('acct_locations_updated_by_idx').on(columns.updatedBy),
+    index('acct_locations_updated_at_idx').on(columns.updatedAt),
+    index('acct_locations_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_projects = pgTable(
+  'acct_projects',
+  {
+    id: serial('id').primaryKey(),
+    projectCode: varchar('project_code').notNull(),
+    name: varchar('name').notNull(),
+    status: enum_acct_projects_status('status').notNull().default('draft'),
+    customer: integer('customer_id').references(() => accounting_customers.id, {
+      onDelete: 'set null',
+    }),
+    managerUser: integer('manager_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    projectType: enum_acct_projects_project_type('project_type').notNull().default('internal'),
+    course: integer('course_id').references(() => courses.id, {
+      onDelete: 'set null',
+    }),
+    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    endDate: timestamp('end_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    department: integer('department_id').references(() => acct_departments.id, {
+      onDelete: 'set null',
+    }),
+    location: integer('location_id').references(() => acct_locations.id, {
+      onDelete: 'set null',
+    }),
+    budgetAmount: numeric('budget_amount', { mode: 'number' }).default(0),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_projects_project_code_idx').on(columns.projectCode),
+    index('acct_projects_customer_idx').on(columns.customer),
+    index('acct_projects_manager_user_idx').on(columns.managerUser),
+    index('acct_projects_course_idx').on(columns.course),
+    index('acct_projects_branch_idx').on(columns.branch),
+    index('acct_projects_department_idx').on(columns.department),
+    index('acct_projects_location_idx').on(columns.location),
+    index('acct_projects_created_by_idx').on(columns.createdBy),
+    index('acct_projects_updated_by_idx').on(columns.updatedBy),
+    index('acct_projects_updated_at_idx').on(columns.updatedAt),
+    index('acct_projects_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_project_tasks = pgTable(
+  'acct_project_tasks',
+  {
+    id: serial('id').primaryKey(),
+    project: integer('project_id')
+      .notNull()
+      .references(() => acct_projects.id, {
+        onDelete: 'set null',
+      }),
+    taskCode: varchar('task_code').notNull(),
+    name: varchar('name').notNull(),
+    status: enum_acct_project_tasks_status('status').notNull().default('draft'),
+    assignedTo: integer('assigned_to_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    billable: boolean('billable').default(true),
+    startDate: timestamp('start_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    dueDate: timestamp('due_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_project_tasks_project_idx').on(columns.project),
+    index('acct_project_tasks_task_code_idx').on(columns.taskCode),
+    index('acct_project_tasks_assigned_to_idx').on(columns.assignedTo),
+    index('acct_project_tasks_created_by_idx').on(columns.createdBy),
+    index('acct_project_tasks_updated_by_idx').on(columns.updatedBy),
+    index('acct_project_tasks_updated_at_idx').on(columns.updatedAt),
+    index('acct_project_tasks_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_budgets = pgTable(
+  'acct_budgets',
+  {
+    id: serial('id').primaryKey(),
+    budgetCode: varchar('budget_code').notNull(),
+    name: varchar('name').notNull(),
+    fiscalYear: integer('fiscal_year_id')
+      .notNull()
+      .references(() => accounting_fiscal_years.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_acct_budgets_status('status').notNull().default('draft'),
+    budgetType: enum_acct_budgets_budget_type('budget_type').notNull().default('annual'),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    department: integer('department_id').references(() => acct_departments.id, {
+      onDelete: 'set null',
+    }),
+    location: integer('location_id').references(() => acct_locations.id, {
+      onDelete: 'set null',
+    }),
+    project: integer('project_id').references(() => acct_projects.id, {
+      onDelete: 'set null',
+    }),
+    courseCategory: integer('course_category_id').references(() => course_categories.id, {
+      onDelete: 'set null',
+    }),
+    scenario: integer('scenario_id').references(() => acct_forecast_scenarios.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_budgets_budget_code_idx').on(columns.budgetCode),
+    index('acct_budgets_fiscal_year_idx').on(columns.fiscalYear),
+    index('acct_budgets_branch_idx').on(columns.branch),
+    index('acct_budgets_department_idx').on(columns.department),
+    index('acct_budgets_location_idx').on(columns.location),
+    index('acct_budgets_project_idx').on(columns.project),
+    index('acct_budgets_course_category_idx').on(columns.courseCategory),
+    index('acct_budgets_scenario_idx').on(columns.scenario),
+    index('acct_budgets_created_by_idx').on(columns.createdBy),
+    index('acct_budgets_updated_by_idx').on(columns.updatedBy),
+    index('acct_budgets_updated_at_idx').on(columns.updatedAt),
+    index('acct_budgets_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_budget_lines = pgTable(
+  'acct_budget_lines',
+  {
+    id: serial('id').primaryKey(),
+    budget: integer('budget_id')
+      .notNull()
+      .references(() => acct_budgets.id, {
+        onDelete: 'set null',
+      }),
+    account: integer('account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    period: integer('period_id').references(() => accounting_periods.id, {
+      onDelete: 'set null',
+    }),
+    plannedAmount: numeric('planned_amount', { mode: 'number' }).notNull().default(0),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_budget_lines_budget_idx').on(columns.budget),
+    index('acct_budget_lines_account_idx').on(columns.account),
+    index('acct_budget_lines_period_idx').on(columns.period),
+    index('acct_budget_lines_created_by_idx').on(columns.createdBy),
+    index('acct_budget_lines_updated_by_idx').on(columns.updatedBy),
+    index('acct_budget_lines_updated_at_idx').on(columns.updatedAt),
+    index('acct_budget_lines_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_forecast_scenarios = pgTable(
+  'acct_forecast_scenarios',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    scenarioType: enum_acct_forecast_scenarios_scenario_type('scenario_type')
+      .notNull()
+      .default('base_case'),
+    fiscalYear: integer('fiscal_year_id')
+      .notNull()
+      .references(() => accounting_fiscal_years.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_acct_forecast_scenarios_status('status').notNull().default('draft'),
+    assumptions: jsonb('assumptions'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_forecast_scenarios_fiscal_year_idx').on(columns.fiscalYear),
+    index('acct_forecast_scenarios_created_by_idx').on(columns.createdBy),
+    index('acct_forecast_scenarios_updated_by_idx').on(columns.updatedBy),
+    index('acct_forecast_scenarios_updated_at_idx').on(columns.updatedAt),
+    index('acct_forecast_scenarios_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_time_entries = pgTable(
+  'acct_time_entries',
+  {
+    id: serial('id').primaryKey(),
+    entryDate: timestamp('entry_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    timesheet: integer('timesheet_id').references(() => acct_timesheets.id, {
+      onDelete: 'set null',
+    }),
+    project: integer('project_id').references(() => acct_projects.id, {
+      onDelete: 'set null',
+    }),
+    projectTask: integer('project_task_id').references(() => acct_project_tasks.id, {
+      onDelete: 'set null',
+    }),
+    course: integer('course_id').references(() => courses.id, {
+      onDelete: 'set null',
+    }),
+    instructor: integer('instructor_id').references(() => instructors.id, {
+      onDelete: 'set null',
+    }),
+    hours: numeric('hours', { mode: 'number' }).default(0),
+    minutes: numeric('minutes', { mode: 'number' }).default(0),
+    billable: boolean('billable').default(true),
+    billingRate: numeric('billing_rate', { mode: 'number' }).default(0),
+    costRate: numeric('cost_rate', { mode: 'number' }).default(0),
+    status: enum_acct_time_entries_status('status').notNull().default('draft'),
+    sourceType: enum_acct_time_entries_source_type('source_type').notNull().default('manual'),
+    startedAt: timestamp('started_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    endedAt: timestamp('ended_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    approvedBy: integer('approved_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    approvedAt: timestamp('approved_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_time_entries_entry_date_idx').on(columns.entryDate),
+    index('acct_time_entries_user_idx').on(columns.user),
+    index('acct_time_entries_timesheet_idx').on(columns.timesheet),
+    index('acct_time_entries_project_idx').on(columns.project),
+    index('acct_time_entries_project_task_idx').on(columns.projectTask),
+    index('acct_time_entries_course_idx').on(columns.course),
+    index('acct_time_entries_instructor_idx').on(columns.instructor),
+    index('acct_time_entries_approved_by_idx').on(columns.approvedBy),
+    index('acct_time_entries_created_by_idx').on(columns.createdBy),
+    index('acct_time_entries_updated_by_idx').on(columns.updatedBy),
+    index('acct_time_entries_updated_at_idx').on(columns.updatedAt),
+    index('acct_time_entries_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_timesheets = pgTable(
+  'acct_timesheets',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    periodStart: timestamp('period_start', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    periodEnd: timestamp('period_end', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    status: enum_acct_timesheets_status('status').notNull().default('draft'),
+    totalHours: numeric('total_hours', { mode: 'number' }).default(0),
+    approvedBy: integer('approved_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    approvedAt: timestamp('approved_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_timesheets_user_idx').on(columns.user),
+    index('acct_timesheets_period_start_idx').on(columns.periodStart),
+    index('acct_timesheets_period_end_idx').on(columns.periodEnd),
+    index('acct_timesheets_approved_by_idx').on(columns.approvedBy),
+    index('acct_timesheets_created_by_idx').on(columns.createdBy),
+    index('acct_timesheets_updated_by_idx').on(columns.updatedBy),
+    index('acct_timesheets_updated_at_idx').on(columns.updatedAt),
+    index('acct_timesheets_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_fixed_assets = pgTable(
+  'acct_fixed_assets',
+  {
+    id: serial('id').primaryKey(),
+    assetCode: varchar('asset_code').notNull(),
+    name: varchar('name').notNull(),
+    assetCategory: enum_acct_fixed_assets_asset_category('asset_category')
+      .notNull()
+      .default('equipment'),
+    purchaseDate: timestamp('purchase_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    inServiceDate: timestamp('in_service_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    cost: numeric('cost', { mode: 'number' }).notNull(),
+    salvageValue: numeric('salvage_value', { mode: 'number' }).default(0),
+    usefulLifeMonths: numeric('useful_life_months', { mode: 'number' }).notNull(),
+    depreciationMethod: enum_acct_fixed_assets_depreciation_method('depreciation_method')
+      .notNull()
+      .default('straight_line'),
+    expenseAccount: integer('expense_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    assetAccount: integer('asset_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    accumulatedDepreciationAccount: integer('accumulated_depreciation_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    department: integer('department_id').references(() => acct_departments.id, {
+      onDelete: 'set null',
+    }),
+    location: integer('location_id').references(() => acct_locations.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_acct_fixed_assets_status('status').notNull().default('draft'),
+    supportingDocument: integer('supporting_document_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_fixed_assets_asset_code_idx').on(columns.assetCode),
+    index('acct_fixed_assets_expense_account_idx').on(columns.expenseAccount),
+    index('acct_fixed_assets_asset_account_idx').on(columns.assetAccount),
+    index('acct_fixed_assets_accumulated_depreciation_account_idx').on(
+      columns.accumulatedDepreciationAccount,
+    ),
+    index('acct_fixed_assets_branch_idx').on(columns.branch),
+    index('acct_fixed_assets_department_idx').on(columns.department),
+    index('acct_fixed_assets_location_idx').on(columns.location),
+    index('acct_fixed_assets_supporting_document_idx').on(columns.supportingDocument),
+    index('acct_fixed_assets_created_by_idx').on(columns.createdBy),
+    index('acct_fixed_assets_updated_by_idx').on(columns.updatedBy),
+    index('acct_fixed_assets_updated_at_idx').on(columns.updatedAt),
+    index('acct_fixed_assets_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_depr_entries = pgTable(
+  'acct_depr_entries',
+  {
+    id: serial('id').primaryKey(),
+    fixedAsset: integer('fixed_asset_id')
+      .notNull()
+      .references(() => acct_fixed_assets.id, {
+        onDelete: 'set null',
+      }),
+    fiscalYear: integer('fiscal_year_id')
+      .notNull()
+      .references(() => accounting_fiscal_years.id, {
+        onDelete: 'set null',
+      }),
+    period: integer('period_id')
+      .notNull()
+      .references(() => accounting_periods.id, {
+        onDelete: 'set null',
+      }),
+    depreciationDate: timestamp('depreciation_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    status: enum_acct_depr_entries_status('status').notNull().default('scheduled'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_depr_entries_fixed_asset_idx').on(columns.fixedAsset),
+    index('acct_depr_entries_fiscal_year_idx').on(columns.fiscalYear),
+    index('acct_depr_entries_period_idx').on(columns.period),
+    index('acct_depr_entries_depreciation_date_idx').on(columns.depreciationDate),
+    index('acct_depr_entries_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('acct_depr_entries_created_by_idx').on(columns.createdBy),
+    index('acct_depr_entries_updated_by_idx').on(columns.updatedBy),
+    index('acct_depr_entries_updated_at_idx').on(columns.updatedAt),
+    index('acct_depr_entries_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_asset_disposals = pgTable(
+  'acct_asset_disposals',
+  {
+    id: serial('id').primaryKey(),
+    fixedAsset: integer('fixed_asset_id')
+      .notNull()
+      .references(() => acct_fixed_assets.id, {
+        onDelete: 'set null',
+      }),
+    disposalDate: timestamp('disposal_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    disposalType: enum_acct_asset_disposals_disposal_type('disposal_type')
+      .notNull()
+      .default('sale'),
+    proceedsAmount: numeric('proceeds_amount', { mode: 'number' }).default(0),
+    bookValueAtDisposal: numeric('book_value_at_disposal', { mode: 'number' }).default(0),
+    gainOrLossAmount: numeric('gain_or_loss_amount', { mode: 'number' }).default(0),
+    proceedsAccount: integer('proceeds_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    gainAccount: integer('gain_account_id').references(() => accounting_chart_of_accounts.id, {
+      onDelete: 'set null',
+    }),
+    lossAccount: integer('loss_account_id').references(() => accounting_chart_of_accounts.id, {
+      onDelete: 'set null',
+    }),
+    status: enum_acct_asset_disposals_status('status').notNull().default('draft'),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_asset_disposals_fixed_asset_idx').on(columns.fixedAsset),
+    index('acct_asset_disposals_disposal_date_idx').on(columns.disposalDate),
+    index('acct_asset_disposals_proceeds_account_idx').on(columns.proceedsAccount),
+    index('acct_asset_disposals_gain_account_idx').on(columns.gainAccount),
+    index('acct_asset_disposals_loss_account_idx').on(columns.lossAccount),
+    index('acct_asset_disposals_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('acct_asset_disposals_created_by_idx').on(columns.createdBy),
+    index('acct_asset_disposals_updated_by_idx').on(columns.updatedBy),
+    index('acct_asset_disposals_updated_at_idx').on(columns.updatedAt),
+    index('acct_asset_disposals_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_payroll_runs = pgTable(
+  'acct_payroll_runs',
+  {
+    id: serial('id').primaryKey(),
+    payrollCode: varchar('payroll_code').notNull(),
+    periodStart: timestamp('period_start', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    periodEnd: timestamp('period_end', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    paymentDate: timestamp('payment_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    status: enum_acct_payroll_runs_status('status').notNull().default('draft'),
+    branch: integer('branch_id').references(() => acct_branches.id, {
+      onDelete: 'set null',
+    }),
+    department: integer('department_id').references(() => acct_departments.id, {
+      onDelete: 'set null',
+    }),
+    approvalRequest: integer('approval_request_id').references(() => acct_approval_requests.id, {
+      onDelete: 'set null',
+    }),
+    postedJournalEntry: integer('posted_journal_entry_id').references(
+      () => accounting_journal_entries.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_payroll_runs_payroll_code_idx').on(columns.payrollCode),
+    index('acct_payroll_runs_period_start_idx').on(columns.periodStart),
+    index('acct_payroll_runs_period_end_idx').on(columns.periodEnd),
+    index('acct_payroll_runs_payment_date_idx').on(columns.paymentDate),
+    index('acct_payroll_runs_branch_idx').on(columns.branch),
+    index('acct_payroll_runs_department_idx').on(columns.department),
+    index('acct_payroll_runs_approval_request_idx').on(columns.approvalRequest),
+    index('acct_payroll_runs_posted_journal_entry_idx').on(columns.postedJournalEntry),
+    index('acct_payroll_runs_created_by_idx').on(columns.createdBy),
+    index('acct_payroll_runs_updated_by_idx').on(columns.updatedBy),
+    index('acct_payroll_runs_updated_at_idx').on(columns.updatedAt),
+    index('acct_payroll_runs_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_payroll_entries = pgTable(
+  'acct_payroll_entries',
+  {
+    id: serial('id').primaryKey(),
+    payrollRun: integer('payroll_run_id')
+      .notNull()
+      .references(() => acct_payroll_runs.id, {
+        onDelete: 'set null',
+      }),
+    user: integer('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    instructor: integer('instructor_id').references(() => instructors.id, {
+      onDelete: 'set null',
+    }),
+    project: integer('project_id').references(() => acct_projects.id, {
+      onDelete: 'set null',
+    }),
+    entryType: enum_acct_payroll_entries_entry_type('entry_type').notNull().default('salary'),
+    grossAmount: numeric('gross_amount', { mode: 'number' }).notNull().default(0),
+    deductionAmount: numeric('deduction_amount', { mode: 'number' }).default(0),
+    netAmount: numeric('net_amount', { mode: 'number' }).notNull().default(0),
+    expenseAccount: integer('expense_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    payableAccount: integer('payable_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_acct_payroll_entries_status('status').notNull().default('draft'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_payroll_entries_payroll_run_idx').on(columns.payrollRun),
+    index('acct_payroll_entries_user_idx').on(columns.user),
+    index('acct_payroll_entries_instructor_idx').on(columns.instructor),
+    index('acct_payroll_entries_project_idx').on(columns.project),
+    index('acct_payroll_entries_expense_account_idx').on(columns.expenseAccount),
+    index('acct_payroll_entries_payable_account_idx').on(columns.payableAccount),
+    index('acct_payroll_entries_created_by_idx').on(columns.createdBy),
+    index('acct_payroll_entries_updated_by_idx').on(columns.updatedBy),
+    index('acct_payroll_entries_updated_at_idx').on(columns.updatedAt),
+    index('acct_payroll_entries_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_payroll_account_mappings = pgTable(
+  'acct_payroll_account_mappings',
+  {
+    id: serial('id').primaryKey(),
+    entryType: enum_acct_payroll_account_mappings_entry_type('entry_type')
+      .notNull()
+      .default('salary'),
+    person: varchar('person').notNull(),
+    expenseAccount: integer('expense_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    payableAccount: integer('payable_account_id')
+      .notNull()
+      .references(() => accounting_chart_of_accounts.id, {
+        onDelete: 'set null',
+      }),
+    deductionAmount: numeric('deduction_amount', { mode: 'number' }).default(0),
+    status: enum_acct_payroll_account_mappings_status('status').notNull().default('draft'),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_payroll_account_mappings_entry_type_idx').on(columns.entryType),
+    index('acct_payroll_account_mappings_expense_account_idx').on(columns.expenseAccount),
+    index('acct_payroll_account_mappings_payable_account_idx').on(columns.payableAccount),
+    index('acct_payroll_account_mappings_status_idx').on(columns.status),
+    index('acct_payroll_account_mappings_created_by_idx').on(columns.createdBy),
+    index('acct_payroll_account_mappings_updated_by_idx').on(columns.updatedBy),
+    index('acct_payroll_account_mappings_updated_at_idx').on(columns.updatedAt),
+    index('acct_payroll_account_mappings_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_approval_workflows_steps = pgTable(
+  'acct_approval_workflows_steps',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    stepNumber: numeric('step_number', { mode: 'number' }).notNull(),
+    label: varchar('label'),
+    approverUser: integer('approver_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    approverRole: varchar('approver_role'),
+  },
+  (columns) => [
+    index('acct_approval_workflows_steps_order_idx').on(columns._order),
+    index('acct_approval_workflows_steps_parent_id_idx').on(columns._parentID),
+    index('acct_approval_workflows_steps_approver_user_idx').on(columns.approverUser),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [acct_approval_workflows.id],
+      name: 'acct_approval_workflows_steps_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const acct_approval_workflows = pgTable(
+  'acct_approval_workflows',
+  {
+    id: serial('id').primaryKey(),
+    workflowCode: varchar('workflow_code').notNull(),
+    name: varchar('name').notNull(),
+    entityType: enum_acct_approval_workflows_entity_type('entity_type').notNull(),
+    isActive: boolean('is_active').default(true),
+    notes: varchar('notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('acct_approval_workflows_workflow_code_idx').on(columns.workflowCode),
+    index('acct_approval_workflows_created_by_idx').on(columns.createdBy),
+    index('acct_approval_workflows_updated_by_idx').on(columns.updatedBy),
+    index('acct_approval_workflows_updated_at_idx').on(columns.updatedAt),
+    index('acct_approval_workflows_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_approval_requests_approval_trail = pgTable(
+  'acct_approval_requests_approval_trail',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    stepNumber: numeric('step_number', { mode: 'number' }),
+    approver: integer('approver_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    decision: varchar('decision'),
+    notes: varchar('notes'),
+    actedAt: timestamp('acted_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('acct_approval_requests_approval_trail_order_idx').on(columns._order),
+    index('acct_approval_requests_approval_trail_parent_id_idx').on(columns._parentID),
+    index('acct_approval_requests_approval_trail_approver_idx').on(columns.approver),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [acct_approval_requests.id],
+      name: 'acct_approval_requests_approval_trail_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const acct_approval_requests = pgTable(
+  'acct_approval_requests',
+  {
+    id: serial('id').primaryKey(),
+    workflow: integer('workflow_id')
+      .notNull()
+      .references(() => acct_approval_workflows.id, {
+        onDelete: 'set null',
+      }),
+    entityType: enum_acct_approval_requests_entity_type('entity_type').notNull(),
+    entityId: varchar('entity_id').notNull(),
+    status: enum_acct_approval_requests_status('status').notNull().default('pending'),
+    requestedBy: integer('requested_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    currentApprover: integer('current_approver_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    requestedAt: timestamp('requested_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    resolvedAt: timestamp('resolved_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    resolutionNotes: varchar('resolution_notes'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_approval_requests_workflow_idx').on(columns.workflow),
+    index('acct_approval_requests_entity_id_idx').on(columns.entityId),
+    index('acct_approval_requests_requested_by_idx').on(columns.requestedBy),
+    index('acct_approval_requests_current_approver_idx').on(columns.currentApprover),
+    index('acct_approval_requests_created_by_idx').on(columns.createdBy),
+    index('acct_approval_requests_updated_by_idx').on(columns.updatedBy),
+    index('acct_approval_requests_updated_at_idx').on(columns.updatedAt),
+    index('acct_approval_requests_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const acct_audit_logs = pgTable(
+  'acct_audit_logs',
+  {
+    id: serial('id').primaryKey(),
+    entityType: enum_acct_audit_logs_entity_type('entity_type').notNull(),
+    entityId: varchar('entity_id').notNull(),
+    actionType: enum_acct_audit_logs_action_type('action_type').notNull(),
+    performedBy: integer('performed_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    performedAt: timestamp('performed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    beforeData: jsonb('before_data'),
+    afterData: jsonb('after_data'),
+    reason: varchar('reason'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('acct_audit_logs_entity_id_idx').on(columns.entityId),
+    index('acct_audit_logs_performed_by_idx').on(columns.performedBy),
+    index('acct_audit_logs_performed_at_idx').on(columns.performedAt),
+    index('acct_audit_logs_created_by_idx').on(columns.createdBy),
+    index('acct_audit_logs_updated_by_idx').on(columns.updatedBy),
+    index('acct_audit_logs_updated_at_idx').on(columns.updatedAt),
+    index('acct_audit_logs_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const courses_learning_objectives = pgTable(
   'courses_learning_objectives',
   {
@@ -849,10 +5318,13 @@ export const courses = pgTable(
     estimatedDuration: numeric('estimated_duration', { mode: 'number' }),
     estimatedDurationUnit:
       enum_courses_estimated_duration_unit('estimated_duration_unit').default('hours'),
-    difficultyLevel: enum_courses_difficulty_level('difficulty_level').default('beginner'),
+    difficultyLevel: enum_courses_difficulty_level('difficulty_level').default('standard'),
     isFeatured: boolean('is_featured').default(false),
     language: enum_courses_language('language').default('en'),
     passingGrade: numeric('passing_grade', { mode: 'number' }).default(70),
+    gradeScale: integer('grade_scale_id').references(() => grade_scales.id, {
+      onDelete: 'set null',
+    }),
     evaluationMode: enum_courses_evaluation_mode('evaluation_mode').default('lessons_exam'),
     certificateTemplate: integer('certificate_template_id').references(
       () => certificate_templates.id,
@@ -863,6 +5335,10 @@ export const courses = pgTable(
     status: enum_courses_status('status').notNull().default('draft'),
     publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
     settings: jsonb('settings'),
+    feedbackForm: integer('feedback_form_id').references(() => feedback_forms.id, {
+      onDelete: 'set null',
+    }),
+    isFeedbackRequired: boolean('is_feedback_required').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -875,7 +5351,9 @@ export const courses = pgTable(
     index('courses_instructor_idx').on(columns.instructor),
     index('courses_thumbnail_idx').on(columns.thumbnail),
     index('courses_banner_image_idx').on(columns.bannerImage),
+    index('courses_grade_scale_idx').on(columns.gradeScale),
     index('courses_certificate_template_idx').on(columns.certificateTemplate),
+    index('courses_feedback_form_idx').on(columns.feedbackForm),
     index('courses_updated_at_idx').on(columns.updatedAt),
     index('courses_created_at_idx').on(columns.createdAt),
   ],
@@ -891,6 +5369,7 @@ export const courses_rels = pgTable(
     'course-modulesID': integer('course_modules_id'),
     instructorsID: integer('instructors_id'),
     'course-categoriesID': integer('course_categories_id'),
+    'course-tagsID': integer('course_tags_id'),
   },
   (columns) => [
     index('courses_rels_order_idx').on(columns.order),
@@ -899,6 +5378,7 @@ export const courses_rels = pgTable(
     index('courses_rels_course_modules_id_idx').on(columns['course-modulesID']),
     index('courses_rels_instructors_id_idx').on(columns.instructorsID),
     index('courses_rels_course_categories_id_idx').on(columns['course-categoriesID']),
+    index('courses_rels_course_tags_id_idx').on(columns['course-tagsID']),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [courses.id],
@@ -918,6 +5398,11 @@ export const courses_rels = pgTable(
       columns: [columns['course-categoriesID']],
       foreignColumns: [course_categories.id],
       name: 'courses_rels_course_categories_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-tagsID']],
+      foreignColumns: [course_tags.id],
+      name: 'courses_rels_course_tags_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -956,6 +5441,190 @@ export const course_categories = pgTable(
   ],
 )
 
+export const course_tags = pgTable(
+  'course_tags',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    slug: varchar('slug').notNull(),
+    description: varchar('description'),
+    colorCode: varchar('color_code'),
+    displayOrder: numeric('display_order', { mode: 'number' }).default(0),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('course_tags_slug_idx').on(columns.slug),
+    index('course_tags_updated_at_idx').on(columns.updatedAt),
+    index('course_tags_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const coupon_codes_allowed_emails = pgTable(
+  'coupon_codes_allowed_emails',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    email: varchar('email').notNull(),
+  },
+  (columns) => [
+    index('coupon_codes_allowed_emails_order_idx').on(columns._order),
+    index('coupon_codes_allowed_emails_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [coupon_codes.id],
+      name: 'coupon_codes_allowed_emails_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const coupon_codes = pgTable(
+  'coupon_codes',
+  {
+    id: serial('id').primaryKey(),
+    code: varchar('code').notNull(),
+    name: varchar('name'),
+    description: varchar('description'),
+    status: enum_coupon_codes_status('status').notNull().default('draft'),
+    startsAt: timestamp('starts_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    expiresAt: timestamp('expires_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    discountType: enum_coupon_codes_discount_type('discount_type').notNull().default('percent'),
+    amount: numeric('amount', { mode: 'number' }).notNull(),
+    maxDiscountAmount: numeric('max_discount_amount', { mode: 'number' }),
+    scopeType: enum_coupon_codes_scope_type('scope_type').notNull().default('all_courses'),
+    excludeSaleCourses: boolean('exclude_sale_courses').default(false),
+    minimumAmount: numeric('minimum_amount', { mode: 'number' }),
+    maximumAmount: numeric('maximum_amount', { mode: 'number' }),
+    usageLimitTotal: numeric('usage_limit_total', { mode: 'number' }),
+    usageLimitPerUser: numeric('usage_limit_per_user', { mode: 'number' }),
+    maxItemsAffected: numeric('max_items_affected', { mode: 'number' }),
+    stackable: boolean('stackable').default(false),
+    priority: numeric('priority', { mode: 'number' }).default(100),
+    usageCount: numeric('usage_count', { mode: 'number' }).default(0),
+    lastUsedAt: timestamp('last_used_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('coupon_codes_code_idx').on(columns.code),
+    index('coupon_codes_status_idx').on(columns.status),
+    index('coupon_codes_starts_at_idx').on(columns.startsAt),
+    index('coupon_codes_expires_at_idx').on(columns.expiresAt),
+    index('coupon_codes_updated_at_idx').on(columns.updatedAt),
+    index('coupon_codes_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const coupon_codes_rels = pgTable(
+  'coupon_codes_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    coursesID: integer('courses_id'),
+    'course-categoriesID': integer('course_categories_id'),
+    traineesID: integer('trainees_id'),
+  },
+  (columns) => [
+    index('coupon_codes_rels_order_idx').on(columns.order),
+    index('coupon_codes_rels_parent_idx').on(columns.parent),
+    index('coupon_codes_rels_path_idx').on(columns.path),
+    index('coupon_codes_rels_courses_id_idx').on(columns.coursesID),
+    index('coupon_codes_rels_course_categories_id_idx').on(columns['course-categoriesID']),
+    index('coupon_codes_rels_trainees_id_idx').on(columns.traineesID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [coupon_codes.id],
+      name: 'coupon_codes_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['coursesID']],
+      foreignColumns: [courses.id],
+      name: 'coupon_codes_rels_courses_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['course-categoriesID']],
+      foreignColumns: [course_categories.id],
+      name: 'coupon_codes_rels_course_categories_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['traineesID']],
+      foreignColumns: [trainees.id],
+      name: 'coupon_codes_rels_trainees_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const coupon_redemptions = pgTable(
+  'coupon_redemptions',
+  {
+    id: serial('id').primaryKey(),
+    coupon: integer('coupon_id')
+      .notNull()
+      .references(() => coupon_codes.id, {
+        onDelete: 'set null',
+      }),
+    trainee: integer('trainee_id').references(() => trainees.id, {
+      onDelete: 'set null',
+    }),
+    user: integer('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    courseEnrollment: integer('course_enrollment_id').references(() => course_enrollments.id, {
+      onDelete: 'set null',
+    }),
+    course: integer('course_id').references(() => courses.id, {
+      onDelete: 'set null',
+    }),
+    contextType: enum_coupon_redemptions_context_type('context_type')
+      .notNull()
+      .default('checkout_commit'),
+    status: enum_coupon_redemptions_status('status').notNull().default('applied'),
+    codeSnapshot: varchar('code_snapshot').notNull(),
+    discountTypeSnapshot: varchar('discount_type_snapshot').notNull(),
+    discountAmountSnapshot: numeric('discount_amount_snapshot', { mode: 'number' }).notNull(),
+    subtotalSnapshot: numeric('subtotal_snapshot', { mode: 'number' }).notNull(),
+    finalTotalSnapshot: numeric('final_total_snapshot', { mode: 'number' }).notNull(),
+    currencySnapshot: varchar('currency_snapshot').notNull().default('PHP'),
+    appliedAt: timestamp('applied_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    metadata: jsonb('metadata'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('coupon_redemptions_coupon_idx').on(columns.coupon),
+    index('coupon_redemptions_trainee_idx').on(columns.trainee),
+    index('coupon_redemptions_user_idx').on(columns.user),
+    index('coupon_redemptions_course_enrollment_idx').on(columns.courseEnrollment),
+    index('coupon_redemptions_course_idx').on(columns.course),
+    index('coupon_redemptions_status_idx').on(columns.status),
+    index('coupon_redemptions_code_snapshot_idx').on(columns.codeSnapshot),
+    index('coupon_redemptions_applied_at_idx').on(columns.appliedAt),
+    index('coupon_redemptions_updated_at_idx').on(columns.updatedAt),
+    index('coupon_redemptions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const course_enrollments = pgTable(
   'course_enrollments',
   {
@@ -982,6 +5651,14 @@ export const course_enrollments = pgTable(
       precision: 3,
     }),
     amountPaid: numeric('amount_paid', { mode: 'number' }),
+    coupon: integer('coupon_id').references(() => coupon_codes.id, {
+      onDelete: 'set null',
+    }),
+    couponCode: varchar('coupon_code'),
+    couponDiscountAmount: numeric('coupon_discount_amount', { mode: 'number' }).default(0),
+    listPriceSnapshot: numeric('list_price_snapshot', { mode: 'number' }),
+    finalPriceSnapshot: numeric('final_price_snapshot', { mode: 'number' }),
+    pricingBreakdown: jsonb('pricing_breakdown'),
     progressPercentage: numeric('progress_percentage', { mode: 'number' }).default(0),
     lastAccessedAt: timestamp('last_accessed_at', {
       mode: 'string',
@@ -998,6 +5675,7 @@ export const course_enrollments = pgTable(
     }),
     notes: varchar('notes'),
     displayTitle: varchar('display_title'),
+    isArchived: boolean('is_archived').default(false),
     metadata: jsonb('metadata'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -1009,6 +5687,8 @@ export const course_enrollments = pgTable(
   (columns) => [
     index('course_enrollments_student_idx').on(columns.student),
     index('course_enrollments_course_idx').on(columns.course),
+    index('course_enrollments_coupon_idx').on(columns.coupon),
+    index('course_enrollments_coupon_code_idx').on(columns.couponCode),
     index('course_enrollments_enrolled_by_idx').on(columns.enrolledBy),
     index('course_enrollments_updated_at_idx').on(columns.updatedAt),
     index('course_enrollments_created_at_idx').on(columns.createdAt),
@@ -1122,6 +5802,7 @@ export const course_modules_rels = pgTable(
     path: varchar('path').notNull(),
     'course-lessonsID': integer('course_lessons_id'),
     assessmentsID: integer('assessments_id'),
+    assignmentsID: integer('assignments_id'),
   },
   (columns) => [
     index('course_modules_rels_order_idx').on(columns.order),
@@ -1129,6 +5810,7 @@ export const course_modules_rels = pgTable(
     index('course_modules_rels_path_idx').on(columns.path),
     index('course_modules_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
     index('course_modules_rels_assessments_id_idx').on(columns.assessmentsID),
+    index('course_modules_rels_assignments_id_idx').on(columns.assignmentsID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [course_modules.id],
@@ -1143,6 +5825,11 @@ export const course_modules_rels = pgTable(
       columns: [columns['assessmentsID']],
       foreignColumns: [assessments.id],
       name: 'course_modules_rels_assessments_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assignmentsID']],
+      foreignColumns: [assignments.id],
+      name: 'course_modules_rels_assignments_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -1316,22 +6003,147 @@ export const announcements = pgTable(
   ],
 )
 
-export const course_feedbacks = pgTable(
-  'course_feedbacks',
+export const feedback_forms_blocks_text_input = pgTable(
+  'feedback_forms_blocks_text_input',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: varchar('id').primaryKey(),
+    name: varchar('name').notNull(),
+    label: varchar('label').notNull(),
+    placeholder: varchar('placeholder'),
+    format: enum_feedback_forms_blocks_text_input_format('format').default('text'),
+    isRequired: boolean('is_required').default(false),
+    blockName: varchar('block_name'),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_text_input_order_idx').on(columns._order),
+    index('feedback_forms_blocks_text_input_parent_id_idx').on(columns._parentID),
+    index('feedback_forms_blocks_text_input_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms.id],
+      name: 'feedback_forms_blocks_text_input_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms_blocks_choice_input_options = pgTable(
+  'feedback_forms_blocks_choice_input_options',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: varchar('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    label: varchar('label').notNull(),
+    value: varchar('value').notNull(),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_choice_input_options_order_idx').on(columns._order),
+    index('feedback_forms_blocks_choice_input_options_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms_blocks_choice_input.id],
+      name: 'feedback_forms_blocks_choice_input_options_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms_blocks_choice_input = pgTable(
+  'feedback_forms_blocks_choice_input',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: varchar('id').primaryKey(),
+    name: varchar('name').notNull(),
+    label: varchar('label').notNull(),
+    uiType: enum_feedback_forms_blocks_choice_input_ui_type('ui_type').notNull().default('radio'),
+    isRequired: boolean('is_required').default(false),
+    blockName: varchar('block_name'),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_choice_input_order_idx').on(columns._order),
+    index('feedback_forms_blocks_choice_input_parent_id_idx').on(columns._parentID),
+    index('feedback_forms_blocks_choice_input_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms.id],
+      name: 'feedback_forms_blocks_choice_input_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms_blocks_survey_matrix_columns = pgTable(
+  'feedback_forms_blocks_survey_matrix_columns',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: varchar('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    label: varchar('label').notNull(),
+    value: varchar('value').notNull(),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_survey_matrix_columns_order_idx').on(columns._order),
+    index('feedback_forms_blocks_survey_matrix_columns_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms_blocks_survey_matrix.id],
+      name: 'feedback_forms_blocks_survey_matrix_columns_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms_blocks_survey_matrix_rows = pgTable(
+  'feedback_forms_blocks_survey_matrix_rows',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: varchar('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    statement: varchar('statement').notNull(),
+    value: varchar('value').notNull(),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_survey_matrix_rows_order_idx').on(columns._order),
+    index('feedback_forms_blocks_survey_matrix_rows_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms_blocks_survey_matrix.id],
+      name: 'feedback_forms_blocks_survey_matrix_rows_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms_blocks_survey_matrix = pgTable(
+  'feedback_forms_blocks_survey_matrix',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    _path: text('_path').notNull(),
+    id: varchar('id').primaryKey(),
+    name: varchar('name').notNull(),
+    question: varchar('question').notNull(),
+    isRequired: boolean('is_required').default(false),
+    blockName: varchar('block_name'),
+  },
+  (columns) => [
+    index('feedback_forms_blocks_survey_matrix_order_idx').on(columns._order),
+    index('feedback_forms_blocks_survey_matrix_parent_id_idx').on(columns._parentID),
+    index('feedback_forms_blocks_survey_matrix_path_idx').on(columns._path),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [feedback_forms.id],
+      name: 'feedback_forms_blocks_survey_matrix_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const feedback_forms = pgTable(
+  'feedback_forms',
   {
     id: serial('id').primaryKey(),
-    user: integer('user_id')
-      .notNull()
-      .references(() => users.id, {
-        onDelete: 'set null',
-      }),
-    course: integer('course_id')
-      .notNull()
-      .references(() => courses.id, {
-        onDelete: 'set null',
-      }),
-    rating: numeric('rating', { mode: 'number' }),
-    comment: varchar('comment').notNull(),
+    title: varchar('title').notNull(),
+    description: varchar('description'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -1340,10 +6152,44 @@ export const course_feedbacks = pgTable(
       .notNull(),
   },
   (columns) => [
-    index('course_feedbacks_user_idx').on(columns.user),
-    index('course_feedbacks_course_idx').on(columns.course),
-    index('course_feedbacks_updated_at_idx').on(columns.updatedAt),
-    index('course_feedbacks_created_at_idx').on(columns.createdAt),
+    index('feedback_forms_updated_at_idx').on(columns.updatedAt),
+    index('feedback_forms_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const feedback_submissions = pgTable(
+  'feedback_submissions',
+  {
+    id: serial('id').primaryKey(),
+    form: integer('form_id')
+      .notNull()
+      .references(() => feedback_forms.id, {
+        onDelete: 'set null',
+      }),
+    course: integer('course_id')
+      .notNull()
+      .references(() => courses.id, {
+        onDelete: 'set null',
+      }),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    responses: jsonb('responses').notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('feedback_submissions_form_idx').on(columns.form),
+    index('feedback_submissions_course_idx').on(columns.course),
+    index('feedback_submissions_trainee_idx').on(columns.trainee),
+    index('feedback_submissions_updated_at_idx').on(columns.updatedAt),
+    index('feedback_submissions_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -1475,6 +6321,7 @@ export const course_item_progress_rels = pgTable(
     path: varchar('path').notNull(),
     'course-lessonsID': integer('course_lessons_id'),
     assessmentsID: integer('assessments_id'),
+    assignmentsID: integer('assignments_id'),
   },
   (columns) => [
     index('course_item_progress_rels_order_idx').on(columns.order),
@@ -1482,6 +6329,7 @@ export const course_item_progress_rels = pgTable(
     index('course_item_progress_rels_path_idx').on(columns.path),
     index('course_item_progress_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
     index('course_item_progress_rels_assessments_id_idx').on(columns.assessmentsID),
+    index('course_item_progress_rels_assignments_id_idx').on(columns.assignmentsID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [course_item_progress.id],
@@ -1496,6 +6344,11 @@ export const course_item_progress_rels = pgTable(
       columns: [columns['assessmentsID']],
       foreignColumns: [assessments.id],
       name: 'course_item_progress_rels_assessments_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['assignmentsID']],
+      foreignColumns: [assignments.id],
+      name: 'course_item_progress_rels_assignments_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -1635,6 +6488,7 @@ export const assessments = pgTable(
     passingScore: numeric('passing_score', { mode: 'number' }).default(70),
     maxAttempts: numeric('max_attempts', { mode: 'number' }).default(1),
     timeLimitMinutes: numeric('time_limit_minutes', { mode: 'number' }),
+    gradeWeight: numeric('grade_weight', { mode: 'number' }).default(1),
     showCorrectAnswer: boolean('show_correct_answer').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -1688,6 +6542,7 @@ export const assessment_submissions = pgTable(
     }).notNull(),
     completedAt: timestamp('completed_at', { mode: 'string', withTimezone: true, precision: 3 }),
     isLatest: boolean('is_latest').default(true),
+    isFeedbackRead: boolean('is_feedback_read').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -1702,6 +6557,198 @@ export const assessment_submissions = pgTable(
     index('assessment_submissions_course_idx').on(columns.course),
     index('assessment_submissions_updated_at_idx').on(columns.updatedAt),
     index('assessment_submissions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const assignments_allowed_file_types = pgTable(
+  'assignments_allowed_file_types',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum_assignments_allowed_file_types('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('assignments_allowed_file_types_order_idx').on(columns.order),
+    index('assignments_allowed_file_types_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [assignments.id],
+      name: 'assignments_allowed_file_types_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const assignments = pgTable(
+  'assignments',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    description: jsonb('description'),
+    instructor: integer('instructor_id')
+      .notNull()
+      .references(() => instructors.id, {
+        onDelete: 'set null',
+      }),
+    maxScore: numeric('max_score', { mode: 'number' }).notNull().default(100),
+    passingScore: numeric('passing_score', { mode: 'number' }).notNull().default(75),
+    submissionType: enum_assignments_submission_type('submission_type').notNull().default('both'),
+    dueDate: timestamp('due_date', { mode: 'string', withTimezone: true, precision: 3 }),
+    gradeWeight: numeric('grade_weight', { mode: 'number' }).default(1),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('assignments_instructor_idx').on(columns.instructor),
+    index('assignments_updated_at_idx').on(columns.updatedAt),
+    index('assignments_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const assignments_rels = pgTable(
+  'assignments_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('assignments_rels_order_idx').on(columns.order),
+    index('assignments_rels_parent_idx').on(columns.parent),
+    index('assignments_rels_path_idx').on(columns.path),
+    index('assignments_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [assignments.id],
+      name: 'assignments_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'assignments_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const assignment_submissions = pgTable(
+  'assignment_submissions',
+  {
+    id: serial('id').primaryKey(),
+    assignment: integer('assignment_id')
+      .notNull()
+      .references(() => assignments.id, {
+        onDelete: 'set null',
+      }),
+    trainee: integer('trainee_id')
+      .notNull()
+      .references(() => trainees.id, {
+        onDelete: 'set null',
+      }),
+    enrollment: integer('enrollment_id')
+      .notNull()
+      .references(() => course_enrollments.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_assignment_submissions_status('status').notNull().default('draft'),
+    submittedText: jsonb('submitted_text'),
+    score: numeric('score', { mode: 'number' }),
+    feedback: jsonb('feedback'),
+    submittedAt: timestamp('submitted_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    gradedAt: timestamp('graded_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    gradedBy: integer('graded_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    isFeedbackRead: boolean('is_feedback_read').default(false),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('assignment_submissions_assignment_idx').on(columns.assignment),
+    index('assignment_submissions_trainee_idx').on(columns.trainee),
+    index('assignment_submissions_enrollment_idx').on(columns.enrollment),
+    index('assignment_submissions_status_idx').on(columns.status),
+    index('assignment_submissions_graded_by_idx').on(columns.gradedBy),
+    index('assignment_submissions_updated_at_idx').on(columns.updatedAt),
+    index('assignment_submissions_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const assignment_submissions_rels = pgTable(
+  'assignment_submissions_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    mediaID: integer('media_id'),
+  },
+  (columns) => [
+    index('assignment_submissions_rels_order_idx').on(columns.order),
+    index('assignment_submissions_rels_parent_idx').on(columns.parent),
+    index('assignment_submissions_rels_path_idx').on(columns.path),
+    index('assignment_submissions_rels_media_id_idx').on(columns.mediaID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [assignment_submissions.id],
+      name: 'assignment_submissions_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['mediaID']],
+      foreignColumns: [media.id],
+      name: 'assignment_submissions_rels_media_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const grade_scales_grades = pgTable(
+  'grade_scales_grades',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    label: varchar('label').notNull(),
+    minScore: numeric('min_score', { mode: 'number' }).notNull(),
+    maxScore: numeric('max_score', { mode: 'number' }).notNull(),
+    gpaValue: numeric('gpa_value', { mode: 'number' }),
+    description: varchar('description'),
+  },
+  (columns) => [
+    index('grade_scales_grades_order_idx').on(columns._order),
+    index('grade_scales_grades_parent_id_idx').on(columns._parentID),
+    foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [grade_scales.id],
+      name: 'grade_scales_grades_parent_id_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const grade_scales = pgTable(
+  'grade_scales',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    description: varchar('description'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('grade_scales_updated_at_idx').on(columns.updatedAt),
+    index('grade_scales_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -1724,6 +6771,7 @@ export const submission_answers = pgTable(
     isCorrect: boolean('is_correct').default(false),
     pointsEarned: numeric('points_earned', { mode: 'number' }).default(0),
     feedback: varchar('feedback'),
+    isFeedbackRead: boolean('is_feedback_read').default(false),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -1886,6 +6934,58 @@ export const user_notifications = pgTable(
     index('user_notifications_notification_idx').on(columns.notification),
     index('user_notifications_updated_at_idx').on(columns.updatedAt),
     index('user_notifications_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const web_push_subscriptions = pgTable(
+  'web_push_subscriptions',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    endpoint: varchar('endpoint').notNull(),
+    p256dh: varchar('p256dh').notNull(),
+    auth: varchar('auth').notNull(),
+    userAgent: varchar('user_agent'),
+    browser: varchar('browser'),
+    platform: varchar('platform'),
+    deviceLabel: varchar('device_label'),
+    permissionState: enum_web_push_subscriptions_permission_state('permission_state')
+      .notNull()
+      .default('granted'),
+    isActive: boolean('is_active').notNull().default(true),
+    lastSeenAt: timestamp('last_seen_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    lastSubscribedAt: timestamp('last_subscribed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastSuccessAt: timestamp('last_success_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastFailureAt: timestamp('last_failure_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    failureReason: varchar('failure_reason'),
+    subscriptionJSON: jsonb('subscription_j_s_o_n'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('web_push_subscriptions_user_idx').on(columns.user),
+    index('web_push_subscriptions_updated_at_idx').on(columns.updatedAt),
+    index('web_push_subscriptions_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -2109,7 +7209,7 @@ export const chat_messages = pgTable(
       .references(() => users.id, {
         onDelete: 'set null',
       }),
-    content: jsonb('content').notNull(),
+    content: jsonb('content'),
     contentType: enum_chat_messages_content_type('content_type').default('text'),
     replyTo: integer('reply_to_id').references((): AnyPgColumn => chat_messages.id, {
       onDelete: 'set null',
@@ -2230,336 +7330,6 @@ export const payload_kv = pgTable(
   (columns) => [uniqueIndex('payload_kv_key_idx').on(columns.key)],
 )
 
-export const payload_locked_documents = pgTable(
-  'payload_locked_documents',
-  {
-    id: serial('id').primaryKey(),
-    globalSlug: varchar('global_slug'),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('payload_locked_documents_global_slug_idx').on(columns.globalSlug),
-    index('payload_locked_documents_updated_at_idx').on(columns.updatedAt),
-    index('payload_locked_documents_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const payload_locked_documents_rels = pgTable(
-  'payload_locked_documents_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    usersID: integer('users_id'),
-    instructorsID: integer('instructors_id'),
-    traineesID: integer('trainees_id'),
-    adminsID: integer('admins_id'),
-    'user-eventsID': integer('user_events_id'),
-    'emergency-contactsID': integer('emergency_contacts_id'),
-    mediaID: integer('media_id'),
-    postsID: integer('posts_id'),
-    'post-categoriesID': integer('post_categories_id'),
-    coursesID: integer('courses_id'),
-    'course-categoriesID': integer('course_categories_id'),
-    'course-enrollmentsID': integer('course_enrollments_id'),
-    certificatesID: integer('certificates_id'),
-    'certificate-templatesID': integer('certificate_templates_id'),
-    'course-modulesID': integer('course_modules_id'),
-    'course-lessonsID': integer('course_lessons_id'),
-    materialsID: integer('materials_id'),
-    'course-materialsID': integer('course_materials_id'),
-    'lesson-materialsID': integer('lesson_materials_id'),
-    announcementsID: integer('announcements_id'),
-    'course-feedbacksID': integer('course_feedbacks_id'),
-    wishlistsID: integer('wishlists_id'),
-    'recently-viewed-coursesID': integer('recently_viewed_courses_id'),
-    'course-item-progressID': integer('course_item_progress_id'),
-    questionsID: integer('questions_id'),
-    assessmentsID: integer('assessments_id'),
-    'assessment-submissionsID': integer('assessment_submissions_id'),
-    'submission-answersID': integer('submission_answers_id'),
-    'notification-templatesID': integer('notification_templates_id'),
-    notificationsID: integer('notifications_id'),
-    'user-notificationsID': integer('user_notifications_id'),
-    'support-ticketsID': integer('support_tickets_id'),
-    'support-ticket-messagesID': integer('support_ticket_messages_id'),
-    chatsID: integer('chats_id'),
-    'chat-messagesID': integer('chat_messages_id'),
-    'chat-message-statusID': integer('chat_message_status_id'),
-    'chat-typing-statusID': integer('chat_typing_status_id'),
-  },
-  (columns) => [
-    index('payload_locked_documents_rels_order_idx').on(columns.order),
-    index('payload_locked_documents_rels_parent_idx').on(columns.parent),
-    index('payload_locked_documents_rels_path_idx').on(columns.path),
-    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
-    index('payload_locked_documents_rels_instructors_id_idx').on(columns.instructorsID),
-    index('payload_locked_documents_rels_trainees_id_idx').on(columns.traineesID),
-    index('payload_locked_documents_rels_admins_id_idx').on(columns.adminsID),
-    index('payload_locked_documents_rels_user_events_id_idx').on(columns['user-eventsID']),
-    index('payload_locked_documents_rels_emergency_contacts_id_idx').on(
-      columns['emergency-contactsID'],
-    ),
-    index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
-    index('payload_locked_documents_rels_posts_id_idx').on(columns.postsID),
-    index('payload_locked_documents_rels_post_categories_id_idx').on(columns['post-categoriesID']),
-    index('payload_locked_documents_rels_courses_id_idx').on(columns.coursesID),
-    index('payload_locked_documents_rels_course_categories_id_idx').on(
-      columns['course-categoriesID'],
-    ),
-    index('payload_locked_documents_rels_course_enrollments_id_idx').on(
-      columns['course-enrollmentsID'],
-    ),
-    index('payload_locked_documents_rels_certificates_id_idx').on(columns.certificatesID),
-    index('payload_locked_documents_rels_certificate_templates_id_idx').on(
-      columns['certificate-templatesID'],
-    ),
-    index('payload_locked_documents_rels_course_modules_id_idx').on(columns['course-modulesID']),
-    index('payload_locked_documents_rels_course_lessons_id_idx').on(columns['course-lessonsID']),
-    index('payload_locked_documents_rels_materials_id_idx').on(columns.materialsID),
-    index('payload_locked_documents_rels_course_materials_id_idx').on(
-      columns['course-materialsID'],
-    ),
-    index('payload_locked_documents_rels_lesson_materials_id_idx').on(
-      columns['lesson-materialsID'],
-    ),
-    index('payload_locked_documents_rels_announcements_id_idx').on(columns.announcementsID),
-    index('payload_locked_documents_rels_course_feedbacks_id_idx').on(
-      columns['course-feedbacksID'],
-    ),
-    index('payload_locked_documents_rels_wishlists_id_idx').on(columns.wishlistsID),
-    index('payload_locked_documents_rels_recently_viewed_courses_id_idx').on(
-      columns['recently-viewed-coursesID'],
-    ),
-    index('payload_locked_documents_rels_course_item_progress_id_idx').on(
-      columns['course-item-progressID'],
-    ),
-    index('payload_locked_documents_rels_questions_id_idx').on(columns.questionsID),
-    index('payload_locked_documents_rels_assessments_id_idx').on(columns.assessmentsID),
-    index('payload_locked_documents_rels_assessment_submissions_id_idx').on(
-      columns['assessment-submissionsID'],
-    ),
-    index('payload_locked_documents_rels_submission_answers_id_idx').on(
-      columns['submission-answersID'],
-    ),
-    index('payload_locked_documents_rels_notification_templates_id_idx').on(
-      columns['notification-templatesID'],
-    ),
-    index('payload_locked_documents_rels_notifications_id_idx').on(columns.notificationsID),
-    index('payload_locked_documents_rels_user_notifications_id_idx').on(
-      columns['user-notificationsID'],
-    ),
-    index('payload_locked_documents_rels_support_tickets_id_idx').on(columns['support-ticketsID']),
-    index('payload_locked_documents_rels_support_ticket_messages_id_idx').on(
-      columns['support-ticket-messagesID'],
-    ),
-    index('payload_locked_documents_rels_chats_id_idx').on(columns.chatsID),
-    index('payload_locked_documents_rels_chat_messages_id_idx').on(columns['chat-messagesID']),
-    index('payload_locked_documents_rels_chat_message_status_id_idx').on(
-      columns['chat-message-statusID'],
-    ),
-    index('payload_locked_documents_rels_chat_typing_status_id_idx').on(
-      columns['chat-typing-statusID'],
-    ),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [payload_locked_documents.id],
-      name: 'payload_locked_documents_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['usersID']],
-      foreignColumns: [users.id],
-      name: 'payload_locked_documents_rels_users_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['instructorsID']],
-      foreignColumns: [instructors.id],
-      name: 'payload_locked_documents_rels_instructors_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['traineesID']],
-      foreignColumns: [trainees.id],
-      name: 'payload_locked_documents_rels_trainees_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['adminsID']],
-      foreignColumns: [admins.id],
-      name: 'payload_locked_documents_rels_admins_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['user-eventsID']],
-      foreignColumns: [user_events.id],
-      name: 'payload_locked_documents_rels_user_events_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['emergency-contactsID']],
-      foreignColumns: [emergency_contacts.id],
-      name: 'payload_locked_documents_rels_emergency_contacts_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['mediaID']],
-      foreignColumns: [media.id],
-      name: 'payload_locked_documents_rels_media_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['postsID']],
-      foreignColumns: [posts.id],
-      name: 'payload_locked_documents_rels_posts_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['post-categoriesID']],
-      foreignColumns: [post_categories.id],
-      name: 'payload_locked_documents_rels_post_categories_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['coursesID']],
-      foreignColumns: [courses.id],
-      name: 'payload_locked_documents_rels_courses_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-categoriesID']],
-      foreignColumns: [course_categories.id],
-      name: 'payload_locked_documents_rels_course_categories_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-enrollmentsID']],
-      foreignColumns: [course_enrollments.id],
-      name: 'payload_locked_documents_rels_course_enrollments_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['certificatesID']],
-      foreignColumns: [certificates.id],
-      name: 'payload_locked_documents_rels_certificates_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['certificate-templatesID']],
-      foreignColumns: [certificate_templates.id],
-      name: 'payload_locked_documents_rels_certificate_templates_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-modulesID']],
-      foreignColumns: [course_modules.id],
-      name: 'payload_locked_documents_rels_course_modules_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-lessonsID']],
-      foreignColumns: [course_lessons.id],
-      name: 'payload_locked_documents_rels_course_lessons_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['materialsID']],
-      foreignColumns: [materials.id],
-      name: 'payload_locked_documents_rels_materials_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-materialsID']],
-      foreignColumns: [course_materials.id],
-      name: 'payload_locked_documents_rels_course_materials_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['lesson-materialsID']],
-      foreignColumns: [lesson_materials.id],
-      name: 'payload_locked_documents_rels_lesson_materials_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['announcementsID']],
-      foreignColumns: [announcements.id],
-      name: 'payload_locked_documents_rels_announcements_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-feedbacksID']],
-      foreignColumns: [course_feedbacks.id],
-      name: 'payload_locked_documents_rels_course_feedbacks_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['wishlistsID']],
-      foreignColumns: [wishlists.id],
-      name: 'payload_locked_documents_rels_wishlists_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['recently-viewed-coursesID']],
-      foreignColumns: [recently_viewed_courses.id],
-      name: 'payload_locked_documents_rels_recently_viewed_courses_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['course-item-progressID']],
-      foreignColumns: [course_item_progress.id],
-      name: 'payload_locked_documents_rels_course_item_progress_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['questionsID']],
-      foreignColumns: [questions.id],
-      name: 'payload_locked_documents_rels_questions_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['assessmentsID']],
-      foreignColumns: [assessments.id],
-      name: 'payload_locked_documents_rels_assessments_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['assessment-submissionsID']],
-      foreignColumns: [assessment_submissions.id],
-      name: 'payload_locked_documents_rels_assessment_submissions_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['submission-answersID']],
-      foreignColumns: [submission_answers.id],
-      name: 'payload_locked_documents_rels_submission_answers_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['notification-templatesID']],
-      foreignColumns: [notification_templates.id],
-      name: 'payload_locked_documents_rels_notification_templates_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['notificationsID']],
-      foreignColumns: [notifications.id],
-      name: 'payload_locked_documents_rels_notifications_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['user-notificationsID']],
-      foreignColumns: [user_notifications.id],
-      name: 'payload_locked_documents_rels_user_notifications_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['support-ticketsID']],
-      foreignColumns: [support_tickets.id],
-      name: 'payload_locked_documents_rels_support_tickets_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['support-ticket-messagesID']],
-      foreignColumns: [support_ticket_messages.id],
-      name: 'payload_locked_documents_rels_support_ticket_messages_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['chatsID']],
-      foreignColumns: [chats.id],
-      name: 'payload_locked_documents_rels_chats_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['chat-messagesID']],
-      foreignColumns: [chat_messages.id],
-      name: 'payload_locked_documents_rels_chat_messages_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['chat-message-statusID']],
-      foreignColumns: [chat_message_status.id],
-      name: 'payload_locked_documents_rels_chat_message_status_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['chat-typing-statusID']],
-      foreignColumns: [chat_typing_status.id],
-      name: 'payload_locked_documents_rels_chat_typing_status_fk',
-    }).onDelete('cascade'),
-  ],
-)
-
 export const payload_preferences = pgTable(
   'payload_preferences',
   {
@@ -2623,6 +7393,100 @@ export const payload_migrations = pgTable(
   (columns) => [
     index('payload_migrations_updated_at_idx').on(columns.updatedAt),
     index('payload_migrations_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const accounting_settings = pgTable(
+  'accounting_settings',
+  {
+    id: serial('id').primaryKey(),
+    baseCurrency: varchar('base_currency').notNull().default('PHP'),
+    timezone: varchar('timezone').notNull().default('Asia/Manila'),
+    journalNumberPrefix: varchar('journal_number_prefix').notNull().default('JE'),
+    customerNumberPrefix: varchar('customer_number_prefix').notNull().default('CUST'),
+    vendorNumberPrefix: varchar('vendor_number_prefix').notNull().default('VEND'),
+    invoiceNumberPrefix: varchar('invoice_number_prefix').notNull().default('INV'),
+    billNumberPrefix: varchar('bill_number_prefix').notNull().default('BILL'),
+    paymentReceivedNumberPrefix: varchar('payment_received_number_prefix')
+      .notNull()
+      .default('RCPT'),
+    paymentMadeNumberPrefix: varchar('payment_made_number_prefix').notNull().default('PAY'),
+    officialReceiptNumberPrefix: varchar('official_receipt_number_prefix').notNull().default('OR'),
+    creditNoteNumberPrefix: varchar('credit_note_number_prefix').notNull().default('CN'),
+    vendorCreditNumberPrefix: varchar('vendor_credit_number_prefix').notNull().default('VCN'),
+    refundNumberPrefix: varchar('refund_number_prefix').notNull().default('REF'),
+    depositNumberPrefix: varchar('deposit_number_prefix').notNull().default('DEP'),
+    transferNumberPrefix: varchar('transfer_number_prefix').notNull().default('TRF'),
+    openingBalanceSourceType: enum_accounting_settings_opening_balance_source_type(
+      'opening_balance_source_type',
+    )
+      .notNull()
+      .default('opening_balance'),
+    defaultSuspenseAccount: integer('default_suspense_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    defaultReceivableAccount: integer('default_receivable_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    defaultPayableAccount: integer('default_payable_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    defaultUndepositedFundsAccount: integer('default_undeposited_funds_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    defaultOutputTaxAccount: integer('default_output_tax_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    defaultInputTaxAccount: integer('default_input_tax_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    retainedEarningsAccount: integer('retained_earnings_account_id').references(
+      () => accounting_chart_of_accounts.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    allowBackdatedPosting: boolean('allow_backdated_posting').default(false),
+    defaultTaxBehavior: enum_accounting_settings_default_tax_behavior('default_tax_behavior')
+      .notNull()
+      .default('exclusive'),
+    updatedBy: integer('updated_by_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  },
+  (columns) => [
+    index('accounting_settings_default_suspense_account_idx').on(columns.defaultSuspenseAccount),
+    index('accounting_settings_default_receivable_account_idx').on(
+      columns.defaultReceivableAccount,
+    ),
+    index('accounting_settings_default_payable_account_idx').on(columns.defaultPayableAccount),
+    index('accounting_settings_default_undeposited_funds_account_idx').on(
+      columns.defaultUndepositedFundsAccount,
+    ),
+    index('accounting_settings_default_output_tax_account_idx').on(columns.defaultOutputTaxAccount),
+    index('accounting_settings_default_input_tax_account_idx').on(columns.defaultInputTaxAccount),
+    index('accounting_settings_retained_earnings_account_idx').on(columns.retainedEarningsAccount),
+    index('accounting_settings_updated_by_idx').on(columns.updatedBy),
   ],
 )
 
@@ -2740,7 +7604,13 @@ export const relations_emergency_contacts = relations(emergency_contacts, ({ one
     relationName: 'user',
   }),
 }))
-export const relations_media = relations(media, () => ({}))
+export const relations_media = relations(media, ({ one }) => ({
+  uploadedBy: one(users, {
+    fields: [media.uploadedBy],
+    references: [users.id],
+    relationName: 'uploadedBy',
+  }),
+}))
 export const relations_posts_tags = relations(posts_tags, ({ one }) => ({
   _parentID: one(posts, {
     fields: [posts_tags._parentID],
@@ -2827,6 +7697,1947 @@ export const relations_post_categories = relations(post_categories, ({ one }) =>
     relationName: 'icon',
   }),
 }))
+export const relations_post_tags = relations(post_tags, () => ({}))
+export const relations_post_comments = relations(post_comments, ({ one }) => ({
+  post: one(posts, {
+    fields: [post_comments.post],
+    references: [posts.id],
+    relationName: 'post',
+  }),
+  parent: one(post_comments, {
+    fields: [post_comments.parent],
+    references: [post_comments.id],
+    relationName: 'parent',
+  }),
+  author: one(users, {
+    fields: [post_comments.author],
+    references: [users.id],
+    relationName: 'author',
+  }),
+}))
+export const relations_accounting_chart_of_accounts = relations(
+  accounting_chart_of_accounts,
+  ({ one }) => ({
+    parentAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_chart_of_accounts.parentAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'parentAccount',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_chart_of_accounts.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_chart_of_accounts.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_fiscal_years = relations(accounting_fiscal_years, ({ one }) => ({
+  closedBy: one(users, {
+    fields: [accounting_fiscal_years.closedBy],
+    references: [users.id],
+    relationName: 'closedBy',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_fiscal_years.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_fiscal_years.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_periods = relations(accounting_periods, ({ one }) => ({
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [accounting_periods.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  closedBy: one(users, {
+    fields: [accounting_periods.closedBy],
+    references: [users.id],
+    relationName: 'closedBy',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_periods.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_periods.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_tax_codes = relations(accounting_tax_codes, ({ one }) => ({
+  purchaseAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_tax_codes.purchaseAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'purchaseAccount',
+  }),
+  salesAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_tax_codes.salesAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'salesAccount',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_tax_codes.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_tax_codes.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_journal_entries = relations(
+  accounting_journal_entries,
+  ({ one }) => ({
+    fiscalYear: one(accounting_fiscal_years, {
+      fields: [accounting_journal_entries.fiscalYear],
+      references: [accounting_fiscal_years.id],
+      relationName: 'fiscalYear',
+    }),
+    period: one(accounting_periods, {
+      fields: [accounting_journal_entries.period],
+      references: [accounting_periods.id],
+      relationName: 'period',
+    }),
+    reversalOf: one(accounting_journal_entries, {
+      fields: [accounting_journal_entries.reversalOf],
+      references: [accounting_journal_entries.id],
+      relationName: 'reversalOf',
+    }),
+    reversalEntry: one(accounting_journal_entries, {
+      fields: [accounting_journal_entries.reversalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'reversalEntry',
+    }),
+    reversedByUser: one(users, {
+      fields: [accounting_journal_entries.reversedByUser],
+      references: [users.id],
+      relationName: 'reversedByUser',
+    }),
+    postedBy: one(users, {
+      fields: [accounting_journal_entries.postedBy],
+      references: [users.id],
+      relationName: 'postedBy',
+    }),
+    approvedBy: one(users, {
+      fields: [accounting_journal_entries.approvedBy],
+      references: [users.id],
+      relationName: 'approvedBy',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_journal_entries.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_journal_entries.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_journal_entry_lines = relations(
+  accounting_journal_entry_lines,
+  ({ one }) => ({
+    journalEntry: one(accounting_journal_entries, {
+      fields: [accounting_journal_entry_lines.journalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'journalEntry',
+    }),
+    account: one(accounting_chart_of_accounts, {
+      fields: [accounting_journal_entry_lines.account],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'account',
+    }),
+    taxCode: one(accounting_tax_codes, {
+      fields: [accounting_journal_entry_lines.taxCode],
+      references: [accounting_tax_codes.id],
+      relationName: 'taxCode',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_journal_entry_lines.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_journal_entry_lines.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_currencies = relations(acct_currencies, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [acct_currencies.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_currencies.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_payment_terms = relations(acct_payment_terms, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [acct_payment_terms.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_payment_terms.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_customers = relations(accounting_customers, ({ one }) => ({
+  currencyReference: one(acct_currencies, {
+    fields: [accounting_customers.currencyReference],
+    references: [acct_currencies.id],
+    relationName: 'currencyReference',
+  }),
+  paymentTermReference: one(acct_payment_terms, {
+    fields: [accounting_customers.paymentTermReference],
+    references: [acct_payment_terms.id],
+    relationName: 'paymentTermReference',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_customers.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_customers.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_vendors = relations(accounting_vendors, ({ one }) => ({
+  currencyReference: one(acct_currencies, {
+    fields: [accounting_vendors.currencyReference],
+    references: [acct_currencies.id],
+    relationName: 'currencyReference',
+  }),
+  paymentTermReference: one(acct_payment_terms, {
+    fields: [accounting_vendors.paymentTermReference],
+    references: [acct_payment_terms.id],
+    relationName: 'paymentTermReference',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_vendors.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_vendors.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_bank_accounts = relations(
+  accounting_bank_accounts,
+  ({ one }) => ({
+    currencyReference: one(acct_currencies, {
+      fields: [accounting_bank_accounts.currencyReference],
+      references: [acct_currencies.id],
+      relationName: 'currencyReference',
+    }),
+    ledgerAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_bank_accounts.ledgerAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'ledgerAccount',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bank_accounts.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bank_accounts.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_invoices = relations(accounting_invoices, ({ one }) => ({
+  customer: one(accounting_customers, {
+    fields: [accounting_invoices.customer],
+    references: [accounting_customers.id],
+    relationName: 'customer',
+  }),
+  project: one(acct_projects, {
+    fields: [accounting_invoices.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [accounting_invoices.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  period: one(accounting_periods, {
+    fields: [accounting_invoices.period],
+    references: [accounting_periods.id],
+    relationName: 'period',
+  }),
+  receivableAccountOverride: one(accounting_chart_of_accounts, {
+    fields: [accounting_invoices.receivableAccountOverride],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'receivableAccountOverride',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [accounting_invoices.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  voidedBy: one(users, {
+    fields: [accounting_invoices.voidedBy],
+    references: [users.id],
+    relationName: 'voidedBy',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_invoices.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_invoices.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_invoice_line_items = relations(
+  accounting_invoice_line_items,
+  ({ one }) => ({
+    invoice: one(accounting_invoices, {
+      fields: [accounting_invoice_line_items.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+    taxCode: one(accounting_tax_codes, {
+      fields: [accounting_invoice_line_items.taxCode],
+      references: [accounting_tax_codes.id],
+      relationName: 'taxCode',
+    }),
+    incomeAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_invoice_line_items.incomeAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'incomeAccount',
+    }),
+    receivableAccountOverride: one(accounting_chart_of_accounts, {
+      fields: [accounting_invoice_line_items.receivableAccountOverride],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'receivableAccountOverride',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_invoice_line_items.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_invoice_line_items.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_bills = relations(accounting_bills, ({ one }) => ({
+  vendor: one(accounting_vendors, {
+    fields: [accounting_bills.vendor],
+    references: [accounting_vendors.id],
+    relationName: 'vendor',
+  }),
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [accounting_bills.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  period: one(accounting_periods, {
+    fields: [accounting_bills.period],
+    references: [accounting_periods.id],
+    relationName: 'period',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [accounting_bills.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  payableAccountOverride: one(accounting_chart_of_accounts, {
+    fields: [accounting_bills.payableAccountOverride],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'payableAccountOverride',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_bills.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_bills.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_bill_line_items = relations(
+  accounting_bill_line_items,
+  ({ one }) => ({
+    bill: one(accounting_bills, {
+      fields: [accounting_bill_line_items.bill],
+      references: [accounting_bills.id],
+      relationName: 'bill',
+    }),
+    taxCode: one(accounting_tax_codes, {
+      fields: [accounting_bill_line_items.taxCode],
+      references: [accounting_tax_codes.id],
+      relationName: 'taxCode',
+    }),
+    expenseAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_bill_line_items.expenseAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'expenseAccount',
+    }),
+    assetAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_bill_line_items.assetAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'assetAccount',
+    }),
+    payableAccountOverride: one(accounting_chart_of_accounts, {
+      fields: [accounting_bill_line_items.payableAccountOverride],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'payableAccountOverride',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bill_line_items.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bill_line_items.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_credit_notes_applications = relations(
+  accounting_credit_notes_applications,
+  ({ one }) => ({
+    _parentID: one(accounting_credit_notes, {
+      fields: [accounting_credit_notes_applications._parentID],
+      references: [accounting_credit_notes.id],
+      relationName: 'applications',
+    }),
+    invoice: one(accounting_invoices, {
+      fields: [accounting_credit_notes_applications.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+  }),
+)
+export const relations_accounting_credit_notes = relations(
+  accounting_credit_notes,
+  ({ one, many }) => ({
+    customer: one(accounting_customers, {
+      fields: [accounting_credit_notes.customer],
+      references: [accounting_customers.id],
+      relationName: 'customer',
+    }),
+    fiscalYear: one(accounting_fiscal_years, {
+      fields: [accounting_credit_notes.fiscalYear],
+      references: [accounting_fiscal_years.id],
+      relationName: 'fiscalYear',
+    }),
+    period: one(accounting_periods, {
+      fields: [accounting_credit_notes.period],
+      references: [accounting_periods.id],
+      relationName: 'period',
+    }),
+    sourceInvoice: one(accounting_invoices, {
+      fields: [accounting_credit_notes.sourceInvoice],
+      references: [accounting_invoices.id],
+      relationName: 'sourceInvoice',
+    }),
+    applications: many(accounting_credit_notes_applications, {
+      relationName: 'applications',
+    }),
+    adjustmentAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_credit_notes.adjustmentAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'adjustmentAccount',
+    }),
+    postedJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_credit_notes.postedJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'postedJournalEntry',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_credit_notes.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_credit_notes.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_vendor_credits_applications = relations(
+  accounting_vendor_credits_applications,
+  ({ one }) => ({
+    _parentID: one(accounting_vendor_credits, {
+      fields: [accounting_vendor_credits_applications._parentID],
+      references: [accounting_vendor_credits.id],
+      relationName: 'applications',
+    }),
+    bill: one(accounting_bills, {
+      fields: [accounting_vendor_credits_applications.bill],
+      references: [accounting_bills.id],
+      relationName: 'bill',
+    }),
+  }),
+)
+export const relations_accounting_vendor_credits = relations(
+  accounting_vendor_credits,
+  ({ one, many }) => ({
+    vendor: one(accounting_vendors, {
+      fields: [accounting_vendor_credits.vendor],
+      references: [accounting_vendors.id],
+      relationName: 'vendor',
+    }),
+    fiscalYear: one(accounting_fiscal_years, {
+      fields: [accounting_vendor_credits.fiscalYear],
+      references: [accounting_fiscal_years.id],
+      relationName: 'fiscalYear',
+    }),
+    period: one(accounting_periods, {
+      fields: [accounting_vendor_credits.period],
+      references: [accounting_periods.id],
+      relationName: 'period',
+    }),
+    sourceBill: one(accounting_bills, {
+      fields: [accounting_vendor_credits.sourceBill],
+      references: [accounting_bills.id],
+      relationName: 'sourceBill',
+    }),
+    applications: many(accounting_vendor_credits_applications, {
+      relationName: 'applications',
+    }),
+    adjustmentAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_vendor_credits.adjustmentAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'adjustmentAccount',
+    }),
+    postedJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_vendor_credits.postedJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'postedJournalEntry',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_vendor_credits.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_vendor_credits.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_payments_received_applications = relations(
+  accounting_payments_received_applications,
+  ({ one }) => ({
+    _parentID: one(accounting_payments_received, {
+      fields: [accounting_payments_received_applications._parentID],
+      references: [accounting_payments_received.id],
+      relationName: 'applications',
+    }),
+    invoice: one(accounting_invoices, {
+      fields: [accounting_payments_received_applications.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+  }),
+)
+export const relations_accounting_payments_received = relations(
+  accounting_payments_received,
+  ({ one, many }) => ({
+    customer: one(accounting_customers, {
+      fields: [accounting_payments_received.customer],
+      references: [accounting_customers.id],
+      relationName: 'customer',
+    }),
+    fiscalYear: one(accounting_fiscal_years, {
+      fields: [accounting_payments_received.fiscalYear],
+      references: [accounting_fiscal_years.id],
+      relationName: 'fiscalYear',
+    }),
+    period: one(accounting_periods, {
+      fields: [accounting_payments_received.period],
+      references: [accounting_periods.id],
+      relationName: 'period',
+    }),
+    depositAccount: one(accounting_bank_accounts, {
+      fields: [accounting_payments_received.depositAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'depositAccount',
+    }),
+    undepositedFundsAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_payments_received.undepositedFundsAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'undepositedFundsAccount',
+    }),
+    applications: many(accounting_payments_received_applications, {
+      relationName: 'applications',
+    }),
+    postedJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_payments_received.postedJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'postedJournalEntry',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_payments_received.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_payments_received.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_payments_made_applications = relations(
+  accounting_payments_made_applications,
+  ({ one }) => ({
+    _parentID: one(accounting_payments_made, {
+      fields: [accounting_payments_made_applications._parentID],
+      references: [accounting_payments_made.id],
+      relationName: 'applications',
+    }),
+    bill: one(accounting_bills, {
+      fields: [accounting_payments_made_applications.bill],
+      references: [accounting_bills.id],
+      relationName: 'bill',
+    }),
+  }),
+)
+export const relations_accounting_payments_made = relations(
+  accounting_payments_made,
+  ({ one, many }) => ({
+    vendor: one(accounting_vendors, {
+      fields: [accounting_payments_made.vendor],
+      references: [accounting_vendors.id],
+      relationName: 'vendor',
+    }),
+    fiscalYear: one(accounting_fiscal_years, {
+      fields: [accounting_payments_made.fiscalYear],
+      references: [accounting_fiscal_years.id],
+      relationName: 'fiscalYear',
+    }),
+    period: one(accounting_periods, {
+      fields: [accounting_payments_made.period],
+      references: [accounting_periods.id],
+      relationName: 'period',
+    }),
+    bankAccount: one(accounting_bank_accounts, {
+      fields: [accounting_payments_made.bankAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'bankAccount',
+    }),
+    applications: many(accounting_payments_made_applications, {
+      relationName: 'applications',
+    }),
+    postedJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_payments_made.postedJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'postedJournalEntry',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_payments_made.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_payments_made.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_expenses = relations(accounting_expenses, ({ one }) => ({
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [accounting_expenses.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  period: one(accounting_periods, {
+    fields: [accounting_expenses.period],
+    references: [accounting_periods.id],
+    relationName: 'period',
+  }),
+  vendor: one(accounting_vendors, {
+    fields: [accounting_expenses.vendor],
+    references: [accounting_vendors.id],
+    relationName: 'vendor',
+  }),
+  project: one(acct_projects, {
+    fields: [accounting_expenses.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  expenseAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_expenses.expenseAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'expenseAccount',
+  }),
+  taxCode: one(accounting_tax_codes, {
+    fields: [accounting_expenses.taxCode],
+    references: [accounting_tax_codes.id],
+    relationName: 'taxCode',
+  }),
+  paymentAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_expenses.paymentAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'paymentAccount',
+  }),
+  bankAccount: one(accounting_bank_accounts, {
+    fields: [accounting_expenses.bankAccount],
+    references: [accounting_bank_accounts.id],
+    relationName: 'bankAccount',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [accounting_expenses.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_expenses.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_expenses.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_deposits = relations(accounting_deposits, ({ one }) => ({
+  bankAccount: one(accounting_bank_accounts, {
+    fields: [accounting_deposits.bankAccount],
+    references: [accounting_bank_accounts.id],
+    relationName: 'bankAccount',
+  }),
+  sourceAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_deposits.sourceAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'sourceAccount',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [accounting_deposits.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_deposits.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_deposits.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_transfers = relations(accounting_transfers, ({ one }) => ({
+  fromBankAccount: one(accounting_bank_accounts, {
+    fields: [accounting_transfers.fromBankAccount],
+    references: [accounting_bank_accounts.id],
+    relationName: 'fromBankAccount',
+  }),
+  toBankAccount: one(accounting_bank_accounts, {
+    fields: [accounting_transfers.toBankAccount],
+    references: [accounting_bank_accounts.id],
+    relationName: 'toBankAccount',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [accounting_transfers.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_transfers.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_transfers.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_bounced_payments = relations(
+  accounting_bounced_payments,
+  ({ one }) => ({
+    originalPayment: one(accounting_payments_received, {
+      fields: [accounting_bounced_payments.originalPayment],
+      references: [accounting_payments_received.id],
+      relationName: 'originalPayment',
+    }),
+    customer: one(accounting_customers, {
+      fields: [accounting_bounced_payments.customer],
+      references: [accounting_customers.id],
+      relationName: 'customer',
+    }),
+    originalDepositAccount: one(accounting_bank_accounts, {
+      fields: [accounting_bounced_payments.originalDepositAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'originalDepositAccount',
+    }),
+    originalJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_bounced_payments.originalJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'originalJournalEntry',
+    }),
+    chargeExpenseAccount: one(accounting_chart_of_accounts, {
+      fields: [accounting_bounced_payments.chargeExpenseAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'chargeExpenseAccount',
+    }),
+    reversalJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_bounced_payments.reversalJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'reversalJournalEntry',
+    }),
+    chargeJournalEntry: one(accounting_journal_entries, {
+      fields: [accounting_bounced_payments.chargeJournalEntry],
+      references: [accounting_journal_entries.id],
+      relationName: 'chargeJournalEntry',
+    }),
+    recoveryPayment: one(accounting_payments_received, {
+      fields: [accounting_bounced_payments.recoveryPayment],
+      references: [accounting_payments_received.id],
+      relationName: 'recoveryPayment',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bounced_payments.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bounced_payments.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_bank_feeds = relations(accounting_bank_feeds, ({ one }) => ({
+  bankAccount: one(accounting_bank_accounts, {
+    fields: [accounting_bank_feeds.bankAccount],
+    references: [accounting_bank_accounts.id],
+    relationName: 'bankAccount',
+  }),
+  createdBy: one(users, {
+    fields: [accounting_bank_feeds.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_bank_feeds.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_accounting_bank_statement_imports = relations(
+  accounting_bank_statement_imports,
+  ({ one }) => ({
+    bankAccount: one(accounting_bank_accounts, {
+      fields: [accounting_bank_statement_imports.bankAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'bankAccount',
+    }),
+    statementFile: one(media, {
+      fields: [accounting_bank_statement_imports.statementFile],
+      references: [media.id],
+      relationName: 'statementFile',
+    }),
+    uploadedBy: one(users, {
+      fields: [accounting_bank_statement_imports.uploadedBy],
+      references: [users.id],
+      relationName: 'uploadedBy',
+    }),
+    importedBy: one(users, {
+      fields: [accounting_bank_statement_imports.importedBy],
+      references: [users.id],
+      relationName: 'importedBy',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bank_statement_imports.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bank_statement_imports.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_bank_transactions = relations(
+  accounting_bank_transactions,
+  ({ one }) => ({
+    bankAccount: one(accounting_bank_accounts, {
+      fields: [accounting_bank_transactions.bankAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'bankAccount',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bank_transactions.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bank_transactions.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_bank_reconciliations = relations(
+  accounting_bank_reconciliations,
+  ({ one }) => ({
+    bankAccount: one(accounting_bank_accounts, {
+      fields: [accounting_bank_reconciliations.bankAccount],
+      references: [accounting_bank_accounts.id],
+      relationName: 'bankAccount',
+    }),
+    completedBy: one(users, {
+      fields: [accounting_bank_reconciliations.completedBy],
+      references: [users.id],
+      relationName: 'completedBy',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_bank_reconciliations.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_bank_reconciliations.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_accounting_document_links = relations(
+  accounting_document_links,
+  ({ one }) => ({
+    media: one(media, {
+      fields: [accounting_document_links.media],
+      references: [media.id],
+      relationName: 'media',
+    }),
+    uploadedBy: one(users, {
+      fields: [accounting_document_links.uploadedBy],
+      references: [users.id],
+      relationName: 'uploadedBy',
+    }),
+    createdBy: one(users, {
+      fields: [accounting_document_links.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [accounting_document_links.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_course_fee_profiles = relations(
+  acct_course_fee_profiles,
+  ({ one }) => ({
+    course: one(courses, {
+      fields: [acct_course_fee_profiles.course],
+      references: [courses.id],
+      relationName: 'course',
+    }),
+    courseRevenueAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_course_fee_profiles.courseRevenueAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'courseRevenueAccount',
+    }),
+    deferredRevenueAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_course_fee_profiles.deferredRevenueAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'deferredRevenueAccount',
+    }),
+    certificateRevenueAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_course_fee_profiles.certificateRevenueAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'certificateRevenueAccount',
+    }),
+    discountContraRevenueAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_course_fee_profiles.discountContraRevenueAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'discountContraRevenueAccount',
+    }),
+    instructorExpenseAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_course_fee_profiles.instructorExpenseAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'instructorExpenseAccount',
+    }),
+    createdBy: one(users, {
+      fields: [acct_course_fee_profiles.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_course_fee_profiles.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_scholarship_sponsors = relations(
+  acct_scholarship_sponsors,
+  ({ one }) => ({
+    defaultCustomer: one(accounting_customers, {
+      fields: [acct_scholarship_sponsors.defaultCustomer],
+      references: [accounting_customers.id],
+      relationName: 'defaultCustomer',
+    }),
+    createdBy: one(users, {
+      fields: [acct_scholarship_sponsors.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_scholarship_sponsors.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_corporate_accounts = relations(acct_corporate_accounts, ({ one }) => ({
+  customer: one(accounting_customers, {
+    fields: [acct_corporate_accounts.customer],
+    references: [accounting_customers.id],
+    relationName: 'customer',
+  }),
+  createdBy: one(users, {
+    fields: [acct_corporate_accounts.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_corporate_accounts.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_instructor_payout_rules = relations(
+  acct_instructor_payout_rules,
+  ({ one }) => ({
+    instructor: one(instructors, {
+      fields: [acct_instructor_payout_rules.instructor],
+      references: [instructors.id],
+      relationName: 'instructor',
+    }),
+    course: one(courses, {
+      fields: [acct_instructor_payout_rules.course],
+      references: [courses.id],
+      relationName: 'course',
+    }),
+    createdBy: one(users, {
+      fields: [acct_instructor_payout_rules.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_instructor_payout_rules.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_enrollment_billing_links = relations(
+  acct_enrollment_billing_links,
+  ({ one }) => ({
+    enrollment: one(course_enrollments, {
+      fields: [acct_enrollment_billing_links.enrollment],
+      references: [course_enrollments.id],
+      relationName: 'enrollment',
+    }),
+    course: one(courses, {
+      fields: [acct_enrollment_billing_links.course],
+      references: [courses.id],
+      relationName: 'course',
+    }),
+    trainee: one(trainees, {
+      fields: [acct_enrollment_billing_links.trainee],
+      references: [trainees.id],
+      relationName: 'trainee',
+    }),
+    user: one(users, {
+      fields: [acct_enrollment_billing_links.user],
+      references: [users.id],
+      relationName: 'user',
+    }),
+    invoice: one(accounting_invoices, {
+      fields: [acct_enrollment_billing_links.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+    customer: one(accounting_customers, {
+      fields: [acct_enrollment_billing_links.customer],
+      references: [accounting_customers.id],
+      relationName: 'customer',
+    }),
+    createdBy: one(users, {
+      fields: [acct_enrollment_billing_links.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_enrollment_billing_links.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_billing_adjustments = relations(
+  acct_billing_adjustments,
+  ({ one }) => ({
+    enrollmentBillingLink: one(acct_enrollment_billing_links, {
+      fields: [acct_billing_adjustments.enrollmentBillingLink],
+      references: [acct_enrollment_billing_links.id],
+      relationName: 'enrollmentBillingLink',
+    }),
+    approvedBy: one(users, {
+      fields: [acct_billing_adjustments.approvedBy],
+      references: [users.id],
+      relationName: 'approvedBy',
+    }),
+    createdBy: one(users, {
+      fields: [acct_billing_adjustments.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_billing_adjustments.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_payment_allocations = relations(
+  acct_payment_allocations,
+  ({ one }) => ({
+    paymentReceived: one(accounting_payments_received, {
+      fields: [acct_payment_allocations.paymentReceived],
+      references: [accounting_payments_received.id],
+      relationName: 'paymentReceived',
+    }),
+    invoice: one(accounting_invoices, {
+      fields: [acct_payment_allocations.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+    enrollmentBillingLink: one(acct_enrollment_billing_links, {
+      fields: [acct_payment_allocations.enrollmentBillingLink],
+      references: [acct_enrollment_billing_links.id],
+      relationName: 'enrollmentBillingLink',
+    }),
+    createdBy: one(users, {
+      fields: [acct_payment_allocations.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_payment_allocations.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_receipts = relations(acct_receipts, ({ one }) => ({
+  paymentReceived: one(accounting_payments_received, {
+    fields: [acct_receipts.paymentReceived],
+    references: [accounting_payments_received.id],
+    relationName: 'paymentReceived',
+  }),
+  enrollmentBillingLink: one(acct_enrollment_billing_links, {
+    fields: [acct_receipts.enrollmentBillingLink],
+    references: [acct_enrollment_billing_links.id],
+    relationName: 'enrollmentBillingLink',
+  }),
+  customer: one(accounting_customers, {
+    fields: [acct_receipts.customer],
+    references: [accounting_customers.id],
+    relationName: 'customer',
+  }),
+  proofDocument: one(media, {
+    fields: [acct_receipts.proofDocument],
+    references: [media.id],
+    relationName: 'proofDocument',
+  }),
+  issuedBy: one(users, {
+    fields: [acct_receipts.issuedBy],
+    references: [users.id],
+    relationName: 'issuedBy',
+  }),
+  voidedBy: one(users, {
+    fields: [acct_receipts.voidedBy],
+    references: [users.id],
+    relationName: 'voidedBy',
+  }),
+  createdBy: one(users, {
+    fields: [acct_receipts.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_receipts.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_refunds = relations(acct_refunds, ({ one }) => ({
+  enrollmentBillingLink: one(acct_enrollment_billing_links, {
+    fields: [acct_refunds.enrollmentBillingLink],
+    references: [acct_enrollment_billing_links.id],
+    relationName: 'enrollmentBillingLink',
+  }),
+  invoice: one(accounting_invoices, {
+    fields: [acct_refunds.invoice],
+    references: [accounting_invoices.id],
+    relationName: 'invoice',
+  }),
+  paymentReceived: one(accounting_payments_received, {
+    fields: [acct_refunds.paymentReceived],
+    references: [accounting_payments_received.id],
+    relationName: 'paymentReceived',
+  }),
+  creditNote: one(accounting_credit_notes, {
+    fields: [acct_refunds.creditNote],
+    references: [accounting_credit_notes.id],
+    relationName: 'creditNote',
+  }),
+  processedBy: one(users, {
+    fields: [acct_refunds.processedBy],
+    references: [users.id],
+    relationName: 'processedBy',
+  }),
+  proofDocument: one(media, {
+    fields: [acct_refunds.proofDocument],
+    references: [media.id],
+    relationName: 'proofDocument',
+  }),
+  createdBy: one(users, {
+    fields: [acct_refunds.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_refunds.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_rev_rec_schedules = relations(acct_rev_rec_schedules, ({ one }) => ({
+  invoice: one(accounting_invoices, {
+    fields: [acct_rev_rec_schedules.invoice],
+    references: [accounting_invoices.id],
+    relationName: 'invoice',
+  }),
+  enrollmentBillingLink: one(acct_enrollment_billing_links, {
+    fields: [acct_rev_rec_schedules.enrollmentBillingLink],
+    references: [acct_enrollment_billing_links.id],
+    relationName: 'enrollmentBillingLink',
+  }),
+  createdBy: one(users, {
+    fields: [acct_rev_rec_schedules.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_rev_rec_schedules.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_scholarship_awards = relations(acct_scholarship_awards, ({ one }) => ({
+  enrollmentBillingLink: one(acct_enrollment_billing_links, {
+    fields: [acct_scholarship_awards.enrollmentBillingLink],
+    references: [acct_enrollment_billing_links.id],
+    relationName: 'enrollmentBillingLink',
+  }),
+  scholarshipSponsor: one(acct_scholarship_sponsors, {
+    fields: [acct_scholarship_awards.scholarshipSponsor],
+    references: [acct_scholarship_sponsors.id],
+    relationName: 'scholarshipSponsor',
+  }),
+  trainee: one(trainees, {
+    fields: [acct_scholarship_awards.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
+  }),
+  createdBy: one(users, {
+    fields: [acct_scholarship_awards.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_scholarship_awards.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_corporate_billing_links = relations(
+  acct_corporate_billing_links,
+  ({ one }) => ({
+    corporateAccount: one(acct_corporate_accounts, {
+      fields: [acct_corporate_billing_links.corporateAccount],
+      references: [acct_corporate_accounts.id],
+      relationName: 'corporateAccount',
+    }),
+    enrollmentBillingLink: one(acct_enrollment_billing_links, {
+      fields: [acct_corporate_billing_links.enrollmentBillingLink],
+      references: [acct_enrollment_billing_links.id],
+      relationName: 'enrollmentBillingLink',
+    }),
+    invoice: one(accounting_invoices, {
+      fields: [acct_corporate_billing_links.invoice],
+      references: [accounting_invoices.id],
+      relationName: 'invoice',
+    }),
+    createdBy: one(users, {
+      fields: [acct_corporate_billing_links.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_corporate_billing_links.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_instructor_payouts = relations(acct_instructor_payouts, ({ one }) => ({
+  instructor: one(instructors, {
+    fields: [acct_instructor_payouts.instructor],
+    references: [instructors.id],
+    relationName: 'instructor',
+  }),
+  course: one(courses, {
+    fields: [acct_instructor_payouts.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  createdBy: one(users, {
+    fields: [acct_instructor_payouts.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_instructor_payouts.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_branches = relations(acct_branches, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [acct_branches.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_branches.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_departments = relations(acct_departments, ({ one }) => ({
+  branch: one(acct_branches, {
+    fields: [acct_departments.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  createdBy: one(users, {
+    fields: [acct_departments.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_departments.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_locations = relations(acct_locations, ({ one }) => ({
+  branch: one(acct_branches, {
+    fields: [acct_locations.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  createdBy: one(users, {
+    fields: [acct_locations.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_locations.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_projects = relations(acct_projects, ({ one }) => ({
+  customer: one(accounting_customers, {
+    fields: [acct_projects.customer],
+    references: [accounting_customers.id],
+    relationName: 'customer',
+  }),
+  managerUser: one(users, {
+    fields: [acct_projects.managerUser],
+    references: [users.id],
+    relationName: 'managerUser',
+  }),
+  course: one(courses, {
+    fields: [acct_projects.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  branch: one(acct_branches, {
+    fields: [acct_projects.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  department: one(acct_departments, {
+    fields: [acct_projects.department],
+    references: [acct_departments.id],
+    relationName: 'department',
+  }),
+  location: one(acct_locations, {
+    fields: [acct_projects.location],
+    references: [acct_locations.id],
+    relationName: 'location',
+  }),
+  createdBy: one(users, {
+    fields: [acct_projects.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_projects.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_project_tasks = relations(acct_project_tasks, ({ one }) => ({
+  project: one(acct_projects, {
+    fields: [acct_project_tasks.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  assignedTo: one(users, {
+    fields: [acct_project_tasks.assignedTo],
+    references: [users.id],
+    relationName: 'assignedTo',
+  }),
+  createdBy: one(users, {
+    fields: [acct_project_tasks.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_project_tasks.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_budgets = relations(acct_budgets, ({ one }) => ({
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [acct_budgets.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  branch: one(acct_branches, {
+    fields: [acct_budgets.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  department: one(acct_departments, {
+    fields: [acct_budgets.department],
+    references: [acct_departments.id],
+    relationName: 'department',
+  }),
+  location: one(acct_locations, {
+    fields: [acct_budgets.location],
+    references: [acct_locations.id],
+    relationName: 'location',
+  }),
+  project: one(acct_projects, {
+    fields: [acct_budgets.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  courseCategory: one(course_categories, {
+    fields: [acct_budgets.courseCategory],
+    references: [course_categories.id],
+    relationName: 'courseCategory',
+  }),
+  scenario: one(acct_forecast_scenarios, {
+    fields: [acct_budgets.scenario],
+    references: [acct_forecast_scenarios.id],
+    relationName: 'scenario',
+  }),
+  createdBy: one(users, {
+    fields: [acct_budgets.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_budgets.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_budget_lines = relations(acct_budget_lines, ({ one }) => ({
+  budget: one(acct_budgets, {
+    fields: [acct_budget_lines.budget],
+    references: [acct_budgets.id],
+    relationName: 'budget',
+  }),
+  account: one(accounting_chart_of_accounts, {
+    fields: [acct_budget_lines.account],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'account',
+  }),
+  period: one(accounting_periods, {
+    fields: [acct_budget_lines.period],
+    references: [accounting_periods.id],
+    relationName: 'period',
+  }),
+  createdBy: one(users, {
+    fields: [acct_budget_lines.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_budget_lines.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_forecast_scenarios = relations(acct_forecast_scenarios, ({ one }) => ({
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [acct_forecast_scenarios.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  createdBy: one(users, {
+    fields: [acct_forecast_scenarios.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_forecast_scenarios.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_time_entries = relations(acct_time_entries, ({ one }) => ({
+  user: one(users, {
+    fields: [acct_time_entries.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  timesheet: one(acct_timesheets, {
+    fields: [acct_time_entries.timesheet],
+    references: [acct_timesheets.id],
+    relationName: 'timesheet',
+  }),
+  project: one(acct_projects, {
+    fields: [acct_time_entries.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  projectTask: one(acct_project_tasks, {
+    fields: [acct_time_entries.projectTask],
+    references: [acct_project_tasks.id],
+    relationName: 'projectTask',
+  }),
+  course: one(courses, {
+    fields: [acct_time_entries.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+  instructor: one(instructors, {
+    fields: [acct_time_entries.instructor],
+    references: [instructors.id],
+    relationName: 'instructor',
+  }),
+  approvedBy: one(users, {
+    fields: [acct_time_entries.approvedBy],
+    references: [users.id],
+    relationName: 'approvedBy',
+  }),
+  createdBy: one(users, {
+    fields: [acct_time_entries.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_time_entries.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_timesheets = relations(acct_timesheets, ({ one }) => ({
+  user: one(users, {
+    fields: [acct_timesheets.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  approvedBy: one(users, {
+    fields: [acct_timesheets.approvedBy],
+    references: [users.id],
+    relationName: 'approvedBy',
+  }),
+  createdBy: one(users, {
+    fields: [acct_timesheets.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_timesheets.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_fixed_assets = relations(acct_fixed_assets, ({ one }) => ({
+  expenseAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_fixed_assets.expenseAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'expenseAccount',
+  }),
+  assetAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_fixed_assets.assetAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'assetAccount',
+  }),
+  accumulatedDepreciationAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_fixed_assets.accumulatedDepreciationAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'accumulatedDepreciationAccount',
+  }),
+  branch: one(acct_branches, {
+    fields: [acct_fixed_assets.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  department: one(acct_departments, {
+    fields: [acct_fixed_assets.department],
+    references: [acct_departments.id],
+    relationName: 'department',
+  }),
+  location: one(acct_locations, {
+    fields: [acct_fixed_assets.location],
+    references: [acct_locations.id],
+    relationName: 'location',
+  }),
+  supportingDocument: one(media, {
+    fields: [acct_fixed_assets.supportingDocument],
+    references: [media.id],
+    relationName: 'supportingDocument',
+  }),
+  createdBy: one(users, {
+    fields: [acct_fixed_assets.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_fixed_assets.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_depr_entries = relations(acct_depr_entries, ({ one }) => ({
+  fixedAsset: one(acct_fixed_assets, {
+    fields: [acct_depr_entries.fixedAsset],
+    references: [acct_fixed_assets.id],
+    relationName: 'fixedAsset',
+  }),
+  fiscalYear: one(accounting_fiscal_years, {
+    fields: [acct_depr_entries.fiscalYear],
+    references: [accounting_fiscal_years.id],
+    relationName: 'fiscalYear',
+  }),
+  period: one(accounting_periods, {
+    fields: [acct_depr_entries.period],
+    references: [accounting_periods.id],
+    relationName: 'period',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [acct_depr_entries.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [acct_depr_entries.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_depr_entries.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_asset_disposals = relations(acct_asset_disposals, ({ one }) => ({
+  fixedAsset: one(acct_fixed_assets, {
+    fields: [acct_asset_disposals.fixedAsset],
+    references: [acct_fixed_assets.id],
+    relationName: 'fixedAsset',
+  }),
+  proceedsAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_asset_disposals.proceedsAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'proceedsAccount',
+  }),
+  gainAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_asset_disposals.gainAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'gainAccount',
+  }),
+  lossAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_asset_disposals.lossAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'lossAccount',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [acct_asset_disposals.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [acct_asset_disposals.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_asset_disposals.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_payroll_runs = relations(acct_payroll_runs, ({ one }) => ({
+  branch: one(acct_branches, {
+    fields: [acct_payroll_runs.branch],
+    references: [acct_branches.id],
+    relationName: 'branch',
+  }),
+  department: one(acct_departments, {
+    fields: [acct_payroll_runs.department],
+    references: [acct_departments.id],
+    relationName: 'department',
+  }),
+  approvalRequest: one(acct_approval_requests, {
+    fields: [acct_payroll_runs.approvalRequest],
+    references: [acct_approval_requests.id],
+    relationName: 'approvalRequest',
+  }),
+  postedJournalEntry: one(accounting_journal_entries, {
+    fields: [acct_payroll_runs.postedJournalEntry],
+    references: [accounting_journal_entries.id],
+    relationName: 'postedJournalEntry',
+  }),
+  createdBy: one(users, {
+    fields: [acct_payroll_runs.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_payroll_runs.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_payroll_entries = relations(acct_payroll_entries, ({ one }) => ({
+  payrollRun: one(acct_payroll_runs, {
+    fields: [acct_payroll_entries.payrollRun],
+    references: [acct_payroll_runs.id],
+    relationName: 'payrollRun',
+  }),
+  user: one(users, {
+    fields: [acct_payroll_entries.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  instructor: one(instructors, {
+    fields: [acct_payroll_entries.instructor],
+    references: [instructors.id],
+    relationName: 'instructor',
+  }),
+  project: one(acct_projects, {
+    fields: [acct_payroll_entries.project],
+    references: [acct_projects.id],
+    relationName: 'project',
+  }),
+  expenseAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_payroll_entries.expenseAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'expenseAccount',
+  }),
+  payableAccount: one(accounting_chart_of_accounts, {
+    fields: [acct_payroll_entries.payableAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'payableAccount',
+  }),
+  createdBy: one(users, {
+    fields: [acct_payroll_entries.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_payroll_entries.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
+export const relations_acct_payroll_account_mappings = relations(
+  acct_payroll_account_mappings,
+  ({ one }) => ({
+    expenseAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_payroll_account_mappings.expenseAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'expenseAccount',
+    }),
+    payableAccount: one(accounting_chart_of_accounts, {
+      fields: [acct_payroll_account_mappings.payableAccount],
+      references: [accounting_chart_of_accounts.id],
+      relationName: 'payableAccount',
+    }),
+    createdBy: one(users, {
+      fields: [acct_payroll_account_mappings.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_payroll_account_mappings.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_approval_workflows_steps = relations(
+  acct_approval_workflows_steps,
+  ({ one }) => ({
+    _parentID: one(acct_approval_workflows, {
+      fields: [acct_approval_workflows_steps._parentID],
+      references: [acct_approval_workflows.id],
+      relationName: 'steps',
+    }),
+    approverUser: one(users, {
+      fields: [acct_approval_workflows_steps.approverUser],
+      references: [users.id],
+      relationName: 'approverUser',
+    }),
+  }),
+)
+export const relations_acct_approval_workflows = relations(
+  acct_approval_workflows,
+  ({ one, many }) => ({
+    steps: many(acct_approval_workflows_steps, {
+      relationName: 'steps',
+    }),
+    createdBy: one(users, {
+      fields: [acct_approval_workflows.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_approval_workflows.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_approval_requests_approval_trail = relations(
+  acct_approval_requests_approval_trail,
+  ({ one }) => ({
+    _parentID: one(acct_approval_requests, {
+      fields: [acct_approval_requests_approval_trail._parentID],
+      references: [acct_approval_requests.id],
+      relationName: 'approvalTrail',
+    }),
+    approver: one(users, {
+      fields: [acct_approval_requests_approval_trail.approver],
+      references: [users.id],
+      relationName: 'approver',
+    }),
+  }),
+)
+export const relations_acct_approval_requests = relations(
+  acct_approval_requests,
+  ({ one, many }) => ({
+    workflow: one(acct_approval_workflows, {
+      fields: [acct_approval_requests.workflow],
+      references: [acct_approval_workflows.id],
+      relationName: 'workflow',
+    }),
+    requestedBy: one(users, {
+      fields: [acct_approval_requests.requestedBy],
+      references: [users.id],
+      relationName: 'requestedBy',
+    }),
+    currentApprover: one(users, {
+      fields: [acct_approval_requests.currentApprover],
+      references: [users.id],
+      relationName: 'currentApprover',
+    }),
+    approvalTrail: many(acct_approval_requests_approval_trail, {
+      relationName: 'approvalTrail',
+    }),
+    createdBy: one(users, {
+      fields: [acct_approval_requests.createdBy],
+      references: [users.id],
+      relationName: 'createdBy',
+    }),
+    updatedBy: one(users, {
+      fields: [acct_approval_requests.updatedBy],
+      references: [users.id],
+      relationName: 'updatedBy',
+    }),
+  }),
+)
+export const relations_acct_audit_logs = relations(acct_audit_logs, ({ one }) => ({
+  performedBy: one(users, {
+    fields: [acct_audit_logs.performedBy],
+    references: [users.id],
+    relationName: 'performedBy',
+  }),
+  createdBy: one(users, {
+    fields: [acct_audit_logs.createdBy],
+    references: [users.id],
+    relationName: 'createdBy',
+  }),
+  updatedBy: one(users, {
+    fields: [acct_audit_logs.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
 export const relations_courses_learning_objectives = relations(
   courses_learning_objectives,
   ({ one }) => ({
@@ -2865,6 +9676,11 @@ export const relations_courses_rels = relations(courses_rels, ({ one }) => ({
     references: [course_categories.id],
     relationName: 'course-categories',
   }),
+  'course-tagsID': one(course_tags, {
+    fields: [courses_rels['course-tagsID']],
+    references: [course_tags.id],
+    relationName: 'course-tags',
+  }),
 }))
 export const relations_courses = relations(courses, ({ one, many }) => ({
   instructor: one(instructors, {
@@ -2882,6 +9698,11 @@ export const relations_courses = relations(courses, ({ one, many }) => ({
     references: [media.id],
     relationName: 'bannerImage',
   }),
+  gradeScale: one(grade_scales, {
+    fields: [courses.gradeScale],
+    references: [grade_scales.id],
+    relationName: 'gradeScale',
+  }),
   learningObjectives: many(courses_learning_objectives, {
     relationName: 'learningObjectives',
   }),
@@ -2892,6 +9713,11 @@ export const relations_courses = relations(courses, ({ one, many }) => ({
     fields: [courses.certificateTemplate],
     references: [certificate_templates.id],
     relationName: 'certificateTemplate',
+  }),
+  feedbackForm: one(feedback_forms, {
+    fields: [courses.feedbackForm],
+    references: [feedback_forms.id],
+    relationName: 'feedbackForm',
   }),
   _rels: many(courses_rels, {
     relationName: '_rels',
@@ -2909,6 +9735,74 @@ export const relations_course_categories = relations(course_categories, ({ one }
     relationName: 'icon',
   }),
 }))
+export const relations_course_tags = relations(course_tags, () => ({}))
+export const relations_coupon_codes_allowed_emails = relations(
+  coupon_codes_allowed_emails,
+  ({ one }) => ({
+    _parentID: one(coupon_codes, {
+      fields: [coupon_codes_allowed_emails._parentID],
+      references: [coupon_codes.id],
+      relationName: 'allowedEmails',
+    }),
+  }),
+)
+export const relations_coupon_codes_rels = relations(coupon_codes_rels, ({ one }) => ({
+  parent: one(coupon_codes, {
+    fields: [coupon_codes_rels.parent],
+    references: [coupon_codes.id],
+    relationName: '_rels',
+  }),
+  coursesID: one(courses, {
+    fields: [coupon_codes_rels.coursesID],
+    references: [courses.id],
+    relationName: 'courses',
+  }),
+  'course-categoriesID': one(course_categories, {
+    fields: [coupon_codes_rels['course-categoriesID']],
+    references: [course_categories.id],
+    relationName: 'course-categories',
+  }),
+  traineesID: one(trainees, {
+    fields: [coupon_codes_rels.traineesID],
+    references: [trainees.id],
+    relationName: 'trainees',
+  }),
+}))
+export const relations_coupon_codes = relations(coupon_codes, ({ many }) => ({
+  allowedEmails: many(coupon_codes_allowed_emails, {
+    relationName: 'allowedEmails',
+  }),
+  _rels: many(coupon_codes_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_coupon_redemptions = relations(coupon_redemptions, ({ one }) => ({
+  coupon: one(coupon_codes, {
+    fields: [coupon_redemptions.coupon],
+    references: [coupon_codes.id],
+    relationName: 'coupon',
+  }),
+  trainee: one(trainees, {
+    fields: [coupon_redemptions.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
+  }),
+  user: one(users, {
+    fields: [coupon_redemptions.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  courseEnrollment: one(course_enrollments, {
+    fields: [coupon_redemptions.courseEnrollment],
+    references: [course_enrollments.id],
+    relationName: 'courseEnrollment',
+  }),
+  course: one(courses, {
+    fields: [coupon_redemptions.course],
+    references: [courses.id],
+    relationName: 'course',
+  }),
+}))
 export const relations_course_enrollments = relations(course_enrollments, ({ one }) => ({
   student: one(trainees, {
     fields: [course_enrollments.student],
@@ -2919,6 +9813,11 @@ export const relations_course_enrollments = relations(course_enrollments, ({ one
     fields: [course_enrollments.course],
     references: [courses.id],
     relationName: 'course',
+  }),
+  coupon: one(coupon_codes, {
+    fields: [course_enrollments.coupon],
+    references: [coupon_codes.id],
+    relationName: 'coupon',
   }),
   enrolledBy: one(users, {
     fields: [course_enrollments.enrolledBy],
@@ -2970,6 +9869,11 @@ export const relations_course_modules_rels = relations(course_modules_rels, ({ o
     fields: [course_modules_rels.assessmentsID],
     references: [assessments.id],
     relationName: 'assessments',
+  }),
+  assignmentsID: one(assignments, {
+    fields: [course_modules_rels.assignmentsID],
+    references: [assignments.id],
+    relationName: 'assignments',
   }),
 }))
 export const relations_course_modules = relations(course_modules, ({ many }) => ({
@@ -3037,16 +9941,101 @@ export const relations_announcements = relations(announcements, ({ one }) => ({
     relationName: 'createdBy',
   }),
 }))
-export const relations_course_feedbacks = relations(course_feedbacks, ({ one }) => ({
-  user: one(users, {
-    fields: [course_feedbacks.user],
-    references: [users.id],
-    relationName: 'user',
+export const relations_feedback_forms_blocks_text_input = relations(
+  feedback_forms_blocks_text_input,
+  ({ one }) => ({
+    _parentID: one(feedback_forms, {
+      fields: [feedback_forms_blocks_text_input._parentID],
+      references: [feedback_forms.id],
+      relationName: '_blocks_textInput',
+    }),
+  }),
+)
+export const relations_feedback_forms_blocks_choice_input_options = relations(
+  feedback_forms_blocks_choice_input_options,
+  ({ one }) => ({
+    _parentID: one(feedback_forms_blocks_choice_input, {
+      fields: [feedback_forms_blocks_choice_input_options._parentID],
+      references: [feedback_forms_blocks_choice_input.id],
+      relationName: 'options',
+    }),
+  }),
+)
+export const relations_feedback_forms_blocks_choice_input = relations(
+  feedback_forms_blocks_choice_input,
+  ({ one, many }) => ({
+    _parentID: one(feedback_forms, {
+      fields: [feedback_forms_blocks_choice_input._parentID],
+      references: [feedback_forms.id],
+      relationName: '_blocks_choiceInput',
+    }),
+    options: many(feedback_forms_blocks_choice_input_options, {
+      relationName: 'options',
+    }),
+  }),
+)
+export const relations_feedback_forms_blocks_survey_matrix_columns = relations(
+  feedback_forms_blocks_survey_matrix_columns,
+  ({ one }) => ({
+    _parentID: one(feedback_forms_blocks_survey_matrix, {
+      fields: [feedback_forms_blocks_survey_matrix_columns._parentID],
+      references: [feedback_forms_blocks_survey_matrix.id],
+      relationName: 'columns',
+    }),
+  }),
+)
+export const relations_feedback_forms_blocks_survey_matrix_rows = relations(
+  feedback_forms_blocks_survey_matrix_rows,
+  ({ one }) => ({
+    _parentID: one(feedback_forms_blocks_survey_matrix, {
+      fields: [feedback_forms_blocks_survey_matrix_rows._parentID],
+      references: [feedback_forms_blocks_survey_matrix.id],
+      relationName: 'rows',
+    }),
+  }),
+)
+export const relations_feedback_forms_blocks_survey_matrix = relations(
+  feedback_forms_blocks_survey_matrix,
+  ({ one, many }) => ({
+    _parentID: one(feedback_forms, {
+      fields: [feedback_forms_blocks_survey_matrix._parentID],
+      references: [feedback_forms.id],
+      relationName: '_blocks_surveyMatrix',
+    }),
+    columns: many(feedback_forms_blocks_survey_matrix_columns, {
+      relationName: 'columns',
+    }),
+    rows: many(feedback_forms_blocks_survey_matrix_rows, {
+      relationName: 'rows',
+    }),
+  }),
+)
+export const relations_feedback_forms = relations(feedback_forms, ({ many }) => ({
+  _blocks_textInput: many(feedback_forms_blocks_text_input, {
+    relationName: '_blocks_textInput',
+  }),
+  _blocks_choiceInput: many(feedback_forms_blocks_choice_input, {
+    relationName: '_blocks_choiceInput',
+  }),
+  _blocks_surveyMatrix: many(feedback_forms_blocks_survey_matrix, {
+    relationName: '_blocks_surveyMatrix',
+  }),
+}))
+export const relations_feedback_submissions = relations(feedback_submissions, ({ one }) => ({
+  form: one(feedback_forms, {
+    fields: [feedback_submissions.form],
+    references: [feedback_forms.id],
+    relationName: 'form',
   }),
   course: one(courses, {
-    fields: [course_feedbacks.course],
+    fields: [feedback_submissions.course],
     references: [courses.id],
     relationName: 'course',
+  }),
+  trainee: one(trainees, {
+    fields: [feedback_submissions.trainee],
+    references: [trainees.id],
+    relationName: 'trainee',
   }),
 }))
 export const relations_wishlists = relations(wishlists, ({ one }) => ({
@@ -3090,6 +10079,11 @@ export const relations_course_item_progress_rels = relations(
       fields: [course_item_progress_rels.assessmentsID],
       references: [assessments.id],
       relationName: 'assessments',
+    }),
+    assignmentsID: one(assignments, {
+      fields: [course_item_progress_rels.assignmentsID],
+      references: [assignments.id],
+      relationName: 'assignments',
     }),
   }),
 )
@@ -3191,6 +10185,96 @@ export const relations_assessment_submissions = relations(assessment_submissions
     relationName: 'course',
   }),
 }))
+export const relations_assignments_allowed_file_types = relations(
+  assignments_allowed_file_types,
+  ({ one }) => ({
+    parent: one(assignments, {
+      fields: [assignments_allowed_file_types.parent],
+      references: [assignments.id],
+      relationName: 'allowedFileTypes',
+    }),
+  }),
+)
+export const relations_assignments_rels = relations(assignments_rels, ({ one }) => ({
+  parent: one(assignments, {
+    fields: [assignments_rels.parent],
+    references: [assignments.id],
+    relationName: '_rels',
+  }),
+  mediaID: one(media, {
+    fields: [assignments_rels.mediaID],
+    references: [media.id],
+    relationName: 'media',
+  }),
+}))
+export const relations_assignments = relations(assignments, ({ one, many }) => ({
+  instructor: one(instructors, {
+    fields: [assignments.instructor],
+    references: [instructors.id],
+    relationName: 'instructor',
+  }),
+  allowedFileTypes: many(assignments_allowed_file_types, {
+    relationName: 'allowedFileTypes',
+  }),
+  _rels: many(assignments_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_assignment_submissions_rels = relations(
+  assignment_submissions_rels,
+  ({ one }) => ({
+    parent: one(assignment_submissions, {
+      fields: [assignment_submissions_rels.parent],
+      references: [assignment_submissions.id],
+      relationName: '_rels',
+    }),
+    mediaID: one(media, {
+      fields: [assignment_submissions_rels.mediaID],
+      references: [media.id],
+      relationName: 'media',
+    }),
+  }),
+)
+export const relations_assignment_submissions = relations(
+  assignment_submissions,
+  ({ one, many }) => ({
+    assignment: one(assignments, {
+      fields: [assignment_submissions.assignment],
+      references: [assignments.id],
+      relationName: 'assignment',
+    }),
+    trainee: one(trainees, {
+      fields: [assignment_submissions.trainee],
+      references: [trainees.id],
+      relationName: 'trainee',
+    }),
+    enrollment: one(course_enrollments, {
+      fields: [assignment_submissions.enrollment],
+      references: [course_enrollments.id],
+      relationName: 'enrollment',
+    }),
+    gradedBy: one(users, {
+      fields: [assignment_submissions.gradedBy],
+      references: [users.id],
+      relationName: 'gradedBy',
+    }),
+    _rels: many(assignment_submissions_rels, {
+      relationName: '_rels',
+    }),
+  }),
+)
+export const relations_grade_scales_grades = relations(grade_scales_grades, ({ one }) => ({
+  _parentID: one(grade_scales, {
+    fields: [grade_scales_grades._parentID],
+    references: [grade_scales.id],
+    relationName: 'grades',
+  }),
+}))
+export const relations_grade_scales = relations(grade_scales, ({ many }) => ({
+  grades: many(grade_scales_grades, {
+    relationName: 'grades',
+  }),
+}))
 export const relations_submission_answers = relations(submission_answers, ({ one }) => ({
   submission: one(assessment_submissions, {
     fields: [submission_answers.submission],
@@ -3255,6 +10339,13 @@ export const relations_user_notifications = relations(user_notifications, ({ one
     fields: [user_notifications.notification],
     references: [notifications.id],
     relationName: 'notification',
+  }),
+}))
+export const relations_web_push_subscriptions = relations(web_push_subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [web_push_subscriptions.user],
+    references: [users.id],
+    relationName: 'user',
   }),
 }))
 export const relations_support_tickets_rels = relations(support_tickets_rels, ({ one }) => ({
@@ -3411,209 +10502,6 @@ export const relations_chat_typing_status = relations(chat_typing_status, ({ one
   }),
 }))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
-export const relations_payload_locked_documents_rels = relations(
-  payload_locked_documents_rels,
-  ({ one }) => ({
-    parent: one(payload_locked_documents, {
-      fields: [payload_locked_documents_rels.parent],
-      references: [payload_locked_documents.id],
-      relationName: '_rels',
-    }),
-    usersID: one(users, {
-      fields: [payload_locked_documents_rels.usersID],
-      references: [users.id],
-      relationName: 'users',
-    }),
-    instructorsID: one(instructors, {
-      fields: [payload_locked_documents_rels.instructorsID],
-      references: [instructors.id],
-      relationName: 'instructors',
-    }),
-    traineesID: one(trainees, {
-      fields: [payload_locked_documents_rels.traineesID],
-      references: [trainees.id],
-      relationName: 'trainees',
-    }),
-    adminsID: one(admins, {
-      fields: [payload_locked_documents_rels.adminsID],
-      references: [admins.id],
-      relationName: 'admins',
-    }),
-    'user-eventsID': one(user_events, {
-      fields: [payload_locked_documents_rels['user-eventsID']],
-      references: [user_events.id],
-      relationName: 'user-events',
-    }),
-    'emergency-contactsID': one(emergency_contacts, {
-      fields: [payload_locked_documents_rels['emergency-contactsID']],
-      references: [emergency_contacts.id],
-      relationName: 'emergency-contacts',
-    }),
-    mediaID: one(media, {
-      fields: [payload_locked_documents_rels.mediaID],
-      references: [media.id],
-      relationName: 'media',
-    }),
-    postsID: one(posts, {
-      fields: [payload_locked_documents_rels.postsID],
-      references: [posts.id],
-      relationName: 'posts',
-    }),
-    'post-categoriesID': one(post_categories, {
-      fields: [payload_locked_documents_rels['post-categoriesID']],
-      references: [post_categories.id],
-      relationName: 'post-categories',
-    }),
-    coursesID: one(courses, {
-      fields: [payload_locked_documents_rels.coursesID],
-      references: [courses.id],
-      relationName: 'courses',
-    }),
-    'course-categoriesID': one(course_categories, {
-      fields: [payload_locked_documents_rels['course-categoriesID']],
-      references: [course_categories.id],
-      relationName: 'course-categories',
-    }),
-    'course-enrollmentsID': one(course_enrollments, {
-      fields: [payload_locked_documents_rels['course-enrollmentsID']],
-      references: [course_enrollments.id],
-      relationName: 'course-enrollments',
-    }),
-    certificatesID: one(certificates, {
-      fields: [payload_locked_documents_rels.certificatesID],
-      references: [certificates.id],
-      relationName: 'certificates',
-    }),
-    'certificate-templatesID': one(certificate_templates, {
-      fields: [payload_locked_documents_rels['certificate-templatesID']],
-      references: [certificate_templates.id],
-      relationName: 'certificate-templates',
-    }),
-    'course-modulesID': one(course_modules, {
-      fields: [payload_locked_documents_rels['course-modulesID']],
-      references: [course_modules.id],
-      relationName: 'course-modules',
-    }),
-    'course-lessonsID': one(course_lessons, {
-      fields: [payload_locked_documents_rels['course-lessonsID']],
-      references: [course_lessons.id],
-      relationName: 'course-lessons',
-    }),
-    materialsID: one(materials, {
-      fields: [payload_locked_documents_rels.materialsID],
-      references: [materials.id],
-      relationName: 'materials',
-    }),
-    'course-materialsID': one(course_materials, {
-      fields: [payload_locked_documents_rels['course-materialsID']],
-      references: [course_materials.id],
-      relationName: 'course-materials',
-    }),
-    'lesson-materialsID': one(lesson_materials, {
-      fields: [payload_locked_documents_rels['lesson-materialsID']],
-      references: [lesson_materials.id],
-      relationName: 'lesson-materials',
-    }),
-    announcementsID: one(announcements, {
-      fields: [payload_locked_documents_rels.announcementsID],
-      references: [announcements.id],
-      relationName: 'announcements',
-    }),
-    'course-feedbacksID': one(course_feedbacks, {
-      fields: [payload_locked_documents_rels['course-feedbacksID']],
-      references: [course_feedbacks.id],
-      relationName: 'course-feedbacks',
-    }),
-    wishlistsID: one(wishlists, {
-      fields: [payload_locked_documents_rels.wishlistsID],
-      references: [wishlists.id],
-      relationName: 'wishlists',
-    }),
-    'recently-viewed-coursesID': one(recently_viewed_courses, {
-      fields: [payload_locked_documents_rels['recently-viewed-coursesID']],
-      references: [recently_viewed_courses.id],
-      relationName: 'recently-viewed-courses',
-    }),
-    'course-item-progressID': one(course_item_progress, {
-      fields: [payload_locked_documents_rels['course-item-progressID']],
-      references: [course_item_progress.id],
-      relationName: 'course-item-progress',
-    }),
-    questionsID: one(questions, {
-      fields: [payload_locked_documents_rels.questionsID],
-      references: [questions.id],
-      relationName: 'questions',
-    }),
-    assessmentsID: one(assessments, {
-      fields: [payload_locked_documents_rels.assessmentsID],
-      references: [assessments.id],
-      relationName: 'assessments',
-    }),
-    'assessment-submissionsID': one(assessment_submissions, {
-      fields: [payload_locked_documents_rels['assessment-submissionsID']],
-      references: [assessment_submissions.id],
-      relationName: 'assessment-submissions',
-    }),
-    'submission-answersID': one(submission_answers, {
-      fields: [payload_locked_documents_rels['submission-answersID']],
-      references: [submission_answers.id],
-      relationName: 'submission-answers',
-    }),
-    'notification-templatesID': one(notification_templates, {
-      fields: [payload_locked_documents_rels['notification-templatesID']],
-      references: [notification_templates.id],
-      relationName: 'notification-templates',
-    }),
-    notificationsID: one(notifications, {
-      fields: [payload_locked_documents_rels.notificationsID],
-      references: [notifications.id],
-      relationName: 'notifications',
-    }),
-    'user-notificationsID': one(user_notifications, {
-      fields: [payload_locked_documents_rels['user-notificationsID']],
-      references: [user_notifications.id],
-      relationName: 'user-notifications',
-    }),
-    'support-ticketsID': one(support_tickets, {
-      fields: [payload_locked_documents_rels['support-ticketsID']],
-      references: [support_tickets.id],
-      relationName: 'support-tickets',
-    }),
-    'support-ticket-messagesID': one(support_ticket_messages, {
-      fields: [payload_locked_documents_rels['support-ticket-messagesID']],
-      references: [support_ticket_messages.id],
-      relationName: 'support-ticket-messages',
-    }),
-    chatsID: one(chats, {
-      fields: [payload_locked_documents_rels.chatsID],
-      references: [chats.id],
-      relationName: 'chats',
-    }),
-    'chat-messagesID': one(chat_messages, {
-      fields: [payload_locked_documents_rels['chat-messagesID']],
-      references: [chat_messages.id],
-      relationName: 'chat-messages',
-    }),
-    'chat-message-statusID': one(chat_message_status, {
-      fields: [payload_locked_documents_rels['chat-message-statusID']],
-      references: [chat_message_status.id],
-      relationName: 'chat-message-status',
-    }),
-    'chat-typing-statusID': one(chat_typing_status, {
-      fields: [payload_locked_documents_rels['chat-typing-statusID']],
-      references: [chat_typing_status.id],
-      relationName: 'chat-typing-status',
-    }),
-  }),
-)
-export const relations_payload_locked_documents = relations(
-  payload_locked_documents,
-  ({ many }) => ({
-    _rels: many(payload_locked_documents_rels, {
-      relationName: '_rels',
-    }),
-  }),
-)
 export const relations_payload_preferences_rels = relations(
   payload_preferences_rels,
   ({ one }) => ({
@@ -3635,6 +10523,48 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
   }),
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
+export const relations_accounting_settings = relations(accounting_settings, ({ one }) => ({
+  defaultSuspenseAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultSuspenseAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultSuspenseAccount',
+  }),
+  defaultReceivableAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultReceivableAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultReceivableAccount',
+  }),
+  defaultPayableAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultPayableAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultPayableAccount',
+  }),
+  defaultUndepositedFundsAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultUndepositedFundsAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultUndepositedFundsAccount',
+  }),
+  defaultOutputTaxAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultOutputTaxAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultOutputTaxAccount',
+  }),
+  defaultInputTaxAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.defaultInputTaxAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'defaultInputTaxAccount',
+  }),
+  retainedEarningsAccount: one(accounting_chart_of_accounts, {
+    fields: [accounting_settings.retainedEarningsAccount],
+    references: [accounting_chart_of_accounts.id],
+    relationName: 'retainedEarningsAccount',
+  }),
+  updatedBy: one(users, {
+    fields: [accounting_settings.updatedBy],
+    references: [users.id],
+    relationName: 'updatedBy',
+  }),
+}))
 export const relations_site_settings_social_links = relations(
   site_settings_social_links,
   ({ one }) => ({
@@ -3669,14 +10599,113 @@ type DatabaseSchema = {
   enum_admins_admin_level: typeof enum_admins_admin_level
   enum_user_events_event_type: typeof enum_user_events_event_type
   enum_emergency_contacts_relationship: typeof enum_emergency_contacts_relationship
+  enum_media_visibility: typeof enum_media_visibility
   enum_posts_status: typeof enum_posts_status
   enum__posts_v_version_status: typeof enum__posts_v_version_status
+  enum_post_comments_status: typeof enum_post_comments_status
+  enum_accounting_chart_of_accounts_account_type: typeof enum_accounting_chart_of_accounts_account_type
+  enum_accounting_chart_of_accounts_account_sub_type: typeof enum_accounting_chart_of_accounts_account_sub_type
+  enum_accounting_chart_of_accounts_normal_balance: typeof enum_accounting_chart_of_accounts_normal_balance
+  enum_accounting_fiscal_years_status: typeof enum_accounting_fiscal_years_status
+  enum_accounting_fiscal_years_close_mode: typeof enum_accounting_fiscal_years_close_mode
+  enum_accounting_periods_status: typeof enum_accounting_periods_status
+  enum_accounting_tax_codes_scope: typeof enum_accounting_tax_codes_scope
+  enum_accounting_tax_codes_calculation_method: typeof enum_accounting_tax_codes_calculation_method
+  enum_accounting_journal_entries_source_type: typeof enum_accounting_journal_entries_source_type
+  enum_accounting_journal_entries_status: typeof enum_accounting_journal_entries_status
+  enum_accounting_journal_entries_posting_status: typeof enum_accounting_journal_entries_posting_status
+  enum_accounting_customers_customer_type: typeof enum_accounting_customers_customer_type
+  enum_accounting_customers_status: typeof enum_accounting_customers_status
+  enum_accounting_vendors_vendor_type: typeof enum_accounting_vendors_vendor_type
+  enum_accounting_vendors_status: typeof enum_accounting_vendors_status
+  enum_accounting_bank_accounts_account_type: typeof enum_accounting_bank_accounts_account_type
+  enum_accounting_invoices_status: typeof enum_accounting_invoices_status
+  enum_accounting_invoices_posting_status: typeof enum_accounting_invoices_posting_status
+  enum_accounting_invoice_line_items_item_type: typeof enum_accounting_invoice_line_items_item_type
+  enum_accounting_bills_status: typeof enum_accounting_bills_status
+  enum_accounting_bills_posting_status: typeof enum_accounting_bills_posting_status
+  enum_accounting_credit_notes_status: typeof enum_accounting_credit_notes_status
+  enum_accounting_vendor_credits_status: typeof enum_accounting_vendor_credits_status
+  enum_accounting_payments_received_payment_method: typeof enum_accounting_payments_received_payment_method
+  enum_accounting_payments_received_status: typeof enum_accounting_payments_received_status
+  enum_accounting_payments_made_payment_method: typeof enum_accounting_payments_made_payment_method
+  enum_accounting_payments_made_status: typeof enum_accounting_payments_made_status
+  enum_accounting_expenses_payment_method: typeof enum_accounting_expenses_payment_method
+  enum_accounting_expenses_status: typeof enum_accounting_expenses_status
+  enum_accounting_deposits_status: typeof enum_accounting_deposits_status
+  enum_accounting_transfers_status: typeof enum_accounting_transfers_status
+  enum_accounting_bounced_payments_bounce_reason: typeof enum_accounting_bounced_payments_bounce_reason
+  enum_accounting_bounced_payments_case_status: typeof enum_accounting_bounced_payments_case_status
+  enum_accounting_bank_feeds_connector_type: typeof enum_accounting_bank_feeds_connector_type
+  enum_accounting_bank_feeds_connection_status: typeof enum_accounting_bank_feeds_connection_status
+  enum_accounting_bank_feeds_health_status: typeof enum_accounting_bank_feeds_health_status
+  enum_accounting_bank_feeds_sync_frequency: typeof enum_accounting_bank_feeds_sync_frequency
+  enum_accounting_bank_statement_imports_source_format: typeof enum_accounting_bank_statement_imports_source_format
+  enum_accounting_bank_statement_imports_import_status: typeof enum_accounting_bank_statement_imports_import_status
+  enum_accounting_bank_transactions_match_status: typeof enum_accounting_bank_transactions_match_status
+  enum_accounting_bank_transactions_matched_entity_type: typeof enum_accounting_bank_transactions_matched_entity_type
+  enum_accounting_bank_reconciliations_status: typeof enum_accounting_bank_reconciliations_status
+  enum_accounting_document_links_entity_type: typeof enum_accounting_document_links_entity_type
+  enum_accounting_document_links_document_category: typeof enum_accounting_document_links_document_category
+  enum_acct_course_fee_profiles_default_recognition_method: typeof enum_acct_course_fee_profiles_default_recognition_method
+  enum_acct_scholarship_sponsors_status: typeof enum_acct_scholarship_sponsors_status
+  enum_acct_corporate_accounts_status: typeof enum_acct_corporate_accounts_status
+  enum_acct_instructor_payout_rules_payout_method: typeof enum_acct_instructor_payout_rules_payout_method
+  enum_acct_instructor_payout_rules_status: typeof enum_acct_instructor_payout_rules_status
+  enum_acct_enrollment_billing_links_billing_status: typeof enum_acct_enrollment_billing_links_billing_status
+  enum_acct_billing_adjustments_adjustment_type: typeof enum_acct_billing_adjustments_adjustment_type
+  enum_acct_billing_adjustments_direction: typeof enum_acct_billing_adjustments_direction
+  enum_acct_payment_allocations_allocation_type: typeof enum_acct_payment_allocations_allocation_type
+  enum_acct_receipts_status: typeof enum_acct_receipts_status
+  enum_acct_refunds_refund_type: typeof enum_acct_refunds_refund_type
+  enum_acct_refunds_status: typeof enum_acct_refunds_status
+  enum_acct_rev_rec_schedules_recognition_method: typeof enum_acct_rev_rec_schedules_recognition_method
+  enum_acct_rev_rec_schedules_status: typeof enum_acct_rev_rec_schedules_status
+  enum_acct_scholarship_awards_award_type: typeof enum_acct_scholarship_awards_award_type
+  enum_acct_scholarship_awards_status: typeof enum_acct_scholarship_awards_status
+  enum_acct_corporate_billing_links_coverage_type: typeof enum_acct_corporate_billing_links_coverage_type
+  enum_acct_corporate_billing_links_status: typeof enum_acct_corporate_billing_links_status
+  enum_acct_instructor_payouts_status: typeof enum_acct_instructor_payouts_status
+  enum_acct_branches_status: typeof enum_acct_branches_status
+  enum_acct_departments_status: typeof enum_acct_departments_status
+  enum_acct_locations_status: typeof enum_acct_locations_status
+  enum_acct_projects_status: typeof enum_acct_projects_status
+  enum_acct_projects_project_type: typeof enum_acct_projects_project_type
+  enum_acct_project_tasks_status: typeof enum_acct_project_tasks_status
+  enum_acct_budgets_status: typeof enum_acct_budgets_status
+  enum_acct_budgets_budget_type: typeof enum_acct_budgets_budget_type
+  enum_acct_forecast_scenarios_scenario_type: typeof enum_acct_forecast_scenarios_scenario_type
+  enum_acct_forecast_scenarios_status: typeof enum_acct_forecast_scenarios_status
+  enum_acct_time_entries_status: typeof enum_acct_time_entries_status
+  enum_acct_time_entries_source_type: typeof enum_acct_time_entries_source_type
+  enum_acct_timesheets_status: typeof enum_acct_timesheets_status
+  enum_acct_fixed_assets_asset_category: typeof enum_acct_fixed_assets_asset_category
+  enum_acct_fixed_assets_depreciation_method: typeof enum_acct_fixed_assets_depreciation_method
+  enum_acct_fixed_assets_status: typeof enum_acct_fixed_assets_status
+  enum_acct_depr_entries_status: typeof enum_acct_depr_entries_status
+  enum_acct_asset_disposals_disposal_type: typeof enum_acct_asset_disposals_disposal_type
+  enum_acct_asset_disposals_status: typeof enum_acct_asset_disposals_status
+  enum_acct_payroll_runs_status: typeof enum_acct_payroll_runs_status
+  enum_acct_payroll_entries_entry_type: typeof enum_acct_payroll_entries_entry_type
+  enum_acct_payroll_entries_status: typeof enum_acct_payroll_entries_status
+  enum_acct_payroll_account_mappings_entry_type: typeof enum_acct_payroll_account_mappings_entry_type
+  enum_acct_payroll_account_mappings_status: typeof enum_acct_payroll_account_mappings_status
+  enum_acct_approval_workflows_entity_type: typeof enum_acct_approval_workflows_entity_type
+  enum_acct_approval_requests_entity_type: typeof enum_acct_approval_requests_entity_type
+  enum_acct_approval_requests_status: typeof enum_acct_approval_requests_status
+  enum_acct_audit_logs_entity_type: typeof enum_acct_audit_logs_entity_type
+  enum_acct_audit_logs_action_type: typeof enum_acct_audit_logs_action_type
   enum_courses_estimated_duration_unit: typeof enum_courses_estimated_duration_unit
   enum_courses_difficulty_level: typeof enum_courses_difficulty_level
   enum_courses_language: typeof enum_courses_language
   enum_courses_evaluation_mode: typeof enum_courses_evaluation_mode
   enum_courses_status: typeof enum_courses_status
   enum_course_categories_category_type: typeof enum_course_categories_category_type
+  enum_coupon_codes_status: typeof enum_coupon_codes_status
+  enum_coupon_codes_discount_type: typeof enum_coupon_codes_discount_type
+  enum_coupon_codes_scope_type: typeof enum_coupon_codes_scope_type
+  enum_coupon_redemptions_context_type: typeof enum_coupon_redemptions_context_type
+  enum_coupon_redemptions_status: typeof enum_coupon_redemptions_status
   enum_course_enrollments_enrollment_type: typeof enum_course_enrollments_enrollment_type
   enum_course_enrollments_status: typeof enum_course_enrollments_status
   enum_course_enrollments_payment_status: typeof enum_course_enrollments_payment_status
@@ -3684,6 +10713,8 @@ type DatabaseSchema = {
   enum_certificates_status: typeof enum_certificates_status
   enum_certificate_templates_status: typeof enum_certificate_templates_status
   enum_materials_material_source: typeof enum_materials_material_source
+  enum_feedback_forms_blocks_text_input_format: typeof enum_feedback_forms_blocks_text_input_format
+  enum_feedback_forms_blocks_choice_input_ui_type: typeof enum_feedback_forms_blocks_choice_input_ui_type
   enum_course_item_progress_status: typeof enum_course_item_progress_status
   enum_questions_type: typeof enum_questions_type
   enum_questions_difficulty: typeof enum_questions_difficulty
@@ -3691,6 +10722,9 @@ type DatabaseSchema = {
   enum_questions_true_false_correct: typeof enum_questions_true_false_correct
   enum_assessments_assessment_type: typeof enum_assessments_assessment_type
   enum_assessment_submissions_status: typeof enum_assessment_submissions_status
+  enum_assignments_allowed_file_types: typeof enum_assignments_allowed_file_types
+  enum_assignments_submission_type: typeof enum_assignments_submission_type
+  enum_assignment_submissions_status: typeof enum_assignment_submissions_status
   enum_submission_answers_question_type: typeof enum_submission_answers_question_type
   enum_notification_templates_channels: typeof enum_notification_templates_channels
   enum_notification_templates_category: typeof enum_notification_templates_category
@@ -3701,6 +10735,7 @@ type DatabaseSchema = {
   enum_notifications_status: typeof enum_notifications_status
   enum_user_notifications_category: typeof enum_user_notifications_category
   enum_user_notifications_channel: typeof enum_user_notifications_channel
+  enum_web_push_subscriptions_permission_state: typeof enum_web_push_subscriptions_permission_state
   enum_support_tickets_status: typeof enum_support_tickets_status
   enum_support_tickets_priority: typeof enum_support_tickets_priority
   enum_support_tickets_category: typeof enum_support_tickets_category
@@ -3708,6 +10743,8 @@ type DatabaseSchema = {
   enum_chats_status: typeof enum_chats_status
   enum_chat_messages_content_type: typeof enum_chat_messages_content_type
   enum_chat_message_status_status: typeof enum_chat_message_status_status
+  enum_accounting_settings_opening_balance_source_type: typeof enum_accounting_settings_opening_balance_source_type
+  enum_accounting_settings_default_tax_behavior: typeof enum_accounting_settings_default_tax_behavior
   enum_site_settings_social_links_platform: typeof enum_site_settings_social_links_platform
   users_reset_password_tokens: typeof users_reset_password_tokens
   users_sessions: typeof users_sessions
@@ -3725,11 +10762,84 @@ type DatabaseSchema = {
   _posts_v: typeof _posts_v
   _posts_v_rels: typeof _posts_v_rels
   post_categories: typeof post_categories
+  post_tags: typeof post_tags
+  post_comments: typeof post_comments
+  accounting_chart_of_accounts: typeof accounting_chart_of_accounts
+  accounting_fiscal_years: typeof accounting_fiscal_years
+  accounting_periods: typeof accounting_periods
+  accounting_tax_codes: typeof accounting_tax_codes
+  accounting_journal_entries: typeof accounting_journal_entries
+  accounting_journal_entry_lines: typeof accounting_journal_entry_lines
+  acct_currencies: typeof acct_currencies
+  acct_payment_terms: typeof acct_payment_terms
+  accounting_customers: typeof accounting_customers
+  accounting_vendors: typeof accounting_vendors
+  accounting_bank_accounts: typeof accounting_bank_accounts
+  accounting_invoices: typeof accounting_invoices
+  accounting_invoice_line_items: typeof accounting_invoice_line_items
+  accounting_bills: typeof accounting_bills
+  accounting_bill_line_items: typeof accounting_bill_line_items
+  accounting_credit_notes_applications: typeof accounting_credit_notes_applications
+  accounting_credit_notes: typeof accounting_credit_notes
+  accounting_vendor_credits_applications: typeof accounting_vendor_credits_applications
+  accounting_vendor_credits: typeof accounting_vendor_credits
+  accounting_payments_received_applications: typeof accounting_payments_received_applications
+  accounting_payments_received: typeof accounting_payments_received
+  accounting_payments_made_applications: typeof accounting_payments_made_applications
+  accounting_payments_made: typeof accounting_payments_made
+  accounting_expenses: typeof accounting_expenses
+  accounting_deposits: typeof accounting_deposits
+  accounting_transfers: typeof accounting_transfers
+  accounting_bounced_payments: typeof accounting_bounced_payments
+  accounting_bank_feeds: typeof accounting_bank_feeds
+  accounting_bank_statement_imports: typeof accounting_bank_statement_imports
+  accounting_bank_transactions: typeof accounting_bank_transactions
+  accounting_bank_reconciliations: typeof accounting_bank_reconciliations
+  accounting_document_links: typeof accounting_document_links
+  acct_course_fee_profiles: typeof acct_course_fee_profiles
+  acct_scholarship_sponsors: typeof acct_scholarship_sponsors
+  acct_corporate_accounts: typeof acct_corporate_accounts
+  acct_instructor_payout_rules: typeof acct_instructor_payout_rules
+  acct_enrollment_billing_links: typeof acct_enrollment_billing_links
+  acct_billing_adjustments: typeof acct_billing_adjustments
+  acct_payment_allocations: typeof acct_payment_allocations
+  acct_receipts: typeof acct_receipts
+  acct_refunds: typeof acct_refunds
+  acct_rev_rec_schedules: typeof acct_rev_rec_schedules
+  acct_scholarship_awards: typeof acct_scholarship_awards
+  acct_corporate_billing_links: typeof acct_corporate_billing_links
+  acct_instructor_payouts: typeof acct_instructor_payouts
+  acct_branches: typeof acct_branches
+  acct_departments: typeof acct_departments
+  acct_locations: typeof acct_locations
+  acct_projects: typeof acct_projects
+  acct_project_tasks: typeof acct_project_tasks
+  acct_budgets: typeof acct_budgets
+  acct_budget_lines: typeof acct_budget_lines
+  acct_forecast_scenarios: typeof acct_forecast_scenarios
+  acct_time_entries: typeof acct_time_entries
+  acct_timesheets: typeof acct_timesheets
+  acct_fixed_assets: typeof acct_fixed_assets
+  acct_depr_entries: typeof acct_depr_entries
+  acct_asset_disposals: typeof acct_asset_disposals
+  acct_payroll_runs: typeof acct_payroll_runs
+  acct_payroll_entries: typeof acct_payroll_entries
+  acct_payroll_account_mappings: typeof acct_payroll_account_mappings
+  acct_approval_workflows_steps: typeof acct_approval_workflows_steps
+  acct_approval_workflows: typeof acct_approval_workflows
+  acct_approval_requests_approval_trail: typeof acct_approval_requests_approval_trail
+  acct_approval_requests: typeof acct_approval_requests
+  acct_audit_logs: typeof acct_audit_logs
   courses_learning_objectives: typeof courses_learning_objectives
   courses_prerequisites: typeof courses_prerequisites
   courses: typeof courses
   courses_rels: typeof courses_rels
   course_categories: typeof course_categories
+  course_tags: typeof course_tags
+  coupon_codes_allowed_emails: typeof coupon_codes_allowed_emails
+  coupon_codes: typeof coupon_codes
+  coupon_codes_rels: typeof coupon_codes_rels
+  coupon_redemptions: typeof coupon_redemptions
   course_enrollments: typeof course_enrollments
   certificates: typeof certificates
   certificate_templates: typeof certificate_templates
@@ -3741,7 +10851,14 @@ type DatabaseSchema = {
   course_materials: typeof course_materials
   lesson_materials: typeof lesson_materials
   announcements: typeof announcements
-  course_feedbacks: typeof course_feedbacks
+  feedback_forms_blocks_text_input: typeof feedback_forms_blocks_text_input
+  feedback_forms_blocks_choice_input_options: typeof feedback_forms_blocks_choice_input_options
+  feedback_forms_blocks_choice_input: typeof feedback_forms_blocks_choice_input
+  feedback_forms_blocks_survey_matrix_columns: typeof feedback_forms_blocks_survey_matrix_columns
+  feedback_forms_blocks_survey_matrix_rows: typeof feedback_forms_blocks_survey_matrix_rows
+  feedback_forms_blocks_survey_matrix: typeof feedback_forms_blocks_survey_matrix
+  feedback_forms: typeof feedback_forms
+  feedback_submissions: typeof feedback_submissions
   wishlists: typeof wishlists
   recently_viewed_courses: typeof recently_viewed_courses
   course_item_progress: typeof course_item_progress
@@ -3753,12 +10870,20 @@ type DatabaseSchema = {
   assessments_items: typeof assessments_items
   assessments: typeof assessments
   assessment_submissions: typeof assessment_submissions
+  assignments_allowed_file_types: typeof assignments_allowed_file_types
+  assignments: typeof assignments
+  assignments_rels: typeof assignments_rels
+  assignment_submissions: typeof assignment_submissions
+  assignment_submissions_rels: typeof assignment_submissions_rels
+  grade_scales_grades: typeof grade_scales_grades
+  grade_scales: typeof grade_scales
   submission_answers: typeof submission_answers
   notification_templates_channels: typeof notification_templates_channels
   notification_templates: typeof notification_templates
   notifications: typeof notifications
   notifications_rels: typeof notifications_rels
   user_notifications: typeof user_notifications
+  web_push_subscriptions: typeof web_push_subscriptions
   support_tickets: typeof support_tickets
   support_tickets_rels: typeof support_tickets_rels
   support_ticket_messages: typeof support_ticket_messages
@@ -3771,11 +10896,10 @@ type DatabaseSchema = {
   chat_message_status: typeof chat_message_status
   chat_typing_status: typeof chat_typing_status
   payload_kv: typeof payload_kv
-  payload_locked_documents: typeof payload_locked_documents
-  payload_locked_documents_rels: typeof payload_locked_documents_rels
   payload_preferences: typeof payload_preferences
   payload_preferences_rels: typeof payload_preferences_rels
   payload_migrations: typeof payload_migrations
+  accounting_settings: typeof accounting_settings
   site_settings_social_links: typeof site_settings_social_links
   site_settings: typeof site_settings
   relations_users_reset_password_tokens: typeof relations_users_reset_password_tokens
@@ -3794,11 +10918,84 @@ type DatabaseSchema = {
   relations__posts_v_rels: typeof relations__posts_v_rels
   relations__posts_v: typeof relations__posts_v
   relations_post_categories: typeof relations_post_categories
+  relations_post_tags: typeof relations_post_tags
+  relations_post_comments: typeof relations_post_comments
+  relations_accounting_chart_of_accounts: typeof relations_accounting_chart_of_accounts
+  relations_accounting_fiscal_years: typeof relations_accounting_fiscal_years
+  relations_accounting_periods: typeof relations_accounting_periods
+  relations_accounting_tax_codes: typeof relations_accounting_tax_codes
+  relations_accounting_journal_entries: typeof relations_accounting_journal_entries
+  relations_accounting_journal_entry_lines: typeof relations_accounting_journal_entry_lines
+  relations_acct_currencies: typeof relations_acct_currencies
+  relations_acct_payment_terms: typeof relations_acct_payment_terms
+  relations_accounting_customers: typeof relations_accounting_customers
+  relations_accounting_vendors: typeof relations_accounting_vendors
+  relations_accounting_bank_accounts: typeof relations_accounting_bank_accounts
+  relations_accounting_invoices: typeof relations_accounting_invoices
+  relations_accounting_invoice_line_items: typeof relations_accounting_invoice_line_items
+  relations_accounting_bills: typeof relations_accounting_bills
+  relations_accounting_bill_line_items: typeof relations_accounting_bill_line_items
+  relations_accounting_credit_notes_applications: typeof relations_accounting_credit_notes_applications
+  relations_accounting_credit_notes: typeof relations_accounting_credit_notes
+  relations_accounting_vendor_credits_applications: typeof relations_accounting_vendor_credits_applications
+  relations_accounting_vendor_credits: typeof relations_accounting_vendor_credits
+  relations_accounting_payments_received_applications: typeof relations_accounting_payments_received_applications
+  relations_accounting_payments_received: typeof relations_accounting_payments_received
+  relations_accounting_payments_made_applications: typeof relations_accounting_payments_made_applications
+  relations_accounting_payments_made: typeof relations_accounting_payments_made
+  relations_accounting_expenses: typeof relations_accounting_expenses
+  relations_accounting_deposits: typeof relations_accounting_deposits
+  relations_accounting_transfers: typeof relations_accounting_transfers
+  relations_accounting_bounced_payments: typeof relations_accounting_bounced_payments
+  relations_accounting_bank_feeds: typeof relations_accounting_bank_feeds
+  relations_accounting_bank_statement_imports: typeof relations_accounting_bank_statement_imports
+  relations_accounting_bank_transactions: typeof relations_accounting_bank_transactions
+  relations_accounting_bank_reconciliations: typeof relations_accounting_bank_reconciliations
+  relations_accounting_document_links: typeof relations_accounting_document_links
+  relations_acct_course_fee_profiles: typeof relations_acct_course_fee_profiles
+  relations_acct_scholarship_sponsors: typeof relations_acct_scholarship_sponsors
+  relations_acct_corporate_accounts: typeof relations_acct_corporate_accounts
+  relations_acct_instructor_payout_rules: typeof relations_acct_instructor_payout_rules
+  relations_acct_enrollment_billing_links: typeof relations_acct_enrollment_billing_links
+  relations_acct_billing_adjustments: typeof relations_acct_billing_adjustments
+  relations_acct_payment_allocations: typeof relations_acct_payment_allocations
+  relations_acct_receipts: typeof relations_acct_receipts
+  relations_acct_refunds: typeof relations_acct_refunds
+  relations_acct_rev_rec_schedules: typeof relations_acct_rev_rec_schedules
+  relations_acct_scholarship_awards: typeof relations_acct_scholarship_awards
+  relations_acct_corporate_billing_links: typeof relations_acct_corporate_billing_links
+  relations_acct_instructor_payouts: typeof relations_acct_instructor_payouts
+  relations_acct_branches: typeof relations_acct_branches
+  relations_acct_departments: typeof relations_acct_departments
+  relations_acct_locations: typeof relations_acct_locations
+  relations_acct_projects: typeof relations_acct_projects
+  relations_acct_project_tasks: typeof relations_acct_project_tasks
+  relations_acct_budgets: typeof relations_acct_budgets
+  relations_acct_budget_lines: typeof relations_acct_budget_lines
+  relations_acct_forecast_scenarios: typeof relations_acct_forecast_scenarios
+  relations_acct_time_entries: typeof relations_acct_time_entries
+  relations_acct_timesheets: typeof relations_acct_timesheets
+  relations_acct_fixed_assets: typeof relations_acct_fixed_assets
+  relations_acct_depr_entries: typeof relations_acct_depr_entries
+  relations_acct_asset_disposals: typeof relations_acct_asset_disposals
+  relations_acct_payroll_runs: typeof relations_acct_payroll_runs
+  relations_acct_payroll_entries: typeof relations_acct_payroll_entries
+  relations_acct_payroll_account_mappings: typeof relations_acct_payroll_account_mappings
+  relations_acct_approval_workflows_steps: typeof relations_acct_approval_workflows_steps
+  relations_acct_approval_workflows: typeof relations_acct_approval_workflows
+  relations_acct_approval_requests_approval_trail: typeof relations_acct_approval_requests_approval_trail
+  relations_acct_approval_requests: typeof relations_acct_approval_requests
+  relations_acct_audit_logs: typeof relations_acct_audit_logs
   relations_courses_learning_objectives: typeof relations_courses_learning_objectives
   relations_courses_prerequisites: typeof relations_courses_prerequisites
   relations_courses_rels: typeof relations_courses_rels
   relations_courses: typeof relations_courses
   relations_course_categories: typeof relations_course_categories
+  relations_course_tags: typeof relations_course_tags
+  relations_coupon_codes_allowed_emails: typeof relations_coupon_codes_allowed_emails
+  relations_coupon_codes_rels: typeof relations_coupon_codes_rels
+  relations_coupon_codes: typeof relations_coupon_codes
+  relations_coupon_redemptions: typeof relations_coupon_redemptions
   relations_course_enrollments: typeof relations_course_enrollments
   relations_certificates: typeof relations_certificates
   relations_certificate_templates: typeof relations_certificate_templates
@@ -3810,7 +11007,14 @@ type DatabaseSchema = {
   relations_course_materials: typeof relations_course_materials
   relations_lesson_materials: typeof relations_lesson_materials
   relations_announcements: typeof relations_announcements
-  relations_course_feedbacks: typeof relations_course_feedbacks
+  relations_feedback_forms_blocks_text_input: typeof relations_feedback_forms_blocks_text_input
+  relations_feedback_forms_blocks_choice_input_options: typeof relations_feedback_forms_blocks_choice_input_options
+  relations_feedback_forms_blocks_choice_input: typeof relations_feedback_forms_blocks_choice_input
+  relations_feedback_forms_blocks_survey_matrix_columns: typeof relations_feedback_forms_blocks_survey_matrix_columns
+  relations_feedback_forms_blocks_survey_matrix_rows: typeof relations_feedback_forms_blocks_survey_matrix_rows
+  relations_feedback_forms_blocks_survey_matrix: typeof relations_feedback_forms_blocks_survey_matrix
+  relations_feedback_forms: typeof relations_feedback_forms
+  relations_feedback_submissions: typeof relations_feedback_submissions
   relations_wishlists: typeof relations_wishlists
   relations_recently_viewed_courses: typeof relations_recently_viewed_courses
   relations_course_item_progress_rels: typeof relations_course_item_progress_rels
@@ -3822,12 +11026,20 @@ type DatabaseSchema = {
   relations_assessments_items: typeof relations_assessments_items
   relations_assessments: typeof relations_assessments
   relations_assessment_submissions: typeof relations_assessment_submissions
+  relations_assignments_allowed_file_types: typeof relations_assignments_allowed_file_types
+  relations_assignments_rels: typeof relations_assignments_rels
+  relations_assignments: typeof relations_assignments
+  relations_assignment_submissions_rels: typeof relations_assignment_submissions_rels
+  relations_assignment_submissions: typeof relations_assignment_submissions
+  relations_grade_scales_grades: typeof relations_grade_scales_grades
+  relations_grade_scales: typeof relations_grade_scales
   relations_submission_answers: typeof relations_submission_answers
   relations_notification_templates_channels: typeof relations_notification_templates_channels
   relations_notification_templates: typeof relations_notification_templates
   relations_notifications_rels: typeof relations_notifications_rels
   relations_notifications: typeof relations_notifications
   relations_user_notifications: typeof relations_user_notifications
+  relations_web_push_subscriptions: typeof relations_web_push_subscriptions
   relations_support_tickets_rels: typeof relations_support_tickets_rels
   relations_support_tickets: typeof relations_support_tickets
   relations_support_ticket_messages_rels: typeof relations_support_ticket_messages_rels
@@ -3840,11 +11052,10 @@ type DatabaseSchema = {
   relations_chat_message_status: typeof relations_chat_message_status
   relations_chat_typing_status: typeof relations_chat_typing_status
   relations_payload_kv: typeof relations_payload_kv
-  relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
-  relations_payload_locked_documents: typeof relations_payload_locked_documents
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels
   relations_payload_preferences: typeof relations_payload_preferences
   relations_payload_migrations: typeof relations_payload_migrations
+  relations_accounting_settings: typeof relations_accounting_settings
   relations_site_settings_social_links: typeof relations_site_settings_social_links
   relations_site_settings: typeof relations_site_settings
 }

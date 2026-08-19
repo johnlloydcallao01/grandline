@@ -5,9 +5,9 @@ import {
     X, Plus, CheckCircle, AlertTriangle
 } from '@/components/ui/IconWrapper';
 import {
-    getCategories, searchInstructors, searchCollection, listCollection,
-    type CategoryOption, type InstructorRef, type SimpleDocRef, type CourseDoc
+    getCategories, getTags, searchInstructors, searchCollection, listCollection,
 } from '@/app/(main)/courses/actions';
+import type { CategoryOption, InstructorRef, SimpleDocRef, Course, TagOption } from '@encreasl/cms-types';
 import { RichTextEditor } from '@/components/cms/RichTextEditor';
 
 const DIFFICULTY_OPTIONS = [
@@ -57,6 +57,7 @@ interface FormState {
     instructorLabel: string;
     coInstructors: string[];
     category: string[];
+    tags: string[];
     modules: string[];
     thumbnailUrl: string;
     bannerImageUrl: string;
@@ -89,7 +90,7 @@ const DEFAULTS: FormState = {
     title: '', courseCode: '', status: 'draft',
     description: '', excerpt: '',
     instructor: '', instructorSearch: '', instructorLabel: '',
-    coInstructors: [], category: [], modules: [],
+    coInstructors: [], category: [], tags: [], modules: [],
     thumbnailUrl: '', bannerImageUrl: '',
     price: 0, discountedPrice: 0, maxStudents: 0,
     enrollmentStartDate: '', enrollmentEndDate: '',
@@ -106,7 +107,7 @@ const DEFAULTS: FormState = {
 interface CourseFormProps {
     mode: 'create' | 'edit';
     courseId?: string;
-    course?: CourseDoc | null;
+    course?: Course | null;
     initialData?: Partial<FormState>;
     isSaving: boolean;
     error: string | null;
@@ -128,6 +129,7 @@ export default function CourseForm({
 }: CourseFormProps) {
     const [form, setForm] = useState<FormState>(() => initialData ? { ...DEFAULTS, ...initialData } : { ...DEFAULTS });
     const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+    const [tagOptions, setTagOptions] = useState<TagOption[]>([]);
     const [instructorOptions, setInstructorOptions] = useState<InstructorRef[]>([]);
     const [coInstructorOptions, setCoInstructorOptions] = useState<InstructorRef[]>([]);
     const [coInstructorSearch, setCoInstructorSearch] = useState('');
@@ -145,6 +147,8 @@ export default function CourseForm({
     }, []);
 
     useEffect(() => { getCategories().then(setCategoryOptions).catch(() => {}); }, []);
+
+    useEffect(() => { getTags().then(setTagOptions).catch(() => {}); }, []);
 
     useEffect(() => {
         if (form.instructorSearch.length < 1 || form.instructorSearch === form.instructorLabel) {
@@ -220,6 +224,7 @@ export default function CourseForm({
             instructor: form.instructor || undefined,
             coInstructors: form.coInstructors.length > 0 ? form.coInstructors : [],
             category: form.category.length > 0 ? form.category : [],
+            tags: form.tags.length > 0 ? form.tags : [],
             modules: form.modules.length > 0 ? form.modules : [],
             price: form.price,
             discountedPrice: form.discountedPrice || undefined,
@@ -419,6 +424,19 @@ export default function CourseForm({
                                 </button>
                             ))}
                             {categoryOptions.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-500">No categories</p>}
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                        <div className="flex flex-wrap gap-2">
+                            {tagOptions.map(tag => (
+                                <button key={tag.id} onClick={() => updateField('tags',
+                                    form.tags.includes(tag.id) ? form.tags.filter(id => id !== tag.id) : [...form.tags, tag.id])}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${form.tags.includes(tag.id) ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700' : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                    {tag.name}
+                                </button>
+                            ))}
+                            {tagOptions.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-500">No tags</p>}
                         </div>
                     </div>
                 </div>

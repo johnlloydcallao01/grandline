@@ -4,9 +4,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import NextLink from 'next/link';
 import {
-    getAssessmentById, updateAssessment,
-    type AssessmentDoc
+    getAssessmentById, updateAssessment, getQuestions
 } from '../../actions';
+import type {
+    AssessmentCourseOption, AssessmentDoc, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types';
 import AssessmentForm from '@/components/courses/AssessmentForm';
 
 const Link = NextLink as any;
@@ -32,9 +34,9 @@ export default function EditAssessmentPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    const [moduleOptions, setModuleOptions] = useState<{ id: string; title: string }[]>([]);
-    const [courseOptions, setCourseOptions] = useState<{ id: string; title: string }[]>([]);
-    const [questions, setQuestions] = useState<{ id: string; prompt: string; type: string; difficulty: string }[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<AssessmentModuleOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AssessmentCourseOption[]>([]);
+    const [questions, setQuestions] = useState<AssessmentQuestionOption[]>([]);
     const [initialData, setInitialData] = useState<any>(null);
     const [initialItems, setInitialItems] = useState<any[]>([]);
 
@@ -47,7 +49,8 @@ export default function EditAssessmentPage() {
             setAssessment(data);
             setModuleOptions(result.moduleOptions || []);
             setCourseOptions(result.courseOptions || []);
-            setQuestions(result.questions || []);
+            const qs = await getQuestions({ limit: 200 });
+            setQuestions(qs);
 
             let moduleId = '';
             let moduleLabel = '';

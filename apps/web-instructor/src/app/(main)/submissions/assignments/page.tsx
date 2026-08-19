@@ -5,9 +5,11 @@ import {
   getAssignmentSubmissions,
   getCourseOptions,
   gradeAssignmentSubmission,
-  type AssignmentSubmissionDoc,
-  type CourseOption,
 } from './actions'
+import {
+  type AssignmentSubmissionDoc,
+  type SubmissionCourseOption,
+} from '@encreasl/cms-types'
 
 const ITEMS_PER_PAGE = 20
 
@@ -80,7 +82,7 @@ function mediaUrl(file: any): string | null {
 
 export default function AssignmentSubmissionsPage() {
   const [submissions, setSubmissions] = useState<AssignmentSubmissionDoc[]>([])
-  const [courses, setCourses] = useState<CourseOption[]>([])
+  const [courses, setCourses] = useState<SubmissionCourseOption[]>([])
   const [totalDocs, setTotalDocs] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)

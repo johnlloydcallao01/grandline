@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import {
     X, Plus, Trash2, CheckCircle, AlertTriangle, Folder
 } from '@/components/ui/IconWrapper';
-import {
-    type ModuleOption, type CourseOption, type QuestionOption
-} from '@/app/(main)/courses/assessments/actions';
+import type {
+    AssessmentCourseOption, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types';
 import { RichTextEditor } from '@/components/cms/RichTextEditor';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -67,9 +67,9 @@ interface AssessmentFormProps {
     assessment?: any;
     initialData?: Partial<FormState>;
     initialItems?: ItemEntry[];
-    moduleOptions: ModuleOption[];
-    courseOptions: CourseOption[];
-    questions: QuestionOption[];
+    moduleOptions: AssessmentModuleOption[];
+    courseOptions: AssessmentCourseOption[];
+    questions: AssessmentQuestionOption[];
     isSaving: boolean;
     error: string | null;
     saveSuccess: boolean;

@@ -83,6 +83,7 @@ export default function EditCoursePage() {
                 instructorLabel,
                 coInstructors: extractIds(data.coInstructors as any),
                 category: extractIds(data.category as any),
+                tags: extractIds(data.tags as any),
                 modules: extractIds(data.modules as any),
                 thumbnailUrl: thumbUrl,
                 bannerImageUrl: bannerUrl,
@@ -129,7 +130,7 @@ export default function EditCoursePage() {
             for (const key of ['instructor', 'certificateTemplate', 'feedbackForm']) {
                 if (safeData[key] != null && typeof safeData[key] !== 'object') safeData[key] = Number(safeData[key]);
             }
-            for (const key of ['category', 'coInstructors', 'modules']) {
+            for (const key of ['category', 'coInstructors', 'modules', 'tags']) {
                 if (Array.isArray(safeData[key])) safeData[key] = safeData[key].map((v: any) => typeof v === 'object' ? v : Number(v));
             }
             await updateCourse(courseId, safeData);

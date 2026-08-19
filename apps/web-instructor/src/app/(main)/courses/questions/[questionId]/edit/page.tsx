@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation';
 import NextLink from 'next/link';
 import {
     getQuestionById, updateQuestion,
-    type QuestionDoc
 } from '../../actions';
+import type { QuestionDoc } from '@encreasl/cms-types';
 import QuestionForm from '@/components/courses/QuestionForm';
 
 const Link = NextLink as any;

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-    getModuleOptions, type ModuleOption, type LessonDoc
+    getModuleOptions,
 } from '@/app/(main)/courses/lessons/actions'
+import type { LessonDoc, LessonModuleOption } from '@encreasl/cms-types'
 
 interface FormState {
     title: string
@@ -45,7 +46,7 @@ export default function LessonForm({
     const [form, setForm] = useState<FormState>(() =>
         initialData ? { ...DEFAULTS, ...initialData } : { ...DEFAULTS }
     )
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([])
+    const [moduleOptions, setModuleOptions] = useState<LessonModuleOption[]>([])
 
     useEffect(() => {
         getModuleOptions()

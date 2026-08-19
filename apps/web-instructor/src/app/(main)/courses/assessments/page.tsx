@@ -3,9 +3,11 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import NextLink from 'next/link';
 import {
-    getAssessments, deleteAssessment, getAssessmentById,
-    type AssessmentDoc, type ModuleOption
+    getAssessments, deleteAssessment, getAssessmentById
 } from './actions';
+import type {
+    AssessmentCourseOption, AssessmentDoc, AssessmentModuleOption
+} from '@encreasl/cms-types';
 
 const Link = NextLink as any;
 const ITEMS_PER_PAGE = 12;
@@ -77,8 +79,8 @@ export default function InstructorAssessmentsPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
-    const [courseOptions, setCourseOptions] = useState<{ id: string; title: string }[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<AssessmentModuleOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AssessmentCourseOption[]>([]);
     const [moduleFilter, setModuleFilter] = useState('all');
     const [deleteTarget, setDeleteTarget] = useState<AssessmentDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);

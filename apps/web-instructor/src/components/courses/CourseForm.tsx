@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { searchCollection, type SimpleDocRef, type CourseDoc } from '@/app/(main)/courses/actions';
+import { searchCollection } from '@/app/(main)/courses/actions';
+import type { SimpleDocRef, Course } from '@encreasl/cms-types';
 
 const DIFFICULTY_OPTIONS = [
     { value: 'standard', label: 'Standard' },
@@ -46,6 +47,7 @@ interface FormState {
     description: string;
     excerpt: string;
     modules: string[];
+    tags: string[];
     thumbnailUrl: string;
     bannerImageUrl: string;
     maxStudents: number;
@@ -67,6 +69,7 @@ const DEFAULTS: FormState = {
     title: '', courseCode: '', status: 'draft',
     description: '', excerpt: '',
     modules: [],
+    tags: [],
     thumbnailUrl: '', bannerImageUrl: '',
     maxStudents: 0,
     enrollmentStartDate: '', enrollmentEndDate: '',
@@ -80,7 +83,7 @@ const DEFAULTS: FormState = {
 interface CourseFormProps {
     mode: 'create' | 'edit';
     courseId?: string;
-    course?: CourseDoc | null;
+    course?: Course | null;
     initialData?: Partial<FormState>;
     isSaving: boolean;
     error: string | null;
@@ -102,6 +105,8 @@ export default function CourseForm({
     const [form, setForm] = useState<FormState>(() => initialData ? { ...DEFAULTS, ...initialData } : { ...DEFAULTS });
     const [moduleSearch, setModuleSearch] = useState('');
     const [moduleResults, setModuleResults] = useState<SimpleDocRef[]>([]);
+    const [tagSearch, setTagSearch] = useState('');
+    const [tagResults, setTagResults] = useState<SimpleDocRef[]>([]);
 
     useEffect(() => {
         const s = document.createElement('style');
@@ -119,6 +124,14 @@ export default function CourseForm({
         return () => clearTimeout(t);
     }, [moduleSearch]);
 
+    useEffect(() => {
+        if (!tagSearch || tagSearch.length < 1) { setTagResults([]); return; }
+        const t = setTimeout(async () => {
+            try { setTagResults(await searchCollection('course-tags', tagSearch, 'name')); } catch { setTagResults([]); }
+        }, 300);
+        return () => clearTimeout(t);
+    }, [tagSearch]);
+
     const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
         setForm(prev => ({ ...prev, [key]: value }));
     };
@@ -133,6 +146,16 @@ export default function CourseForm({
         updateField('modules', form.modules.filter(m => m !== id));
     };
 
+    const addTag = (id: string) => {
+        if (!form.tags.includes(id)) updateField('tags', [...form.tags, id]);
+        setTagResults([]);
+        setTagSearch('');
+    };
+
+    const removeTag = (id: string) => {
+        updateField('tags', form.tags.filter(t => t !== id));
+    };
+
     const handleSubmit = async () => {
         if (!form.title.trim() || !form.courseCode.trim()) return;
         const payload: Record<string, any> = {
@@ -140,6 +163,7 @@ export default function CourseForm({
             courseCode: form.courseCode,
             status: form.status,
             modules: form.modules.length > 0 ? form.modules : [],
+            tags: form.tags.length > 0 ? form.tags : [],
             maxStudents: form.maxStudents > 0 ? form.maxStudents : undefined,
             excerpt: form.excerpt || undefined,
             description: form.description || undefined,
@@ -294,6 +318,39 @@ export default function CourseForm({
                             <div className="mt-1 border border-gray-200 dark:border-gray-700 rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-[var(--card-background)] shadow-sm">
                                 {moduleResults.map((opt: any) => (
                                     <button key={opt.id} onClick={() => addModule(opt.id)}
+                                        className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                        {opt.title || opt.name || `#${opt.id}`}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Tags */}
+                <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Tags</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">Organize your course with tags managed by your administrators.</p>
+                    {form.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                            {form.tags.map(id => (
+                                <span key={id} className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-medium">
+                                    #{String(id).slice(0, 8)}
+                                    <button onClick={() => removeTag(id)} className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400">
+                                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                    <div>
+                        <input type="text" value={tagSearch} onChange={e => setTagSearch(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
+                            placeholder="Search tags to add..." />
+                        {tagResults.length > 0 && (
+                            <div className="mt-1 border border-gray-200 dark:border-gray-700 rounded-lg max-h-40 overflow-y-auto bg-white dark:bg-[var(--card-background)] shadow-sm">
+                                {tagResults.map((opt: any) => (
+                                    <button key={opt.id} onClick={() => addTag(opt.id)}
                                         className="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                         {opt.title || opt.name || `#${opt.id}`}
                                     </button>

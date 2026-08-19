@@ -8,8 +8,10 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getAssessmentSubmissions, deleteAssessmentSubmission, getSubmissionAnswers,
-    type AssessmentSubmissionDoc, type AnswerDoc
 } from './actions';
+import {
+    type AssessmentSubmissionDoc, type SubmissionAnswerDoc
+} from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -80,7 +82,7 @@ export default function AssessmentSubmissionsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const [detailSubmission, setDetailSubmission] = useState<AssessmentSubmissionDoc | null>(null);
-    const [detailAnswers, setDetailAnswers] = useState<AnswerDoc[]>([]);
+    const [detailAnswers, setDetailAnswers] = useState<SubmissionAnswerDoc[]>([]);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
 
     const loadSubmissions = useCallback(async () => {

@@ -4,9 +4,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import {
-    createAssessment, getAssessments, getQuestions,
-    type ModuleOption, type CourseOption, type QuestionOption
+    createAssessment, getAssessments, getQuestions
 } from '../actions';
+import type {
+    AssessmentCourseOption, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types';
 import AssessmentForm from '@/components/courses/AssessmentForm';
 
 const Link = NextLink as any;
@@ -18,9 +20,9 @@ export default function CreateAssessmentPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
-    const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
-    const [questions, setQuestions] = useState<QuestionOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<AssessmentModuleOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AssessmentCourseOption[]>([]);
+    const [questions, setQuestions] = useState<AssessmentQuestionOption[]>([]);
 
     const loadOptions = useCallback(async () => {
         try {

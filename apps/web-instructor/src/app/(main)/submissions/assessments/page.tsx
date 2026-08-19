@@ -5,10 +5,12 @@ import {
   getAssessmentSubmissions,
   getCourseOptions,
   getSubmissionAnswers,
-  type AnswerDoc,
-  type AssessmentSubmissionDoc,
-  type CourseOption,
 } from './actions'
+import {
+  type AssessmentSubmissionDoc,
+  type SubmissionAnswerDoc,
+  type SubmissionCourseOption,
+} from '@encreasl/cms-types'
 
 const ITEMS_PER_PAGE = 20
 
@@ -84,7 +86,7 @@ function responseText(response: any): string {
 
 export default function AssessmentSubmissionsPage() {
   const [submissions, setSubmissions] = useState<AssessmentSubmissionDoc[]>([])
-  const [courses, setCourses] = useState<CourseOption[]>([])
+  const [courses, setCourses] = useState<SubmissionCourseOption[]>([])
   const [totalDocs, setTotalDocs] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -95,7 +97,7 @@ export default function AssessmentSubmissionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [detail, setDetail] = useState<AssessmentSubmissionDoc | null>(null)
-  const [answers, setAnswers] = useState<AnswerDoc[]>([])
+  const [answers, setAnswers] = useState<SubmissionAnswerDoc[]>([])
   const [answersLoading, setAnswersLoading] = useState(false)
   const [answersError, setAnswersError] = useState<string | null>(null)
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(null)
@@ -195,12 +197,12 @@ function StatusBadge({ status }: { status: AssessmentSubmissionDoc['status'] }) 
   return <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${styles}`}>{label}</span>
 }
 
-function SubmissionDrawer({ submission, answers, loading, error, onClose }: { submission: AssessmentSubmissionDoc; answers: AnswerDoc[]; loading: boolean; error: string | null; onClose: () => void }) {
+function SubmissionDrawer({ submission, answers, loading, error, onClose }: { submission: AssessmentSubmissionDoc; answers: SubmissionAnswerDoc[]; loading: boolean; error: string | null; onClose: () => void }) {
   const result = passed(submission)
   return <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}><div className="absolute inset-0 bg-black/30" /><div onClick={(event) => event.stopPropagation()} className="relative h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl dark:bg-[var(--card-background)]"><div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4 dark:border-[var(--card-border)] dark:bg-[var(--card-background)]"><div><h2 className="truncate pr-4 text-lg font-bold text-gray-900 dark:text-gray-100">Submission Review</h2><p className="text-xs text-gray-500">#{submission.id}</p></div><button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><XIcon className="h-5 w-5" /></button></div><div className="space-y-6 p-6"><div className="flex items-center justify-between"><StatusBadge status={submission.status} />{result === null ? <span className="text-sm text-gray-500">Result unavailable</span> : result ? <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600"><CheckIcon className="h-4 w-4" />Passed</span> : <span className="inline-flex items-center gap-1 text-sm font-medium text-red-600"><AlertIcon className="h-4 w-4" />Failed</span>}</div><div className="grid grid-cols-2 gap-4 border-y py-4 text-sm dark:border-[var(--card-border)]"><div><span className="text-gray-500">Trainee</span><p className="mt-1 flex items-center gap-1.5 font-medium text-gray-900 dark:text-gray-100"><UserIcon className="h-3.5 w-3.5 text-gray-400" />{traineeName(submission)}</p></div><div><span className="text-gray-500">Assessment</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{assessmentTitle(submission)}</p></div><div><span className="text-gray-500">Course</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{courseTitle(submission)}</p></div><div><span className="text-gray-500">Attempt</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">#{submission.attemptNumber}</p></div><div><span className="text-gray-500">Score</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{scoreLabel(submission)}{submission.pointsPossible !== undefined ? ` (${submission.pointsTotal ?? 0}/${submission.pointsPossible} points)` : ''}</p></div><div><span className="text-gray-500">Passing score</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{submission.passingScoreSnapshot !== undefined ? `${submission.passingScoreSnapshot}%` : '—'}</p></div><div><span className="text-gray-500">Started</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{formatDate(submission.startedAt)}</p></div><div><span className="text-gray-500">Completed</span><p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{formatDate(submission.completedAt)}</p></div></div><div><h3 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">Answer Review</h3>{error && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}{loading ? <div className="space-y-3">{[1, 2, 3].map((item) => <div key={item} className="h-24 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />)}</div> : answers.length === 0 ? <div className="rounded-lg border border-dashed p-8 text-center text-sm text-gray-500">No answers available for this submission.</div> : <div className="space-y-3">{answers.map((answer, index) => <AnswerCard key={answer.id} answer={answer} index={index} />)}</div>}</div><button onClick={onClose} className="w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">Close</button></div></div></div>
 }
 
-function AnswerCard({ answer, index }: { answer: AnswerDoc; index: number }) {
+function AnswerCard({ answer, index }: { answer: SubmissionAnswerDoc; index: number }) {
   const question = typeof answer.question === 'object' ? answer.question : null
   const type = answer.questionType || question?.type || 'question'
   return <div className={`rounded-lg border p-4 ${answer.isCorrect ? 'border-green-200 bg-green-50/50 dark:border-green-900/50 dark:bg-green-900/10' : 'border-red-200 bg-red-50/50 dark:border-red-900/50 dark:bg-red-900/10'}`}><div className="mb-2 flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Question {index + 1} · {type.replace(/_/g, ' ')}</p><p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{question?.prompt || `Question #${typeof answer.question === 'number' ? answer.question : answer.id}`}</p></div>{answer.isCorrect ? <CheckIcon className="h-5 w-5 shrink-0 text-green-600" /> : <AlertIcon className="h-5 w-5 shrink-0 text-red-600" />}</div><div className="grid gap-2 text-sm sm:grid-cols-2"><div><span className="text-xs text-gray-500">Response</span><p className="mt-0.5 break-words text-gray-900 dark:text-gray-100">{responseText(answer.response)}</p></div><div><span className="text-xs text-gray-500">Points earned</span><p className="mt-0.5 text-gray-900 dark:text-gray-100">{answer.pointsEarned ?? 0}</p></div></div>{answer.feedback && <div className="mt-3 border-t border-black/5 pt-3 text-sm dark:border-white/10"><span className="text-xs text-gray-500">Feedback</span><p className="mt-0.5 text-gray-700 dark:text-gray-300">{answer.feedback}</p></div>}</div>

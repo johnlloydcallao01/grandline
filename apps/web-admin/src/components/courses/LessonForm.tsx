@@ -5,8 +5,9 @@ import {
     X, CheckCircle, AlertTriangle
 } from '@/components/ui/IconWrapper';
 import {
-    getModuleOptions, type ModuleOption, type LessonDoc
+    getModuleOptions,
 } from '@/app/(main)/courses/lessons/actions';
+import type { LessonDoc, LessonModuleOption } from '@encreasl/cms-types';
 import { RichTextEditor } from '@/components/cms/RichTextEditor';
 
 interface FormState {
@@ -47,7 +48,7 @@ export default function LessonForm({
     onClearError,
 }: LessonFormProps) {
     const [form, setForm] = useState<FormState>(() => initialData ? { ...DEFAULTS, ...initialData } : { ...DEFAULTS });
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<LessonModuleOption[]>([]);
 
     useEffect(() => {
         getModuleOptions().then(setModuleOptions).catch(() => {});

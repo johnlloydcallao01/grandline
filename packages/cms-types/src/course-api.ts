@@ -15,6 +15,11 @@ export interface CategoryOption {
   name: string;
 }
 
+export interface TagOption {
+  id: string;
+  name: string;
+}
+
 export interface CMSApiResponse<T = any> {
   docs?: T[];
   doc?: T;

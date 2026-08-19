@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Payload, type Where } from 'payload'
 import configPromise from '@payload-config'
-import { isAuthorizedServiceRequest } from '../../../../../_utils/service-api-key'
+import { isAuthorizedServiceRequest } from '../../../../_utils/service-api-key'
 
 async function resolveInstructorId(payload: Payload, userId: string): Promise<string | null> {
   const result = await payload.find({

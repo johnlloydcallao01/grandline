@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import NextLink from 'next/link';
-import { getLessonById, updateLesson, type LessonDoc } from '../../actions';
+import { getLessonById, updateLesson } from '../../actions';
+import type { LessonDoc } from '@encreasl/cms-types';
 import LessonForm from '@/components/courses/LessonForm';
 
 const Link = NextLink as any;
@@ -23,8 +24,9 @@ export default function EditLessonPage() {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await getLessonById(lessonId);
-            setLesson(data as LessonDoc);
+            const result = await getLessonById(lessonId);
+            const data = result.lesson;
+            setLesson(data);
 
             const mod = data.module;
             let moduleId = '';

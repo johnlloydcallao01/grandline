@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import NextLink from 'next/link';
 import {
     getLessons, deleteLesson, getLessonById,
-    type LessonDoc, type ModuleOption
 } from './actions';
+import type { LessonDoc, LessonModuleOption } from '@encreasl/cms-types';
 
 const Link = NextLink as any;
 const ITEMS_PER_PAGE = 12;
@@ -53,7 +53,7 @@ export default function InstructorLessonsPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<LessonModuleOption[]>([]);
     const [deleteTarget, setDeleteTarget] = useState<LessonDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [detailLesson, setDetailLesson] = useState<LessonDoc | null>(null);
@@ -113,11 +113,11 @@ export default function InstructorLessonsPage() {
 
     const openDetail = async (lesson: LessonDoc) => {
         setDetailLesson(lesson);
-        if (typeof lesson.module === 'string' || !lesson.bodyBlocks) {
+        if (typeof lesson.module === 'string' || !lesson.description) {
             setIsDetailLoading(true);
             try {
                 const full = await getLessonById(lesson.id);
-                setDetailLesson(full as LessonDoc);
+                setDetailLesson(full.lesson);
             } catch { /* use existing data */ }
             setIsDetailLoading(false);
         }
@@ -553,7 +553,7 @@ export default function InstructorLessonsPage() {
                                     </div>
 
                                     {/* Description */}
-                                    {detailLesson.bodyBlocks ? (
+                                    {detailLesson.description ? (
                                         <div>
                                             <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
                                             <div className="mt-2 prose prose-sm max-w-none text-gray-900 dark:text-gray-100">

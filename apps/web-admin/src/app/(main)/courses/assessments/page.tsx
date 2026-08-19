@@ -7,9 +7,9 @@ import {
     Loader2, X, Folder, FileText
 } from '@/components/ui/IconWrapper';
 import {
-    getAssessments, deleteAssessment, getAssessmentById,
-    type AssessmentDoc
+    getAssessments, deleteAssessment, getAssessmentById
 } from './actions';
+import type { AssessmentDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
 

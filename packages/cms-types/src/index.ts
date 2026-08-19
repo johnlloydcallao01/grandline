@@ -90,6 +90,12 @@ export interface CategoryRef {
   title?: string;
 }
 
+export interface TagRef {
+  id: string;
+  name?: string;
+  title?: string;
+}
+
 export interface MediaRef {
   id: string;
   url?: string;
@@ -114,6 +120,7 @@ export interface Course {
   instructor: InstructorRef | string;
   coInstructors?: (InstructorRef | string)[];
   category?: (CategoryRef | string)[];
+  tags?: (TagRef | string)[];
   modules?: (SimpleDocRef | string)[];
   thumbnail?: MediaRef | string;
   bannerImage?: MediaRef | string;
@@ -144,17 +151,73 @@ export interface Course {
   createdAt: string;
 }
 
+export interface CourseCounts {
+  total: number;
+  published: number;
+  draft: number;
+  archived: number;
+}
+
+export interface CourseListFilters {
+  search?: string;
+  status?: string;
+  tag?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
 export interface CourseListResult {
   docs: Course[];
   totalDocs: number;
   page: number;
   limit: number;
   totalPages: number;
+  counts?: CourseCounts;
 }
 
 export interface CategoryOption {
   id: string;
   name: string;
+}
+
+export interface TagOption {
+  id: string;
+  name: string;
+}
+
+export interface CreateCourseInput {
+  title: string;
+  courseCode: string;
+  status?: string;
+  instructor?: string;
+  category?: string[];
+  tags?: string[];
+  coInstructors?: string[];
+  modules?: string[];
+  price?: number;
+  discountedPrice?: number;
+  maxStudents?: number;
+  excerpt?: string;
+  description?: unknown;
+  difficultyLevel?: string;
+  language?: string;
+  estimatedDuration?: number;
+  estimatedDurationUnit?: string;
+  passingGrade?: number;
+  evaluationMode?: string;
+  isFeatured?: boolean;
+  enrollmentStartDate?: string;
+  enrollmentEndDate?: string;
+  courseStartDate?: string;
+  courseEndDate?: string;
+  certificateTemplate?: string;
+  feedbackForm?: string;
+  isFeedbackRequired?: boolean;
+  thumbnailUrl?: string;
+  bannerImageUrl?: string;
+  learningObjectives?: Array<{ objective: string }>;
+  prerequisites?: Array<{ prerequisite: string }>;
 }
 
 // ========================================
@@ -193,12 +256,23 @@ export interface EnrollmentDoc {
   notes: string;
 }
 
+export interface EnrollmentCounts {
+  total: number;
+  active: number;
+  pending: number;
+  completed: number;
+  suspended: number;
+  dropped: number;
+  expired: number;
+}
+
 export interface EnrollmentListResult {
   docs: EnrollmentDoc[];
   totalDocs: number;
   page: number;
   limit: number;
   totalPages: number;
+  counts?: EnrollmentCounts;
 }
 
 export interface CourseOption {
@@ -238,6 +312,7 @@ export interface CreateEnrollmentInput {
 export interface CourseEditData {
   course: Course;
   categories: CategoryOption[];
+  tags: TagOption[];
   modules?: SimpleDocRef[];
 }
 
@@ -255,12 +330,621 @@ export interface CourseModule {
 export interface CourseLesson {
   id: string;
   title: string;
-  module: CourseModule | string;
-  order: number;
-  bodyBlocks?: ContentBlock[];
+  module: SimpleDocRef | string;
+  description?: unknown;
   estimatedDuration?: number;
   updatedAt: string;
   createdAt: string;
+}
+
+// ========================================
+// LESSON TYPES
+// ========================================
+
+export interface LessonModuleOption {
+  id: string;
+  title: string;
+}
+
+export interface LessonDoc {
+  id: string;
+  title: string;
+  module: SimpleDocRef | string;
+  description?: unknown;
+  estimatedDuration?: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface LessonListFilters {
+  search?: string;
+  moduleId?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface LessonListResult {
+  docs: LessonDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  moduleOptions: LessonModuleOption[];
+}
+
+export interface LessonEditData {
+  lesson: LessonDoc;
+  moduleOptions: LessonModuleOption[];
+}
+
+export interface CreateLessonInput {
+  title: string;
+  module: string;
+  description?: unknown;
+  estimatedDuration?: number;
+}
+
+// ========================================
+// ASSESSMENT TYPES
+// ========================================
+
+export type AssessmentType = 'quiz' | 'exam' | 'final_exam';
+
+export interface AssessmentModuleOption {
+  id: string;
+  title: string;
+}
+
+export interface AssessmentCourseOption {
+  id: string;
+  title: string;
+}
+
+export interface AssessmentQuestionOption {
+  id: string;
+  prompt: string;
+  type: string;
+  difficulty: string;
+}
+
+export interface AssessmentItemInput {
+  question: string;
+  order?: number;
+  points?: number;
+}
+
+export interface AssessmentDoc {
+  id: string;
+  title: string;
+  description?: unknown;
+  assessmentType: AssessmentType;
+  module?: SimpleDocRef | string;
+  course?: SimpleDocRef | string;
+  passingScore?: number;
+  maxAttempts?: number;
+  timeLimitMinutes?: number;
+  gradeWeight?: number;
+  showCorrectAnswer?: boolean;
+  items?: Array<{
+    question: any;
+    order?: number;
+    points?: number;
+    id?: string;
+  }>;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface AssessmentListFilters {
+  search?: string;
+  assessmentType?: string;
+  moduleId?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface AssessmentListResult {
+  docs: AssessmentDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  moduleOptions: AssessmentModuleOption[];
+  courseOptions: AssessmentCourseOption[];
+}
+
+export interface AssessmentEditData {
+  assessment: AssessmentDoc;
+  moduleOptions: AssessmentModuleOption[];
+  courseOptions: AssessmentCourseOption[];
+}
+
+export interface CreateAssessmentInput {
+  title: string;
+  assessmentType: AssessmentType;
+  module?: string;
+  course?: string;
+  passingScore?: number;
+  maxAttempts?: number;
+  timeLimitMinutes?: number;
+  showCorrectAnswer?: boolean;
+  items?: AssessmentItemInput[];
+}
+
+// ========================================
+// QUESTION BANK TYPES
+// ========================================
+
+export type QuestionType = 'single_choice' | 'multiple_choice' | 'true_false';
+export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
+export type QuestionStatus = 'draft' | 'active' | 'deprecated';
+export type QuestionTrueFalseCorrect = 'true' | 'false';
+
+export interface QuestionOption {
+  label: string;
+  isCorrect: boolean;
+  id?: string;
+}
+
+export interface QuestionDoc {
+  id: string;
+  prompt: string;
+  type: QuestionType;
+  explanation?: string;
+  difficulty: QuestionDifficulty;
+  status: QuestionStatus;
+  tags?: string[];
+  trueFalseCorrect?: QuestionTrueFalseCorrect;
+  options?: QuestionOption[];
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface QuestionListFilters {
+  search?: string;
+  type?: string;
+  difficulty?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface QuestionListResult {
+  docs: QuestionDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateQuestionInput {
+  prompt: string;
+  type: QuestionType;
+  explanation?: string;
+  difficulty: QuestionDifficulty;
+  status: QuestionStatus;
+  tags?: string[];
+  trueFalseCorrect?: QuestionTrueFalseCorrect;
+  options?: QuestionOption[];
+}
+
+export type UpdateQuestionInput = Partial<CreateQuestionInput>;
+
+// ========================================
+// COURSE TAG TYPES
+// ========================================
+
+export interface TagDoc {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  colorCode?: string;
+  displayOrder?: number;
+  isActive: boolean;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface TagListFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface TagListResult {
+  docs: TagDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateTagInput {
+  name: string;
+  slug?: string;
+  description?: string;
+  colorCode?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export type UpdateTagInput = Partial<CreateTagInput>;
+
+export interface TagCourseRef {
+  id: number;
+  title: string;
+  courseCode: string;
+  status: string;
+}
+
+export interface InstructorTagDoc {
+  id: number;
+  name: string;
+  slug?: string;
+  description?: string;
+  colorCode?: string;
+  isActive: boolean;
+  courseCount: number;
+  courses: TagCourseRef[];
+}
+
+export interface TagStats {
+  totalTags: number;
+  totalCourses: number;
+  taggedCourses: number;
+  untaggedCourses: number;
+  coursesPerTag: number;
+}
+
+export interface InstructorTagsFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface InstructorTagsResult {
+  docs: InstructorTagDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: TagStats;
+}
+
+// ========================================
+// COURSE CATEGORY TYPES
+// ========================================
+
+export type CategoryType = 'course' | 'skill' | 'topic' | 'industry';
+
+export interface CategoryParentRef {
+  id: string;
+  name?: string;
+}
+
+export interface CategoryDoc {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parent?: CategoryParentRef | string;
+  categoryType: CategoryType;
+  icon?: any;
+  colorCode?: string;
+  displayOrder?: number;
+  isActive: boolean;
+  metadata?: any;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface CategoryListFilters {
+  search?: string;
+  categoryType?: string;
+  isActive?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface CategoryListResult {
+  docs: CategoryDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateCategoryInput {
+  name: string;
+  slug?: string;
+  description?: string;
+  parent?: string;
+  categoryType: CategoryType;
+  colorCode?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+  metadata?: any;
+}
+
+export type UpdateCategoryInput = Partial<CreateCategoryInput>;
+
+export interface CategoryCourseRef {
+  id: number;
+  title: string;
+  courseCode: string;
+  status: string;
+}
+
+export interface InstructorCategoryDoc {
+  id: number;
+  name: string;
+  slug?: string;
+  categoryType: CategoryType;
+  colorCode?: string;
+  isActive: boolean;
+  courseCount: number;
+  courses: CategoryCourseRef[];
+}
+
+export interface CategoryStats {
+  totalCategories: number;
+  totalCourses: number;
+  categorizedCourses: number;
+  uncategorizedCourses: number;
+  coursesPerCategory: number;
+}
+
+export interface InstructorCategoriesFilters {
+  search?: string;
+  categoryType?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface InstructorCategoriesResult {
+  docs: InstructorCategoryDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: CategoryStats;
+}
+
+// ========================================
+// ASSIGNMENT TYPES
+// ========================================
+
+export type AssignmentSubmissionType = 'file_upload' | 'text_entry' | 'both';
+export type AssignmentAllowedFileType = 'pdf' | 'word' | 'excel' | 'powerpoint' | 'images' | 'zip';
+
+export interface AssignmentDoc {
+  id: string;
+  title: string;
+  description?: unknown;
+  attachments?: Array<Media | string>;
+  instructor?: SimpleDocRef | string;
+  maxScore: number;
+  passingScore: number;
+  submissionType: AssignmentSubmissionType;
+  allowedFileTypes?: AssignmentAllowedFileType[];
+  dueDate?: string;
+  gradeWeight?: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface AssignmentListFilters {
+  search?: string;
+  submissionType?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface AssignmentListResult {
+  docs: AssignmentDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateAssignmentInput {
+  title: string;
+  maxScore: number;
+  passingScore: number;
+  submissionType: AssignmentSubmissionType;
+  description?: unknown;
+  attachments?: string[];
+  allowedFileTypes?: AssignmentAllowedFileType[];
+  dueDate?: string;
+  instructor?: string;
+}
+
+// ========================================
+// SUBMISSION TYPES
+// ========================================
+
+export type SubmissionStatus = 'in_progress' | 'submitted' | 'graded';
+
+export interface SubmissionTraineeRef {
+  id: number;
+  srn?: string;
+  user?: { id: number; firstName?: string; lastName?: string; email?: string };
+}
+
+export interface SubmissionAssessmentRef {
+  id: number;
+  title?: string;
+  assessmentType?: string;
+}
+
+export interface SubmissionCourseRef {
+  id: number;
+  title?: string;
+}
+
+export interface AssessmentSubmissionDoc {
+  id: number;
+  trainee?: SubmissionTraineeRef | number;
+  enrollment?: any;
+  assessment?: SubmissionAssessmentRef | number;
+  course?: SubmissionCourseRef | number;
+  status: SubmissionStatus;
+  attemptNumber: number;
+  score?: number;
+  pointsTotal?: number;
+  pointsPossible?: number;
+  passingScoreSnapshot?: number;
+  startedAt: string;
+  completedAt?: string;
+  isLatest?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionListFilters {
+  search?: string;
+  status?: string;
+  courseId?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface SubmissionListResult {
+  docs: AssessmentSubmissionDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface SubmissionAnswerDoc {
+  id: number;
+  submission: number;
+  question: { id: number; prompt?: string; type?: string } | number;
+  questionType: string;
+  response: any;
+  isCorrect: boolean;
+  pointsEarned: number;
+  feedback?: string | null;
+}
+
+export interface SubmissionCourseOption {
+  id: number;
+  title: string;
+  code: string;
+}
+
+// ========================================
+// ASSIGNMENT SUBMISSION TYPES
+// ========================================
+
+export type AssignmentSubmissionStatus = 'draft' | 'submitted' | 'graded' | 'returned_for_revision';
+
+export interface SubmissionAssignmentRef {
+  id: number;
+  title?: string;
+  maxScore?: number;
+  passingScore?: number;
+}
+
+export interface SubmissionMediaRef {
+  id: number;
+  filename?: string;
+  url?: string;
+  mimeType?: string;
+  filesize?: number;
+}
+
+export interface AssignmentSubmissionDoc {
+  id: number;
+  assignment?: SubmissionAssignmentRef | number;
+  trainee?: SubmissionTraineeRef | number;
+  enrollment?: { id: number; course?: SubmissionCourseRef | number } | number;
+  status: AssignmentSubmissionStatus;
+  submittedText?: any;
+  uploadedFiles?: SubmissionMediaRef[] | number[];
+  score?: number;
+  feedback?: any;
+  submittedAt?: string;
+  gradedAt?: string;
+  gradedBy?: { id: number; firstName?: string; lastName?: string } | number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssignmentSubmissionListFilters {
+  search?: string;
+  status?: string;
+  courseId?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface AssignmentSubmissionListResult {
+  docs: AssignmentSubmissionDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface GradeAssignmentInput {
+  id: number;
+  status: 'graded' | 'returned_for_revision';
+  score?: number;
+  feedback?: string;
+}
+
+// ========================================
+// FEEDBACK TYPES
+// ========================================
+
+export interface FeedbackFormRef {
+  id: number;
+  title?: string;
+  description?: string;
+  fields?: any[];
+}
+
+export interface FeedbackSubmissionDoc {
+  id: number;
+  form?: FeedbackFormRef | number;
+  course?: SubmissionCourseRef | number;
+  trainee?: SubmissionTraineeRef | number;
+  responses: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FeedbackListFilters {
+  search?: string;
+  formId?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface FeedbackListResult {
+  docs: FeedbackSubmissionDoc[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface FeedbackFormOption {
+  id: number;
+  title: string;
 }
 
 export type MaterialSource = 'media' | 'external';

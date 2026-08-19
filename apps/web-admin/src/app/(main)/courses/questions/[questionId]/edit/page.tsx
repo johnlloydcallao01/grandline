@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { Loader2, Save, AlertTriangle, HelpCircle } from '@/components/ui/IconWrapper';
 import {
     getQuestionById, updateQuestion,
-    type QuestionDoc
 } from '../../actions';
+import type { QuestionDoc } from '@encreasl/cms-types';
 import QuestionForm from '@/components/courses/QuestionForm';
 
 export default function EditQuestionPage() {

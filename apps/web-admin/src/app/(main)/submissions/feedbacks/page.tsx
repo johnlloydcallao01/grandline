@@ -5,11 +5,8 @@ import {
     Search, BookOpen, Trash2, Eye,
     Loader2, X, User, Folder, MessageSquare,
 } from '@/components/ui/IconWrapper';
-import {
-    getFeedbackSubmissions, deleteFeedbackSubmission, getFeedbackFormOptions,
-    type FeedbackSubmissionDoc, type FeedbackFormOption,
-    type FormRef
-} from './actions';
+import { getFeedbackSubmissions, deleteFeedbackSubmission, getFeedbackFormOptions } from './actions';
+import type { FeedbackFormRef, FeedbackFormOption, FeedbackSubmissionDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -153,7 +150,7 @@ export default function FeedbackSubmissionsPage() {
         return String(value);
     };
 
-    const getFieldLabel = (form: FormRef | number | undefined, fieldName: string): string => {
+    const getFieldLabel = (form: FeedbackFormRef | number | undefined, fieldName: string): string => {
         if (!form || typeof form === 'number') return fieldName;
         const f = form as any;
         if (!f.fields || !Array.isArray(f.fields)) return fieldName;

@@ -123,6 +123,7 @@ import * as migration_20260801_switch_assignments_created_by_to_instructor from 
 import * as migration_20260801_add_uploaded_by_visibility_to_media from './20260801_add_uploaded_by_visibility_to_media';
 import * as migration_20260802_add_messenger_chat_type from './20260802_add_messenger_chat_type';
 import * as migration_20260803_make_chat_messages_content_optional from './20260803_make_chat_messages_content_optional';
+import * as migration_20260819_add_course_tags_relationship from './20260819_add_course_tags_relationship';
 
 export const migrations = [
   {
@@ -749,5 +750,10 @@ export const migrations = [
     up: migration_20260803_make_chat_messages_content_optional.up,
     down: migration_20260803_make_chat_messages_content_optional.down,
     name: '20260803_make_chat_messages_content_optional',
+  },
+  {
+    up: migration_20260819_add_course_tags_relationship.up,
+    down: migration_20260819_add_course_tags_relationship.down,
+    name: '20260819_add_course_tags_relationship',
   },
 ];

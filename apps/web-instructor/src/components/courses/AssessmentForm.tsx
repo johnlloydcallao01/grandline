@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react'
-import {
-  type ModuleOption, type CourseOption, type QuestionOption
-} from '@/app/(main)/courses/assessments/actions'
+import type {
+  AssessmentCourseOption, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types'
 
 const TYPE_LABELS: Record<string, string> = {
   quiz: 'Quiz',
@@ -63,9 +63,9 @@ interface AssessmentFormProps {
   assessment?: any
   initialData?: Partial<FormState>
   initialItems?: ItemEntry[]
-  moduleOptions: ModuleOption[]
-  courseOptions: CourseOption[]
-  questions: QuestionOption[]
+  moduleOptions: AssessmentModuleOption[]
+  courseOptions: AssessmentCourseOption[]
+  questions: AssessmentQuestionOption[]
   isSaving: boolean
   error: string | null
   saveSuccess: boolean

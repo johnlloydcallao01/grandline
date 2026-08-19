@@ -62,6 +62,7 @@ export default function EditCoursePage() {
                 description,
                 excerpt: data.excerpt || '',
                 modules: extractIds(data.modules as any),
+                tags: extractIds(data.tags as any),
                 thumbnailUrl: thumbUrl,
                 bannerImageUrl: bannerUrl,
                 maxStudents: data.maxStudents || 0,
@@ -93,7 +94,7 @@ export default function EditCoursePage() {
         try {
             setIsSaving(true);
             setSaveSuccess(false);
-            for (const key of ['modules']) {
+            for (const key of ['modules', 'tags']) {
                 if (Array.isArray(payload[key])) payload[key] = payload[key].map((v: any) => typeof v === 'object' ? v : Number(v));
             }
             await updateCourse(courseId, payload);

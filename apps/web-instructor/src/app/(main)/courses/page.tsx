@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import NextLink from 'next/link';
-import { getCourses, type CourseDoc } from './actions';
+import { getCourses } from './actions';
+import type { Course, CourseCounts } from '@encreasl/cms-types';
 const Link = NextLink as any;
 
 const ITEMS_PER_PAGE = 12;
@@ -27,9 +28,10 @@ const STATUS_OPTIONS = [
 ];
 
 export default function InstructorCoursesPage() {
-    const [courses, setCourses] = useState<CourseDoc[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [counts, setCounts] = useState<CourseCounts | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export default function InstructorCoursesPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [detailCourse, setDetailCourse] = useState<CourseDoc | null>(null);
+    const [detailCourse, setDetailCourse] = useState<Course | null>(null);
 
     const loadCourses = useCallback(async () => {
         try {
@@ -53,6 +55,7 @@ export default function InstructorCoursesPage() {
             setCourses(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setCounts(data.counts || null);
         } catch (err) {
             console.error(err);
             setError('Failed to load courses');
@@ -74,14 +77,14 @@ export default function InstructorCoursesPage() {
         return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
     }, [searchTerm]);
 
-    const getImageUrl = (course: CourseDoc): string | null => {
+    const getImageUrl = (course: Course): string | null => {
         const t = course.thumbnail;
         if (!t) return null;
         if (typeof t === 'object') return (t as any).cloudinaryURL || (t as any).url || null;
         return null;
     };
 
-    const getCategoryNames = (course: CourseDoc): string[] => {
+    const getCategoryNames = (course: Course): string[] => {
         const cats = course.category;
         if (!cats || !Array.isArray(cats)) return [];
         return cats.map(c => {
@@ -109,10 +112,10 @@ export default function InstructorCoursesPage() {
     };
 
     const metricCards = [
-        { label: 'Total Courses', value: totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookIcon },
-        { label: 'Published', value: courses.filter(c => c.status === 'published').length, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: EyeIcon },
-        { label: 'Draft', value: courses.filter(c => c.status === 'draft').length, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30', icon: ClockIcon },
-        { label: 'Archived', value: courses.filter(c => c.status === 'archived').length, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800', icon: ArchiveIcon },
+        { label: 'Total Courses', value: counts?.total ?? totalDocs, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: BookIcon },
+        { label: 'Published', value: counts?.published ?? 0, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: EyeIcon },
+        { label: 'Draft', value: counts?.draft ?? 0, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/30', icon: ClockIcon },
+        { label: 'Archived', value: counts?.archived ?? 0, color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800', icon: ArchiveIcon },
     ];
 
     if (error) {

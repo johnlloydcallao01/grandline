@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getLessons, deleteLesson, getLessonById,
-    type LessonDoc, type ModuleOption
 } from './actions';
+import type { LessonDoc, LessonModuleOption } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -25,7 +25,7 @@ export default function CourseLessonsPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<LessonModuleOption[]>([]);
 
     const [deleteTarget, setDeleteTarget] = useState<LessonDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);

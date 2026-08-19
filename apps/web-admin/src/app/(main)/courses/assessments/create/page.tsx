@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, AlertTriangle } from '@/components/ui/IconWrapper';
 import {
-    getAssessments, createAssessment, getQuestions,
-    type ModuleOption, type CourseOption, type QuestionOption
+    getAssessments, createAssessment, getQuestions
 } from '../actions';
+import type {
+    AssessmentCourseOption, AssessmentModuleOption, AssessmentQuestionOption
+} from '@encreasl/cms-types';
 import AssessmentForm from '@/components/courses/AssessmentForm';
 
 export default function CreateAssessmentPage() {
@@ -17,9 +19,9 @@ export default function CreateAssessmentPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    const [moduleOptions, setModuleOptions] = useState<ModuleOption[]>([]);
-    const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
-    const [questions, setQuestions] = useState<QuestionOption[]>([]);
+    const [moduleOptions, setModuleOptions] = useState<AssessmentModuleOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AssessmentCourseOption[]>([]);
+    const [questions, setQuestions] = useState<AssessmentQuestionOption[]>([]);
 
     const loadOptions = useCallback(async () => {
         try {

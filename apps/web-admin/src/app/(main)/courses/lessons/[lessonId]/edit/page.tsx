@@ -5,13 +5,14 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, BookOpen, AlertTriangle } from '@/components/ui/IconWrapper';
 import { getLessonById, updateLesson } from '../../actions';
+import type { LessonDoc } from '@encreasl/cms-types';
 import LessonForm from '@/components/courses/LessonForm';
 
 export default function EditLessonPage() {
     const params = useParams();
     const lessonId = params.lessonId as string;
 
-    const [lesson, setLesson] = useState<any>(null);
+    const [lesson, setLesson] = useState<LessonDoc | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);

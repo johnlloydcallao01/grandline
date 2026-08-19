@@ -106,6 +106,15 @@ export const Courses: CollectionConfig = {
         description: 'Course category for organization',
       },
     },
+    {
+      name: 'tags',
+      type: 'relationship',
+      relationTo: 'course-tags',
+      hasMany: true,
+      admin: {
+        description: 'Tags for organizing and filtering this course',
+      },
+    },
 
     // === MEDIA & VISUAL ===
     {

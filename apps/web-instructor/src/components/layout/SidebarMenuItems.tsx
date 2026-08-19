@@ -102,7 +102,7 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
         >
           <LinkComponent
             href="/courses"
-            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assessments') && !pathname?.startsWith('/courses/questions') && !pathname?.startsWith('/courses/assignments'))
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname === '/courses' || (pathname?.startsWith('/courses') && !pathname?.startsWith('/courses/lessons') && !pathname?.startsWith('/courses/assessments') && !pathname?.startsWith('/courses/questions') && !pathname?.startsWith('/courses/assignments') && !pathname?.startsWith('/courses/categories') && !pathname?.startsWith('/courses/tags'))
               ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
             }`}
@@ -144,6 +144,24 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
             }`}
           >
             <span className="truncate">Assignments</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/categories"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/categories')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Categories</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/courses/tags"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/courses/tags')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Tags</span>
           </LinkComponent>
         </SidebarDropdownGroup>
         <SidebarDropdownGroup
@@ -243,6 +261,15 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
             }`}
           >
             <span className="truncate">Grade Setup</span>
+          </LinkComponent>
+          <LinkComponent
+            href="/gradebook/recent-activity"
+            className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/gradebook/recent-activity')
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+            }`}
+          >
+            <span className="truncate">Recent Activity</span>
           </LinkComponent>
         </SidebarDropdownGroup>
         <SidebarItem

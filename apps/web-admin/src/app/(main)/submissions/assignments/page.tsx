@@ -8,8 +8,10 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getAssignmentSubmissions, deleteAssignmentSubmission,
-    type AssignmentSubmissionDoc, type MediaRef
 } from './actions';
+import {
+    type AssignmentSubmissionDoc, type SubmissionMediaRef
+} from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -536,7 +538,7 @@ export default function AssignmentSubmissionsPage() {
                                         Uploaded Files ({detailSubmission.uploadedFiles.length})
                                     </h3>
                                     <div className="space-y-2">
-                                        {(detailSubmission.uploadedFiles as MediaRef[]).map((file) => {
+                                        {(detailSubmission.uploadedFiles as SubmissionMediaRef[]).map((file) => {
                                             const name = file.filename || `File #${file.id}`;
                                             return (
                                                 <div key={file.id} className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">

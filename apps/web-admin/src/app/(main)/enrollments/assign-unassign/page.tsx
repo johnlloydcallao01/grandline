@@ -15,9 +15,11 @@ import {
   archiveEnrollment,
   updateEnrollmentStatus,
 } from './actions'
-import type { EnrollmentDoc, CourseOption, TraineeOption } from '@encreasl/cms-types'
+import type { EnrollmentDoc, CourseOption, TraineeOption, EnrollmentCounts } from '@encreasl/cms-types'
 
 type SortKey = 'student' | 'course' | 'status' | 'enrolledAt' | 'progressPercentage'
+
+const STATUS_CHIPS = ['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'] as const
 
 function getStatusBadge(status: string) {
   const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium'
@@ -104,6 +106,7 @@ export default function AssignUnassignPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [statusCounts, setStatusCounts] = useState<EnrollmentCounts | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -157,6 +160,7 @@ export default function AssignUnassignPage() {
       setEnrollments(result.docs || [])
       setTotalDocs(result.totalDocs)
       setTotalPages(result.totalPages)
+      setStatusCounts(result.counts || null)
     } catch (e: any) {
       setError(e.message || 'Failed to load enrollments')
     } finally {
@@ -366,21 +370,14 @@ export default function AssignUnassignPage() {
   }
 
   const metrics = useMemo(() => {
+    const c = statusCounts
     return {
-      total: totalDocs,
-      active: enrollments.filter((d) => d.status === 'active').length,
-      completed: enrollments.filter((d) => d.status === 'completed').length,
-      pending: enrollments.filter((d) => d.status === 'pending').length,
+      total: c?.total ?? totalDocs,
+      active: c?.active ?? 0,
+      completed: c?.completed ?? 0,
+      pending: c?.pending ?? 0,
     }
-  }, [totalDocs, enrollments])
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const d of enrollments) {
-      counts[d.status] = (counts[d.status] || 0) + 1
-    }
-    return counts
-  }, [enrollments])
+  }, [statusCounts, totalDocs])
 
   const sortedEnrollments = useMemo(() => {
     if (!sortKey) return enrollments
@@ -565,26 +562,25 @@ export default function AssignUnassignPage() {
           >
             All
             <span className={`tabular-nums ${!statusFilter ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
-              {enrollments.length}
+              {statusCounts?.total ?? enrollments.length}
             </span>
           </button>
-          {['active', 'pending', 'completed', 'suspended', 'dropped', 'expired']
-            .map((s) => (
-              <button
-                key={s}
-                onClick={() => handleStatusFilter(s)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  statusFilter === s
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-                <span className={`tabular-nums ${statusFilter === s ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
-                  {statusCounts[s] || 0}
-                </span>
-              </button>
-            ))}
+          {STATUS_CHIPS.map((s) => (
+            <button
+              key={s}
+              onClick={() => handleStatusFilter(s)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                statusFilter === s
+                  ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+              <span className={`tabular-nums ${statusFilter === s ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
+                {statusCounts?.[s] ?? 0}
+              </span>
+            </button>
+          ))}
         </div>
 
       {/* Error banner */}

@@ -4,12 +4,12 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
     Search, Edit, Trash2, Eye,
-    Loader2, X, BookOpen
+    Loader2, BookOpen
 } from '@/components/ui/IconWrapper';
 import {
-    getTagsList, deleteTag, getTagById,
-    type TagDoc
+    getTagsList, deleteTag,
 } from './actions';
+import type { TagDoc } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -26,9 +26,6 @@ export default function CourseTagsPage() {
 
     const [deleteTarget, setDeleteTarget] = useState<TagDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const [detailTag, setDetailTag] = useState<TagDoc | null>(null);
-    const [isDetailLoading, setIsDetailLoading] = useState(false);
 
     const loadTags = useCallback(async () => {
         try {
@@ -75,18 +72,6 @@ export default function CourseTagsPage() {
             console.error(err);
         } finally {
             setIsDeleting(false);
-        }
-    };
-
-    const openDetail = async (t: TagDoc) => {
-        setDetailTag(t);
-        if (!t.description) {
-            setIsDetailLoading(true);
-            try {
-                const full = await getTagById(t.id);
-                setDetailTag(full);
-            } catch { /* use existing data */ }
-            setIsDetailLoading(false);
         }
     };
 
@@ -270,10 +255,10 @@ export default function CourseTagsPage() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => openDetail(t)}
-                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="View Details">
+                                                <Link href={`/courses/tags/${t.id}`}
+                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="View Tag">
                                                     <Eye className="h-4 w-4" />
-                                                </button>
+                                                </Link>
                                                 <Link href={`/courses/tags/${t.id}/edit`}
                                                     className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Edit Tag">
                                                     <Edit className="h-4 w-4" />
@@ -342,84 +327,6 @@ export default function CourseTagsPage() {
                                     {isDeleting ? 'Deleting...' : 'Delete'}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Detail Slide-Over */}
-            {detailTag && (
-                <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailTag(null)}>
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div className="relative w-full max-w-lg bg-white dark:bg-[var(--card-background)] shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white dark:bg-[var(--card-background)] border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4 flex items-center justify-between z-10">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate pr-4">{detailTag.name}</h2>
-                            <button onClick={() => setDetailTag(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 shrink-0">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            {isDetailLoading ? (
-                                <div className="space-y-4 animate-pulse">
-                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
-                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
-                                    <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded w-full" />
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${detailTag.isActive ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
-                                            {detailTag.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Tag ID</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">#{detailTag.id}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Slug</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">{detailTag.slug}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Display Order</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailTag.displayOrder ?? 0}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Color</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1 flex items-center gap-2">
-                                                {detailTag.colorCode ? (
-                                                    <><span className="h-4 w-4 rounded border border-gray-200 dark:border-gray-600 inline-block" style={{ backgroundColor: detailTag.colorCode }} />{detailTag.colorCode}</>
-                                                ) : '-'}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{new Date(detailTag.updatedAt).toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
-
-                                    {detailTag.description ? (
-                                        <div>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
-                                            <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{detailTag.description}</p>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8">
-                                            <BookOpen className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" />
-                                            <p className="text-sm text-gray-400 dark:text-gray-500">No description</p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
-                                        <Link href={`/courses/tags/${detailTag.id}/edit`}
-                                            className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
-                                            <Edit className="h-4 w-4 mr-2" />
-                                            Edit Tag
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
                         </div>
                     </div>
                 </div>
