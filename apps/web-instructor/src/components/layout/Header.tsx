@@ -8,6 +8,7 @@ import { SearchProvider, Search, useSearch } from '@encreasl/ui/search'
 import { useInstructorSearch } from '@/lib/search'
 import { MessengerButton } from '@encreasl/ui/messenger-button'
 import { MessengerPanel } from './MessengerPanel'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 interface HeaderProps {
   sidebarOpen: boolean
@@ -271,6 +272,8 @@ function HeaderInner({ sidebarOpen, onToggleSidebar, onToggleMobileSidebar }: He
           >
             <i className="fa fa-search text-sm" />
           </button>
+
+          <NotificationBell />
 
           <MessengerButton />
 

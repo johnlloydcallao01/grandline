@@ -76,9 +76,18 @@ export async function cmsFetch<T = any>(
 
   void _unused;
 
+  const headers = createHeaders(apiKey);
+  if (init?.body instanceof FormData) {
+    delete headers['Content-Type'];
+  }
+
   const res = await fetch(url, {
-    headers: createHeaders(apiKey),
     ...fetchOpts,
+    headers: {
+      ...headers,
+      ...(fetchOpts.headers || {}),
+    },
+    cache: 'no-store',
   });
 
   if (!res.ok) {

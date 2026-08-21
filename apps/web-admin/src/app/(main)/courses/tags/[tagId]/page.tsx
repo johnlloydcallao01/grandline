@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Search, Edit, BookOpen, Users, DollarSign, AlertTriangle,
+    Search, Edit, BookOpen, Users, AlertTriangle,
 } from '@/components/ui/IconWrapper';
 import { getTagById } from '../actions';
 import { getCourses } from '../../actions';
@@ -30,6 +30,9 @@ const STATUS_OPTIONS = [
     { value: 'draft', label: 'Draft' },
     { value: 'archived', label: 'Archived' },
 ];
+
+const formatPrice = (value: number) =>
+    new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
 
 export default function TagViewPage() {
     const params = useParams();
@@ -199,7 +202,7 @@ export default function TagViewPage() {
     }
 
     return (
-        <div className="p-6 w-full space-y-6">
+        <div className="py-6 w-full space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -390,12 +393,11 @@ export default function TagViewPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-1">
-                                                    <DollarSign className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                                                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                                        {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
+                                                        {course.price === 0 ? 'Free' : formatPrice(course.price)}
                                                     </span>
                                                     {course.discountedPrice && course.discountedPrice < course.price && (
-                                                        <span className="text-xs text-gray-400 dark:text-gray-500 line-through ml-1">${course.discountedPrice.toFixed(2)}</span>
+                                                        <span className="text-xs text-gray-400 dark:text-gray-500 line-through ml-1">{formatPrice(course.discountedPrice)}</span>
                                                     )}
                                                 </div>
                                             </td>

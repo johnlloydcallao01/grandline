@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { getEligibleEnrollments, type EligibleEnrollment } from './actions'
+import type { EligibleEnrollment } from '@encreasl/cms-types'
+import { getEligibleEnrollments } from './actions'
 
 const SearchIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
@@ -50,7 +51,9 @@ const ISSUANCE_STEPS = [
 
 export default function CertificateIssuancePage() {
   const [enrollments, setEnrollments] = useState<EligibleEnrollment[]>([])
+  const [selectedEnrollment, setSelectedEnrollment] = useState<EligibleEnrollment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -62,20 +65,39 @@ export default function CertificateIssuancePage() {
 
   const comboboxRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevQueryRef = useRef(query)
 
-  const load = useCallback(async () => {
-    try {
+  const load = useCallback(async (search?: string) => {
+    if (search === undefined) {
       setIsLoading(true)
+    } else {
+      setIsSearching(true)
+    }
+    try {
       setError(null)
-      setEnrollments(await getEligibleEnrollments())
+      setEnrollments(await getEligibleEnrollments(search ? { search } : {}))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load eligible enrollments')
     } finally {
       setIsLoading(false)
+      setIsSearching(false)
     }
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (prevQueryRef.current === query) return
+    prevQueryRef.current = query
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      load(query)
+    }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [query, load])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -87,25 +109,17 @@ export default function CertificateIssuancePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const q = query.trim().toLowerCase()
-  const filtered = enrollments.filter((enrollment) => {
-    if (!q) return true
-    return enrollment.studentName.toLowerCase().includes(q)
-      || enrollment.studentEmail.toLowerCase().includes(q)
-      || enrollment.courseTitle.toLowerCase().includes(q)
-  })
-
-  const selectedEnrollment = enrollments.find((enrollment) => String(enrollment.id) === selectedId) || null
-
   const handleSelect = (enrollment: EligibleEnrollment) => {
     if (!enrollment.hasTemplate) return
     setSelectedId(String(enrollment.id))
+    setSelectedEnrollment(enrollment)
     setQuery(`${enrollment.studentName} — ${enrollment.courseTitle}`)
     setIsOpen(false)
   }
 
   const handleClear = () => {
     setSelectedId('')
+    setSelectedEnrollment(null)
     setQuery('')
     setIsOpen(true)
     inputRef.current?.focus()
@@ -168,6 +182,7 @@ export default function CertificateIssuancePage() {
           if (data.success) {
             setMessage({ type: 'success', text: 'Certificate successfully issued!' })
             setSelectedId('')
+            setSelectedEnrollment(null)
             setQuery('')
             load()
           }
@@ -224,7 +239,7 @@ export default function CertificateIssuancePage() {
                   <div>
                     <div className="text-sm font-medium">Failed to load eligible enrollments</div>
                     <div className="text-xs mt-1">{error}</div>
-                    <button onClick={load} className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Retry</button>
+                    <button onClick={() => load()} className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Retry</button>
                   </div>
                 </div>
               )}
@@ -277,17 +292,17 @@ export default function CertificateIssuancePage() {
 
                     {isOpen && (
                       <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none dark:bg-[var(--card-background)] dark:ring-gray-600 sm:text-sm">
-                        {isLoading ? (
+                        {isLoading || isSearching ? (
                           <div className="flex cursor-default items-center justify-center px-4 py-4 text-gray-500 dark:text-gray-400">
                             <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-gray-500 dark:border-gray-400"></div>
                             Loading...
                           </div>
-                        ) : filtered.length === 0 ? (
+                        ) : enrollments.length === 0 ? (
                           <div className="cursor-default px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                            {q ? 'No enrollments match your search.' : 'No eligible enrollments found.'}
+                            {isSearching ? 'Searching...' : query.trim() ? 'No enrollments match your search.' : 'No eligible enrollments found.'}
                           </div>
                         ) : (
-                          filtered.map((enrollment) => {
+                          enrollments.map((enrollment) => {
                             const isSelected = selectedId === String(enrollment.id)
                             return (
                               <div

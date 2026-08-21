@@ -2,12 +2,12 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import NextLink from 'next/link'
-import {
-  getRecentActivity,
-  type ActivityEvent,
-  type ActivityStats,
-  type CourseOption,
-} from './actions'
+import { getRecentActivity } from './actions'
+import type {
+  GradebookActivityCourseOption,
+  GradebookActivityEvent,
+  GradebookActivityStats,
+} from '@encreasl/cms-types'
 
 const Link = NextLink as any
 
@@ -108,9 +108,9 @@ function formatDateTime(dateStr: string): string {
 }
 
 export default function RecentActivityPage() {
-  const [events, setEvents] = useState<ActivityEvent[]>([])
-  const [stats, setStats] = useState<ActivityStats | null>(null)
-  const [courses, setCourses] = useState<CourseOption[]>([])
+  const [events, setEvents] = useState<GradebookActivityEvent[]>([])
+  const [stats, setStats] = useState<GradebookActivityStats | null>(null)
+  const [courses, setCourses] = useState<GradebookActivityCourseOption[]>([])
   const [totalDocs, setTotalDocs] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -170,7 +170,7 @@ export default function RecentActivityPage() {
   ]
 
   // Group the *current page* events by date for the timeline.
-  const groupedByDate = new Map<string, ActivityEvent[]>()
+  const groupedByDate = new Map<string, GradebookActivityEvent[]>()
   for (const e of events) {
     const dateKey = new Date(e.timestamp).toLocaleDateString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric',

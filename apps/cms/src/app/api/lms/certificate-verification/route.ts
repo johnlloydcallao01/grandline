@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import type { CertificateVerificationResult } from '@encreasl/cms-types'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     if (!code || !code.trim()) {
       return NextResponse.json(
-        { error: 'Certificate code is required' },
+        { verified: false, error: 'Certificate code is required' } satisfies CertificateVerificationResult,
         { status: 400 },
       )
     }
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (!certs.docs || certs.docs.length === 0) {
       return NextResponse.json(
-        { verified: false, error: 'Certificate not found' },
+        { verified: false, error: 'Certificate not found' } satisfies CertificateVerificationResult,
         { status: 404 },
       )
     }
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     const course = cert.course as any
     const user = trainee?.user as any
 
-    return NextResponse.json({
+    const result: CertificateVerificationResult = {
       verified: true,
       certificate: {
         id: cert.id,
@@ -57,7 +58,9 @@ export async function GET(request: NextRequest) {
         title: course?.title || null,
         code: course?.code || null,
       },
-    })
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error verifying certificate:', error)
     return NextResponse.json(

@@ -2,10 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import NextLink from 'next/link'
-import {
-  getGradebookData,
-  type GradebookData,
-} from './actions'
+import { getGradebookData } from './actions'
+import type { GradebookData } from '@encreasl/cms-types'
 
 const Link = NextLink as any
 

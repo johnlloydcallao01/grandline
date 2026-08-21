@@ -3,11 +3,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import NextLink from 'next/link'
-import {
-  getGradebookData,
-  type GradebookData,
-  type GradebookCourse,
-} from '../actions'
+import { getGradebookData } from '../actions'
+import type { GradebookCourse, GradebookData } from '@encreasl/cms-types'
 
 const Link = NextLink as any
 

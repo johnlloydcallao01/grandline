@@ -4,13 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save } from '@/components/ui/IconWrapper';
-import { getCoursesList, type CourseDoc } from '../actions';
-
-const CMS_API = process.env.NEXT_PUBLIC_API_URL || '';
+import { getCoursesList, createEnrollment } from '../actions';
+import type { GradebookCourseDoc } from '@encreasl/cms-types';
 
 export default function CreateEnrollmentPage() {
     const router = useRouter();
-    const [courses, setCourses] = useState<CourseDoc[]>([]);
+    const [courses, setCourses] = useState<GradebookCourseDoc[]>([]);
     const [courseId, setCourseId] = useState('');
     const [studentEmail, setStudentEmail] = useState('');
     const [enrollmentType, setEnrollmentType] = useState('free');
@@ -39,21 +38,11 @@ export default function CreateEnrollmentPage() {
             setIsSaving(true);
             setError(null);
 
-            const res = await fetch(`${CMS_API}/course-enrollments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    course: Number(courseId),
-                    studentEmail: studentEmail.trim(),
-                    enrollmentType,
-                }),
-                cache: 'no-store',
+            await createEnrollment({
+                course: Number(courseId),
+                studentEmail: studentEmail.trim(),
+                enrollmentType,
             });
-
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.errors?.[0]?.message || err.message || `HTTP ${res.status}`);
-            }
 
             router.push(`/gradebook/${courseId}`);
         } catch (err: any) {

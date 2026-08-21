@@ -2,12 +2,8 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import {
-    getFeedbackForms,
-    type FeedbackFormDoc,
-    type FeedbackFormsStats,
-    type FormFieldBlock,
-} from './actions';
+import { getFeedbackForms } from './actions';
+import type { FeedbackFormDoc, FeedbackFormsStats, FormFieldBlock } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 

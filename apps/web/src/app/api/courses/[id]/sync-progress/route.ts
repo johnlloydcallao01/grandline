@@ -77,12 +77,18 @@ export async function POST(
             return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 })
         }
 
-        // Only update if progress actually changed
+        // 4. Trigger server-side progress calculation and persistence
+        const calcRes = await fetch(`${apiUrl}/lms/enrollments/admin/progress?enrollmentId=${enrollment.id}`, { headers, cache: 'no-store' })
+        if (calcRes.ok) {
+            const progressData = await calcRes.json()
+            return NextResponse.json({ success: true, progressPercentage: progressData.progressPercentage, updated: true })
+        }
+
+        // Fallback: If calculation endpoint fails, patch with provided progressPercentage
         if (enrollment.progressPercentage === progressPercentage) {
             return NextResponse.json({ success: true, progressPercentage, updated: false })
         }
 
-        // 4. Update Enrollment Progress
         const updateRes = await fetch(`${apiUrl}/course-enrollments/${enrollment.id}`, {
             method: 'PATCH',
             headers,

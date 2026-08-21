@@ -87,7 +87,7 @@ export function createTagService(config: TagServiceConfig): TagService {
       return data.tag;
     },
 
-    async createTag(input, userId): Promise<TagDoc> {
+    async createTag(input, _userId): Promise<TagDoc> {
       if (scope !== 'admin') {
         throw new Error('createTag is only available for the admin scope');
       }
@@ -97,7 +97,7 @@ export function createTagService(config: TagServiceConfig): TagService {
       });
     },
 
-    async updateTag(id, data, userId): Promise<TagDoc> {
+    async updateTag(id, data, _userId): Promise<TagDoc> {
       if (scope !== 'admin') {
         throw new Error('updateTag is only available for the admin scope');
       }

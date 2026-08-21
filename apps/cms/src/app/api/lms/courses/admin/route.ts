@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     const search = (searchParams.get('search') || '').trim()
     const status = (searchParams.get('status') || '').trim()
     const tag = (searchParams.get('tag') || '').trim()
+    const category = (searchParams.get('category') || '').trim()
     const sort = searchParams.get('sort') || '-updatedAt'
 
     const where: Where = { and: [] } as any
@@ -70,6 +71,10 @@ export async function GET(request: NextRequest) {
 
     if (tag) {
       ;(where as any).and.push({ tags: { contains: tag } })
+    }
+
+    if (category) {
+      ;(where as any).and.push({ category: { contains: category } })
     }
 
     const countsWhere = JSON.parse(JSON.stringify(where)) as Where

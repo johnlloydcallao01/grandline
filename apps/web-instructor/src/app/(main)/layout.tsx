@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Header, Sidebar } from '@/components/layout';
 import { ProtectedRoute } from '@/components/auth';
 import { MessengerProvider } from '@encreasl/ui/messenger-context';
+import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function MainLayout({
@@ -64,30 +65,32 @@ export default function MainLayout({
   return (
     <ProtectedRoute>
       <MessengerProvider token={token} userId={user?.id} apiBaseUrl={messengerApiBase}>
-        <div className="min-h-screen bg-[var(--background)]">
-          {/* Header */}
-          <Header
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={toggleSidebar}
-            onToggleMobileSidebar={toggleMobileSidebar}
-          />
+        <NotificationsProvider userId={user?.id}>
+          <div className="min-h-screen bg-[var(--background)]">
+            {/* Header */}
+            <Header
+              sidebarOpen={sidebarOpen}
+              onToggleSidebar={toggleSidebar}
+              onToggleMobileSidebar={toggleMobileSidebar}
+            />
 
-          {/* Sidebar */}
-          <Sidebar
-            isOpen={sidebarOpen}
-            onToggle={toggleSidebar}
-            mobileOpen={mobileSidebarOpen}
-            onCloseMobile={closeMobileSidebar}
-          />
+            {/* Sidebar */}
+            <Sidebar
+              isOpen={sidebarOpen}
+              onToggle={toggleSidebar}
+              mobileOpen={mobileSidebarOpen}
+              onCloseMobile={closeMobileSidebar}
+            />
 
-          {/* Main Content */}
-          <main className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'}`}>
-            <div className="min-h-full px-[10px] pb-20 lg:pb-0">
-              {children}
-            </div>
-          </main>
+            {/* Main Content */}
+            <main className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-20'}`}>
+              <div className="min-h-full px-[10px] pb-20 lg:pb-0">
+                {children}
+              </div>
+            </main>
 
-        </div>
+          </div>
+        </NotificationsProvider>
       </MessengerProvider>
     </ProtectedRoute>
   );

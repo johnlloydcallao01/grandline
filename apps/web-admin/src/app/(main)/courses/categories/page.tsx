@@ -4,10 +4,10 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
     Search, Edit, Trash2, Eye,
-    Loader2, X, Folder
+    Loader2, Folder
 } from '@/components/ui/IconWrapper';
 import {
-    getCategoriesList, deleteCategory, getCategoryById,
+    getCategoriesList, deleteCategory,
 } from './actions';
 import type { CategoryDoc } from '@encreasl/cms-types';
 
@@ -49,9 +49,6 @@ export default function CourseCategoriesPage() {
 
     const [deleteTarget, setDeleteTarget] = useState<CategoryDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const [detailCategory, setDetailCategory] = useState<CategoryDoc | null>(null);
-    const [isDetailLoading, setIsDetailLoading] = useState(false);
 
     const loadCategories = useCallback(async () => {
         try {
@@ -99,18 +96,6 @@ export default function CourseCategoriesPage() {
             console.error(err);
         } finally {
             setIsDeleting(false);
-        }
-    };
-
-    const openDetail = async (cat: CategoryDoc) => {
-        setDetailCategory(cat);
-        if (!cat.description) {
-            setIsDetailLoading(true);
-            try {
-                const full = await getCategoryById(cat.id);
-                setDetailCategory(full);
-            } catch { /* use existing data */ }
-            setIsDetailLoading(false);
         }
     };
 
@@ -318,10 +303,10 @@ export default function CourseCategoriesPage() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => openDetail(cat)}
-                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="View Details">
+                                                <Link href={`/courses/categories/${cat.id}`}
+                                                    className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="View Category">
                                                     <Eye className="h-4 w-4" />
-                                                </button>
+                                                </Link>
                                                 <Link href={`/courses/categories/${cat.id}/edit`}
                                                     className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Edit Category">
                                                     <Edit className="h-4 w-4" />
@@ -395,63 +380,6 @@ export default function CourseCategoriesPage() {
                 </div>
             )}
 
-            {/* Detail Slide-Over */}
-            {detailCategory && (
-                <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailCategory(null)}>
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div className="relative w-full max-w-lg bg-white dark:bg-[var(--card-background)] shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white dark:bg-[var(--card-background)] border-b border-gray-200 dark:border-[var(--card-border)] px-6 py-4 flex items-center justify-between z-10">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate pr-4">{detailCategory.name}</h2>
-                            <button onClick={() => setDetailCategory(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 shrink-0">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            {isDetailLoading ? (
-                                <div className="space-y-4 animate-pulse">
-                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
-                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
-                                    <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded w-full" />
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[detailCategory.categoryType] || 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
-                                            {TYPE_LABELS[detailCategory.categoryType] || detailCategory.categoryType}
-                                        </span>
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${detailCategory.isActive ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
-                                            {detailCategory.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-500 dark:text-gray-400">Category ID</span><p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">#{detailCategory.id}</p></div>
-                                        <div><span className="text-gray-500 dark:text-gray-400">Slug</span><p className="font-medium text-gray-900 dark:text-gray-100 font-mono text-xs mt-1">{detailCategory.slug}</p></div>
-                                        <div><span className="text-gray-500 dark:text-gray-400">Parent</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{getParentName(detailCategory) || 'None (top-level)'}</p></div>
-                                        <div><span className="text-gray-500 dark:text-gray-400">Display Order</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{detailCategory.displayOrder ?? 0}</p></div>
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Color</span>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 mt-1 flex items-center gap-2">
-                                                {detailCategory.colorCode ? <><span className="h-4 w-4 rounded border border-gray-200 dark:border-gray-600 inline-block" style={{ backgroundColor: detailCategory.colorCode }} />{detailCategory.colorCode}</> : '-'}
-                                            </p>
-                                        </div>
-                                        <div><span className="text-gray-500 dark:text-gray-400">Last Updated</span><p className="font-medium text-gray-900 dark:text-gray-100 mt-1">{new Date(detailCategory.updatedAt).toLocaleDateString()}</p></div>
-                                    </div>
-                                    {detailCategory.description ? (
-                                        <div><span className="text-sm text-gray-500 dark:text-gray-400">Description</span><p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{detailCategory.description}</p></div>
-                                    ) : (
-                                        <div className="text-center py-8"><Folder className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" /><p className="text-sm text-gray-400 dark:text-gray-500">No description</p></div>
-                                    )}
-                                    <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[var(--card-border)]">
-                                        <Link href={`/courses/categories/${detailCategory.id}/edit`} className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
-                                            <Edit className="h-4 w-4 mr-2" />Edit Category
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

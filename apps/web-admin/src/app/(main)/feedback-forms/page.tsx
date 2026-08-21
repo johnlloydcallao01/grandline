@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getFormsList, deleteForm, getFormById,
-    type FeedbackFormDoc
 } from './actions';
+import type { FeedbackFormDoc, FeedbackFormsStats } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -29,6 +29,7 @@ export default function FeedbackFormsPage() {
     const [forms, setForms] = useState<FeedbackFormDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [stats, setStats] = useState<FeedbackFormsStats | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export default function FeedbackFormsPage() {
             setForms(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setStats(data.stats);
         } catch (err) {
             console.error(err);
             setError('Failed to load feedback forms');
@@ -98,7 +100,7 @@ export default function FeedbackFormsPage() {
         setIsDetailLoading(false);
     };
 
-    const totalFieldCount = forms.reduce((sum, f) => sum + (f.fields?.length || 0), 0);
+    const totalFieldCount = stats?.totalFields ?? 0;
 
     if (error) {
         return (
@@ -165,7 +167,7 @@ export default function FeedbackFormsPage() {
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-900/30"><Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" /></div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{forms.length > 0 ? Math.round(totalFieldCount / forms.length) : 0}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats?.avgFieldsPerForm ?? 0}</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">Avg Fields/Form</p>
                                 </div>
                             </div>

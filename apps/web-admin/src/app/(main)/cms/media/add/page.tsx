@@ -3,7 +3,8 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, X, Upload, CheckCircle } from '@/components/ui/IconWrapper';
-import { uploadMedia, type MediaDoc } from '../actions';
+import { uploadMedia } from '../actions';
+import type { MediaDoc } from '@encreasl/cms-types';
 
 function getMediaUrl(item: MediaDoc): string {
     return item.cloudinaryURL || item.thumbnailURL || item.url || ''

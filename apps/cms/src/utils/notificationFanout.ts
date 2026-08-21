@@ -10,7 +10,7 @@ type NotificationFanoutArgs = {
   body: string
   link?: string
   metadata?: Record<string, unknown>
-  sourceType: 'course' | 'lesson' | 'assessment' | 'announcement' | 'enrollment' | 'certificate' | 'system' | 'other'
+  sourceType: 'course' | 'lesson' | 'assessment' | 'assignment' | 'announcement' | 'enrollment' | 'certificate' | 'system' | 'other'
   sourceId?: string
   audienceType?: 'all-users' | 'specific-users' | 'role-based' | 'segment'
   push?: {

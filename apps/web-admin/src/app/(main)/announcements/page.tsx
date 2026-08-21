@@ -9,8 +9,11 @@ import {
 import {
     getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement,
     getCourseOptions,
-    type AnnouncementDoc, type CourseOption,
 } from './actions';
+import type {
+    AnnouncementDoc, AnnouncementCourseOption, AnnouncementsStats,
+    CreateAnnouncementData,
+} from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 15;
 
@@ -73,6 +76,7 @@ export default function AnnouncementsPage() {
     const [announcements, setAnnouncements] = useState<AnnouncementDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [stats, setStats] = useState<AnnouncementsStats>({ total: 0, pinned: 0, active: 0, expired: 0 });
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -93,7 +97,7 @@ export default function AnnouncementsPage() {
 
     const [form, setForm] = useState<FormState>(FORM_DEFAULTS);
 
-    const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
+    const [courseOptions, setCourseOptions] = useState<AnnouncementCourseOption[]>([]);
     const [loadingOptions, setLoadingOptions] = useState(false);
 
     const [courseSearch, setCourseSearch] = useState('');
@@ -112,6 +116,7 @@ export default function AnnouncementsPage() {
             setAnnouncements(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            if (data.stats) setStats(data.stats);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load announcements');
         } finally {
@@ -205,7 +210,7 @@ export default function AnnouncementsPage() {
         setForm(prev => ({ ...prev, [key]: value }));
     };
 
-    const selectCourse = (option: CourseOption) => {
+    const selectCourse = (option: AnnouncementCourseOption) => {
         updateField('course', String(option.id));
         setCourseSearch(option.title);
         setShowCourseDropdown(false);
@@ -219,7 +224,7 @@ export default function AnnouncementsPage() {
             if (!form.title.trim()) { setSaveError('Title is required.'); setIsSaving(false); return; }
             if (!form.course) { setSaveError('Please select a course.'); setIsSaving(false); return; }
 
-            const payload: Record<string, unknown> = {
+            const payload: CreateAnnouncementData = {
                 title: form.title.trim(),
                 course: Number(form.course),
                 content: form.content.trim() || null,
@@ -229,10 +234,10 @@ export default function AnnouncementsPage() {
             };
 
             if (slideAnnouncement) {
-                const updated = await updateAnnouncement(slideAnnouncement.id, payload as any);
+                const updated = await updateAnnouncement(slideAnnouncement.id, payload);
                 setAnnouncements(prev => prev.map(a => a.id === updated.id ? updated : a));
             } else {
-                const created = await createAnnouncement(payload as any);
+                const created = await createAnnouncement(payload);
                 setAnnouncements(prev => [created, ...prev]);
                 setTotalDocs(prev => prev + 1);
             }
@@ -260,16 +265,11 @@ export default function AnnouncementsPage() {
         }
     };
 
-    const pinnedCount = announcements.filter(a => a.pinned).length;
-    const activeCount = announcements.filter(isActive).length;
-    const now = Date.now();
-    const expiredCount = announcements.filter(a => a.visibleUntil && new Date(a.visibleUntil).getTime() < now).length;
-
     const metricCards = [
-        { label: 'Total Announcements', value: totalDocs, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Bell },
-        { label: 'Pinned', value: pinnedCount, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/30', icon: Star },
-        { label: 'Active', value: activeCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Calendar },
-        { label: 'Expired', value: expiredCount, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/30', icon: BookOpen },
+        { label: 'Total Announcements', value: stats.total, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Bell },
+        { label: 'Pinned', value: stats.pinned, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/30', icon: Star },
+        { label: 'Active', value: stats.active, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Calendar },
+        { label: 'Expired', value: stats.expired, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/30', icon: BookOpen },
     ];
 
     return (

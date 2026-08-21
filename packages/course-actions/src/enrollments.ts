@@ -14,9 +14,11 @@ import {
   cmsFetch,
   type CourseOption,
   type CreateEnrollmentInput,
+  type EnrollmentCouponOption,
   type EnrollmentDoc,
   type EnrollmentFilters,
   type EnrollmentListResult,
+  type EnrollmentUserOption,
   type TraineeOption,
 } from '@encreasl/cms-types';
 
@@ -30,9 +32,13 @@ export interface EnrollmentServiceConfig {
 
 export interface EnrollmentService {
   getEnrollments(filters: EnrollmentFilters): Promise<EnrollmentListResult>;
+  getEnrollment(id: string, userId?: string): Promise<EnrollmentDoc>;
   searchCourses(search: string, limit?: number, userId?: string): Promise<CourseOption[]>;
   searchTrainees(search: string): Promise<TraineeOption[]>;
+  searchEnrollmentCoupons(search: string): Promise<EnrollmentCouponOption[]>;
+  searchEnrollmentUsers(search: string): Promise<EnrollmentUserOption[]>;
   createEnrollment(input: CreateEnrollmentInput): Promise<EnrollmentDoc>;
+  updateEnrollment(id: string, input: Partial<CreateEnrollmentInput>, userId?: string): Promise<void>;
   updateEnrollmentStatus(id: string, status: string, userId?: string): Promise<void>;
   unassignEnrollment(id: string, userId?: string): Promise<void>;
   archiveEnrollment(id: string): Promise<void>;
@@ -43,6 +49,15 @@ export function createEnrollmentService(config: EnrollmentServiceConfig): Enroll
   const basePath = scope === 'admin' ? '/lms/enrollments/admin' : '/lms/enrollments/instructor';
 
   return {
+    async getEnrollment(id: string, userId?: string): Promise<EnrollmentDoc> {
+      const params: Record<string, string> = { id };
+      if (userId) params.userId = userId;
+      return cmsFetch<EnrollmentDoc>(apiKey, cmsUrl, basePath, {
+        params,
+        cache: 'no-store',
+      });
+    },
+
     async getEnrollments(filters: EnrollmentFilters = {}): Promise<EnrollmentListResult> {
       const params: Record<string, string> = {};
       if (filters.search) params.search = filters.search;
@@ -50,7 +65,12 @@ export function createEnrollmentService(config: EnrollmentServiceConfig): Enroll
       if (filters.page) params.page = String(filters.page);
       if (filters.limit) params.limit = String(filters.limit);
       if (filters.userId) params.userId = filters.userId;
-      return cmsFetch<EnrollmentListResult>(apiKey, cmsUrl, basePath, { params, cache: 'no-store' });
+      // Bust Next.js server-action / fetch memoization after mutations.
+      params._ts = String(Date.now());
+      return cmsFetch<EnrollmentListResult>(apiKey, cmsUrl, basePath, {
+        params,
+        cache: 'no-store',
+      });
     },
 
     async searchCourses(search: string, limit?: number, userId?: string): Promise<CourseOption[]> {
@@ -108,18 +128,72 @@ export function createEnrollmentService(config: EnrollmentServiceConfig): Enroll
       }));
     },
 
-    async createEnrollment(input: CreateEnrollmentInput): Promise<EnrollmentDoc> {
-      const body: Record<string, unknown> = {
-        student: input.student,
-        course: input.course,
-        status: input.status || 'active',
-        notes: input.notes || '',
+    async searchEnrollmentCoupons(search: string): Promise<EnrollmentCouponOption[]> {
+      if (scope !== 'admin') return [];
+      const trimmed = (search || '').trim();
+      if (!trimmed) return [];
+      const params: Record<string, string> = {
+        depth: '0',
+        limit: '20',
+        'where[or][0][code][like]': trimmed,
+        'where[or][1][name][like]': trimmed,
+        sort: 'code',
       };
-      if (input.userId) body.userId = input.userId;
+      const data = await cmsFetch<{ docs: EnrollmentCouponOption[] }>(apiKey, cmsUrl, '/coupon-codes', {
+        params,
+        cache: 'no-store',
+      });
+      return (data.docs || []).map((coupon) => ({
+        id: String(coupon.id),
+        code: coupon.code || '',
+        name: coupon.name || '',
+        status: coupon.status || '',
+      }));
+    },
+
+    async searchEnrollmentUsers(search: string): Promise<EnrollmentUserOption[]> {
+      if (scope !== 'admin') return [];
+      const trimmed = (search || '').trim();
+      if (!trimmed) return [];
+      const params: Record<string, string> = {
+        depth: '0',
+        limit: '20',
+        'where[or][0][email][like]': trimmed,
+        'where[or][1][firstName][like]': trimmed,
+        'where[or][2][lastName][like]': trimmed,
+        sort: 'firstName',
+      };
+      const data = await cmsFetch<{ docs: EnrollmentUserOption[] }>(apiKey, cmsUrl, '/users', {
+        params,
+        cache: 'no-store',
+      });
+      return (data.docs || []).map((user) => ({
+        id: String(user.id),
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        role: user.role || '',
+      }));
+    },
+
+    async createEnrollment(input: CreateEnrollmentInput): Promise<EnrollmentDoc> {
+      const body: Record<string, unknown> = { ...input };
+      // Instructor endpoints require userId for ownership checks; admin does not.
+      if (scope === 'admin') delete body.userId;
       return cmsFetch<EnrollmentDoc>(apiKey, cmsUrl, basePath, {
         method: 'POST',
         body: JSON.stringify(body),
       });
+    },
+
+    async updateEnrollment(id: string, input: Partial<CreateEnrollmentInput>, userId?: string): Promise<void> {
+      const body: Record<string, unknown> = { id, ...input };
+      if (scope === 'admin') {
+        delete body.userId;
+      } else if (userId) {
+        body.userId = userId;
+      }
+      await cmsFetch(apiKey, cmsUrl, basePath, { method: 'PATCH', body: JSON.stringify(body) });
     },
 
     async updateEnrollmentStatus(id: string, status: string, userId?: string): Promise<void> {

@@ -131,14 +131,14 @@ export interface Course {
   feedbackForm?: any | null; // The associated Feedback Form (Survey)
   isFeedbackRequired?: boolean | null; // Whether the feedback form is mandatory
   evaluationMode?:
-    | 'lessons'
-    | 'exam'
-    | 'quizzes'
-    | 'lessons_exam'
-    | 'lessons_quizzes'
-    | 'quizzes_exam'
-    | 'lessons_quizzes_exam'
-    | null;
+  | 'lessons'
+  | 'exam'
+  | 'quizzes'
+  | 'lessons_exam'
+  | 'lessons_quizzes'
+  | 'quizzes_exam'
+  | 'lessons_quizzes_exam'
+  | null;
 }
 
 // Extended Course interface with instructor information
@@ -149,7 +149,7 @@ export interface CourseWithInstructor extends Course {
   discountedPrice?: number | null;
   instructor?: Instructor | null;
   category?: CourseCategory[] | null;
-   announcements?: CourseAnnouncement[] | null;
+  announcements?: CourseAnnouncement[] | null;
   curriculum?: {
     modules: Array<{
       id: string;

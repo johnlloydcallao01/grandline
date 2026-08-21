@@ -6,18 +6,12 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getGradeScalesList, createGradeScale, updateGradeScale, deleteGradeScale,
-    type GradeScaleDoc, type GradeGrade
 } from '../actions';
-
-interface FormData {
-    title: string;
-    description: string;
-    grades: GradeGrade[];
-}
+import type { CreateGradeScaleInput, GradeScaleDoc, GradeGrade } from '@encreasl/cms-types';
 
 const emptyGrade = (): GradeGrade => ({ label: '', minScore: 0, maxScore: 100, gpaValue: null, description: '' });
 
-function initForm(scale?: GradeScaleDoc | null): FormData {
+function initForm(scale?: GradeScaleDoc | null): CreateGradeScaleInput {
     return {
         title: scale?.title || '',
         description: scale?.description || '',
@@ -32,7 +26,7 @@ export default function GradeSetupPage() {
 
     const [showForm, setShowForm] = useState(false);
     const [editingScale, setEditingScale] = useState<GradeScaleDoc | null>(null);
-    const [form, setForm] = useState<FormData>(initForm());
+    const [form, setForm] = useState<CreateGradeScaleInput>(initForm());
     const [isSaving, setIsSaving] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -73,7 +67,7 @@ export default function GradeSetupPage() {
         setEditingScale(null);
     }
 
-    function updateField(field: keyof FormData, value: any) {
+    function updateField(field: keyof CreateGradeScaleInput, value: any) {
         setForm(prev => ({ ...prev, [field]: value }));
     }
 
@@ -110,7 +104,7 @@ export default function GradeSetupPage() {
             setFormError(null);
             const payload = {
                 title: form.title.trim(),
-                description: form.description.trim() || null,
+                description: (form.description || '').trim() || null,
                 grades: form.grades,
             };
             if (editingScale) {

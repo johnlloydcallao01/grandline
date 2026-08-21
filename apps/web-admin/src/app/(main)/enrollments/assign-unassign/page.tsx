@@ -2,24 +2,360 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
+import Link from 'next/link'
 import {
-  Search, Plus, ChevronDown, Loader2, X, Trash2, AlertTriangle,
-  CheckCircle, Clock, User, BookOpen, Users, Download, Edit,
+  Search, Plus, Loader2, X, Trash2, AlertTriangle,
+  CheckCircle, Clock, User, BookOpen, Users, Download, Edit, Eye,
 } from '@/components/ui/IconWrapper'
 import {
   getEnrollments,
   searchCourses,
   searchTrainees,
+  searchEnrollmentCoupons,
+  searchEnrollmentUsers,
   createEnrollment,
+  updateEnrollment,
   deleteEnrollment,
   archiveEnrollment,
-  updateEnrollmentStatus,
 } from './actions'
-import type { EnrollmentDoc, CourseOption, TraineeOption, EnrollmentCounts } from '@encreasl/cms-types'
+import type {
+  CreateEnrollmentInput,
+  EnrollmentCouponOption,
+  EnrollmentDoc,
+  CourseOption,
+  TraineeOption,
+  EnrollmentCounts,
+  EnrollmentUserOption,
+} from '@encreasl/cms-types'
 
 type SortKey = 'student' | 'course' | 'status' | 'enrolledAt' | 'progressPercentage'
 
 const STATUS_CHIPS = ['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'] as const
+const STATUS_OPTIONS = ['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'] as const
+const ENROLLMENT_TYPES = [
+  ['free', 'Free'],
+  ['paid', 'Paid'],
+  ['scholarship', 'Scholarship'],
+  ['trial', 'Trial'],
+  ['corporate', 'Corporate'],
+] as const
+const PAYMENT_STATUSES = [
+  ['completed', 'Completed'],
+  ['pending', 'Pending'],
+  ['failed', 'Failed'],
+  ['refunded', 'Refunded'],
+  ['not_required', 'Not Required'],
+] as const
+
+type EnrollmentFormState = {
+  enrolledAt: string
+  enrollmentType: string
+  status: string
+  paymentStatus: string
+  accessExpiresAt: string
+  amountPaid: string
+  couponCode: string
+  couponDiscountAmount: string
+  listPriceSnapshot: string
+  finalPriceSnapshot: string
+  pricingBreakdown: string
+  progressPercentage: string
+  lastAccessedAt: string
+  completedAt: string
+  currentGrade: string
+  finalGrade: string
+  finalEvaluation: string
+  certificateIssued: boolean
+  notes: string
+  isArchived: boolean
+  metadata: string
+  couponId: string
+  enrolledById: string
+}
+
+function toDateTimeLocal(value?: string | null): string {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 16)
+}
+
+function initialEnrollmentForm(): EnrollmentFormState {
+  return {
+    enrolledAt: toDateTimeLocal(new Date().toISOString()),
+    enrollmentType: 'free',
+    status: 'active',
+    paymentStatus: 'not_required',
+    accessExpiresAt: '',
+    amountPaid: '',
+    couponCode: '',
+    couponDiscountAmount: '0',
+    listPriceSnapshot: '',
+    finalPriceSnapshot: '',
+    pricingBreakdown: '',
+    progressPercentage: '0',
+    lastAccessedAt: '',
+    completedAt: '',
+    currentGrade: '',
+    finalGrade: '',
+    finalEvaluation: '',
+    certificateIssued: false,
+    notes: '',
+    isArchived: false,
+    metadata: '',
+    couponId: '',
+    enrolledById: '',
+  }
+}
+
+function enrollmentFormFromDoc(doc: EnrollmentDoc): EnrollmentFormState {
+  const form = initialEnrollmentForm()
+  return {
+    ...form,
+    enrolledAt: toDateTimeLocal(doc.enrolledAt),
+    enrollmentType: doc.enrollmentType || 'free',
+    status: doc.status || 'active',
+    paymentStatus: doc.paymentStatus || 'not_required',
+    accessExpiresAt: toDateTimeLocal(doc.accessExpiresAt),
+    amountPaid: doc.amountPaid == null ? '' : String(doc.amountPaid),
+    couponCode: doc.couponCode || '',
+    couponDiscountAmount: doc.couponDiscountAmount == null ? '' : String(doc.couponDiscountAmount),
+    listPriceSnapshot: doc.listPriceSnapshot == null ? '' : String(doc.listPriceSnapshot),
+    finalPriceSnapshot: doc.finalPriceSnapshot == null ? '' : String(doc.finalPriceSnapshot),
+    pricingBreakdown: doc.pricingBreakdown ? JSON.stringify(doc.pricingBreakdown, null, 2) : '',
+    progressPercentage: doc.progressPercentage == null ? '0' : String(doc.progressPercentage),
+    lastAccessedAt: toDateTimeLocal(doc.lastAccessedAt),
+    completedAt: toDateTimeLocal(doc.completedAt),
+    currentGrade: doc.currentGrade == null ? '' : String(doc.currentGrade),
+    finalGrade: doc.finalGrade == null ? '' : String(doc.finalGrade),
+    finalEvaluation: doc.finalEvaluation || '',
+    certificateIssued: Boolean(doc.certificateIssued),
+    notes: doc.notes || '',
+    isArchived: Boolean(doc.isArchived),
+    metadata: doc.metadata ? JSON.stringify(doc.metadata, null, 2) : '',
+    couponId: doc.coupon && typeof doc.coupon === 'object' ? String(doc.coupon.id) : doc.coupon ? String(doc.coupon) : '',
+    enrolledById: doc.enrolledBy && typeof doc.enrolledBy === 'object' ? String(doc.enrolledBy.id) : doc.enrolledBy ? String(doc.enrolledBy) : '',
+  }
+}
+
+function parseOptionalNumber(value: string, field: string, allowNull: boolean): number | null | undefined {
+  if (!value.trim()) return allowNull ? null : undefined
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) throw new Error(`${field} must be a valid number`)
+  return parsed
+}
+
+function parseOptionalJson(value: string, field: string, allowNull: boolean): unknown {
+  if (!value.trim()) return allowNull ? null : undefined
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(value)
+  } catch {
+    throw new Error(`${field} must contain valid JSON`)
+  }
+  return parsed
+}
+
+function buildEnrollmentInput(form: EnrollmentFormState, allowNulls = false): Omit<CreateEnrollmentInput, 'student' | 'course'> {
+  const toDate = (value: string) => value ? new Date(value).toISOString() : (allowNulls ? null : undefined)
+  const input: Omit<CreateEnrollmentInput, 'student' | 'course'> = {
+    enrolledAt: toDate(form.enrolledAt) || undefined,
+    enrollmentType: form.enrollmentType as CreateEnrollmentInput['enrollmentType'],
+    status: form.status as CreateEnrollmentInput['status'],
+    paymentStatus: form.paymentStatus as CreateEnrollmentInput['paymentStatus'],
+    accessExpiresAt: toDate(form.accessExpiresAt),
+    amountPaid: parseOptionalNumber(form.amountPaid, 'Amount paid', allowNulls),
+    couponCode: form.couponCode.trim() || (allowNulls ? null : undefined),
+    couponDiscountAmount: parseOptionalNumber(form.couponDiscountAmount, 'Coupon discount amount', allowNulls),
+    listPriceSnapshot: parseOptionalNumber(form.listPriceSnapshot, 'List price snapshot', allowNulls),
+    finalPriceSnapshot: parseOptionalNumber(form.finalPriceSnapshot, 'Final price snapshot', allowNulls),
+    pricingBreakdown: parseOptionalJson(form.pricingBreakdown, 'Pricing breakdown', allowNulls),
+    progressPercentage: parseOptionalNumber(form.progressPercentage, 'Progress percentage', allowNulls),
+    lastAccessedAt: toDate(form.lastAccessedAt),
+    completedAt: toDate(form.completedAt),
+    currentGrade: parseOptionalNumber(form.currentGrade, 'Current grade', allowNulls),
+    finalGrade: parseOptionalNumber(form.finalGrade, 'Final grade', allowNulls),
+    finalEvaluation: (form.finalEvaluation || (allowNulls ? null : undefined)) as CreateEnrollmentInput['finalEvaluation'],
+    certificateIssued: form.certificateIssued,
+    enrolledBy: form.enrolledById || (allowNulls ? null : undefined),
+    notes: form.notes || (allowNulls ? null : undefined),
+    isArchived: form.isArchived,
+    metadata: parseOptionalJson(form.metadata, 'Metadata', allowNulls),
+  }
+  if (form.couponId || allowNulls) input.coupon = form.couponId || null
+  return input
+}
+
+const FORM_INPUT = 'w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]'
+const FORM_SELECT = `${FORM_INPUT} appearance-none pr-9`
+
+type EnrollmentDetailFieldsProps = {
+  form: EnrollmentFormState
+  setForm: React.Dispatch<React.SetStateAction<EnrollmentFormState>>
+  selectedCoupon: EnrollmentCouponOption | null
+  couponSearch: string
+  couponResults: EnrollmentCouponOption[]
+  isSearchingCoupons: boolean
+  onCouponSearch: (value: string) => void
+  onSelectCoupon: (coupon: EnrollmentCouponOption) => void
+  onClearCoupon: () => void
+  selectedEnrolledBy: EnrollmentUserOption | null
+  enrolledBySearch: string
+  enrolledByResults: EnrollmentUserOption[]
+  isSearchingEnrolledBy: boolean
+  onEnrolledBySearch: (value: string) => void
+  onSelectEnrolledBy: (user: EnrollmentUserOption) => void
+  onClearEnrolledBy: () => void
+}
+
+function EnrollmentDetailFields({
+  form,
+  setForm,
+  selectedCoupon,
+  couponSearch,
+  couponResults,
+  isSearchingCoupons,
+  onCouponSearch,
+  onSelectCoupon,
+  onClearCoupon,
+  selectedEnrolledBy,
+  enrolledBySearch,
+  enrolledByResults,
+  isSearchingEnrolledBy,
+  onEnrolledBySearch,
+  onSelectEnrolledBy,
+  onClearEnrolledBy,
+}: EnrollmentDetailFieldsProps) {
+  const setField = <K extends keyof EnrollmentFormState>(field: K, value: EnrollmentFormState[K]) => {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  return (
+    <>
+      <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enrollment Details</h4>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enrolled at
+            <input type="datetime-local" value={form.enrolledAt} onChange={(e) => setField('enrolledAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enrollment type
+            <select value={form.enrollmentType} onChange={(e) => setField('enrollmentType', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+              {ENROLLMENT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status
+            <select value={form.status} onChange={(e) => setField('status', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+              {STATUS_OPTIONS.map((value) => <option key={value} value={value}>{value.charAt(0).toUpperCase() + value.slice(1)}</option>)}
+            </select>
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment status
+            <select value={form.paymentStatus} onChange={(e) => setField('paymentStatus', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+              {PAYMENT_STATUSES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Access expires at
+            <input type="datetime-local" value={form.accessExpiresAt} onChange={(e) => setField('accessExpiresAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payment & Pricing</h4>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount paid
+            <input type="number" min="0" step="0.01" value={form.amountPaid} onChange={(e) => setField('amountPaid', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Coupon discount amount
+            <input type="number" min="0" step="0.01" value={form.couponDiscountAmount} onChange={(e) => setField('couponDiscountAmount', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">List price snapshot
+            <input type="number" min="0" step="0.01" value={form.listPriceSnapshot} onChange={(e) => setField('listPriceSnapshot', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final price snapshot
+            <input type="number" min="0" step="0.01" value={form.finalPriceSnapshot} onChange={(e) => setField('finalPriceSnapshot', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Coupon code snapshot
+            <input type="text" value={form.couponCode} onChange={(e) => setField('couponCode', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="e.g. SCHOLARSHIP2026" />
+          </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Coupon relationship</label>
+            {selectedCoupon ? (
+              <div className="mt-1.5 flex items-center justify-between rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2">
+                <span className="text-sm text-gray-900 dark:text-gray-100">{selectedCoupon.code}{selectedCoupon.name ? ` - ${selectedCoupon.name}` : ''}</span>
+                <button type="button" onClick={onClearCoupon} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"><X className="h-4 w-4" /></button>
+              </div>
+            ) : (
+              <div className="relative mt-1.5">
+                <input type="text" value={couponSearch} onChange={(e) => onCouponSearch(e.target.value)} className={FORM_INPUT} placeholder="Search coupon code or name..." />
+                {isSearchingCoupons && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
+                {couponResults.length > 0 && <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg">
+                  {couponResults.map((coupon) => <button key={coupon.id} type="button" onClick={() => onSelectCoupon(coupon)} className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800"><span className="font-medium text-gray-900 dark:text-gray-100">{coupon.code}</span><span className="ml-2 text-xs text-gray-500">{coupon.name || coupon.status}</span></button>)}
+                </div>}
+              </div>
+            )}
+          </div>
+        </div>
+        <label className="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-300">Pricing breakdown JSON
+          <textarea rows={4} value={form.pricingBreakdown} onChange={(e) => setField('pricingBreakdown', e.target.value)} className={`${FORM_INPUT} mt-1.5 font-mono text-xs`} placeholder={'{"currency":"PHP","originalPrice":0}'}/>
+        </label>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Progress & Grading</h4>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Progress percentage
+            <input type="number" min="0" max="100" step="0.01" value={form.progressPercentage} onChange={(e) => setField('progressPercentage', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last accessed at
+            <input type="datetime-local" value={form.lastAccessedAt} onChange={(e) => setField('lastAccessedAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Completed at
+            <input type="datetime-local" value={form.completedAt} onChange={(e) => setField('completedAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current grade
+            <input type="number" min="0" max="100" step="0.01" value={form.currentGrade} onChange={(e) => setField('currentGrade', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final grade
+            <input type="number" min="0" max="100" step="0.01" value={form.finalGrade} onChange={(e) => setField('finalGrade', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final evaluation
+            <select value={form.finalEvaluation} onChange={(e) => setField('finalEvaluation', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+              <option value="">Not evaluated</option><option value="passed">Passed</option><option value="failed">Failed</option>
+            </select>
+          </label>
+        </div>
+        <label className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"><input type="checkbox" checked={form.certificateIssued} onChange={(e) => setField('certificateIssued', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" /> Certificate issued</label>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Administration</h4>
+        <div className="mt-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enrolled by</label>
+          {selectedEnrolledBy ? (
+            <div className="mt-1.5 flex items-center justify-between rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2">
+              <span className="text-sm text-gray-900 dark:text-gray-100">{selectedEnrolledBy.firstName} {selectedEnrolledBy.lastName} <span className="text-xs text-gray-500">({selectedEnrolledBy.email})</span></span>
+              <button type="button" onClick={onClearEnrolledBy} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"><X className="h-4 w-4" /></button>
+            </div>
+          ) : (
+            <div className="relative mt-1.5">
+              <input type="text" value={enrolledBySearch} onChange={(e) => onEnrolledBySearch(e.target.value)} className={FORM_INPUT} placeholder="Search admin or instructor..." />
+              {isSearchingEnrolledBy && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
+              {enrolledByResults.length > 0 && <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg">
+                 {enrolledByResults.map((user) => <button key={user.id} type="button" onClick={() => onSelectEnrolledBy(user)} className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800"><span className="font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</span><span className="ml-2 text-xs text-gray-500">{user.email} - {user.role}</span></button>)}
+              </div>}
+            </div>
+          )}
+        </div>
+        <label className="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-300">Administrative notes
+          <textarea rows={3} value={form.notes} onChange={(e) => setField('notes', e.target.value)} className={`${FORM_INPUT} mt-1.5 resize-none`} placeholder="Optional admin notes..." />
+        </label>
+        <label className="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-300">Metadata JSON
+          <textarea rows={4} value={form.metadata} onChange={(e) => setField('metadata', e.target.value)} className={`${FORM_INPUT} mt-1.5 font-mono text-xs`} placeholder={'{"source":"admin"}'}/>
+        </label>
+        <label className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"><input type="checkbox" checked={form.isArchived} onChange={(e) => setField('isArchived', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" /> Archive immediately</label>
+      </div>
+    </>
+  )
+}
 
 function getStatusBadge(status: string) {
   const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium'
@@ -125,7 +461,15 @@ export default function AssignUnassignPage() {
   const [courseSearch, setCourseSearch] = useState('')
   const [courseResults, setCourseResults] = useState<CourseOption[]>([])
   const [isSearchingCourses, setIsSearchingCourses] = useState(false)
-  const [assignNotes, setAssignNotes] = useState('')
+  const [assignForm, setAssignForm] = useState<EnrollmentFormState>(initialEnrollmentForm)
+  const [selectedCoupon, setSelectedCoupon] = useState<EnrollmentCouponOption | null>(null)
+  const [couponSearch, setCouponSearch] = useState('')
+  const [couponResults, setCouponResults] = useState<EnrollmentCouponOption[]>([])
+  const [isSearchingCoupons, setIsSearchingCoupons] = useState(false)
+  const [selectedEnrolledBy, setSelectedEnrolledBy] = useState<EnrollmentUserOption | null>(null)
+  const [enrolledBySearch, setEnrolledBySearch] = useState('')
+  const [enrolledByResults, setEnrolledByResults] = useState<EnrollmentUserOption[]>([])
+  const [isSearchingEnrolledBy, setIsSearchingEnrolledBy] = useState(false)
   const [assignError, setAssignError] = useState<string | null>(null)
   const [isAssignSubmitting, setIsAssignSubmitting] = useState(false)
 
@@ -141,20 +485,28 @@ export default function AssignUnassignPage() {
 
   // Edit enrollment state
   const [editTarget, setEditTarget] = useState<EnrollmentDoc | null>(null)
-  const [editStatus, setEditStatus] = useState('')
+  const [editForm, setEditForm] = useState<EnrollmentFormState>(initialEnrollmentForm)
   const [isEditSubmitting, setIsEditSubmitting] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const fetchEnrollments = useCallback(async () => {
+  const fetchEnrollments = useCallback(async ({
+    nextSearch,
+    nextStatus,
+    nextPage,
+  }: {
+    nextSearch: string
+    nextStatus: string
+    nextPage: number
+  }) => {
     setIsLoading(true)
     setError(null)
     try {
       const result = await getEnrollments({
-        search: search || undefined,
-        status: statusFilter || undefined,
-        page: currentPage,
+        search: nextSearch || undefined,
+        status: nextStatus || undefined,
+        page: nextPage,
         limit: 10,
       })
       setEnrollments(result.docs || [])
@@ -166,11 +518,23 @@ export default function AssignUnassignPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [search, statusFilter, currentPage])
+  }, [])
+
+  const handleRefresh = async () => {
+    await fetchEnrollments({
+      nextSearch: search,
+      nextStatus: statusFilter,
+      nextPage: currentPage,
+    })
+  }
 
   useEffect(() => {
-    fetchEnrollments()
-  }, [fetchEnrollments])
+    void fetchEnrollments({
+      nextSearch: search,
+      nextStatus: statusFilter,
+      nextPage: currentPage,
+    })
+  }, [currentPage, fetchEnrollments, search, statusFilter])
 
   useEffect(() => {
     if (isAssignOpen) {
@@ -204,6 +568,8 @@ export default function AssignUnassignPage() {
   }, [])
 
   const courseSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const couponSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const enrolledBySearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleCourseSearch = useCallback((value: string) => {
     setCourseSearch(value)
@@ -221,6 +587,44 @@ export default function AssignUnassignPage() {
         setCourseResults([])
       } finally {
         setIsSearchingCourses(false)
+      }
+    }, 300)
+  }, [])
+
+  const handleCouponSearch = useCallback((value: string) => {
+    setCouponSearch(value)
+    if (couponSearchTimer.current) clearTimeout(couponSearchTimer.current)
+    if (value.length < 1) {
+      setCouponResults([])
+      return
+    }
+    couponSearchTimer.current = setTimeout(async () => {
+      setIsSearchingCoupons(true)
+      try {
+        setCouponResults(await searchEnrollmentCoupons(value))
+      } catch {
+        setCouponResults([])
+      } finally {
+        setIsSearchingCoupons(false)
+      }
+    }, 300)
+  }, [])
+
+  const handleEnrolledBySearch = useCallback((value: string) => {
+    setEnrolledBySearch(value)
+    if (enrolledBySearchTimer.current) clearTimeout(enrolledBySearchTimer.current)
+    if (value.length < 1) {
+      setEnrolledByResults([])
+      return
+    }
+    enrolledBySearchTimer.current = setTimeout(async () => {
+      setIsSearchingEnrolledBy(true)
+      try {
+        setEnrolledByResults(await searchEnrollmentUsers(value))
+      } catch {
+        setEnrolledByResults([])
+      } finally {
+        setIsSearchingEnrolledBy(false)
       }
     }, 300)
   }, [])
@@ -258,7 +662,13 @@ export default function AssignUnassignPage() {
     setSelectedCourse(null)
     setCourseSearch('')
     setCourseResults([])
-    setAssignNotes('')
+    setAssignForm(initialEnrollmentForm())
+    setSelectedCoupon(null)
+    setCouponSearch('')
+    setCouponResults([])
+    setSelectedEnrolledBy(null)
+    setEnrolledBySearch('')
+    setEnrolledByResults([])
     setTraineeSearch('')
     setTraineeResults([])
     setAssignError(null)
@@ -269,6 +679,8 @@ export default function AssignUnassignPage() {
     setIsAssignOpen(false)
     setSelectedTrainee(null)
     setSelectedCourse(null)
+    setSelectedCoupon(null)
+    setSelectedEnrolledBy(null)
   }
 
   const handleAssignSubmit = async (e: React.FormEvent) => {
@@ -284,15 +696,23 @@ export default function AssignUnassignPage() {
       return
     }
 
+    let enrollmentInput: Omit<CreateEnrollmentInput, 'student' | 'course'>
+    try {
+      enrollmentInput = buildEnrollmentInput(assignForm)
+    } catch (error: any) {
+      setAssignError(error.message)
+      return
+    }
+
     setIsAssignSubmitting(true)
     try {
       await createEnrollment({
         student: selectedTrainee.id,
         course: selectedCourse.id,
-        notes: assignNotes || undefined,
+        ...enrollmentInput,
       })
       closeAssign()
-      fetchEnrollments()
+      await handleRefresh()
     } catch (e: any) {
       setAssignError(e.message || 'Failed to create enrollment')
     } finally {
@@ -306,10 +726,8 @@ export default function AssignUnassignPage() {
     setIsUnassignSubmitting(true)
     try {
       await deleteEnrollment(unassignTarget.id)
-      setEnrollments((prev) =>
-        prev.map((e) => (e.id === unassignTarget.id ? { ...e, status: 'dropped' } : e))
-      )
       setUnassignTarget(null)
+      await handleRefresh()
     } catch (e: any) {
       setUnassignError(e.message || 'Failed to unassign enrollment')
     } finally {
@@ -323,8 +741,8 @@ export default function AssignUnassignPage() {
     setIsDeleteSubmitting(true)
     try {
       await archiveEnrollment(deleteTarget.id)
-      setEnrollments((prev) => prev.filter((e) => e.id !== deleteTarget.id))
       setDeleteTarget(null)
+      await handleRefresh()
     } catch (e: any) {
       setDeleteError(e.message || 'Failed to delete enrollment')
     } finally {
@@ -337,11 +755,14 @@ export default function AssignUnassignPage() {
     setEditError(null)
     setIsEditSubmitting(true)
     try {
-      await updateEnrollmentStatus(editTarget.id, editStatus)
-      setEnrollments((prev) =>
-        prev.map((e) => (e.id === editTarget.id ? { ...e, status: editStatus } : e))
-      )
+      const enrollmentInput = buildEnrollmentInput(editForm, true)
+      await updateEnrollment(editTarget.id, {
+        student: selectedTrainee?.id || String(typeof editTarget.student === 'object' ? editTarget.student.id : editTarget.student),
+        course: selectedCourse?.id || String(typeof editTarget.course === 'object' ? editTarget.course.id : editTarget.course),
+        ...enrollmentInput,
+      })
       setEditTarget(null)
+      await handleRefresh()
     } catch (e: any) {
       setEditError(e.message || 'Failed to update enrollment')
     } finally {
@@ -351,7 +772,29 @@ export default function AssignUnassignPage() {
 
   const openEdit = (enrollment: EnrollmentDoc) => {
     setEditTarget(enrollment)
-    setEditStatus(enrollment.status)
+    setEditForm(enrollmentFormFromDoc(enrollment))
+    setSelectedTrainee(typeof enrollment.student === 'object' ? {
+      id: String(enrollment.student.id),
+      user: enrollment.student.user,
+      srn: enrollment.student.srn || '',
+    } : null)
+    setSelectedCourse(typeof enrollment.course === 'object' ? {
+      id: String(enrollment.course.id),
+      title: enrollment.course.title,
+      courseCode: enrollment.course.courseCode,
+      status: enrollment.course.status,
+    } : null)
+    setSelectedCoupon(enrollment.coupon && typeof enrollment.coupon === 'object' ? {
+      id: String(enrollment.coupon.id),
+      code: enrollment.coupon.code || '',
+      name: enrollment.coupon.name || '',
+    } : null)
+    setSelectedEnrolledBy(enrollment.enrolledBy && typeof enrollment.enrolledBy === 'object' ? {
+      id: String(enrollment.enrolledBy.id),
+      firstName: enrollment.enrolledBy.firstName || '',
+      lastName: enrollment.enrolledBy.lastName || '',
+      email: enrollment.enrolledBy.email || '',
+    } : null)
     setEditError(null)
   }
 
@@ -588,7 +1031,7 @@ export default function AssignUnassignPage() {
         <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
-          <button onClick={fetchEnrollments} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Retry</button>
+          <button onClick={handleRefresh} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Retry</button>
         </div>
       )}
 
@@ -659,7 +1102,9 @@ export default function AssignUnassignPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {sortedEnrollments.map((enrollment) => {
-                  const pct = enrollment.progressPercentage || 0
+                  const pct = typeof enrollment.progressPercentage === 'number'
+                    ? enrollment.progressPercentage
+                    : 0
                   const typeTag = getEnrollmentTypeTag(enrollment.enrollmentType)
                   return (
                     <tr
@@ -700,6 +1145,15 @@ export default function AssignUnassignPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            href={`/enrollments/assign-unassign/${enrollment.id}`}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                            title="View enrollment"
+                            aria-label="View enrollment"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Link>
                           <button
                             onClick={() => openEdit(enrollment)}
                             className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -912,10 +1366,24 @@ export default function AssignUnassignPage() {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notes</label>
-                  <textarea value={assignNotes} onChange={(e) => setAssignNotes(e.target.value)} rows={3} placeholder="Optional admin notes..." className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none resize-none bg-white dark:bg-[var(--card-background)]" />
-                </div>
+                 <EnrollmentDetailFields
+                   form={assignForm}
+                   setForm={setAssignForm}
+                   selectedCoupon={selectedCoupon}
+                   couponSearch={couponSearch}
+                   couponResults={couponResults}
+                   isSearchingCoupons={isSearchingCoupons}
+                   onCouponSearch={handleCouponSearch}
+                   onSelectCoupon={(coupon) => { setSelectedCoupon(coupon); setAssignForm((current) => ({ ...current, couponId: coupon.id })); setCouponSearch(''); setCouponResults([]) }}
+                   onClearCoupon={() => { setSelectedCoupon(null); setAssignForm((current) => ({ ...current, couponId: '' })) }}
+                   selectedEnrolledBy={selectedEnrolledBy}
+                   enrolledBySearch={enrolledBySearch}
+                   enrolledByResults={enrolledByResults}
+                   isSearchingEnrolledBy={isSearchingEnrolledBy}
+                   onEnrolledBySearch={handleEnrolledBySearch}
+                   onSelectEnrolledBy={(user) => { setSelectedEnrolledBy(user); setAssignForm((current) => ({ ...current, enrolledById: user.id })); setEnrolledBySearch(''); setEnrolledByResults([]) }}
+                   onClearEnrolledBy={() => { setSelectedEnrolledBy(null); setAssignForm((current) => ({ ...current, enrolledById: '' })) }}
+                 />
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
                   <button type="button" onClick={closeAssign} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
@@ -952,22 +1420,6 @@ export default function AssignUnassignPage() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
-                  <div className="relative">
-                    <select
-                      value={editStatus}
-                      onChange={(e) => setEditStatus(e.target.value)}
-                      className="w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]"
-                    >
-                      {['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'].map((s) => (
-                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                  </div>
-                </div>
-
                 <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                   <div className="flex justify-between"><span>Student</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentName(editTarget)}</span></div>
                   <div className="flex justify-between"><span>Email</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentEmail(editTarget)}</span></div>
@@ -975,9 +1427,28 @@ export default function AssignUnassignPage() {
                   <div className="flex justify-between"><span>Enrolled</span><span className="font-medium text-gray-700 dark:text-gray-200">{formatDate(editTarget.enrolledAt)}</span></div>
                 </div>
 
+                <EnrollmentDetailFields
+                  form={editForm}
+                  setForm={setEditForm}
+                  selectedCoupon={selectedCoupon}
+                  couponSearch={couponSearch}
+                  couponResults={couponResults}
+                  isSearchingCoupons={isSearchingCoupons}
+                  onCouponSearch={handleCouponSearch}
+                  onSelectCoupon={(coupon) => { setSelectedCoupon(coupon); setEditForm((current) => ({ ...current, couponId: coupon.id })); setCouponSearch(''); setCouponResults([]) }}
+                  onClearCoupon={() => { setSelectedCoupon(null); setEditForm((current) => ({ ...current, couponId: '' })) }}
+                  selectedEnrolledBy={selectedEnrolledBy}
+                  enrolledBySearch={enrolledBySearch}
+                  enrolledByResults={enrolledByResults}
+                  isSearchingEnrolledBy={isSearchingEnrolledBy}
+                  onEnrolledBySearch={handleEnrolledBySearch}
+                  onSelectEnrolledBy={(user) => { setSelectedEnrolledBy(user); setEditForm((current) => ({ ...current, enrolledById: user.id })); setEnrolledBySearch(''); setEnrolledByResults([]) }}
+                  onClearEnrolledBy={() => { setSelectedEnrolledBy(null); setEditForm((current) => ({ ...current, enrolledById: '' })) }}
+                />
+
                 <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
                   <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
-                  <button type="button" onClick={handleEditSave} disabled={isEditSubmitting || editStatus === editTarget.status} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                  <button type="button" onClick={handleEditSave} disabled={isEditSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     {isEditSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>) : (<>Save Changes</>)}
                   </button>
                 </div>

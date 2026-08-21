@@ -171,6 +171,7 @@ export const submitAssessmentHandler: PayloadHandler = async (req): Promise<Resp
       where: {
         trainee: { equals: traineeId },
         course: { equals: courseId },
+        'item.relationTo': { equals: 'assessments' },
         'item.value': { equals: assessmentId },
       },
       limit: 1,

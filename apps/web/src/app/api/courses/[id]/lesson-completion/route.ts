@@ -108,6 +108,7 @@ export async function POST(
     const progressParams = new URLSearchParams()
     progressParams.set('where[trainee][equals]', traineeId)
     progressParams.set('where[course][equals]', validCourseId)
+    progressParams.set('where[item.relationTo][equals]', 'course-lessons')
     progressParams.set('where[item.value][equals]', String(formattedLessonId))
 
     const progressRes = await fetch(
@@ -183,6 +184,7 @@ export async function POST(
     const allProgressParams = new URLSearchParams()
     allProgressParams.set('where[trainee][equals]', traineeId)
     allProgressParams.set('where[course][equals]', validCourseId)
+    allProgressParams.set('where[item.relationTo][equals]', 'course-lessons')
     allProgressParams.set('where[isCompleted][equals]', 'true')
     allProgressParams.set('limit', '1000')
     allProgressParams.set('depth', '0')
@@ -197,14 +199,27 @@ export async function POST(
     const completedLessonIds: string[] = []
     if (allProgressData.docs) {
       allProgressData.docs.forEach((doc: any) => {
+        if (doc.item?.relationTo && doc.item.relationTo !== 'course-lessons') return
         const itemId = typeof doc.item === 'object' ? (doc.item.value?.id || doc.item.value) : doc.item
         if (itemId) completedLessonIds.push(itemId)
       })
     }
 
+    let progressPercentage: number | undefined
+    try {
+      const calcRes = await fetch(`${apiUrl}/lms/enrollments/admin/progress?enrollmentId=${enrollment.id}`, { headers, cache: 'no-store' })
+      if (calcRes.ok) {
+        const calcData = await calcRes.json()
+        progressPercentage = calcData.progressPercentage
+      }
+    } catch (_err) {
+      // Ignore calculation error fallback
+    }
+
     return NextResponse.json({
       success: true,
       completedLessons: completedLessonIds,
+      progressPercentage,
     })
   } catch (error) {
     console.error('Error updating lesson completion:', error)

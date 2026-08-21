@@ -7,6 +7,54 @@ import { isAuthorizedServiceRequest } from '../../../_utils/service-api-key'
 // system-transitioned states and are intentionally excluded.
 const ALLOWED_STATUSES = ['active', 'pending', 'suspended', 'dropped']
 
+// Instructor-writable enrollment fields. Admin-only controls (isArchived,
+// enrolledBy reassignment, coupon relationship search) are intentionally omitted.
+const INSTRUCTOR_ENROLLMENT_FIELDS = [
+  'enrolledAt',
+  'enrollmentType',
+  'status',
+  'paymentStatus',
+  'accessExpiresAt',
+  'amountPaid',
+  'couponCode',
+  'couponDiscountAmount',
+  'listPriceSnapshot',
+  'finalPriceSnapshot',
+  'pricingBreakdown',
+  'progressPercentage',
+  'lastAccessedAt',
+  'completedAt',
+  'currentGrade',
+  'finalGrade',
+  'finalEvaluation',
+  'certificateIssued',
+  'notes',
+  'metadata',
+] as const
+
+function getInstructorEnrollmentData(body: Record<string, any>, includeDefaults = false): Record<string, any> {
+  const data: Record<string, any> = {}
+
+  for (const field of INSTRUCTOR_ENROLLMENT_FIELDS) {
+    if (body[field] !== undefined) data[field] = body[field]
+  }
+
+  if (includeDefaults) {
+    data.enrolledAt = data.enrolledAt || new Date().toISOString()
+    data.status = data.status || 'active'
+    data.enrollmentType = data.enrollmentType || 'free'
+    data.paymentStatus = data.paymentStatus || 'not_required'
+    data.progressPercentage = data.progressPercentage ?? 0
+    data.notes = data.notes || ''
+  }
+
+  if (data.status && !ALLOWED_STATUSES.includes(data.status) && !includeDefaults) {
+    // Keep existing completed/expired values only when not changing status.
+  }
+
+  return data
+}
+
 async function resolveInstructorId(payload: Payload, userId: string): Promise<string | null> {
   const result = await payload.find({
     collection: 'instructors',
@@ -49,8 +97,37 @@ function normalizeEnrollmentDoc(d: any) {
     status: d.status || '',
     enrollmentType: d.enrollmentType || '',
     enrolledAt: d.enrolledAt || '',
+    paymentStatus: d.paymentStatus ?? null,
+    accessExpiresAt: d.accessExpiresAt ?? null,
+    amountPaid: d.amountPaid ?? null,
+    coupon:
+      d.coupon && typeof d.coupon === 'object'
+        ? { id: Number(d.coupon.id), code: d.coupon.code || '', name: d.coupon.name || '' }
+        : d.coupon ?? null,
+    couponCode: d.couponCode ?? null,
+    couponDiscountAmount: d.couponDiscountAmount ?? null,
+    listPriceSnapshot: d.listPriceSnapshot ?? null,
+    finalPriceSnapshot: d.finalPriceSnapshot ?? null,
+    pricingBreakdown: d.pricingBreakdown ?? null,
     progressPercentage: d.progressPercentage || 0,
+    lastAccessedAt: d.lastAccessedAt ?? null,
+    completedAt: d.completedAt ?? null,
+    currentGrade: d.currentGrade ?? null,
+    finalGrade: d.finalGrade ?? null,
+    finalEvaluation: d.finalEvaluation ?? null,
+    certificateIssued: d.certificateIssued ?? null,
+    enrolledBy:
+      d.enrolledBy && typeof d.enrolledBy === 'object'
+        ? {
+            id: Number(d.enrolledBy.id),
+            firstName: d.enrolledBy.firstName || '',
+            lastName: d.enrolledBy.lastName || '',
+            email: d.enrolledBy.email || '',
+          }
+        : d.enrolledBy ?? null,
     notes: d.notes || '',
+    isArchived: d.isArchived ?? null,
+    metadata: d.metadata ?? null,
   }
 }
 
@@ -86,6 +163,29 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = (searchParams.get('search') || '').trim()
     const status = (searchParams.get('status') || '').trim()
+    const id = (searchParams.get('id') || '').trim()
+
+    if (id) {
+      const owned = await payload.find({
+        collection: 'course-enrollments',
+        where: {
+          and: [
+            { id: { equals: id } },
+            { 'course.instructor': { equals: instructorId } },
+          ],
+        },
+        limit: 1,
+        depth: 3,
+        overrideAccess: true,
+      })
+
+      const enrollment = owned.docs?.[0]
+      if (!enrollment) {
+        return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 })
+      }
+
+      return NextResponse.json(normalizeEnrollmentDoc(enrollment))
+    }
 
     const where: Where = {
       and: [
@@ -236,7 +336,7 @@ export async function POST(request: NextRequest) {
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 
-    const { userId, student, course, status: enrollmentStatus, notes } = body
+    const { userId, student, course } = body
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
@@ -288,19 +388,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const enrollmentData = getInstructorEnrollmentData(body, true)
+    if (enrollmentData.status && !ALLOWED_STATUSES.includes(enrollmentData.status)) {
+      return NextResponse.json(
+        { error: 'Invalid enrollment status' },
+        { status: 400 },
+      )
+    }
+
     const enrollment = await payload.create({
       collection: 'course-enrollments',
       data: {
+        ...enrollmentData,
         student: studentId,
         course: courseId,
-        status: enrollmentStatus || 'active',
-        notes: notes || '',
         enrolledBy: Number(userId) || null,
-        enrolledAt: new Date().toISOString(),
-        progressPercentage: 0,
-        enrollmentType: 'free',
-        paymentStatus: 'not_required',
-      },
+      } as any,
       overrideAccess: true,
     })
 
@@ -316,7 +419,7 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH /api/lms/enrollments/instructor
-// Updates status or unassigns an enrollment owned by the instructor.
+// Updates enrollment fields or unassigns an enrollment owned by the instructor.
 export async function PATCH(request: NextRequest) {
   try {
     if (!isAuthorizedServiceRequest(request, process.env.PAYLOAD_API_KEY)) {
@@ -326,7 +429,7 @@ export async function PATCH(request: NextRequest) {
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 
-    const { userId, id, status, notes, unassign } = body
+    const { userId, id, unassign } = body
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
@@ -372,23 +475,19 @@ export async function PATCH(request: NextRequest) {
       data.status = 'dropped'
       const existingNotes = (enrollment.notes || '').trim()
       data.notes = `${existingNotes ? `${existingNotes}\n` : ''}Unassigned by instructor at ${new Date().toISOString()}`
-    } else if (status) {
-      if (!ALLOWED_STATUSES.includes(status)) {
+    } else {
+      Object.assign(data, getInstructorEnrollmentData(body))
+      if (data.status && !ALLOWED_STATUSES.includes(data.status)) {
         return NextResponse.json(
           { error: 'Invalid enrollment status' },
           { status: 400 },
         )
       }
-      data.status = status
-    }
-
-    if (notes !== undefined && unassign !== true) {
-      data.notes = String(notes)
     }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json(
-        { error: 'status or unassign is required' },
+        { error: 'At least one enrollment field or unassign is required' },
         { status: 400 },
       )
     }

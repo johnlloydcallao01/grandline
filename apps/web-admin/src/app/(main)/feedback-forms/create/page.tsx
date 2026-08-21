@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save } from '@/components/ui/IconWrapper';
-import { createForm, type FormFieldBlock } from '../actions';
+import { createForm } from '../actions';
+import type { FormFieldBlock, FeedbackFormPayload } from '@encreasl/cms-types';
 import FeedbackFormBlockEditor from '@/components/cms/FeedbackFormBlockEditor';
 
 export default function CreateFeedbackFormPage() {
@@ -26,7 +27,7 @@ export default function CreateFeedbackFormPage() {
             setIsSaving(true);
             setError(null);
 
-            const payload: Record<string, any> = {
+            const payload: FeedbackFormPayload = {
                 title: title.trim(),
                 fields: fields.map(f => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,7 +40,7 @@ export default function CreateFeedbackFormPage() {
                 payload.description = description.trim();
             }
 
-            const created: any = await createForm(payload as any);
+            const created = await createForm(payload);
             setSaveSuccess(true);
             setTimeout(() => router.push(`/feedback-forms/${created.id}/edit`), 800);
         } catch (err: any) {

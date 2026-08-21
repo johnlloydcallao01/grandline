@@ -7,8 +7,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getMedia, uploadMedia, updateMedia, deleteMedia,
-    type MediaDoc,
 } from './actions';
+import type { MediaDoc } from '@encreasl/cms-types';
 
 function getMediaUrl(item: MediaDoc): string {
     return item.cloudinaryURL || item.thumbnailURL || item.url || ''
@@ -50,6 +50,12 @@ export default function MediaPage() {
     const [items, setItems] = useState<MediaDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [stats, setStats] = useState<{ totalFiles: number; images: number; videos: number; documents: number }>({
+        totalFiles: 0,
+        images: 0,
+        videos: 0,
+        documents: 0,
+    });
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -86,6 +92,7 @@ export default function MediaPage() {
             setItems(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setStats(data.stats || { totalFiles: 0, images: 0, videos: 0, documents: 0 });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load media');
         } finally {
@@ -172,9 +179,9 @@ export default function MediaPage() {
         }
     };
 
-    const imageCount = items.filter(i => isImageMime(i.mimeType)).length;
-    const videoCount = items.filter(i => i.mimeType?.startsWith('video/')).length;
-    const docCount = items.filter(i => i.mimeType && !i.mimeType.startsWith('image/') && !i.mimeType.startsWith('video/')).length;
+    const imageCount = stats.images;
+    const videoCount = stats.videos;
+    const docCount = stats.documents;
 
     return (
         <div className="py-6 space-y-6">

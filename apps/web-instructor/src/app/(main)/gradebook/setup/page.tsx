@@ -2,10 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import NextLink from 'next/link'
-import {
-  getGradeSetupReference,
-  type GradeSetupData,
-} from './actions'
+import { getGradeSetupReference } from './actions'
+import type { GradeSetupData } from '@encreasl/cms-types'
 
 const Link = NextLink as any
 

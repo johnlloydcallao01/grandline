@@ -17,11 +17,11 @@ export async function GET(request: NextRequest) {
 
     // Build query parameters for PayloadCMS API
     const params = new URLSearchParams({
-      status,
       limit,
       page,
       sort,
     });
+    params.set('where[status][equals]', status);
     if (categoryId) {
       params.set('where[category][contains]', categoryId);
     }

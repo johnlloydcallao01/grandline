@@ -7,6 +7,26 @@ interface GradeResult {
   weightedScore: number
 }
 
+function getRelationshipId(value: unknown): string | number | null {
+  if (value === null || value === undefined) return null
+
+  if (typeof value === 'object') {
+    if ('id' in value && (value as { id?: unknown }).id != null) {
+      return (value as { id: string | number }).id
+    }
+
+    if ('value' in value) {
+      return getRelationshipId((value as { value?: unknown }).value)
+    }
+
+    return null
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') return value
+
+  return null
+}
+
 /**
  * Recalculates the course grade for a given enrollment by querying all
  * graded assessments and assignments, weighting them by their `gradeWeight`,
@@ -30,14 +50,23 @@ export async function recalculateEnrollmentGrade(
     throw new Error(`Enrollment ${enrollmentId} not found`)
   }
 
-  const courseId = typeof enrollment.course === 'object' ? enrollment.course.id : enrollment.course
-  const traineeId = typeof enrollment.student === 'object' ? enrollment.student.id : enrollment.student
+  const courseId = getRelationshipId(enrollment.course)
+  const traineeId = getRelationshipId(enrollment.student)
+
+  if (!courseId || !traineeId) {
+    return {
+      currentGrade: null,
+      finalGrade: null,
+      totalWeight: 0,
+      weightedScore: 0,
+    }
+  }
 
   // Load course
   const course = await payload.findByID({
     collection: 'courses',
     id: courseId,
-    depth: 1,
+    depth: 0,
   })
 
   if (!course) {
@@ -53,17 +82,26 @@ export async function recalculateEnrollmentGrade(
   let totalWeight = 0
   let weightedScore = 0
 
+  const moduleIds = (Array.isArray((course as any).modules) ? (course as any).modules : [])
+    .map(getRelationshipId)
+    .filter((id: string | number | null): id is string | number => id !== null)
+
   // 2. Process ALL graded assessments (quizzes + exams) in this course
   const assessmentsResult = await payload.find({
     collection: 'assessments',
     where: {
       or: [
         // Quizzes and exams linked via module → course
-        {
-          and: [
-            { assessmentType: { not_equals: 'final_exam' } },
-          ],
-        },
+        ...(moduleIds.length > 0
+          ? [
+              {
+                and: [
+                  { assessmentType: { not_equals: 'final_exam' } },
+                  { module: { in: moduleIds } },
+                ],
+              },
+            ]
+          : []),
         // Final exams linked directly to course
         {
           and: [
@@ -77,27 +115,7 @@ export async function recalculateEnrollmentGrade(
     limit: 0,
   })
 
-  // For non-final-exam assessments, we need to find them via course modules
-  // Load course modules
-  const modulesResult = await payload.find({
-    collection: 'course-modules',
-    where: {
-      course: { equals: courseId },
-    },
-    depth: 0,
-    limit: 0,
-  })
-
-  const moduleIds = modulesResult.docs.map((m: any) => m.id)
-
-  // Get all assessments in these modules
-  const moduleAssessments = assessmentsResult.docs.filter((a: any) => {
-    if (a.assessmentType === 'final_exam') return true
-    const aModuleId = typeof a.module === 'object' ? a.module?.id : a.module
-    return aModuleId && moduleIds.includes(aModuleId)
-  })
-
-  for (const assessment of moduleAssessments) {
+  for (const assessment of assessmentsResult.docs) {
     const shouldCount =
       (assessment.assessmentType === 'quiz' && countsQuizzes) ||
       (assessment.assessmentType === 'exam' && countsQuizzes) ||

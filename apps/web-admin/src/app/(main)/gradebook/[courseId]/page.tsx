@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getEnrollmentsList, getCoursesList, deleteEnrollment, getEnrollmentById,
-    type EnrollmentDoc, type CourseDoc
 } from '../actions';
+import type { GradebookEnrollmentDoc, GradebookCourseDoc } from '@encreasl/cms-types';
 import { getStudentName } from '../utils';
 
 const ITEMS_PER_PAGE = 30;
@@ -50,8 +50,8 @@ export default function CourseGradebookPage() {
     const params = useParams();
     const courseId = params.courseId as string;
 
-    const [course, setCourse] = useState<CourseDoc | null>(null);
-    const [enrollments, setEnrollments] = useState<EnrollmentDoc[]>([]);
+    const [course, setCourse] = useState<GradebookCourseDoc | null>(null);
+    const [enrollments, setEnrollments] = useState<GradebookEnrollmentDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -61,9 +61,9 @@ export default function CourseGradebookPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [deleteTarget, setDeleteTarget] = useState<EnrollmentDoc | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<GradebookEnrollmentDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [detailEnrollment, setDetailEnrollment] = useState<EnrollmentDoc | null>(null);
+    const [detailEnrollment, setDetailEnrollment] = useState<GradebookEnrollmentDoc | null>(null);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
 
     const loadCourse = useCallback(async () => {
@@ -122,7 +122,7 @@ export default function CourseGradebookPage() {
         }
     };
 
-    const openDetail = async (e: EnrollmentDoc) => {
+    const openDetail = async (e: GradebookEnrollmentDoc) => {
         setDetailEnrollment(e);
         setIsDetailLoading(true);
         try {

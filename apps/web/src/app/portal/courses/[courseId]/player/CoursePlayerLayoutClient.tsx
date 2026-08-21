@@ -358,12 +358,10 @@ export default function CoursePlayerLayout({
   );
 
   const evaluationMode = course?.evaluationMode;
+  const isTerminalEnrollment = enrollmentStatus === 'completed';
+  const hasFinalEvaluation = finalEvaluation === 'passed' || finalEvaluation === 'failed';
 
   const { progressPercent, completedItems, totalItems } = useMemo(() => {
-    const currentIndex = currentItem
-      ? flatItems.findIndex((item) => item.key === currentItem.key)
-      : -1;
-
     if (evaluationMode === 'lessons' || evaluationMode === 'lessons_exam') {
       const lessonItems = flatItems.filter((i) => i.type === 'lesson');
       const completedLessonCount = lessonItems.filter((i) => completedLessonIds.includes(i.id)).length;
@@ -487,9 +485,16 @@ export default function CoursePlayerLayout({
       };
     }
 
-    // Default behavior (count everything)
+    // Default behavior (count completed items across curriculum)
     const total = flatItems.length;
-    const completed = currentIndex >= 0 ? currentIndex + 1 : 0;
+    let completed = 0;
+    for (const item of flatItems) {
+      if (item.type === 'lesson' && completedLessonIds.includes(item.id)) {
+        completed++;
+      } else if ((item.type === 'assessment' || item.type === 'finalExam') && (submissionHistory[item.id] || []).length > 0) {
+        completed++;
+      }
+    }
 
     return {
       progressPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
@@ -497,7 +502,7 @@ export default function CoursePlayerLayout({
       totalItems: total,
       progressLabel: 'learning items'
     };
-  }, [flatItems, currentItem, evaluationMode, completedLessonIds, submissionHistory]);
+  }, [flatItems, evaluationMode, completedLessonIds, submissionHistory]);
 
   useEffect(() => {
     if (!courseId || progressPercent === undefined || !mounted) return;
@@ -729,7 +734,6 @@ export default function CoursePlayerLayout({
 
   const showFinishButton = useMemo(() => {
     if (enrollmentStatus === 'completed') return false;
-    if (finalEvaluation === 'passed' || finalEvaluation === 'failed') return false;
     if (enrollmentStatus !== 'active') return false;
 
     // Check feedback requirement first - if required but not submitted, completely block Finish Button
@@ -844,7 +848,7 @@ export default function CoursePlayerLayout({
   }, [evaluationMode, enrollmentStatus, finalEvaluation, progressPercent, flatItems, submissionHistory, course?.isFeedbackRequired, hasSubmittedFeedback]);
 
   const showEvaluationButton = useMemo(() => {
-    if (enrollmentStatus === 'completed' && evaluationMode === 'lessons') return true;
+    if ((isTerminalEnrollment || hasFinalEvaluation) && evaluationMode === 'lessons') return true;
 
     if (evaluationMode === 'exam') {
       // Find the final exam
@@ -923,7 +927,7 @@ export default function CoursePlayerLayout({
     }
 
     return false;
-  }, [enrollmentStatus, evaluationMode, flatItems, submissionHistory]);
+  }, [enrollmentStatus, finalEvaluation, evaluationMode, flatItems, submissionHistory, isTerminalEnrollment, hasFinalEvaluation]);
 
   const handleToggleModule = (moduleId: string) => {
     setExpandedModules((prev) =>
@@ -1083,7 +1087,7 @@ export default function CoursePlayerLayout({
               </div>
             </div>
             <div className="hidden lg:flex items-center gap-6">
-              {enrollmentStatus === 'completed' && (
+              {isTerminalEnrollment && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-md border border-green-200">
                   <i className="fa fa-check-circle text-green-600" />
                   <span className="text-sm font-semibold">Course Finished</span>
@@ -1206,7 +1210,7 @@ export default function CoursePlayerLayout({
                     />
                   </div>
 
-                  {enrollmentStatus === 'completed' && (
+                  {isTerminalEnrollment && (
                     <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-md border border-green-200 w-full justify-center">
                       <i className="fa fa-check-circle text-green-600" />
                       <span className="text-sm font-semibold">Course Finished</span>

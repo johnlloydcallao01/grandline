@@ -2,6 +2,62 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
 
+const ENROLLMENT_FIELDS = [
+  'student',
+  'course',
+  'enrolledAt',
+  'enrollmentType',
+  'status',
+  'paymentStatus',
+  'accessExpiresAt',
+  'amountPaid',
+  'coupon',
+  'couponCode',
+  'couponDiscountAmount',
+  'listPriceSnapshot',
+  'finalPriceSnapshot',
+  'pricingBreakdown',
+  'progressPercentage',
+  'lastAccessedAt',
+  'completedAt',
+  'currentGrade',
+  'finalGrade',
+  'finalEvaluation',
+  'certificateIssued',
+  'enrolledBy',
+  'notes',
+  'isArchived',
+  'metadata',
+] as const
+
+function getEnrollmentData(body: Record<string, any>, includeDefaults = false): Record<string, any> {
+  const data: Record<string, any> = {}
+
+  for (const field of ENROLLMENT_FIELDS) {
+    if (body[field] !== undefined) data[field] = body[field]
+  }
+
+  if (data.student !== undefined) data.student = Number(data.student)
+  if (data.course !== undefined) data.course = Number(data.course)
+  if (data.enrolledBy !== undefined && data.enrolledBy !== null && data.enrolledBy !== '') {
+    data.enrolledBy = Number(data.enrolledBy)
+  }
+  if (data.coupon !== undefined && data.coupon !== null && data.coupon !== '') {
+    data.coupon = Number(data.coupon)
+  }
+
+  if (includeDefaults) {
+    data.enrolledAt = data.enrolledAt || new Date().toISOString()
+    data.status = data.status || 'active'
+    data.enrollmentType = data.enrollmentType || 'free'
+    data.paymentStatus = data.paymentStatus || 'not_required'
+    data.progressPercentage = data.progressPercentage ?? 0
+    data.notes = data.notes || ''
+  }
+
+  return data
+}
+
 export async function GET(request: NextRequest) {
   try {
     const payload = await getPayload({ config: configPromise })
@@ -11,6 +67,22 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = (searchParams.get('search') || '').trim()
     const status = (searchParams.get('status') || '').trim()
+    const id = (searchParams.get('id') || '').trim()
+
+    if (id) {
+      const enrollment = await payload.findByID({
+        collection: 'course-enrollments',
+        id,
+        depth: 3,
+        overrideAccess: true,
+      })
+
+      if (!enrollment) {
+        return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 })
+      }
+
+      return NextResponse.json(enrollment)
+    }
 
     const where: Where = {
       and: [
@@ -147,7 +219,7 @@ export async function POST(request: NextRequest) {
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 
-    const { student, course, status: enrollmentStatus, notes, enrolledBy } = body
+    const { student, course } = body
 
     if (!student || !course) {
       return NextResponse.json(
@@ -189,16 +261,10 @@ export async function POST(request: NextRequest) {
     const enrollment = await payload.create({
       collection: 'course-enrollments',
       data: {
+        ...getEnrollmentData(body, true),
         student: studentId,
         course: courseId,
-        status: enrollmentStatus || 'active',
-        notes: notes || '',
-        enrolledBy: enrolledBy || null,
-        enrolledAt: new Date().toISOString(),
-        progressPercentage: 0,
-        enrollmentType: 'free',
-        paymentStatus: 'not_required',
-      },
+      } as any,
       overrideAccess: true,
     })
 
@@ -263,18 +329,17 @@ export async function PATCH(request: NextRequest) {
     const payload = await getPayload({ config: configPromise })
     const body = await request.json()
 
-    const { id, status, isArchived } = body
+    const { id } = body
 
     if (!id) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 })
     }
 
-    const data: Record<string, any> = {}
-    if (status) data.status = status
-    if (typeof isArchived === 'boolean') data.isArchived = isArchived
+    const data = getEnrollmentData(body)
+    delete data.id
 
     if (Object.keys(data).length === 0) {
-      return NextResponse.json({ error: 'status or isArchived is required' }, { status: 400 })
+      return NextResponse.json({ error: 'At least one enrollment field is required' }, { status: 400 })
     }
 
     await payload.update({

@@ -2,11 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import NextLink from 'next/link'
-import {
-  getInstructorStudentOverview,
-  type StudentOverviewData,
-  type StudentRow,
-} from './actions'
+import { getInstructorStudentOverview } from './actions'
+import type { InstructorStudentOverviewData, StudentRow } from '@encreasl/cms-types'
 
 const Link = NextLink as any
 const ITEMS_PER_PAGE = 25
@@ -92,10 +89,13 @@ function formatDate(value?: string | null): string {
 }
 
 export default function StudentOverviewPage() {
-  const [data, setData] = useState<StudentOverviewData | null>(null)
+  const [data, setData] = useState<InstructorStudentOverviewData | null>(null)
+  const [totalDocs, setTotalDocs] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [courseFilter, setCourseFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null)
@@ -105,50 +105,38 @@ export default function StudentOverviewPage() {
     try {
       setIsLoading(true)
       setError(null)
-      setData(await getInstructorStudentOverview())
+      const data = await getInstructorStudentOverview({
+        search: debouncedSearch || undefined,
+        courseId: courseFilter === 'all' ? undefined : courseFilter,
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      })
+      setData(data)
+      setTotalDocs(data.totalDocs || 0)
+      setTotalPages(data.totalPages || 0)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load students')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [debouncedSearch, courseFilter, currentPage])
 
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
     if (searchTimer.current) clearTimeout(searchTimer.current)
     searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
       setCurrentPage(1)
-    }, 250)
+    }, 400)
     return () => { if (searchTimer.current) clearTimeout(searchTimer.current) }
-  }, [searchTerm, courseFilter])
+  }, [searchTerm])
 
-  const query = searchTerm.trim().toLowerCase()
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [courseFilter])
 
-  const allowedTraineeIds = useCallback(() => {
-    if (courseFilter === 'all' || !data) return null
-    const set = new Set<number>()
-    for (const enrollment of data.enrollments) {
-      if (String(enrollment.courseId) === courseFilter) set.add(enrollment.traineeId)
-    }
-    return set
-  }, [courseFilter, data])
-
-  const filteredStudents = (() => {
-    if (!data) return []
-    const allowed = allowedTraineeIds()
-    return data.students.filter((student) => {
-      if (allowed && !allowed.has(student.traineeId)) return false
-      if (!query) return true
-      return student.name.toLowerCase().includes(query)
-        || student.email.toLowerCase().includes(query)
-        || student.srn.toLowerCase().includes(query)
-    })
-  })()
-
-  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / ITEMS_PER_PAGE))
-  const safePage = Math.min(currentPage, totalPages)
-  const visibleStudents = filteredStudents.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE)
+  const query = debouncedSearch.trim().toLowerCase()
   const summary = data?.summary
 
   if (error) {
@@ -190,7 +178,7 @@ export default function StudentOverviewPage() {
         <div className="flex flex-col gap-3 border-b border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-[var(--card-border)]">
           <div>
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Students</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{isLoading ? 'Loading students...' : `${filteredStudents.length} of ${summary?.totalStudents ?? 0} students shown`}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{isLoading ? 'Loading students...' : `${(data?.students || []).length} of ${totalDocs} students shown`}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative w-full sm:w-72"><SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by name, SRN, or email..." className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100" /></div>
@@ -198,12 +186,12 @@ export default function StudentOverviewPage() {
           </div>
         </div>
 
-        {isLoading ? <div className="space-y-4 p-6">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-12 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />)}</div> : filteredStudents.length === 0 ? (
+        {isLoading ? <div className="space-y-4 p-6">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-12 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />)}</div> : (data?.students || []).length === 0 ? (
           <div className="p-12 text-center"><UsersIcon className="mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" /><h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">No students found</h3><p className="text-sm text-gray-500 dark:text-gray-400">{query || courseFilter !== 'all' ? 'Try adjusting your search or filters.' : 'No students are enrolled in your courses yet.'}</p></div>
         ) : (
-          <div className="overflow-x-auto"><table className="w-full min-w-[900px]"><thead><tr className="border-b border-gray-200 bg-gray-50/60 dark:border-[var(--card-border)] dark:bg-gray-800/50"><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">SRN</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Level</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Courses</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Completed</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Avg Grade</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Pending</th><th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{visibleStudents.map((student) => <tr key={student.traineeId} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50"><td className="px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/30"><UserIcon className="h-4 w-4 text-blue-500" /></div><div className="min-w-0"><p className="max-w-[160px] truncate text-sm font-medium text-gray-900 dark:text-gray-100">{student.name}</p>{student.email && <p className="max-w-[160px] truncate text-xs text-gray-400">{student.email}</p>}</div></div></td><td className="px-4 py-3"><span className="font-mono text-xs text-gray-600 dark:text-gray-400">{student.srn || '—'}</span></td><td className="px-4 py-3"><LevelBadge level={student.level} /></td><td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{student.enrollmentCount}</td><td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{student.completedCount}</td><td className="px-4 py-3"><GradeValue grade={student.avgGrade} passingGrade={70} /></td><td className="px-4 py-3">{student.pendingCount > 0 ? <span className="inline-flex rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{student.pendingCount} pending</span> : <span className="text-xs text-gray-400 dark:text-gray-500">—</span>}</td><td className="px-4 py-3 text-right"><button onClick={() => setSelectedStudent(student)} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"><EyeIcon className="h-3.5 w-3.5" />View</button></td></tr>)}</tbody></table></div>
+          <div className="overflow-x-auto"><table className="w-full min-w-[900px]"><thead><tr className="border-b border-gray-200 bg-gray-50/60 dark:border-[var(--card-border)] dark:bg-gray-800/50"><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Student</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">SRN</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Level</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Courses</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Completed</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Avg Grade</th><th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Pending</th><th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{(data?.students || []).map((student) => <tr key={student.traineeId} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50"><td className="px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/30"><UserIcon className="h-4 w-4 text-blue-500" /></div><div className="min-w-0"><p className="max-w-[160px] truncate text-sm font-medium text-gray-900 dark:text-gray-100">{student.name}</p>{student.email && <p className="max-w-[160px] truncate text-xs text-gray-400">{student.email}</p>}</div></div></td><td className="px-4 py-3"><span className="font-mono text-xs text-gray-600 dark:text-gray-400">{student.srn || '—'}</span></td><td className="px-4 py-3"><LevelBadge level={student.level} /></td><td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{student.enrollmentCount}</td><td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{student.completedCount}</td><td className="px-4 py-3"><GradeValue grade={student.avgGrade} passingGrade={70} /></td><td className="px-4 py-3">{student.pendingCount > 0 ? <span className="inline-flex rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{student.pendingCount} pending</span> : <span className="text-xs text-gray-400 dark:text-gray-500">—</span>}</td><td className="px-4 py-3 text-right"><button onClick={() => setSelectedStudent(student)} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"><EyeIcon className="h-3.5 w-3.5" />View</button></td></tr>)}</tbody></table></div>
         )}
-        {!isLoading && filteredStudents.length > ITEMS_PER_PAGE && <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-[var(--card-border)]"><p className="text-sm text-gray-500 dark:text-gray-400">Showing {(safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, filteredStudents.length)} of {filteredStudents.length}</p><div className="flex gap-2"><button onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={safePage === 1} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Previous</button><button onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={safePage === totalPages} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Next</button></div></div>}
+        {!isLoading && totalPages > 1 && <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-[var(--card-border)]"><p className="text-sm text-gray-500 dark:text-gray-400">Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, totalDocs)} of {totalDocs}</p><div className="flex gap-2"><button onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage <= 1} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Previous</button><button onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage >= totalPages} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Next</button></div></div>}
       </div>
 
       {selectedStudent && <StudentDrawer student={selectedStudent} enrollments={data?.enrollments || []} courses={data?.courses || []} onClose={() => setSelectedStudent(null)} />}
@@ -211,7 +199,7 @@ export default function StudentOverviewPage() {
   )
 }
 
-function StudentDrawer({ student, enrollments, courses, onClose }: { student: StudentRow; enrollments: StudentOverviewData['enrollments']; courses: StudentOverviewData['courses']; onClose: () => void }) {
+function StudentDrawer({ student, enrollments, courses, onClose }: { student: StudentRow; enrollments: InstructorStudentOverviewData['enrollments']; courses: InstructorStudentOverviewData['courses']; onClose: () => void }) {
   const studentEnrollments = enrollments.filter((enrollment) => enrollment.traineeId === student.traineeId)
   const passingGradeFor = (courseId: number) => courses.find((course) => course.id === courseId)?.passingGrade ?? 70
 

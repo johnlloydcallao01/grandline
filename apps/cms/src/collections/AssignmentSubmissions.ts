@@ -1,6 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { recalculateEnrollmentGrade } from '../utils/gradeCalculation'
+import { recalculateEnrollmentProgress } from '../utils/progressCalculation'
+import { createNotificationFanout } from '../utils/notificationFanout'
+import { getCourseInstructorUserIds, getTraineeUserId, getUserDisplayName } from '../utils/notificationTargets'
 
 export const AssignmentSubmissions: CollectionConfig = {
   slug: 'assignment-submissions',
@@ -151,6 +154,15 @@ export const AssignmentSubmissions: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, req }) => {
+        if (doc.enrollment) {
+          const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment.id : doc.enrollment
+          try {
+            await recalculateEnrollmentProgress(req.payload, enrollmentId)
+          } catch (err) {
+            console.error('[AssignmentSubmissions Hook] Progress recalculation error:', err)
+          }
+        }
+
         if (doc.status === 'graded' && doc.enrollment) {
           const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment.id : doc.enrollment
           try {
@@ -168,6 +180,85 @@ export const AssignmentSubmissions: CollectionConfig = {
           } catch (err) {
             console.error('[AssignmentSubmissions Hook] Grade recalculation error:', err)
           }
+        }
+      },
+      async ({ doc, previousDoc, req }) => {
+        const status = doc.status
+        const prevStatus = previousDoc?.status
+        if (status !== 'submitted' || prevStatus === 'submitted') return
+        if (!doc.enrollment) return
+
+        try {
+          const payload = req.payload
+          const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment.id : doc.enrollment
+          const enrollment = await payload.findByID({
+            collection: 'course-enrollments',
+            id: enrollmentId,
+            depth: 1,
+            overrideAccess: true,
+          })
+          const courseId = typeof enrollment?.course === 'object' ? enrollment.course.id : enrollment?.course
+          if (!courseId) return
+
+          const instructorUserIds = await getCourseInstructorUserIds(payload, courseId)
+          if (instructorUserIds.length === 0) return
+
+          const traineeId = typeof doc.trainee === 'object' ? doc.trainee.id : doc.trainee
+          const traineeUser = await getTraineeUserId(payload, traineeId)
+          const traineeName = traineeUser ? await getUserDisplayName(payload, traineeUser) : 'A trainee'
+
+          const assignmentId = typeof doc.assignment === 'object' ? doc.assignment.id : doc.assignment
+          const assignment = assignmentId
+            ? await payload.findByID({
+                collection: 'assignments',
+                id: assignmentId,
+                depth: 0,
+                overrideAccess: true,
+              })
+            : null
+          const assignmentTitle = assignment?.title || 'Assignment'
+
+          const title = `📝 New Assignment Submission: ${traineeName}`
+          const body = `${traineeName} submitted "${assignmentTitle}".`
+
+          await Promise.all(
+            instructorUserIds.map((userId) =>
+              createNotificationFanout({
+                payload,
+                userId,
+                templateCode: 'ASSIGNMENT_SUBMISSION_INSTRUCTOR',
+                category: 'learning',
+                title,
+                body,
+                link: '/submissions/assignments',
+                metadata: {
+                  submissionId: doc.id,
+                  assignmentId,
+                  assignmentTitle,
+                  courseId,
+                  traineeName,
+                },
+                sourceType: 'assignment',
+                sourceId: String(doc.id),
+                push: {
+                  title,
+                  body,
+                  url: '/submissions/assignments',
+                  data: {
+                    submissionId: doc.id,
+                    assignmentId,
+                    assignmentTitle,
+                    courseId,
+                    traineeName,
+                  },
+                },
+              }),
+            ),
+          )
+
+          console.log(`[AssignmentSubmissions Hook] Instructor fan-out attempted for course ${courseId}, users [${instructorUserIds.join(', ')}]`)
+        } catch (err) {
+          console.error('[AssignmentSubmissions Hook] Instructor notification error:', err)
         }
       },
     ],

@@ -4,12 +4,15 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
     Search, BookOpen, Users, Clock, Edit, Trash2, Eye,
-    DollarSign, Loader2, X
+    Loader2, X
 } from '@/components/ui/IconWrapper';
 import { getCourses, deleteCourse, updateCourse } from './actions';
 import type { Course, CourseCounts } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 12;
+
+const formatPrice = (value: number) =>
+    new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
 
 const DIFFICULTY_COLORS: Record<string, string> = {
     standard: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
@@ -389,12 +392,11 @@ export default function CoursesPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-1">
-                                                    <DollarSign className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                                                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                                        {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
+                                                        {course.price === 0 ? 'Free' : formatPrice(course.price)}
                                                     </span>
                                                     {course.discountedPrice && course.discountedPrice < course.price && (
-                                                        <span className="text-xs text-gray-400 dark:text-gray-500 line-through ml-1">${course.discountedPrice.toFixed(2)}</span>
+                                                        <span className="text-xs text-gray-400 dark:text-gray-500 line-through ml-1">{formatPrice(course.discountedPrice)}</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -567,7 +569,7 @@ export default function CoursesPage() {
                                 </div>
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Price</span>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">{detailCourse.price === 0 ? 'Free' : `$${detailCourse.price.toFixed(2)}`}</p>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{detailCourse.price === 0 ? 'Free' : formatPrice(detailCourse.price)}</p>
                                 </div>
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Language</span>

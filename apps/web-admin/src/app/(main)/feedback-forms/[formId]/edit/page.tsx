@@ -4,7 +4,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, FileText, AlertTriangle } from '@/components/ui/IconWrapper';
-import { getFormById, updateForm, type FeedbackFormDoc, type FormFieldBlock } from '../../actions';
+import { getFormById, updateForm } from '../../actions';
+import type { FeedbackFormDoc, FeedbackFormPayload, FormFieldBlock } from '@encreasl/cms-types';
 import FeedbackFormBlockEditor from '@/components/cms/FeedbackFormBlockEditor';
 
 export default function EditFeedbackFormPage() {
@@ -49,7 +50,7 @@ export default function EditFeedbackFormPage() {
             setIsSaving(true);
             setSaveSuccess(false);
 
-            const payload: Record<string, any> = {
+            const payload: FeedbackFormPayload = {
                 title: title.trim(),
                 fields: fields.map(f => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars

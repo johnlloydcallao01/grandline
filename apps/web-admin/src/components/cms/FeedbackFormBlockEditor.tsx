@@ -4,7 +4,7 @@ import React from 'react';
 import {
     Plus, X, AlertTriangle, CheckCircle
 } from '@/components/ui/IconWrapper';
-import type { FormFieldBlock, TextInputBlock, ChoiceInputBlock, SurveyMatrixBlock, ChoiceOption, MatrixColumn, MatrixRow } from '@/app/(main)/feedback-forms/actions';
+import type { FormFieldBlock, TextInputBlock, ChoiceInputBlock, SurveyMatrixBlock, ChoiceOption, MatrixColumn, MatrixRow } from '@encreasl/cms-types';
 
 interface Props {
     fields: FormFieldBlock[];

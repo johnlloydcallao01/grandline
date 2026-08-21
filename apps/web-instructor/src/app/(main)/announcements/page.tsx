@@ -7,9 +7,12 @@ import {
   getAnnouncements,
   getCourseOptions,
   updateAnnouncement,
-  type AnnouncementDoc,
-  type CourseOption,
 } from './actions'
+import type {
+  AnnouncementCourseOption,
+  AnnouncementDoc,
+  AnnouncementsStats,
+} from '@encreasl/cms-types'
 
 const ITEMS_PER_PAGE = 15
 
@@ -96,9 +99,10 @@ type EditorState = {
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<AnnouncementDoc[]>([])
-  const [courses, setCourses] = useState<CourseOption[]>([])
+  const [courses, setCourses] = useState<AnnouncementCourseOption[]>([])
   const [totalDocs, setTotalDocs] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [stats, setStats] = useState<AnnouncementsStats>({ total: 0, pinned: 0, active: 0, expired: 0 })
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [courseFilter, setCourseFilter] = useState('all')
@@ -126,6 +130,7 @@ export default function AnnouncementsPage() {
       setAnnouncements(result.docs)
       setTotalDocs(result.totalDocs)
       setTotalPages(result.totalPages)
+      if (result.stats) setStats(result.stats)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load announcements')
     } finally {
@@ -206,9 +211,12 @@ export default function AnnouncementsPage() {
     }
   }
 
-  const pagePinned = announcements.filter((item) => item.pinned).length
-  const pageActive = announcements.filter((item) => isActive(item)).length
-  const pageExpired = announcements.filter((item) => isExpired(item)).length
+  const metricCards = [
+    { label: 'Total', value: stats.total, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30' },
+    { label: 'Pinned', value: stats.pinned, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30' },
+    { label: 'Active', value: stats.active, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' },
+    { label: 'Expired', value: stats.expired, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' },
+  ]
 
   if (error) {
     return <div className="p-6 flex min-h-[400px] items-center justify-center"><div className="text-center"><p className="mb-3 font-medium text-red-600 dark:text-red-400">Failed to load announcements</p><p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{error}</p><button onClick={loadAnnouncements} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Retry</button></div></div>
@@ -222,12 +230,7 @@ export default function AnnouncementsPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          ['Total', totalDocs, 'text-blue-600 dark:text-blue-400', 'bg-blue-50 dark:bg-blue-950/30'],
-          ['Pinned', pagePinned, 'text-purple-600 dark:text-purple-400', 'bg-purple-50 dark:bg-purple-950/30'],
-          ['Active', pageActive, 'text-green-600 dark:text-green-400', 'bg-green-50 dark:bg-green-950/30'],
-          ['Expired', pageExpired, 'text-amber-600 dark:text-amber-400', 'bg-amber-50 dark:bg-amber-950/30'],
-        ].map(([label, value, color, bg]) => <div key={String(label)} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]"><div className={`mb-2 inline-flex rounded-lg p-2 ${bg}`}><MegaphoneIcon className={`h-5 w-5 ${color}`} /></div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{isLoading ? '—' : value}</p><p className="text-xs text-gray-500 dark:text-gray-400">{label}{label !== 'Total' ? ' on this page' : ''}</p></div>)}
+        {metricCards.map(({ label, value, color, bg }) => <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-[var(--card-border)] dark:bg-[var(--card-background)]"><div className={`mb-2 inline-flex rounded-lg p-2 ${bg}`}><MegaphoneIcon className={`h-5 w-5 ${color}`} /></div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{isLoading ? '—' : value}</p><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p></div>)}
       </div>
 
       <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row dark:border-[var(--card-border)] dark:bg-[var(--card-background)]">
@@ -247,7 +250,7 @@ export default function AnnouncementsPage() {
   )
 }
 
-function EditorDrawer({ editor, courses, isSaving, error, onClose, onSave }: { editor: EditorState; courses: CourseOption[]; isSaving: boolean; error: string | null; onClose: () => void; onSave: (event: React.FormEvent<HTMLFormElement>) => void }) {
+function EditorDrawer({ editor, courses, isSaving, error, onClose, onSave }: { editor: EditorState; courses: AnnouncementCourseOption[]; isSaving: boolean; error: string | null; onClose: () => void; onSave: (event: React.FormEvent<HTMLFormElement>) => void }) {
   const announcement = editor.announcement
   const content = announcement ? extractText(announcement.bodyBlocks) : ''
   return <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}><div className="absolute inset-0 bg-black/30" /><form onSubmit={onSave} onClick={(event) => event.stopPropagation()} className="relative h-full w-full max-w-xl overflow-y-auto bg-white shadow-2xl dark:bg-[var(--card-background)]"><div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4 dark:border-[var(--card-border)] dark:bg-[var(--card-background)]"><h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{editor.mode === 'create' ? 'New Announcement' : 'Edit Announcement'}</h2><button type="button" onClick={onClose} disabled={isSaving} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><XIcon className="h-5 w-5" /></button></div><div className="space-y-5 p-6">{error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div><label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label><input name="title" required defaultValue={announcement?.title || ''} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100" /></div><div><label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label><select name="course" required defaultValue={courseId(announcement)?.toString() || ''} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100"><option value="">Select a course</option>{courses.map((course) => <option key={course.id} value={course.id}>{course.title}{course.code ? ` (${course.code})` : ''}</option>)}</select></div><div><label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label><textarea name="content" rows={8} defaultValue={content} placeholder="Write an update for your trainees..." className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100" /></div><label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" name="pinned" defaultChecked={Boolean(announcement?.pinned)} className="accent-blue-600" /> Pin this announcement</label><div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Visible from</label><input type="datetime-local" name="visibleFrom" defaultValue={dateInputValue(announcement?.visibleFrom)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100" /></div><div><label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Visible until</label><input type="datetime-local" name="visibleUntil" defaultValue={dateInputValue(announcement?.visibleUntil)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-[var(--card-background)] dark:text-gray-100" /></div></div></div><div className="sticky bottom-0 flex gap-3 border-t bg-white px-6 py-4 dark:border-[var(--card-border)] dark:bg-[var(--card-background)]"><button type="button" onClick={onClose} disabled={isSaving} className="flex-1 rounded-lg border px-4 py-2 text-sm">Cancel</button><button type="submit" disabled={isSaving} className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Announcement'}</button></div></form></div>

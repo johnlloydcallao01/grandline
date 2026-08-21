@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { SidebarItem, SidebarDropdownGroup } from '@/components/ui';
 import Link from 'next/link';
 import { useMessenger } from '@encreasl/ui/messenger-context';
+import { useNotifications } from '@/contexts/NotificationsContext';
 
 interface SidebarMenuItemsProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface SidebarMenuItemsProps {
 export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
   const pathname = usePathname();
   const { unreadCount } = useMessenger();
+  const notifications = useNotifications();
+  const notificationUnread = notifications?.unreadCount ?? 0;
 
   const hasActiveCourseManagerChild =
     pathname?.startsWith('/courses');
@@ -328,6 +331,14 @@ export function SidebarMenuItems({ isOpen }: SidebarMenuItemsProps) {
           active={pathname?.startsWith('/announcements')}
           collapsed={!isOpen}
           href="/announcements"
+        />
+        <SidebarItem
+          icon="notifications"
+          label="Notifications"
+          active={pathname?.startsWith('/notifications')}
+          collapsed={!isOpen}
+          href="/notifications"
+          badge={notificationUnread}
         />
         <SidebarItem
           icon="messenger"

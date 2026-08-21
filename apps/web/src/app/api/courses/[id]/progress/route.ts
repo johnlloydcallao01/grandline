@@ -90,6 +90,29 @@ export async function GET(
 
         console.log(`[Progress API] Found ${data.docs?.length || 0} progress records for user ${userId} in course ${validCourseId}`)
 
+        // 2.5 Fetch Enrollment progress from CMS server-side recalculation
+        const enrollParams = new URLSearchParams()
+        enrollParams.set('where[student][equals]', String(traineeId))
+        enrollParams.set('where[course][equals]', String(validCourseId))
+        enrollParams.set('where[isArchived][not_equals]', 'true')
+        enrollParams.set('limit', '1')
+
+        const enrollRes = await fetch(`${apiUrl}/course-enrollments?${enrollParams.toString()}`, { headers, cache: 'no-store' })
+        let serverProgress: { progressPercentage: number; completedItems?: number; totalItems?: number } | null = null
+
+        if (enrollRes.ok) {
+            const enrollData = await enrollRes.json()
+            const enrollment = enrollData.docs?.[0]
+            if (enrollment?.id) {
+                const calcRes = await fetch(`${apiUrl}/lms/enrollments/admin/progress?enrollmentId=${enrollment.id}`, { headers, cache: 'no-store' })
+                if (calcRes.ok) {
+                    serverProgress = await calcRes.json()
+                } else if (enrollment.progressPercentage != null) {
+                    serverProgress = { progressPercentage: enrollment.progressPercentage }
+                }
+            }
+        }
+
         // 3. Transform to a simple map or list for the frontend
         // We want to return a list of completed lesson IDs for compatibility with the current frontend logic
         // But also the full map for future use.
@@ -109,17 +132,25 @@ export async function GET(
                 let itemId: string | undefined
 
                 if (doc.item && typeof doc.item === 'object') {
+                    const relationTo = doc.item.relationTo
                     if (typeof doc.item.value === 'object' && doc.item.value !== null) {
                         itemId = doc.item.value.id
                     } else {
                         itemId = doc.item.value
+                    }
+
+                    progressMap[`${relationTo || 'unknown'}:${itemId}`] = {
+                        status: doc.status,
+                        isCompleted: doc.isCompleted,
+                        score: doc.score,
+                        attempts: 0, // Reset attempts here, will be populated by submissions below
                     }
                 } else if (typeof doc.item === 'string') {
                     itemId = doc.item
                 }
 
                 if (itemId) {
-                    progressMap[itemId] = {
+                    progressMap[itemId] = progressMap[itemId] || {
                         status: doc.status,
                         isCompleted: doc.isCompleted,
                         score: doc.score,
@@ -132,8 +163,9 @@ export async function GET(
                     // We include ALL completed items (lessons, assessments, etc.)
                     // Check both boolean flag AND status string for robustness
                     const isCompleted = doc.isCompleted === true || doc.status === 'completed' || doc.status === 'passed'
+                    const relationTo = doc.item && typeof doc.item === 'object' ? doc.item.relationTo : null
 
-                    if (isCompleted) {
+                    if (relationTo === 'course-lessons' && isCompleted) {
                         completedLessonIds.push(itemId)
                     }
                 }
@@ -180,6 +212,9 @@ export async function GET(
                     // Also update the progressMap for consistency
                     if (progressMap[assessmentId]) {
                         progressMap[assessmentId].attempts = attemptCounts[assessmentId]
+                    }
+                    if (progressMap[`assessments:${assessmentId}`]) {
+                        progressMap[`assessments:${assessmentId}`].attempts = attemptCounts[assessmentId]
                     }
                 }
             })
@@ -239,7 +274,10 @@ export async function GET(
             progressMap,
             completedLessonIds,
             attemptCounts,
-            submissionHistory
+            submissionHistory,
+            progressPercentage: serverProgress?.progressPercentage ?? 0,
+            completedItems: serverProgress?.completedItems ?? 0,
+            totalItems: serverProgress?.totalItems ?? 0,
         })
 
     } catch (error) {

@@ -8,11 +8,12 @@ import {
 } from '@/components/ui/IconWrapper';
 import {
     getTraineesList, getStudentOverview,
-    type TraineeWithStats, type StudentOverviewData, type EnrollmentDoc
 } from '../actions';
+import type {
+    GradebookEnrollmentDoc, GradebookTraineeDoc, GradebookTraineeSummary, GradebookTraineeWithStats, StudentOverviewData
+} from '@encreasl/cms-types';
 import {
     getTraineeDisplayName, getTraineeEmail, getCourseTitle,
-    type TraineeDoc
 } from '../utils';
 
 const ITEMS_PER_PAGE = 25;
@@ -60,7 +61,10 @@ function GradeDisplay({ grade }: { grade: number | null | undefined }) {
 }
 
 export default function StudentOverviewPage() {
-    const [trainees, setTrainees] = useState<TraineeWithStats[]>([]);
+    const [trainees, setTrainees] = useState<GradebookTraineeWithStats[]>([]);
+    const [summary, setSummary] = useState<GradebookTraineeSummary>({
+        totalStudents: 0, totalEnrollments: 0, completedCount: 0, avgGrade: null, certificateCount: 0,
+    });
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -70,7 +74,7 @@ export default function StudentOverviewPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-    const [selectedTrainee, setSelectedTrainee] = useState<TraineeDoc | null>(null);
+    const [selectedTrainee, setSelectedTrainee] = useState<GradebookTraineeDoc | null>(null);
     const [overview, setOverview] = useState<StudentOverviewData | null>(null);
     const [isOverviewLoading, setIsOverviewLoading] = useState(false);
     const [overviewError, setOverviewError] = useState<string | null>(null);
@@ -85,6 +89,7 @@ export default function StudentOverviewPage() {
                 limit: ITEMS_PER_PAGE,
             });
             setTrainees(data.docs || []);
+            if (data.summary) setSummary(data.summary);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
         } catch (err) {
@@ -106,7 +111,7 @@ export default function StudentOverviewPage() {
         return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
     }, [searchTerm]);
 
-    const openOverview = async (t: TraineeDoc) => {
+    const openOverview = async (t: GradebookTraineeDoc) => {
         setSelectedTrainee(t);
         setIsOverviewLoading(true);
         setOverviewError(null);
@@ -120,9 +125,7 @@ export default function StudentOverviewPage() {
         setIsOverviewLoading(false);
     };
 
-    const avgGradeAll = trainees.length > 0
-        ? Math.round(trainees.reduce((s, t) => s + (t.avgGrade ?? 0), 0) / trainees.length)
-        : 0;
+    const avgGradeAll = summary.avgGrade ?? 0;
 
     if (error) {
         return (
@@ -170,13 +173,13 @@ export default function StudentOverviewPage() {
                         <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-lg bg-blue-600"><Users className="h-5 w-5 text-white" /></div>
-                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalDocs}</p><p className="text-xs text-gray-500 dark:text-gray-400">Total Students</p></div>
+                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summary.totalStudents}</p><p className="text-xs text-gray-500 dark:text-gray-400">Total Students</p></div>
                             </div>
                         </div>
                         <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-lg bg-green-600"><CheckCircle className="h-5 w-5 text-white" /></div>
-                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{trainees.reduce((s, t) => s + t.completedCount, 0)}</p><p className="text-xs text-gray-500 dark:text-gray-400">Courses Completed</p></div>
+                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summary.completedCount}</p><p className="text-xs text-gray-500 dark:text-gray-400">Courses Completed</p></div>
                             </div>
                         </div>
                         <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
@@ -188,7 +191,7 @@ export default function StudentOverviewPage() {
                         <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-lg bg-indigo-600"><Award className="h-5 w-5 text-white" /></div>
-                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{trainees.reduce((s, t) => s + t.certificateCount, 0)}</p><p className="text-xs text-gray-500 dark:text-gray-400">Certificates</p></div>
+                                <div><p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summary.certificateCount}</p><p className="text-xs text-gray-500 dark:text-gray-400">Certificates</p></div>
                             </div>
                         </div>
                     </>
@@ -430,7 +433,7 @@ export default function StudentOverviewPage() {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                                    {overview.enrollments.map((e: EnrollmentDoc) => {
+                                                    {overview.enrollments.map((e: GradebookEnrollmentDoc) => {
                                                         const courseId = typeof e.course === 'number' ? e.course : (e.course as any)?.id;
                                                         return (
                                                             <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">

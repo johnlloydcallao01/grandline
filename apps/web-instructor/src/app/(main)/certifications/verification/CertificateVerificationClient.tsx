@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { verifyCertificate, type VerificationResult } from './actions'
+import type { CertificateVerificationResult } from '@encreasl/cms-types'
+import { verifyCertificate } from './actions'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 const SearchIcon = ({ className }: { className?: string }) => (
@@ -38,7 +39,7 @@ export function CertificateVerificationClient({ initialCode }: { initialCode?: s
   const { siteName, logoUrl } = useSiteSettings()
 
   const [searchQuery, setSearchQuery] = useState(initialCode || '')
-  const [result, setResult] = useState<VerificationResult | null>(null)
+  const [result, setResult] = useState<CertificateVerificationResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [shareUrl, setShareUrl] = useState('')
   const [copied, setCopied] = useState(false)

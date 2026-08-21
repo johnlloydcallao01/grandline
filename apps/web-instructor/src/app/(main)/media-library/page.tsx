@@ -5,9 +5,8 @@ import {
     getMedia,
     uploadMedia,
     updateMedia,
-    type MediaDoc,
-    type MediaScope,
 } from './actions';
+import type { MediaDoc, MediaScope } from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 60;
 
@@ -81,6 +80,12 @@ export default function MediaLibraryPage() {
     const [items, setItems] = useState<MediaDoc[]>([]);
     const [totalDocs, setTotalDocs] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [stats, setStats] = useState<{ totalFiles: number; images: number; videos: number; documents: number }>({
+        totalFiles: 0,
+        images: 0,
+        videos: 0,
+        documents: 0,
+    });
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -119,6 +124,7 @@ export default function MediaLibraryPage() {
             setItems(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setStats(data.stats || { totalFiles: 0, images: 0, videos: 0, documents: 0 });
             setCurrentUserId(data.currentUserId);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load media');
@@ -193,9 +199,9 @@ export default function MediaLibraryPage() {
         }
     };
 
-    const imageCount = items.filter(i => isImageMime(i.mimeType)).length;
-    const videoCount = items.filter(i => i.mimeType?.startsWith('video/')).length;
-    const docCount = items.filter(i => i.mimeType && !i.mimeType.startsWith('image/') && !i.mimeType.startsWith('video/')).length;
+    const imageCount = stats.images;
+    const videoCount = stats.videos;
+    const docCount = stats.documents;
 
     return (
         <div className="py-6 space-y-6">

@@ -3,34 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import { Send, CheckCircle, AlertCircle, FileCheck, Info, Search, ChevronDown, Check, X } from 'lucide-react';
+import type { EligibleEnrollment } from '@encreasl/cms-types';
 import { getEligibleEnrollments } from './actions';
 
-interface Enrollment {
-    id: number;
-    student: {
-        id: number;
-        user: {
-            firstName: string;
-            lastName: string;
-        } | number;
-    };
-    course: {
-        id: number;
-        title: string;
-        certificateTemplate?: number | object;
-        instructor?: {
-            user?: {
-                firstName: string;
-                lastName: string;
-            } | number;
-        } | number;
-    };
-    completedAt?: string;
-    certificateIssued: boolean;
-}
-
 export default function CertificateIssuancePage() {
-    const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+    const [enrollments, setEnrollments] = useState<EligibleEnrollment[]>([]);
+    const [selectedEnrollment, setSelectedEnrollment] = useState<EligibleEnrollment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +28,7 @@ export default function CertificateIssuancePage() {
             setIsSearching(true);
         }
         try {
-            const data = await getEligibleEnrollments(search);
+            const data = await getEligibleEnrollments(search ? { search } : {});
             setEnrollments(data);
         } catch (e: any) {
             console.error('Error fetching enrollments:', e);
@@ -93,18 +71,18 @@ export default function CertificateIssuancePage() {
         };
     }, []);
 
-    const handleSelect = (enrollment: Enrollment) => {
-        if (!enrollment.course.certificateTemplate) return;
+    const handleSelect = (enrollment: EligibleEnrollment) => {
+        if (!enrollment.hasTemplate) return;
 
         setSelectedEnrollmentId(enrollment.id.toString());
-        const studentUser = typeof enrollment.student.user === 'object' ? enrollment.student.user : null;
-        const studentName = studentUser ? `${studentUser.firstName} ${studentUser.lastName}` : `Student #${enrollment.student.id}`;
-        setQuery(`${studentName} - ${enrollment.course.title}`);
+        setSelectedEnrollment(enrollment);
+        setQuery(`${enrollment.studentName} - ${enrollment.courseTitle}`);
         setIsOpen(false);
     };
 
     const handleClear = () => {
         setSelectedEnrollmentId('');
+        setSelectedEnrollment(null);
         setQuery('');
         setIsOpen(true);
         inputRef.current?.focus();
@@ -113,7 +91,10 @@ export default function CertificateIssuancePage() {
     const handleInputChange = (value: string) => {
         setQuery(value);
         setIsOpen(true);
-        if (value === '') setSelectedEnrollmentId('');
+        if (value === '') {
+            setSelectedEnrollmentId('');
+            setSelectedEnrollment(null);
+        }
     };
 
     const [progress, setProgress] = useState(0);
@@ -129,10 +110,10 @@ export default function CertificateIssuancePage() {
         setProgressMessage('Initiating...');
 
         try {
-            const enrollment = enrollments.find(e => e.id.toString() === selectedEnrollmentId);
+            const enrollment = selectedEnrollment;
             if (!enrollment) throw new Error('Enrollment not found');
 
-            if (!enrollment.course.certificateTemplate) {
+            if (!enrollment.hasTemplate) {
                 throw new Error('This course does not have a Certificate Template assigned. Please assign one in the Courses collection first.');
             }
 
@@ -174,6 +155,7 @@ export default function CertificateIssuancePage() {
                         if (data.success) {
                             setMessage({ type: 'success', text: 'Certificate successfully issued!' });
                             setSelectedEnrollmentId('');
+                            setSelectedEnrollment(null);
                             setQuery('');
                             fetchEnrollments();
                         }
@@ -197,8 +179,6 @@ export default function CertificateIssuancePage() {
             }, 3000);
         }
     };
-
-    const selectedEnrollment = enrollments.find(e => e.id.toString() === selectedEnrollmentId);
 
     return (
         <div className="w-full min-h-screen bg-gray-50 dark:bg-[var(--background)] py-6 md:py-8 space-y-8">
@@ -289,9 +269,8 @@ export default function CertificateIssuancePage() {
                                                     </div>
                                                 ) : (
                                                     enrollments.map((enc) => {
-                                                        const studentUser = typeof enc.student.user === 'object' ? enc.student.user : null;
-                                                        const studentName = studentUser ? `${studentUser.firstName} ${studentUser.lastName}` : `Student #${enc.student.id}`;
-                                                        const hasTemplate = !!enc.course.certificateTemplate;
+                                                        const studentName = enc.studentName;
+                                                        const hasTemplate = enc.hasTemplate;
                                                         const isSelected = selectedEnrollmentId === enc.id.toString();
 
                                                         return (
@@ -304,7 +283,7 @@ export default function CertificateIssuancePage() {
                                                             >
                                                                 <div className="flex flex-col">
                                                                     <span className={`block truncate ${isSelected ? 'font-semibold' : 'font-normal'}`}>
-                                                                        {studentName} — {enc.course.title || 'Unknown Course'}
+                                                                        {studentName} — {enc.courseTitle || 'Unknown Course'}
                                                                     </span>
                                                                     {!hasTemplate && (
                                                                         <span className="text-xs text-red-400 dark:text-red-500 italic mt-0.5">
@@ -373,15 +352,12 @@ export default function CertificateIssuancePage() {
                                 <div>
                                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Student</label>
                                     <div className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                        {(() => {
-                                            const u = typeof selectedEnrollment.student.user === 'object' ? selectedEnrollment.student.user : null;
-                                            return u ? `${u.firstName} ${u.lastName}` : `#${selectedEnrollment.student.id}`;
-                                        })()}
+                                        {selectedEnrollment.studentName}
                                     </div>
                                 </div>
                                 <div>
                                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Course</label>
-                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">{selectedEnrollment.course.title}</div>
+                                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">{selectedEnrollment.courseTitle}</div>
                                 </div>
                                 <div>
                                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Completion Date</label>

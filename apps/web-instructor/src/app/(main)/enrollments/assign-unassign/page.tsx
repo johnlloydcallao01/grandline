@@ -2,17 +2,274 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import {
     getEnrollments,
     searchCourses,
     searchTrainees,
     createEnrollment,
-    updateEnrollmentStatus,
+    updateEnrollment,
     unassignEnrollment,
 } from './actions';
-import type { EnrollmentDoc, CourseOption, TraineeOption, EnrollmentCounts } from '@encreasl/cms-types';
+import type {
+    CreateEnrollmentInput,
+    EnrollmentDoc,
+    CourseOption,
+    TraineeOption,
+    EnrollmentCounts,
+} from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 10;
+
+const STATUS_OPTIONS = ['active', 'pending', 'suspended', 'dropped'] as const;
+const ENROLLMENT_TYPES = [
+    ['free', 'Free'],
+    ['paid', 'Paid'],
+    ['scholarship', 'Scholarship'],
+    ['trial', 'Trial'],
+    ['corporate', 'Corporate'],
+] as const;
+const PAYMENT_STATUSES = [
+    ['completed', 'Completed'],
+    ['pending', 'Pending'],
+    ['failed', 'Failed'],
+    ['refunded', 'Refunded'],
+    ['not_required', 'Not Required'],
+] as const;
+
+type EnrollmentFormState = {
+    enrolledAt: string;
+    enrollmentType: string;
+    status: string;
+    paymentStatus: string;
+    accessExpiresAt: string;
+    amountPaid: string;
+    couponCode: string;
+    couponDiscountAmount: string;
+    listPriceSnapshot: string;
+    finalPriceSnapshot: string;
+    pricingBreakdown: string;
+    progressPercentage: string;
+    lastAccessedAt: string;
+    completedAt: string;
+    currentGrade: string;
+    finalGrade: string;
+    finalEvaluation: string;
+    certificateIssued: boolean;
+    notes: string;
+    metadata: string;
+};
+
+function toDateTimeLocal(value?: string | null): string {
+    if (!value) return '';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 16);
+}
+
+function initialEnrollmentForm(): EnrollmentFormState {
+    return {
+        enrolledAt: toDateTimeLocal(new Date().toISOString()),
+        enrollmentType: 'free',
+        status: 'active',
+        paymentStatus: 'not_required',
+        accessExpiresAt: '',
+        amountPaid: '',
+        couponCode: '',
+        couponDiscountAmount: '0',
+        listPriceSnapshot: '',
+        finalPriceSnapshot: '',
+        pricingBreakdown: '',
+        progressPercentage: '0',
+        lastAccessedAt: '',
+        completedAt: '',
+        currentGrade: '',
+        finalGrade: '',
+        finalEvaluation: '',
+        certificateIssued: false,
+        notes: '',
+        metadata: '',
+    };
+}
+
+function enrollmentFormFromDoc(doc: EnrollmentDoc): EnrollmentFormState {
+    return {
+        ...initialEnrollmentForm(),
+        enrolledAt: toDateTimeLocal(doc.enrolledAt),
+        enrollmentType: doc.enrollmentType || 'free',
+        status: STATUS_OPTIONS.includes(doc.status as (typeof STATUS_OPTIONS)[number]) ? doc.status : 'active',
+        paymentStatus: doc.paymentStatus || 'not_required',
+        accessExpiresAt: toDateTimeLocal(doc.accessExpiresAt),
+        amountPaid: doc.amountPaid == null ? '' : String(doc.amountPaid),
+        couponCode: doc.couponCode || '',
+        couponDiscountAmount: doc.couponDiscountAmount == null ? '' : String(doc.couponDiscountAmount),
+        listPriceSnapshot: doc.listPriceSnapshot == null ? '' : String(doc.listPriceSnapshot),
+        finalPriceSnapshot: doc.finalPriceSnapshot == null ? '' : String(doc.finalPriceSnapshot),
+        pricingBreakdown: doc.pricingBreakdown ? JSON.stringify(doc.pricingBreakdown, null, 2) : '',
+        progressPercentage: doc.progressPercentage == null ? '0' : String(doc.progressPercentage),
+        lastAccessedAt: toDateTimeLocal(doc.lastAccessedAt),
+        completedAt: toDateTimeLocal(doc.completedAt),
+        currentGrade: doc.currentGrade == null ? '' : String(doc.currentGrade),
+        finalGrade: doc.finalGrade == null ? '' : String(doc.finalGrade),
+        finalEvaluation: doc.finalEvaluation || '',
+        certificateIssued: Boolean(doc.certificateIssued),
+        notes: doc.notes || '',
+        metadata: doc.metadata ? JSON.stringify(doc.metadata, null, 2) : '',
+    };
+}
+
+function parseOptionalNumber(value: string, field: string, allowNull: boolean): number | null | undefined {
+    if (!value.trim()) return allowNull ? null : undefined;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) throw new Error(`${field} must be a valid number`);
+    return parsed;
+}
+
+function parseOptionalJson(value: string, field: string, allowNull: boolean): unknown {
+    if (!value.trim()) return allowNull ? null : undefined;
+    try {
+        return JSON.parse(value);
+    } catch {
+        throw new Error(`${field} must contain valid JSON`);
+    }
+}
+
+function buildEnrollmentInput(form: EnrollmentFormState, allowNulls = false): Omit<CreateEnrollmentInput, 'student' | 'course'> {
+    const toDate = (value: string) => (value ? new Date(value).toISOString() : allowNulls ? null : undefined);
+    return {
+        enrolledAt: toDate(form.enrolledAt) || undefined,
+        enrollmentType: form.enrollmentType as CreateEnrollmentInput['enrollmentType'],
+        status: form.status as CreateEnrollmentInput['status'],
+        paymentStatus: form.paymentStatus as CreateEnrollmentInput['paymentStatus'],
+        accessExpiresAt: toDate(form.accessExpiresAt),
+        amountPaid: parseOptionalNumber(form.amountPaid, 'Amount paid', allowNulls),
+        couponCode: form.couponCode.trim() || (allowNulls ? null : undefined),
+        couponDiscountAmount: parseOptionalNumber(form.couponDiscountAmount, 'Coupon discount amount', allowNulls),
+        listPriceSnapshot: parseOptionalNumber(form.listPriceSnapshot, 'List price snapshot', allowNulls),
+        finalPriceSnapshot: parseOptionalNumber(form.finalPriceSnapshot, 'Final price snapshot', allowNulls),
+        pricingBreakdown: parseOptionalJson(form.pricingBreakdown, 'Pricing breakdown', allowNulls),
+        progressPercentage: parseOptionalNumber(form.progressPercentage, 'Progress percentage', allowNulls),
+        lastAccessedAt: toDate(form.lastAccessedAt),
+        completedAt: toDate(form.completedAt),
+        currentGrade: parseOptionalNumber(form.currentGrade, 'Current grade', allowNulls),
+        finalGrade: parseOptionalNumber(form.finalGrade, 'Final grade', allowNulls),
+        finalEvaluation: (form.finalEvaluation || (allowNulls ? null : undefined)) as CreateEnrollmentInput['finalEvaluation'],
+        certificateIssued: form.certificateIssued,
+        notes: form.notes || (allowNulls ? null : undefined),
+        metadata: parseOptionalJson(form.metadata, 'Metadata', allowNulls),
+    };
+}
+
+const FORM_INPUT = 'w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]';
+const FORM_SELECT = `${FORM_INPUT} appearance-none pr-9`;
+
+function EnrollmentDetailFields({
+    form,
+    setForm,
+}: {
+    form: EnrollmentFormState;
+    setForm: React.Dispatch<React.SetStateAction<EnrollmentFormState>>;
+}) {
+    const setField = <K extends keyof EnrollmentFormState>(field: K, value: EnrollmentFormState[K]) => {
+        setForm((current) => ({ ...current, [field]: value }));
+    };
+
+    return (
+        <>
+            <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enrollment Details</h4>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enrolled at
+                        <input type="datetime-local" value={form.enrolledAt} onChange={(e) => setField('enrolledAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enrollment type
+                        <select value={form.enrollmentType} onChange={(e) => setField('enrollmentType', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+                            {ENROLLMENT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status
+                        <select value={form.status} onChange={(e) => setField('status', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+                            {STATUS_OPTIONS.map((value) => <option key={value} value={value}>{value.charAt(0).toUpperCase() + value.slice(1)}</option>)}
+                        </select>
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment status
+                        <select value={form.paymentStatus} onChange={(e) => setField('paymentStatus', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+                            {PAYMENT_STATUSES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Access expires at
+                        <input type="datetime-local" value={form.accessExpiresAt} onChange={(e) => setField('accessExpiresAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                </div>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payment & Pricing</h4>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount paid
+                        <input type="number" min="0" step="0.01" value={form.amountPaid} onChange={(e) => setField('amountPaid', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Coupon discount amount
+                        <input type="number" min="0" step="0.01" value={form.couponDiscountAmount} onChange={(e) => setField('couponDiscountAmount', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">List price snapshot
+                        <input type="number" min="0" step="0.01" value={form.listPriceSnapshot} onChange={(e) => setField('listPriceSnapshot', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final price snapshot
+                        <input type="number" min="0" step="0.01" value={form.finalPriceSnapshot} onChange={(e) => setField('finalPriceSnapshot', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="0.00" />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-2">Coupon code snapshot
+                        <input type="text" value={form.couponCode} onChange={(e) => setField('couponCode', e.target.value)} className={`${FORM_INPUT} mt-1.5`} placeholder="e.g. SCHOLARSHIP2026" />
+                    </label>
+                </div>
+                <label className="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-300">Pricing breakdown JSON
+                    <textarea rows={4} value={form.pricingBreakdown} onChange={(e) => setField('pricingBreakdown', e.target.value)} className={`${FORM_INPUT} mt-1.5 font-mono text-xs`} placeholder={'{"currency":"PHP","originalPrice":0}'} />
+                </label>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Progress & Grading</h4>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Progress percentage
+                        <input type="number" min="0" max="100" step="0.01" value={form.progressPercentage} onChange={(e) => setField('progressPercentage', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last accessed at
+                        <input type="datetime-local" value={form.lastAccessedAt} onChange={(e) => setField('lastAccessedAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Completed at
+                        <input type="datetime-local" value={form.completedAt} onChange={(e) => setField('completedAt', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current grade
+                        <input type="number" min="0" max="100" step="0.01" value={form.currentGrade} onChange={(e) => setField('currentGrade', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final grade
+                        <input type="number" min="0" max="100" step="0.01" value={form.finalGrade} onChange={(e) => setField('finalGrade', e.target.value)} className={`${FORM_INPUT} mt-1.5`} />
+                    </label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Final evaluation
+                        <select value={form.finalEvaluation} onChange={(e) => setField('finalEvaluation', e.target.value)} className={`${FORM_SELECT} mt-1.5`}>
+                            <option value="">Not evaluated</option>
+                            <option value="passed">Passed</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </label>
+                </div>
+                <label className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <input type="checkbox" checked={form.certificateIssued} onChange={(e) => setField('certificateIssued', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    Certificate issued
+                </label>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-[var(--card-border)] pt-5">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notes & Metadata</h4>
+                <label className="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes
+                    <textarea rows={3} value={form.notes} onChange={(e) => setField('notes', e.target.value)} className={`${FORM_INPUT} mt-1.5 resize-none`} placeholder="Optional notes..." />
+                </label>
+                <label className="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-300">Metadata JSON
+                    <textarea rows={4} value={form.metadata} onChange={(e) => setField('metadata', e.target.value)} className={`${FORM_INPUT} mt-1.5 font-mono text-xs`} placeholder={'{"source":"instructor"}'} />
+                </label>
+            </div>
+        </>
+    );
+}
 
 // Inline SVG icon components (matching web-instructor pattern)
 const SearchIcon = ({ className }: { className?: string }) => (
@@ -23,9 +280,6 @@ const PlusIcon = ({ className }: { className?: string }) => (
 );
 const Loader2Icon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
-);
-const ChevronDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
 );
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18" /><path d="M6 6l12 12" /></svg>
@@ -56,6 +310,9 @@ const DownloadIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 const EditIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+);
+const EyeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
 );
 
 type SortKey = 'student' | 'course' | 'status' | 'enrolledAt' | 'progressPercentage';
@@ -140,8 +397,6 @@ function downloadCSV(docs: EnrollmentDoc[]) {
     URL.revokeObjectURL(url);
 }
 
-const EDIT_STATUSES = ['active', 'pending', 'suspended', 'dropped'];
-
 const STATUS_CHIPS = ['active', 'pending', 'completed', 'suspended', 'dropped', 'expired'] as const;
 
 export default function AssignUnassignPage() {
@@ -170,7 +425,7 @@ export default function AssignUnassignPage() {
     const [courseSearch, setCourseSearch] = useState('');
     const [courseResults, setCourseResults] = useState<CourseOption[]>([]);
     const [isSearchingCourses, setIsSearchingCourses] = useState(false);
-    const [assignNotes, setAssignNotes] = useState('');
+    const [assignForm, setAssignForm] = useState<EnrollmentFormState>(initialEnrollmentForm);
     const [assignError, setAssignError] = useState<string | null>(null);
     const [isAssignSubmitting, setIsAssignSubmitting] = useState(false);
 
@@ -181,21 +436,29 @@ export default function AssignUnassignPage() {
 
     // Edit enrollment state
     const [editTarget, setEditTarget] = useState<EnrollmentDoc | null>(null);
-    const [editStatus, setEditStatus] = useState('');
+    const [editForm, setEditForm] = useState<EnrollmentFormState>(initialEnrollmentForm);
     const [isEditSubmitting, setIsEditSubmitting] = useState(false);
     const [editError, setEditError] = useState<string | null>(null);
 
     const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const courseSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const fetchEnrollments = useCallback(async () => {
+    const fetchEnrollments = useCallback(async ({
+        nextSearch,
+        nextStatus,
+        nextPage,
+    }: {
+        nextSearch: string;
+        nextStatus: string;
+        nextPage: number;
+    }) => {
         setIsLoading(true);
         setError(null);
         try {
             const result = await getEnrollments({
-                search: search || undefined,
-                status: statusFilter || undefined,
-                page: currentPage,
+                search: nextSearch || undefined,
+                status: nextStatus || undefined,
+                page: nextPage,
                 limit: ITEMS_PER_PAGE,
             });
             setEnrollments(result.docs || []);
@@ -207,11 +470,23 @@ export default function AssignUnassignPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [search, statusFilter, currentPage]);
+    }, []);
+
+    const handleRefresh = async () => {
+        await fetchEnrollments({
+            nextSearch: search,
+            nextStatus: statusFilter,
+            nextPage: currentPage,
+        });
+    };
 
     useEffect(() => {
-        fetchEnrollments();
-    }, [fetchEnrollments]);
+        void fetchEnrollments({
+            nextSearch: search,
+            nextStatus: statusFilter,
+            nextPage: currentPage,
+        });
+    }, [currentPage, fetchEnrollments, search, statusFilter]);
 
     useEffect(() => {
         if (isAssignOpen) {
@@ -297,7 +572,7 @@ export default function AssignUnassignPage() {
         setSelectedCourse(null);
         setCourseSearch('');
         setCourseResults([]);
-        setAssignNotes('');
+        setAssignForm(initialEnrollmentForm());
         setTraineeSearch('');
         setTraineeResults([]);
         setAssignError(null);
@@ -323,15 +598,23 @@ export default function AssignUnassignPage() {
             return;
         }
 
+        let enrollmentInput: Omit<CreateEnrollmentInput, 'student' | 'course'>;
+        try {
+            enrollmentInput = buildEnrollmentInput(assignForm);
+        } catch (error: any) {
+            setAssignError(error.message);
+            return;
+        }
+
         setIsAssignSubmitting(true);
         try {
             await createEnrollment({
                 student: selectedTrainee.id,
                 course: selectedCourse.id,
-                notes: assignNotes || undefined,
+                ...enrollmentInput,
             });
             closeAssign();
-            fetchEnrollments();
+            await handleRefresh();
         } catch (e: any) {
             setAssignError(e.message || 'Failed to create enrollment');
         } finally {
@@ -345,10 +628,8 @@ export default function AssignUnassignPage() {
         setIsUnassignSubmitting(true);
         try {
             await unassignEnrollment(unassignTarget.id);
-            setEnrollments((prev) =>
-                prev.map((e) => (e.id === unassignTarget.id ? { ...e, status: 'dropped' } : e))
-            );
             setUnassignTarget(null);
+            await handleRefresh();
         } catch (e: any) {
             setUnassignError(e.message || 'Failed to unassign enrollment');
         } finally {
@@ -358,20 +639,27 @@ export default function AssignUnassignPage() {
 
     const openEdit = (enrollment: EnrollmentDoc) => {
         setEditTarget(enrollment);
-        setEditStatus(enrollment.status);
+        setEditForm(enrollmentFormFromDoc(enrollment));
         setEditError(null);
     };
 
     const handleEditSave = async () => {
         if (!editTarget) return;
         setEditError(null);
+
+        let enrollmentInput: Omit<CreateEnrollmentInput, 'student' | 'course'>;
+        try {
+            enrollmentInput = buildEnrollmentInput(editForm, true);
+        } catch (error: any) {
+            setEditError(error.message);
+            return;
+        }
+
         setIsEditSubmitting(true);
         try {
-            await updateEnrollmentStatus(editTarget.id, editStatus);
-            setEnrollments((prev) =>
-                prev.map((e) => (e.id === editTarget.id ? { ...e, status: editStatus } : e))
-            );
+            await updateEnrollment(editTarget.id, enrollmentInput);
             setEditTarget(null);
+            await handleRefresh();
         } catch (e: any) {
             setEditError(e.message || 'Failed to update enrollment');
         } finally {
@@ -591,7 +879,7 @@ export default function AssignUnassignPage() {
                 <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
                     <AlertTriangleIcon className="h-4 w-4 shrink-0" />
                     {error}
-                    <button onClick={fetchEnrollments} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Retry</button>
+                    <button onClick={handleRefresh} className="ml-auto text-red-700 dark:text-red-400 underline hover:no-underline">Retry</button>
                 </div>
             )}
 
@@ -662,7 +950,9 @@ export default function AssignUnassignPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {sortedEnrollments.map((enrollment) => {
-                                    const pct = enrollment.progressPercentage || 0;
+                                    const pct = typeof enrollment.progressPercentage === 'number'
+                                        ? enrollment.progressPercentage
+                                        : 0;
                                     const typeTag = getEnrollmentTypeTag(enrollment.enrollmentType);
                                     return (
                                         <tr
@@ -701,9 +991,18 @@ export default function AssignUnassignPage() {
                                                     <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">{pct}%</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    <button
+                                             <td className="px-4 py-3 text-right">
+                                                 <div className="flex items-center justify-end gap-1.5">
+                                                     <Link
+                                                         href={`/enrollments/assign-unassign/${enrollment.id}` as any}
+                                                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                                         title="View enrollment"
+                                                         aria-label="View enrollment"
+                                                     >
+                                                         <EyeIcon className="h-4 w-4" />
+                                                         View
+                                                     </Link>
+                                                     <button
                                                         onClick={() => openEdit(enrollment)}
                                                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                                         title="Edit enrollment"
@@ -907,10 +1206,7 @@ export default function AssignUnassignPage() {
                                     )}
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notes</label>
-                                    <textarea value={assignNotes} onChange={(e) => setAssignNotes(e.target.value)} rows={3} placeholder="Optional notes..." className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none resize-none bg-white dark:bg-[var(--card-background)]" />
-                                </div>
+                                <EnrollmentDetailFields form={assignForm} setForm={setAssignForm} />
 
                                 <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
                                     <button type="button" onClick={closeAssign} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
@@ -947,22 +1243,6 @@ export default function AssignUnassignPage() {
                                     </div>
                                 )}
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
-                                    <div className="relative">
-                                        <select
-                                            value={editStatus}
-                                            onChange={(e) => setEditStatus(e.target.value)}
-                                            className="w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400/20 outline-none bg-white dark:bg-[var(--card-background)]"
-                                        >
-                                            {EDIT_STATUSES.map((s) => (
-                                                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                                    </div>
-                                </div>
-
                                 <div className="rounded-lg border border-gray-200 dark:border-[var(--card-border)] bg-gray-50 dark:bg-gray-800/50 p-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                                     <div className="flex justify-between"><span>Student</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentName(editTarget)}</span></div>
                                     <div className="flex justify-between"><span>Email</span><span className="font-medium text-gray-700 dark:text-gray-200">{getStudentEmail(editTarget)}</span></div>
@@ -970,9 +1250,11 @@ export default function AssignUnassignPage() {
                                     <div className="flex justify-between"><span>Enrolled</span><span className="font-medium text-gray-700 dark:text-gray-200">{formatDate(editTarget.enrolledAt)}</span></div>
                                 </div>
 
+                                <EnrollmentDetailFields form={editForm} setForm={setEditForm} />
+
                                 <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[var(--card-border)]">
                                     <button type="button" onClick={() => setEditTarget(null)} className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-[var(--card-background)]">Cancel</button>
-                                    <button type="button" onClick={handleEditSave} disabled={isEditSubmitting || editStatus === editTarget.status} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                                    <button type="button" onClick={handleEditSave} disabled={isEditSubmitting} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                                         {isEditSubmitting ? (<><Loader2Icon className="h-4 w-4 animate-spin" /> Saving...</>) : (<>Save Changes</>)}
                                     </button>
                                 </div>

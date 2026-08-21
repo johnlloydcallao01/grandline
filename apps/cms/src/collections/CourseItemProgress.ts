@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { recalculateEnrollmentProgress } from '../utils/progressCalculation'
 
 export const CourseItemProgress: CollectionConfig = {
   slug: 'course-item-progress',
@@ -169,4 +170,18 @@ export const CourseItemProgress: CollectionConfig = {
       fields: ['enrollment', 'isCompleted'],
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        const enrollmentId = typeof doc.enrollment === 'object' ? doc.enrollment?.id : doc.enrollment
+        if (enrollmentId) {
+          try {
+            await recalculateEnrollmentProgress(req.payload, enrollmentId)
+          } catch (err) {
+            console.error('[CourseItemProgress Hook] Progress recalculation error:', err)
+          }
+        }
+      },
+    ],
+  },
 }

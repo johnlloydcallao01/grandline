@@ -6,7 +6,8 @@ import {
     Search, FileCheck, CheckCircle, AlertCircle,
     Calendar, User, XCircle, Clock, Link as LinkIcon
 } from '@/components/ui/IconWrapper';
-import { verifyCertificate, type VerificationResult } from './actions';
+import { verifyCertificate } from './actions';
+import type { CertificateVerificationResult } from '@encreasl/cms-types';
 import Image from 'next/image';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
@@ -20,7 +21,7 @@ export default function CertificateVerificationPage() {
     const codeFromQuery = searchParams.get('code');
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [result, setResult] = useState<VerificationResult | null>(null);
+    const [result, setResult] = useState<CertificateVerificationResult | null>(null);
     const [loading, setLoading] = useState(false);
 
     // Auto-verify if code is in URL (for QR code links)

@@ -7,11 +7,12 @@ import {
     CheckCircle, ArrowUpRight
 } from '@/components/ui/IconWrapper';
 import {
-    getCoursesWithStats, type CourseWithStats
+    getCoursesWithStats
 } from './actions';
+import type { GradebookCourseWithStats } from '@encreasl/cms-types';
 
 export default function GradebookPage() {
-    const [courses, setCourses] = useState<CourseWithStats[]>([]);
+    const [courses, setCourses] = useState<GradebookCourseWithStats[]>([]);
     const [totalCourses, setTotalCourses] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

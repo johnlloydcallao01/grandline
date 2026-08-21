@@ -1,6 +1,7 @@
 import { APIError, type CollectionConfig } from 'payload'
 import { lmsAccess } from '../access'
 import { createNotificationFanout } from '../utils/notificationFanout'
+import { getCourseInstructorUserIds, getTraineeUserId, getUserDisplayName } from '../utils/notificationTargets'
 import { AccountingLmsBridgeSyncService } from '../accounting/services/enrollment-billing/AccountingLmsBridgeSyncService'
 import { recalculateEnrollmentGrade, determineFinalEvaluation } from '../utils/gradeCalculation'
 
@@ -518,6 +519,58 @@ export const CourseEnrollments: CollectionConfig = {
             })
 
             console.log(`[CourseEnrollments Hook] Notification created, broadcast, and push fan-out attempted for user ${userId}, course ${course.title}`)
+
+            const instructorUserIds = await getCourseInstructorUserIds(payload, courseId)
+            if (instructorUserIds.length > 0) {
+              const traineeUser = await getTraineeUserId(payload, studentId)
+              const traineeName = traineeUser ? await getUserDisplayName(payload, traineeUser) : 'A trainee'
+              const instructorTitle = isPendingNotification
+                ? `📝 New Enrollment Request: ${traineeName}`
+                : `🎓 New Enrollment: ${traineeName}`
+              const instructorBody = isPendingNotification
+                ? `${traineeName} requested enrollment in ${course.title}. Review and approve the request.`
+                : `${traineeName} enrolled in ${course.title}.`
+
+              await Promise.all(
+                instructorUserIds.map((instructorUserId) =>
+                  createNotificationFanout({
+                    payload,
+                    userId: instructorUserId,
+                    templateCode: isPendingNotification
+                      ? 'COURSE_ENROLLMENT_REQUEST_INSTRUCTOR'
+                      : 'COURSE_ENROLLED_INSTRUCTOR',
+                    category: 'learning',
+                    title: instructorTitle,
+                    body: instructorBody,
+                    link: '/enrollments/roster',
+                    metadata: {
+                      enrollmentId: doc.id,
+                      courseId: course.id,
+                      courseName: course.title,
+                      studentName: traineeName,
+                      enrollmentType: doc.enrollmentType,
+                      enrollmentStatus: currentStatus,
+                    },
+                    sourceType: 'enrollment',
+                    sourceId: String(doc.id),
+                    push: {
+                      title: instructorTitle,
+                      body: instructorBody,
+                      url: '/enrollments/roster',
+                      data: {
+                        enrollmentId: doc.id,
+                        courseId: course.id,
+                        courseName: course.title,
+                        studentName: traineeName,
+                        enrollmentStatus: currentStatus,
+                      },
+                    },
+                  }),
+                ),
+              )
+
+              console.log(`[CourseEnrollments Hook] Instructor fan-out attempted for course ${course.title}, users [${instructorUserIds.join(', ')}]`)
+            }
           } catch (notifyError) {
             console.error('[CourseEnrollments Hook] Failed to create notification:', notifyError)
           }

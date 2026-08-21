@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { Loader2, Save, GraduationCap, AlertTriangle } from '@/components/ui/IconWrapper';
 import {
     getEnrollmentById, updateEnrollment,
-    type EnrollmentDoc
 } from '../../../actions';
+import type { GradebookEnrollmentDoc } from '@encreasl/cms-types';
 import { getStudentName, getCourseTitle } from '../../../utils';
 
 export default function EditEnrollmentGradePage() {
@@ -15,7 +15,7 @@ export default function EditEnrollmentGradePage() {
     const courseId = params.courseId as string;
     const enrollmentId = params.enrollmentId as string;
 
-    const [enrollment, setEnrollment] = useState<EnrollmentDoc | null>(null);
+    const [enrollment, setEnrollment] = useState<GradebookEnrollmentDoc | null>(null);
     const [currentGrade, setCurrentGrade] = useState<string>('');
     const [finalGrade, setFinalGrade] = useState<string>('');
     const [finalEvaluation, setFinalEvaluation] = useState<string>('');

@@ -1,14 +1,21 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
     Activity, UserCheck, CheckCircle, TrendingUp,
-    FileText, BookOpen, Clock, X
+    FileText, BookOpen, Clock, X, Search, ArrowLeft
 } from '@/components/ui/IconWrapper';
 import {
-    getRecentActivity, type ActivityEvent
+    getRecentActivity,
 } from '../actions';
+import type {
+    GradebookActivityEvent,
+    GradebookActivityCourseOption,
+    GradebookActivityStats,
+} from '@encreasl/cms-types';
+
+const ITEMS_PER_PAGE = 20;
 
 const TYPE_CONFIG: Record<string, { icon: React.ComponentType<any>; label: string; color: string; bgColor: string; dotColor: string }> = {
     enrollment_created: {
@@ -74,45 +81,75 @@ function formatDateTime(dateStr: string): string {
 }
 
 export default function RecentActivityPage() {
-    const [events, setEvents] = useState<ActivityEvent[]>([]);
-    const [total, setTotal] = useState(0);
+    const [events, setEvents] = useState<GradebookActivityEvent[]>([]);
+    const [stats, setStats] = useState<GradebookActivityStats | null>(null);
+    const [courses, setCourses] = useState<GradebookActivityCourseOption[]>([]);
+    const [totalDocs, setTotalDocs] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filterType, setFilterType] = useState<string>('');
+    const [filterType, setFilterType] = useState('');
+    const [filterCourse, setFilterCourse] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
     const loadActivity = useCallback(async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await getRecentActivity(100);
-            setEvents(data.events);
-            setTotal(data.total);
+            const data = await getRecentActivity({
+                search: debouncedSearch || undefined,
+                type: filterType || undefined,
+                courseId: filterCourse || undefined,
+                page: currentPage,
+                limit: ITEMS_PER_PAGE,
+            });
+            setEvents(data.events || []);
+            setStats(data.stats);
+            setCourses(data.courses || []);
+            setTotalDocs(data.totalDocs || 0);
+            setTotalPages(data.totalPages || 0);
         } catch (err) {
             console.error(err);
             setError('Failed to load activity');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [debouncedSearch, filterType, filterCourse, currentPage]);
 
     useEffect(() => { loadActivity(); }, [loadActivity]);
 
-    const filtered = filterType ? events.filter(e => e.type === filterType) : events;
+    useEffect(() => {
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setCurrentPage(1);
+        }, 400);
+        return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+    }, [searchTerm]);
 
-    // Group by date for timeline
-    const groupedByDate = new Map<string, ActivityEvent[]>();
-    for (const e of filtered) {
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterType, filterCourse]);
+
+    const metricCards = [
+        { label: 'Total Events', value: stats?.totalEvents ?? 0, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', icon: Activity },
+        { label: 'Assignments Graded', value: stats?.gradedAssignments ?? 0, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/30', icon: BookOpen },
+        { label: 'Assessments Graded', value: stats?.gradedAssessments ?? 0, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30', icon: FileText },
+        { label: 'Completions', value: stats?.completions ?? 0, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30', icon: CheckCircle },
+    ];
+
+    // Group the *current page* events by date for the timeline.
+    const groupedByDate = new Map<string, GradebookActivityEvent[]>();
+    for (const e of events) {
         const dateKey = new Date(e.timestamp).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
         });
         if (!groupedByDate.has(dateKey)) groupedByDate.set(dateKey, []);
         groupedByDate.get(dateKey)!.push(e);
     }
-
-    const typeCounts = events.reduce((acc, e) => {
-        acc[e.type] = (acc[e.type] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
 
     if (error) {
         return (
@@ -130,39 +167,89 @@ export default function RecentActivityPage() {
         );
     }
 
+    const hasFilters = Boolean(filterType || filterCourse || debouncedSearch);
+
     return (
         <div className="py-6 space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4">
                     <Link href="/gradebook" className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+                        <ArrowLeft className="h-5 w-5" />
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Recent Activity</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Track grading events, enrollments, and course completions</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">Grading events, enrollments, and completions across your courses</p>
                     </div>
                 </div>
             </div>
 
-            {/* Filter pills + summary bar */}
-            <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4">
+            {/* Metric Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {isLoading || !stats ? (
+                    <>
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm animate-pulse">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800"><div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded" /></div>
+                                    <div><div className="h-7 w-12 bg-gray-100 dark:bg-gray-800 rounded mb-1" /><div className="h-3 w-20 bg-gray-100 dark:bg-gray-800 rounded" /></div>
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    metricCards.map((card) => (
+                        <div key={card.label} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className={`p-2.5 rounded-lg ${card.bg}`}>
+                                    <card.icon className={`h-5 w-5 ${card.color}`} />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{card.value}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{card.label}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <input
+                            type="text"
+                            placeholder="Search by student, course, or description..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-[var(--card-background)]"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <select
+                        value={filterCourse}
+                        onChange={(e) => setFilterCourse(e.target.value)}
+                        className="w-full sm:w-72 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-[var(--card-background)]"
+                    >
+                        <option value="">All Courses</option>
+                        {courses.map((course) => (
+                            <option key={course.id} value={course.id}>{course.title}</option>
+                        ))}
+                    </select>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <button onClick={() => setFilterType('')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${!filterType ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-                        All <span className="ml-1 opacity-70">({total})</span>
+                        All <span className="ml-1 opacity-70">({stats?.totalEvents ?? 0})</span>
                     </button>
-                    {Object.entries(TYPE_CONFIG).map(([key, cfg]) => {
-                        const count = typeCounts[key] || 0;
-                        if (count === 0) return null;
-                        return (
-                            <button key={key} onClick={() => setFilterType(key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterType === key ? `${cfg.bgColor} ${cfg.color}` : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-                                <cfg.icon className="h-3 w-3 inline mr-1" />
-                                {cfg.label} <span className="ml-0.5 opacity-70">({count})</span>
-                            </button>
-                        );
-                    })}
+                    {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+                        <button key={key} onClick={() => setFilterType(filterType === key ? '' : key)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterType === key ? `${cfg.bgColor} ${cfg.color}` : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                            <cfg.icon className="h-3 w-3 inline mr-1" />
+                            {cfg.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -191,20 +278,22 @@ export default function RecentActivityPage() {
                             </div>
                         ))}
                     </div>
-                ) : filtered.length === 0 ? (
+                ) : events.length === 0 ? (
                     <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-12 text-center">
                         <div className="h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Activity className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No activity yet</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No activity found</h3>
                         <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                            {filterType ? 'No events of this type yet.' : 'Gradebook activity will appear here as students submit work and receive grades.'}
+                            {hasFilters
+                                ? 'No events match your current filters. Try adjusting the search or clearing a filter.'
+                                : 'Gradebook activity will appear here as students enroll, submit work, and receive grades.'}
                         </p>
-                        {filterType && (
-                            <button onClick={() => setFilterType('')}
+                        {hasFilters && (
+                            <button onClick={() => { setFilterType(''); setFilterCourse(''); setSearchTerm(''); setDebouncedSearch(''); setCurrentPage(1); }}
                                 className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-sm font-medium">
                                 <X className="h-4 w-4 inline mr-1" />
-                                Clear Filter
+                                Clear Filters
                             </button>
                         )}
                     </div>
@@ -228,7 +317,6 @@ export default function RecentActivityPage() {
 
                                     return (
                                         <div key={event.id} className="flex gap-4 group">
-                                            {/* Timeline dot + line */}
                                             <div className="flex flex-col items-center shrink-0">
                                                 <div className={`h-9 w-9 rounded-full flex items-center justify-center ring-4 ring-white dark:ring-[var(--card-background)] ${cfg?.dotColor || 'bg-gray-300'}`}>
                                                     <Icon className="h-4 w-4 text-white" />
@@ -236,7 +324,6 @@ export default function RecentActivityPage() {
                                                 {!isLast && <div className="flex-1 w-px bg-gray-200 dark:bg-gray-700 min-h-[8px]" />}
                                             </div>
 
-                                            {/* Event card */}
                                             <div className={`flex-1 ${isLast ? '' : 'mb-2'}`}>
                                                 <div className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm p-4 hover:shadow-md transition-shadow">
                                                     <div className="flex items-start justify-between gap-4">
@@ -286,6 +373,42 @@ export default function RecentActivityPage() {
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            {!isLoading && totalPages > 1 && (
+                <div className="flex items-center justify-between bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] shadow-sm px-4 py-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}&ndash;{Math.min(currentPage * ITEMS_PER_PAGE, totalDocs)} of {totalDocs}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage <= 1}
+                            className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]"
+                        >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+                        </button>
+                        {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                            let pageNum: number;
+                            if (totalPages <= 5) pageNum = i + 1;
+                            else if (currentPage <= 3) pageNum = i + 1;
+                            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                            else pageNum = currentPage - 2 + i;
+                            return (
+                                <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-medium ${currentPage === pageNum ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                    {pageNum}
+                                </button>
+                            );
+                        })}
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage >= totalPages}
+                            className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-[var(--card-background)]">
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

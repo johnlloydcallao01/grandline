@@ -162,6 +162,7 @@ export interface CourseListFilters {
   search?: string;
   status?: string;
   tag?: string;
+  category?: string;
   page?: number;
   limit?: number;
   sort?: string;
@@ -251,9 +252,26 @@ export interface EnrollmentDoc {
   status: string;
   enrollmentType: string;
   enrolledAt: string;
+  paymentStatus?: string | null;
+  accessExpiresAt?: string | null;
+  amountPaid?: number | null;
+  coupon?: number | { id: number; code?: string; name?: string } | null;
+  couponCode?: string | null;
+  couponDiscountAmount?: number | null;
+  listPriceSnapshot?: number | null;
+  finalPriceSnapshot?: number | null;
+  pricingBreakdown?: unknown;
   progressPercentage: number;
+  lastAccessedAt?: string | null;
   completedAt?: string | null;
+  currentGrade?: number | null;
+  finalGrade?: number | null;
+  finalEvaluation?: 'passed' | 'failed' | null;
+  certificateIssued?: boolean | null;
+  enrolledBy?: number | { id: number; firstName?: string; lastName?: string; email?: string } | null;
   notes: string;
+  isArchived?: boolean | null;
+  metadata?: unknown;
 }
 
 export interface EnrollmentCounts {
@@ -282,6 +300,21 @@ export interface CourseOption {
   status?: string;
 }
 
+export interface EnrollmentUserOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string;
+}
+
+export interface EnrollmentCouponOption {
+  id: string;
+  code: string;
+  name?: string;
+  status?: string;
+}
+
 export interface TraineeOption {
   id: string;
   user: {
@@ -304,9 +337,85 @@ export interface EnrollmentFilters {
 export interface CreateEnrollmentInput {
   student: string;
   course: string;
-  notes?: string;
-  status?: string;
+  enrolledAt?: string;
+  enrollmentType?: 'free' | 'paid' | 'scholarship' | 'trial' | 'corporate';
+  status?: EnrollmentStatus;
+  paymentStatus?: 'completed' | 'pending' | 'failed' | 'refunded' | 'not_required';
+  accessExpiresAt?: string | null;
+  amountPaid?: number | null;
+  coupon?: string | number | null;
+  couponCode?: string | null;
+  couponDiscountAmount?: number | null;
+  listPriceSnapshot?: number | null;
+  finalPriceSnapshot?: number | null;
+  pricingBreakdown?: unknown;
+  progressPercentage?: number | null;
+  lastAccessedAt?: string | null;
+  completedAt?: string | null;
+  currentGrade?: number | null;
+  finalGrade?: number | null;
+  finalEvaluation?: 'passed' | 'failed' | null;
+  certificateIssued?: boolean;
+  enrolledBy?: string | number | null;
+  notes?: string | null;
+  isArchived?: boolean;
+  metadata?: unknown;
   userId?: string;
+}
+
+export interface EligibleEnrollment {
+  id: number;
+  studentName: string;
+  studentEmail: string;
+  courseId: number;
+  courseTitle: string;
+  hasTemplate: boolean;
+  completedAt?: string | null;
+}
+
+export interface EligibleEnrollmentFilters {
+  search?: string;
+  limit?: number;
+}
+
+export interface EligibleEnrollmentListResult {
+  docs: EligibleEnrollment[];
+  totalDocs: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// ========================================
+// CERTIFICATE VERIFICATION TYPES
+// ========================================
+
+export type CertificateStatus = 'active' | 'revoked' | 'expired';
+
+export interface CertificateVerificationCertificate {
+  id: number;
+  certificateCode: string;
+  status: CertificateStatus;
+  issueDate: string;
+  expiryDate: string | null;
+}
+
+export interface CertificateVerificationTrainee {
+  fullName: string | null;
+  srn: string | null;
+}
+
+export interface CertificateVerificationCourse {
+  title: string | null;
+  code: string | null;
+}
+
+export interface CertificateVerificationResult {
+  verified: boolean;
+  certificate?: CertificateVerificationCertificate;
+  trainee?: CertificateVerificationTrainee;
+  course?: CertificateVerificationCourse;
+  error?: string;
 }
 
 export interface CourseEditData {
@@ -947,6 +1056,454 @@ export interface FeedbackFormOption {
   title: string;
 }
 
+// ========================================
+// FEEDBACK FORM TYPES
+// ========================================
+
+export type TextInputFormat = 'text' | 'email' | 'phone' | 'number' | 'textarea';
+
+export interface TextInputBlock {
+  id?: string;
+  blockType: 'textInput';
+  name: string;
+  label: string;
+  placeholder?: string;
+  format: TextInputFormat;
+  isRequired?: boolean;
+}
+
+export type ChoiceInputUiType = 'radio' | 'dropdown' | 'checkbox_group';
+
+export interface ChoiceOption {
+  id?: string;
+  label: string;
+  value: string;
+}
+
+export interface ChoiceInputBlock {
+  id?: string;
+  blockType: 'choiceInput';
+  name: string;
+  label: string;
+  uiType: ChoiceInputUiType;
+  options: ChoiceOption[];
+  isRequired?: boolean;
+}
+
+export interface MatrixColumn {
+  id?: string;
+  label: string;
+  value: string;
+}
+
+export interface MatrixRow {
+  id?: string;
+  statement: string;
+  value: string;
+}
+
+export interface SurveyMatrixBlock {
+  id?: string;
+  blockType: 'surveyMatrix';
+  name: string;
+  question: string;
+  columns: MatrixColumn[];
+  rows: MatrixRow[];
+  isRequired?: boolean;
+}
+
+export type FormFieldBlock = TextInputBlock | ChoiceInputBlock | SurveyMatrixBlock;
+
+export interface FeedbackFormCourseRef {
+  id: number;
+  title: string;
+}
+
+export interface FeedbackFormDoc {
+  id: number;
+  title: string;
+  description?: string | null;
+  fields: FormFieldBlock[];
+  createdAt: string;
+  updatedAt: string;
+  courses: FeedbackFormCourseRef[];
+}
+
+export interface FeedbackFormsStats {
+  totalForms: number;
+  totalFields: number;
+  avgFieldsPerForm: number;
+}
+
+export interface FeedbackFormsListFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface FeedbackFormsListResult {
+  docs: FeedbackFormDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: FeedbackFormsStats;
+}
+
+export interface FeedbackFormPayload {
+  title: string;
+  description?: string | null;
+  fields: FormFieldBlock[];
+}
+
+// ========================================
+// MEDIA API TYPES
+// ========================================
+
+export type MediaVisibility = 'shared' | 'private';
+
+export type MediaScope = 'all' | 'mine' | 'shared';
+
+export interface MediaDoc {
+  id: number;
+  url: string | null;
+  cloudinaryURL: string | null;
+  thumbnailURL: string | null;
+  filename: string | null;
+  alt: string | null;
+  mimeType: string | null;
+  filesize: number | null;
+  visibility: MediaVisibility;
+  uploadedBy: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaStats {
+  totalFiles: number;
+  images: number;
+  videos: number;
+  documents: number;
+}
+
+export interface MediaListFilters {
+  search?: string;
+  scope?: MediaScope;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface MediaListResult {
+  docs: MediaDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: MediaStats;
+  currentUserId: number | null;
+}
+
+export interface UpdateMediaData {
+  alt?: string | null;
+  filename?: string | null;
+  visibility?: MediaVisibility;
+}
+
+// ========================================
+// ANNOUNCEMENT API TYPES
+// ========================================
+
+export interface AnnouncementCourseRef {
+  id: number;
+  title?: string;
+  courseCode?: string;
+}
+
+export interface AnnouncementCreatorRef {
+  id: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+export interface AnnouncementDoc {
+  id: number;
+  title: string;
+  course: AnnouncementCourseRef | number;
+  bodyBlocks?: unknown;
+  pinned: boolean;
+  visibleFrom: string | null;
+  visibleUntil: string | null;
+  createdBy: AnnouncementCreatorRef | number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AnnouncementsStats {
+  total: number;
+  pinned: number;
+  active: number;
+  expired: number;
+}
+
+export interface AnnouncementsListFilters {
+  search?: string;
+  courseId?: number | string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface AnnouncementsListResult {
+  docs: AnnouncementDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: AnnouncementsStats;
+}
+
+export interface CreateAnnouncementData {
+  title: string;
+  course: number;
+  content?: string | null;
+  pinned?: boolean;
+  visibleFrom?: string | null;
+  visibleUntil?: string | null;
+}
+
+export interface UpdateAnnouncementData {
+  title?: string;
+  course?: number;
+  content?: string | null;
+  pinned?: boolean;
+  visibleFrom?: string | null;
+  visibleUntil?: string | null;
+}
+
+export interface AnnouncementCourseOption {
+  id: number;
+  title: string;
+  code: string;
+}
+
+// ── Notification API types ────────────────────────────────────────────────────
+export type NotificationCategory = 'learning' | 'account' | 'system-update' | 'other';
+export type NotificationChannel = 'in-app' | 'email' | 'push';
+export type NotificationOrigin = 'manual' | 'automatic';
+export type NotificationAudienceType = 'all-users' | 'role' | 'segment' | 'specific-users';
+export type NotificationAudienceRole = 'trainee' | 'instructor' | 'admin' | 'service';
+export type NotificationStatus = 'draft' | 'scheduled' | 'sent' | 'cancelled';
+
+export interface NotificationTemplateRef {
+  id: number;
+  name?: string;
+  code?: string;
+}
+
+export interface NotificationUserRef {
+  id: number;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface NotificationDoc {
+  id: number;
+  title: string;
+  category: NotificationCategory;
+  body?: string | null;
+  template?: NotificationTemplateRef | number | null;
+  origin: NotificationOrigin;
+  audienceType: NotificationAudienceType;
+  audienceRole?: NotificationAudienceRole | null;
+  audienceUsers?: NotificationUserRef[] | number[] | null;
+  segmentDefinition?: unknown;
+  sourceType?: string | null;
+  sourceId?: string | null;
+  actor?: NotificationUserRef | number | null;
+  metadata?: unknown;
+  scheduledAt?: string | null;
+  expiresAt?: string | null;
+  status: NotificationStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationsStats {
+  total: number;
+  draft: number;
+  scheduled: number;
+  sent: number;
+  cancelled: number;
+}
+
+export interface NotificationsListFilters {
+  search?: string;
+  status?: NotificationStatus;
+  category?: NotificationCategory;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface NotificationsListResult {
+  docs: NotificationDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: NotificationsStats;
+}
+
+export interface CreateNotificationData {
+  title: string;
+  category: NotificationCategory;
+  body?: string | null;
+  template?: number | null;
+  origin: NotificationOrigin;
+  audienceType: NotificationAudienceType;
+  audienceRole?: NotificationAudienceRole | null;
+  audienceUsers?: number[] | null;
+  segmentDefinition?: unknown;
+  sourceType?: string | null;
+  sourceId?: string | null;
+  scheduledAt?: string | null;
+  expiresAt?: string | null;
+  status: NotificationStatus;
+}
+
+export interface UpdateNotificationData {
+  title?: string;
+  category?: NotificationCategory;
+  body?: string | null;
+  template?: number | null;
+  origin?: NotificationOrigin;
+  audienceType?: NotificationAudienceType;
+  audienceRole?: NotificationAudienceRole | null;
+  audienceUsers?: number[] | null;
+  segmentDefinition?: unknown;
+  sourceType?: string | null;
+  sourceId?: string | null;
+  scheduledAt?: string | null;
+  expiresAt?: string | null;
+  status?: NotificationStatus;
+}
+
+export interface NotificationUserOption {
+  id: number;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface NotificationTemplateDoc {
+  id: number;
+  name: string;
+  code: string;
+  category: NotificationCategory;
+  titleTemplate: string;
+  bodyTemplate?: string | null;
+  defaultLink?: string | null;
+  channels?: NotificationChannel[] | null;
+  automatic?: boolean | null;
+  manual?: boolean | null;
+  metadataSchema?: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TemplateStats {
+  total: number;
+  automated: number;
+  withEmail: number;
+  manual: number;
+}
+
+export interface TemplateListFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface TemplateListResult {
+  docs: NotificationTemplateDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: TemplateStats;
+}
+
+export interface CreateTemplateData {
+  name: string;
+  code: string;
+  category: NotificationCategory;
+  titleTemplate: string;
+  bodyTemplate?: string | null;
+  defaultLink?: string | null;
+  channels?: NotificationChannel[];
+  automatic?: boolean;
+  manual?: boolean;
+  metadataSchema?: unknown;
+}
+
+export interface UpdateTemplateData {
+  name?: string;
+  code?: string;
+  category?: NotificationCategory;
+  titleTemplate?: string;
+  bodyTemplate?: string | null;
+  defaultLink?: string | null;
+  channels?: NotificationChannel[] | null;
+  automatic?: boolean;
+  manual?: boolean;
+  metadataSchema?: unknown;
+}
+
+export interface NotificationTemplateOption {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface UserNotificationDoc {
+  id: number;
+  user: number;
+  notification: number;
+  category: NotificationCategory;
+  title: string;
+  body?: string | null;
+  link?: string | null;
+  metadata?: unknown;
+  deliveredAt?: string | null;
+  readAt?: string | null;
+  seenAt?: string | null;
+  channel?: NotificationChannel | null;
+  archived?: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserNotificationsResult {
+  docs: UserNotificationDoc[];
+  unreadCount: number;
+  unseenCount: number;
+}
+
+export interface UserNotificationUpdateData {
+  readAt?: string | null;
+  seenAt?: string | null;
+  archived?: boolean;
+}
+
+export interface UserNotificationBulkResult {
+  success: boolean;
+  updated: number;
+}
+
 export type MaterialSource = 'media' | 'external';
 
 export interface Material {
@@ -1112,6 +1669,354 @@ export interface PostFilters {
   search?: string;
   limit?: number;
   page?: number;
+}
+
+// ========================================
+// GRADEBOOK TYPES
+// ========================================
+
+export interface GradebookTraineeStub {
+  id: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+export interface GradebookCourseStub {
+  id: number;
+  title?: string;
+}
+
+export interface GradebookEnrollmentDoc {
+  id: number;
+  student: number | GradebookTraineeStub;
+  course: number | GradebookCourseStub;
+  status: string;
+  enrollmentType: string;
+  currentGrade?: number | null;
+  finalGrade?: number | null;
+  finalEvaluation?: string | null;
+  progressPercentage?: number;
+  certificateIssued?: boolean | null;
+  enrolledAt: string;
+  completedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  displayTitle?: string;
+}
+
+export interface GradebookEnrollmentListResult {
+  docs: GradebookEnrollmentDoc[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+}
+
+export interface GradebookEnrollmentFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+  courseId?: number;
+  status?: string;
+}
+
+export interface GradebookCourseDoc {
+  id: number;
+  title: string;
+}
+
+export interface GradebookCourseListResult {
+  docs: GradebookCourseDoc[];
+  totalDocs: number;
+}
+
+export interface GradebookCourseWithStats extends GradebookCourseDoc {
+  enrollmentCount: number;
+  gradedCount: number;
+  avgGrade: number | null;
+  passedCount: number;
+}
+
+export interface GradebookUserStub {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface GradebookTraineeDoc {
+  id: number;
+  user: number | GradebookUserStub;
+  srn: string;
+  currentLevel?: string | null;
+  enrollmentDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface GradebookTraineeWithStats extends GradebookTraineeDoc {
+  enrollmentCount: number;
+  completedCount: number;
+  avgGrade: number | null;
+  passedCount: number;
+  failedCount: number;
+  certificateCount: number;
+}
+
+export interface GradebookTraineeSummary {
+  totalStudents: number;
+  totalEnrollments: number;
+  completedCount: number;
+  avgGrade: number | null;
+  certificateCount: number;
+}
+
+export interface GradebookTraineeListResult {
+  docs: GradebookTraineeWithStats[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  summary: GradebookTraineeSummary;
+}
+
+export interface GradebookSubmissionItem {
+  id: string;
+  type: 'assessment' | 'assignment';
+  title: string;
+  score: number | null | undefined;
+  status: string;
+  submittedAt: string;
+  courseTitle?: string;
+  courseId?: number;
+}
+
+export interface StudentOverviewData {
+  trainee: GradebookTraineeDoc;
+  enrollments: GradebookEnrollmentDoc[];
+  submissions: GradebookSubmissionItem[];
+  stats: {
+    totalCourses: number;
+    completedCourses: number;
+    inProgressCourses: number;
+    avgGrade: number | null;
+    passedCount: number;
+    failedCount: number;
+    certificateCount: number;
+    totalSubmissions: number;
+  };
+}
+
+export type GradebookActivityType =
+  | 'enrollment_created'
+  | 'enrollment_completed'
+  | 'enrollment_status_change'
+  | 'grade_updated'
+  | 'assessment_graded'
+  | 'assignment_graded';
+
+export interface GradebookActivityEvent {
+  id: string;
+  type: GradebookActivityType;
+  timestamp: string;
+  traineeName?: string;
+  traineeId?: number;
+  courseTitle?: string;
+  courseId?: number;
+  enrollmentId?: number;
+  description: string;
+  detail: string;
+  metadata?: Record<string, any>;
+}
+
+export interface GradeGrade {
+  id?: string | null;
+  label: string;
+  minScore: number;
+  maxScore: number;
+  gpaValue?: number | null;
+  description?: string | null;
+}
+
+export interface GradeScaleDoc {
+  id: number;
+  title: string;
+  description?: string | null;
+  grades: GradeGrade[];
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface GradeScaleListResult {
+  docs: GradeScaleDoc[];
+  totalDocs: number;
+}
+
+export interface CreateGradeScaleInput {
+  title: string;
+  description?: string | null;
+  grades: GradeGrade[];
+}
+
+export interface UpdateGradeScaleInput {
+  title?: string;
+  description?: string | null;
+  grades?: GradeGrade[];
+}
+
+export interface CreateGradebookEnrollmentInput {
+  course: number;
+  studentEmail: string;
+  enrollmentType?: string;
+}
+
+export interface GradebookCourse {
+  id: number;
+  title: string;
+  code: string;
+  passingGrade: number;
+  enrollmentCount: number;
+  gradedCount: number;
+  avgGrade: number | null;
+  passedCount: number;
+  pendingCount: number;
+}
+
+export interface GradebookEnrollment {
+  id: number;
+  traineeName: string;
+  traineeEmail: string;
+  courseId: number;
+  courseTitle: string;
+  status: string;
+  progressPercentage: number | null;
+  currentGrade: number | null;
+  finalGrade: number | null;
+  finalEvaluation: 'passed' | 'failed' | null;
+  pendingCount: number;
+}
+
+export interface GradebookSummary {
+  totalCourses: number;
+  totalEnrollments: number;
+  totalGraded: number;
+  averageGrade: number | null;
+  totalPassed: number;
+  totalPending: number;
+}
+
+export interface GradebookData {
+  courses: GradebookCourse[];
+  enrollments: GradebookEnrollment[];
+  summary: GradebookSummary;
+}
+
+export interface InstructorCourseRef {
+  id: number;
+  title: string;
+  code: string;
+  passingGrade?: number;
+}
+
+export interface GradeScaleRef {
+  id: number;
+  title: string;
+  description: string | null;
+  grades: GradeGrade[];
+  usedByCourses: InstructorCourseRef[];
+}
+
+export interface GradeSetupData {
+  scales: GradeScaleRef[];
+  summary: {
+    totalScales: number;
+    usedByMyCourses: number;
+    courseReferences: number;
+    unusedByMyCourses: number;
+  };
+}
+
+export interface StudentRow {
+  traineeId: number;
+  name: string;
+  email: string;
+  srn: string;
+  level: string | null;
+  enrollmentDate: string | null;
+  enrollmentCount: number;
+  completedCount: number;
+  inProgressCount: number;
+  avgGrade: number | null;
+  passedCount: number;
+  certificateCount: number;
+  pendingCount: number;
+}
+
+export interface StudentEnrollment {
+  id: number;
+  traineeId: number;
+  courseId: number;
+  courseTitle: string;
+  status: string;
+  progressPercentage: number | null;
+  currentGrade: number | null;
+  finalGrade: number | null;
+  finalEvaluation: 'passed' | 'failed' | null;
+  pendingCount: number;
+}
+
+export interface InstructorStudentOverviewFilters {
+  search?: string;
+  courseId?: number | string;
+  page?: number;
+  limit?: number;
+}
+
+export interface InstructorStudentOverviewData {
+  students: StudentRow[];
+  enrollments: StudentEnrollment[];
+  courses: InstructorCourseRef[];
+  summary: {
+    totalStudents: number;
+    totalEnrollments: number;
+    averageGrade: number | null;
+    totalCompleted: number;
+    totalPending: number;
+  };
+  page: number;
+  totalDocs: number;
+  totalPages: number;
+}
+
+export interface GradebookActivityStats {
+  totalEvents: number;
+  gradedAssignments: number;
+  gradedAssessments: number;
+  newEnrollments: number;
+  completions: number;
+}
+
+export interface GradebookActivityCourseOption {
+  id: number;
+  title: string;
+}
+
+export interface GradebookRecentActivityFilters {
+  page?: number;
+  limit?: number;
+  type?: string;
+  courseId?: number | string;
+  search?: string;
+}
+
+export interface GradebookRecentActivityResult {
+  events: GradebookActivityEvent[];
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  stats: GradebookActivityStats;
+  courses: GradebookActivityCourseOption[];
 }
 
 // ========================================

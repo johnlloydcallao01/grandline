@@ -52,19 +52,12 @@ function buildListParams(filters: CourseListFilters = {}, userId?: string): Reco
   if (filters.search) params.search = filters.search;
   if (filters.status && filters.status !== 'all') params.status = filters.status;
   if (filters.tag) params.tag = filters.tag;
+  if (filters.category) params.category = filters.category;
   if (filters.page) params.page = String(filters.page);
   if (filters.limit) params.limit = String(filters.limit);
   if (filters.sort) params.sort = filters.sort;
   if (userId) params.userId = userId;
   return params;
-}
-
-function buildQueryString(params: Record<string, string>): string {
-  const parts: string[] = [];
-  for (const [key, val] of Object.entries(params)) {
-    if (val !== undefined && val !== '') parts.push(`${key}=${encodeURIComponent(String(val))}`);
-  }
-  return parts.join('&');
 }
 
 export function createCourseService(config: CourseServiceConfig): CourseService {

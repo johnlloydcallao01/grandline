@@ -85,7 +85,7 @@ export function createCategoryService(config: CategoryServiceConfig): CategorySe
       return data.category;
     },
 
-    async createCategory(input, userId): Promise<CategoryDoc> {
+    async createCategory(input, _userId): Promise<CategoryDoc> {
       if (scope !== 'admin') {
         throw new Error('createCategory is only available for the admin scope');
       }
@@ -95,7 +95,7 @@ export function createCategoryService(config: CategoryServiceConfig): CategorySe
       });
     },
 
-    async updateCategory(id, data, userId): Promise<CategoryDoc> {
+    async updateCategory(id, data, _userId): Promise<CategoryDoc> {
       if (scope !== 'admin') {
         throw new Error('updateCategory is only available for the admin scope');
       }

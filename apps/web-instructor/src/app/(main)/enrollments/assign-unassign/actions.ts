@@ -1,5 +1,6 @@
 'use server'
 
+import { unstable_noStore as noStore } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createEnrollmentService } from '@encreasl/course-actions'
 import type {
@@ -40,8 +41,15 @@ async function getUserId(): Promise<string> {
 }
 
 export async function getEnrollments(params: EnrollmentFilters): Promise<EnrollmentListResult> {
+  noStore()
   const userId = await getUserId()
   return service.getEnrollments({ ...params, userId })
+}
+
+export async function getEnrollment(id: string): Promise<EnrollmentDoc> {
+  noStore()
+  const userId = await getUserId()
+  return service.getEnrollment(id, userId)
 }
 
 export async function searchCourses(search: string, limit?: number): Promise<CourseOption[]> {
@@ -56,6 +64,11 @@ export async function searchTrainees(search: string): Promise<TraineeOption[]> {
 export async function createEnrollment(data: CreateEnrollmentInput): Promise<EnrollmentDoc> {
   const userId = await getUserId()
   return service.createEnrollment({ ...data, userId })
+}
+
+export async function updateEnrollment(id: string, data: Partial<CreateEnrollmentInput>): Promise<void> {
+  const userId = await getUserId()
+  return service.updateEnrollment(id, data, userId)
 }
 
 export async function updateEnrollmentStatus(id: string, status: string): Promise<void> {

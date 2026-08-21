@@ -120,18 +120,19 @@ export async function POST(
 
         for (const p of allProgressDocs) {
             const itemId = String(typeof p.item === 'object' ? p.item.value?.id || p.item.value : p.item);
+            const relationTo = typeof p.item === 'object' ? p.item.relationTo : null;
             const status = p.status;
             
-            if (lessonIds.includes(itemId) && p.isCompleted) {
+            if (relationTo === 'course-lessons' && lessonIds.includes(itemId) && p.isCompleted) {
                 completedLessonIds.add(itemId);
             }
-            if (quizIds.includes(itemId)) {
+            if (relationTo === 'assessments' && quizIds.includes(itemId)) {
                 submittedQuizIds.add(itemId);
                 if (status === 'passed') {
                     passedQuizIds.add(itemId);
                 }
             }
-            if (finalExamId && itemId === finalExamId) {
+            if (relationTo === 'assessments' && finalExamId && itemId === finalExamId) {
                 finalExamSubmitted = true;
                 if (status === 'passed') {
                     finalExamPassed = true;

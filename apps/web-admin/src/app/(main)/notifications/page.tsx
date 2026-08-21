@@ -12,9 +12,22 @@ import {
     getNotifications, createNotification, updateNotification, deleteNotification,
     getTemplates, createTemplate, updateTemplate, deleteTemplate,
     getUserOptions, getTemplateOptions,
-    type NotificationDoc, type NotificationTemplateDoc,
-    type UserOption,
 } from './actions';
+import type {
+    CreateNotificationData,
+    CreateTemplateData,
+    NotificationAudienceRole,
+    NotificationAudienceType,
+    NotificationCategory,
+    NotificationChannel,
+    NotificationDoc,
+    NotificationOrigin,
+    NotificationStatus,
+    NotificationTemplateDoc,
+    NotificationUserOption,
+    NotificationsStats,
+    TemplateStats,
+} from '@encreasl/cms-types';
 
 const ITEMS_PER_PAGE = 15;
 
@@ -127,6 +140,7 @@ function NotificationsTab() {
     const [statusFilter, setStatusFilter] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
+    const [stats, setStats] = useState<NotificationsStats>({ total: 0, draft: 0, scheduled: 0, sent: 0, cancelled: 0 });
 
     const [deleteTarget, setDeleteTarget] = useState<NotificationDoc | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -144,7 +158,7 @@ function NotificationsTab() {
     const [templateOptions, setTemplateOptions] = useState<{ id: number; name: string; code: string }[]>([]);
     const [loadingTemplateOptions, setLoadingTemplateOptions] = useState(false);
 
-    const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+    const [userOptions, setUserOptions] = useState<NotificationUserOption[]>([]);
     const [userSearch, setUserSearch] = useState('');
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const userRef = useRef<HTMLDivElement>(null);
@@ -155,14 +169,15 @@ function NotificationsTab() {
             setError(null);
             const data = await getNotifications({
                 search: debouncedSearch || undefined,
-                status: statusFilter || undefined,
-                category: categoryFilter || undefined,
+                status: (statusFilter || undefined) as NotificationStatus | undefined,
+                category: (categoryFilter || undefined) as NotificationCategory | undefined,
                 page: currentPage,
                 limit: ITEMS_PER_PAGE,
             });
             setItems(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setStats(data.stats || { total: 0, draft: 0, scheduled: 0, sent: 0, cancelled: 0 });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load notifications');
         } finally {
@@ -287,28 +302,28 @@ function NotificationsTab() {
                 catch { setSaveError('Invalid JSON in Segment Definition.'); setIsSaving(false); return; }
             }
 
-            const payload: Record<string, unknown> = {
+            const payload: CreateNotificationData = {
                 title: form.title.trim(),
-                category: form.category,
+                category: form.category as NotificationCategory,
                 body: form.body.trim() || null,
                 template: form.template ? Number(form.template) : null,
-                origin: form.origin,
-                audienceType: form.audienceType,
-                audienceRole: form.audienceType === 'role' ? form.audienceRole : null,
+                origin: form.origin as NotificationOrigin,
+                audienceType: form.audienceType as NotificationAudienceType,
+                audienceRole: form.audienceType === 'role' ? (form.audienceRole as NotificationAudienceRole) : null,
                 audienceUsers: form.audienceType === 'specific-users' && form.audienceUsers.length > 0 ? form.audienceUsers : null,
                 segmentDefinition: form.audienceType === 'segment' ? segmentDefinition : null,
                 sourceType: form.sourceType.trim() || null,
                 sourceId: form.sourceId.trim() || null,
                 scheduledAt: form.scheduledAt || null,
                 expiresAt: form.expiresAt || null,
-                status: form.status,
+                status: form.status as NotificationStatus,
             };
 
             if (slideItem) {
-                const updated = await updateNotification(slideItem.id, payload as any);
+                const updated = await updateNotification(slideItem.id, payload);
                 setItems(prev => prev.map(a => a.id === updated.id ? updated : a));
             } else {
-                const created = await createNotification(payload as any);
+                const created = await createNotification(payload);
                 setItems(prev => [created, ...prev]);
                 setTotalDocs(prev => prev + 1);
             }
@@ -336,19 +351,11 @@ function NotificationsTab() {
         }
     };
 
-    const statusCounts = {
-        total: totalDocs,
-        draft: items.filter(a => a.status === 'draft').length,
-        scheduled: items.filter(a => a.status === 'scheduled').length,
-        sent: items.filter(a => a.status === 'sent').length,
-        cancelled: items.filter(a => a.status === 'cancelled').length,
-    };
-
     const metricCards = [
-        { label: 'Total', value: statusCounts.total, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Bell },
-        { label: 'Draft', value: statusCounts.draft, color: 'text-gray-600', bg: 'bg-gray-100 dark:bg-gray-800', icon: FileText },
-        { label: 'Scheduled', value: statusCounts.scheduled, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Clock },
-        { label: 'Sent', value: statusCounts.sent, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Send },
+        { label: 'Total', value: stats.total, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Bell },
+        { label: 'Draft', value: stats.draft, color: 'text-gray-600', bg: 'bg-gray-100 dark:bg-gray-800', icon: FileText },
+        { label: 'Scheduled', value: stats.scheduled, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: Clock },
+        { label: 'Sent', value: stats.sent, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Send },
     ];
 
     const filterChips = [
@@ -942,6 +949,7 @@ function TemplatesTab() {
     const [saveError, setSaveError] = useState<string | null>(null);
 
     const [form, setForm] = useState<TemplateFormState>(TEMPLATE_FORM_DEFAULTS);
+    const [templateStats, setTemplateStats] = useState<TemplateStats>({ total: 0, automated: 0, withEmail: 0, manual: 0 });
 
     const loadItems = useCallback(async () => {
         try {
@@ -955,6 +963,7 @@ function TemplatesTab() {
             setItems(data.docs || []);
             setTotalDocs(data.totalDocs || 0);
             setTotalPages(data.totalPages || 0);
+            setTemplateStats(data.stats || { total: 0, automated: 0, withEmail: 0, manual: 0 });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load templates');
         } finally {
@@ -992,7 +1001,7 @@ function TemplatesTab() {
             titleTemplate: item.titleTemplate || '',
             bodyTemplate: item.bodyTemplate || '',
             defaultLink: item.defaultLink || '',
-            channels: (item.channels as string[]) || ['in-app'],
+            channels: (item.channels ?? ['in-app']) as NotificationChannel[],
             automatic: item.automatic ?? false,
             manual: item.manual ?? true,
             metadataSchema: item.metadataSchema ? JSON.stringify(item.metadataSchema, null, 2) : '',
@@ -1034,24 +1043,24 @@ function TemplatesTab() {
                 catch { setSaveError('Invalid JSON in Metadata Schema.'); setIsSaving(false); return; }
             }
 
-            const payload: Record<string, unknown> = {
+            const payload: CreateTemplateData = {
                 name: form.name.trim(),
                 code: form.code.trim(),
-                category: form.category,
+                category: form.category as NotificationCategory,
                 titleTemplate: form.titleTemplate.trim(),
                 bodyTemplate: form.bodyTemplate.trim() || null,
                 defaultLink: form.defaultLink.trim() || null,
-                channels: form.channels,
+                channels: form.channels as NotificationChannel[],
                 automatic: form.automatic,
                 manual: form.manual,
                 metadataSchema,
             };
 
             if (slideItem) {
-                const updated = await updateTemplate(slideItem.id, payload as any);
+                const updated = await updateTemplate(slideItem.id, payload);
                 setItems(prev => prev.map(a => a.id === updated.id ? updated : a));
             } else {
-                const created = await createTemplate(payload as any);
+                const created = await createTemplate(payload);
                 setItems(prev => [created, ...prev]);
                 setTotalDocs(prev => prev + 1);
             }
@@ -1078,9 +1087,6 @@ function TemplatesTab() {
         }
     };
 
-    const automatedCount = items.filter(t => t.automatic).length;
-    const channelsWithEmail = items.filter(t => t.channels?.includes('email')).length;
-
     return (
         <div className="space-y-6">
             <div className="flex justify-end">
@@ -1100,10 +1106,10 @@ function TemplatesTab() {
                     ))
                 ) : (
                     [
-                        { label: 'Total Templates', value: totalDocs, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: FileText },
-                        { label: 'Automated', value: automatedCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Send },
-                        { label: 'With Email', value: channelsWithEmail, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30', icon: Mail },
-                        { label: 'Manual', value: items.filter(t => t.manual).length, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/30', icon: UserCheck },
+                        { label: 'Total Templates', value: templateStats.total, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: FileText },
+                        { label: 'Automated', value: templateStats.automated, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/30', icon: Send },
+                        { label: 'With Email', value: templateStats.withEmail, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30', icon: Mail },
+                        { label: 'Manual', value: templateStats.manual, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/30', icon: UserCheck },
                     ].map(card => (
                         <div key={card.label} className="bg-white dark:bg-[var(--card-background)] rounded-xl border border-gray-200 dark:border-[var(--card-border)] p-4 shadow-sm">
                             <div className="flex items-center gap-3">
